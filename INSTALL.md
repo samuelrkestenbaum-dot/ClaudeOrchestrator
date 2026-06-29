@@ -50,21 +50,60 @@ Without it, the orchestrator still routes — it just has no saved memory yet.
 
 ## 2. Claude Code on the web / remote environments
 
-Web sessions run in **ephemeral containers** that are cloned fresh and discarded,
-so a one-time `~/.claude/` install does **not** persist. Instead, run the
-installer at container start via the environment's **setup script** (configured
-in the web UI — see
-https://code.claude.com/docs/en/claude-code-on-the-web).
+Web sessions run in **ephemeral containers** cloned fresh from a repo and then
+discarded, so a one-time `~/.claude/` install does **not** persist. The per-repo
+mechanism for setup is a **SessionStart hook committed to the target repo**
+(see https://code.claude.com/docs/en/claude-code-on-the-web). Pick one of:
 
-Example setup-script step (clones this repo and installs globally each start):
+### A. Connect a project (recommended) — `connect-project.sh`
+
+Adds a tiny bootstrap to the target repo so **every** web/remote session on it
+auto-installs Build OS (pulled from this GitHub repo) at session start. Only two
+small files are committed; the engine itself is **not** vendored, so it stays
+centrally updatable.
+
+```bash
+# one-time, from a clone of ClaudeOrchestrator:
+git clone https://github.com/samuelrkestenbaum-dot/ClaudeOrchestrator.git
+cd /path/to/your/target-project
+/path/to/ClaudeOrchestrator/connect-project.sh
+git add .claude/hooks/session-start.sh .claude/settings.json
+git commit -m "Connect Build OS bootstrap" && git push
+```
+
+The committed `.claude/hooks/session-start.sh` is gated to `CLAUDE_CODE_REMOTE`,
+clones/refreshes this repo into `~/.cache/claude-orchestrator`, runs
+`install-project.sh --no-session-hook`, then prints `Orchestrator: ON` + memory.
+Once it's on the repo's **default branch**, all future sessions use it.
+
+### B. Vendor the engine into the repo — `install-project.sh`
+
+Copies the full engine + `build-os/` scaffold into the target repo. Commit it and
+the orchestrator is present at clone time in every session (web **and** local),
+with zero bootstrap and no timing dependency — the most deterministic option.
+
+```bash
+cd /path/to/your/target-project
+/path/to/ClaudeOrchestrator/install-project.sh
+git add .claude build-os CLAUDE.md && git commit -m "Add Build OS" && git push
+```
+
+### C. Environment setup script (no repo edits)
+
+If you'd rather not commit anything to the target repo, set the environment's
+**setup script** (web UI) to install globally each container start:
 
 ```bash
 git clone https://github.com/samuelrkestenbaum-dot/ClaudeOrchestrator.git /tmp/build-os \
   && /tmp/build-os/install-global.sh
 ```
 
-If a web session works *inside this same repo*, no setup script is needed — the
-project-scope `.claude/` is already present on clone.
+### On demand ("if I ask it to install it")
+
+In any session, just ask Claude to **"install the Build OS"** — it will clone
+this repo and run `install-project.sh` in the current project. If a web session
+already works *inside this repo*, nothing is needed — the project-scope
+`.claude/` is present on clone.
 
 ## Updating
 
