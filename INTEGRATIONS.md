@@ -12,12 +12,19 @@ and the orchestrator routes to it **when connected**, under the usual gates.
 
 ## How wiring works
 
+> **Already installed & connected?** Then steps 1–2 are optional. The orchestrator
+> **discovers** connected MCP servers, skills, slash commands, and subagents at
+> session start (the SessionStart hook prints the inventory) and uses whatever
+> fits the task — it is not limited to the rows below. Adding a router row just
+> records a preferred default and documents the mapping.
+
 1. **Install** the tool (MCP server in your MCP config, skill via the
-   marketplace, plugin, or CLI on PATH).
+   marketplace, plugin, or CLI on PATH) — skip if it's already connected.
 2. **Add a router row** in `tool_router.md`: *task type → tool → which agent uses
-   it → gate*.
-3. The orchestrator **detects** it (SessionStart MCP scan / `mcp__server__*`
-   tools), **prefers** it when present, and **falls back + says so** when not.
+   it → gate* — optional, sets a preferred default.
+3. The orchestrator **detects** it (SessionStart inventory / `mcp__server__*`
+   tools / globbing skill+command+agent dirs), **prefers** it when present, and
+   **falls back + says so** when not.
 4. **Gates always apply:** read-only use (search/scrape/inspect/review) is normal
    budget; anything that **mutates** the outside world (push, deploy, send
    mail/messages, write to a remote DB/SaaS) is a **STOP** for explicit go.

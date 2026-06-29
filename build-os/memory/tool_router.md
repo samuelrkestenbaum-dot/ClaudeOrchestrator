@@ -35,9 +35,13 @@ that can cross a merge/deploy/secret/push boundary must say **STOP** there.
 ## External tool routing (use when connected)
 
 Route to these **only when connected** in the current environment; otherwise fall
-back to native tools and name the missing capability in the Tool Budget.
-⚠️ The tool/repo handles below are common names — **verify the exact package/repo
-before installing**; ecosystem names change and are easy to mistype.
+back to native tools and name the missing capability in the Tool Budget. These
+rows are **preferences, not a whitelist** — the orchestrator also uses any *other*
+capability already connected in the session (skills, slash commands, subagents,
+MCP servers) that fits the task. The SessionStart hook surfaces the live
+inventory; default to "it's probably connected — check," not "it's absent."
+⚠️ The tool/repo handles below are common names — if you ever *install* something
+new, **verify the exact package/repo first**; ecosystem names are easy to mistype.
 
 | Task type | Preferred external tool(s) | Used by | Gate |
 |---|---|---|---|

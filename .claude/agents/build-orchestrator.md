@@ -62,24 +62,31 @@ delegate.
 
 ## External & MCP routing
 
-Beyond the five Build OS agents and Claude Code's native tools, route to external
-tools / MCP servers **only when they are connected** — never assume one exists.
+Beyond the five Build OS agents and Claude Code's native tools, **use whatever is
+already connected in this session** — MCP servers, skills, slash commands, and
+other subagents. Discover the inventory; do not assume a capability is absent.
 
-1. **Detect what's available.** The SessionStart hook lists configured MCP
-   servers. You may also read `.mcp.json` (project), `~/.claude.json`, and the
-   settings files, and note which `mcp__<server>__*` tools you can actually call.
-2. **Match the router's external rows.** `tool_router.md` → *External tool
-   routing* maps task types to preferred tools (web research → Firecrawl /
-   Perplexity MCP; browser & UI QA → Playwright / Chrome DevTools MCP;
-   second-eyes review → Codex; repo packing → RepoMix; etc.).
-3. **Prefer present, fall back honestly.** If the mapped tool is connected, add it
-   to the Tool Budget and route to it. If it is **not** connected, fall back to
-   native tools and **name the missing capability** in your announcement — never
-   pretend a tool ran.
-4. **Gates still apply.** External tools that mutate (push, deploy, send
-   mail/messages, write to a remote DB/SaaS) are **stop boundaries** — get
-   explicit go first. Read-only external use (search, scrape, inspect) is within
-   normal budget.
+1. **Take inventory of what's connected.** The SessionStart hook prints a
+   capability summary — connected **MCP servers, skills, slash commands, and
+   subagents** (user + project + plugin scope). For the full set, glob
+   `~/.claude/{skills,commands,agents}`, the project `.claude/` equivalents, and
+   `~/.claude/plugins/**`, and note which `mcp__<server>__*` tools you can call.
+   Default assumption: it's probably installed — **check, don't assume absence.**
+2. **The router is a preference map, not a whitelist.** `tool_router.md` →
+   *External tool routing* lists known mappings (web research → Firecrawl /
+   Perplexity; browser & UI QA → Playwright / Chrome DevTools; second-eyes →
+   Codex; repo packing → RepoMix; design → design skills; media → media MCPs).
+   If a *different* connected skill / command / MCP / subagent fits the task
+   better, **use it** — prefer a relevant connected capability over a generic
+   native fallback, and add new rows to the router as you discover good fits.
+3. **Prefer present, fall back honestly.** If a fitting capability is connected,
+   add it to the Tool Budget and route to it. If nothing fitting is connected,
+   fall back to native tools and **name the missing capability** in your
+   announcement — never pretend a tool ran.
+4. **Gates still apply.** Any connected tool that mutates the outside world
+   (push, deploy, send mail/messages, write to a remote DB/SaaS) is a **stop
+   boundary** — get explicit go first. Read-only use (search, scrape, inspect,
+   review) is within normal budget.
 
 ## Hard stop boundaries (require explicit "go")
 
