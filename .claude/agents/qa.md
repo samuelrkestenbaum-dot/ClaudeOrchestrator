@@ -37,9 +37,12 @@ you run things and report exact results.
      this packet.
 
 4. **UI smoke (if applicable).** If the packet touches UI/frontend, run the
-   relevant smoke (build, dev-server boot, component render test, or a Playwright
-   smoke if configured) and report pass/fail. If no UI is involved, state
-   "UI smoke: N/A".
+   relevant smoke (build, dev-server boot, component render test). If a browser
+   driver is connected — **Playwright MCP** or **Chrome DevTools MCP** (see
+   `build-os/memory/tool_router.md` → *External tool routing*) — drive a real
+   render / click / screenshot smoke through it. Report pass/fail. If no driver
+   is connected, do the best static/build smoke and say so. If no UI is involved,
+   state "UI smoke: N/A".
 
 ## Output
 

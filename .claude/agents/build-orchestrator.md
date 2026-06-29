@@ -39,7 +39,9 @@ delegate.
 
 4. **Read the router.** Read `build-os/memory/tool_router.md` and pick the row
    matching the classified task type. If the router file is absent or has no
-   matching row, route from embedded defaults and note that.
+   matching row, route from embedded defaults and note that. If the row names an
+   external tool or MCP server, confirm it is connected (see *External & MCP
+   routing* below) and prefer it when present — otherwise fall back and say so.
 
 5. **Declare a Tool Budget.** State the exact tools/agents you intend to use and
    why, in one line: `Tools: [Read, Bash, builder, qa] — implement + prove
@@ -57,6 +59,27 @@ delegate.
    - **qa** — full suite + regression + Commit-1-isolation + safety grep.
    - **archivist** — write the receipt and update memory (touches `build-os/` only).
    Sequence them; do not let one agent do another's job.
+
+## External & MCP routing
+
+Beyond the five Build OS agents and Claude Code's native tools, route to external
+tools / MCP servers **only when they are connected** — never assume one exists.
+
+1. **Detect what's available.** The SessionStart hook lists configured MCP
+   servers. You may also read `.mcp.json` (project), `~/.claude.json`, and the
+   settings files, and note which `mcp__<server>__*` tools you can actually call.
+2. **Match the router's external rows.** `tool_router.md` → *External tool
+   routing* maps task types to preferred tools (web research → Firecrawl /
+   Perplexity MCP; browser & UI QA → Playwright / Chrome DevTools MCP;
+   second-eyes review → Codex; repo packing → RepoMix; etc.).
+3. **Prefer present, fall back honestly.** If the mapped tool is connected, add it
+   to the Tool Budget and route to it. If it is **not** connected, fall back to
+   native tools and **name the missing capability** in your announcement — never
+   pretend a tool ran.
+4. **Gates still apply.** External tools that mutate (push, deploy, send
+   mail/messages, write to a remote DB/SaaS) are **stop boundaries** — get
+   explicit go first. Read-only external use (search, scrape, inspect) is within
+   normal budget.
 
 ## Hard stop boundaries (require explicit "go")
 

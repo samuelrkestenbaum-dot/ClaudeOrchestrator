@@ -31,3 +31,30 @@ matches, it routes from embedded defaults and says so.
 
 Add a row per new task type. Keep the **Gate / stop** column honest — every row
 that can cross a merge/deploy/secret/push boundary must say **STOP** there.
+
+## External tool routing (use when connected)
+
+Route to these **only when connected** in the current environment; otherwise fall
+back to native tools and name the missing capability in the Tool Budget.
+⚠️ The tool/repo handles below are common names — **verify the exact package/repo
+before installing**; ecosystem names change and are easy to mistype.
+
+| Task type | Preferred external tool(s) | Used by | Gate |
+|---|---|---|---|
+| Web research / live docs | Perplexity MCP, native WebSearch/WebFetch | build-orchestrator, builder | read-only — normal budget |
+| Site scrape → context | Firecrawl MCP (`firecrawl-mcp-server`) | builder, build-orchestrator | read-only — normal budget |
+| Browser / UI QA / screenshots | Playwright MCP (`@playwright/mcp`), Chrome DevTools MCP (`chrome-devtools-mcp`) | qa | read-only drive; no prod actions |
+| Second-eyes code review | Codex (`codex` CLI / Codex-for-Claude-Code plugin) | reviewer | read-only — normal budget |
+| Repo → LLM context pack | RepoMix (`repomix`) | build-orchestrator, builder | read-only — normal budget |
+| Parallel multi-agent work | Claude Squad / parallel sub-agents | build-orchestrator (agent-swarm) | **merge plan required** |
+| Send mail / message / SaaS write | Gmail, Slack, Notion, HubSpot, Supabase MCP (write ops) | builder | **STOP** — external mutation, explicit go |
+| Design / UI polish | design skills (UI/UX, Taste, design-system) | builder (design-ui) | frontend only |
+| Media generation | Higgsfield / Glif / Remotion | builder (marketing-media) | marketing/media packets only |
+
+### Auto-detect connected MCPs
+
+The SessionStart hook lists configured MCP servers (read from `.mcp.json`,
+`~/.claude.json`, and settings). In-session, MCP tools appear as
+`mcp__<server>__<tool>`. The orchestrator routes a task to a mapped MCP **only if
+that server is present**, and otherwise falls back to native tools and declares
+the gap. See `INTEGRATIONS.md` for the full ecosystem map and how to wire more in.

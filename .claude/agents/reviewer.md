@@ -21,10 +21,11 @@ plus the reasoning behind it.
 2. **The tests.** Confirm the tests actually exercise the new behavior (not
    vacuous/always-green), that they were written test-first, and that they map to
    the packet's "done" criteria.
-3. **Codex second-eyes (if available).** If a Codex CLI / second-model reviewer
-   is available on this machine (e.g. `codex` on PATH), run it on the diff as an
-   independent reviewer and fold its findings in. If it is **not** available, say
-   so explicitly — do not pretend a second-eyes pass happened.
+3. **Codex second-eyes (if available).** If a Codex second-model reviewer is
+   connected (a `codex` CLI on PATH, or a Codex-for-Claude-Code plugin — see
+   `build-os/memory/tool_router.md` → *External tool routing*), run it on the diff
+   as an independent reviewer and fold its findings in. If it is **not**
+   available, say so explicitly — do not pretend a second-eyes pass happened.
 4. **Product Trajectory Check.** Step back from the line-level diff: does this
    packet move the product in the intended direction? Does it add scope debt,
    lock in a wrong abstraction, or contradict `build-os/memory/current_state.md`?
