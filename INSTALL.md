@@ -55,6 +55,24 @@ discarded, so a one-time `~/.claude/` install does **not** persist. The per-repo
 mechanism for setup is a **SessionStart hook committed to the target repo**
 (see https://code.claude.com/docs/en/claude-code-on-the-web). Pick one of:
 
+> **Will the bootstrap (A/C/on-demand) work in *your* environment?** Those paths
+> clone ClaudeOrchestrator at session start, so they need two things:
+> - **The repo is cloneable.** ClaudeOrchestrator is **public**, so the clone
+>   needs no credentials and works even from a session whose credentials are
+>   scoped to a *different* single repo. (If you make it private again, the env
+>   must have access to it.)
+> - **Network egress to `github.com` is allowed** by the environment's network
+>   policy. Most allow it; a maximally-locked-down policy may not.
+>
+> If github egress is **blocked**, use **B (vendor)** — it needs zero network
+> because the engine is already in the repo at checkout.
+>
+> Note on scope guardrails: a session told "don't read repos outside your scope"
+> may decline to clone ClaudeOrchestrator *itself*, but the committed
+> **SessionStart hook (A)** runs as environment setup — the sanctioned web-setup
+> mechanism — so it is not subject to that agent instruction. Prefer A over an
+> agent-initiated clone in scoped environments.
+
 ### A. Connect a project (recommended) — `connect-project.sh`
 
 Adds a tiny bootstrap to the target repo so **every** web/remote session on it

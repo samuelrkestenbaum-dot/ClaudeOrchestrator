@@ -52,6 +52,11 @@ cd ClaudeOrchestrator
 ```
 
 On demand, in any session: just ask Claude to **"install the Build OS."**
+
+This repo is **public**, so the web `connect`/bootstrap and on-demand paths clone
+it without credentials — even from a session scoped to a *different* repo —
+provided the environment allows `github.com` egress. If egress is blocked, vendor
+with `install-project.sh` (zero network). See [`INSTALL.md`](INSTALL.md).
 Full matrix of options: [`INSTALL.md`](INSTALL.md).
 
 ## The roster
