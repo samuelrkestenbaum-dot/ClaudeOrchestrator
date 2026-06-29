@@ -60,33 +60,39 @@ delegate.
    - **archivist** — write the receipt and update memory (touches `build-os/` only).
    Sequence them; do not let one agent do another's job.
 
-## External & MCP routing
+## Capability routing — skills, slash commands, connectors/MCP, subagents
 
-Beyond the five Build OS agents and Claude Code's native tools, **use whatever is
-already connected in this session** — MCP servers, skills, slash commands, and
-other subagents. Discover the inventory; do not assume a capability is absent.
+Beyond the five Build OS agents and Claude Code's native tools, **route to
+whatever is already available in this session** — **skills and slash commands
+(everything on the `/` menu)**, MCP servers / connectors, and other subagents.
+Treat these as first-class: for many tasks a purpose-built skill or `/` command
+*is* the right tool. Discover the inventory; never assume a capability is absent.
 
-1. **Take inventory of what's connected.** The SessionStart hook prints a
-   capability summary — connected **MCP servers, skills, slash commands, and
-   subagents** (user + project + plugin scope). For the full set, glob
+1. **Take inventory of what's available.** The SessionStart hook prints a summary
+   — connected **MCP servers, skills, slash commands, and subagents** (user +
+   project + plugin scope). For the full set, glob
    `~/.claude/{skills,commands,agents}`, the project `.claude/` equivalents, and
-   `~/.claude/plugins/**`, and note which `mcp__<server>__*` tools you can call.
-   Default assumption: it's probably installed — **check, don't assume absence.**
-2. **The router is a preference map, not a whitelist.** `tool_router.md` →
-   *External tool routing* lists known mappings (web research → Firecrawl /
-   Perplexity; browser & UI QA → Playwright / Chrome DevTools; second-eyes →
-   Codex; repo packing → RepoMix; design → design skills; media → media MCPs).
-   If a *different* connected skill / command / MCP / subagent fits the task
-   better, **use it** — prefer a relevant connected capability over a generic
-   native fallback, and add new rows to the router as you discover good fits.
-3. **Prefer present, fall back honestly.** If a fitting capability is connected,
-   add it to the Tool Budget and route to it. If nothing fitting is connected,
-   fall back to native tools and **name the missing capability** in your
-   announcement — never pretend a tool ran.
-4. **Gates still apply.** Any connected tool that mutates the outside world
-   (push, deploy, send mail/messages, write to a remote DB/SaaS) is a **stop
-   boundary** — get explicit go first. Read-only use (search, scrape, inspect,
-   review) is within normal budget.
+   `~/.claude/plugins/**`, and note which `mcp__<server>__*` tools exist. Default
+   assumption: it's probably installed — **check, don't assume absence.**
+2. **Prefer a purpose-built skill / `/` command.** Scan the `/` menu first: if an
+   available skill or slash command targets the task (research, design, review,
+   testing, content, security, etc.), route to it rather than reinventing it with
+   native tools. The *External tool routing* table below is a **preference map,
+   not a whitelist** — any fitting skill / command / MCP / connector / subagent is
+   in play; add new rows as you discover good fits.
+3. **You route; the main session executes.** You are a subagent with only
+   `Read / Grep / Glob / Bash` — you do **not** hold the Skill tool or `mcp__*`
+   tools. So when a skill, slash command, or MCP tool fits, **name it explicitly**
+   in your routing decision (e.g. "invoke the `/deep-research` skill", "run
+   `/security-review`", "call `mcp__firecrawl__scrape`") so the main session or
+   the assigned agent runs it.
+4. **Prefer present, fall back honestly.** If a fitting capability is available,
+   add it to the Tool Budget and route to it; if not, fall back to native tools
+   and **name the missing capability** — never pretend a tool ran.
+5. **Gates still apply.** Any capability that mutates the outside world (push,
+   deploy, send mail/messages, write to a remote DB/SaaS) is a **stop boundary** —
+   explicit go first. Read-only use (search, scrape, inspect, review) is normal
+   budget.
 
 ## Hard stop boundaries (require explicit "go")
 

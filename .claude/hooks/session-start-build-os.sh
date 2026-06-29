@@ -90,7 +90,7 @@ print("MCP servers: " + (cap(servers) or "(none in config — mcp__<server>__* t
 print("Skills:      " + (cap(skills) or "(none found in skill dirs)"))
 print("Commands:    " + (cap(md_items(cmd_roots)) or "(none found)"))
 print("Subagents:   " + (cap(md_items(agent_roots)) or "(none found)"))
-print("(Summary — orchestrator: glob these dirs / call mcp__* tools for the full set when routing.)")
+print("(Summary — orchestrator: route to fitting skills / slash commands / MCP / subagents; glob these dirs or call mcp__* for the full set.)")
 PY
 else
   echo "(python3 unavailable — skipping capability detection)"

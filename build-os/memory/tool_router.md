@@ -55,10 +55,21 @@ new, **verify the exact package/repo first**; ecosystem names are easy to mistyp
 | Design / UI polish | design skills (UI/UX, Taste, design-system) | builder (design-ui) | frontend only |
 | Media generation | Higgsfield / Glif / Remotion | builder (marketing-media) | marketing/media packets only |
 
+### Skills & slash commands (the `/` menu)
+
+Skills and slash commands are **first-class routing targets**, not just MCP/CLI
+tools. The SessionStart inventory lists available skills and commands (user +
+project + plugin scope). When one is purpose-built for the task — e.g.
+`/deep-research`, `/security-review`, `/code-review`, design or content skills —
+the orchestrator **prefers it over native tools** and **names it for the main
+session to invoke** (the orchestrator subagent itself holds only Read/Grep/Glob/
+Bash, so it routes rather than executing the skill). Gates still apply.
+
 ### Auto-detect connected MCPs
 
 The SessionStart hook lists configured MCP servers (read from `.mcp.json`,
-`~/.claude.json`, and settings). In-session, MCP tools appear as
-`mcp__<server>__<tool>`. The orchestrator routes a task to a mapped MCP **only if
-that server is present**, and otherwise falls back to native tools and declares
-the gap. See `INTEGRATIONS.md` for the full ecosystem map and how to wire more in.
+`~/.claude.json`, and settings) **plus** available skills, slash commands, and
+subagents. In-session, MCP tools appear as `mcp__<server>__<tool>`. The
+orchestrator routes a task to a mapped capability **only if it is present**, and
+otherwise falls back to native tools and declares the gap. See `INTEGRATIONS.md`
+for the full ecosystem map and how to wire more in.
