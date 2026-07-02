@@ -6,16 +6,23 @@
 
 ## Deferred (follow-up packets)
 
-- _<deferred item → candidate packet, or "none">_
+- **P-001:** Real lyrics not yet pasted into `lyrics/*.txt` → candidate packet
+  "paste real lyrics + regenerate/refit". Auto-fit is unproven against full
+  real lyric lengths at scale (only validated with a 120-line dummy lyric).
+- **P-001:** PDF/print output — only if requested.
 
 ## Known risks / debt
 
-- _<risk or tech-debt the next builder should know about, or "none">_
+- **P-001:** Running the test suite dirties the checked-in
+  `HappyMedium_Setlist_Lyrics.docx` (zip timestamps change on regeneration) —
+  cosmetic, but shows as a modified file after tests.
+- **P-001:** No codex CLI available in the environment, so the review was
+  single-eyes (no second-eyes pass).
 
 ## Open boundaries (awaiting explicit go)
 
-- _<any merge / deploy / push / secret action paused for go, or "none">_
+- none
 
 ---
-_Append-only working notes. Initialized as a scaffold — clear the placeholders
-on first real use._
+_Append-only working notes. Last updated by the archivist on close of P-001
+(2026-07-02)._
