@@ -11,9 +11,9 @@
 
 ## Where we are
 
-- **Last closed packet:** P-002 — Part II standalone cleanup + Phase 1 Repository Auditor specification
+- **Last closed packet:** P-003-S1 — Phase 1 Repository Auditor — Slice 1: proof surface (report schema, check registry, decision engine, fixture harness, offline determinism)
 - **Now:** none active
-- **Next:** LaunchGraph Phase 1: Repository Auditor implementation — awaiting explicit go; decompose per spec (see build-os/packets/active_packet.md for the defined-but-not-active P-003 candidate).
+- **Next:** P-003-S2 (first detector slice — deterministic detectors against the proof surface) — awaiting orchestrator confirmation and explicit go (see build-os/packets/active_packet.md for the staged candidate).
 
 ## Stable facts (slow-changing)
 
@@ -22,6 +22,8 @@
 - LaunchGraph's first buildable target is the Part II production-readiness layer.
 - Phase 1 spec lives at LaunchGraph `specs/phase-1-repository-auditor.md` (commit 5621aa9, branch claude/launchgraph-product-scope-43pgdx).
 - Phase 1 decision ceiling is `ready_with_warnings` until Phase 3+.
+- LaunchGraph now has a tested proof surface (branch tip 263ac7c): `src/schema`, `src/checks/registry`, `src/decision/engine`, `src/report/serialize`, `src/eval/harness`; 78 tests; zero runtime deps; build/test commands `npm test` + `npm run typecheck` in the LaunchGraph checkout.
+- AT-17 is closed; AT-23/25/26 have unit-proven groundwork; AT-24 has fixture-data groundwork (`fixtures/unsupported/`, inert).
 
 ---
-_Updated by the archivist on close of P-002 (2026-07-23)._
+_Updated by the archivist on close of P-003-S1 (2026-07-23)._

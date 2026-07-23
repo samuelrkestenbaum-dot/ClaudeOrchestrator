@@ -4,33 +4,42 @@
 > the builder implements exactly this and nothing else; the archivist clears it
 > on close. One packet at a time.
 
-- **Status:** defined — awaiting explicit go (do not implement). No packet is active (last closed: P-002 — see build-os/receipts/P-002.md).
-- **Packet id:** P-003
-- **Title:** Phase 1 Repository Auditor — implementation start
-
-## Goal / "done" criteria
-
-- First implementation slice per LaunchGraph `specs/phase-1-repository-auditor.md`; the exact slice is to be confirmed by the orchestrator at go time, with the AT coverage (from AT-01..AT-29) it satisfies named explicitly.
-
-## In scope
-
-- LaunchGraph repo, per spec §1 boundaries.
-
-## Out of scope (explicit)
-
-- Everything in spec §13 (deferred functionality).
-- Merge or PR.
-- Provider access of any kind.
-
-## Branch base
-
-- origin/claude/launchgraph-product-scope-43pgdx @ 5621aa9 — orchestrator verifies via `git merge-base` before building.
-
-## Plan (≤2 commits)
-
-- To be declared at go (≤2 commits, Commit-1 green in isolation).
+- **Status:** none active (last closed: P-003-S1 — see build-os/receipts/P-003-S1.md)
 
 ---
-_Staged by the archivist on close of P-002 (2026-07-23). This is a candidate
-definition only — do not implement until the orchestrator confirms explicit go
-and declares the commit plan._
+
+## Staged candidate — P-003-S2 (NOT active)
+
+- **Status:** candidate — awaiting orchestrator confirmation and explicit go
+- **Packet id:** P-003-S2
+- **Title:** Phase 1 Repository Auditor — Slice 2: first detector slice (deterministic detectors against the proof surface)
+
+### Suggested scope
+
+- First deterministic detectors — candidates LG-001, LG-002, LG-004 (pure
+  repo-signal checks) — plus broken-fixture(s) for them, wired through the
+  `ScannerFn` seam into the §9 harness.
+
+### Branch base
+
+- origin/claude/launchgraph-product-scope-43pgdx @ 263ac7c (P-003-S1 tip);
+  verify via `git merge-base` at go.
+
+### Plan
+
+- ≤2 commits, to be declared at go.
+
+### Notes (carry forward)
+
+- **DETECTOR-SLICE OBLIGATION:** every finding on LG-003/010/012/014/015 must
+  carry `externalVerification` (or unverified classification) — that enforces
+  the §7 Phase-1 ceiling; AT-16 is the backstop. Any detector slice touching
+  those checks must honor this.
+- Fixtures remain inert data: never a workspace, excluded from
+  install/build/test tooling (SEC-1; sec1 test suite guards it).
+- No merge, no PR, no provider access without explicit go.
+
+---
+_Cleared by the archivist on close of P-003-S1 (2026-07-23). The staged
+candidate above activates only on orchestrator confirmation and explicit user
+go._
