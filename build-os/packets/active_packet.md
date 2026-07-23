@@ -4,32 +4,33 @@
 > the builder implements exactly this and nothing else; the archivist clears it
 > on close. One packet at a time.
 
-- **Status:** none active (last closed: P-001 — see build-os/receipts/P-001.md)
-- **Packet id:** _<id, e.g. P-002>_
-- **Title:** _<short title>_
+- **Status:** defined — awaiting explicit go (do not implement). No packet is active (last closed: P-002 — see build-os/receipts/P-002.md).
+- **Packet id:** P-003
+- **Title:** Phase 1 Repository Auditor — implementation start
 
 ## Goal / "done" criteria
 
-- _<the single, testable outcome that means this packet is done>_
+- First implementation slice per LaunchGraph `specs/phase-1-repository-auditor.md`; the exact slice is to be confirmed by the orchestrator at go time, with the AT coverage (from AT-01..AT-29) it satisfies named explicitly.
 
 ## In scope
 
-- _<files / surfaces this packet may touch>_
+- LaunchGraph repo, per spec §1 boundaries.
 
 ## Out of scope (explicit)
 
-- _<things that look related but are NOT this packet — surface as new packets>_
+- Everything in spec §13 (deferred functionality).
+- Merge or PR.
+- Provider access of any kind.
 
 ## Branch base
 
-- _<expected merge-base, e.g. origin/main — orchestrator verifies via git merge-base>_
+- origin/claude/launchgraph-product-scope-43pgdx @ 5621aa9 — orchestrator verifies via `git merge-base` before building.
 
 ## Plan (≤2 commits)
 
-1. **Commit 1 (green in isolation):** _<test-first change that passes on its own>_
-2. **Commit 2 (optional, same packet):** _<follow-through that keeps suite green>_
+- To be declared at go (≤2 commits, Commit-1 green in isolation).
 
 ---
-_Cleared by the archivist on close of P-001 (2026-07-23). Define/confirm the
-next packet here before delegating to builder — likely candidate: LaunchGraph
-Phase 1 "Repository auditor" (see build-os/memory/current_state.md)._
+_Staged by the archivist on close of P-002 (2026-07-23). This is a candidate
+definition only — do not implement until the orchestrator confirms explicit go
+and declares the commit plan._
