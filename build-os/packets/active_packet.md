@@ -4,8 +4,8 @@
 > the builder implements exactly this and nothing else; the archivist clears it
 > on close. One packet at a time.
 
-- **Status:** none active
-- **Packet id:** _<id, e.g. P-001>_
+- **Status:** none active (last closed: P-001 — see build-os/receipts/P-001.md)
+- **Packet id:** _<id, e.g. P-002>_
 - **Title:** _<short title>_
 
 ## Goal / "done" criteria
@@ -30,4 +30,6 @@
 2. **Commit 2 (optional, same packet):** _<follow-through that keeps suite green>_
 
 ---
-_Initialized empty. Define/confirm a packet here before delegating to builder._
+_Cleared by the archivist on close of P-001 (2026-07-23). Define/confirm the
+next packet here before delegating to builder — likely candidate: LaunchGraph
+Phase 1 "Repository auditor" (see build-os/memory/current_state.md)._

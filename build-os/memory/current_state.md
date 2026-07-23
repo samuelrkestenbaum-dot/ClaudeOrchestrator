@@ -5,21 +5,21 @@
 
 ## Project
 
-- **What this repo is:** _<one-line description — fill in>_
-- **Primary branch / base:** _<e.g. main>_
-- **Build/test command:** _<e.g. npm test / pytest / make test>_
+- **What this repo is:** Build OS control/orchestrator repo — packets, receipts, and memory for builds it directs (product work lands in separate repos).
+- **Primary branch / base:** claude/add-build-os
+- **Build/test command:** none (docs/config repo)
 
 ## Where we are
 
-- **Last closed packet:** _<id + title, or "none yet">_
-- **Now:** _<the current focus / active packet id, or "none">_
-- **Next:** _<the most likely next packet>_
+- **Last closed packet:** P-001 — LaunchGraph product scope — founding documents
+- **Now:** none
+- **Next:** LaunchGraph Phase 1 "Repository auditor" packet (per PRODUCT_SCOPE.md section 35 / Part II first milestone)
 
 ## Stable facts (slow-changing)
 
-- _<key architectural facts, conventions, invariants the orchestrator should
-  carry between sessions>_
+- LaunchGraph product repo lives at samuelrkestenbaum-dot/LaunchGraph; local checkout at /home/user/LaunchGraph.
+- LaunchGraph's founding scope is PRODUCT_SCOPE.md (root commit c7267e8).
+- LaunchGraph's first buildable target is the Part II production-readiness layer.
 
 ---
-_Updated by the archivist on close. Initialized as a scaffold — replace the
-placeholders with real state on first use._
+_Updated by the archivist on close of P-001 (2026-07-23)._
