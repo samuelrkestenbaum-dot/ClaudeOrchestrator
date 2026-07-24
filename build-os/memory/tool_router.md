@@ -230,6 +230,19 @@ activation · authentication · repository rollout** as five distinct states.
 | **claude-code-action** | Repo-scoped GitHub assistance | **DOCUMENTED/OPT-IN** | named repo + secret + explicit go |
 | **claude-code-security-review** | Repo-scoped PR security review | **DOCUMENTED/OPT-IN** | named repo + secret + explicit go |
 
+### Specialist capability profiles
+
+The focused profile is the fast default, not a permanent capability deletion. Before
+work that materially benefits from ECC-only language/framework reviewers, browser QA,
+networking, production operations, or its specialist agents, offer or invoke the `ecc`
+profile for the next fresh session. Before an explicit compiler/assembly zeroization
+audit, use the `zeroize` profile. Return to `focused` afterward:
+
+`build-os/tools/capability-profile.sh {focused|ecc|zeroize|status}`
+
+Each profile keeps exactly one Serena MCP. Never enable ECC and zeroize indiscriminately
+for ordinary work; profile switching should follow exact task match and lowest overhead.
+
 > **Repo-scoped ≠ global.** `claude-code-action` and `claude-code-security-review`
 > are per-repository GitHub Action templates, **not** global plugins — never add
 > them to arbitrary product repos. Minimum-permission, advisory-first install

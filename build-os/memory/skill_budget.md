@@ -46,3 +46,18 @@ blindly keep redundant skills, and do not blindly delete useful ones.
   and 35 bundled skills with **no skill-budget warning**, then returned the requested
   response within the configured cost cap.
 - `repair-host-integrations.sh` enforces this state after future plugin updates.
+
+## Reversible specialist profiles (P-013)
+
+Disabled does not mean removed. Run:
+
+- `build-os/tools/capability-profile.sh focused` — fast default.
+- `build-os/tools/capability-profile.sh ecc` — restores all 372 ECC skills, 67 agents,
+  hooks, and Chrome DevTools MCP for a specialist engineering session.
+- `build-os/tools/capability-profile.sh zeroize` — restores the zeroization-audit skill
+  and agents, swaps pinned user Serena for the plugin's bundled Serena, and prevents a
+  duplicate server.
+- `build-os/tools/capability-profile.sh status` — read-only current state.
+
+Restart Claude Code after switching. The `/capability-profile` command exposes the same
+workflow inside Claude.

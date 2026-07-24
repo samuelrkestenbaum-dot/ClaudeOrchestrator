@@ -11,7 +11,7 @@
 - **Primary branch / base:** `claude/add-build-os` (current integration base; no
   `main` present in this environment). Active work branch:
   `claude/orchestrator-tools-list-e0mdaz`.
-- **Build/test command:** `bash tests/build_os_tests.sh` (78 checks; no network; temp dirs)
+- **Build/test command:** `bash tests/build_os_tests.sh` (82 checks; no network; temp dirs)
   — proportionate-routing + tool-ranking rules, the SessionStart detector (enabledPlugins/
   native vs plugin-cache candidates), installer copy parity, managed-block replacement,
   global convergence (legacy routing supersession preserving unrelated notes, + arbitrary-
@@ -22,7 +22,9 @@
 
 ## Where we are
 
-- **Last closed packet:** P-012 — live host convergence after the P-011 repair: CLI authentication restored, ECC disabled, focused skill inventory visible without truncation, and one user-scope Serena MCP pinned to official commit `68884f1`. Fresh prompt, hook, budget, and MCP checks pass. `tests/build_os_tests.sh` — 78/78 green.
+- **Last closed packet:** P-013 — reversible specialist profiles: focused remains the
+  fast default, while ECC and zeroization auditing can be restored explicitly with
+  correct skill budgets and single-Serena handling. `tests/build_os_tests.sh` — 82/82 green.
 - **Now:** none active.
 - **Next (candidates):** decide Context Mode routing enablement (stays non-secret pilot);
   name a target repo + approve

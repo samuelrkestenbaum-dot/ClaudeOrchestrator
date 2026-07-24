@@ -291,6 +291,48 @@ grep -qi "Remote / org capabilities" "$ROUTER" && ok "router separates remote/or
 grep -qi "NOT in the local Claude Code plugin registry" "$ROUTER" && ok "router flags org caps as not-in-local-registry" || no "router still conflates org with local"
 grep -qi "no-route-to-unverified" "$ROUTER" && ok "router has a no-route-to-unverified rule" || no "router lacks no-route-to-unverified rule"
 
+echo "== 13. P-013: reversible specialist capability profiles =="
+PROFILE="$SRC/build-os/tools/capability-profile.sh"
+PROFILE_HOME="$WORK/profile-home"
+mkdir -p "$PROFILE_HOME/.claude"
+printf '%s\n' '{"enabledPlugins":{}}' > "$PROFILE_HOME/.claude/settings.json"
+printf '%s\n' '{"mcpServers":{"keep-me":{"command":"keep"}}}' > "$PROFILE_HOME/.claude.json"
+if CLAUDE_USER_DIR="$PROFILE_HOME/.claude" CLAUDE_CONFIG_PATH="$PROFILE_HOME/.claude.json" bash "$PROFILE" focused >/dev/null 2>&1; then
+  ok "focused capability profile runs"
+else
+  no "focused capability profile missing or failed"
+fi
+python3 - "$PROFILE_HOME/.claude/settings.json" "$PROFILE_HOME/.claude.json" <<'PY'
+import json, sys
+s = json.load(open(sys.argv[1])); c = json.load(open(sys.argv[2]))
+assert s["enabledPlugins"]["ecc@ecc"] is False
+assert s["enabledPlugins"]["zeroize-audit@trailofbits"] is False
+assert s["skillListingBudgetFraction"] == 0.18
+assert "68884f1190489685082dc3c3b56917e92a1de0e6" in " ".join(c["mcpServers"]["serena"]["args"])
+assert c["mcpServers"]["keep-me"]["command"] == "keep"
+PY
+test "$?" -eq 0 && ok "focused profile keeps pinned Serena and focused budget" || no "focused profile state wrong"
+CLAUDE_USER_DIR="$PROFILE_HOME/.claude" CLAUDE_CONFIG_PATH="$PROFILE_HOME/.claude.json" bash "$PROFILE" ecc >/dev/null 2>&1
+python3 - "$PROFILE_HOME/.claude/settings.json" "$PROFILE_HOME/.claude.json" <<'PY'
+import json, sys
+s = json.load(open(sys.argv[1])); c = json.load(open(sys.argv[2]))
+assert s["enabledPlugins"]["ecc@ecc"] is True
+assert s["enabledPlugins"]["zeroize-audit@trailofbits"] is False
+assert s["skillListingBudgetFraction"] == 0.40
+assert "serena" in c["mcpServers"]
+PY
+test "$?" -eq 0 && ok "ECC profile restores all ECC capabilities without duplicate Serena" || no "ECC profile state wrong"
+CLAUDE_USER_DIR="$PROFILE_HOME/.claude" CLAUDE_CONFIG_PATH="$PROFILE_HOME/.claude.json" bash "$PROFILE" zeroize >/dev/null 2>&1
+python3 - "$PROFILE_HOME/.claude/settings.json" "$PROFILE_HOME/.claude.json" <<'PY'
+import json, sys
+s = json.load(open(sys.argv[1])); c = json.load(open(sys.argv[2]))
+assert s["enabledPlugins"]["ecc@ecc"] is False
+assert s["enabledPlugins"]["zeroize-audit@trailofbits"] is True
+assert "serena" not in c["mcpServers"]
+assert c["mcpServers"]["keep-me"]["command"] == "keep"
+PY
+test "$?" -eq 0 && ok "zeroize profile restores audit workflow and removes duplicate Serena" || no "zeroize profile state wrong"
+
 echo
 echo "==== RESULT: $PASS passed, $FAIL failed ===="
 [ "$FAIL" -eq 0 ]
