@@ -59,21 +59,31 @@ with open(path, "w") as f:
 print("  + settings.json hooks merged")
 PY
 
-# 5) Append Build OS guidance to ~/.claude/CLAUDE.md — guarded, idempotent.
-CLAUDE_MD="$DEST/CLAUDE.md"
-MARK_START="<!-- BUILD-OS:START (managed by install-global.sh) -->"
-MARK_END="<!-- BUILD-OS:END -->"
-if [ -f "$CLAUDE_MD" ] && grep -qF "$MARK_START" "$CLAUDE_MD"; then
-  echo "  = CLAUDE.md already has the Build OS block — skipped"
-else
-  {
-    echo ""
-    echo "$MARK_START"
-    cat "$SRC/build-os/global-claude-md.md"
-    echo "$MARK_END"
-  } >> "$CLAUDE_MD"
-  echo "  + CLAUDE.md guidance appended"
-fi
+# 5) Install Build OS guidance into ~/.claude/CLAUDE.md — managed block, REPLACED on
+#    re-run (so stale guidance is refreshed, not skipped). Non-managed content is kept.
+python3 - "$DEST/CLAUDE.md" "$SRC/build-os/global-claude-md.md" "install-global.sh" <<'PY'
+import os, re, sys
+claude_md, block_src, manager = sys.argv[1], sys.argv[2], sys.argv[3]
+start = "<!-- BUILD-OS:START (managed by %s) -->" % manager
+end = "<!-- BUILD-OS:END -->"
+with open(block_src) as f:
+    body = f.read().rstrip("\n")
+managed = "%s\n%s\n%s" % (start, body, end)
+
+existing = ""
+if os.path.exists(claude_md):
+    with open(claude_md) as f:
+        existing = f.read()
+
+# Strip ALL prior managed blocks (any manager tag), then re-append one fresh block.
+had = "BUILD-OS:START" in existing
+cleaned = re.sub(r"\n*<!-- BUILD-OS:START.*?-->.*?<!-- BUILD-OS:END -->\n*", "\n",
+                 existing, flags=re.DOTALL).rstrip("\n")
+new = (cleaned + "\n\n" + managed + "\n") if cleaned else (managed + "\n")
+with open(claude_md, "w") as f:
+    f.write(new)
+print("  %s CLAUDE.md Build OS block" % ("~ replaced" if had else "+ added"))
+PY
 
 echo
 echo "Done. Build OS is now active in every Claude Code session on this machine."

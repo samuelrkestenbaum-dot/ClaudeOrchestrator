@@ -51,16 +51,28 @@ claude = os.path.join(home, ".claude")
 plug = os.path.join(claude, "plugins")
 
 def cap(names, n=50):
-    names = sorted(set(n for n in names if n))
+    names = sorted(set(x for x in names if x))
     if not names:
         return None
     if len(names) <= n:
         return ", ".join(names)
     return ", ".join(names[:n]) + " … (+%d more)" % (len(names) - n)
 
-# MCP servers — config files (incl. projects.<path>.mcpServers nesting)
+CONFIGS = [os.path.join(root, ".mcp.json"), os.path.join(home, ".claude.json"),
+           os.path.join(claude, "settings.json"), os.path.join(claude, "settings.local.json"),
+           os.path.join(root, ".claude", "settings.json"), os.path.join(root, ".claude", "settings.local.json")]
+
+def load(p):
+    try:
+        with open(p) as f:
+            return json.load(f)
+    except Exception:
+        return None
+docs = [d for d in (load(p) for p in CONFIGS) if isinstance(d, dict)]
+
+# MCP servers — from config (incl. projects.<path>.mcpServers nesting)
 servers = set()
-def collect(d):
+def collect_servers(d):
     if not isinstance(d, dict):
         return
     if isinstance(d.get("mcpServers"), dict):
@@ -68,39 +80,64 @@ def collect(d):
     projs = d.get("projects")
     if isinstance(projs, dict):
         for v in projs.values():
-            if isinstance(v, dict) and isinstance(v.get("mcpServers"), dict):
-                servers.update(v["mcpServers"].keys())
-for p in [os.path.join(root, ".mcp.json"), os.path.join(home, ".claude.json"),
-          os.path.join(claude, "settings.json"), os.path.join(claude, "settings.local.json"),
-          os.path.join(root, ".claude", "settings.json"), os.path.join(root, ".claude", "settings.local.json")]:
-    try:
-        with open(p) as f:
-            collect(json.load(f))
-    except Exception:
-        continue
+            collect_servers(v)
+for d in docs:
+    collect_servers(d)
 
-# Skills — directories (user, project, plugins/**)
-skill_roots = [os.path.join(claude, "skills"), os.path.join(root, ".claude", "skills")]
-skill_roots += glob.glob(os.path.join(plug, "**", "skills"), recursive=True)
-skills = []
-for r in skill_roots:
-    if os.path.isdir(r):
-        skills += [d for d in os.listdir(r) if os.path.isdir(os.path.join(r, d))]
+# Enabled plugins — from settings/config (authoritative), NOT the plugin cache.
+enabled = set()
+def collect_enabled(d):
+    if not isinstance(d, dict):
+        return
+    ep = d.get("enabledPlugins")
+    if isinstance(ep, dict):
+        for k, v in ep.items():
+            if isinstance(v, list):
+                for item in v:
+                    enabled.add(str(item) if "@" in str(item) else "%s@%s" % (item, k))
+            elif v:
+                enabled.add(str(k))
+    elif isinstance(ep, list):
+        enabled.update(str(x) for x in ep)
+    projs = d.get("projects")
+    if isinstance(projs, dict):
+        for v in projs.values():
+            collect_enabled(v)
+for d in docs:
+    collect_enabled(d)
 
-# Slash commands & subagents — *.md (user, project, plugins/**)
-def md_items(roots):
+# NATIVE skills/commands/subagents — user + project scope ONLY (real on disk, not plugin cache).
+def dirs_in(*roots):
     out = []
     for r in roots:
-        out += [os.path.splitext(os.path.basename(p))[0] for p in glob.glob(os.path.join(r, "*.md"))]
+        if os.path.isdir(r):
+            out += [x for x in os.listdir(r) if os.path.isdir(os.path.join(r, x))]
     return out
-cmd_roots = [os.path.join(claude, "commands"), os.path.join(root, ".claude", "commands")] + glob.glob(os.path.join(plug, "**", "commands"), recursive=True)
-agent_roots = [os.path.join(claude, "agents"), os.path.join(root, ".claude", "agents")] + glob.glob(os.path.join(plug, "**", "agents"), recursive=True)
+def md_in(*roots):
+    out = []
+    for r in roots:
+        if os.path.isdir(r):
+            out += [os.path.splitext(f)[0] for f in os.listdir(r) if f.endswith(".md")]
+    return out
+native_skills = dirs_in(os.path.join(claude, "skills"), os.path.join(root, ".claude", "skills"))
+native_cmds   = md_in(os.path.join(claude, "commands"), os.path.join(root, ".claude", "commands"))
+native_agents = md_in(os.path.join(claude, "agents"), os.path.join(root, ".claude", "agents"))
 
-print("MCP servers: " + (cap(servers) or "(none in config — mcp__<server>__* tools may still be live in-session)"))
-print("Skills:      " + (cap(skills) or "(none found in skill dirs)"))
-print("Commands:    " + (cap(md_items(cmd_roots)) or "(none found)"))
-print("Subagents:   " + (cap(md_items(agent_roots)) or "(none found)"))
-print("(Summary — orchestrator: route to fitting skills / slash commands / MCP / subagents; glob these dirs or call mcp__* for the full set.)")
+# Plugin-cache entries — CANDIDATES ONLY. Presence on disk is NOT proof of activation.
+cache = []
+for r in glob.glob(os.path.join(plug, "**", "skills"), recursive=True):
+    if os.path.isdir(r):
+        cache += [x for x in os.listdir(r) if os.path.isdir(os.path.join(r, x))]
+
+print("MCP servers (config):            " + (cap(servers) or "(none in config — mcp__<server>__* tools may still be live in-session)"))
+print("Enabled plugins (settings):      " + (cap(enabled) or "(none listed in settings enabledPlugins)"))
+print("Skills (native user/project):    " + (cap(native_skills) or "(none)"))
+print("Commands (native user/project):  " + (cap(native_cmds) or "(none)"))
+print("Subagents (native user/project): " + (cap(native_agents) or "(none)"))
+print("Plugin-cache candidates (VERIFY LIVE): " + (cap(cache) or "(none in ~/.claude/plugins cache)"))
+print("(Availability = live proof, not cache. The cache/config entries above are CANDIDATES;")
+print(" confirm with a live registry/tool call — ListPlugins / ListConnectors / ListSkills, or an")
+print(" mcp__<server>__* call — before claiming a capability is ACTIVE.)")
 PY
 else
   echo "(python3 unavailable — skipping capability detection)"
