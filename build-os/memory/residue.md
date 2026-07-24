@@ -69,6 +69,18 @@
   or run Chrome DevTools MCP beside another devtools server for the same task. Encoded in
   `tool_router.md` under *Canonical MCP servers*; extend the named examples as new
   duplicate-prone servers appear.
+- **Zero-touch handoff — tested vs live (P-014):** `specialist-handoff.sh` is fully
+  regression-tested with a mock `claude` + real `capability-profile.sh` against temp homes
+  (classification, focused no-op, ECC/zeroize handoff, prompt/cwd preservation, recursion
+  guard, child-failure cleanup, timeout, single-Serena, dry-run). A **live** host handoff
+  additionally needs the real authenticated `claude` CLI; the local CLI OAuth is expired, so
+  a live child relaunch is a user step. The prompt-hook path resolves the handoff script from
+  repo-relative / `$CLAUDE_PROJECT_DIR` / `~/build-os` and is non-fatal if absent.
+- **Host specialist capabilities (P-014):** 21st.dev verified live in-session (read-only
+  `get_usage`); `agent-reach` skill present in-session; Claude Watch + UI UX Pro Max are
+  host-reported (installed/uploaded per user) and **not independently verifiable here** — no
+  ACTIVE claim. All are preserved across profile transitions and routed in `tool_router.md`
+  → *Host specialist capabilities*.
 - Snapshot leakage: Repomix output can embed code — the hardened config excludes
   secrets/env/deps/build, but **sharing a snapshot externally is a STOP**.
 

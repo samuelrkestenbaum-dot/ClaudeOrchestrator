@@ -11,20 +11,27 @@
 - **Primary branch / base:** `claude/add-build-os` (current integration base; no
   `main` present in this environment). Active work branch:
   `claude/orchestrator-tools-list-e0mdaz`.
-- **Build/test command:** `bash tests/build_os_tests.sh` (82 checks; no network; temp dirs)
+- **Build/test command:** `bash tests/build_os_tests.sh` (112 checks; no network; temp dirs)
   — proportionate-routing + tool-ranking rules, the SessionStart detector (enabledPlugins/
   native vs plugin-cache candidates), installer copy parity, managed-block replacement,
   global convergence (legacy routing supersession preserving unrelated notes, + arbitrary-
   repo user-scope router resolution), plus install-global DURABLY-CONFIGURED reporting, the
   explicit 3-tier router fallback, and the canonical duplicate-MCP rule, plus P-011
   hook-dedupe (no prompt_id), skill-budget audit, honest Serena reconciliation, and
-  remote/org-vs-local capability separation.
+  remote/org-vs-local capability separation, plus P-013 reversible profiles and P-014
+  zero-touch specialist handoff (route classification, focused no-op, ECC/zeroize handoff,
+  prompt/cwd preservation, recursion guard, child-failure cleanup, timeout, single-Serena,
+  dry-run) and unrelated-capability preservation across profile transitions.
 
 ## Where we are
 
-- **Last closed packet:** P-013 — reversible specialist profiles: focused remains the
-  fast default, while ECC and zeroization auditing can be restored explicitly with
-  correct skill budgets and single-Serena handling. `tests/build_os_tests.sh` — 82/82 green.
+- **Last closed packet:** P-014 — zero-touch specialist orchestration: the prompt-entry
+  hook auto-detects focused vs ECC vs zeroize and, only when a disabled specialist is needed,
+  hands off to a fresh non-interactive Claude child (preserving the exact task + cwd),
+  surfaces its exit status, and always restores focused — recursion-guarded, timed out,
+  single-Serena, never a silent success. Unrelated host capabilities (21st.dev live, Agent
+  Reach skill, Claude Watch + UI UX Pro Max host-reported) preserved + routed.
+  `tests/build_os_tests.sh` — 112/112 green.
 - **Now:** none active.
 - **Next (candidates):** decide Context Mode routing enablement (stays non-secret pilot);
   name a target repo + approve
@@ -66,6 +73,13 @@
 - **Discovery-first rule:** every build discovers live capabilities, then selects
   the smallest correct toolset; Serena is primary for symbol-level work in large/
   unfamiliar repos before broad file reads.
+- **Zero-touch specialist handoff (P-014):** `build-os/tools/specialist-handoff.sh` + the
+  `prompt-router.sh` hook auto-route focused (no relaunch) vs ECC vs zeroize; a disabled
+  specialist triggers an automatic bounded child session, then focused is always restored
+  (recursion-guarded, timed out, single-Serena, honest exit status). Host capabilities are
+  preserved across profiles + routed: 21st.dev (✅ verified live via read-only `get_usage`),
+  Agent Reach (`agent-reach` skill present in-session), Claude Watch + UI UX Pro Max
+  (host-reported; not independently verifiable here — no ACTIVE claim).
 - **Gates hold:** external mutation (push/merge/deploy/secret/send/SaaS-write),
   plus DDL / remote-DB writes / payments / flags / canaries / telemetry / OAuth,
   are each a separate STOP for explicit go. Repo-scoped GH Actions never go global.
