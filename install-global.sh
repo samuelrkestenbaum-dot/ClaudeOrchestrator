@@ -32,6 +32,10 @@ cp "$SRC/.claude/hooks/"*.sh        "$DEST/hooks/"
 chmod +x "$DEST/hooks/"*.sh
 echo "  + agents, commands, hooks copied"
 
+# Repair known plugin hook conflicts and keep the global agent registry below
+# Claude's discovery limit. Idempotent; preserves backups before first mutation.
+CLAUDE_USER_DIR="$DEST" bash "$SRC/repair-host-integrations.sh"
+
 # Keep the user-scope router authoritative for repos without project Build OS.
 cp "$SRC/build-os/memory/tool_router.md" "$USER_BUILD_OS/memory/tool_router.md"
 echo "  + user-scope tool router synchronized"

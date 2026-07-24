@@ -16,8 +16,7 @@
   user scope; benchmark PASS. **Routing limited to non-secret pilot** (not wired into any
   project `.mcp.json`); awaiting go to widen. Non-secret repos only; never route
   secrets/customer-data/logs through it.
-- **Trail of Bits** → 9 curated plugins installed + enabled at host user scope
-  (advisory/read-only); **not vendored** (CC BY-SA). ACTIVE pends fresh-session test.
+- **Trail of Bits** → **ACTIVE**; 9 curated plugins verified in a fresh session (advisory/read-only); **not vendored** (CC BY-SA).
 - **GH Action opt-in** → `claude-code-action` / `claude-code-security-review` are
   repo-scoped templates; install into a **named** target repo only with explicit go +
   the required secret (`ANTHROPIC_API_KEY` / `CLAUDE_API_KEY`).
@@ -52,18 +51,12 @@
   while preserving unrelated user notes, and syncs the current router to
   `~/build-os/memory/tool_router.md` (overridable via `BUILD_OS_USER_DIR`). Conservative by
   design; extend the signatures + test if a new legacy shape appears on the host.
-- **Installation vs configuration vs activation (P-007):** running `install-global.sh` is a
-  **configuration** act (writes `~/.claude/CLAUDE.md` + syncs the user-scope router) — NOT
-  activation. The local Claude CLI is logged out, so **no fresh-session behavioral-ACTIVE
-  claim** is made. Keep the three states distinct.
+- **Installation vs configuration vs activation:** `install-global.sh` remains a configuration act; P-010 separately verified a fresh authenticated session.
 - **Parallel-work reconciliation (P-007):** the split-brain fix was implemented on the host
   Mac (`Converge global orchestrator routing`) and pushed to this branch; a duplicate
   in-container implementation was discarded in favour of the validated host version, and
   this packet added only the missing Build OS closure (receipt + memory).
-- **Config ≠ activation, restated (P-008):** `install-global.sh` now reports **DURABLY
-  CONFIGURED** and explicitly states it is **not ACTIVE** until a fresh, authenticated
-  Claude Code session passes the SessionStart check. Local CLI is logged out → no ACTIVE
-  claim anywhere. A test asserts the installer makes no "now active" claim.
+- **Config ≠ activation:** installer output intentionally does not claim activation; P-010 supplies the independent activation evidence.
 - **Canonical MCP rule (P-008):** one live server per job; prefer a pinned/user-configured
   server over a plugin-bundled copy over an unpinned `@latest`; do not double-launch Serena
   or run Chrome DevTools MCP beside another devtools server for the same task. Encoded in
@@ -76,8 +69,7 @@
 
 - **No secrets touched, no OAuth authorized, no accounts connected.** Stripe /
   Cloudflare still unauthenticated; GH Action API keys not added.
-- Host tools installed + enabled (Serena, Repomix, ccusage, claude-hud, context-mode,
-  9 Trail of Bits plugins), but **none ACTIVE** until the fresh-session activation test.
+- Build OS, Serena, Repomix, ccusage, Context Mode, and 9 Trail of Bits plugins are **ACTIVE**. Claude HUD is enabled; visual TTY rendering remains unverified.
 - Context Mode enabled on host but routing **limited to non-secret pilot** — awaiting go
   to widen.
 - Trail of Bits (CC BY-SA) enabled at host user scope, **not vendored** into this repo.

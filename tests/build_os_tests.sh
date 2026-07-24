@@ -66,7 +66,6 @@ fi
 grep -qi "VERIFY LIVE" <<<"$OUT" && ok "verify-live note present" || no "verify-live note present"
 grep -q '^Orchestrator: ON' <<<"$OUT" && ok "startup output begins with orchestrator signal" || no "startup signal missing"
 [ "${#OUT}" -lt 12000 ] && ok "startup output stays below 12KB" || no "startup output too large (${#OUT} bytes)"
-grep -q '"command": "serena"' "$SRC/.mcp.json" && ok "project Serena uses the durable host executable" || no "project Serena still launches a duplicate uvx runtime"
 grep -q '68884f1190489685082dc3c3b56917e92a1de0e6' "$SRC/install-accelerators.sh" && ok "Serena bootstrap is commit-pinned" || no "Serena bootstrap is not commit-pinned"
 
 echo "== 3. Installer copy parity (source == install-global == install-project) =="
@@ -150,6 +149,89 @@ grep -qi "in this order" "$GUIDANCE" && ok "guidance states explicit fallback or
 have "$ROUTER" "one canonical live server per job" && ok "canonical-MCP rule present" || no "canonical-MCP rule present"
 have "$ROUTER" "pinned" && ok "canonical-MCP prefers pinned/user-configured" || no "canonical-MCP prefers pinned/user-configured"
 grep -qi "chrome devtools" "$ROUTER" && grep -qi "serena" "$ROUTER" && ok "canonical-MCP names Chrome DevTools + Serena de-dup" || no "canonical-MCP names Chrome DevTools + Serena de-dup"
+
+echo "== 7. P-010 installed-state convergence: one startup + one Serena MCP =="
+DUPE_HOME="$WORK/dupe-home"; DUPE_PROJ="$WORK/dupe-proj"
+DUPE_TMP="$WORK/dupe-tmp"
+mkdir -p "$DUPE_HOME" "$DUPE_PROJ/build-os/memory" "$DUPE_TMP"
+DUPE_INPUT='{"session_id":"build-os-dedup-test","hook_event_name":"SessionStart","source":"startup"}'
+DUPE_OUT="$(
+  printf '%s' "$DUPE_INPUT" | TMPDIR="$DUPE_TMP" HOME="$DUPE_HOME" CLAUDE_PROJECT_DIR="$DUPE_PROJ" bash "$HOOK"
+  printf '%s' "$DUPE_INPUT" | TMPDIR="$DUPE_TMP" HOME="$DUPE_HOME" CLAUDE_PROJECT_DIR="$DUPE_PROJ" bash "$HOOK"
+)"
+test "$(grep -c '^Orchestrator: ON' <<<"$DUPE_OUT")" -eq 1 \
+  && ok "global + project hook invocations converge to one startup" \
+  || no "global + project hooks both emitted startup output"
+PROMPT_INPUT='{"session_id":"build-os-dedup-test","prompt_id":"prompt-1","hook_event_name":"UserPromptSubmit"}'
+PROMPT_OUT="$(
+  printf '%s' "$PROMPT_INPUT" | TMPDIR="$DUPE_TMP" HOME="$DUPE_HOME" bash "$PROMPT_HOOK"
+  printf '%s' "$PROMPT_INPUT" | TMPDIR="$DUPE_TMP" HOME="$DUPE_HOME" bash "$PROMPT_HOOK"
+)"
+test "$(grep -c '^Routing reminder:' <<<"$PROMPT_OUT")" -eq 1 \
+  && ok "global + project prompt hooks converge to one reminder" \
+  || no "global + project prompt hooks both emitted reminders"
+if python3 - "$SRC/.mcp.json" <<'PY'
+import json, sys
+with open(sys.argv[1]) as f:
+    data = json.load(f)
+raise SystemExit(1 if "serena" in data.get("mcpServers", {}) else 0)
+PY
+then
+  ok "project config does not double-launch plugin-provided Serena"
+else
+  no "project config still registers a second Serena MCP"
+fi
+
+echo "== 8. P-010 durable host repair =="
+REPAIR_ROOT="$WORK/repair-home/.claude"
+MEM_CACHE="$REPAIR_ROOT/plugins/cache/thedotmack/claude-mem/13.8.1/hooks"
+MEM_MARKET="$REPAIR_ROOT/plugins/marketplaces/thedotmack/plugin/hooks"
+SUB_CACHE="$REPAIR_ROOT/plugins/cache/claude-subconscious/claude-subconscious/2.1.1/hooks"
+SUB_MARKET="$REPAIR_ROOT/plugins/marketplaces/claude-subconscious/hooks"
+mkdir -p "$MEM_CACHE" "$MEM_MARKET" "$SUB_CACHE" "$SUB_MARKET" "$REPAIR_ROOT/agents"
+printf '%s\n' '"command": "worker start; echo '\''{\"continue\":true,\"suppressOutput\":true}'\''"' \
+  > "$MEM_CACHE/hooks.json"
+cp "$MEM_CACHE/hooks.json" "$MEM_MARKET/hooks.json"
+cat > "$SUB_CACHE/hooks.json" <<'JSON'
+{"hooks":{"SessionStart":[{"matcher":"*","hooks":[
+{"type":"command","command":"session_start.ts","timeout":5},
+{"type":"command","command":"sync_letta_memory.ts","timeout":10}
+]}]}}
+JSON
+cp "$SUB_CACHE/hooks.json" "$SUB_MARKET/hooks.json"
+cat > "$REPAIR_ROOT/agents/large-agent.md" <<'MD'
+---
+name: large-agent
+description: >-
+  This is an intentionally very long routing description that should be compacted
+  without changing any of the complete agent instructions below the frontmatter.
+---
+KEEP THIS FULL AGENT BODY
+MD
+if CLAUDE_USER_DIR="$REPAIR_ROOT" bash "$SRC/repair-host-integrations.sh" >/dev/null 2>&1; then
+  ok "host repair script runs"
+else
+  no "host repair script runs"
+fi
+if rg -q 'start; echo' "$MEM_CACHE/hooks.json" "$MEM_MARKET/hooks.json"; then
+  no "claude-mem duplicate JSON emitter remains"
+else
+  ok "claude-mem duplicate JSON emitter removed durably"
+fi
+python3 - "$SUB_CACHE/hooks.json" "$SUB_MARKET/hooks.json" <<'PY'
+import json, sys
+for path in sys.argv[1:]:
+    groups = json.load(open(path))["hooks"]["SessionStart"]
+    assert len(groups) == 2
+    assert all(len(group["hooks"]) == 1 for group in groups)
+PY
+test "$?" -eq 0 && ok "claude-subconscious startup hooks split durably" || no "claude-subconscious startup hooks not split"
+grep -q 'KEEP THIS FULL AGENT BODY' "$REPAIR_ROOT/agents/large-agent.md" \
+  && ok "agent body preserved during description compaction" \
+  || no "agent body changed during description compaction"
+grep -q '^description: ".*"$' "$REPAIR_ROOT/agents/large-agent.md" \
+  && ok "agent description compacted below limit" \
+  || no "agent description remains oversized"
 
 echo
 echo "==== RESULT: $PASS passed, $FAIL failed ===="

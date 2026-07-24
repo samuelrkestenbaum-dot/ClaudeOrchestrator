@@ -27,15 +27,7 @@ item; this is the index. Keep both honest — re-verify when the environment cha
 - **Installed but NOT live (out of scope until enabled):** Stripe & Cloudflare
   Developer Platform (need auth); Google Calendar / Google Drive / Microsoft 365
   (toggled off in-chat).
-- **Build accelerators (P-005, host-side completion evidence):** All host-installed
-  local tools are **DURABLY CONFIGURED**, **none ACTIVE** until a fresh-session test.
-  Host installs (fresh-login-shell PASS): Serena `/Users/samsmac/.local/bin/serena`
-  1.6.2.dev0 (68884f1); Repomix + ccusage under `/Users/samsmac/.nvm/versions/node/v22.23.1/bin`
-  (1.17.0 / 20.0.18). Enabled at host user scope via the `claude plugin` CLI:
-  `claude-hud@claude-hud` v0.6.0, `context-mode@context-mode` v1.0.169, and 9 curated
-  Trail of Bits plugins. GitHub Actions stay repo-scoped templates (not installed; no
-  secrets). Node compatibility is resolved: the host default is Node 22.23.1 and the
-  Node-based accelerators run/connect under Node 22. Details/proof in §8.
+- **Build accelerators (P-010 live evidence):** Build OS, Serena, Repomix, ccusage, Context Mode, and 9 curated Trail of Bits plugins are **ACTIVE** in a fresh authenticated session. Claude HUD is enabled; visual TTY rendering remains unverified. Node 22.23.1 satisfies the Node-based tools. Details in §8.
 
 > The design / marketing / business / brand-voice rows in the sections below were
 > written as hypotheticals ("wire this in"). Where a ✅ marks the Wire-in column,
@@ -158,64 +150,34 @@ installed · **NOT INSTALLED/BLOCKED** = unavailable / ambiguous / withheld.
 test are verified. Keep installation · configuration · activation · authentication
 · repository rollout as five distinct states.
 
-> **Provisioning status (P-005 — host completion evidence).** All host-installed
-> local accelerators = **DURABLY CONFIGURED**; **none ACTIVE** until a newly restarted
-> Claude Code session activation test. Host: Serena `/Users/samsmac/.local/bin/serena`
-> 1.6.2.dev0 (68884f1); Repomix + ccusage under `/Users/samsmac/.nvm/versions/node/v22.23.1/bin`;
-> `claude-hud` v0.6.0, `context-mode` v1.0.169, and 9 Trail of Bits plugins installed +
-> enabled via the supported `claude plugin` CLI (`claude plugin list` confirms).
-> **Node compatibility is resolved:** the host default is **Node 22.23.1**. The committed
-> `install-accelerators.sh` covers the remote env; GitHub Actions = repo-scoped
-> templates (uninstalled). P-001 claude.ai connectors/plugins stay ACTIVE.
+> **Provisioning status (P-010 live evidence).** Build OS routing and the verified accelerators are **ACTIVE**. The project Serena entry was removed so the connected `zeroize-audit` Serena is canonical. Claude HUD remains enabled but visually unverified.
 
-### 8.1 Serena — semantic code navigation/editing (MCP) · DURABLY CONFIGURED
+### 8.1 Serena — semantic code navigation/editing (MCP) · ACTIVE
 - **Source:** https://github.com/oraios/serena · PyPI `serena-agent` · **1.6.2.dev0 (68884f1)**
 - **Install (official; upstream warns against marketplace/uvx-guess commands):**
   `uv tool install -p 3.13 serena-agent` → provides `serena`, `serena-agent`, `serena-hooks`.
-- **MCP registration:** committed `.mcp.json` (version-pinned, self-bootstrapping,
-  reproducible on a fresh container):
-  ```json
-  { "mcpServers": { "serena": { "command": "serena",
-    "args": ["start-mcp-server","--context","claude-code","--project","."] } } }
-  ```
-- **Status: DURABLY CONFIGURED (proven).** Persistently installed (`uv tool install`,
-  `serena` 1.6.2.dev0 at commit `68884f1` → `/root/.local/bin/serena`) and reconstructed
-  by the commit-pinned installer plus `.mcp.json`. Context corrected `ide-assistant → claude-code`
-  (upstream renamed it; deprecation warning now gone). **Live proof:** a real
-  `mcp__serena__list_memories` call succeeded in-session, and the committed command
-  boots the server (52 tools, LSP, project recognized). The **only** unrun step is an
-  independent fresh-session restart + project-MCP approval — a user action I cannot
-  perform non-interactively; until then it is not labelled ACTIVE. Also auto-provisioned
-  by `install-accelerators.sh`.
-- **Host (user's Mac, P-005):** persistently installed at `/Users/samsmac/.local/bin/serena`
-  1.6.2.dev0 (`68884f1`) via `uv tool install`; fresh-login-shell PASS. **ACTIVE** —
-  ACTIVE pending the fresh Claude Code session restart + MCP approval.
+- **MCP registration:** supplied once by the enabled `zeroize-audit` plugin.
+  Project `.mcp.json` deliberately has no Serena entry, preventing duplicate
+  servers and ambiguous routing.
+- **Status: ACTIVE.** Official host CLI commit `68884f1` is installed. The single canonical MCP is `plugin:zeroize-audit:serena`, verified connected in a fresh session; project `.mcp.json` intentionally contains no duplicate.
+- **Host:** `/Users/samsmac/.local/bin/serena` 1.6.2.dev0 (`68884f1`); fresh-session MCP health PASS.
 - **Gate:** local language servers, **no API key / OAuth**. Primary for symbol-level
   work in large/unfamiliar repos before broad reads. Edits still go through builder.
 
-### 8.2 Repomix — frozen snapshots / cross-model handoffs (CLI) · DURABLY CONFIGURED
+### 8.2 Repomix — frozen snapshots / cross-model handoffs (CLI) · ACTIVE
 - **Source:** https://github.com/yamadashy/repomix · npm `repomix` · **v1.17.0**
 - **Run (no global install):** `npx repomix@latest --config templates/repomix.config.json`
-- **Status: DURABLY CONFIGURED.** **Host (Mac, P-005):** installed at
-  `/Users/samsmac/.nvm/versions/node/v22.23.1/bin/repomix` 1.17.0, fresh-login-shell
-  PASS. Also env-installed (`/opt/node22/bin/repomix`) + auto-provisioned via
-  `install-accelerators.sh`. Repomix's Node 22+ engine requirement is satisfied.
-  **ACTIVE pending a fresh Claude Code session test** (a fresh login shell is not a
-  fresh session; earlier `ACTIVE (env-scoped)` reconciled down).
+- **Status: ACTIVE.** Node 22 host executable 1.17.0 and fresh authenticated session verified.
 - **Gate:** **explicit snapshots only, never always-on.** The committed
   `templates/repomix.config.json` keeps Secretlint ON and excludes env/secrets/keys/
   `node_modules`/`dist`/`build`/`.git`. Respects `.gitignore` + `.repomixignore`.
   **Sharing a snapshot with another model/service is an external send → STOP** for
   that step.
 
-### 8.3 ccusage — usage/cost visibility (CLI) · DURABLY CONFIGURED
+### 8.3 ccusage — usage/cost visibility (CLI) · ACTIVE
 - **Source:** https://github.com/ryoppippi/ccusage · npm `ccusage` · **v20.0.18**
 - **Run:** `npx ccusage@latest` (`daily` | `monthly` | `session` | `blocks`); `--offline` for cached pricing.
-- **Status: DURABLY CONFIGURED.** **Host (Mac, P-005):** installed at
-  `/Users/samsmac/.nvm/versions/node/v22.23.1/bin/ccusage` 20.0.18, fresh-login-shell
-  PASS. Also env-installed + auto-provisioned via `install-accelerators.sh`. **ACTIVE
-  pending a fresh Claude Code session test** (earlier `ACTIVE (env-scoped)` reconciled
-  down). ccusage runs on the host's Node 22.23.1.
+- **Status: ACTIVE.** Node 22 host executable 20.0.18 and fresh authenticated session verified.
 - **Gate:** **visibility-only — never makes build decisions.** Reads local Claude
   Code JSONL; offline-capable; no account/API key.
 
@@ -236,14 +198,9 @@ test are verified. Keep installation · configuration · activation · authentic
   cannot be render-verified in this non-interactive env (that's the activation blocker).
   Never set `CLAUDE_HUD_ALLOW_EXTRA_CMD=1` — it enables arbitrary shell exec (off by default).
 
-### 8.5 Trail of Bits security skills · DURABLY CONFIGURED (host-enabled)
+### 8.5 Trail of Bits security skills · ACTIVE
 - **Source:** https://github.com/trailofbits/skills (official marketplace, 40 plugins)
-- **Status: DURABLY CONFIGURED (host, P-005).** 9 curated plugins installed + enabled
-  at user scope on the Mac via the supported `claude plugin` CLI (marketplace
-  `trailofbits` added): `constant-time-analysis`, `zeroize-audit`,
-  `supply-chain-risk-auditor`, `agentic-actions-auditor`, `insecure-defaults`,
-  `static-analysis`, `variant-analysis`, `differential-review`, `seatbelt-sandboxer`.
-  `claude plugin list` confirms enabled. **ACTIVE pending a fresh-session test.**
+- **Status: ACTIVE.** Nine curated plugins are enabled and verified in a fresh session.
   Advisory/read-only; **not vendored** into this repo (CC BY-SA 4.0). Install cmds:
   `claude plugin marketplace add trailofbits/skills` → enable the subset.
 - **Curated subset for our categories** (activate per-task, security work only):
@@ -259,7 +216,7 @@ test are verified. Keep installation · configuration · activation · authentic
   supply-chain caution); install via the interactive marketplace only. (Verified 40
   plugins in the repo; curated subset above.)
 
-### 8.6 Context Mode — in-session context compression (MCP) · DURABLY CONFIGURED (host-enabled; pilot routing)
+### 8.6 Context Mode — in-session context compression (MCP) · ACTIVE (pilot routing)
 - **Verified upstream:** `mksglu/context-mode` (npm `context-mode@1.0.169`). MCP server;
   **local-only** ("nothing leaves your machine, no telemetry/account"); redacts
   `authorization/token/password/api_key` before persistence; local SQLite under
@@ -268,11 +225,10 @@ test are verified. Keep installation · configuration · activation · authentic
   files / 57 sections in **0.188s**; search returned 2 on-topic chunks in **0.120s**;
   result payload 1,225 B vs 37,283 B corpus ≈ **30× context reduction**. Accuracy,
   latency, and token/cost proxy all **PASS**.
-- **Status: DURABLY CONFIGURED (host, P-005).** Installed + enabled at user scope on
-  the Mac — `context-mode@context-mode` v1.0.169 via the supported `claude plugin` CLI
-  (marketplace `context-mode` added); `claude plugin list` confirms enabled. **ACTIVE
-  pending a fresh-session test.** Context Mode's Node 22+ engine requirement is satisfied;
-  its MCP health check connects under Node 22.
+- **Status: ACTIVE (host, P-010).** Installed + enabled at user scope on the Mac —
+  `context-mode@context-mode` v1.0.169 via the supported `claude plugin` CLI
+  (marketplace `context-mode` added); a fresh authenticated session verified the
+  MCP connection. Context Mode's Node 22+ engine requirement is satisfied.
 - **Gate (pilot only):** enabled at host user scope, but **routing limited to non-secret
   pilot use** — not wired into any project `.mcp.json`. **Non-secret repos only**;
   **never route env output, credentials, customer data, or sensitive logs through it.**
