@@ -107,9 +107,13 @@
   (`mcp__21st__*` unavailable), matching the Desktop-only note.
   (7) **skill-budget-audit** — enabled-aware `--claude-dir` mode reports installed inventory vs
   startup-enabled (via `enabledPlugins` + `installed_plugins.json` installPath, de-duped); only
-  the enabled set is budget-checked. Assumes `installed_plugins.json` lives at
-  `<dir>/plugins/installed_plugins.json` with `installPath` records; if the host schema differs,
-  extend the parser + fixture.
+  the enabled set is budget-checked. `installed_plugins.json` lives at
+  `<dir>/plugins/installed_plugins.json`. **Correction (live-host):** the real file stores each
+  `plugins[name]` as a **LIST** of install records `[{scope,user,installPath,...}]`, not a single
+  dict — the first cut parsed that as 0/0. The parser now accepts list/dict/string schemas via
+  `choose_install_path()` (prefers the current user-scope record, then any on-disk installPath,
+  then the latest named path; one path per plugin). If a host adds yet another shape, extend that
+  helper + the §21 fixture.
 - **Host specialist capabilities (P-014):** 21st.dev verified live in-session (read-only
   `get_usage`); `agent-reach` skill present in-session; Claude Watch + UI UX Pro Max are
   host-reported (installed/uploaded per user) and **not independently verifiable here** — no

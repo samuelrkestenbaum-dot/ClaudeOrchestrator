@@ -11,7 +11,7 @@
 - **Primary branch / base:** `claude/add-build-os` (current integration base; no
   `main` present in this environment). Active work branch:
   `claude/orchestrator-tools-list-e0mdaz`.
-- **Build/test command:** `bash tests/build_os_tests.sh` (186 checks; no network; temp dirs)
+- **Build/test command:** `bash tests/build_os_tests.sh` (189 checks; no network; temp dirs)
   — proportionate-routing + tool-ranking rules, the SessionStart detector (enabledPlugins/
   native vs plugin-cache candidates), installer copy parity, managed-block replacement,
   global convergence (legacy routing supersession preserving unrelated notes, + arbitrary-
@@ -50,7 +50,10 @@
   7. **skill-budget-audit** now reports installed inventory separately from the startup-enabled
      set (via `enabledPlugins` + `installed_plugins.json` installPath, de-duped) and only
      checks the enabled set against budget — a disabled mega-bundle no longer reads OVER BUDGET.
-  `tests/build_os_tests.sh` — 186/186 green (RED 148/38 → GREEN 186/0).
+     **Correction:** the real `installed_plugins.json` stores each plugin as a **LIST** of
+     install records; the parser now handles list/dict/string schemas (prefers the user-scope
+     record) so the host audit is nonzero — was falsely 0/0.
+  `tests/build_os_tests.sh` — 189/189 green (RED 148/38 → GREEN 186/0; +3 list-schema checks → 189/0).
 - **Prior:** P-015 — global install ships the specialist handoff tools (installed hook resolves
   + runs the handoff end-to-end). P-014 — zero-touch specialist orchestration.
 - **Now:** none active.
