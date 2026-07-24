@@ -110,9 +110,12 @@ print("  %s CLAUDE.md Build OS block" % ("~ replaced" if had else "+ added"))
 PY
 
 echo
-echo "Done. Build OS is now active in every Claude Code session on this machine."
-echo "Verify: start a fresh session — the first line reads 'Orchestrator: ON',"
-echo "        and /agents lists build-orchestrator + builder/reviewer/qa/archivist."
+echo "Done. Build OS is DURABLY CONFIGURED at user scope (agents, commands, hooks,"
+echo "guidance, and ~/build-os/memory/tool_router.md written)."
+echo "This is configuration, NOT activation. It is NOT yet ACTIVE: activation requires a"
+echo "fresh, authenticated Claude Code session that passes the SessionStart check —"
+echo "first line 'Orchestrator: ON', and /agents lists build-orchestrator +"
+echo "builder/reviewer/qa/archivist. Confirm there before treating Build OS as ACTIVE."
 echo
 echo "Give a project persistent memory (run from inside that repo):"
 echo "  $SRC/init-build-os.sh"

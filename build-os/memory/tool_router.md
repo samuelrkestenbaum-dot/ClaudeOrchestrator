@@ -85,6 +85,23 @@ ACTIVE, confirm with a **live** signal: `ListPlugins` / `ListConnectors` /
 tool call. The SessionStart inventory labels cache entries as *candidates* for
 exactly this reason.
 
+### Canonical MCP servers (one live server per job, no duplicate launches)
+
+Run **one canonical live server per job** — never two servers that do the same
+thing. When duplicates exist, prefer in this order:
+
+1. a **pinned, user-configured** server (explicit version in `.mcp.json` /
+   `~/.claude.json` / settings), over
+2. a **plugin-bundled** copy, over
+3. an unpinned **`@latest`** invocation.
+
+Concretely: do **not** launch a second **Serena** when one is already live, and do
+**not** run **Chrome DevTools MCP** alongside another browser/devtools server for
+the same task. Pick the single pinned/user-configured instance and route all of
+that job's calls through it. Redundant launches waste resources, split state, and
+make "which one answered?" ambiguous. If two are already running, use the pinned/
+user-configured one and note the duplicate.
+
 ## External tool routing (use when connected)
 
 Route to these **only when connected** in the current environment; otherwise fall

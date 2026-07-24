@@ -16,8 +16,11 @@ when you want continuity in a project.
 ### Per-task protocol
 
 1. **Classify** the task type, weight, and authority.
-2. **Read the router** — `build-os/memory/tool_router.md` (this project's, if
-   present) — and pick the matching row.
+2. **Read the router — in this order:** (a) the project's
+   `build-os/memory/tool_router.md` if present; else (b) the user-scope
+   `~/build-os/memory/tool_router.md`; else (c) the
+   **embedded proportionate lanes** below. Pick the matching row from the first
+   source that resolves.
 3. **Declare a Tool Budget** — the exact tools/agents you will use.
 4. **Announce** it on one line: `Tools: [x] — why`.
 5. **Budget breach = stop.** Needing a tool or authority outside the declared

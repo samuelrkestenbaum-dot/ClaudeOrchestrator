@@ -131,6 +131,22 @@ fi
 test "$(grep -c 'BUILD-OS:START' "$LHOME/CLAUDE.md")" -eq 1 && ok "legacy convergence writes one managed block" || no "legacy convergence block count"
 cmp -s "$ROUTER" "$LROUTER/memory/tool_router.md" && ok "arbitrary repo receives current user router" || no "arbitrary repo router is stale"
 
+echo "== 6. P-008 rules: DURABLY CONFIGURED report, 3-tier router fallback, canonical MCP =="
+# install-global reports DURABLY CONFIGURED and makes NO ACTIVE claim
+DHOME="$WORK/duser"; DROUTER="$WORK/dbuild"
+DOUT="$(CLAUDE_USER_DIR="$DHOME" BUILD_OS_USER_DIR="$DROUTER" bash "$SRC/install-global.sh" 2>&1)"
+grep -qi "DURABLY CONFIGURED" <<<"$DOUT" && ok "install-global reports DURABLY CONFIGURED" || no "install-global reports DURABLY CONFIGURED"
+grep -qiE "is now active|now active in|is active in|now active on" <<<"$DOUT" && no "install-global still claims ACTIVE" || ok "install-global makes no ACTIVE claim"
+grep -qiE "not yet active|fresh, authenticated" <<<"$DOUT" && ok "install-global defers activation to a fresh authenticated session" || no "install-global defers activation to a fresh authenticated session"
+# global guidance: explicit project -> user-scope -> embedded fallback order
+have "$GUIDANCE" "~/build-os/memory/tool_router.md" && ok "guidance names user-scope router tier" || no "guidance names user-scope router tier"
+grep -qi "embedded proportionate lanes" "$GUIDANCE" && ok "guidance names embedded-lanes tier" || no "guidance names embedded-lanes tier"
+grep -qi "in this order" "$GUIDANCE" && ok "guidance states explicit fallback order" || no "guidance states explicit fallback order"
+# canonical-MCP / duplicate rule
+have "$ROUTER" "one canonical live server per job" && ok "canonical-MCP rule present" || no "canonical-MCP rule present"
+have "$ROUTER" "pinned" && ok "canonical-MCP prefers pinned/user-configured" || no "canonical-MCP prefers pinned/user-configured"
+grep -qi "chrome devtools" "$ROUTER" && grep -qi "serena" "$ROUTER" && ok "canonical-MCP names Chrome DevTools + Serena de-dup" || no "canonical-MCP names Chrome DevTools + Serena de-dup"
+
 echo
 echo "==== RESULT: $PASS passed, $FAIL failed ===="
 [ "$FAIL" -eq 0 ]
