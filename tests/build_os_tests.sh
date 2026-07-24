@@ -233,6 +233,46 @@ grep -q '^description: ".*"$' "$REPAIR_ROOT/agents/large-agent.md" \
   && ok "agent description compacted below limit" \
   || no "agent description remains oversized"
 
+echo "== 9. P-011: UserPromptSubmit dedupe without prompt_id (payload-hash event key) =="
+DEDUP="$WORK/dedup"; mkdir -p "$DEDUP"
+P1='{"session_id":"sessABC","transcript_path":"/tmp/t.jsonl","cwd":"/x","hook_event_name":"UserPromptSubmit","prompt":"first prompt"}'
+P2='{"session_id":"sessABC","transcript_path":"/tmp/t.jsonl","cwd":"/x","hook_event_name":"UserPromptSubmit","prompt":"second prompt"}'
+emitted() { [ -n "$(printf '%s' "$1" | TMPDIR="$DEDUP" bash "$SRC/.claude/hooks/prompt-router.sh" 2>/dev/null)" ] && echo 1 || echo 0; }
+a="$(emitted "$P1")"; b="$(emitted "$P1")"   # one prompt fires the hook twice (global+project), no prompt_id
+[ "$a" = "1" ] && [ "$b" = "0" ] && ok "duplicate invocations of one prompt emit exactly once" || no "dedupe wrong for one prompt (a=$a b=$b)"
+c="$(emitted "$P2")"                          # a later, different prompt in the SAME session
+[ "$c" = "1" ] && ok "a later prompt in the same session emits again" || no "later prompt lost the reminder (c=$c)"
+d="$(emitted "$P2")"                          # its own duplicate collapses
+[ "$d" = "0" ] && ok "later prompt's duplicate invocation suppressed" || no "later prompt duplicated (d=$d)"
+grep -q 'sha256' "$SRC/.claude/hooks/hook-once.sh" && ok "hook key is a payload content hash, not prompt_id-only" || no "hook still relies on prompt_id only"
+
+echo "== 10. P-011: skill-budget audit tool + policy =="
+AUDIT="$SRC/build-os/tools/skill-budget-audit.sh"
+[ -x "$AUDIT" ] && ok "skill-budget-audit.sh present + executable" || no "skill-budget-audit.sh missing/not executable"
+SB="$WORK/sbplug"
+mkdir -p "$SB/trailofbits/a/skills/s1" "$SB/trailofbits/b/skills/s2" "$SB/trailofbits/c/skills/s3" "$SB/keep/skills/s4"
+for d in "$SB/trailofbits/a/skills/s1" "$SB/trailofbits/b/skills/s2" "$SB/trailofbits/c/skills/s3" "$SB/keep/skills/s4"; do printf 'name: x\ndescription: y\n' > "$d/SKILL.md"; done
+AOUT="$(bash "$AUDIT" "$SB" 100000 2>/dev/null)"
+grep -q "total skills: 4" <<<"$AOUT" && ok "audit counts skills correctly" || no "audit skill count wrong"
+grep -qi "trailofbits" <<<"$AOUT" && ok "audit surfaces the dominant plugin" || no "audit misses dominant plugin"
+grep -qi "OVER BUDGET" <<<"$(bash "$AUDIT" "$SB" 1 2>/dev/null)" && ok "audit flags over-budget" || no "audit does not flag over-budget"
+POL="$SRC/build-os/memory/skill_budget.md"
+have "$POL" "minimal active skill set" && ok "skill-budget policy present" || no "skill-budget policy missing"
+have "$POL" "685" && ok "policy records the observed over-budget figure" || no "policy missing observed figure"
+
+echo "== 11. P-011: Serena honest reconciliation + reproducible pin =="
+have "$ROUTER" "plugin:zeroize-audit:serena" && ok "router names the live plugin-bundled Serena" || no "router omits live Serena server"
+grep -qiE "unpinned|deviation" "$ROUTER" && ok "router marks Serena as unpinned/deviation" || no "router still claims Serena is pinned/ACTIVE"
+PIN="$SRC/templates/serena-pinned.mcp.json"
+[ -f "$PIN" ] && ok "reproducible pinned-Serena template present" || no "pinned-Serena template missing"
+grep -q "68884f1190489685082dc3c3b56917e92a1de0e6" "$PIN" && ok "pinned template pins the exact commit" || no "pinned template not commit-pinned"
+python3 -c 'import json,sys; json.load(open(sys.argv[1]))' "$PIN" 2>/dev/null && ok "pinned template is valid JSON" || no "pinned template invalid JSON"
+
+echo "== 12. P-011: remote/org vs local-verified capability separation =="
+grep -qi "Remote / org capabilities" "$ROUTER" && ok "router separates remote/org capabilities" || no "router does not separate remote/org"
+grep -qi "NOT in the local Claude Code plugin registry" "$ROUTER" && ok "router flags org caps as not-in-local-registry" || no "router still conflates org with local"
+grep -qi "no-route-to-unverified" "$ROUTER" && ok "router has a no-route-to-unverified rule" || no "router lacks no-route-to-unverified rule"
+
 echo
 echo "==== RESULT: $PASS passed, $FAIL failed ===="
 [ "$FAIL" -eq 0 ]

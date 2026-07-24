@@ -1,0 +1,18 @@
+{
+  "_comment": "OPT-IN reproducibly-pinned Serena (canonical-MCP rule: prefer pinned/user-configured). The live host Serena is currently plugin-bundled (plugin:zeroize-audit:serena) launched from UNPINNED git main — a deviation. To converge to ONE pinned instance: first disable the zeroize-audit plugin's bundled Serena (else you get a duplicate), then merge this mcpServers entry into .mcp.json. Pinned to oraios/serena commit 68884f1190489685082dc3c3b56917e92a1de0e6.",
+  "mcpServers": {
+    "serena": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "git+https://github.com/oraios/serena@68884f1190489685082dc3c3b56917e92a1de0e6",
+        "serena",
+        "start-mcp-server",
+        "--context",
+        "claude-code",
+        "--project",
+        "."
+      ]
+    }
+  }
+}

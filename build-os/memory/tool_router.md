@@ -113,11 +113,13 @@ inventory; default to "it's probably connected — check," not "it's absent."
 ⚠️ The tool/repo handles below are common names — if you ever *install* something
 new, **verify the exact package/repo first**; ecosystem names are easy to mistype.
 
-> **Preference vs. installed.** The table below is a *preference map* and may name
-> tools that are **not** installed here. For what is **actually installed and
-> live** in this environment, see **Installed plugins (live now)** and
-> **Installed connectors (live now)** further down — route to those first, and
-> fall back to native tools (saying so) when a preferred tool is absent.
+> **Preference vs. verified.** The table below is a *preference map* and may name tools
+> that are **not** installed here. Two verified categories differ: **local Claude Code
+> plugins** (in `claude plugin list` — see *Build accelerators*) and **remote/org
+> claude.ai capabilities** (in the app's ListConnectors/ListPlugins — see *Remote / org
+> capabilities* below), which are **not** in the local CLI registry. **No-route-to-
+> unverified:** route to a capability only after confirming it is live in the CURRENT
+> surface; fall back to native tools (saying so) when it is absent.
 
 | Task type | Preferred external tool(s) | Used by | Gate |
 |---|---|---|---|
@@ -128,17 +130,19 @@ new, **verify the exact package/repo first**; ecosystem names are easy to mistyp
 | Repo → LLM context pack | RepoMix (`repomix`) | build-orchestrator, builder | read-only — normal budget |
 | Parallel multi-agent work | Claude Squad / parallel sub-agents | build-orchestrator (agent-swarm) | **merge plan required** |
 | Send mail / message / SaaS write | Gmail, Slack, Notion, HubSpot, Supabase MCP (write ops) | builder | **STOP** — external mutation, explicit go |
-| Design / UI polish | `design` plugin (ACTIVE, claude.ai) — UI/UX, design-system | builder (design-ui) | frontend only |
+| Design / UI polish | `design` plugin (claude.ai org — verify per surface) — UI/UX, design-system | builder (design-ui) | frontend only |
 | Media generation | Higgsfield (installed connector) / Glif / Remotion | builder (marketing-media) | marketing/media packets only |
 
-### Installed plugins (live now — verified in-session, 2026-07)
+### Remote / org capabilities — claude.ai (NOT in the local Claude Code plugin registry)
 
-These claude.ai plugins are **actually installed and enabled** here (confirmed via
-`ListPlugins`) — not hypothetical "wire-in later" entries. They bundle
-skills/commands the orchestrator should route to **by name**, preferring them over
-native tools when the task fits, under the authority + gate shown. Read/analysis
-use is normal budget; anything that mutates the outside world (send, file,
-publish, write to a remote DB/SaaS) is a **STOP** for explicit go.
+⚠️ **Remote/org, not local-CLI-verified.** These are **claude.ai org-level** plugins,
+confirmed only via the claude.ai app's `ListPlugins` — they do **NOT** appear in the local
+Claude Code plugin registry (`claude plugin list`) and are **not** the locally-installed
+CLI plugins (the Trail of Bits curated set, `claude-hud`, `context-mode` — see *Build
+accelerators*). **No-route-to-unverified:** route to one of these only after confirming it
+is live in the CURRENT surface (an `mcp__*`/tool call or the app's live registry) — org-level
+enablement is not proof it is reachable from a local Claude Code CLI session. Mutations
+(send/file/publish/remote-DB-write) are a **STOP** for explicit go.
 
 | Plugin | Build capability | Authority | Gate / stop |
 |---|---|---|---|
@@ -152,10 +156,13 @@ publish, write to a remote DB/SaaS) is a **STOP** for explicit go.
 | `legal` | Contracts, review, legal docs | build (business) | read normal; **STOP** on e-sign/file/send |
 | `cowork-plugin-management` | Meta: install/enable/manage plugins | meta | plugin-management only; no product code |
 
-### Installed connectors (live now — verified in-session, 2026-07)
+### Remote / org connectors — claude.ai (verify per surface)
 
-MCP connectors **live and usable this session** (confirmed via `ListConnectors`).
-Read is normal budget; **write ops are a STOP** for explicit go.
+⚠️ **Remote/org, not local-CLI-verified.** These MCP connectors are **claude.ai org-level**,
+confirmed via the app's `ListConnectors` — availability is **per surface**; they are not
+guaranteed reachable from a local Claude Code CLI session and do not appear in the local
+plugin registry. Apply **no-route-to-unverified**: confirm the connector is live in the
+current surface before routing. Read is normal budget; **write ops are a STOP**.
 
 | Connector | Use | Gate / stop |
 |---|---|---|
@@ -205,16 +212,21 @@ memory, residue, receipts):
 fresh-session activation test are verified. Keep **installation · configuration ·
 activation · authentication · repository rollout** as five distinct states.
 
-> **Provisioning status (P-010 — live host evidence).** Build OS routing, Serena,
-> Repomix, ccusage, Context Mode, and the curated Trail of Bits plugins are
-> **ACTIVE** in a fresh authenticated Claude Code session. Node 22.23.1 satisfies
-> the Node-based tools. The project does not register a second Serena MCP;
-> `zeroize-audit` supplies the single canonical server. Claude HUD remains enabled,
-> with its visual TTY render still unverified.
+> **Provisioning status (P-011 — honest reconciliation).** Build OS routing, Repomix,
+> ccusage, and Context Mode were verified ACTIVE in a prior authenticated session; the
+> local CLI OAuth is now **expired**, so live status is not independently re-verifiable
+> here (no ACTIVE re-claim). **Serena is a known deviation:** the only live server is
+> `plugin:zeroize-audit:serena`, launched by the plugin from **unpinned git `main`** —
+> NOT the repo's pinned bootstrap (commit `68884f1`) and NOT a pinned user-configured
+> server. This violates the canonical "prefer pinned/user-configured" rule; the plugin
+> bundles Serena and the repo cannot repin it. A reproducible single-instance pin is
+> available opt-in: `templates/serena-pinned.mcp.json` (enable only after disabling the
+> plugin's Serena). Node 22.23.1 satisfies the Node tools; Claude HUD's visual TTY render
+> is unverified.
 
 | Accelerator | Route to it when… | Status (P-010 live evidence) | Gate / stop |
 |---|---|---|---|
-| **Serena** — MCP, official commit `68884f1` | Primary for symbol-level work in large or unfamiliar repos | **ACTIVE** — canonical `plugin:zeroize-audit:serena` connected; host CLI available; project `.mcp.json` intentionally has no duplicate | local LSP only; edits flow through builder |
+| **Serena** — MCP | Primary for symbol-level work in large or unfamiliar repos | **Live: `plugin:zeroize-audit:serena` (plugin-bundled, UNPINNED git `main`)** — a deviation from the pinned/user-configured rule; the repo cannot repin the plugin. Live version not independently verifiable here (CLI OAuth expired). Reproducible pin (commit `68884f1`) available opt-in via `templates/serena-pinned.mcp.json` — enable only after disabling the plugin's Serena to stay single-instance | local LSP only; edits flow through builder; keep ONE instance |
 | **Repomix** — `repomix@1.17.0` | Explicit snapshots / handoffs only | **ACTIVE** — Node 22 host executable and fresh session PASS | hardened config; external sharing = **STOP** |
 | **ccusage** — `ccusage@20.0.18` | Usage / cost visibility | **ACTIVE** — Node 22 host executable and fresh session PASS | visibility-only |
 | **Claude HUD** | Operator visibility | **DURABLY CONFIGURED** — v0.6.0 enabled; visual TTY render unverified | visibility-only |
@@ -250,6 +262,7 @@ for the full ecosystem map and how to wire more in.
 The hook's inventory can lag or truncate — for the authoritative live set, query
 the registries directly: **`ListConnectors`** (MCP connectors: `connected` +
 `enabledInChat`), **`ListPlugins`** (enabled plugins), and **`ListSkills`**. The
-*Installed plugins / connectors (live now)* tables above were reconciled from
-those registries; re-verify and update them when the environment changes rather
-than trusting a stale list.
+*Remote / org capabilities* tables above were reconciled from those (claude.ai app)
+registries — they are org-level, **not** the local `claude plugin` registry. Re-verify
+per surface when the environment changes rather than trusting a stale list, and never
+route to a capability not confirmed live in the current surface.
