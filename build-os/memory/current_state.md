@@ -11,16 +11,18 @@
 - **Primary branch / base:** `claude/add-build-os` (current integration base; no
   `main` present in this environment). Active work branch:
   `claude/orchestrator-tools-list-e0mdaz`.
-- **Build/test command:** `bash tests/build_os_tests.sh` (59 checks; no network; temp dirs)
+- **Build/test command:** `bash tests/build_os_tests.sh` (77 checks; no network; temp dirs)
   — proportionate-routing + tool-ranking rules, the SessionStart detector (enabledPlugins/
   native vs plugin-cache candidates), installer copy parity, managed-block replacement,
   global convergence (legacy routing supersession preserving unrelated notes, + arbitrary-
   repo user-scope router resolution), plus install-global DURABLY-CONFIGURED reporting, the
-  explicit 3-tier router fallback, and the canonical duplicate-MCP rule.
+  explicit 3-tier router fallback, and the canonical duplicate-MCP rule, plus P-011
+  hook-dedupe (no prompt_id), skill-budget audit, honest Serena reconciliation, and
+  remote/org-vs-local capability separation.
 
 ## Where we are
 
-- **Last closed packet:** P-010 — installed-state convergence: atomic global/project hook deduplication, one plugin-provided Serena MCP, durable host integration repair, and activation-state reconciliation. Current startup + hook debug + MCP health pass; the previously verified account OAuth is now expired and needs user re-login. `tests/build_os_tests.sh` — 59/59 green.
+- **Last closed packet:** P-011 — audit follow-up: robust UserPromptSubmit dedupe without prompt_id (payload-hash event key), skill-budget audit tool + policy, honest Serena reconciliation (live server is plugin-bundled/unpinned — a deviation; reproducible pin opt-in), and remote/org-vs-local-verified capability separation with a no-route-to-unverified rule. Local CLI OAuth expired → no ACTIVE re-claim. `tests/build_os_tests.sh` — 77/77 green.
 - **Now:** none active.
 - **Next (candidates):** decide Context Mode routing enablement (stays non-secret pilot);
   name a target repo + approve
@@ -28,26 +30,31 @@
 
 ## Stable facts (slow-changing)
 
-- **ACTIVE — claude.ai org-level (2026-07):** 9 plugins (`design`, `data`, `productivity`,
-  `brand-voice`, `marketing`, `sales`, `small-business`, `legal`,
-  `cowork-plugin-management`); 13 connectors (Apollo.io, Clay, Docusign, Gmail,
-  Higgsfield, HubSpot, Hugging Face, Netlify, Notion, Otter.ai, Slack, Supabase,
-  Zapier) + 2 session MCPs (GitHub, Claude Code Remote).
+- **Remote / org — claude.ai (2026-07; NOT the local CLI plugin registry):** 9 org plugins
+  (`design`, `data`, `productivity`, `brand-voice`, `marketing`, `sales`, `small-business`,
+  `legal`, `cowork-plugin-management`); 13 connectors (Apollo.io, Clay, Docusign, Gmail,
+  Higgsfield, HubSpot, Hugging Face, Netlify, Notion, Otter.ai, Slack, Supabase, Zapier) +
+  2 session MCPs (GitHub, Claude Code Remote). These are org-level (claude.ai app registry),
+  distinct from the locally-installed CLI plugins; verify live per surface before routing
+  (no-route-to-unverified). See `tool_router.md` → *Remote / org capabilities*.
 - **Installed but NOT live:** Stripe, Cloudflare Developer Platform (need auth);
   Google Calendar, Google Drive, Microsoft 365 (toggled off in-chat).
 - **Source of truth for capabilities:** the live registries — `ListConnectors`,
   `ListPlugins`, `ListSkills` — reconciled into `tool_router.md` (Installed
   plugins / connectors) and `INTEGRATIONS.md`. Re-verify when the env changes.
-- **Build accelerators (P-010 fresh-session evidence):** Build OS routing, Serena,
-  Context Mode, Repomix, and ccusage are **ACTIVE**. Host (user's Mac) — Serena 1.6.2.dev0 (68884f1)
+- **Build accelerators (P-011 reconciliation):** Build OS routing, Repomix, ccusage, and
+  Context Mode were verified ACTIVE in a prior authenticated session (local CLI OAuth now
+  expired → no ACTIVE re-claim); Serena is a deviation (below). Host — Serena ≈1.6.2.dev0 via plugin-bundled UNPINNED git main (NOT pinned bootstrap 68884f1)
   (`/Users/samsmac/.local/bin/serena`, uv tool); Repomix 1.17.0 + ccusage 20.0.18
   (`/Users/samsmac/.nvm/versions/node/v22.23.1/bin`). Enabled at host user scope via the
   `claude plugin` CLI (`claude plugin list` confirms): `claude-hud` v0.6.0,
   `context-mode` v1.0.169 (routing limited to non-secret pilot), and 9 curated Trail of
   Bits plugins (`constant-time-analysis`, `zeroize-audit`, `supply-chain-risk-auditor`,
   `agentic-actions-auditor`, `insecure-defaults`, `static-analysis`, `variant-analysis`,
-  `differential-review`, `seatbelt-sandboxer`). Serena is provided once by the canonical
-  `zeroize-audit` plugin, with no duplicate project MCP; in-session health PASS. Claude HUD remains enabled but its visual
+  `differential-review`, `seatbelt-sandboxer`). Serena is provided by the `zeroize-audit`
+  plugin from unpinned git main (deviation from the pinned rule; reproducible pin opt-in via
+  `templates/serena-pinned.mcp.json`); no duplicate project MCP; live health not independently
+  re-verified here (CLI OAuth expired). Claude HUD remains enabled but its visual
   statusline is not independently claimed. Node compatibility resolved: host default is
   Node 22.23.1; Repomix, ccusage, and Context Mode run/connect under Node 22. GitHub
   Actions = repo-scoped templates (uninstalled; no secrets). Gates in `tool_router.md` +
