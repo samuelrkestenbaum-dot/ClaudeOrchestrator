@@ -30,12 +30,12 @@ item; this is the index. Keep both honest — re-verify when the environment cha
 - **Build accelerators (P-005, host-side completion evidence):** All host-installed
   local tools are **DURABLY CONFIGURED**, **none ACTIVE** until a fresh-session test.
   Host installs (fresh-login-shell PASS): Serena `/Users/samsmac/.local/bin/serena`
-  1.6.1; Repomix + ccusage under `/Users/samsmac/.nvm/versions/node/v20.19.0/bin`
+  1.6.1; Repomix + ccusage under `/Users/samsmac/.nvm/versions/node/v22.23.1/bin`
   (1.17.0 / 20.0.18). Enabled at host user scope via the `claude plugin` CLI:
   `claude-hud@claude-hud` v0.6.0, `context-mode@context-mode` v1.0.169, and 9 curated
   Trail of Bits plugins. GitHub Actions stay repo-scoped templates (not installed; no
-  secrets). ⚠️ Node compat: Repomix + Context Mode declare Node 22+, host default Node
-  20.19.0 (checks pass). Details/proof in §8.
+  secrets). Node compatibility is resolved: the host default is Node 22.23.1 and the
+  Node-based accelerators run/connect under Node 22. Details/proof in §8.
 
 > The design / marketing / business / brand-voice rows in the sections below were
 > written as hypotheticals ("wire this in"). Where a ✅ marks the Wire-in column,
@@ -161,11 +161,10 @@ test are verified. Keep installation · configuration · activation · authentic
 > **Provisioning status (P-005 — host completion evidence).** All host-installed
 > local accelerators = **DURABLY CONFIGURED**; **none ACTIVE** until a newly restarted
 > Claude Code session activation test. Host: Serena `/Users/samsmac/.local/bin/serena`
-> 1.6.1; Repomix + ccusage under `/Users/samsmac/.nvm/versions/node/v20.19.0/bin`;
+> 1.6.1; Repomix + ccusage under `/Users/samsmac/.nvm/versions/node/v22.23.1/bin`;
 > `claude-hud` v0.6.0, `context-mode` v1.0.169, and 9 Trail of Bits plugins installed +
-> enabled via the supported `claude plugin` CLI (`claude plugin list` confirms). ⚠️
-> **Node compat:** Repomix + Context Mode declare **Node 22+** vs host **Node 20.19.0**
-> (executable/doctor checks pass — recorded, not hidden). The committed
+> enabled via the supported `claude plugin` CLI (`claude plugin list` confirms).
+> **Node compatibility is resolved:** the host default is **Node 22.23.1**. The committed
 > `install-accelerators.sh` covers the remote env; GitHub Actions = repo-scoped
 > templates (uninstalled). P-001 claude.ai connectors/plugins stay ACTIVE.
 
@@ -199,10 +198,9 @@ test are verified. Keep installation · configuration · activation · authentic
 - **Source:** https://github.com/yamadashy/repomix · npm `repomix` · **v1.17.0**
 - **Run (no global install):** `npx repomix@latest --config templates/repomix.config.json`
 - **Status: DURABLY CONFIGURED.** **Host (Mac, P-005):** installed at
-  `/Users/samsmac/.nvm/versions/node/v20.19.0/bin/repomix` 1.17.0, fresh-login-shell
+  `/Users/samsmac/.nvm/versions/node/v22.23.1/bin/repomix` 1.17.0, fresh-login-shell
   PASS. Also env-installed (`/opt/node22/bin/repomix`) + auto-provisioned via
-  `install-accelerators.sh`. **⚠️ Node compat:** repomix declares **Node 22+**; host
-  default is **Node 20.19.0** — the executable check passes (recorded, not hidden).
+  `install-accelerators.sh`. Repomix's Node 22+ engine requirement is satisfied.
   **ACTIVE pending a fresh Claude Code session test** (a fresh login shell is not a
   fresh session; earlier `ACTIVE (env-scoped)` reconciled down).
 - **Gate:** **explicit snapshots only, never always-on.** The committed
@@ -215,10 +213,10 @@ test are verified. Keep installation · configuration · activation · authentic
 - **Source:** https://github.com/ryoppippi/ccusage · npm `ccusage` · **v20.0.18**
 - **Run:** `npx ccusage@latest` (`daily` | `monthly` | `session` | `blocks`); `--offline` for cached pricing.
 - **Status: DURABLY CONFIGURED.** **Host (Mac, P-005):** installed at
-  `/Users/samsmac/.nvm/versions/node/v20.19.0/bin/ccusage` 20.0.18, fresh-login-shell
+  `/Users/samsmac/.nvm/versions/node/v22.23.1/bin/ccusage` 20.0.18, fresh-login-shell
   PASS. Also env-installed + auto-provisioned via `install-accelerators.sh`. **ACTIVE
   pending a fresh Claude Code session test** (earlier `ACTIVE (env-scoped)` reconciled
-  down). ccusage runs on the host's Node 20.19.0.
+  down). ccusage runs on the host's Node 22.23.1.
 - **Gate:** **visibility-only — never makes build decisions.** Reads local Claude
   Code JSONL; offline-capable; no account/API key.
 
@@ -274,8 +272,8 @@ test are verified. Keep installation · configuration · activation · authentic
 - **Status: DURABLY CONFIGURED (host, P-005).** Installed + enabled at user scope on
   the Mac — `context-mode@context-mode` v1.0.169 via the supported `claude plugin` CLI
   (marketplace `context-mode` added); `claude plugin list` confirms enabled. **ACTIVE
-  pending a fresh-session test.** **⚠️ Node compat:** context-mode declares **Node 22+**;
-  host default is **Node 20.19.0** — `doctor` passes (recorded, not hidden).
+  pending a fresh-session test.** Context Mode's Node 22+ engine requirement is satisfied;
+  its MCP health check connects under Node 22.
 - **Gate (pilot only):** enabled at host user scope, but **routing limited to non-secret
   pilot use** — not wired into any project `.mcp.json`. **Non-secret repos only**;
   **never route env output, credentials, customer data, or sensitive logs through it.**

@@ -37,10 +37,9 @@
   CONFIGURED** until a fresh Claude Code session test (earlier `ACTIVE (env-scoped)`
   reconciled down — a login shell is not a fresh session). Re-verify at session start
   against the five-state taxonomy.
-- **Node compatibility (P-005):** Repomix and Context Mode declare **Node 22+**, but the
-  host default is **Node 20.19.0**. Executable/`doctor` checks pass today, but this is an
-  unsupported-engine mismatch — recorded, not hidden. Fix by upgrading the host to Node 22+
-  (or pinning an nvm alias) before relying on them long-term.
+- **Node compatibility (resolved 2026-07-24):** host default is **Node 22.23.1**.
+  Repomix 1.17.0 and ccusage 20.0.18 resolve from the Node 22 bin, and Context Mode
+  MCP health connects under Node 22.
 - **SessionStart runs background installs (P-004):** the hook launches
   `install-accelerators.sh` detached; first session on a fresh container does network
   installs (fast-skip thereafter). Non-fatal by design — never breaks a session.
