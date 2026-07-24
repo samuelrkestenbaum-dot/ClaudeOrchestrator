@@ -4,41 +4,44 @@
 > the builder implements exactly this and nothing else; the archivist clears it
 > on close. One packet at a time.
 
-- **Status:** none active (last closed: **P-004** — see build-os/receipts/P-004.md).
+- **Status:** none active (last closed: **P-005** — see `build-os/receipts/P-005.md`).
 
 ---
 
-## Staged candidate (NOT yet active — awaiting orchestrator shaping + explicit go)
+## Staged candidate (awaiting orchestrator shaping + explicit go)
 
-- **Status:** CANDIDATE — awaiting orchestrator shaping and explicit go. **Likely larger than ≤2 commits — the orchestrator MUST decompose it into ≤2-commit packets before activation.**
-- **Working id:** (to be assigned — Fork **Branch A**)
-- **Title:** Phase 1 Repository Auditor — model-layer foundation (Fork Branch A)
+- **Status:** candidate — awaiting orchestrator shaping + explicit go. NOT activated.
+- **Working id:** A-S2 (Fork Branch A, Slice 2)
+- **Nominal title:** Phase 1 Repository Auditor — LG-005 (non-idempotent webhook, Layer D+M) via the model-layer substrate.
 
-### Goal / "done" criteria
+### Recommendation for the orchestrator to shape (IMPORTANT)
 
-- Stand up the model layer that unblocks the remaining 7 checks. Bounded per spec **§4.2**:
-  - The model receives ONLY deterministic-surfaced excerpts — **no tools, no network**.
-  - **Every conclusion cites evidence.**
-  - Model-sourced findings classified at best `inferred`, **confidence capped at 0.9**.
-  - `--offline` disables the model layer, and the deterministic-only fallback must STILL produce a valid report **and now mark model-dependent checks `unknown`** — closing the OWED half of AT-27.
-- Unblocks **LG-005/006/009/011/013** (Layer D+M), **LG-007** (Layer M), and **LG-012** (Layer D+M, external — the LAST pending externalVerification check).
+Before or WITH LG-005, the next slice should first land a bundle — these three are naturally one unit and A-S2 needs the locator anyway:
+
+1. **Extract the shared webhook-handler locator** (currently restated byte-identically in `lg004.ts` + `lg006.ts`) into a shared module (e.g. `src/scan/webhook.ts` or `detectorKit`), with a guard test asserting the locators agree. LG-005 will be a THIRD consumer, so do this before it lands. Reconcile the `.find()` (LG-006, first-handler-only) vs `.filter()` (LG-004, all-handlers) multi-handler behavior here. (Residue follow-up #2.)
+2. **Fix the LG-006 deterministic-disjunct fidelity gap** — a FULLY MISSING cancellation branch must emit a deterministic `confirmed` blocker `fail` that stands even under `--offline` (today it reports `unknown`/`inferred` — a false-negative on the canonical LG-006 defect in the deterministic/CI path). Reserve `unknown`/`inferred` for the branch-present-but-unconfirmed case. This is a FIDELITY gap, not a safety gap (the deterministic signal is already captured). (Residue TOP ITEM / follow-up #1.)
+3. **Add the `broken-lg-006` eval fixture** and AT-06-via-eval, sequenced with #2.
+
+The orchestrator must decide whether this bundle is its own slice (A-S1b) or folds into A-S2, and decompose to ≤2 commits at go time.
+
+### Likely goal / "done" (LG-005 portion)
+
+- Implement LG-005 (non-idempotent webhook handler) as a Layer D+M check plugged into the existing substrate: a Layer-D surface fn (using the SHARED webhook locator from item 1) + an `InferencePresentation`, run through `runInferenceContract`. Model receives only deterministic-surfaced, already-redacted excerpts wrapped as SEC-5 untrusted data; no tools; cite-or-discard; classified at best `inferred`, capped 0.9, `contradictory` on disagreement; `--offline` → `unknown` ("model layer disabled"). Engine + schema UNCHANGED (emit-only). Full suite green; Commit-1 green in isolation; eval stays 10/10 / 0 blocker FPs.
 
 ### Branch base
 
-- origin/claude/launchgraph-product-scope-43pgdx @ **a4ffbf5** (P-004 tip). Re-verify via `git merge-base` at go.
+- origin/`claude/launchgraph-product-scope-43pgdx` @ **fb5663b** (P-005 tip). Re-verify via `git merge-base` at builder start.
 
-### Carry-forward obligations (still binding)
+### Carry-forward constraints (bind this slice)
 
-- **externalVerification obligation** — binds on LG-012 the moment it lands (provider-side proof owned by Phase 3; the scanner never represents repo evidence as provider-side proof).
-- **TEST-DATA POLICY** — <20 contiguous alphanumerics for every key-shaped fake, no Sentry-DSN shapes, every surface incl. receipts/memory; never allowlist a secret.
-- **CEILING WATCH-ITEM** — `hasAppSignal ⊇ scanner.supported`; add the AT-16 regression when `golden/` lands; any change to `detectStack`/`supported` or LG-015's gate must preserve the superset.
-- **CLI entry-point seam** — the model layer plugs into the existing pure, synchronous `run(argv, io): number` + injected `Io {stdout, stderr, now, cwd, writeFile}` seam (P-004); `--offline` already threads through to disable it.
-- Registry stays the single source of check metadata.
-
-### Notes for the orchestrator
-
-- This is the FORK's Branch A. Branch B (the scan/eval CLI) closed as P-004. The deterministic-only detector run is COMPLETE (8 of 15 CLI-wired); the remaining 7 checks ALL require this model layer, so no further detector work can proceed until it is shaped and decomposed.
-- Gravito's Express/Vite/Fly recipe is the first named post-golden-path expansion + eval target but is NOT part of Branch A — the golden Next.js path is completed first (recorded in build-os/memory/residue.md).
+- **Model-layer safety boundary** — credential boundary at the bin only; `RealModelClient` bin-only over built-in `fetch`, no `process.env` in model/detector code; `FakeModelClient` drives ALL tests; SEC-5 delimited untrusted data; emit-only (engine + schema byte-identical).
+- **externalVerification obligation** — LG-012 is the LAST pending external check (A-S7); the substrate threads it via `InferencePresentation.externalVerification`.
+- **TEST-DATA POLICY** — <20 contiguous alphanumerics for every key-shaped fake; no Sentry-DSN shapes; every surface incl. receipts/memory; never allowlist a secret.
+- **CEILING WATCH-ITEM** — `hasAppSignal ⊇ scanner.supported`; add the AT-16 regression when `golden/` lands.
+- **The model-layer substrate seam** — `ModelClient`/`InferenceRequest`/`InferenceResult`/`runInferenceContract`/`InferencePresentation` is the plug-in point; A-S2 supplies a Layer-D surface fn + a presentation.
+- **Registry is the single source** of check metadata (severity/blocker/provider via `makeFinding`).
 
 ---
-_Cleared on close of P-004 (2026-07-23). No packet active. Merge and PR remain hard stops; feature-branch pushes stay under standing authorization after qa green + reviewer pass. Branch A must be shaped and decomposed before activation._
+_Cleared by the archivist on close of P-005 (2026-07-23). No packet is active until
+the orchestrator shapes the next slice and the user gives explicit go. Merge and PR
+remain hard stops; no deploy, no secrets, no provider access._
