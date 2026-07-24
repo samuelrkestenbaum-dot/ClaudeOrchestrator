@@ -1,0 +1,6 @@
+# Serena MCP project cache / memories (tool-generated, not source)
+.serena/
+
+# Repomix snapshot output — explicit handoffs only; never commit (sharing = STOP)
+repomix-output.xml
+repomix-output.*

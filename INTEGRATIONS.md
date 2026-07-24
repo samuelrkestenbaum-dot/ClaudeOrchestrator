@@ -27,16 +27,17 @@ item; this is the index. Keep both honest — re-verify when the environment cha
 - **Installed but NOT live (out of scope until enabled):** Stripe & Cloudflare
   Developer Platform (need auth); Google Calendar / Google Drive / Microsoft 365
   (toggled off in-chat).
-- **Build accelerators (P-002, verified 2026-07):** Serena (MCP, `serena-agent==1.6.1`,
-  `.mcp.json` committed — needs restart + approval), Repomix (`repomix@1.17.0`, npx)
-  and ccusage (`ccusage@20.0.18`, npx) are installed/runnable; Trail of Bits skills,
-  Context Mode, and the two GitHub Actions are **documented opt-in** (§8); Claude HUD
-  is **blocked** pending disambiguation. Gates in `tool_router.md` → *Build
-  accelerators* and §8 below.
+- **Build accelerators (P-002, status corrected in P-003):** **ZERO** are permanently
+  ACTIVE. Serena (`serena-agent==1.6.1`) is **DURABLY CONFIGURED** (committed
+  `.mcp.json`, not active until fresh session + MCP approval); Repomix (`repomix@1.17.0`)
+  and ccusage (`ccusage@20.0.18`) are **RUNNABLE ON DEMAND** (npx only, not persistent/
+  global); Trail of Bits skills, Context Mode, and the two GitHub Actions are
+  **DOCUMENTED/OPT-IN**; Claude HUD is **NOT INSTALLED/BLOCKED**. Status semantics +
+  gates in `tool_router.md` → *Build accelerators* and §8 below.
 
 > The design / marketing / business / brand-voice rows in the sections below were
 > written as hypotheticals ("wire this in"). Where a ✅ marks the Wire-in column,
-> that capability is now **live via an installed plugin** — treat it as installed,
+> that capability is now **live via an ACTIVE plugin** — treat it as ACTIVE,
 > not aspirational.
 
 ## How wiring works
@@ -107,7 +108,7 @@ item; this is the index. Keep both honest — re-verify when the environment cha
 
 | Tool | What it does | Build OS authority / gate | Wire-in |
 |---|---|---|---|
-| UI/UX Pro Max, Taste, Impeccable Design, Emil Kowalski, Web Design Guidelines | Design taste, palettes, motion, audits | **design-ui — frontend only** | ✅ installed via `design` plugin — builder under design-ui authority |
+| UI/UX Pro Max, Taste, Impeccable Design, Emil Kowalski, Web Design Guidelines | Design taste, palettes, motion, audits | **design-ui — frontend only** | ACTIVE — `design` plugin (claude.ai) — builder under design-ui authority |
 | Extract Design System / Image-to-Code / Figma-to-Code | Visual → code | design-ui — frontend only | builder under design-ui |
 | 21st.dev Magic MCP, Google Stitch | Component/design asset generation | design-ui — frontend only | router design row |
 
@@ -122,9 +123,9 @@ item; this is the index. Keep both honest — re-verify when the environment cha
 
 | Tool | What it does | Build OS authority / gate | Wire-in |
 |---|---|---|---|
-| Corey Haines marketing skills, Marketing bundle, LinkedIn skill | Copy, SEO, CRO, email, social | **marketing-media packets only** | ✅ installed via `marketing` plugin — builder under marketing-media |
-| Stop Slop / Human Skill | Remove AI-sounding writing | marketing-media | ✅ installed via `brand-voice` plugin — post-process content |
-| Small Business / Sales / Legal plugins | Ops: invoicing, CRM, contracts | **STOP on external actions** | ✅ installed (`small-business`, `sales`, `legal`) — read normal; send/file = gate |
+| Corey Haines marketing skills, Marketing bundle, LinkedIn skill | Copy, SEO, CRO, email, social | **marketing-media packets only** | ACTIVE — `marketing` plugin (claude.ai) — builder under marketing-media |
+| Stop Slop / Human Skill | Remove AI-sounding writing | marketing-media | ACTIVE — `brand-voice` plugin (claude.ai) — post-process content |
+| Small Business / Sales / Legal plugins | Ops: invoicing, CRM, contracts | **STOP on external actions** | ACTIVE — `small-business`, `sales`, `legal` (claude.ai) — read normal; send/file = gate |
 
 ## 7. Agent swarm
 
@@ -136,14 +137,31 @@ item; this is the index. Keep both honest — re-verify when the environment cha
 
 ---
 
-## 8. Build accelerators — verified install recipes (P-002, 2026-07)
+## 8. Build accelerators — verified recipes + corrected status (P-002; status corrected P-003)
 
 Verified against live registries + official upstream on 2026-07-24. `ListPlugins`
 and `ListSkills` returned **no** claude.ai-marketplace entry for any of these —
 upstream (GitHub / npm / PyPI) is the only source. Discover live first, then pick
 the smallest correct toolset. **Do not claim an unavailable tool is installed.**
 
-### 8.1 Serena — semantic code navigation/editing (MCP) · ✅ installed, needs restart
+**Status semantics (use these exact labels):** **ACTIVE** = verified in a newly
+started normal Claude Code session · **DURABLY CONFIGURED** = committed config can
+reconstruct it, not active until restart/approval · **RUNNABLE ON DEMAND** =
+verified via npx/uvx in *this ephemeral container*, NOT a persistent install on the
+user's Mac or in Claude Desktop · **DOCUMENTED/OPT-IN** = recipe/guidance only, not
+installed · **NOT INSTALLED/BLOCKED** = unavailable / ambiguous / withheld.
+
+**Anti-overstatement rule:** never label npx/uvx success in an ephemeral container
+"installed" unless *both* persistent host state *and* a fresh-session activation
+test are verified. Keep installation · configuration · activation · authentication
+· repository rollout as five distinct states.
+
+> **Net new accelerators permanently ACTIVE right now: ZERO.** (Serena = DURABLY
+> CONFIGURED; Repomix + ccusage = RUNNABLE ON DEMAND; the rest = DOCUMENTED/OPT-IN
+> or BLOCKED.) The P-001 claude.ai connectors/plugins are a separate, genuinely
+> ACTIVE category and are not counted among these accelerators.
+
+### 8.1 Serena — semantic code navigation/editing (MCP) · DURABLY CONFIGURED
 - **Source:** https://github.com/oraios/serena · PyPI `serena-agent` · **v1.6.1**
 - **Install (official; upstream warns against marketplace/uvx-guess commands):**
   `uv tool install -p 3.13 serena-agent` → provides `serena`, `serena-agent`, `serena-hooks`.
@@ -154,29 +172,34 @@ the smallest correct toolset. **Do not claim an unavailable tool is installed.**
     "args": ["--from","serena-agent==1.6.1","serena","start-mcp-server",
              "--context","ide-assistant","--project","."] } } }
   ```
-- **State:** CLI verified `Serena 1.6.1`; MCP goes live on **next session restart +
-  project-MCP approval** (Claude Code gates project `.mcp.json` servers).
+- **Status: DURABLY CONFIGURED.** The committed `.mcp.json` reconstructs Serena via
+  version-pinned uvx. A temp-container `uv tool install` was verified (`Serena 1.6.1`)
+  and the MCP was observed resolvable in a *resumed* session — but there has been
+  **no fresh-session activation test**, so it is **not ACTIVE**: a newly started
+  Claude Code session must launch and **approve** the project MCP first.
 - **Gate:** local language servers, **no API key / OAuth**. Primary for symbol-level
   work in large/unfamiliar repos before broad reads. Edits still go through builder.
 
-### 8.2 Repomix — frozen snapshots / cross-model handoffs (CLI) · ✅ runnable
+### 8.2 Repomix — frozen snapshots / cross-model handoffs (CLI) · RUNNABLE ON DEMAND
 - **Source:** https://github.com/yamadashy/repomix · npm `repomix` · **v1.17.0**
 - **Run (no global install):** `npx repomix@latest --config templates/repomix.config.json`
-- **State:** verified runnable (`--version` → 1.17.0).
+- **Status: RUNNABLE ON DEMAND.** Verified via `npx` in this ephemeral container
+  (`--version` → 1.17.0). **Not** a persistent or global install.
 - **Gate:** **explicit snapshots only, never always-on.** The committed
   `templates/repomix.config.json` keeps Secretlint ON and excludes env/secrets/keys/
   `node_modules`/`dist`/`build`/`.git`. Respects `.gitignore` + `.repomixignore`.
   **Sharing a snapshot with another model/service is an external send → STOP** for
   that step.
 
-### 8.3 ccusage — usage/cost visibility (CLI) · ✅ runnable
+### 8.3 ccusage — usage/cost visibility (CLI) · RUNNABLE ON DEMAND
 - **Source:** https://github.com/ryoppippi/ccusage · npm `ccusage` · **v20.0.18**
 - **Run:** `npx ccusage@latest` (`daily` | `monthly` | `session` | `blocks`); `--offline` for cached pricing.
-- **State:** verified runnable (`ccusage 20.0.18`).
+- **Status: RUNNABLE ON DEMAND.** Verified via `npx` in this ephemeral container
+  (`ccusage 20.0.18`). **Not** a persistent or global install.
 - **Gate:** **visibility-only — never makes build decisions.** Reads local Claude
   Code JSONL; offline-capable; no account/API key.
 
-### 8.4 Claude HUD — operator visibility · ⛔ blocked (disambiguation needed)
+### 8.4 Claude HUD — operator visibility · NOT INSTALLED/BLOCKED
 - **Finding:** no canonical/official "Claude HUD". Third-party TUIs exist
   (e.g. `schmoli/claude-dashboard`, `neochoon/agenthud` — read-only local-JSONL) —
   **but some tools in this space run an API-call interceptor proxy**, which can
@@ -185,7 +208,7 @@ the smallest correct toolset. **Do not claim an unavailable tool is installed.**
   prefer a **read-only, local-JSONL** TUI; **never a proxy interceptor.** ccusage
   already covers cost/usage; a live-session HUD is the only gap.
 
-### 8.5 Trail of Bits security skills · 📋 documented / opt-in
+### 8.5 Trail of Bits security skills · DOCUMENTED/OPT-IN
 - **Source:** https://github.com/trailofbits/skills (official marketplace, 40 plugins)
 - **Install (interactive):** `/plugin marketplace add trailofbits/skills` → `/plugin menu`
   (enable individual plugins). Cloning needs no API key/OAuth.
@@ -199,7 +222,7 @@ the smallest correct toolset. **Do not claim an unavailable tool is installed.**
 - **Gate:** activate only for relevant security work; **produces advisory evidence,
   not unilateral production changes.**
 
-### 8.6 Context Mode — in-session context compression (MCP) · 📋 pilot / opt-in, NOT enabled
+### 8.6 Context Mode — in-session context compression (MCP) · DOCUMENTED/OPT-IN (pilot, not enabled)
 - **Finding:** community MCP that sandboxes large tool outputs into a local store +
   BM25 retrieval to cut context. Multiple write-ups with **inconsistent repo/star
   claims** — **verify the exact upstream repo before any pilot.**
@@ -207,7 +230,7 @@ the smallest correct toolset. **Do not claim an unavailable tool is installed.**
   credentials, customer data, or sensitive logs through it.** Before wider use,
   benchmark **answer accuracy, latency, and token/cost**. Not enabled by this packet.
 
-### 8.7 `anthropics/claude-code-action` — repo-scoped GitHub Action · 📋 opt-in template
+### 8.7 `anthropics/claude-code-action` — repo-scoped GitHub Action · DOCUMENTED/OPT-IN
 - **Source:** https://github.com/anthropics/claude-code-action · ref `@v1.0` (or `@main`)
 - **What:** `@claude` PR/issue assistant; **can open PRs; no auto-merge / auto-deploy.**
 - **Advisory-first, minimum-permission opt-in** (escalate to write only with explicit go):
@@ -223,7 +246,7 @@ the smallest correct toolset. **Do not claim an unavailable tool is installed.**
   (a secret → separate explicit approval). Add only to a repo with explicit go;
   human-controlled PRs; never auto-merge.
 
-### 8.8 `anthropics/claude-code-security-review` — repo-scoped GitHub Action · 📋 opt-in template
+### 8.8 `anthropics/claude-code-security-review` — repo-scoped GitHub Action · DOCUMENTED/OPT-IN
 - **Source:** https://github.com/anthropics/claude-code-security-review · ref `@main`
 - **What:** AI security review that **comments advisory findings on PRs only — no
   code changes, no merge.**

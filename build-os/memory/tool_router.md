@@ -58,7 +58,7 @@ new, **verify the exact package/repo first**; ecosystem names are easy to mistyp
 | Repo → LLM context pack | RepoMix (`repomix`) | build-orchestrator, builder | read-only — normal budget |
 | Parallel multi-agent work | Claude Squad / parallel sub-agents | build-orchestrator (agent-swarm) | **merge plan required** |
 | Send mail / message / SaaS write | Gmail, Slack, Notion, HubSpot, Supabase MCP (write ops) | builder | **STOP** — external mutation, explicit go |
-| Design / UI polish | ✅ `design` plugin (installed) — UI/UX, design-system | builder (design-ui) | frontend only |
+| Design / UI polish | `design` plugin (ACTIVE, claude.ai) — UI/UX, design-system | builder (design-ui) | frontend only |
 | Media generation | Higgsfield (installed connector) / Glif / Remotion | builder (marketing-media) | marketing/media packets only |
 
 ### Installed plugins (live now — verified in-session, 2026-07)
@@ -119,16 +119,37 @@ One orchestrator only (Build OS): these accelerators are *instruments*, not
 competing agent frameworks. None of them makes build decisions or crosses a
 production boundary on its own.
 
-| Accelerator | Route to it when… | State (this env) | Gate / stop |
+**Status semantics — use these exact labels everywhere** (tool_router, INTEGRATIONS,
+memory, residue, receipts):
+
+- **ACTIVE** — available and verified in a *newly started normal* Claude Code session.
+- **DURABLY CONFIGURED** — committed config can reconstruct the tool, but it is *not
+  active until restart/approval*.
+- **RUNNABLE ON DEMAND** — verified via npx/uvx in *this ephemeral container*; this is
+  **NOT** a persistent install on the user's Mac or globally in Claude Desktop.
+- **DOCUMENTED/OPT-IN** — recipe / routing guidance only; not installed.
+- **NOT INSTALLED/BLOCKED** — unavailable, ambiguous, or intentionally withheld.
+
+**Anti-overstatement rule.** Never call npx/uvx success in an ephemeral container
+"installed." Use "installed" **only** when *both* persistent host state *and* a
+fresh-session activation test are verified. Keep **installation · configuration ·
+activation · authentication · repository rollout** as five distinct states.
+
+> **Net new accelerators permanently ACTIVE right now: ZERO.** Serena is DURABLY
+> CONFIGURED; Repomix + ccusage are RUNNABLE ON DEMAND; the rest are DOCUMENTED/
+> OPT-IN or BLOCKED. (The P-001 claude.ai connectors/plugins are a *separate*
+> category and remain ACTIVE at org level — not counted here.)
+
+| Accelerator | Route to it when… | Status (P-003 semantics) | Gate / stop |
 |---|---|---|---|
-| **Serena** — MCP, PyPI `serena-agent==1.6.1` ([oraios/serena](https://github.com/oraios/serena)) | **Primary** for symbol-level exploration / refactoring in large or unfamiliar repos — `find_symbol`, references, semantic edits **before** broad file reads | ✅ CLI installed + `.mcp.json` committed — **needs restart + project-MCP approval** to go live | local LSP only, no API key; edits still flow through builder + ≤2-commit packet discipline |
-| **Repomix** — CLI, npm `repomix@1.17.0` ([yamadashy/repomix](https://github.com/yamadashy/repomix)) | **Explicit snapshots / cross-model handoffs only** — never always-on | ✅ runnable: `npx repomix@latest` | run with `templates/repomix.config.json` (Secretlint ON; excludes env/secrets/deps/build). Sharing a snapshot externally = **STOP** for that step |
-| **ccusage** — CLI, npm `ccusage@20.0.18` ([ryoppippi/ccusage](https://github.com/ryoppippi/ccusage)) | Usage / cost visibility | ✅ runnable: `npx ccusage@latest` | **visibility-only**; never makes build decisions; reads local JSONL, offline-capable |
-| **Claude HUD** — operator visibility | Live session/operator dashboard | ⛔ **blocked — no canonical tool**; 3rd-party TUIs vary, some run API-proxy interceptors (secret-exposure risk) | **do not install without disambiguation + explicit go**; prefer read-only local-JSONL TUIs, never a proxy interceptor; ccusage already covers cost/usage |
-| **Trail of Bits skills** — marketplace [`trailofbits/skills`](https://github.com/trailofbits/skills) | Only for **relevant security work**: crypto (`constant-time-analysis`, `zeroize-audit`), supply-chain (`supply-chain-risk-auditor`), CI/agentic (`agentic-actions-auditor`), creds/privacy (`insecure-defaults`), review (`static-analysis`, `variant-analysis`, `differential-review`), isolation (`seatbelt-sandboxer`) | 📋 documented/opt-in — interactive `/plugin` install | activate **per-task only**; produces **advisory evidence, not production changes**; no auth-/MCP-/tenant-isolation-specific plugin — use the general analysis skills |
-| **Context Mode** — community MCP (in-session context compression) | Long single sessions — **pilot only** | 📋 documented/opt-in — **not enabled**; exact upstream repo unverified | **non-secret repos only**; never route env / credentials / customer data / logs through it; benchmark accuracy + latency + token/cost before any wider use |
-| **claude-code-action** — [`anthropics/claude-code-action@v1.0`](https://github.com/anthropics/claude-code-action) | Repo-scoped GitHub Action: `@claude` PR/issue assistance | 📋 repo-scoped template — **not installed here** | needs `ANTHROPIC_API_KEY` + write perms; **can open PRs, never auto-merges**; add only to a target repo with explicit go; start advisory / minimum perms |
-| **claude-code-security-review** — [`anthropics/claude-code-security-review@main`](https://github.com/anthropics/claude-code-security-review) | Repo-scoped GitHub Action: AI security review on PRs | 📋 repo-scoped template — **not installed here** | needs `CLAUDE_API_KEY`; perms `pull-requests: write, contents: read`; **advisory PR comments only** — no code change / merge; explicit go per repo |
+| **Serena** — MCP, PyPI `serena-agent==1.6.1` ([oraios/serena](https://github.com/oraios/serena)) | **Primary** for symbol-level exploration / refactoring in large or unfamiliar repos — `find_symbol`, references, semantic edits **before** broad file reads | **DURABLY CONFIGURED** — committed `.mcp.json` self-bootstrap (uvx); temp-container install verified, **not ACTIVE until a fresh session + project-MCP approval** | local LSP only, no API key; edits still flow through builder + ≤2-commit packet discipline |
+| **Repomix** — CLI, npm `repomix@1.17.0` ([yamadashy/repomix](https://github.com/yamadashy/repomix)) | **Explicit snapshots / cross-model handoffs only** — never always-on | **RUNNABLE ON DEMAND** — `npx repomix@latest` (this container); not persistent/global | run with `templates/repomix.config.json` (Secretlint ON; excludes env/secrets/deps/build). Sharing a snapshot externally = **STOP** for that step |
+| **ccusage** — CLI, npm `ccusage@20.0.18` ([ryoppippi/ccusage](https://github.com/ryoppippi/ccusage)) | Usage / cost visibility | **RUNNABLE ON DEMAND** — `npx ccusage@latest` (this container); not persistent/global | **visibility-only**; never makes build decisions; reads local JSONL, offline-capable |
+| **Claude HUD** — operator visibility | Live session/operator dashboard | **NOT INSTALLED/BLOCKED** — no canonical tool; 3rd-party TUIs vary, some run API-proxy interceptors (secret-exposure risk) | **do not install without disambiguation + explicit go**; prefer read-only local-JSONL TUIs, never a proxy interceptor; ccusage already covers cost/usage |
+| **Trail of Bits skills** — marketplace [`trailofbits/skills`](https://github.com/trailofbits/skills) | Only for **relevant security work**: crypto (`constant-time-analysis`, `zeroize-audit`), supply-chain (`supply-chain-risk-auditor`), CI/agentic (`agentic-actions-auditor`), creds/privacy (`insecure-defaults`), review (`static-analysis`, `variant-analysis`, `differential-review`), isolation (`seatbelt-sandboxer`) | **DOCUMENTED/OPT-IN** — interactive `/plugin` install; not installed | activate **per-task only**; produces **advisory evidence, not production changes**; no auth-/MCP-/tenant-isolation-specific plugin — use the general analysis skills |
+| **Context Mode** — community MCP (in-session context compression) | Long single sessions — **pilot only** | **DOCUMENTED/OPT-IN** — pilot only, **not enabled**; exact upstream unresolved | **non-secret repos only**; never route env / credentials / customer data / logs through it; benchmark accuracy + latency + token/cost before any wider use |
+| **claude-code-action** — [`anthropics/claude-code-action@v1.0`](https://github.com/anthropics/claude-code-action) | Repo-scoped GitHub Action: `@claude` PR/issue assistance | **DOCUMENTED/OPT-IN** — repo recipe; not installed in any repo; no secrets | needs `ANTHROPIC_API_KEY` + write perms; **can open PRs, never auto-merges**; add only to a target repo with explicit go; start advisory / minimum perms |
+| **claude-code-security-review** — [`anthropics/claude-code-security-review@main`](https://github.com/anthropics/claude-code-security-review) | Repo-scoped GitHub Action: AI security review on PRs | **DOCUMENTED/OPT-IN** — repo recipe; not installed in any repo; no secrets | needs `CLAUDE_API_KEY`; perms `pull-requests: write, contents: read`; **advisory PR comments only** — no code change / merge; explicit go per repo |
 
 > **Repo-scoped ≠ global.** `claude-code-action` and `claude-code-security-review`
 > are per-repository GitHub Action templates, **not** global plugins — never add
