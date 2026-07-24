@@ -4,33 +4,41 @@
 > the builder implements exactly this and nothing else; the archivist clears it
 > on close. One packet at a time.
 
-- **Status:** none active (last closed: P-003-S4 — see build-os/receipts/P-003-S4.md).
+- **Status:** none active (last closed: **P-004** — see build-os/receipts/P-004.md).
 
 ---
 
-## Staged candidate — a FORK decision (awaiting orchestrator confirmation and explicit go)
+## Staged candidate (NOT yet active — awaiting orchestrator shaping + explicit go)
 
-- **Status:** candidate — awaiting orchestrator confirmation and explicit go. NOT active. The builder must not start until the orchestrator shapes ONE of the branches below and the user gives an explicit go.
+- **Status:** CANDIDATE — awaiting orchestrator shaping and explicit go. **Likely larger than ≤2 commits — the orchestrator MUST decompose it into ≤2-commit packets before activation.**
+- **Working id:** (to be assigned — Fork **Branch A**)
+- **Title:** Phase 1 Repository Auditor — model-layer foundation (Fork Branch A)
 
-- **Context that forces the fork:** the deterministic-only detector run is **COMPLETE** (8 of 15: LG-001/002/003/004/008/010/014/015; blocker tier + warning tier both proven). There are **NO remaining pure-Deterministic checks**. The remaining 7 — LG-005/006/009/011/013 (Layer D+M), LG-007 (Layer M), LG-012 (Layer D+M, external, the last pending externalVerification check) — **all require the model layer.** So detector work cannot continue without a model-layer decision.
+### Goal / "done" criteria
 
-### Branch A — Model-layer foundation packet (larger, distinct scope; orchestrator must shape it explicitly)
-- Stands up the Layer-D+M / Layer-M substrate so the remaining 7 checks become buildable.
-- **Spec §4.2 bounds (binding):** the model receives ONLY deterministic-surfaced excerpts (no repo/tool access, no network); it uses no tools; every conclusion must cite evidence; its findings are classified at best `inferred` and capped at 0.9 confidence; `--offline` disables the model layer entirely (deterministic-only fallback must still produce a valid report).
-- This is bigger than a normal ≤2-commit slice — the orchestrator should decompose it before activation.
+- Stand up the model layer that unblocks the remaining 7 checks. Bounded per spec **§4.2**:
+  - The model receives ONLY deterministic-surfaced excerpts — **no tools, no network**.
+  - **Every conclusion cites evidence.**
+  - Model-sourced findings classified at best `inferred`, **confidence capped at 0.9**.
+  - `--offline` disables the model layer, and the deterministic-only fallback must STILL produce a valid report **and now mark model-dependent checks `unknown`** — closing the OWED half of AT-27.
+- Unblocks **LG-005/006/009/011/013** (Layer D+M), **LG-007** (Layer M), and **LG-012** (Layer D+M, external — the LAST pending externalVerification check).
 
-### Branch B — Another non-detector slice (smaller, unblocks program breadth without the model layer)
-- Candidate: the **scan/eval CLI** — closes AT-24, gives real exit codes (0 / not-ready / 3-not-evaluated), wraps the composed ScannerFn + §9 harness.
-- Or: **remediation packages**, or remaining fixtures (`hostile/` for AT-20/AT-22, real `golden/` for AT-16 — which would let the ceiling-invariant regression assertion land).
+### Branch base
 
-### Common to whichever branch is chosen
-- **Branch base:** origin/claude/launchgraph-product-scope-43pgdx @ `006cadd` (P-003-S4 tip) — re-verify via `git merge-base` at go.
-- **Carry-forward obligations (binding):**
-  - externalVerification obligation — LG-012 is the LAST pending external check (needs the model layer); it must carry `externalVerification` (or an unverified classification) the moment it lands.
-  - TEST-DATA POLICY — <20 contiguous alphanumerics for every key-shaped fake, PLUS no Sentry-DSN shapes, on every surface incl. receipts/memory; never allowlist a secret.
-  - CEILING WATCH-ITEM — preserve `hasAppSignal ⊇ scanner.supported`; add the regression assertion when `golden/`/AT-16 lands.
-  - Registry stays the single source of check metadata.
-- **Hard stops:** ≤2 commits per slice; Commit-1 green in isolation; qa full proof + safety grep before close; NO merge / NO PR without explicit go; no deploys, no secrets, no provider access.
+- origin/claude/launchgraph-product-scope-43pgdx @ **a4ffbf5** (P-004 tip). Re-verify via `git merge-base` at go.
+
+### Carry-forward obligations (still binding)
+
+- **externalVerification obligation** — binds on LG-012 the moment it lands (provider-side proof owned by Phase 3; the scanner never represents repo evidence as provider-side proof).
+- **TEST-DATA POLICY** — <20 contiguous alphanumerics for every key-shaped fake, no Sentry-DSN shapes, every surface incl. receipts/memory; never allowlist a secret.
+- **CEILING WATCH-ITEM** — `hasAppSignal ⊇ scanner.supported`; add the AT-16 regression when `golden/` lands; any change to `detectStack`/`supported` or LG-015's gate must preserve the superset.
+- **CLI entry-point seam** — the model layer plugs into the existing pure, synchronous `run(argv, io): number` + injected `Io {stdout, stderr, now, cwd, writeFile}` seam (P-004); `--offline` already threads through to disable it.
+- Registry stays the single source of check metadata.
+
+### Notes for the orchestrator
+
+- This is the FORK's Branch A. Branch B (the scan/eval CLI) closed as P-004. The deterministic-only detector run is COMPLETE (8 of 15 CLI-wired); the remaining 7 checks ALL require this model layer, so no further detector work can proceed until it is shaped and decomposed.
+- Gravito's Express/Vite/Fly recipe is the first named post-golden-path expansion + eval target but is NOT part of Branch A — the golden Next.js path is completed first (recorded in build-os/memory/residue.md).
 
 ---
-_Cleared by the archivist on close of P-003-S4 (2026-07-23). The staged candidate is a fork the orchestrator must resolve — it is not an activation._
+_Cleared on close of P-004 (2026-07-23). No packet active. Merge and PR remain hard stops; feature-branch pushes stay under standing authorization after qa green + reviewer pass. Branch A must be shaped and decomposed before activation._
