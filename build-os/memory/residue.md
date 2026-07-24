@@ -65,6 +65,15 @@
   Mac (`Converge global orchestrator routing`) and pushed to this branch; a duplicate
   in-container implementation was discarded in favour of the validated host version, and
   this packet added only the missing Build OS closure (receipt + memory).
+- **Config ≠ activation, restated (P-008):** `install-global.sh` now reports **DURABLY
+  CONFIGURED** and explicitly states it is **not ACTIVE** until a fresh, authenticated
+  Claude Code session passes the SessionStart check. Local CLI is logged out → no ACTIVE
+  claim anywhere. A test asserts the installer makes no "now active" claim.
+- **Canonical MCP rule (P-008):** one live server per job; prefer a pinned/user-configured
+  server over a plugin-bundled copy over an unpinned `@latest`; do not double-launch Serena
+  or run Chrome DevTools MCP beside another devtools server for the same task. Encoded in
+  `tool_router.md` under *Canonical MCP servers*; extend the named examples as new
+  duplicate-prone servers appear.
 - Snapshot leakage: Repomix output can embed code — the hardened config excludes
   secrets/env/deps/build, but **sharing a snapshot externally is a STOP**.
 

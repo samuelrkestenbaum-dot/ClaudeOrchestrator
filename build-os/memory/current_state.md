@@ -11,18 +11,21 @@
 - **Primary branch / base:** `claude/add-build-os` (current integration base; no
   `main` present in this environment). Active work branch:
   `claude/orchestrator-tools-list-e0mdaz`.
-- **Build/test command:** `bash tests/build_os_tests.sh` (39 checks; no network; temp dirs)
+- **Build/test command:** `bash tests/build_os_tests.sh` (48 checks; no network; temp dirs)
   — proportionate-routing + tool-ranking rules, the SessionStart detector (enabledPlugins/
-  native vs plugin-cache candidates), installer copy parity, managed-block replacement, and
+  native vs plugin-cache candidates), installer copy parity, managed-block replacement,
   global convergence (legacy routing supersession preserving unrelated notes, + arbitrary-
-  repo user-scope router resolution).
+  repo user-scope router resolution), plus install-global DURABLY-CONFIGURED reporting, the
+  explicit 3-tier router fallback, and the canonical duplicate-MCP rule.
 
 ## Where we are
 
-- **Last closed packet:** P-007 — Split-brain routing repair: outcome-sensitive embedded
-  fallback + proportionate global guidance/prompt-hook/orchestrator; install-global
-  converges legacy routing blocks + syncs the user-scope router (implemented on host,
-  re-verified here; `tests/build_os_tests.sh` — 39/39 green).
+- **Last closed packet:** P-008 — Audit follow-up: install-global reports DURABLY
+  CONFIGURED (never ACTIVE until a fresh authenticated session); global guidance uses an
+  explicit project → `~/build-os/memory/tool_router.md` → embedded-lanes fallback; added a
+  canonical duplicate-MCP rule (one live server per job; prefer pinned/user-configured over
+  plugin-bundled/@latest; no redundant Chrome DevTools / Serena). `tests/build_os_tests.sh`
+  — 48/48 green.
 - **Now:** none active.
 - **Next (candidates):** run the **fresh Claude Code session activation test** (flips the
   host-installed accelerators ACTIVE; approve the Serena project MCP on restart); decide
