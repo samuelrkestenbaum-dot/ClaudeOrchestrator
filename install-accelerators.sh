@@ -14,16 +14,18 @@
 set -uo pipefail
 log(){ printf '[accelerators] %s\n' "$*"; }
 
-# 1) Serena (semantic-code MCP) — official oraios/serena, pinned. No API key; local LSP.
+# 1) Serena (semantic-code MCP) — official oraios/serena, commit-pinned. No API key; local LSP.
 if command -v serena >/dev/null 2>&1; then
   log "serena present: $(serena --version 2>&1 | head -1)"
 elif command -v uv >/dev/null 2>&1; then
-  log "installing serena-agent==1.6.1 (uv tool) ..."
-  uv tool install -p 3.13 'serena-agent==1.6.1' >/dev/null 2>&1 \
+  log "installing Serena at 68884f1190489685082dc3c3b56917e92a1de0e6 (uv tool) ..."
+  uv tool install -p 3.13 --from \
+    'git+https://github.com/oraios/serena@68884f1190489685082dc3c3b56917e92a1de0e6' \
+    serena-agent >/dev/null 2>&1 \
     && log "serena installed" \
-    || log "serena install failed (non-fatal; committed .mcp.json still bootstraps it via uvx)"
+    || log "serena install failed (non-fatal; retry the pinned uv install)"
 else
-  log "uv not found — committed .mcp.json bootstraps serena via uvx on MCP launch"
+  log "uv not found — Serena project MCP remains unavailable until uv is installed"
 fi
 
 # 2) Repomix + ccusage (CLIs) — pinned official npm packages.

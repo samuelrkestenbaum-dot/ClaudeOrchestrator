@@ -64,6 +64,10 @@ else
   ok "cache NOT counted as native/active"
 fi
 grep -qi "VERIFY LIVE" <<<"$OUT" && ok "verify-live note present" || no "verify-live note present"
+grep -q '^Orchestrator: ON' <<<"$OUT" && ok "startup output begins with orchestrator signal" || no "startup signal missing"
+[ "${#OUT}" -lt 12000 ] && ok "startup output stays below 12KB" || no "startup output too large (${#OUT} bytes)"
+grep -q '"command": "serena"' "$SRC/.mcp.json" && ok "project Serena uses the durable host executable" || no "project Serena still launches a duplicate uvx runtime"
+grep -q '68884f1190489685082dc3c3b56917e92a1de0e6' "$SRC/install-accelerators.sh" && ok "Serena bootstrap is commit-pinned" || no "Serena bootstrap is not commit-pinned"
 
 echo "== 3. Installer copy parity (source == install-global == install-project) =="
 src_agents="$(cd "$SRC/.claude/agents"   && ls *.md | sort)"

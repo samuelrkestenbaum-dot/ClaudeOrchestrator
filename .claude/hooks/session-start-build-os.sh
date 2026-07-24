@@ -1,10 +1,14 @@
 #!/usr/bin/env bash
 # Build OS — SessionStart hook.
-# Reminds the session to route through build-orchestrator and surfaces the
-# current Build OS memory + active packet as context.
+# Reminds the session to route through build-orchestrator and surfaces a compact
+# capability summary. Keep output small: oversized SessionStart payloads are
+# discarded by Claude Code, which makes a healthy hook look broken.
 set -uo pipefail
 
 ROOT="${CLAUDE_PROJECT_DIR:-$(pwd)}"
+
+echo "Orchestrator: ON — Build OS wired. Reminder: invoke the build-orchestrator subagent PROACTIVELY before any build packet (architecture, next steps, tool routing, \"keep going\"). It will announce its routing line 'Orchestrator: ON — routing from <file|embedded>' when it runs."
+echo
 
 # Auto-provision persistent local accelerators (P-004): non-blocking, non-fatal,
 # fast-skip-if-present. Serena/Repomix/ccusage only; no secrets/network egress
@@ -16,24 +20,16 @@ if [ -x "$ROOT/install-accelerators.sh" ]; then
   echo
 fi
 
-echo "Orchestrator: ON — Build OS wired. Reminder: invoke the build-orchestrator subagent PROACTIVELY before any build packet (architecture, next steps, tool routing, \"keep going\"). It will announce its routing line 'Orchestrator: ON — routing from <file|embedded>' when it runs."
-echo
-
-echo "=== build-os/memory ==="
-shopt -s nullglob 2>/dev/null || true
-mem_found=0
-for f in "$ROOT"/build-os/memory/*.md; do
-  [ -e "$f" ] || continue
-  mem_found=1
-  echo "----- ${f#$ROOT/} -----"
-  cat "$f"
-  echo
-done
-[ "$mem_found" -eq 0 ] && echo "(no build-os/memory/*.md found)"
+echo "Memory: project build-os/memory → user ~/build-os/memory → embedded lanes."
+if [ -d "$ROOT/build-os/memory" ]; then
+  echo "Project memory present; build-orchestrator reads current_state.md, residue.md, and tool_router.md on demand."
+else
+  echo "No project memory; use the user-scope router or embedded lanes."
+fi
 
 echo "=== active packet ==="
 if [ -f "$ROOT/build-os/packets/active_packet.md" ]; then
-  cat "$ROOT/build-os/packets/active_packet.md"
+  grep -m 1 '^- \*\*Status:\*\*' "$ROOT/build-os/packets/active_packet.md" || echo "(status not declared)"
 else
   echo "(no build-os/packets/active_packet.md found)"
 fi
@@ -50,7 +46,7 @@ root, home = sys.argv[1], sys.argv[2]
 claude = os.path.join(home, ".claude")
 plug = os.path.join(claude, "plugins")
 
-def cap(names, n=50):
+def cap(names, n=12):
     names = sorted(set(x for x in names if x))
     if not names:
         return None

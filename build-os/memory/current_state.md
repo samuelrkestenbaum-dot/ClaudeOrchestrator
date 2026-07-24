@@ -11,7 +11,7 @@
 - **Primary branch / base:** `claude/add-build-os` (current integration base; no
   `main` present in this environment). Active work branch:
   `claude/orchestrator-tools-list-e0mdaz`.
-- **Build/test command:** `bash tests/build_os_tests.sh` (48 checks; no network; temp dirs)
+- **Build/test command:** `bash tests/build_os_tests.sh` (52 checks; no network; temp dirs)
   — proportionate-routing + tool-ranking rules, the SessionStart detector (enabledPlugins/
   native vs plugin-cache candidates), installer copy parity, managed-block replacement,
   global convergence (legacy routing supersession preserving unrelated notes, + arbitrary-
@@ -20,16 +20,14 @@
 
 ## Where we are
 
-- **Last closed packet:** P-008 — Audit follow-up: install-global reports DURABLY
-  CONFIGURED (never ACTIVE until a fresh authenticated session); global guidance uses an
-  explicit project → `~/build-os/memory/tool_router.md` → embedded-lanes fallback; added a
-  canonical duplicate-MCP rule (one live server per job; prefer pinned/user-configured over
-  plugin-bundled/@latest; no redundant Chrome DevTools / Serena). `tests/build_os_tests.sh`
-  — 48/48 green.
+- **Last closed packet:** P-009 — behavioral activation repair: compact SessionStart
+  payload; align Serena executable/schema at official commit `68884f1`; repair malformed
+  claude-mem and claude-subconscious host hooks; compact global agent descriptions below
+  Claude's registry limit. Fresh authenticated prompt + hook debug + MCP health pass.
+  `tests/build_os_tests.sh` — 52/52 green.
 - **Now:** none active.
-- **Next (candidates):** run the **fresh Claude Code session activation test** (flips the
-  host-installed accelerators ACTIVE; approve the Serena project MCP on restart); decide
-  Context Mode routing enablement (stays non-secret pilot); name a target repo + approve
+- **Next (candidates):** decide Context Mode routing enablement (stays non-secret pilot);
+  name a target repo + approve
   a secret for the GH Actions; authorize/enable the deferred connectors.
 
 ## Stable facts (slow-changing)
@@ -44,8 +42,8 @@
 - **Source of truth for capabilities:** the live registries — `ListConnectors`,
   `ListPlugins`, `ListSkills` — reconciled into `tool_router.md` (Installed
   plugins / connectors) and `INTEGRATIONS.md`. Re-verify when the env changes.
-- **Build accelerators (P-005, host-side completion evidence — all DURABLY CONFIGURED,
-  none ACTIVE yet):** Host (user's Mac), fresh-login-shell PASS — Serena 1.6.1
+- **Build accelerators (P-009 fresh-session evidence):** Build OS routing, Serena,
+  Context Mode, Repomix, and ccusage are **ACTIVE**. Host (user's Mac) — Serena 1.6.2.dev0 (68884f1)
   (`/Users/samsmac/.local/bin/serena`, uv tool); Repomix 1.17.0 + ccusage 20.0.18
   (`/Users/samsmac/.nvm/versions/node/v22.23.1/bin`). Enabled at host user scope via the
   `claude plugin` CLI (`claude plugin list` confirms): `claude-hud` v0.6.0,
@@ -53,8 +51,8 @@
   Bits plugins (`constant-time-analysis`, `zeroize-audit`, `supply-chain-risk-auditor`,
   `agentic-actions-auditor`, `insecure-defaults`, `static-analysis`, `variant-analysis`,
   `differential-review`, `seatbelt-sandboxer`). Serena also has committed `.mcp.json`
-  (`claude-code`) + in-session `list_memories` PASS. **ACTIVE for every item pends a newly
-  restarted Claude Code session test.** Node compatibility resolved: host default is
+  (`claude-code`) + in-session MCP health PASS. Claude HUD remains enabled but its visual
+  statusline is not independently claimed. Node compatibility resolved: host default is
   Node 22.23.1; Repomix, ccusage, and Context Mode run/connect under Node 22. GitHub
   Actions = repo-scoped templates (uninstalled; no secrets). Gates in `tool_router.md` +
   `INTEGRATIONS.md` §8. One orchestrator (Build OS) — no competing framework.

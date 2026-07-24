@@ -6,14 +6,10 @@
 
 ## Deferred (follow-up packets)
 
-- **Fresh-session activation test (single remaining gate for the host tools)** → all
-  host-installed accelerators are **DURABLY CONFIGURED**; a *newly restarted* Claude Code
-  session must run for them to count as **ACTIVE**. On that restart: approve the Serena
-  project MCP; confirm `claude plugin list` still shows claude-hud / context-mode / the
-  9 Trail of Bits plugins enabled; confirm the HUD statusline renders (TTY). Do not mark
-  anything ACTIVE until this passes.
-- **Serena** → host `/Users/samsmac/.local/bin/serena` 1.6.1 + committed `.mcp.json`
-  (`claude-code`) + in-session `list_memories` PASS. ACTIVE pends restart + MCP approval.
+- **Fresh-session activation test passed (P-009):** authenticated prompt, Build OS
+  startup signal, hook parsing, and MCP health all pass.
+- **Serena** → **ACTIVE**; official commit `68884f1`, host executable + committed
+  `.mcp.json`, project approval, and fresh-session MCP connection verified.
 - **Claude HUD** → `claude-hud@claude-hud` v0.6.0 installed + enabled at host user scope;
   security + function PASS. ACTIVE pends fresh-session render test (TTY).
 - **Context Mode** → `context-mode@context-mode` v1.0.169 installed + enabled at host
@@ -43,7 +39,7 @@
 - **SessionStart runs background installs (P-004):** the hook launches
   `install-accelerators.sh` detached; first session on a fresh container does network
   installs (fast-skip thereafter). Non-fatal by design — never breaks a session.
-- **Version pins are point-in-time (2026-07):** `serena-agent==1.6.1`,
+- **Version pins are point-in-time (2026-07):** `serena-agent commit 68884f1`,
   `repomix@1.17.0`, `ccusage@20.0.18`, `context-mode@1.0.169`, `claude-hud` v0.6.0.
   Re-pin on upgrade.
 - **`enabledPlugins` schema (P-006):** the SessionStart detector parses `enabledPlugins`

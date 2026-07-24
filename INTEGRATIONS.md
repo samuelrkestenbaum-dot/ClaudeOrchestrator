@@ -30,7 +30,7 @@ item; this is the index. Keep both honest — re-verify when the environment cha
 - **Build accelerators (P-005, host-side completion evidence):** All host-installed
   local tools are **DURABLY CONFIGURED**, **none ACTIVE** until a fresh-session test.
   Host installs (fresh-login-shell PASS): Serena `/Users/samsmac/.local/bin/serena`
-  1.6.1; Repomix + ccusage under `/Users/samsmac/.nvm/versions/node/v22.23.1/bin`
+  1.6.2.dev0 (68884f1); Repomix + ccusage under `/Users/samsmac/.nvm/versions/node/v22.23.1/bin`
   (1.17.0 / 20.0.18). Enabled at host user scope via the `claude plugin` CLI:
   `claude-hud@claude-hud` v0.6.0, `context-mode@context-mode` v1.0.169, and 9 curated
   Trail of Bits plugins. GitHub Actions stay repo-scoped templates (not installed; no
@@ -161,7 +161,7 @@ test are verified. Keep installation · configuration · activation · authentic
 > **Provisioning status (P-005 — host completion evidence).** All host-installed
 > local accelerators = **DURABLY CONFIGURED**; **none ACTIVE** until a newly restarted
 > Claude Code session activation test. Host: Serena `/Users/samsmac/.local/bin/serena`
-> 1.6.1; Repomix + ccusage under `/Users/samsmac/.nvm/versions/node/v22.23.1/bin`;
+> 1.6.2.dev0 (68884f1); Repomix + ccusage under `/Users/samsmac/.nvm/versions/node/v22.23.1/bin`;
 > `claude-hud` v0.6.0, `context-mode` v1.0.169, and 9 Trail of Bits plugins installed +
 > enabled via the supported `claude plugin` CLI (`claude plugin list` confirms).
 > **Node compatibility is resolved:** the host default is **Node 22.23.1**. The committed
@@ -169,19 +169,18 @@ test are verified. Keep installation · configuration · activation · authentic
 > templates (uninstalled). P-001 claude.ai connectors/plugins stay ACTIVE.
 
 ### 8.1 Serena — semantic code navigation/editing (MCP) · DURABLY CONFIGURED
-- **Source:** https://github.com/oraios/serena · PyPI `serena-agent` · **v1.6.1**
+- **Source:** https://github.com/oraios/serena · PyPI `serena-agent` · **1.6.2.dev0 (68884f1)**
 - **Install (official; upstream warns against marketplace/uvx-guess commands):**
   `uv tool install -p 3.13 serena-agent` → provides `serena`, `serena-agent`, `serena-hooks`.
 - **MCP registration:** committed `.mcp.json` (version-pinned, self-bootstrapping,
   reproducible on a fresh container):
   ```json
-  { "mcpServers": { "serena": { "command": "uvx",
-    "args": ["--from","serena-agent==1.6.1","serena","start-mcp-server",
-             "--context","ide-assistant","--project","."] } } }
+  { "mcpServers": { "serena": { "command": "serena",
+    "args": ["start-mcp-server","--context","claude-code","--project","."] } } }
   ```
 - **Status: DURABLY CONFIGURED (proven).** Persistently installed (`uv tool install`,
-  `serena` 1.6.1 → `/root/.local/bin/serena`) and reconstructed by the committed
-  `.mcp.json` via version-pinned uvx. Context corrected `ide-assistant → claude-code`
+  `serena` 1.6.2.dev0 at commit `68884f1` → `/root/.local/bin/serena`) and reconstructed
+  by the commit-pinned installer plus `.mcp.json`. Context corrected `ide-assistant → claude-code`
   (upstream renamed it; deprecation warning now gone). **Live proof:** a real
   `mcp__serena__list_memories` call succeeded in-session, and the committed command
   boots the server (52 tools, LSP, project recognized). The **only** unrun step is an
@@ -189,7 +188,7 @@ test are verified. Keep installation · configuration · activation · authentic
   perform non-interactively; until then it is not labelled ACTIVE. Also auto-provisioned
   by `install-accelerators.sh`.
 - **Host (user's Mac, P-005):** persistently installed at `/Users/samsmac/.local/bin/serena`
-  1.6.1 via `uv tool install`; fresh-login-shell PASS. Still **DURABLY CONFIGURED** —
+  1.6.2.dev0 (`68884f1`) via `uv tool install`; fresh-login-shell PASS. **ACTIVE** —
   ACTIVE pending the fresh Claude Code session restart + MCP approval.
 - **Gate:** local language servers, **no API key / OAuth**. Primary for symbol-level
   work in large/unfamiliar repos before broad reads. Edits still go through builder.

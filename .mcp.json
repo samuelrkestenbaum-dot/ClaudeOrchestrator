@@ -1,11 +1,8 @@
 {
   "mcpServers": {
     "serena": {
-      "command": "uvx",
+      "command": "serena",
       "args": [
-        "--from",
-        "serena-agent==1.6.1",
-        "serena",
         "start-mcp-server",
         "--context",
         "claude-code",
