@@ -26,9 +26,15 @@ matches, it routes from embedded defaults and says so.
 
 ## Embedded defaults (no matching row)
 
-- Treat the task as **build** authority, route `builder → qa → reviewer →
-  archivist`, declare the build toolset, and **stop** before any external
-  mutation. Announce `Orchestrator: ON — routing from embedded`.
+- Route from the requested outcome, using the smallest safe lane:
+  - read-only answer / explanation → direct; `Read, Grep, Glob`
+  - diagnosis / triage → direct or `qa`; read-only tools; report, do not fix
+  - tiny reversible local edit → `builder-lite` + one targeted check
+  - substantive feature / bugfix / multi-file build → `builder → qa → reviewer
+    → archivist`
+  - architecture, ambiguous scope, or gated work → `build-orchestrator`
+- Stop before external mutation. Announce
+  `Orchestrator: ON — routing from embedded`.
 
 ## How to extend
 

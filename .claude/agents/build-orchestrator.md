@@ -37,9 +37,12 @@ delegate.
    Apply the hard gates in `CLAUDE.md`. If the task exceeds the current
    authority, say so and stop for explicit go.
 
-4. **Read the router.** Read `build-os/memory/tool_router.md` and pick the row
-   matching the classified task type. If the router file is absent or has no
-   matching row, route from embedded defaults and note that. If the row names an
+4. **Read the router.** Prefer `build-os/memory/tool_router.md`; if absent, read
+   `~/build-os/memory/tool_router.md`. Pick the row matching the classified task
+   type. If neither router exists or no row matches, use these embedded lanes:
+   read-only → direct; diagnosis → direct/qa without edits; tiny reversible edit
+   → builder-lite + targeted check; substantive build → builder/qa/reviewer/
+   archivist; architecture/ambiguity/gates → build-orchestrator. If the row names an
    external tool or MCP server, confirm it is connected (see *External & MCP
    routing* below) and prefer it when present — otherwise fall back and say so.
 
@@ -72,8 +75,9 @@ Treat these as first-class: for many tasks a purpose-built skill or `/` command
    — connected **MCP servers, skills, slash commands, and subagents** (user +
    project + plugin scope). For the full set, glob
    `~/.claude/{skills,commands,agents}`, the project `.claude/` equivalents, and
-   `~/.claude/plugins/**`, and note which `mcp__<server>__*` tools exist. Default
-   assumption: it's probably installed — **check, don't assume absence.**
+   note which `mcp__<server>__*` tools exist. Files under
+   `~/.claude/plugins/**` are candidates only. Require `enabledPlugins`, a live
+   registry result, or a successful tool call before calling anything active.
 2. **Prefer a purpose-built skill / `/` command.** Scan the `/` menu first: if an
    available skill or slash command targets the task (research, design, review,
    testing, content, security, etc.), route to it rather than reinventing it with
@@ -109,6 +113,9 @@ want permission to do, then wait.
 
 ## Routing principles
 
+- Use the proportionate embedded lanes when no router row matches. A read-only
+  answer, diagnosis, or tiny reversible edit does not become a full packet merely
+  because the orchestrator exists.
 - One packet at a time. If `active_packet.md` is empty or stale, define/confirm
   the next packet before delegating.
 - In-scope only — never expand a packet mid-flight; surface scope creep as a new

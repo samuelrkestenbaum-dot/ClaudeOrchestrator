@@ -2,6 +2,6 @@
 # Build OS — UserPromptSubmit hook. One-line routing reminder.
 set -uo pipefail
 
-echo "Routing reminder: classify the task → read build-os/memory/tool_router.md → declare a Tool Budget → announce 'Tools: [x] — why'; route via build-orchestrator and STOP at any merge/deploy/secret/push boundary for explicit go."
+echo "Routing reminder: classify weight + authority; read the project router or ~/build-os/memory/tool_router.md. Read-only answers and diagnosis may run direct; tiny reversible edits use builder-lite + a targeted check. Use build-orchestrator for architecture/planning, substantive builds, ambiguous scope, or gates. Declare the smallest Tool Budget; STOP at merge/deploy/secret/push boundaries."
 
 exit 0

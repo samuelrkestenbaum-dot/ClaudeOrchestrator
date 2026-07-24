@@ -2,11 +2,10 @@
 
 This machine runs a native **Build OS** orchestrator, installed at user scope so
 it applies to **every** Claude Code session in **every** project. Use the
-**build-orchestrator** subagent **proactively at session start** and before any
-build packet (architecture, next steps, tool routing, or "keep going"). The
-orchestrator routes; it never implements. Implementation goes through
-**builder**, proof through **qa**, judgment through **reviewer**, and closure
-through **archivist**.
+**build-orchestrator** for architecture/planning, substantive build packets,
+ambiguous scope, and gated work. Read-only answers, diagnosis-only work, and
+tiny reversible edits use the router's direct/lightweight lanes. The
+orchestrator routes; it never implements.
 
 Per-project state lives in that project's `build-os/` directory
 (`build-os/memory/`, `build-os/packets/`, `build-os/receipts/`). If the current
@@ -16,14 +15,26 @@ when you want continuity in a project.
 
 ### Per-task protocol
 
-1. **Classify** the task type and its authority.
+1. **Classify** the task type, weight, and authority.
 2. **Read the router** — `build-os/memory/tool_router.md` (this project's, if
    present) — and pick the matching row.
 3. **Declare a Tool Budget** — the exact tools/agents you will use.
 4. **Announce** it on one line: `Tools: [x] — why`.
 5. **Budget breach = stop.** Needing a tool or authority outside the declared
    budget is a hard stop for explicit go, not a silent expansion.
-6. **Close with a receipt** via the archivist (`build-os/receipts/<id>.md`).
+6. **Close substantive build packets** with a receipt via the archivist
+   (`build-os/receipts/<id>.md`). Read-only, diagnosis-only, and tiny-edit lanes
+   require no packet, reviewer, archivist, or receipt unless risk forces
+   escalation.
+
+### Proportionate lanes
+
+- **Read-only answer / explanation:** direct evidence-based response.
+- **Diagnosis / triage:** investigate and report; do not implement unless asked.
+- **Tiny reversible local edit:** one direct builder-lite pass and one targeted
+  check.
+- **Substantive build:** builder → qa → reviewer → archivist.
+- **Architecture / ambiguity / gates:** build-orchestrator.
 
 ### Hard gates
 
