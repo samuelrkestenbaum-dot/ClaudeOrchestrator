@@ -4,56 +4,57 @@
 > the builder implements exactly this and nothing else; the archivist clears it
 > on close. One packet at a time.
 
-- **Status:** none active (last closed: P-003-S2 — see build-os/receipts/P-003-S2.md)
+- **Status:** none active (last closed: **P-003-S3** — see build-os/receipts/P-003-S3.md).
 
 ---
 
-## Staged candidate (not active)
+## Staged candidate — P-003-S4 (NOT yet active)
 
 - **Status:** candidate — awaiting orchestrator confirmation and explicit go.
-- **Packet id:** P-003-S3
-- **Title:** Phase 1 Repository Auditor — Slice 3: next deterministic detector slice
+- **Packet id (proposed):** P-003-S4
+- **Title (proposed):** Phase 1 Repository Auditor — Slice 4: next detector slice.
 
-### Suggested scope
+### Suggested scope (orchestrator to confirm)
 
-- Next deterministic detectors wired through the composed `ScannerFn` seam.
-  Candidates:
-  - **LG-003** — missing production webhook. **MUST carry `externalVerification`**
-    (or an unverified classification) on every finding — this is the first slice
-    where the externalVerification obligation binds.
-  - **LG-008** — preview using production database.
-  - **LG-015** — missing / unverified production domain (external).
-- Plus `broken-lg-00{3,8}` / `broken-lg-015` fixtures wired through the ScannerFn
-  seam (inert data: `private: true`, no scripts, excluded from tooling).
+- **Model-layer decision required first (flag for the orchestrator):** the
+  remaining detectors split by layer. LG-005/006/009/011/013 are **Layer D+M**
+  and LG-007 is **Layer M** — those need the model layer, which does not yet
+  exist. The remaining **pure-Deterministic, externally-bound** checks are
+  **LG-010** (unauthenticated email domain — Warning, external) and **LG-014**
+  (Sentry unverified in production — Warning, external).
+- **Recommended path (keeps the deterministic-only discipline):** implement
+  **LG-010 and/or LG-014** next. Both are pure-D and external, so they continue
+  exercising the externalVerification obligation (proven for LG-003/LG-015,
+  still pending for LG-010/012/014) without opening the model layer. Alternative
+  path: stand up the model layer for LG-005/006/007/009/011/013 — a larger,
+  distinct decision the orchestrator should scope explicitly rather than fold
+  into a detector slice.
 
-### Out of scope (expected)
+### Branch base (proposed)
 
-- The remaining detectors; the `scan`/`eval` CLI; the model layer; remediation
-  packages; `hostile/` and real `golden/` fixtures (AT-16 still deferred).
-  Everything in spec §13. Merge or PR. Provider access of any kind.
+- `origin/claude/launchgraph-product-scope-43pgdx` @ `47fbb8d` (P-003-S3 tip) —
+  re-verify via `git merge-base` at go.
 
-### Branch base
+### Plan (≤2 commits at go)
 
-- origin/claude/launchgraph-product-scope-43pgdx @ `ea9d250` (P-003-S2 tip) —
-  to be re-verified via `git merge-base` at go.
+- Detector(s) + detectorKit reuse (registry stays the single source of check
+  metadata) as Commit 1 (green in isolation); broken fixture(s) + scanner
+  registration + integration/ceiling assertions as Commit 2. Exact shape set at
+  go.
 
-### Plan (≤2 commits)
+### Carry-forward notes (binding on this slice)
 
-- To be declared at go.
-
-### Notes (carry forward — binding)
-
-- **externalVerification OBLIGATION:** every LG-003/010/012/014/015 finding must
-  carry `externalVerification` (or unverified) — enforces the §7 Phase-1 ceiling;
-  AT-16 is the backstop. This slice is where it first binds (LG-003, LG-015).
-- **TEST-DATA POLICY:** fake provider-key literals (esp. LG-003 `whsec_` and any
-  Supabase/Resend keys) must keep SHORT suffixes (<20 contiguous alphanumerics)
-  so GitHub secret scanning does not block pushes. Never resolve push-protection
-  by allowlisting a secret.
-- Registry remains the single source of check metadata; detectors plug into the
-  §9 gate via `ScannerFn` injection without rework.
+- **externalVerification obligation** — LG-010 and LG-014 are external; any
+  finding must carry `externalVerification` (or an unverified classification)
+  and must NEVER represent repository evidence as provider-side proof.
+- **TEST-DATA POLICY** — every key-shaped fake (fixtures/tests/receipts/memory)
+  keeps a short suffix (<20 contiguous alphanumerics); never allowlist a secret.
+- **CEILING WATCH-ITEM** — preserve `hasAppSignal ⊇ scanner.supported`; do not
+  broaden `scanner.supported` or narrow LG-015's gate without keeping the
+  superset, or an unqualified-`ready` hole can open. Add the AT-16 regression
+  assertion when the real `golden/` fixture lands.
 
 ---
-_Cleared by the archivist on close of P-003-S2 (2026-07-23). The staged candidate
-above is a suggestion for the orchestrator; it is NOT activated. Push of any
-future commits, and every merge/PR, remain hard stops awaiting explicit go._
+_Cleared and staged by the archivist on close of P-003-S3 (2026-07-23). No new
+build begins until the orchestrator confirms and the user gives explicit go.
+Merge and PR remain hard stops in both repos._
