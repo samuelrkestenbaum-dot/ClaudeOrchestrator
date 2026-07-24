@@ -52,6 +52,19 @@
   Code version changes that shape, update the parser + the detector test. Cache entries
   under `~/.claude/plugins/**` are reported as *candidates* only — live verification
   (ListPlugins/ListConnectors/ListSkills or an `mcp__*` call) is required before ACTIVE.
+- **Legacy convergence heuristic (P-007):** `install-global.sh` supersedes known legacy
+  Build OS/Ruflo routing content (heading/body signatures incl. `stack-capability-map`)
+  while preserving unrelated user notes, and syncs the current router to
+  `~/build-os/memory/tool_router.md` (overridable via `BUILD_OS_USER_DIR`). Conservative by
+  design; extend the signatures + test if a new legacy shape appears on the host.
+- **Installation vs configuration vs activation (P-007):** running `install-global.sh` is a
+  **configuration** act (writes `~/.claude/CLAUDE.md` + syncs the user-scope router) — NOT
+  activation. The local Claude CLI is logged out, so **no fresh-session behavioral-ACTIVE
+  claim** is made. Keep the three states distinct.
+- **Parallel-work reconciliation (P-007):** the split-brain fix was implemented on the host
+  Mac (`Converge global orchestrator routing`) and pushed to this branch; a duplicate
+  in-container implementation was discarded in favour of the validated host version, and
+  this packet added only the missing Build OS closure (receipt + memory).
 - Snapshot leakage: Repomix output can embed code — the hardened config excludes
   secrets/env/deps/build, but **sharing a snapshot externally is a STOP**.
 
