@@ -333,6 +333,130 @@ assert c["mcpServers"]["keep-me"]["command"] == "keep"
 PY
 test "$?" -eq 0 && ok "zeroize profile restores audit workflow and removes duplicate Serena" || no "zeroize profile state wrong"
 
+echo "== 14. P-014: zero-touch specialist orchestration =="
+HANDOFF="$SRC/build-os/tools/specialist-handoff.sh"
+PROFILE="$SRC/build-os/tools/capability-profile.sh"
+[ -x "$HANDOFF" ] && ok "specialist-handoff.sh present + executable" || no "specialist-handoff.sh missing/not executable"
+
+# deterministic route classification
+[ "$(bash "$HANDOFF" classify 'please refactor the build script' 2>/dev/null)" = "focused" ] && ok "classify: ordinary task -> focused" || no "classify focused wrong"
+[ "$(bash "$HANDOFF" classify 'run a zeroize-audit on the key handling' 2>/dev/null)" = "zeroize" ] && ok "classify: zeroize task -> zeroize" || no "classify zeroize wrong"
+[ "$(bash "$HANDOFF" classify 'implement ed25519 ECC signing' 2>/dev/null)" = "ecc" ] && ok "classify: ECC task -> ecc" || no "classify ecc wrong"
+r14="$(bash "$HANDOFF" classify 'zeroize the ecc private key' 2>/dev/null)"
+{ [ "$r14" = "zeroize" ] || [ "$r14" = "ecc" ]; } && ok "classify never returns ECC+zeroize together (got $r14)" || no "classify ambiguous"
+
+mkbin() { mkdir -p "$1" "$2"; cat > "$1/claude" <<'EOF'
+#!/usr/bin/env bash
+mkdir -p "$MOCK_REC"
+echo "$PWD" > "$MOCK_REC/pwd"
+prompt=""; while [ $# -gt 0 ]; do [ "$1" = "-p" ] && prompt="${2:-}"; shift; done
+printf '%s' "$prompt" > "$MOCK_REC/prompt"
+printf '%s' "${BUILD_OS_SPECIALIST_HANDOFF:-}" > "$MOCK_REC/guard"
+: > "$MOCK_REC/launched"
+[ -n "${MOCK_CLAUDE_SLEEP:-}" ] && sleep "$MOCK_CLAUDE_SLEEP"
+echo "MOCK_CHILD_OUTPUT route=${BUILD_OS_SPECIALIST_HANDOFF:-}"
+exit "${MOCK_CLAUDE_EXIT:-0}"
+EOF
+chmod +x "$1/claude"; }
+
+seed_home() { mkdir -p "$1/.claude"
+  printf '{"enabledPlugins":{},"skillListingBudgetFraction":0.18}\n' > "$1/.claude/settings.json"
+  printf '{"mcpServers":{"keep-me":{"command":"keep"}}}\n' > "$1/.claude.json"
+  CLAUDE_USER_DIR="$1/.claude" CLAUDE_CONFIG_PATH="$1/.claude.json" bash "$PROFILE" focused >/dev/null 2>&1; }
+
+run_handoff() { MOCK_REC="$REC" CLAUDE_BIN="$MB/claude" CAPABILITY_PROFILE_BIN="$PROFILE" \
+  CLAUDE_USER_DIR="$PH/.claude" CLAUDE_CONFIG_PATH="$PH/.claude.json" \
+  HANDOFF_LOG="$REC/handoffs.log" HANDOFF_TIMEOUT="${HANDOFF_TIMEOUT:-30}" \
+  bash "$HANDOFF" detect "$1" "$2"; }
+
+is_focused() { python3 - "$PH/.claude/settings.json" "$PH/.claude.json" <<'PY'
+import json,sys
+s=json.load(open(sys.argv[1])); c=json.load(open(sys.argv[2]))
+sys.exit(0 if (s["enabledPlugins"].get("ecc@ecc") is False and s["enabledPlugins"].get("zeroize-audit@trailofbits") is False and "serena" in c["mcpServers"]) else 1)
+PY
+}
+
+# focused: no relaunch
+MB="$WORK/h1/bin"; REC="$WORK/h1/rec"; PH="$WORK/h1/home"; mkbin "$MB" "$REC"; seed_home "$PH"
+run_handoff "just list the files" "$WORK/h1" >/dev/null 2>&1
+[ ! -e "$REC/launched" ] && ok "focused task incurs NO child relaunch" || no "focused task relaunched a child"
+
+# ECC handoff: launch child, preserve prompt+cwd+guard, surface result, restore focused
+MB="$WORK/h2/bin"; REC="$WORK/h2/rec"; PH="$WORK/h2/home"; mkbin "$MB" "$REC"; seed_home "$PH"
+CWD="$WORK/h2/work"; mkdir -p "$CWD"
+OUT="$(run_handoff "please add ed25519 ecc support" "$CWD" 2>/dev/null)"; EC=$?
+[ -e "$REC/launched" ] && ok "ECC task launches a specialist child" || no "ECC task did not launch child"
+[ "$(cat "$REC/prompt" 2>/dev/null)" = "please add ed25519 ecc support" ] && ok "ECC handoff preserves the exact original prompt" || no "ECC prompt not preserved"
+[ "$(cat "$REC/pwd" 2>/dev/null)" = "$CWD" ] && ok "ECC handoff preserves the original working directory" || no "ECC cwd not preserved"
+[ "$(cat "$REC/guard" 2>/dev/null)" = "ecc" ] && ok "ECC child carries recursion-guard env" || no "ECC child missing guard env"
+grep -q "MOCK_CHILD_OUTPUT" <<<"$OUT" && ok "ECC handoff surfaces the child result" || no "ECC child result not surfaced"
+[ "$EC" = "0" ] && ok "ECC handoff exit status reflects child success" || no "ECC exit status wrong ($EC)"
+is_focused && ok "ECC handoff restores focused mode afterward" || no "ECC handoff did not restore focused"
+[ -s "$REC/handoffs.log" ] && ok "handoff writes an auditable receipt line" || no "handoff receipt log missing"
+
+# zeroize handoff + single-Serena invariant after restore
+MB="$WORK/h3/bin"; REC="$WORK/h3/rec"; PH="$WORK/h3/home"; mkbin "$MB" "$REC"; seed_home "$PH"
+run_handoff "zeroize the secret buffers" "$WORK/h3" >/dev/null 2>&1
+{ [ -e "$REC/launched" ] && [ "$(cat "$REC/guard")" = "zeroize" ]; } && ok "zeroize task launches its specialist child" || no "zeroize handoff wrong"
+python3 - "$PH/.claude/settings.json" "$PH/.claude.json" <<'PY' && ok "single-Serena invariant holds after zeroize handoff" || no "single-Serena invariant broken"
+import json,sys
+s=json.load(open(sys.argv[1])); c=json.load(open(sys.argv[2]))
+assert s["enabledPlugins"]["zeroize-audit@trailofbits"] is False
+assert list(c["mcpServers"]).count("serena") == 1
+PY
+
+# recursion guard: a child (guard already set) must NOT hand off again
+MB="$WORK/h4/bin"; REC="$WORK/h4/rec"; PH="$WORK/h4/home"; mkbin "$MB" "$REC"; seed_home "$PH"
+BUILD_OS_SPECIALIST_HANDOFF="ecc" run_handoff "add ed25519 ecc support" "$WORK/h4" >/dev/null 2>&1
+[ ! -e "$REC/launched" ] && ok "recursion guard prevents a child from re-handing-off" || no "recursion guard failed"
+
+# cleanup on child FAILURE: non-zero surfaced (not silent) + focused restored
+MB="$WORK/h5/bin"; REC="$WORK/h5/rec"; PH="$WORK/h5/home"; mkbin "$MB" "$REC"; seed_home "$PH"
+OUT="$(MOCK_CLAUDE_EXIT=7 run_handoff "add ecc ed25519" "$WORK/h5" 2>&1)"; EC=$?
+[ "$EC" != "0" ] && ok "child failure surfaced with non-zero exit (not silent)" || no "child failure reported as success"
+grep -qiE "fail|error|exit" <<<"$OUT" && ok "child failure prints an actionable message" || no "no actionable failure message"
+is_focused && ok "focused restored even when the child fails" || no "focused not restored on child failure"
+
+# timeout: overrunning child killed, focused restored
+MB="$WORK/h6/bin"; REC="$WORK/h6/rec"; PH="$WORK/h6/home"; mkbin "$MB" "$REC"; seed_home "$PH"
+OUT="$(MOCK_CLAUDE_SLEEP=5 HANDOFF_TIMEOUT=1 run_handoff "add ecc support" "$WORK/h6" 2>&1)"; EC=$?
+{ [ "$EC" != "0" ] && grep -qiE "timeout|timed out" <<<"$OUT"; } && ok "child timeout enforced + reported" || no "timeout not enforced/reported (ec=$EC)"
+is_focused && ok "focused restored after a timeout" || no "focused not restored after timeout"
+
+# dry-run: classify + report, NO relaunch, NO profile change
+MB="$WORK/h7/bin"; REC="$WORK/h7/rec"; PH="$WORK/h7/home"; mkbin "$MB" "$REC"; seed_home "$PH"
+DOUT="$(MOCK_REC="$REC" CLAUDE_BIN="$MB/claude" CAPABILITY_PROFILE_BIN="$PROFILE" CLAUDE_USER_DIR="$PH/.claude" CLAUDE_CONFIG_PATH="$PH/.claude.json" bash "$HANDOFF" --dry-run "add ed25519 ecc support" 2>&1)"
+{ [ ! -e "$REC/launched" ] && grep -qi "ecc" <<<"$DOUT"; } && ok "dry-run reports route without relaunch" || no "dry-run relaunched or misreported"
+is_focused && ok "dry-run does not change the active profile" || no "dry-run changed the profile"
+
+# integration: prompt-entry hook wires in automatic detection
+grep -q "specialist-handoff.sh" "$SRC/.claude/hooks/prompt-router.sh" && ok "prompt-router hook wires in specialist-handoff detection" || no "prompt-router hook does not wire in handoff detection"
+
+echo "== 15. P-014 addendum: profile transitions preserve unrelated host capabilities =="
+PPH="$WORK/preserve/home"; mkdir -p "$PPH/.claude"
+cat > "$PPH/.claude/settings.json" <<'JSON'
+{ "enabledPlugins": { "ui-ux-pro-max@ui-ux-pro-max": true, "claude-hud@claude-hud": true }, "skillListingBudgetFraction": 0.18 }
+JSON
+cat > "$PPH/.claude.json" <<'JSON'
+{ "mcpServers": { "21st-dev": {"command":"21st"}, "claude-watch": {"command":"cw"}, "agent-reach": {"command":"ar"} } }
+JSON
+preserved_ok=1
+for prof in focused ecc zeroize focused; do
+  CLAUDE_USER_DIR="$PPH/.claude" CLAUDE_CONFIG_PATH="$PPH/.claude.json" bash "$PROFILE" "$prof" >/dev/null 2>&1
+  python3 - "$PPH/.claude/settings.json" "$PPH/.claude.json" <<'PY' || preserved_ok=0
+import json,sys
+s=json.load(open(sys.argv[1])); c=json.load(open(sys.argv[2]))
+assert s["enabledPlugins"].get("ui-ux-pro-max@ui-ux-pro-max") is True
+assert s["enabledPlugins"].get("claude-hud@claude-hud") is True
+for k in ("21st-dev","claude-watch","agent-reach"):
+    assert k in c["mcpServers"], k
+PY
+done
+[ "$preserved_ok" = 1 ] && ok "focused/ecc/zeroize transitions preserve 21st.dev, Claude Watch, Agent Reach, UI UX Pro Max" || no "a profile transition dropped an unrelated capability"
+for cap in "21st.dev" "Claude Watch" "Agent Reach" "UI UX Pro Max"; do
+  have "$ROUTER" "$cap" && ok "router routes to: $cap" || no "router missing capability: $cap"
+done
+
 echo
 echo "==== RESULT: $PASS passed, $FAIL failed ===="
 [ "$FAIL" -eq 0 ]

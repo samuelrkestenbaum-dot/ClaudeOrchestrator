@@ -248,6 +248,20 @@ for ordinary work; profile switching should follow exact task match and lowest o
 > them to arbitrary product repos. Minimum-permission, advisory-first install
 > recipes live in `INTEGRATIONS.md` §8.
 
+### Host specialist capabilities (P-014 — verify per surface, don't duplicate)
+
+Extra capabilities present on the host, **preserved across all profile transitions**
+(the capability-profile switcher only toggles ECC / zeroize-audit / Serena — never
+these). Route deterministically; confirm live in the current surface before use
+(no-route-to-unverified); never disable, duplicate, or falsely claim them active.
+
+| Task type | Route to | Status (2026-07) |
+|---|---|---|
+| UI / component discovery | **21st.dev** MCP (`mcp__21st__*`) | ✅ live in this session — read-only `get_usage` verified |
+| External-platform reachability / web research | **Agent Reach** (`agent-reach` skill) | ✅ present in this session's skill registry |
+| Long-running supervision | **Claude Watch** | host-reported (installed); not independently verifiable here |
+| UI/UX design work | **UI UX Pro Max** | host-reported (uploaded + enabled); not independently verifiable here |
+
 ### Skills & slash commands (the `/` menu)
 
 Skills and slash commands are **first-class routing targets**, not just MCP/CLI

@@ -61,3 +61,11 @@ Disabled does not mean removed. Run:
 
 Restart Claude Code after switching. The `/capability-profile` command exposes the same
 workflow inside Claude.
+
+## Zero-touch handoff (P-014)
+
+`build-os/tools/specialist-handoff.sh` (wired into the `prompt-router.sh` prompt-entry hook)
+auto-detects when a request needs ECC or zeroization and, only then, activates that profile
+for a fresh non-interactive child session — ECC temporarily raises `skillListingBudgetFraction`
+to 0.40 for the child — and **always restores focused (0.18) afterward**. Focused requests
+incur no relaunch and no budget change, so the default session stays under budget.
