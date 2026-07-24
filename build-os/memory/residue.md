@@ -76,6 +76,14 @@
   additionally needs the real authenticated `claude` CLI; the local CLI OAuth is expired, so
   a live child relaunch is a user step. The prompt-hook path resolves the handoff script from
   repo-relative / `$CLAUDE_PROJECT_DIR` / `~/build-os` and is non-fatal if absent.
+- **Global install now ships the handoff tools (P-015):** the live-install audit found
+  `install-global.sh` created only `~/build-os/memory` and never copied
+  `specialist-handoff.sh` / `capability-profile.sh`, so the *globally installed*
+  `prompt-router.sh` (whose only global-scope candidate is `~/build-os/tools/specialist-handoff.sh`)
+  produced just the routing reminder — no handoff. Fixed: the installer now
+  `mkdir -p ~/build-os/tools` and copies the tools dir with exec bits preserved. Test section 16
+  installs into temp homes and proves the installed hook resolves + runs the handoff end-to-end.
+  The user will reinstall + rerun the live global-hook dry proof.
 - **Host specialist capabilities (P-014):** 21st.dev verified live in-session (read-only
   `get_usage`); `agent-reach` skill present in-session; Claude Watch + UI UX Pro Max are
   host-reported (installed/uploaded per user) and **not independently verifiable here** — no
