@@ -6,34 +6,41 @@
 
 ## Deferred (follow-up packets)
 
-- **Serena go-live (only remaining step)** → persistently installed + committed
-  `.mcp.json` (`claude-code` context) + a real `list_memories` call already succeeded
-  in-session, so it is **DURABLY CONFIGURED (proven)**. To reach ACTIVE, a *newly
-  started* Claude Code session must launch + **approve the project MCP** — a user/
-  interactive action the remote non-interactive session cannot self-perform.
-- **Claude HUD (RESOLVED upstream; interactive install remains)** → `jarrodwatts/claude-hud`
-  v0.6.0 selected + security PASS + functional PASS. Enable via interactive `/plugin`;
-  statusline renders only in a TTY (can't render-verify here).
-- **Context Mode (RESOLVED upstream + benchmarked; enablement decision remains)** →
-  `mksglu/context-mode@1.0.169`, local-only, benchmark PASS (≈30× ctx cut, <0.2s).
-  Installed for pilot but **routing deliberately disabled**; awaiting your go to wire
-  it. Non-secret repos only; never route secrets/customer-data/logs through it.
-- **GH Action opt-in** → `claude-code-action` and `claude-code-security-review`
-  are repo-scoped templates; install into a target repo only with explicit go +
+- **Fresh-session activation test (single remaining gate for the host tools)** → all
+  host-installed accelerators are **DURABLY CONFIGURED**; a *newly restarted* Claude Code
+  session must run for them to count as **ACTIVE**. On that restart: approve the Serena
+  project MCP; confirm `claude plugin list` still shows claude-hud / context-mode / the
+  9 Trail of Bits plugins enabled; confirm the HUD statusline renders (TTY). Do not mark
+  anything ACTIVE until this passes.
+- **Serena** → host `/Users/samsmac/.local/bin/serena` 1.6.1 + committed `.mcp.json`
+  (`claude-code`) + in-session `list_memories` PASS. ACTIVE pends restart + MCP approval.
+- **Claude HUD** → `claude-hud@claude-hud` v0.6.0 installed + enabled at host user scope;
+  security + function PASS. ACTIVE pends fresh-session render test (TTY).
+- **Context Mode** → `context-mode@context-mode` v1.0.169 installed + enabled at host
+  user scope; benchmark PASS. **Routing limited to non-secret pilot** (not wired into any
+  project `.mcp.json`); awaiting go to widen. Non-secret repos only; never route
+  secrets/customer-data/logs through it.
+- **Trail of Bits** → 9 curated plugins installed + enabled at host user scope
+  (advisory/read-only); **not vendored** (CC BY-SA). ACTIVE pends fresh-session test.
+- **GH Action opt-in** → `claude-code-action` / `claude-code-security-review` are
+  repo-scoped templates; install into a **named** target repo only with explicit go +
   the required secret (`ANTHROPIC_API_KEY` / `CLAUDE_API_KEY`).
-- **Trail of Bits** → enable only the curated security subset per-task via
-  `/plugin marketplace add trailofbits/skills` (interactive).
 - Carried from P-001: authorize Stripe + Cloudflare, enable Google/Microsoft
   connectors; session-MCP router rows for GitHub + Claude Code Remote.
 
 ## Known risks / debt
 
-- **Ephemerality → solved via committed bootstrap (P-004):** the container is
+- **Ephemerality → solved via committed bootstrap (P-004):** the remote container is
   ephemeral, so durability = the committed `install-accelerators.sh` (wired into
-  SessionStart, idempotent/non-fatal) + `.mcp.json` + `templates/repomix.config.json`,
-  **not** any host binary. In THIS env, Repomix/ccusage are ACTIVE (env-scoped);
-  the user's own Mac/host still needs the one-line `npm i -g` commands. Re-verify at
-  session start against the five-state taxonomy.
+  SessionStart, idempotent/non-fatal) + `.mcp.json` + `templates/repomix.config.json`.
+  Repomix/ccusage are now installed on both the host Mac and the env, but stay **DURABLY
+  CONFIGURED** until a fresh Claude Code session test (earlier `ACTIVE (env-scoped)`
+  reconciled down — a login shell is not a fresh session). Re-verify at session start
+  against the five-state taxonomy.
+- **Node compatibility (P-005):** Repomix and Context Mode declare **Node 22+**, but the
+  host default is **Node 20.19.0**. Executable/`doctor` checks pass today, but this is an
+  unsupported-engine mismatch — recorded, not hidden. Fix by upgrading the host to Node 22+
+  (or pinning an nvm alias) before relying on them long-term.
 - **SessionStart runs background installs (P-004):** the hook launches
   `install-accelerators.sh` detached; first session on a fresh container does network
   installs (fast-skip thereafter). Non-fatal by design — never breaks a session.
@@ -47,10 +54,11 @@
 
 - **No secrets touched, no OAuth authorized, no accounts connected.** Stripe /
   Cloudflare still unauthenticated; GH Action API keys not added.
-- Serena MCP proven in-session; independent fresh-session restart + approval is the
-  user's step to reach ACTIVE.
-- Context Mode installed but routing **disabled** (pilot) — awaiting go to wire it.
-- Trail of Bits (CC BY-SA) not vendored; Claude HUD not enabled — both interactive.
+- Host tools installed + enabled (Serena, Repomix, ccusage, claude-hud, context-mode,
+  9 Trail of Bits plugins), but **none ACTIVE** until the fresh-session activation test.
+- Context Mode enabled on host but routing **limited to non-secret pilot** — awaiting go
+  to widen.
+- Trail of Bits (CC BY-SA) enabled at host user scope, **not vendored** into this repo.
 - Production boundaries default-OFF: secrets, OAuth, DDL, remote-DB writes,
   payments, flags, canaries, telemetry, deploys, merges, external sends — each a
   separate explicit approval.

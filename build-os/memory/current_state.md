@@ -15,13 +15,14 @@
 
 ## Where we are
 
-- **Last closed packet:** P-004 — Provision non-repo accelerators (persistent install
-  + committed auto-provision bootstrap + live activation proof).
+- **Last closed packet:** P-005 — Record host-side completion evidence (all host-installed
+  accelerators DURABLY CONFIGURED; none ACTIVE until the fresh-session test).
 - **Now:** none active.
-- **Next (candidates):** fresh-session restart + MCP approval to flip Serena to ACTIVE;
-  decide Context Mode enablement (benchmark passed); enable Claude HUD / Trail of Bits
-  via interactive `/plugin`; name a target repo + approve a secret for the GH Actions;
-  authorize/enable the deferred connectors.
+- **Next (candidates):** run the **fresh Claude Code session activation test** (flips the
+  host-installed accelerators ACTIVE; approve the Serena project MCP on restart); decide
+  Context Mode routing enablement (stays non-secret pilot); name a target repo + approve
+  a secret for the GH Actions; authorize/enable the deferred connectors; consider a host
+  Node 20→22 upgrade for the Node-22+ tools (repomix, context-mode).
 
 ## Stable facts (slow-changing)
 
@@ -35,20 +36,20 @@
 - **Source of truth for capabilities:** the live registries — `ListConnectors`,
   `ListPlugins`, `ListSkills` — reconciled into `tool_router.md` (Installed
   plugins / connectors) and `INTEGRATIONS.md`. Re-verify when the env changes.
-- **Build accelerators (P-004, provisioned + proven by live tests):** Repomix
-  (`repomix@1.17.0`) + ccusage (`ccusage@20.0.18`) = **ACTIVE (env-scoped)** —
-  persistently installed (`/opt/node22/bin`), fresh-shell verified, auto-provisioned
-  via `install-accelerators.sh` (wired into SessionStart). Serena (`serena-agent==1.6.1`,
-  `.mcp.json` `--context claude-code`) = **DURABLY CONFIGURED (proven)** — real
-  `list_memories` succeeded in-session + boot loads 52 tools; only unrun step =
-  independent fresh-session restart + MCP approval. Context Mode (`context-mode@1.0.169`)
-  = **DOCUMENTED/OPT-IN** pilot — installed + benchmarked (≈30× ctx cut, <0.2s), routing
-  DISABLED. Claude HUD (`jarrodwatts/claude-hud` v0.6.0) = **DOCUMENTED/OPT-IN** —
-  security + functional PASS; interactive/TTY activation. Trail of Bits
-  (`trailofbits/skills`, CC BY-SA) + both GitHub Actions = **DOCUMENTED/OPT-IN**
-  (interactive / repo-scoped; no secrets). Gates in `tool_router.md` → *Build
-  accelerators* and `INTEGRATIONS.md` §8. One orchestrator (Build OS) — no competing
-  framework.
+- **Build accelerators (P-005, host-side completion evidence — all DURABLY CONFIGURED,
+  none ACTIVE yet):** Host (user's Mac), fresh-login-shell PASS — Serena 1.6.1
+  (`/Users/samsmac/.local/bin/serena`, uv tool); Repomix 1.17.0 + ccusage 20.0.18
+  (`/Users/samsmac/.nvm/versions/node/v20.19.0/bin`). Enabled at host user scope via the
+  `claude plugin` CLI (`claude plugin list` confirms): `claude-hud` v0.6.0,
+  `context-mode` v1.0.169 (routing limited to non-secret pilot), and 9 curated Trail of
+  Bits plugins (`constant-time-analysis`, `zeroize-audit`, `supply-chain-risk-auditor`,
+  `agentic-actions-auditor`, `insecure-defaults`, `static-analysis`, `variant-analysis`,
+  `differential-review`, `seatbelt-sandboxer`). Serena also has committed `.mcp.json`
+  (`claude-code`) + in-session `list_memories` PASS. **ACTIVE for every item pends a newly
+  restarted Claude Code session test.** ⚠️ Node compat: Repomix + Context Mode declare
+  Node 22+ vs host Node 20.19.0 (exec/doctor checks pass — recorded, not hidden). GitHub
+  Actions = repo-scoped templates (uninstalled; no secrets). Gates in `tool_router.md` +
+  `INTEGRATIONS.md` §8. One orchestrator (Build OS) — no competing framework.
 - **Status-semantics rule:** never call npx/uvx success in an ephemeral container
   "installed" unless persistent host state **and** a fresh-session activation test
   are both verified. Installation · configuration · activation · authentication ·
