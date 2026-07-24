@@ -76,7 +76,7 @@ CMD="$MHOME/CLAUDE.md"
 n1="$(grep -c "BUILD-OS:START" "$CMD")"
 [ "$n1" = "1" ] && ok "first install writes exactly one managed block" || no "first install block count = $n1 (want 1)"
 printf '\n# User note (must survive)\n' >> "$CMD"                 # non-managed content, outside the block
-sed -i 's/build-orchestrator/STALE_TOKEN/g' "$CMD"               # simulate stale guidance inside the block
+perl -pi -e 's/build-orchestrator/STALE_TOKEN/g' "$CMD"         # portable macOS/Linux stale-guidance simulation
 grep -q "STALE_TOKEN" "$CMD" || no "could not inject stale token"
 CLAUDE_USER_DIR="$MHOME" bash "$SRC/install-global.sh" >/dev/null 2>&1
 n2="$(grep -c "BUILD-OS:START" "$CMD")"
