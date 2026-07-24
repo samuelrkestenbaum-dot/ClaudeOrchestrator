@@ -4,57 +4,33 @@
 > the builder implements exactly this and nothing else; the archivist clears it
 > on close. One packet at a time.
 
-- **Status:** none active (last closed: **P-003-S3** — see build-os/receipts/P-003-S3.md).
+- **Status:** none active (last closed: P-003-S4 — see build-os/receipts/P-003-S4.md).
 
 ---
 
-## Staged candidate — P-003-S4 (NOT yet active)
+## Staged candidate — a FORK decision (awaiting orchestrator confirmation and explicit go)
 
-- **Status:** candidate — awaiting orchestrator confirmation and explicit go.
-- **Packet id (proposed):** P-003-S4
-- **Title (proposed):** Phase 1 Repository Auditor — Slice 4: next detector slice.
+- **Status:** candidate — awaiting orchestrator confirmation and explicit go. NOT active. The builder must not start until the orchestrator shapes ONE of the branches below and the user gives an explicit go.
 
-### Suggested scope (orchestrator to confirm)
+- **Context that forces the fork:** the deterministic-only detector run is **COMPLETE** (8 of 15: LG-001/002/003/004/008/010/014/015; blocker tier + warning tier both proven). There are **NO remaining pure-Deterministic checks**. The remaining 7 — LG-005/006/009/011/013 (Layer D+M), LG-007 (Layer M), LG-012 (Layer D+M, external, the last pending externalVerification check) — **all require the model layer.** So detector work cannot continue without a model-layer decision.
 
-- **Model-layer decision required first (flag for the orchestrator):** the
-  remaining detectors split by layer. LG-005/006/009/011/013 are **Layer D+M**
-  and LG-007 is **Layer M** — those need the model layer, which does not yet
-  exist. The remaining **pure-Deterministic, externally-bound** checks are
-  **LG-010** (unauthenticated email domain — Warning, external) and **LG-014**
-  (Sentry unverified in production — Warning, external).
-- **Recommended path (keeps the deterministic-only discipline):** implement
-  **LG-010 and/or LG-014** next. Both are pure-D and external, so they continue
-  exercising the externalVerification obligation (proven for LG-003/LG-015,
-  still pending for LG-010/012/014) without opening the model layer. Alternative
-  path: stand up the model layer for LG-005/006/007/009/011/013 — a larger,
-  distinct decision the orchestrator should scope explicitly rather than fold
-  into a detector slice.
+### Branch A — Model-layer foundation packet (larger, distinct scope; orchestrator must shape it explicitly)
+- Stands up the Layer-D+M / Layer-M substrate so the remaining 7 checks become buildable.
+- **Spec §4.2 bounds (binding):** the model receives ONLY deterministic-surfaced excerpts (no repo/tool access, no network); it uses no tools; every conclusion must cite evidence; its findings are classified at best `inferred` and capped at 0.9 confidence; `--offline` disables the model layer entirely (deterministic-only fallback must still produce a valid report).
+- This is bigger than a normal ≤2-commit slice — the orchestrator should decompose it before activation.
 
-### Branch base (proposed)
+### Branch B — Another non-detector slice (smaller, unblocks program breadth without the model layer)
+- Candidate: the **scan/eval CLI** — closes AT-24, gives real exit codes (0 / not-ready / 3-not-evaluated), wraps the composed ScannerFn + §9 harness.
+- Or: **remediation packages**, or remaining fixtures (`hostile/` for AT-20/AT-22, real `golden/` for AT-16 — which would let the ceiling-invariant regression assertion land).
 
-- `origin/claude/launchgraph-product-scope-43pgdx` @ `47fbb8d` (P-003-S3 tip) —
-  re-verify via `git merge-base` at go.
-
-### Plan (≤2 commits at go)
-
-- Detector(s) + detectorKit reuse (registry stays the single source of check
-  metadata) as Commit 1 (green in isolation); broken fixture(s) + scanner
-  registration + integration/ceiling assertions as Commit 2. Exact shape set at
-  go.
-
-### Carry-forward notes (binding on this slice)
-
-- **externalVerification obligation** — LG-010 and LG-014 are external; any
-  finding must carry `externalVerification` (or an unverified classification)
-  and must NEVER represent repository evidence as provider-side proof.
-- **TEST-DATA POLICY** — every key-shaped fake (fixtures/tests/receipts/memory)
-  keeps a short suffix (<20 contiguous alphanumerics); never allowlist a secret.
-- **CEILING WATCH-ITEM** — preserve `hasAppSignal ⊇ scanner.supported`; do not
-  broaden `scanner.supported` or narrow LG-015's gate without keeping the
-  superset, or an unqualified-`ready` hole can open. Add the AT-16 regression
-  assertion when the real `golden/` fixture lands.
+### Common to whichever branch is chosen
+- **Branch base:** origin/claude/launchgraph-product-scope-43pgdx @ `006cadd` (P-003-S4 tip) — re-verify via `git merge-base` at go.
+- **Carry-forward obligations (binding):**
+  - externalVerification obligation — LG-012 is the LAST pending external check (needs the model layer); it must carry `externalVerification` (or an unverified classification) the moment it lands.
+  - TEST-DATA POLICY — <20 contiguous alphanumerics for every key-shaped fake, PLUS no Sentry-DSN shapes, on every surface incl. receipts/memory; never allowlist a secret.
+  - CEILING WATCH-ITEM — preserve `hasAppSignal ⊇ scanner.supported`; add the regression assertion when `golden/`/AT-16 lands.
+  - Registry stays the single source of check metadata.
+- **Hard stops:** ≤2 commits per slice; Commit-1 green in isolation; qa full proof + safety grep before close; NO merge / NO PR without explicit go; no deploys, no secrets, no provider access.
 
 ---
-_Cleared and staged by the archivist on close of P-003-S3 (2026-07-23). No new
-build begins until the orchestrator confirms and the user gives explicit go.
-Merge and PR remain hard stops in both repos._
+_Cleared by the archivist on close of P-003-S4 (2026-07-23). The staged candidate is a fork the orchestrator must resolve — it is not an activation._
