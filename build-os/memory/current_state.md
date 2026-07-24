@@ -11,7 +11,7 @@
 - **Primary branch / base:** `claude/add-build-os` (current integration base; no
   `main` present in this environment). Active work branch:
   `claude/orchestrator-tools-list-e0mdaz`.
-- **Build/test command:** `bash tests/build_os_tests.sh` (121 checks; no network; temp dirs)
+- **Build/test command:** `bash tests/build_os_tests.sh` (186 checks; no network; temp dirs)
   — proportionate-routing + tool-ranking rules, the SessionStart detector (enabledPlugins/
   native vs plugin-cache candidates), installer copy parity, managed-block replacement,
   global convergence (legacy routing supersession preserving unrelated notes, + arbitrary-
@@ -22,25 +22,37 @@
   zero-touch specialist handoff (route classification, focused no-op, ECC/zeroize handoff,
   prompt/cwd preservation, recursion guard, child-failure cleanup, timeout, single-Serena,
   dry-run) and unrelated-capability preservation across profile transitions, plus P-015
-  global-install tool shipping (installed hook resolves + runs the handoff end-to-end).
+  global-install tool shipping and P-016 Ferrari hardening (capability registry,
+  inline routing, privacy log, atomic lock, surface inventory, enabled-vs-installed audit).
 
 ## Where we are
 
-- **Last closed packet:** P-015 — global install ships the specialist handoff tools. A
-  live-install audit found `install-global.sh` created only `~/build-os/memory` and never
-  copied `specialist-handoff.sh` / `capability-profile.sh` into `~/build-os/tools`, so the
-  globally installed `prompt-router.sh` (which resolves `~/build-os/tools/specialist-handoff.sh`)
-  produced only the routing reminder and no handoff. Fixed: the installer now creates
-  `~/build-os/tools` and copies the tool scripts with exec bits preserved; a regression test
-  installs into temp `CLAUDE_USER_DIR` + `BUILD_OS_USER_DIR` and proves the installed hook
-  resolves + runs the handoff end-to-end (ECC child launched via the copied tools; focused
-  restored). `tests/build_os_tests.sh` — 121/121 green.
-- **Prior:** P-014 — zero-touch specialist orchestration: the prompt-entry hook auto-detects
-  focused vs ECC vs zeroize and, only when a disabled specialist is needed, hands off to a
-  fresh non-interactive Claude child (preserving the exact task + cwd), surfaces its exit
-  status, and always restores focused — recursion-guarded, timed out, single-Serena, never a
-  silent success. Unrelated host capabilities (21st.dev live, Agent Reach skill, Claude Watch +
-  UI UX Pro Max host-reported) preserved + routed.
+- **Last closed packet:** P-016 — final Ferrari hardening (7 audit fixes):
+  1. **Capability registry** replaces the opaque regex — precedence-ordered, per-family
+     task rules. Broad ECC (Everything Claude Code) tasks now route `ecc`: Rust
+     ownership/unsafe, Go concurrency/debug, PostgreSQL schema/query, autonomous-agent
+     harness/evals, architecture + browser specialists (crypto tokens retained). Ordinary
+     lightweight tasks stay `focused` (no relaunch).
+  2. **Inline routes** — `classify` returns `21st`/`agent-reach`/`claude-watch`/`ui-ux-pro-max`;
+     `detect` emits a REQUIRED current-surface directive with NO capability-profile switch and
+     NO child; the prompt hook no longer falsely claims a child handled an inline route.
+  3. **Zeroize NL coverage** expanded (keys-remain-in-memory, cleared-from-registers/stack);
+     zeroize keeps highest precedence.
+  4. **Privacy** — the handoff audit log records only timestamp/route/result/exit/event-id
+     (never prompt text or cwd), is created/chmodded `0600`, and tightens a pre-existing 0644.
+  5. **Concurrency** — a portable `mkdir`-atomic lock wraps profile activation + child +
+     restore; configurable wait; fail-closed BUSY (no mutation, no child) on contention; safe
+     stale-lock break; released on EXIT/INT/TERM; focused restoration preserved.
+  6. **Surface-aware inventory** — router distinguishes Claude Desktop connector verification
+     from the local Claude CLI (21st.dev Desktop-verified, absent from `claude mcp list`;
+     Agent Reach native skill; UI UX Pro Max v2.11.0; Claude Watch v0.4.1); no cross-surface
+     ACTIVE claim; stale "host-reported" language removed.
+  7. **skill-budget-audit** now reports installed inventory separately from the startup-enabled
+     set (via `enabledPlugins` + `installed_plugins.json` installPath, de-duped) and only
+     checks the enabled set against budget — a disabled mega-bundle no longer reads OVER BUDGET.
+  `tests/build_os_tests.sh` — 186/186 green (RED 148/38 → GREEN 186/0).
+- **Prior:** P-015 — global install ships the specialist handoff tools (installed hook resolves
+  + runs the handoff end-to-end). P-014 — zero-touch specialist orchestration.
 - **Now:** none active.
 - **Next (candidates):** decide Context Mode routing enablement (stays non-secret pilot);
   name a target repo + approve
@@ -82,15 +94,20 @@
 - **Discovery-first rule:** every build discovers live capabilities, then selects
   the smallest correct toolset; Serena is primary for symbol-level work in large/
   unfamiliar repos before broad file reads.
-- **Zero-touch specialist handoff (P-014/P-015):** `build-os/tools/specialist-handoff.sh` + the
-  `prompt-router.sh` hook auto-route focused (no relaunch) vs ECC vs zeroize; a disabled
-  specialist triggers an automatic bounded child session, then focused is always restored
-  (recursion-guarded, timed out, single-Serena, honest exit status). **`install-global.sh` now
-  ships both `specialist-handoff.sh` and `capability-profile.sh` into `~/build-os/tools`** (P-015)
-  so the globally installed hook can resolve + run the handoff — regression-tested end-to-end.
-  Host capabilities are preserved across profiles + routed: 21st.dev (✅ verified live via
-  read-only `get_usage`), Agent Reach (`agent-reach` skill present in-session), Claude Watch +
-  UI UX Pro Max (host-reported; not independently verifiable here — no ACTIVE claim).
+- **Zero-touch specialist handoff (P-014/P-015/P-016):** `build-os/tools/specialist-handoff.sh`
+  + the `prompt-router.sh` hook classify via a maintainable **capability registry** (precedence
+  zeroize > ecc > inline > focused). focused → no relaunch; ecc/zeroize → an automatic bounded
+  child session under a **portable atomic lock** (fail-closed BUSY on contention, safe stale
+  break, released on EXIT/INT/TERM), then focused is always restored (recursion-guarded, timed
+  out, single-Serena, honest exit status). The audit log is **privacy-safe** (route/result/
+  exit/event-id only; `0600`; never prompt/cwd). `install-global.sh` ships both tool scripts
+  into `~/build-os/tools` (P-015). **Inline current-surface routes** (`21st`, `agent-reach`,
+  `claude-watch`, `ui-ux-pro-max`) emit a REQUIRED directive with NO profile switch and NO
+  child. Surface-aware verification: 21st.dev = Claude **Desktop** connector (absent from local
+  `claude mcp list`); Agent Reach = native skill; UI UX Pro Max v2.11.0 + Claude Watch v0.4.1 =
+  enabled Claude Code skills/plugins. No cross-surface ACTIVE claim. In THIS Claude Code session
+  the 21st.dev MCP disconnected (`mcp__21st__*` unavailable) — consistent with the Desktop-only
+  surface note.
 - **Gates hold:** external mutation (push/merge/deploy/secret/send/SaaS-write),
   plus DDL / remote-DB writes / payments / flags / canaries / telemetry / OAuth,
   are each a separate STOP for explicit go. Repo-scoped GH Actions never go global.

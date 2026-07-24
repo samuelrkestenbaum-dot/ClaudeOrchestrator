@@ -29,13 +29,23 @@ blindly keep redundant skills, and do not blindly delete useful ones.
 
 ## Procedure
 
-1. **Audit the dominators** (read-only, safe to run anywhere):
-   `build-os/tools/skill-budget-audit.sh ~/.claude/plugins 30000`
-   → ranks plugins by skill count so the biggest contributors are obvious.
-2. **Disable the dominators** identified above (plugin/skill settings or
+1. **Audit the enabled startup set** (read-only, safe to run anywhere). Prefer the
+   **enabled-aware** mode so installed inventory is not mistaken for the startup budget:
+   `build-os/tools/skill-budget-audit.sh --claude-dir ~/.claude 30000`
+   → reports **installed inventory** (de-duped by `installed_plugins.json` installPath) and,
+   separately, the **startup-enabled** set (only `settings.json` `enabledPlugins`), and checks
+   only the enabled set against budget. The legacy `skill-budget-audit.sh <plugins-dir>` still
+   works for a bare plugins tree but labels any over-budget note as *installed inventory*, not a
+   startup verdict.
+2. **Disable the enabled dominators** it lists (plugin/skill settings or
    `claude plugin disable <name>`), keeping the minimal set.
-3. **Re-audit** until under budget, then start a **fresh debug session** (`claude --debug`)
-   and confirm the "Skill listing over budget" warning is **gone**.
+3. **Re-audit** until the startup-enabled set is under budget, then start a **fresh debug
+   session** (`claude --debug`) and confirm the "Skill listing over budget" warning is **gone**.
+
+> **Do not conflate installed inventory with the startup budget (P-016).** Walking every
+> `~/.claude/plugins/cache/**` and `**/marketplaces/**` SKILL.md double-counts the same plugin
+> and massively over-reports (observed 2,584 skills / 20M chars). Only **enabled** plugins load
+> at startup; count those, de-duped by installPath.
 
 ## Applied host result (P-012)
 

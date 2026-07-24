@@ -83,7 +83,33 @@
   produced just the routing reminder — no handoff. Fixed: the installer now
   `mkdir -p ~/build-os/tools` and copies the tools dir with exec bits preserved. Test section 16
   installs into temp homes and proves the installed hook resolves + runs the handoff end-to-end.
-  The user will reinstall + rerun the live global-hook dry proof.
+- **Ferrari hardening (P-016) — 7 audit fixes, all regression-tested (186/0):**
+  (1) **Capability registry** — the classifier is now precedence-ordered, per-family task
+  rules (not one opaque regex); broad ECC/Everything-Claude-Code families (Rust ownership/unsafe,
+  Go concurrency, PostgreSQL schema/query, autonomous-agent harness/evals, architecture, browser)
+  route `ecc`; crypto tokens retained; lightweight tasks stay `focused`. Extend by editing one
+  `CAP_*` family or adding a family + a line in `classify()`.
+  (2) **Inline routes** — `21st`/`agent-reach`/`claude-watch`/`ui-ux-pro-max` emit a REQUIRED
+  current-surface directive, never switch profiles, never launch a child; the prompt hook's
+  wrapper message is route-accurate (child vs inline).
+  (3) **Zeroize NL** — expanded coverage (keys-remain-in-memory, cleared-from-registers/stack);
+  still highest precedence.
+  (4) **Privacy** — the audit log stores only timestamp/route/result/exit/event-id, is `0600`,
+  and tightens a pre-existing 0644; old plaintext prompts are NOT read/migrated (a pre-existing
+  0644 leak line is left in place but the mode is tightened — re-verify no legacy log holds
+  prompts on the host if that matters).
+  (5) **Atomic lock** — `mkdir`-based, `HANDOFF_LOCK` (default `~/.claude/build-os-handoff.lock`),
+  `HANDOFF_LOCK_WAIT` (30s), `HANDOFF_LOCK_STALE` (1800s). Stale detection is primarily PID-liveness
+  (`kill -0`) + an age fallback; a wrapped-around PID could in theory look alive (single-user host
+  risk, bounded by the age cap). Fail-closed BUSY exit 75.
+  (6) **Surface inventory** — router separates Claude Desktop connector verification from the
+  local CLI; no cross-surface ACTIVE claim. In THIS session the 21st.dev MCP disconnected
+  (`mcp__21st__*` unavailable), matching the Desktop-only note.
+  (7) **skill-budget-audit** — enabled-aware `--claude-dir` mode reports installed inventory vs
+  startup-enabled (via `enabledPlugins` + `installed_plugins.json` installPath, de-duped); only
+  the enabled set is budget-checked. Assumes `installed_plugins.json` lives at
+  `<dir>/plugins/installed_plugins.json` with `installPath` records; if the host schema differs,
+  extend the parser + fixture.
 - **Host specialist capabilities (P-014):** 21st.dev verified live in-session (read-only
   `get_usage`); `agent-reach` skill present in-session; Claude Watch + UI UX Pro Max are
   host-reported (installed/uploaded per user) and **not independently verifiable here** — no
