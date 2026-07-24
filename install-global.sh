@@ -40,6 +40,16 @@ CLAUDE_USER_DIR="$DEST" bash "$SRC/repair-host-integrations.sh"
 cp "$SRC/build-os/memory/tool_router.md" "$USER_BUILD_OS/memory/tool_router.md"
 echo "  + user-scope tool router synchronized"
 
+# Ship the Build OS tools the global prompt hook depends on. The installed
+# prompt-router.sh resolves ~/build-os/tools/specialist-handoff.sh (which in turn
+# resolves its sibling capability-profile.sh) for zero-touch specialist handoff; without
+# these files a global-hook ECC/zeroize prompt would only print the routing reminder and
+# never perform the handoff. Copy the whole tools dir (mirrors source) and keep exec bits.
+mkdir -p "$USER_BUILD_OS/tools"
+cp "$SRC/build-os/tools/"*.sh "$USER_BUILD_OS/tools/"
+chmod +x "$USER_BUILD_OS/tools/"*.sh
+echo "  + user-scope Build OS tools synchronized (specialist-handoff, capability-profile)"
+
 # 4) Merge hooks into ~/.claude/settings.json — preserves other keys, idempotent.
 python3 - "$DEST/settings.json" <<'PY'
 import json, sys

@@ -457,6 +457,45 @@ for cap in "21st.dev" "Claude Watch" "Agent Reach" "UI UX Pro Max"; do
   have "$ROUTER" "$cap" && ok "router routes to: $cap" || no "router missing capability: $cap"
 done
 
+echo "== 16. P-015: global install ships specialist tools so the installed hook can hand off =="
+# Regression: install-global.sh must place specialist-handoff.sh + capability-profile.sh
+# under ~/build-os/tools so the globally installed prompt-router.sh can RESOLVE and INVOKE
+# the handoff. Before the fix only ~/build-os/memory existed, so a global-hook ECC prompt
+# produced the routing reminder and no handoff. Install into temp CLAUDE_USER_DIR +
+# BUILD_OS_USER_DIR under a temp HOME (so ~/build-os == the install target, matching a real
+# global install), then prove the installed hook drives a specialist child end-to-end.
+P15_HOME="$WORK/p015-home"; P15_TMP="$WORK/p015-tmp"; mkdir -p "$P15_TMP"
+P15_BIN="$WORK/p015-bin"; P15_REC="$WORK/p015-rec"
+mkbin "$P15_BIN" "$P15_REC"          # reuse the mock `claude` from section 14
+HOME="$P15_HOME" CLAUDE_USER_DIR="$P15_HOME/.claude" BUILD_OS_USER_DIR="$P15_HOME/build-os" \
+  bash "$SRC/install-global.sh" >/dev/null 2>&1
+P15_TOOLS="$P15_HOME/build-os/tools"
+[ -d "$P15_TOOLS" ] && ok "install-global creates ~/build-os/tools" || no "install-global did not create ~/build-os/tools"
+for t in specialist-handoff.sh capability-profile.sh; do
+  { [ -f "$P15_TOOLS/$t" ] && [ -x "$P15_TOOLS/$t" ]; } && ok "global install ships executable $t" || no "global install missing/non-exec $t"
+  cmp -s "$SRC/build-os/tools/$t" "$P15_TOOLS/$t" && ok "installed $t is byte-identical to source" || no "installed $t differs from source"
+done
+# Deterministic focused baseline for the COPIED capability-profile to switch from.
+mkdir -p "$P15_HOME/.claude"
+printf '{"enabledPlugins":{},"skillListingBudgetFraction":0.18}\n' > "$P15_HOME/.claude/settings.json"
+printf '{"mcpServers":{"keep-me":{"command":"keep"}}}\n' > "$P15_HOME/.claude.json"
+CLAUDE_USER_DIR="$P15_HOME/.claude" CLAUDE_CONFIG_PATH="$P15_HOME/.claude.json" bash "$P15_TOOLS/capability-profile.sh" focused >/dev/null 2>&1
+# End-to-end: the INSTALLED hook + an ECC prompt must resolve + run the installed handoff.
+# MOCK_CHILD_OUTPUT can only appear if the hook found specialist-handoff.sh AND it found its
+# sibling capability-profile.sh (else activate_profile fails and no child launches).
+P15_PAYLOAD='{"hook_event_name":"UserPromptSubmit","prompt":"please add ed25519 ecc signing support","cwd":"'"$P15_HOME"'"}'
+HOUT="$(printf '%s' "$P15_PAYLOAD" | HOME="$P15_HOME" TMPDIR="$P15_TMP" MOCK_REC="$P15_REC" \
+  CLAUDE_BIN="$P15_BIN/claude" HANDOFF_TIMEOUT=30 HANDOFF_LOG="$P15_REC/handoffs.log" \
+  bash "$P15_HOME/.claude/hooks/prompt-router.sh" 2>&1)"
+grep -q "MOCK_CHILD_OUTPUT route=ecc" <<<"$HOUT" && ok "installed global hook resolves + runs the handoff (ECC child launched via copied tools)" || no "installed global hook did not find/run the handoff tool"
+grep -q "already handled this task" <<<"$HOUT" && ok "installed hook emits the specialist-handoff wrapper (not just the routing reminder)" || no "installed hook fell back to routing reminder only"
+PH="$P15_HOME"; is_focused && ok "installed hook restores focused after the handoff (copied capability-profile works)" || no "installed hook left the profile non-focused"
+# Negative control: a focused prompt through the SAME installed hook must NOT hand off.
+FOUT="$(printf '%s' '{"hook_event_name":"UserPromptSubmit","prompt":"list the files in this repo","cwd":"'"$P15_HOME"'"}' \
+  | HOME="$P15_HOME" TMPDIR="$P15_TMP" MOCK_REC="$P15_REC" CLAUDE_BIN="$P15_BIN/claude" \
+  bash "$P15_HOME/.claude/hooks/prompt-router.sh" 2>&1)"
+grep -q "MOCK_CHILD_OUTPUT" <<<"$FOUT" && no "focused prompt spuriously launched a specialist child" || ok "focused prompt through the installed hook does not hand off"
+
 echo
 echo "==== RESULT: $PASS passed, $FAIL failed ===="
 [ "$FAIL" -eq 0 ]
