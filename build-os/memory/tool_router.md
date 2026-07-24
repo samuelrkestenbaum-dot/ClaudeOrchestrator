@@ -43,6 +43,12 @@ inventory; default to "it's probably connected — check," not "it's absent."
 ⚠️ The tool/repo handles below are common names — if you ever *install* something
 new, **verify the exact package/repo first**; ecosystem names are easy to mistype.
 
+> **Preference vs. installed.** The table below is a *preference map* and may name
+> tools that are **not** installed here. For what is **actually installed and
+> live** in this environment, see **Installed plugins (live now)** and
+> **Installed connectors (live now)** further down — route to those first, and
+> fall back to native tools (saying so) when a preferred tool is absent.
+
 | Task type | Preferred external tool(s) | Used by | Gate |
 |---|---|---|---|
 | Web research / live docs | Perplexity MCP, native WebSearch/WebFetch | build-orchestrator, builder | read-only — normal budget |
@@ -52,8 +58,53 @@ new, **verify the exact package/repo first**; ecosystem names are easy to mistyp
 | Repo → LLM context pack | RepoMix (`repomix`) | build-orchestrator, builder | read-only — normal budget |
 | Parallel multi-agent work | Claude Squad / parallel sub-agents | build-orchestrator (agent-swarm) | **merge plan required** |
 | Send mail / message / SaaS write | Gmail, Slack, Notion, HubSpot, Supabase MCP (write ops) | builder | **STOP** — external mutation, explicit go |
-| Design / UI polish | design skills (UI/UX, Taste, design-system) | builder (design-ui) | frontend only |
-| Media generation | Higgsfield / Glif / Remotion | builder (marketing-media) | marketing/media packets only |
+| Design / UI polish | ✅ `design` plugin (installed) — UI/UX, design-system | builder (design-ui) | frontend only |
+| Media generation | Higgsfield (installed connector) / Glif / Remotion | builder (marketing-media) | marketing/media packets only |
+
+### Installed plugins (live now — verified in-session, 2026-07)
+
+These claude.ai plugins are **actually installed and enabled** here (confirmed via
+`ListPlugins`) — not hypothetical "wire-in later" entries. They bundle
+skills/commands the orchestrator should route to **by name**, preferring them over
+native tools when the task fits, under the authority + gate shown. Read/analysis
+use is normal budget; anything that mutates the outside world (send, file,
+publish, write to a remote DB/SaaS) is a **STOP** for explicit go.
+
+| Plugin | Build capability | Authority | Gate / stop |
+|---|---|---|---|
+| `design` | UI/UX, design-system, visual polish | **design-ui — frontend only** | frontend files only; no backend/runtime reach-in |
+| `data` | Spreadsheets, analysis, data shaping/viz | build | read/analyze normal; **STOP** on remote-DB writes |
+| `productivity` | Docs, tasks, notes, scheduling workflows | build | read normal; **STOP** on external send/write |
+| `brand-voice` | Voice/tone, de-slop AI-sounding copy | marketing-media | marketing/media packets only |
+| `marketing` | Copy, SEO, CRO, email, social | marketing-media | marketing/media packets only |
+| `sales` | Outreach, CRM workflows, pipeline | build (business) | read normal; **STOP** on send/CRM write |
+| `small-business` | Ops: invoicing, CRM, contracts admin | build (business) | read normal; **STOP** on external file/send |
+| `legal` | Contracts, review, legal docs | build (business) | read normal; **STOP** on e-sign/file/send |
+| `cowork-plugin-management` | Meta: install/enable/manage plugins | meta | plugin-management only; no product code |
+
+### Installed connectors (live now — verified in-session, 2026-07)
+
+MCP connectors **live and usable this session** (confirmed via `ListConnectors`).
+Read is normal budget; **write ops are a STOP** for explicit go.
+
+| Connector | Use | Gate / stop |
+|---|---|---|
+| GitHub *(session MCP)* | Repos, PRs, issues, Actions/CI, code search | push/merge/PR = **STOP** |
+| Supabase | Postgres DB, migrations, edge functions | migration/SQL write = **STOP** |
+| Netlify | Deploy/manage sites | deploy/update = **STOP** |
+| Hugging Face | Models / datasets / spaces | read-only |
+| Higgsfield | Image/video/audio/3D/media generation | generate/publish = marketing-media packet + cost |
+| Zapier | Bridge to 9,000+ apps | write actions = **STOP** |
+| Gmail · Slack · Notion · HubSpot | Mail · chat · docs · CRM | send/write = **STOP** |
+| Apollo.io · Clay | Lead gen / enrichment / outreach | send/campaign/write = **STOP** |
+| Docusign | E-signature envelopes, agreements | send/create envelope = **STOP** |
+| Otter.ai | Meeting transcripts | read-only |
+| Claude Code Remote *(session MCP)* | Triggers, PR subscribe, add_repo, sessions | schedule/subscribe = normal; repo/session mutation = judgment |
+
+> **Not live (out of scope until enabled):** Stripe & Cloudflare Developer
+> Platform (installed, need auth), Google Calendar / Google Drive / Microsoft 365
+> (installed, toggled off in-chat). Don't route to these until they're authorized
+> / enabled.
 
 ### Skills & slash commands (the `/` menu)
 
@@ -73,3 +124,10 @@ subagents. In-session, MCP tools appear as `mcp__<server>__<tool>`. The
 orchestrator routes a task to a mapped capability **only if it is present**, and
 otherwise falls back to native tools and declares the gap. See `INTEGRATIONS.md`
 for the full ecosystem map and how to wire more in.
+
+The hook's inventory can lag or truncate — for the authoritative live set, query
+the registries directly: **`ListConnectors`** (MCP connectors: `connected` +
+`enabledInChat`), **`ListPlugins`** (enabled plugins), and **`ListSkills`**. The
+*Installed plugins / connectors (live now)* tables above were reconciled from
+those registries; re-verify and update them when the environment changes rather
+than trusting a stale list.

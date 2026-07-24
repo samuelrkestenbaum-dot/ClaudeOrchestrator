@@ -10,6 +10,29 @@ and the orchestrator routes to it **when connected**, under the usual gates.
 > transcription and may be garbled. Confirm the exact package or GitHub repo
 > (and that it's maintained and trustworthy) before installing anything.
 
+## What's actually installed here (verified in-session — 2026-07)
+
+The sections below are the **ecosystem menu** (what you *could* wire in). This
+section is the **reality**: what is installed and live in this environment right
+now, confirmed via `ListConnectors` / `ListPlugins`. The `tool_router.md` →
+*Installed plugins / connectors (live now)* tables carry the authority + gate per
+item; this is the index. Keep both honest — re-verify when the environment changes.
+
+- **Connectors (MCP) — live now (13):** Apollo.io · Clay · Docusign · Gmail ·
+  Higgsfield · HubSpot · Hugging Face · Netlify · Notion · Otter.ai · Slack ·
+  Supabase · Zapier. Plus session/env MCPs: **GitHub**, **Claude Code Remote**.
+- **Plugins — enabled now (9):** `design` · `data` · `productivity` ·
+  `brand-voice` · `marketing` · `sales` · `small-business` · `legal` ·
+  `cowork-plugin-management`.
+- **Installed but NOT live (out of scope until enabled):** Stripe & Cloudflare
+  Developer Platform (need auth); Google Calendar / Google Drive / Microsoft 365
+  (toggled off in-chat).
+
+> The design / marketing / business / brand-voice rows in the sections below were
+> written as hypotheticals ("wire this in"). Where a ✅ marks the Wire-in column,
+> that capability is now **live via an installed plugin** — treat it as installed,
+> not aspirational.
+
 ## How wiring works
 
 > **Already installed & connected?** Then steps 1–2 are optional. The orchestrator
@@ -78,7 +101,7 @@ and the orchestrator routes to it **when connected**, under the usual gates.
 
 | Tool | What it does | Build OS authority / gate | Wire-in |
 |---|---|---|---|
-| UI/UX Pro Max, Taste, Impeccable Design, Emil Kowalski, Web Design Guidelines | Design taste, palettes, motion, audits | **design-ui — frontend only** | builder under design-ui authority |
+| UI/UX Pro Max, Taste, Impeccable Design, Emil Kowalski, Web Design Guidelines | Design taste, palettes, motion, audits | **design-ui — frontend only** | ✅ installed via `design` plugin — builder under design-ui authority |
 | Extract Design System / Image-to-Code / Figma-to-Code | Visual → code | design-ui — frontend only | builder under design-ui |
 | 21st.dev Magic MCP, Google Stitch | Component/design asset generation | design-ui — frontend only | router design row |
 
@@ -93,9 +116,9 @@ and the orchestrator routes to it **when connected**, under the usual gates.
 
 | Tool | What it does | Build OS authority / gate | Wire-in |
 |---|---|---|---|
-| Corey Haines marketing skills, Marketing bundle, LinkedIn skill | Copy, SEO, CRO, email, social | **marketing-media packets only** | builder under marketing-media |
-| Stop Slop / Human Skill | Remove AI-sounding writing | marketing-media | post-process content |
-| Small Business / Sales / Legal plugins | Ops: invoicing, CRM, contracts | **STOP on external actions** | read = normal; send/file = gate |
+| Corey Haines marketing skills, Marketing bundle, LinkedIn skill | Copy, SEO, CRO, email, social | **marketing-media packets only** | ✅ installed via `marketing` plugin — builder under marketing-media |
+| Stop Slop / Human Skill | Remove AI-sounding writing | marketing-media | ✅ installed via `brand-voice` plugin — post-process content |
+| Small Business / Sales / Legal plugins | Ops: invoicing, CRM, contracts | **STOP on external actions** | ✅ installed (`small-business`, `sales`, `legal`) — read normal; send/file = gate |
 
 ## 7. Agent swarm
 
