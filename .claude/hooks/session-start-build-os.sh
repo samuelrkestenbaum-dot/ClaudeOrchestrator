@@ -6,6 +6,16 @@ set -uo pipefail
 
 ROOT="${CLAUDE_PROJECT_DIR:-$(pwd)}"
 
+# Auto-provision persistent local accelerators (P-004): non-blocking, non-fatal,
+# fast-skip-if-present. Serena/Repomix/ccusage only; no secrets/network egress
+# beyond public package registries. Context Mode / Trail of Bits / Claude HUD /
+# GitHub Actions are intentionally NOT auto-installed (see the script header).
+if [ -x "$ROOT/install-accelerators.sh" ]; then
+  ( "$ROOT/install-accelerators.sh" >/tmp/build-os-accelerators.log 2>&1 & ) 2>/dev/null || true
+  echo "Accelerators: background auto-provision started (serena/repomix/ccusage) — log: /tmp/build-os-accelerators.log"
+  echo
+fi
+
 echo "Orchestrator: ON — Build OS wired. Reminder: invoke the build-orchestrator subagent PROACTIVELY before any build packet (architecture, next steps, tool routing, \"keep going\"). It will announce its routing line 'Orchestrator: ON — routing from <file|embedded>' when it runs."
 echo
 

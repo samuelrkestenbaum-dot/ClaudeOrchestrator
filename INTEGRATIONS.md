@@ -27,13 +27,14 @@ item; this is the index. Keep both honest — re-verify when the environment cha
 - **Installed but NOT live (out of scope until enabled):** Stripe & Cloudflare
   Developer Platform (need auth); Google Calendar / Google Drive / Microsoft 365
   (toggled off in-chat).
-- **Build accelerators (P-002, status corrected in P-003):** **ZERO** are permanently
-  ACTIVE. Serena (`serena-agent==1.6.1`) is **DURABLY CONFIGURED** (committed
-  `.mcp.json`, not active until fresh session + MCP approval); Repomix (`repomix@1.17.0`)
-  and ccusage (`ccusage@20.0.18`) are **RUNNABLE ON DEMAND** (npx only, not persistent/
-  global); Trail of Bits skills, Context Mode, and the two GitHub Actions are
-  **DOCUMENTED/OPT-IN**; Claude HUD is **NOT INSTALLED/BLOCKED**. Status semantics +
-  gates in `tool_router.md` → *Build accelerators* and §8 below.
+- **Build accelerators (P-004, provisioned + proven):** Repomix (`repomix@1.17.0`) +
+  ccusage (`ccusage@20.0.18`) are **ACTIVE (env-scoped)** — persistently installed,
+  fresh-shell verified, auto-provisioned via `install-accelerators.sh`. Serena
+  (`serena-agent==1.6.1`) is **DURABLY CONFIGURED (proven)** — a real tool call
+  succeeded in-session; only a fresh-session restart + MCP approval remains. Context
+  Mode (`context-mode@1.0.169`, pilot, benchmarked) + Claude HUD (`claude-hud` v0.6.0,
+  security-cleared) + Trail of Bits (`trailofbits/skills`) are **DOCUMENTED/OPT-IN**;
+  the two GitHub Actions are repo-scoped templates. Proof + gates in §8 below.
 
 > The design / marketing / business / brand-voice rows in the sections below were
 > written as hypotheticals ("wire this in"). Where a ✅ marks the Wire-in column,
@@ -156,10 +157,14 @@ installed · **NOT INSTALLED/BLOCKED** = unavailable / ambiguous / withheld.
 test are verified. Keep installation · configuration · activation · authentication
 · repository rollout as five distinct states.
 
-> **Net new accelerators permanently ACTIVE right now: ZERO.** (Serena = DURABLY
-> CONFIGURED; Repomix + ccusage = RUNNABLE ON DEMAND; the rest = DOCUMENTED/OPT-IN
-> or BLOCKED.) The P-001 claude.ai connectors/plugins are a separate, genuinely
-> ACTIVE category and are not counted among these accelerators.
+> **Provisioning status (P-004, proven by live tests).** Repomix + ccusage =
+> **ACTIVE (env-scoped)** (persistently installed, fresh-shell verified, auto-
+> provisioned). Serena = **DURABLY CONFIGURED (proven)** (real tool call succeeded
+> in-session; fresh-session restart is the only unrun step). Context Mode + Claude
+> HUD + Trail of Bits = **DOCUMENTED/OPT-IN**; GitHub Actions = repo-scoped
+> templates. Durability across container-recycle = the committed
+> `install-accelerators.sh` (wired into SessionStart); the user's own host still
+> needs the one-line commands below. P-001 claude.ai connectors/plugins stay ACTIVE.
 
 ### 8.1 Serena — semantic code navigation/editing (MCP) · DURABLY CONFIGURED
 - **Source:** https://github.com/oraios/serena · PyPI `serena-agent` · **v1.6.1**
@@ -172,41 +177,56 @@ test are verified. Keep installation · configuration · activation · authentic
     "args": ["--from","serena-agent==1.6.1","serena","start-mcp-server",
              "--context","ide-assistant","--project","."] } } }
   ```
-- **Status: DURABLY CONFIGURED.** The committed `.mcp.json` reconstructs Serena via
-  version-pinned uvx. A temp-container `uv tool install` was verified (`Serena 1.6.1`)
-  and the MCP was observed resolvable in a *resumed* session — but there has been
-  **no fresh-session activation test**, so it is **not ACTIVE**: a newly started
-  Claude Code session must launch and **approve** the project MCP first.
+- **Status: DURABLY CONFIGURED (proven).** Persistently installed (`uv tool install`,
+  `serena` 1.6.1 → `/root/.local/bin/serena`) and reconstructed by the committed
+  `.mcp.json` via version-pinned uvx. Context corrected `ide-assistant → claude-code`
+  (upstream renamed it; deprecation warning now gone). **Live proof:** a real
+  `mcp__serena__list_memories` call succeeded in-session, and the committed command
+  boots the server (52 tools, LSP, project recognized). The **only** unrun step is an
+  independent fresh-session restart + project-MCP approval — a user action I cannot
+  perform non-interactively; until then it is not labelled ACTIVE. Also auto-provisioned
+  by `install-accelerators.sh`.
 - **Gate:** local language servers, **no API key / OAuth**. Primary for symbol-level
   work in large/unfamiliar repos before broad reads. Edits still go through builder.
 
-### 8.2 Repomix — frozen snapshots / cross-model handoffs (CLI) · RUNNABLE ON DEMAND
+### 8.2 Repomix — frozen snapshots / cross-model handoffs (CLI) · ACTIVE (env-scoped)
 - **Source:** https://github.com/yamadashy/repomix · npm `repomix` · **v1.17.0**
 - **Run (no global install):** `npx repomix@latest --config templates/repomix.config.json`
-- **Status: RUNNABLE ON DEMAND.** Verified via `npx` in this ephemeral container
-  (`--version` → 1.17.0). **Not** a persistent or global install.
+- **Status: ACTIVE (env-scoped).** Persistently installed `npm i -g repomix@1.17.0`
+  → `/opt/node22/bin/repomix`, verified from a **fresh login shell** (1.17.0). Auto-
+  provisioned via `install-accelerators.sh`. **Host-Mac boundary:** the remote
+  container is not the user's machine — the one host command is
+  `npm install -g repomix@1.17.0`.
 - **Gate:** **explicit snapshots only, never always-on.** The committed
   `templates/repomix.config.json` keeps Secretlint ON and excludes env/secrets/keys/
   `node_modules`/`dist`/`build`/`.git`. Respects `.gitignore` + `.repomixignore`.
   **Sharing a snapshot with another model/service is an external send → STOP** for
   that step.
 
-### 8.3 ccusage — usage/cost visibility (CLI) · RUNNABLE ON DEMAND
+### 8.3 ccusage — usage/cost visibility (CLI) · ACTIVE (env-scoped)
 - **Source:** https://github.com/ryoppippi/ccusage · npm `ccusage` · **v20.0.18**
 - **Run:** `npx ccusage@latest` (`daily` | `monthly` | `session` | `blocks`); `--offline` for cached pricing.
-- **Status: RUNNABLE ON DEMAND.** Verified via `npx` in this ephemeral container
-  (`ccusage 20.0.18`). **Not** a persistent or global install.
+- **Status: ACTIVE (env-scoped).** Persistently installed `npm i -g ccusage@20.0.18`
+  → `/opt/node22/bin/ccusage`, verified from a **fresh login shell** (20.0.18). Auto-
+  provisioned via `install-accelerators.sh`. **Host-Mac boundary:** one host command
+  `npm install -g ccusage@20.0.18`.
 - **Gate:** **visibility-only — never makes build decisions.** Reads local Claude
   Code JSONL; offline-capable; no account/API key.
 
-### 8.4 Claude HUD — operator visibility · NOT INSTALLED/BLOCKED
-- **Finding:** no canonical/official "Claude HUD". Third-party TUIs exist
-  (e.g. `schmoli/claude-dashboard`, `neochoon/agenthud` — read-only local-JSONL) —
-  **but some tools in this space run an API-call interceptor proxy**, which can
-  expose secrets/traffic.
-- **Gate:** **do not install without disambiguation + explicit go.** If pursued,
-  prefer a **read-only, local-JSONL** TUI; **never a proxy interceptor.** ccusage
-  already covers cost/usage; a live-session HUD is the only gap.
+### 8.4 Claude HUD — operator visibility · DOCUMENTED/OPT-IN (security + function PASS)
+- **Selected + verified:** `jarrodwatts/claude-hud` (MIT, v0.6.0). **Security PASS** —
+  README: "local-only… does not make network requests, scrape credentials, or call
+  undocumented Claude APIs"; static egress scan of `dist/` found no outbound calls.
+  **Functional test PASS** — piping a sample statusline stdin JSON to `dist/index.js`
+  rendered a status line from local data only (cwd/model), no credentials. (The two
+  fallbacks `schmoli/claude-dashboard` / `neochoon/agenthud` were not needed since the
+  intended tool passed the read-only/local bar.)
+- **Install (interactive):** `/plugin marketplace add jarrodwatts/claude-hud` →
+  `/plugin install claude-hud`; or set `statusLine` in `~/.claude/settings.json` to run
+  its script.
+- **Gate:** visibility-only; a statusline **renders only in an interactive TTY**, so it
+  cannot be render-verified in this non-interactive env (that's the activation blocker).
+  Never set `CLAUDE_HUD_ALLOW_EXTRA_CMD=1` — it enables arbitrary shell exec (off by default).
 
 ### 8.5 Trail of Bits security skills · DOCUMENTED/OPT-IN
 - **Source:** https://github.com/trailofbits/skills (official marketplace, 40 plugins)
@@ -220,15 +240,24 @@ test are verified. Keep installation · configuration · activation · authentic
 - **Honest gap:** there is **no dedicated auth / MCP / tenant-isolation plugin** —
   those needs are met by the general analysis skills above, not a 1:1 match.
 - **Gate:** activate only for relevant security work; **produces advisory evidence,
-  not unilateral production changes.**
+  not unilateral production changes.** License is **CC BY-SA 4.0** and each item is a
+  full plugin with executable code — **not vendored into this repo** (ShareAlike +
+  supply-chain caution); install via the interactive marketplace only. (Verified 40
+  plugins in the repo; curated subset above.)
 
-### 8.6 Context Mode — in-session context compression (MCP) · DOCUMENTED/OPT-IN (pilot, not enabled)
-- **Finding:** community MCP that sandboxes large tool outputs into a local store +
-  BM25 retrieval to cut context. Multiple write-ups with **inconsistent repo/star
-  claims** — **verify the exact upstream repo before any pilot.**
-- **Gate (pilot only):** **non-secret repos only**; **never route env output,
-  credentials, customer data, or sensitive logs through it.** Before wider use,
-  benchmark **answer accuracy, latency, and token/cost**. Not enabled by this packet.
+### 8.6 Context Mode — in-session context compression (MCP) · DOCUMENTED/OPT-IN (pilot: installed + benchmarked PASS)
+- **Verified upstream:** `mksglu/context-mode` (npm `context-mode@1.0.169`). MCP server;
+  **local-only** ("nothing leaves your machine, no telemetry/account"); redacts
+  `authorization/token/password/api_key` before persistence; local SQLite under
+  `~/.claude/context-mode/`. `context-mode doctor` → PASS.
+- **Benchmark (safe sample = this repo's `build-os/` docs; no secrets):** index 9
+  files / 57 sections in **0.188s**; search returned 2 on-topic chunks in **0.120s**;
+  result payload 1,225 B vs 37,283 B corpus ≈ **30× context reduction**. Accuracy,
+  latency, and token/cost proxy all **PASS**.
+- **Gate (pilot only):** installed for the pilot but **routing intentionally DISABLED**
+  — deliberately **not** wired into `.mcp.json`. **Non-secret repos only**; **never
+  route env output, credentials, customer data, or sensitive logs through it.** Keep
+  broader routing off until you approve enablement.
 
 ### 8.7 `anthropics/claude-code-action` — repo-scoped GitHub Action · DOCUMENTED/OPT-IN
 - **Source:** https://github.com/anthropics/claude-code-action · ref `@v1.0` (or `@main`)
