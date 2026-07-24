@@ -366,7 +366,8 @@ seed_home() { mkdir -p "$1/.claude"
 
 run_handoff() { MOCK_REC="$REC" CLAUDE_BIN="$MB/claude" CAPABILITY_PROFILE_BIN="$PROFILE" \
   CLAUDE_USER_DIR="$PH/.claude" CLAUDE_CONFIG_PATH="$PH/.claude.json" \
-  HANDOFF_LOG="$REC/handoffs.log" HANDOFF_TIMEOUT="${HANDOFF_TIMEOUT:-30}" \
+  HANDOFF_LOG="$REC/handoffs.log" HANDOFF_LOCK="$REC/handoff.lock" \
+  HANDOFF_LOCK_WAIT="${HANDOFF_LOCK_WAIT:-30}" HANDOFF_TIMEOUT="${HANDOFF_TIMEOUT:-30}" \
   bash "$HANDOFF" detect "$1" "$2"; }
 
 is_focused() { python3 - "$PH/.claude/settings.json" "$PH/.claude.json" <<'PY'
@@ -495,6 +496,148 @@ FOUT="$(printf '%s' '{"hook_event_name":"UserPromptSubmit","prompt":"list the fi
   | HOME="$P15_HOME" TMPDIR="$P15_TMP" MOCK_REC="$P15_REC" CLAUDE_BIN="$P15_BIN/claude" \
   bash "$P15_HOME/.claude/hooks/prompt-router.sh" 2>&1)"
 grep -q "MOCK_CHILD_OUTPUT" <<<"$FOUT" && no "focused prompt spuriously launched a specialist child" || ok "focused prompt through the installed hook does not hand off"
+
+echo "== 17. P-016: capability registry — task-family classification (precedence, conservative) =="
+cls() { bash "$HANDOFF" classify "$1" 2>/dev/null; }
+# ECC (Everything Claude Code) specialist families that previously misrouted focused
+[ "$(cls 'review my Rust code for ownership and unsafe usage')" = ecc ]                 && ok "Rust ownership/unsafe -> ecc"        || no "Rust ownership/unsafe route"
+[ "$(cls 'debug a Go concurrency deadlock in the goroutine scheduler')" = ecc ]         && ok "Go concurrency/debug -> ecc"         || no "Go concurrency route"
+[ "$(cls 'optimize this PostgreSQL schema and slow query plan')" = ecc ]                && ok "PostgreSQL schema/query -> ecc"      || no "Postgres route"
+[ "$(cls 'build an autonomous agent eval harness with benchmarks')" = ecc ]             && ok "autonomous-agent harness/evals -> ecc" || no "agent-harness route"
+[ "$(cls 'do an architecture review of our distributed microservice system')" = ecc ]  && ok "architecture specialist -> ecc"      || no "architecture route"
+[ "$(cls 'set up a Chrome DevTools browser automation session')" = ecc ]                && ok "browser specialist -> ecc"           || no "browser route"
+[ "$(cls 'implement ed25519 signing')" = ecc ]                                          && ok "ed25519 crypto still -> ecc"         || no "ed25519 route regressed"
+# Conservative: ordinary lightweight tasks stay focused (no relaunch)
+[ "$(cls 'fix a typo in the Rust README')" = focused ]                                  && ok "trivial Rust doc edit stays focused" || no "trivial Rust edit misrouted"
+[ "$(cls 'list the go source files')" = focused ]                                       && ok "listing go files stays focused"      || no "listing go files misrouted"
+[ "$(cls 'what port does postgres listen on')" = focused ]                              && ok "postgres factual question stays focused" || no "postgres question misrouted"
+[ "$(cls 'please refactor the build script')" = focused ]                               && ok "ordinary refactor stays focused"     || no "ordinary refactor misrouted"
+# Zeroize expanded natural-language coverage + highest precedence
+[ "$(cls 'check whether API keys remain in memory after use')" = zeroize ]              && ok "zeroize NL: keys remain in memory"   || no "zeroize NL keys-in-memory"
+[ "$(cls 'verify secrets are cleared from registers and the stack')" = zeroize ]        && ok "zeroize NL: cleared from registers/stack" || no "zeroize NL registers/stack"
+[ "$(cls 'zeroize the ed25519 private key material')" = zeroize ]                       && ok "zeroize outranks ecc (precedence)"   || no "zeroize precedence"
+# Inline surface routes -> distinct tokens
+[ "$(cls 'find a shadcn button component from 21st.dev')" = 21st ]                       && ok "21st.dev component discovery -> 21st" || no "21st route"
+[ "$(cls 'research what people say about this on Reddit and Twitter')" = agent-reach ]  && ok "web research -> agent-reach"         || no "agent-reach route"
+[ "$(cls 'supervise this long-running overnight build with Claude Watch')" = claude-watch ] && ok "long-running supervision -> claude-watch" || no "claude-watch route"
+[ "$(cls 'design the UI/UX for the new dashboard screen')" = ui-ux-pro-max ]            && ok "UI/UX design -> ui-ux-pro-max"       || no "ui-ux route"
+
+echo "== 18. P-016: inline routing — REQUIRED directive, no child, no profile switch =="
+MB="$WORK/i1/bin"; REC="$WORK/i1/rec"; PH="$WORK/i1/home"; mkbin "$MB" "$REC"; seed_home "$PH"
+for spec in "21st^find a shadcn component from 21st.dev^21st.dev" \
+            "agent-reach^research this topic on reddit and twitter^Agent Reach" \
+            "claude-watch^supervise this long-running overnight run with claude watch^Claude Watch" \
+            "ui-ux-pro-max^design the ui/ux of the settings screen^UI UX Pro Max"; do
+  route="${spec%%^*}"; rest="${spec#*^}"; iprompt="${rest%%^*}"; iname="${rest##*^}"
+  IOUT="$(MOCK_REC="$REC" CLAUDE_BIN="$MB/claude" CAPABILITY_PROFILE_BIN="$PROFILE" \
+    CLAUDE_USER_DIR="$PH/.claude" CLAUDE_CONFIG_PATH="$PH/.claude.json" \
+    HANDOFF_LOG="$REC/inline.log" HANDOFF_LOCK="$REC/$route.lock" \
+    bash "$HANDOFF" detect "$iprompt" "$PH" 2>&1)"
+  grep -qi "REQUIRED" <<<"$IOUT"                 && ok "inline $route emits a REQUIRED directive"        || no "inline $route missing REQUIRED directive"
+  grep -qiF "$iname" <<<"$IOUT"                   && ok "inline $route names the capability ($iname)"     || no "inline $route missing capability name"
+  [ ! -e "$REC/launched" ]                        && ok "inline $route launches NO child"                || no "inline $route launched a child"
+done
+is_focused && ok "inline routes leave the profile focused (no capability-profile switch)" || no "inline route changed the profile"
+grep -q "route=21st" "$REC/inline.log"  && ok "inline route is logged by route" || no "inline route not logged"
+grep -qi "shadcn" "$REC/inline.log"     && no "inline log leaked prompt text"   || ok "inline log has no prompt text"
+# prompt-router must NOT claim a specialist child handled an inline route
+mkdir -p "$WORK/i2tmp"; PRH="$WORK/i2home"; mkdir -p "$PRH/.claude"
+printf '{"enabledPlugins":{},"skillListingBudgetFraction":0.18}\n' > "$PRH/.claude/settings.json"
+printf '{"mcpServers":{"keep-me":{"command":"keep"}}}\n' > "$PRH/.claude.json"
+CLAUDE_USER_DIR="$PRH/.claude" CLAUDE_CONFIG_PATH="$PRH/.claude.json" bash "$PROFILE" focused >/dev/null 2>&1
+PRPAYLOAD='{"hook_event_name":"UserPromptSubmit","prompt":"find a shadcn component from 21st.dev","cwd":"'"$PRH"'"}'
+PROUT="$(printf '%s' "$PRPAYLOAD" | HOME="$PRH" TMPDIR="$WORK/i2tmp" bash "$PROMPT_HOOK" 2>&1)"
+grep -qiE "REQUIRED|inline" <<<"$PROUT"          && ok "prompt-router emits the inline directive for 21st" || no "prompt-router missing inline directive"
+grep -qi "already handled this task" <<<"$PROUT" && no "prompt-router falsely claims a child handled an inline route" || ok "prompt-router does not claim a child for inline routes"
+
+echo "== 19. P-016: handoff audit log is privacy-safe (no prompt/cwd) + 0600 =="
+logmode() { perl -e 'printf "%o", (stat($ARGV[0]))[2] & 07777' "$1" 2>/dev/null; }
+MB="$WORK/pv/bin"; REC="$WORK/pv/rec"; PH="$WORK/pv/home"; mkbin "$MB" "$REC"; seed_home "$PH"
+PVLOG="$REC/audit.log"; SECRET="xyzzy-secret-prompt-marker"; CWDMARK="$WORK/pv/zzcwdmark"; mkdir -p "$CWDMARK"
+MOCK_REC="$REC" CLAUDE_BIN="$MB/claude" CAPABILITY_PROFILE_BIN="$PROFILE" \
+  CLAUDE_USER_DIR="$PH/.claude" CLAUDE_CONFIG_PATH="$PH/.claude.json" \
+  HANDOFF_LOG="$PVLOG" HANDOFF_LOCK="$REC/l.lock" HANDOFF_TIMEOUT=30 \
+  bash "$HANDOFF" detect "add ed25519 ecc support $SECRET" "$CWDMARK" >/dev/null 2>&1
+[ -s "$PVLOG" ]                    && ok "handoff writes an audit line"        || no "audit log empty"
+grep -qF "$SECRET" "$PVLOG"        && no "audit log leaked prompt text"        || ok "audit log has NO prompt text"
+grep -qF "$CWDMARK" "$PVLOG"       && no "audit log leaked cwd path"           || ok "audit log has NO cwd path"
+grep -q "route=ecc" "$PVLOG"       && ok "audit log records the route"         || no "audit log missing route"
+grep -qE "exit=[0-9]+" "$PVLOG"    && ok "audit log records the exit status"   || no "audit log missing exit"
+[ "$(logmode "$PVLOG")" = 600 ]    && ok "audit log mode is 0600"              || no "audit log mode is $(logmode "$PVLOG") (want 600)"
+PVLOG2="$REC/pre.log"; printf 'PREEXISTING-LEAK old prompt content\n' > "$PVLOG2"; chmod 644 "$PVLOG2"
+MOCK_REC="$REC" CLAUDE_BIN="$MB/claude" CAPABILITY_PROFILE_BIN="$PROFILE" \
+  CLAUDE_USER_DIR="$PH/.claude" CLAUDE_CONFIG_PATH="$PH/.claude.json" \
+  HANDOFF_LOG="$PVLOG2" HANDOFF_LOCK="$REC/l2.lock" HANDOFF_TIMEOUT=30 \
+  bash "$HANDOFF" detect "zeroize the secret buffers now" "$PH" >/dev/null 2>&1
+[ "$(logmode "$PVLOG2")" = 600 ]   && ok "pre-existing 0644 log tightened to 0600" || no "pre-existing log mode is $(logmode "$PVLOG2") (want 600)"
+grep -q "route=zeroize" "$PVLOG2"  && ok "privacy-safe line appended to pre-existing log" || no "no new line appended to pre-existing log"
+
+echo "== 20. P-016: atomic profile lock — BUSY/no-mutation, stale break, release on exit =="
+MB="$WORK/lk/bin"; REC="$WORK/lk/rec"; PH="$WORK/lk/home"; mkbin "$MB" "$REC"; seed_home "$PH"
+LK="$REC/profile.lock"; SUM_BEFORE="$(cat "$PH/.claude/settings.json" "$PH/.claude.json" | cksum)"
+sleep 30 & LIVE=$!
+mkdir -p "$LK"; printf '%s\n' "$LIVE" > "$LK/pid"
+BOUT="$(MOCK_REC="$REC" CLAUDE_BIN="$MB/claude" CAPABILITY_PROFILE_BIN="$PROFILE" \
+  CLAUDE_USER_DIR="$PH/.claude" CLAUDE_CONFIG_PATH="$PH/.claude.json" \
+  HANDOFF_LOG="$REC/l.log" HANDOFF_LOCK="$LK" HANDOFF_LOCK_WAIT=1 HANDOFF_TIMEOUT=30 \
+  bash "$HANDOFF" detect "add ed25519 ecc support" "$PH" 2>&1)"; BEC=$?
+kill "$LIVE" 2>/dev/null; wait "$LIVE" 2>/dev/null
+[ "$BEC" != 0 ]                    && ok "held lock -> nonzero exit"           || no "held lock exit was 0"
+grep -qi "busy" <<<"$BOUT"         && ok "held lock -> BUSY result"            || no "held lock did not report BUSY"
+[ ! -e "$REC/launched" ]           && ok "held lock -> NO child launched"      || no "held lock launched a child"
+SUM_AFTER="$(cat "$PH/.claude/settings.json" "$PH/.claude.json" | cksum)"
+[ "$SUM_BEFORE" = "$SUM_AFTER" ]   && ok "held lock -> NO profile mutation"    || no "held lock mutated the profile"
+rm -rf "$LK"
+MB="$WORK/lk2/bin"; REC="$WORK/lk2/rec"; PH="$WORK/lk2/home"; mkbin "$MB" "$REC"; seed_home "$PH"
+LK2="$REC/profile.lock"; mkdir -p "$LK2"; printf '2147483647\n' > "$LK2/pid"
+MOCK_REC="$REC" CLAUDE_BIN="$MB/claude" CAPABILITY_PROFILE_BIN="$PROFILE" \
+  CLAUDE_USER_DIR="$PH/.claude" CLAUDE_CONFIG_PATH="$PH/.claude.json" \
+  HANDOFF_LOG="$REC/l.log" HANDOFF_LOCK="$LK2" HANDOFF_LOCK_WAIT=2 HANDOFF_TIMEOUT=30 \
+  bash "$HANDOFF" detect "add ed25519 ecc support" "$PH" >/dev/null 2>&1
+[ -e "$REC/launched" ]             && ok "stale lock broken -> handoff proceeds (child launched)" || no "stale lock not broken"
+is_focused                         && ok "focused restored after stale-lock handoff" || no "focused not restored after stale-lock"
+[ ! -d "$LK2" ]                    && ok "lock released on exit (stale case)"  || no "lock not released (stale case)"
+MB="$WORK/lk3/bin"; REC="$WORK/lk3/rec"; PH="$WORK/lk3/home"; mkbin "$MB" "$REC"; seed_home "$PH"
+LK3="$REC/profile.lock"
+MOCK_REC="$REC" CLAUDE_BIN="$MB/claude" CAPABILITY_PROFILE_BIN="$PROFILE" \
+  CLAUDE_USER_DIR="$PH/.claude" CLAUDE_CONFIG_PATH="$PH/.claude.json" \
+  HANDOFF_LOG="$REC/l.log" HANDOFF_LOCK="$LK3" HANDOFF_TIMEOUT=30 \
+  bash "$HANDOFF" detect "add ed25519 ecc support" "$PH" >/dev/null 2>&1
+[ ! -d "$LK3" ]                    && ok "lock released on exit (normal handoff)" || no "lock not released (normal handoff)"
+
+echo "== 21. P-016: surface-aware inventory + enabled-vs-installed skill budget =="
+have "$ROUTER" "Claude Desktop"            && ok "router names the Claude Desktop surface"       || no "router omits Desktop surface"
+grep -qi "claude mcp list" "$ROUTER"       && ok "router references the local CLI (claude mcp list)" || no "router omits local CLI surface"
+grep -qi "host-reported" "$ROUTER"         && no "router still uses stale host-reported language" || ok "router drops stale host-reported language"
+grep -qi "v0.4.1" "$ROUTER"                && ok "router records Claude Watch version evidence"  || no "router missing Claude Watch version"
+grep -qi "v2.11.0" "$ROUTER"               && ok "router records UI UX Pro Max version evidence" || no "router missing UI UX Pro Max version"
+for cap in "21st.dev" "Claude Watch" "Agent Reach" "UI UX Pro Max"; do
+  have "$ROUTER" "$cap" && ok "router still routes: $cap" || no "router dropped capability: $cap"
+done
+# skill-budget-audit: enabled-vs-installed separation; a disabled mega-bundle must NOT make startup OVER BUDGET
+CBD="$WORK/claudedir"; mkdir -p "$CBD/plugins"
+mkdir -p "$CBD/plugins/marketplaces/mkt/big/skills/dup"     # marketplace copy (must NOT be double-counted)
+printf 'name: dup\ndescription: d\n' > "$CBD/plugins/marketplaces/mkt/big/skills/dup/SKILL.md"
+BIGCACHE="$CBD/plugins/cache/mkt/big/1.0.0"; mkdir -p "$BIGCACHE/skills/dup"
+printf 'name: dup\ndescription: d\n' > "$BIGCACHE/skills/dup/SKILL.md"                 # same skill, cache copy (installPath)
+for i in 1 2 3 4 5 6 7 8 9 10; do mkdir -p "$BIGCACHE/skills/big$i"; printf 'name: big%s\ndescription: %s\n' "$i" "$(head -c 4000 </dev/zero | tr '\0' x)" > "$BIGCACHE/skills/big$i/SKILL.md"; done
+SMALLCACHE="$CBD/plugins/cache/mkt/small/1.0.0"; mkdir -p "$SMALLCACHE/skills/s1"
+printf 'name: s1\ndescription: d\n' > "$SMALLCACHE/skills/s1/SKILL.md"
+cat > "$CBD/settings.json" <<'JSON'
+{ "enabledPlugins": { "small@mkt": true, "big@mkt": false } }
+JSON
+cat > "$CBD/plugins/installed_plugins.json" <<JSON
+{ "plugins": {
+  "big@mkt":   { "installPath": "$BIGCACHE" },
+  "small@mkt": { "installPath": "$SMALLCACHE" }
+} }
+JSON
+EOUT="$(bash "$AUDIT" --claude-dir "$CBD" 5000 2>/dev/null)"
+grep -qi "installed inventory" <<<"$EOUT"                 && ok "audit reports installed inventory separately"        || no "audit missing installed inventory line"
+grep -qiE "startup[- ]enabled" <<<"$EOUT"                 && ok "audit reports the startup-enabled set separately"    || no "audit missing startup-enabled line"
+grep -qE "installed inventory:[[:space:]]*12 " <<<"$EOUT" && ok "installed inventory de-dupes cache/marketplace (12 skills)" || no "installed inventory count wrong (double-counted?)"
+grep -qE "startup[- ]enabled:[[:space:]]*1 " <<<"$EOUT"   && ok "startup set counts only enabled plugins (1 skill)"   || no "startup-enabled count wrong"
+grep -qiE "startup status:.*within budget" <<<"$EOUT"     && ok "disabled mega-bundle does NOT make startup OVER BUDGET" || no "startup falsely flagged over budget"
 
 echo
 echo "==== RESULT: $PASS passed, $FAIL failed ===="

@@ -248,19 +248,28 @@ for ordinary work; profile switching should follow exact task match and lowest o
 > them to arbitrary product repos. Minimum-permission, advisory-first install
 > recipes live in `INTEGRATIONS.md` §8.
 
-### Host specialist capabilities (P-014 — verify per surface, don't duplicate)
+### Host specialist capabilities (P-014, surface-verified P-016 — don't duplicate)
 
 Extra capabilities present on the host, **preserved across all profile transitions**
 (the capability-profile switcher only toggles ECC / zeroize-audit / Serena — never
-these). Route deterministically; confirm live in the current surface before use
-(no-route-to-unverified); never disable, duplicate, or falsely claim them active.
+these). These are **INLINE current-surface routes**: the prompt hook emits a REQUIRED
+directive to use them here — it never switches capability profiles and never launches a
+child for them. **Verification is surface-specific** — a capability confirmed in **Claude
+Desktop** (the connector/app registry) is *not* the same as one visible to the local
+**Claude Code CLI** (`claude mcp list` / native skills). Confirm live in the current
+surface before routing (no-route-to-unverified); never disable, duplicate, or claim a
+cross-surface ACTIVE state.
 
-| Task type | Route to | Status (2026-07) |
+| Task type | Route to (inline) | Surface & verification (2026-07) |
 |---|---|---|
-| UI / component discovery | **21st.dev** MCP (`mcp__21st__*`) | ✅ live in this session — read-only `get_usage` verified |
-| External-platform reachability / web research | **Agent Reach** (`agent-reach` skill) | ✅ present in this session's skill registry |
-| Long-running supervision | **Claude Watch** | host-reported (installed); not independently verifiable here |
-| UI/UX design work | **UI UX Pro Max** | host-reported (uploaded + enabled); not independently verifiable here |
+| UI / component discovery | **21st.dev** MCP (`mcp__21st__*`) | Verified as a **Claude Desktop** connector; **absent from the local `claude mcp list`** (CLI) — route only on the Desktop surface |
+| External-platform reachability / web research | **Agent Reach** (`agent-reach` skill) | **Native skill present** in Claude Code (skill registry) |
+| Long-running supervision | **Claude Watch** v0.4.1 | **Enabled plugin; plugin skill present** (Claude Code) |
+| UI/UX design work | **UI UX Pro Max** v2.11.0 | **Enabled; native skill present** (Claude Code) |
+
+Surface note: 21st.dev is a Desktop-verified connector and does **not** appear in the local
+CLI's `claude mcp list`; the other three are Claude Code skills/plugins. Do not assert one
+surface's state on another.
 
 ### Skills & slash commands (the `/` menu)
 

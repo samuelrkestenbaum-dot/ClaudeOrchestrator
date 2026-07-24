@@ -33,7 +33,12 @@ print(d.get("cwd","") if isinstance(d,dict) else "")' 2>/dev/null)"
       route="$(bash "$HANDOFF" classify "$PROMPT" 2>/dev/null || echo focused)"
       if [ "$route" != "focused" ]; then
         bash "$HANDOFF" detect "$PROMPT" "${CWD:-$PWD}" 2>&1 || true
-        echo "[specialist-handoff] The specialist child above already handled this task; report its result to the user and do not redo the task in focused mode."
+        case "$route" in
+          ecc|zeroize)
+            echo "[specialist-handoff] A specialist child session (route=$route) already handled this task above; report its result to the user and do not redo the task in focused mode." ;;
+          *)
+            echo "[specialist-handoff] Inline route ($route): the REQUIRED directive above names the capability to use on THIS surface. No child session was launched and no profile was changed — carry out the task here." ;;
+        esac
       fi
     fi
   fi
