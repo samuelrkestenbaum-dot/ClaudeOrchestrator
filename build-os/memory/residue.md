@@ -6,9 +6,11 @@
 
 ## Deferred (follow-up packets)
 
-- **Serena go-live** → next session must **restart + approve the project MCP**
-  (`.mcp.json`) before Serena tools appear. Fresh containers also need
-  `serena` deps fetched by uvx on first launch (network).
+- **Serena go-live (= the pending fresh-session activation test)** → a *newly
+  started* Claude Code session must **launch + approve the project MCP**
+  (`.mcp.json`) before Serena tools count as ACTIVE. Fresh containers also need
+  `serena` deps fetched by uvx on first launch (network). Until that test passes,
+  Serena stays **DURABLY CONFIGURED**, not ACTIVE.
 - **Claude HUD disambiguation** → no canonical tool; pick a read-only local-JSONL
   TUI (never a proxy interceptor) and get explicit go before install.
 - **Context Mode pilot** → verify the exact upstream repo, then pilot in a
@@ -23,10 +25,13 @@
 
 ## Known risks / debt
 
-- **Ephemerality:** CLI installs (Serena via `uv tool`, repomix/ccusage via npx)
-  live only in the current container. Durable state = the committed `.mcp.json`,
-  `templates/repomix.config.json`, and the routing docs — not the installed
-  binaries. Re-verify tool availability at session start.
+- **Ephemerality (the P-002 overstatement, corrected in P-003):** npx/uvx success
+  in this container is **not** a persistent install on the user's Mac or in Claude
+  Desktop. Durable state = the committed `.mcp.json`, `templates/repomix.config.json`,
+  and the routing docs — **not** any host binary. **ZERO** accelerators are
+  permanently ACTIVE. Re-verify status at session start against the five-state
+  taxonomy (ACTIVE / DURABLY CONFIGURED / RUNNABLE ON DEMAND / DOCUMENTED-OPT-IN /
+  NOT-INSTALLED-BLOCKED).
 - **Version pins are point-in-time (2026-07):** `serena-agent==1.6.1`,
   `repomix@1.17.0`, `ccusage@20.0.18`. Re-pin on upgrade.
 - Snapshot leakage: Repomix output can embed code — the hardened config excludes
