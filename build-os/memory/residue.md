@@ -6,27 +6,41 @@
 
 ## Deferred (follow-up packets)
 
-- **Enable + record deferred connectors** → authorize Stripe and Cloudflare
-  Developer Platform, and toggle on Google Calendar / Google Drive / Microsoft 365
-  in-chat; then add them to the *Installed connectors* table. (P-001 left these
-  out per user instruction.)
-- **Session-MCP router rows** → consider first-class *task-type* rows for GitHub
-  and Claude Code Remote (currently listed only in the Installed connectors table).
-- **current_state build/test facts** → fill in if/when a real test harness is added.
+- **Serena go-live** → next session must **restart + approve the project MCP**
+  (`.mcp.json`) before Serena tools appear. Fresh containers also need
+  `serena` deps fetched by uvx on first launch (network).
+- **Claude HUD disambiguation** → no canonical tool; pick a read-only local-JSONL
+  TUI (never a proxy interceptor) and get explicit go before install.
+- **Context Mode pilot** → verify the exact upstream repo, then pilot in a
+  non-secret repo only; benchmark accuracy/latency/token-cost before wider use.
+- **GH Action opt-in** → `claude-code-action` and `claude-code-security-review`
+  are repo-scoped templates; install into a target repo only with explicit go +
+  the required secret (`ANTHROPIC_API_KEY` / `CLAUDE_API_KEY`).
+- **Trail of Bits** → enable only the curated security subset per-task via
+  `/plugin marketplace add trailofbits/skills` (interactive).
+- Carried from P-001: authorize Stripe + Cloudflare, enable Google/Microsoft
+  connectors; session-MCP router rows for GitHub + Claude Code Remote.
 
 ## Known risks / debt
 
-- The *Installed plugins / connectors* tables are a point-in-time snapshot
-  (2026-07). They will drift as the environment changes — re-verify via
-  `ListConnectors` / `ListPlugins` / `ListSkills` rather than trusting the list.
-- Plugin capability descriptions in the router are inferred from plugin names
-  (`ListPlugins` returned no per-plugin descriptions); refine if the plugins
-  expose richer metadata.
+- **Ephemerality:** CLI installs (Serena via `uv tool`, repomix/ccusage via npx)
+  live only in the current container. Durable state = the committed `.mcp.json`,
+  `templates/repomix.config.json`, and the routing docs — not the installed
+  binaries. Re-verify tool availability at session start.
+- **Version pins are point-in-time (2026-07):** `serena-agent==1.6.1`,
+  `repomix@1.17.0`, `ccusage@20.0.18`. Re-pin on upgrade.
+- Snapshot leakage: Repomix output can embed code — the hardened config excludes
+  secrets/env/deps/build, but **sharing a snapshot externally is a STOP**.
 
 ## Open boundaries (awaiting explicit go)
 
-- No merge to base, no PR opened. Feature-branch push proceeds under the session's
-  branch delivery contract. No secrets touched.
+- **No secrets touched, no OAuth authorized, no accounts connected.** Stripe /
+  Cloudflare still unauthenticated; GH Action API keys not added.
+- Serena MCP inert until user restart + approval.
+- Production boundaries default-OFF: secrets, OAuth, DDL, remote-DB writes,
+  payments, flags, canaries, telemetry, deploys, merges, external sends — each a
+  separate explicit approval.
+- Feature-branch push only (`claude/orchestrator-tools-list-e0mdaz`); no PR/merge.
 
 ---
 _Append-only working notes._
