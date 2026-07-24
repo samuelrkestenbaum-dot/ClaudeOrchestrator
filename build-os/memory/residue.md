@@ -8,19 +8,16 @@
 
 - **Fresh-session activation test passed (P-009):** authenticated prompt, Build OS
   startup signal, hook parsing, and MCP health all pass.
-- **Serena (honest, P-011):** the only live server is `plugin:zeroize-audit:serena`,
-  plugin-bundled and launched from UNPINNED git `main` — a deviation from the pinned/
-  user-configured rule (the repo cannot repin the plugin). The repo bootstrap pins the
-  Serena CLI to commit `68884f1`, and a reproducible single-instance pin is opt-in via
-  `templates/serena-pinned.mcp.json` (enable after disabling the plugin's Serena). Live
-  connected version not independently verifiable here — CLI OAuth expired.
+- **Serena (resolved, P-012):** `zeroize-audit` is disabled and one user-scope Serena MCP
+  is pinned to official commit `68884f1`; fresh MCP connection PASS with no duplicate.
 - **Claude HUD** → `claude-hud@claude-hud` v0.6.0 installed + enabled at host user scope;
   security + function PASS. ACTIVE pends fresh-session render test (TTY).
 - **Context Mode** → `context-mode@context-mode` v1.0.169 installed + enabled at host
   user scope; benchmark PASS. **Routing limited to non-secret pilot** (not wired into any
   project `.mcp.json`); awaiting go to widen. Non-secret repos only; never route
   secrets/customer-data/logs through it.
-- **Trail of Bits** → **ACTIVE**; 9 curated plugins verified in a fresh session (advisory/read-only); **not vendored** (CC BY-SA).
+- **Trail of Bits** → **ACTIVE**; 8 focused plugins enabled (advisory/read-only);
+  `zeroize-audit` disabled to remove its unpinned Serena; **not vendored** (CC BY-SA).
 - **GH Action opt-in** → `claude-code-action` / `claude-code-security-review` are
   repo-scoped templates; install into a **named** target repo only with explicit go +
   the required secret (`ANTHROPIC_API_KEY` / `CLAUDE_API_KEY`).
@@ -45,10 +42,9 @@
 - **Version pins are point-in-time (2026-07):** `serena-agent` bootstrap-pinned to commit
   `68884f1` (live host Serena is plugin-bundled/unpinned — deviation), `repomix@1.17.0`,
   `ccusage@20.0.18`, `context-mode@1.0.169`, `claude-hud` v0.6.0. Re-pin on upgrade.
-- **Skill budget (P-011):** host startup warned `685 skills, 171824 chars > 30000`, which
-  truncates skill discovery. Policy + minimal active set in `build-os/memory/skill_budget.md`;
-  audit tool `build-os/tools/skill-budget-audit.sh`. Applying the trim + fresh-debug
-  verification is a **host/user step** (needs the local CLI; OAuth expired).
+- **Skill budget (resolved, P-012):** ECC's 363-skill mega-bundle is disabled and
+  `skillListingBudgetFraction` is 0.18. Fresh authenticated debug loaded 149 directory
+  commands, 170 plugin skills, and 35 bundled skills with no truncation warning.
 - **Remote/org vs local-verified (P-011):** the 9 claude.ai plugins + 13 connectors are
   **org-level** (claude.ai app registry), NOT in the local `claude plugin` registry; router
   now separates them and applies no-route-to-unverified. Verify live per surface before routing.
@@ -80,7 +76,8 @@
 
 - **No secrets touched, no OAuth authorized, no accounts connected.** Stripe /
   Cloudflare still unauthenticated; GH Action API keys not added.
-- Build OS, Repomix, ccusage, Context Mode, and 9 Trail of Bits plugins were verified ACTIVE in a prior session; local CLI OAuth is now **expired**, so no ACTIVE re-claim. Serena is a deviation (plugin-bundled/unpinned; see above). Claude HUD enabled; visual TTY render unverified.
+- Build OS, pinned Serena, Repomix, ccusage, Context Mode, and 8 focused Trail of Bits
+  plugins pass current live checks. Claude HUD enabled; visual TTY render unverified.
 - Context Mode enabled on host but routing **limited to non-secret pilot** — awaiting go
   to widen.
 - Trail of Bits (CC BY-SA) enabled at host user scope, **not vendored** into this repo.

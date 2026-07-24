@@ -22,9 +22,10 @@ blindly keep redundant skills, and do not blindly delete useful ones.
 - `context-mode` (context compression, pilot).
 
 **Disable (dominant / redundant):**
-- The rest of the `trailofbits/skills` marketplace — it ships ~40 plugins; only the 9
-  curated security plugins above are used, so the other ~31 dominate the budget.
-- Any "everything" / mega bundles and skills that duplicate a kept capability.
+- `ecc@ecc`: 363 skills and substantial overlap with GSD, Superpowers, Codex, the
+  focused design/document plugins, and Build OS itself.
+- Any additional "everything" / mega bundle only if a fresh debug run again exceeds
+  the budget.
 
 ## Procedure
 
@@ -36,7 +37,12 @@ blindly keep redundant skills, and do not blindly delete useful ones.
 3. **Re-audit** until under budget, then start a **fresh debug session** (`claude --debug`)
    and confirm the "Skill listing over budget" warning is **gone**.
 
-> **Boundary (user step):** steps 2–3 run on the host and require a working local Claude
-> CLI. The local CLI OAuth is currently **expired**, so applying the trim and the
-> fresh-debug verification are user actions — this repo supplies the audit tool + policy,
-> not a credentialed host change.
+## Applied host result (P-012)
+
+- `ecc@ecc` disabled; focused GSD, Superpowers, Codex, document/design, Context Mode,
+  memory, and security capabilities retained.
+- `skillListingBudgetFraction: 0.18` set at user scope.
+- Fresh authenticated debug session loaded 149 directory commands, 170 plugin skills,
+  and 35 bundled skills with **no skill-budget warning**, then returned the requested
+  response within the configured cost cap.
+- `repair-host-integrations.sh` enforces this state after future plugin updates.

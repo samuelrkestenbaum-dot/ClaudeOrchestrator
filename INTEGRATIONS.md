@@ -27,7 +27,11 @@ item; this is the index. Keep both honest — re-verify when the environment cha
 - **Installed but NOT live (out of scope until enabled):** Stripe & Cloudflare
   Developer Platform (need auth); Google Calendar / Google Drive / Microsoft 365
   (toggled off in-chat).
-- **Build accelerators (P-010 live evidence):** Build OS, Serena, Repomix, ccusage, Context Mode, and 9 curated Trail of Bits plugins are **ACTIVE** in a fresh authenticated session. Claude HUD is enabled; visual TTY rendering remains unverified. Node 22.23.1 satisfies the Node-based tools. Details in §8.
+- **Build accelerators (P-012 live evidence):** Build OS, pinned Serena, Repomix,
+  ccusage, Context Mode, and 8 focused Trail of Bits plugins are **ACTIVE** in a fresh
+  authenticated session. ECC and `zeroize-audit` are disabled to eliminate skill
+  truncation and the unpinned duplicate Serena. Claude HUD is enabled; visual TTY
+  rendering remains unverified. Details in §8.
 
 > The design / marketing / business / brand-voice rows in the sections below were
 > written as hypotheticals ("wire this in"). Where a ✅ marks the Wire-in column,
@@ -150,16 +154,20 @@ installed · **NOT INSTALLED/BLOCKED** = unavailable / ambiguous / withheld.
 test are verified. Keep installation · configuration · activation · authentication
 · repository rollout as five distinct states.
 
-> **Provisioning status (P-010 live evidence).** Build OS routing and the verified accelerators are **ACTIVE**. The project Serena entry was removed so the connected `zeroize-audit` Serena is canonical. Claude HUD remains enabled but visually unverified.
+> **Provisioning status (P-012 live evidence).** Build OS routing and the verified
+> accelerators are **ACTIVE**. Serena is one user-scope server pinned to official commit
+> `68884f1`; the unpinned plugin copy is disabled. Fresh startup has no skill-listing
+> truncation. Claude HUD remains enabled but visually unverified.
 
 ### 8.1 Serena — semantic code navigation/editing (MCP) · ACTIVE
 - **Source:** https://github.com/oraios/serena · PyPI `serena-agent` · **1.6.2.dev0 (68884f1)**
 - **Install (official; upstream warns against marketplace/uvx-guess commands):**
   `uv tool install -p 3.13 serena-agent` → provides `serena`, `serena-agent`, `serena-hooks`.
-- **MCP registration:** supplied once by the enabled `zeroize-audit` plugin.
-  Project `.mcp.json` deliberately has no Serena entry, preventing duplicate
-  servers and ambiguous routing.
-- **Status: ACTIVE.** Official host CLI commit `68884f1` is installed. The single canonical MCP is `plugin:zeroize-audit:serena`, verified connected in a fresh session; project `.mcp.json` intentionally contains no duplicate.
+- **MCP registration:** one user-scope `serena` entry using
+  `git+https://github.com/oraios/serena@68884f1190489685082dc3c3b56917e92a1de0e6`.
+  Project `.mcp.json` has no duplicate; `zeroize-audit` is disabled.
+- **Status: ACTIVE.** The single pinned server connected in a fresh authenticated
+  session and the plugin-bundled unpinned server was absent.
 - **Host:** `/Users/samsmac/.local/bin/serena` 1.6.2.dev0 (`68884f1`); fresh-session MCP health PASS.
 - **Gate:** local language servers, **no API key / OAuth**. Primary for symbol-level
   work in large/unfamiliar repos before broad reads. Edits still go through builder.
@@ -198,13 +206,15 @@ test are verified. Keep installation · configuration · activation · authentic
   cannot be render-verified in this non-interactive env (that's the activation blocker).
   Never set `CLAUDE_HUD_ALLOW_EXTRA_CMD=1` — it enables arbitrary shell exec (off by default).
 
-### 8.5 Trail of Bits security skills · ACTIVE
+### 8.5 Trail of Bits security skills · ACTIVE (focused set)
 - **Source:** https://github.com/trailofbits/skills (official marketplace, 40 plugins)
-- **Status: ACTIVE.** Nine curated plugins are enabled and verified in a fresh session.
+- **Status: ACTIVE.** Eight focused plugins are enabled and verified in a fresh session.
+  `zeroize-audit` is disabled because it bundles an unpinned Serena server; pinned
+  user-scope Serena supplies semantic navigation instead.
   Advisory/read-only; **not vendored** into this repo (CC BY-SA 4.0). Install cmds:
   `claude plugin marketplace add trailofbits/skills` → enable the subset.
 - **Curated subset for our categories** (activate per-task, security work only):
-  crypto → `constant-time-analysis`, `zeroize-audit`; supply-chain → `supply-chain-risk-auditor`;
+  crypto → `constant-time-analysis`; supply-chain → `supply-chain-risk-auditor`;
   CI/agentic → `agentic-actions-auditor`; creds/privacy → `insecure-defaults`;
   review → `static-analysis`, `variant-analysis`, `differential-review`, `semgrep-rule-creator`;
   isolation → `seatbelt-sandboxer`.

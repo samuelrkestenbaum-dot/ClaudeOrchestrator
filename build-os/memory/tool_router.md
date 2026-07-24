@@ -212,25 +212,20 @@ memory, residue, receipts):
 fresh-session activation test are verified. Keep **installation · configuration ·
 activation · authentication · repository rollout** as five distinct states.
 
-> **Provisioning status (P-011 — honest reconciliation).** Build OS routing, Repomix,
-> ccusage, and Context Mode were verified ACTIVE in a prior authenticated session; the
-> local CLI OAuth is now **expired**, so live status is not independently re-verifiable
-> here (no ACTIVE re-claim). **Serena is a known deviation:** the only live server is
-> `plugin:zeroize-audit:serena`, launched by the plugin from **unpinned git `main`** —
-> NOT the repo's pinned bootstrap (commit `68884f1`) and NOT a pinned user-configured
-> server. This violates the canonical "prefer pinned/user-configured" rule; the plugin
-> bundles Serena and the repo cannot repin it. A reproducible single-instance pin is
-> available opt-in: `templates/serena-pinned.mcp.json` (enable only after disabling the
-> plugin's Serena). Node 22.23.1 satisfies the Node tools; Claude HUD's visual TTY render
-> is unverified.
+> **Provisioning status (P-012 — live host convergence).** A fresh authenticated prompt
+> returned successfully with one startup signal, one routing reminder, no hook parse
+> failure, and no skill-listing truncation. `ecc@ecc` is disabled; the focused skill
+> stack remains enabled. Serena is one pinned user-scope MCP at official commit
+> `68884f1`; `zeroize-audit` is disabled so its unpinned bundled server cannot duplicate
+> it. Node 22.23.1 satisfies the Node tools; Claude HUD's visual TTY render is unverified.
 
-| Accelerator | Route to it when… | Status (P-010 live evidence) | Gate / stop |
+| Accelerator | Route to it when… | Status (P-012 live evidence) | Gate / stop |
 |---|---|---|---|
-| **Serena** — MCP | Primary for symbol-level work in large or unfamiliar repos | **Live: `plugin:zeroize-audit:serena` (plugin-bundled, UNPINNED git `main`)** — a deviation from the pinned/user-configured rule; the repo cannot repin the plugin. Live version not independently verifiable here (CLI OAuth expired). Reproducible pin (commit `68884f1`) available opt-in via `templates/serena-pinned.mcp.json` — enable only after disabling the plugin's Serena to stay single-instance | local LSP only; edits flow through builder; keep ONE instance |
+| **Serena** — MCP | Primary for symbol-level work in large or unfamiliar repos | **ACTIVE** — one user-scope `serena` server pinned to official commit `68884f1`; fresh MCP connection PASS; unpinned plugin copy disabled | local LSP only; edits flow through builder; keep ONE instance |
 | **Repomix** — `repomix@1.17.0` | Explicit snapshots / handoffs only | **ACTIVE** — Node 22 host executable and fresh session PASS | hardened config; external sharing = **STOP** |
 | **ccusage** — `ccusage@20.0.18` | Usage / cost visibility | **ACTIVE** — Node 22 host executable and fresh session PASS | visibility-only |
 | **Claude HUD** | Operator visibility | **DURABLY CONFIGURED** — v0.6.0 enabled; visual TTY render unverified | visibility-only |
-| **Trail of Bits skills** | Relevant security work only | **ACTIVE** — 9 curated plugins verified; advisory/read-only | activate per task |
+| **Trail of Bits skills** | Relevant security work only | **ACTIVE** — 8 focused plugins enabled; `zeroize-audit` disabled because its bundled MCP was unpinned | activate per task |
 | **Context Mode** | Long sessions — pilot only | **ACTIVE** — v1.0.169 connected; benchmark PASS | non-secret repos only |
 | **claude-code-action** | Repo-scoped GitHub assistance | **DOCUMENTED/OPT-IN** | named repo + secret + explicit go |
 | **claude-code-security-review** | Repo-scoped PR security review | **DOCUMENTED/OPT-IN** | named repo + secret + explicit go |

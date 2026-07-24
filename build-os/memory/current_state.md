@@ -11,7 +11,7 @@
 - **Primary branch / base:** `claude/add-build-os` (current integration base; no
   `main` present in this environment). Active work branch:
   `claude/orchestrator-tools-list-e0mdaz`.
-- **Build/test command:** `bash tests/build_os_tests.sh` (77 checks; no network; temp dirs)
+- **Build/test command:** `bash tests/build_os_tests.sh` (78 checks; no network; temp dirs)
   — proportionate-routing + tool-ranking rules, the SessionStart detector (enabledPlugins/
   native vs plugin-cache candidates), installer copy parity, managed-block replacement,
   global convergence (legacy routing supersession preserving unrelated notes, + arbitrary-
@@ -22,7 +22,7 @@
 
 ## Where we are
 
-- **Last closed packet:** P-011 — audit follow-up: robust UserPromptSubmit dedupe without prompt_id (payload-hash event key), skill-budget audit tool + policy, honest Serena reconciliation (live server is plugin-bundled/unpinned — a deviation; reproducible pin opt-in), and remote/org-vs-local-verified capability separation with a no-route-to-unverified rule. Local CLI OAuth expired → no ACTIVE re-claim. `tests/build_os_tests.sh` — 77/77 green.
+- **Last closed packet:** P-012 — live host convergence after the P-011 repair: CLI authentication restored, ECC disabled, focused skill inventory visible without truncation, and one user-scope Serena MCP pinned to official commit `68884f1`. Fresh prompt, hook, budget, and MCP checks pass. `tests/build_os_tests.sh` — 78/78 green.
 - **Now:** none active.
 - **Next (candidates):** decide Context Mode routing enablement (stays non-secret pilot);
   name a target repo + approve
@@ -42,19 +42,17 @@
 - **Source of truth for capabilities:** the live registries — `ListConnectors`,
   `ListPlugins`, `ListSkills` — reconciled into `tool_router.md` (Installed
   plugins / connectors) and `INTEGRATIONS.md`. Re-verify when the env changes.
-- **Build accelerators (P-011 reconciliation):** Build OS routing, Repomix, ccusage, and
-  Context Mode were verified ACTIVE in a prior authenticated session (local CLI OAuth now
-  expired → no ACTIVE re-claim); Serena is a deviation (below). Host — Serena ≈1.6.2.dev0 via plugin-bundled UNPINNED git main (NOT pinned bootstrap 68884f1)
-  (`/Users/samsmac/.local/bin/serena`, uv tool); Repomix 1.17.0 + ccusage 20.0.18
+- **Build accelerators (P-012 live evidence):** Build OS routing, Serena, Repomix,
+  ccusage, and Context Mode are ACTIVE. Host — Serena is one user-scope MCP pinned to
+  official commit `68884f1`; Repomix 1.17.0 + ccusage 20.0.18
   (`/Users/samsmac/.nvm/versions/node/v22.23.1/bin`). Enabled at host user scope via the
   `claude plugin` CLI (`claude plugin list` confirms): `claude-hud` v0.6.0,
-  `context-mode` v1.0.169 (routing limited to non-secret pilot), and 9 curated Trail of
-  Bits plugins (`constant-time-analysis`, `zeroize-audit`, `supply-chain-risk-auditor`,
+  `context-mode` v1.0.169 (routing limited to non-secret pilot), and 8 focused Trail of
+  Bits plugins (`constant-time-analysis`, `supply-chain-risk-auditor`,
   `agentic-actions-auditor`, `insecure-defaults`, `static-analysis`, `variant-analysis`,
-  `differential-review`, `seatbelt-sandboxer`). Serena is provided by the `zeroize-audit`
-  plugin from unpinned git main (deviation from the pinned rule; reproducible pin opt-in via
-  `templates/serena-pinned.mcp.json`); no duplicate project MCP; live health not independently
-  re-verified here (CLI OAuth expired). Claude HUD remains enabled but its visual
+  `differential-review`, `seatbelt-sandboxer`). `zeroize-audit` and ECC are disabled;
+  the former prevents an unpinned duplicate Serena and the latter removes 363 redundant
+  skills. A fresh authenticated prompt completed with no skill-budget warning. Claude HUD remains enabled but its visual
   statusline is not independently claimed. Node compatibility resolved: host default is
   Node 22.23.1; Repomix, ccusage, and Context Mode run/connect under Node 22. GitHub
   Actions = repo-scoped templates (uninstalled; no secrets). Gates in `tool_router.md` +

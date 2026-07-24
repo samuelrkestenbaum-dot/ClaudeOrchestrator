@@ -189,6 +189,8 @@ MEM_MARKET="$REPAIR_ROOT/plugins/marketplaces/thedotmack/plugin/hooks"
 SUB_CACHE="$REPAIR_ROOT/plugins/cache/claude-subconscious/claude-subconscious/2.1.1/hooks"
 SUB_MARKET="$REPAIR_ROOT/plugins/marketplaces/claude-subconscious/hooks"
 mkdir -p "$MEM_CACHE" "$MEM_MARKET" "$SUB_CACHE" "$SUB_MARKET" "$REPAIR_ROOT/agents"
+printf '%s\n' '{"enabledPlugins":{"ecc@ecc":true,"zeroize-audit@trailofbits":true}}' > "$REPAIR_ROOT/settings.json"
+printf '%s\n' '{"mcpServers":{"keep-me":{"command":"keep"}}}' > "$WORK/repair-home/.claude.json"
 printf '%s\n' '"command": "worker start; echo '\''{\"continue\":true,\"suppressOutput\":true}'\''"' \
   > "$MEM_CACHE/hooks.json"
 cp "$MEM_CACHE/hooks.json" "$MEM_MARKET/hooks.json"
@@ -232,6 +234,18 @@ grep -q 'KEEP THIS FULL AGENT BODY' "$REPAIR_ROOT/agents/large-agent.md" \
 grep -q '^description: ".*"$' "$REPAIR_ROOT/agents/large-agent.md" \
   && ok "agent description compacted below limit" \
   || no "agent description remains oversized"
+python3 - "$REPAIR_ROOT/settings.json" "$WORK/repair-home/.claude.json" <<'PY'
+import json, sys
+settings = json.load(open(sys.argv[1]))
+host = json.load(open(sys.argv[2]))
+assert settings["skillListingBudgetFraction"] == 0.18
+assert settings["enabledPlugins"]["ecc@ecc"] is False
+assert settings["enabledPlugins"]["zeroize-audit@trailofbits"] is False
+assert host["mcpServers"]["keep-me"]["command"] == "keep"
+serena = host["mcpServers"]["serena"]
+assert "68884f1190489685082dc3c3b56917e92a1de0e6" in " ".join(serena["args"])
+PY
+test "$?" -eq 0 && ok "host runtime converges skill budget and pinned Serena without clobbering MCPs" || no "host runtime convergence failed"
 
 echo "== 9. P-011: UserPromptSubmit dedupe without prompt_id (payload-hash event key) =="
 DEDUP="$WORK/dedup"; mkdir -p "$DEDUP"
@@ -260,9 +274,13 @@ POL="$SRC/build-os/memory/skill_budget.md"
 have "$POL" "minimal active skill set" && ok "skill-budget policy present" || no "skill-budget policy missing"
 have "$POL" "685" && ok "policy records the observed over-budget figure" || no "policy missing observed figure"
 
-echo "== 11. P-011: Serena honest reconciliation + reproducible pin =="
-have "$ROUTER" "plugin:zeroize-audit:serena" && ok "router names the live plugin-bundled Serena" || no "router omits live Serena server"
-grep -qiE "unpinned|deviation" "$ROUTER" && ok "router marks Serena as unpinned/deviation" || no "router still claims Serena is pinned/ACTIVE"
+echo "== 11. P-012: Serena pinned single-instance convergence =="
+have "$ROUTER" "one user-scope" && ok "router names the pinned user-scope Serena" || no "router omits pinned user-scope Serena"
+if grep -q "plugin:zeroize-audit:serena" "$ROUTER"; then
+  no "router still routes to plugin-bundled Serena"
+else
+  ok "router does not route to plugin-bundled Serena"
+fi
 PIN="$SRC/templates/serena-pinned.mcp.json"
 [ -f "$PIN" ] && ok "reproducible pinned-Serena template present" || no "pinned-Serena template missing"
 grep -q "68884f1190489685082dc3c3b56917e92a1de0e6" "$PIN" && ok "pinned template pins the exact commit" || no "pinned template not commit-pinned"

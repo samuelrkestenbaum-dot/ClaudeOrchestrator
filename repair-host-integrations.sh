@@ -12,6 +12,46 @@ import shutil
 import sys
 
 root = Path(sys.argv[1])
+settings_path = root / "settings.json"
+
+# Keep the active skill inventory visible without paying to load the dominant
+# redundant bundle on every prompt. zeroize-audit is disabled because its
+# bundled Serena tracks unpinned git main; the pinned user MCP below replaces it.
+try:
+    settings = json.loads(settings_path.read_text())
+except Exception:
+    settings = {}
+settings["skillListingBudgetFraction"] = 0.18
+enabled = settings.setdefault("enabledPlugins", {})
+if isinstance(enabled, dict):
+    enabled["ecc@ecc"] = False
+    enabled["zeroize-audit@trailofbits"] = False
+settings_path.parent.mkdir(parents=True, exist_ok=True)
+settings_path.write_text(json.dumps(settings, indent=2) + "\n")
+
+# Converge Serena to one reproducible user-scope server while preserving every
+# unrelated MCP entry. This is equivalent to `claude mcp add --scope user`.
+user_config_path = root.parent / ".claude.json"
+try:
+    user_config = json.loads(user_config_path.read_text())
+except Exception:
+    user_config = {}
+servers = user_config.setdefault("mcpServers", {})
+servers["serena"] = {
+    "type": "stdio",
+    "command": "uvx",
+    "args": [
+        "--from",
+        "git+https://github.com/oraios/serena@68884f1190489685082dc3c3b56917e92a1de0e6",
+        "serena",
+        "start-mcp-server",
+        "--context",
+        "claude-code",
+        "--project-from-cwd",
+    ],
+    "env": {},
+}
+user_config_path.write_text(json.dumps(user_config, indent=2) + "\n")
 
 def backup(path: Path) -> None:
     target = path.with_name(path.name + ".build-os.bak")
