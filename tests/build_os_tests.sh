@@ -626,18 +626,33 @@ printf 'name: s1\ndescription: d\n' > "$SMALLCACHE/skills/s1/SKILL.md"
 cat > "$CBD/settings.json" <<'JSON'
 { "enabledPlugins": { "small@mkt": true, "big@mkt": false } }
 JSON
+# REAL host schema (P-016 correction): each plugins[name] is a LIST of install records
+# [{scope,user,installPath,...}]. big@mkt carries a stale project record + the real user
+# record to prove the parser prefers the current-user record and de-dupes.
+cat > "$CBD/plugins/installed_plugins.json" <<JSON
+{ "plugins": {
+  "big@mkt":   [ { "scope": "project", "installPath": "$CBD/plugins/nonexistent-stale" },
+                 { "scope": "user", "user": "sam", "installPath": "$BIGCACHE" } ],
+  "small@mkt": [ { "scope": "user", "user": "sam", "installPath": "$SMALLCACHE" } ]
+} }
+JSON
+EOUT="$(bash "$AUDIT" --claude-dir "$CBD" 5000 2>/dev/null)"
+grep -qi "installed inventory" <<<"$EOUT"                 && ok "audit reports installed inventory separately"        || no "audit missing installed inventory line"
+grep -qiE "startup[- ]enabled" <<<"$EOUT"                 && ok "audit reports the startup-enabled set separately"    || no "audit missing startup-enabled line"
+grep -qE "installed inventory:[[:space:]]*12 " <<<"$EOUT" && ok "list-schema installed inventory de-dupes + prefers user record (12 skills)" || no "list-schema installed inventory count wrong"
+grep -qE "startup[- ]enabled:[[:space:]]*1 " <<<"$EOUT"   && ok "startup set counts only enabled plugins (1 skill)"   || no "startup-enabled count wrong"
+grep -qiE "startup status:.*within budget" <<<"$EOUT"     && ok "disabled mega-bundle does NOT make startup OVER BUDGET" || no "startup falsely flagged over budget"
+grep -qE "installed inventory:[[:space:]]*0 " <<<"$EOUT"  && no "list schema parsed as ZERO (real-host defect)" || ok "list-schema installed inventory is nonzero (real-host defect fixed)"
+# backward-compat: the legacy DICT schema still parses to the same counts
 cat > "$CBD/plugins/installed_plugins.json" <<JSON
 { "plugins": {
   "big@mkt":   { "installPath": "$BIGCACHE" },
   "small@mkt": { "installPath": "$SMALLCACHE" }
 } }
 JSON
-EOUT="$(bash "$AUDIT" --claude-dir "$CBD" 5000 2>/dev/null)"
-grep -qi "installed inventory" <<<"$EOUT"                 && ok "audit reports installed inventory separately"        || no "audit missing installed inventory line"
-grep -qiE "startup[- ]enabled" <<<"$EOUT"                 && ok "audit reports the startup-enabled set separately"    || no "audit missing startup-enabled line"
-grep -qE "installed inventory:[[:space:]]*12 " <<<"$EOUT" && ok "installed inventory de-dupes cache/marketplace (12 skills)" || no "installed inventory count wrong (double-counted?)"
-grep -qE "startup[- ]enabled:[[:space:]]*1 " <<<"$EOUT"   && ok "startup set counts only enabled plugins (1 skill)"   || no "startup-enabled count wrong"
-grep -qiE "startup status:.*within budget" <<<"$EOUT"     && ok "disabled mega-bundle does NOT make startup OVER BUDGET" || no "startup falsely flagged over budget"
+DOUT="$(bash "$AUDIT" --claude-dir "$CBD" 5000 2>/dev/null)"
+grep -qE "installed inventory:[[:space:]]*12 " <<<"$DOUT" && ok "dict-schema installed inventory still 12 (both schemas supported)" || no "dict-schema installed inventory regressed"
+grep -qE "startup[- ]enabled:[[:space:]]*1 " <<<"$DOUT"   && ok "dict-schema startup set still 1" || no "dict-schema startup count regressed"
 
 echo
 echo "==== RESULT: $PASS passed, $FAIL failed ===="

@@ -68,8 +68,38 @@ if mode == "enabled":
         installed_raw = {}
     enabled = settings.get("enabledPlugins", {}) if isinstance(settings, dict) else {}
 
-    # installed_plugins.json may be {"plugins": {...}} or a flat {name: {...}} map.
+    # installed_plugins.json may be {"plugins": {...}} or a flat {name: ...} map.
     plugins = installed_raw.get("plugins", installed_raw) if isinstance(installed_raw, dict) else {}
+
+    def choose_install_path(meta):
+        # A plugin entry may be: a LIST of install records [{scope,user,installPath,...}]
+        # (the real host schema), a single dict with installPath, or a bare path string.
+        # Prefer the current-user record, then any record whose installPath exists on disk,
+        # then the last record with any installPath (latest wins). One path per plugin.
+        if isinstance(meta, str):
+            return meta
+        records = []
+        if isinstance(meta, dict):
+            records = [meta]
+        elif isinstance(meta, list):
+            records = [r for r in meta if isinstance(r, dict)]
+        def path_of(r):
+            p = r.get("installPath")
+            return p if isinstance(p, str) and p else None
+        # 1) a user-scope record with a real directory
+        for r in records:
+            if str(r.get("scope", "")).lower() == "user" and path_of(r) and os.path.isdir(path_of(r)):
+                return path_of(r)
+        # 2) any record with a real directory
+        for r in records:
+            if path_of(r) and os.path.isdir(path_of(r)):
+                return path_of(r)
+        # 3) fall back to the last record that names an installPath (even if missing)
+        chosen = None
+        for r in records:
+            if path_of(r):
+                chosen = path_of(r)
+        return chosen
 
     def is_enabled(name):
         # Match "name@market" or bare "name" against enabledPlugins keys.
@@ -85,7 +115,7 @@ if mode == "enabled":
     seen_paths = set()
     en_rows, disabled_rows = [], []
     for name, meta in (plugins.items() if isinstance(plugins, dict) else []):
-        ipath = meta.get("installPath") if isinstance(meta, dict) else None
+        ipath = choose_install_path(meta)           # handles list + dict + string schemas
         if not ipath or ipath in seen_paths:
             continue
         seen_paths.add(ipath)                       # de-dupe: one installPath == one plugin
