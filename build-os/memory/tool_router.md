@@ -106,6 +106,35 @@ Read is normal budget; **write ops are a STOP** for explicit go.
 > (installed, toggled off in-chat). Don't route to these until they're authorized
 > / enabled.
 
+### Build accelerators (verified 2026-07 — see receipt P-002)
+
+**Discovery-first tool selection (do this every build).** (1) *Discover* live
+capabilities — `ListConnectors` / `ListPlugins` / `ListSkills`, the SessionStart
+inventory, and the tables in this file. (2) Select the **smallest correct
+toolset** for the task. (3) In large or unfamiliar repos, prefer **symbol-level**
+navigation (Serena) over broad file reads. Never claim an unavailable tool is
+installed — if it's not in the live inventory, say so and fall back.
+
+One orchestrator only (Build OS): these accelerators are *instruments*, not
+competing agent frameworks. None of them makes build decisions or crosses a
+production boundary on its own.
+
+| Accelerator | Route to it when… | State (this env) | Gate / stop |
+|---|---|---|---|
+| **Serena** — MCP, PyPI `serena-agent==1.6.1` ([oraios/serena](https://github.com/oraios/serena)) | **Primary** for symbol-level exploration / refactoring in large or unfamiliar repos — `find_symbol`, references, semantic edits **before** broad file reads | ✅ CLI installed + `.mcp.json` committed — **needs restart + project-MCP approval** to go live | local LSP only, no API key; edits still flow through builder + ≤2-commit packet discipline |
+| **Repomix** — CLI, npm `repomix@1.17.0` ([yamadashy/repomix](https://github.com/yamadashy/repomix)) | **Explicit snapshots / cross-model handoffs only** — never always-on | ✅ runnable: `npx repomix@latest` | run with `templates/repomix.config.json` (Secretlint ON; excludes env/secrets/deps/build). Sharing a snapshot externally = **STOP** for that step |
+| **ccusage** — CLI, npm `ccusage@20.0.18` ([ryoppippi/ccusage](https://github.com/ryoppippi/ccusage)) | Usage / cost visibility | ✅ runnable: `npx ccusage@latest` | **visibility-only**; never makes build decisions; reads local JSONL, offline-capable |
+| **Claude HUD** — operator visibility | Live session/operator dashboard | ⛔ **blocked — no canonical tool**; 3rd-party TUIs vary, some run API-proxy interceptors (secret-exposure risk) | **do not install without disambiguation + explicit go**; prefer read-only local-JSONL TUIs, never a proxy interceptor; ccusage already covers cost/usage |
+| **Trail of Bits skills** — marketplace [`trailofbits/skills`](https://github.com/trailofbits/skills) | Only for **relevant security work**: crypto (`constant-time-analysis`, `zeroize-audit`), supply-chain (`supply-chain-risk-auditor`), CI/agentic (`agentic-actions-auditor`), creds/privacy (`insecure-defaults`), review (`static-analysis`, `variant-analysis`, `differential-review`), isolation (`seatbelt-sandboxer`) | 📋 documented/opt-in — interactive `/plugin` install | activate **per-task only**; produces **advisory evidence, not production changes**; no auth-/MCP-/tenant-isolation-specific plugin — use the general analysis skills |
+| **Context Mode** — community MCP (in-session context compression) | Long single sessions — **pilot only** | 📋 documented/opt-in — **not enabled**; exact upstream repo unverified | **non-secret repos only**; never route env / credentials / customer data / logs through it; benchmark accuracy + latency + token/cost before any wider use |
+| **claude-code-action** — [`anthropics/claude-code-action@v1.0`](https://github.com/anthropics/claude-code-action) | Repo-scoped GitHub Action: `@claude` PR/issue assistance | 📋 repo-scoped template — **not installed here** | needs `ANTHROPIC_API_KEY` + write perms; **can open PRs, never auto-merges**; add only to a target repo with explicit go; start advisory / minimum perms |
+| **claude-code-security-review** — [`anthropics/claude-code-security-review@main`](https://github.com/anthropics/claude-code-security-review) | Repo-scoped GitHub Action: AI security review on PRs | 📋 repo-scoped template — **not installed here** | needs `CLAUDE_API_KEY`; perms `pull-requests: write, contents: read`; **advisory PR comments only** — no code change / merge; explicit go per repo |
+
+> **Repo-scoped ≠ global.** `claude-code-action` and `claude-code-security-review`
+> are per-repository GitHub Action templates, **not** global plugins — never add
+> them to arbitrary product repos. Minimum-permission, advisory-first install
+> recipes live in `INTEGRATIONS.md` §8.
+
 ### Skills & slash commands (the `/` menu)
 
 Skills and slash commands are **first-class routing targets**, not just MCP/CLI

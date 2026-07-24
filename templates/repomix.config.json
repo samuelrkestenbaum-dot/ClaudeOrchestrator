@@ -1,0 +1,55 @@
+{
+  "$schema": "https://repomix.com/schemas/latest/schema.json",
+  "_comment": "Build OS hardened Repomix profile for EXPLICIT snapshots / cross-model handoffs only. Copy to a target repo root (or pass via --config) before packing. Secretlint stays ON; secrets/env/deps/build output are excluded. Never share a snapshot externally without explicit go.",
+  "output": {
+    "filePath": "repomix-output.xml",
+    "style": "xml",
+    "showLineNumbers": true,
+    "removeComments": false,
+    "removeEmptyLines": false
+  },
+  "include": [],
+  "ignore": {
+    "useGitignore": true,
+    "useDefaultPatterns": true,
+    "customPatterns": [
+      "**/.env",
+      "**/.env.*",
+      "**/*.pem",
+      "**/*.key",
+      "**/*.p12",
+      "**/*.pfx",
+      "**/*.crt",
+      "**/id_rsa*",
+      "**/id_ed25519*",
+      "**/.ssh/**",
+      "**/.aws/**",
+      "**/.gcloud/**",
+      "**/.npmrc",
+      "**/.netrc",
+      "**/*.tfstate",
+      "**/*.tfstate.*",
+      "**/secrets*",
+      "**/*secret*",
+      "**/*credential*",
+      "**/*.pkcs12",
+      "**/node_modules/**",
+      "**/vendor/**",
+      "**/__pycache__/**",
+      "**/.venv/**",
+      "**/dist/**",
+      "**/build/**",
+      "**/out/**",
+      "**/.next/**",
+      "**/target/**",
+      "**/coverage/**",
+      "**/*.min.js",
+      "**/*.map",
+      "**/*.log",
+      "**/.git/**"
+    ]
+  },
+  "security": {
+    "enableSecurityCheck": true
+  }
+}
