@@ -47,6 +47,11 @@
 - **Version pins are point-in-time (2026-07):** `serena-agent==1.6.1`,
   `repomix@1.17.0`, `ccusage@20.0.18`, `context-mode@1.0.169`, `claude-hud` v0.6.0.
   Re-pin on upgrade.
+- **`enabledPlugins` schema (P-006):** the SessionStart detector parses `enabledPlugins`
+  from settings defensively (dict-of-lists, dict-of-bools, or list). If a future Claude
+  Code version changes that shape, update the parser + the detector test. Cache entries
+  under `~/.claude/plugins/**` are reported as *candidates* only — live verification
+  (ListPlugins/ListConnectors/ListSkills or an `mcp__*` call) is required before ACTIVE.
 - Snapshot leakage: Repomix output can embed code — the hardened config excludes
   secrets/env/deps/build, but **sharing a snapshot externally is a STOP**.
 

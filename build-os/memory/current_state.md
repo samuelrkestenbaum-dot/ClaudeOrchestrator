@@ -11,12 +11,15 @@
 - **Primary branch / base:** `claude/add-build-os` (current integration base; no
   `main` present in this environment). Active work branch:
   `claude/orchestrator-tools-list-e0mdaz`.
-- **Build/test command:** none formal — shell installers + markdown; no test suite yet.
+- **Build/test command:** `bash tests/build_os_tests.sh` — covers proportionate-routing +
+  tool-ranking rules, the SessionStart detector (enabledPlugins/native vs plugin-cache
+  candidates), installer copy parity, and managed-block replacement (no network; temp dirs).
 
 ## Where we are
 
-- **Last closed packet:** P-005 — Record host-side completion evidence (all host-installed
-  accelerators DURABLY CONFIGURED; none ACTIVE until the fresh-session test).
+- **Last closed packet:** P-006 — Proportionate routing + reliable inventory/installer
+  (lightweight routes, tool-ranking rule, cache=candidate detector, managed-block
+  replacement, `tests/build_os_tests.sh` — 26/26 green).
 - **Now:** none active.
 - **Next (candidates):** run the **fresh Claude Code session activation test** (flips the
   host-installed accelerators ACTIVE; approve the Serena project MCP on restart); decide
