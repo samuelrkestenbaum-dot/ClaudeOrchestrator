@@ -11,7 +11,7 @@
 - **Primary branch / base:** `claude/add-build-os` (current integration base; no
   `main` present in this environment). Active work branch:
   `claude/orchestrator-tools-list-e0mdaz`.
-- **Build/test command:** `bash tests/build_os_tests.sh` (189 checks; no network; temp dirs)
+- **Build/test command:** `bash tests/build_os_tests.sh` (198 checks; no network; temp dirs)
   — proportionate-routing + tool-ranking rules, the SessionStart detector (enabledPlugins/
   native vs plugin-cache candidates), installer copy parity, managed-block replacement,
   global convergence (legacy routing supersession preserving unrelated notes, + arbitrary-
@@ -27,7 +27,29 @@
 
 ## Where we are
 
-- **Last closed packet:** P-016 — final Ferrari hardening (7 audit fixes):
+- **Last closed packet:** P-017 — post-release adversarial correction (7 runtime defects;
+  host-implemented on the Mac as `ac500c6`, adopted here; suite 198/0):
+  1. **Failure propagation** — `prompt-router.sh` preserves the real `detect` exit and only
+     an explicit `COMPLETED` suppresses parent work; otherwise it says the handoff was not
+     confirmed complete and the focused parent must continue / obtain input.
+  2. **Semantic completion** — the child must end with a terminal marker
+     `[BUILD_OS_STATUS: COMPLETED|NEEDS_INPUT|BLOCKED|FAILED]`; exit 0 alone is not "done" —
+     missing/malformed status is **UNCONFIRMED** (exit 76), never OK.
+  3. **Prompt privacy** — the task travels over **stdin**, never argv (so it can't leak via `ps`).
+  4. **Lock safety** — no recursive deletion: `lock_path_safe` rejects `/`, `.`, `..`, `$HOME`
+     and symlinks; `safe_release_lock` unlinks only the `pid` file then `rmdir`s.
+  5. **Inline availability is conditional** — routes emit an INLINE CANDIDATE (verify the tool
+     is connected/callable on this surface; else use a built-in/local fallback and state the
+     limitation) — never "REQUIRED use X" and never claim availability from install alone.
+  6. **Budget accuracy** — the audit separates enabled **full-body inventory** from startup
+     metadata and reports the metadata status as **UNKNOWN from files alone** (full SKILL.md
+     bodies are inventory, not measured startup metadata) — no false within/over certainty.
+  7. **Signals + bounded output** — INT/TERM restores focused, releases the lock, and exits;
+     the child is killed (verified) and captured output is bounded + visibly truncated.
+  `tests/build_os_tests.sh` — 198/198 green. (A parallel cloud implementation was discarded in
+  favour of the validated host version, per the P-007 split-brain precedent; this packet adds
+  the missing Build OS memory closure.)
+- **Prior:** P-016 — final Ferrari hardening (7 audit fixes):
   1. **Capability registry** replaces the opaque regex — precedence-ordered, per-family
      task rules. Broad ECC (Everything Claude Code) tasks now route `ecc`: Rust
      ownership/unsafe, Go concurrency/debug, PostgreSQL schema/query, autonomous-agent
@@ -97,20 +119,23 @@
 - **Discovery-first rule:** every build discovers live capabilities, then selects
   the smallest correct toolset; Serena is primary for symbol-level work in large/
   unfamiliar repos before broad file reads.
-- **Zero-touch specialist handoff (P-014/P-015/P-016):** `build-os/tools/specialist-handoff.sh`
-  + the `prompt-router.sh` hook classify via a maintainable **capability registry** (precedence
+- **Zero-touch specialist handoff (P-014→P-017):** `build-os/tools/specialist-handoff.sh` + the
+  `prompt-router.sh` hook classify via a maintainable **capability registry** (precedence
   zeroize > ecc > inline > focused). focused → no relaunch; ecc/zeroize → an automatic bounded
-  child session under a **portable atomic lock** (fail-closed BUSY on contention, safe stale
-  break, released on EXIT/INT/TERM), then focused is always restored (recursion-guarded, timed
-  out, single-Serena, honest exit status). The audit log is **privacy-safe** (route/result/
-  exit/event-id only; `0600`; never prompt/cwd). `install-global.sh` ships both tool scripts
-  into `~/build-os/tools` (P-015). **Inline current-surface routes** (`21st`, `agent-reach`,
-  `claude-watch`, `ui-ux-pro-max`) emit a REQUIRED directive with NO profile switch and NO
-  child. Surface-aware verification: 21st.dev = Claude **Desktop** connector (absent from local
-  `claude mcp list`); Agent Reach = native skill; UI UX Pro Max v2.11.0 + Claude Watch v0.4.1 =
-  enabled Claude Code skills/plugins. No cross-surface ACTIVE claim. In THIS Claude Code session
-  the 21st.dev MCP disconnected (`mcp__21st__*` unavailable) — consistent with the Desktop-only
-  surface note.
+  child under a **safe atomic lock** (path-validated `lock_path_safe`, non-recursive
+  unlink+`rmdir`, fail-closed BUSY, safe stale break; released + focused restored on
+  EXIT/INT/TERM, child killed). The task travels on **stdin** (never argv) and the child must end
+  with a terminal marker `[BUILD_OS_STATUS: COMPLETED|NEEDS_INPUT|BLOCKED|FAILED]`; the hook
+  suppresses parent work **only** on explicit COMPLETED — exit-0-without-marker is UNCONFIRMED
+  (exit 76), and the parent is told to continue/obtain input otherwise. Output is bounded +
+  visibly truncated. The audit log is **privacy-safe** (route/result/exit/event-id; `0600`; never
+  prompt/cwd). `install-global.sh` ships both tool scripts into `~/build-os/tools` (P-015).
+  **Inline routes** (`21st`, `agent-reach`, `claude-watch`, `ui-ux-pro-max`) emit a **conditional**
+  INLINE CANDIDATE (verify live on this surface, else built-in/local fallback + state the limit —
+  never claim use from install alone); no profile switch, no child. Surface-aware: 21st.dev =
+  Claude **Desktop** connector (absent from local `claude mcp list`); Agent Reach = native skill;
+  UI UX Pro Max v2.11.0 + Claude Watch v0.4.1 = enabled Claude Code skills/plugins. No
+  cross-surface ACTIVE claim.
 - **Gates hold:** external mutation (push/merge/deploy/secret/send/SaaS-write),
   plus DDL / remote-DB writes / payments / flags / canaries / telemetry / OAuth,
   are each a separate STOP for explicit go. Repo-scoped GH Actions never go global.

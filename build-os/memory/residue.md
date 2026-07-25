@@ -114,6 +114,26 @@
   `choose_install_path()` (prefers the current user-scope record, then any on-disk installPath,
   then the latest named path; one path per plugin). If a host adds yet another shape, extend that
   helper + the §21 fixture.
+- **Post-release adversarial correction (P-017 — host-implemented `ac500c6`, adopted; 198/0):**
+  (1) `prompt-router.sh` preserves the real `detect` exit and suppresses parent work only after an
+  explicit `COMPLETED`. (2) The child must end with `[BUILD_OS_STATUS: COMPLETED|NEEDS_INPUT|
+  BLOCKED|FAILED]`; exit-0-without-a-valid-marker → **UNCONFIRMED (exit 76)**, never OK. (3) Task
+  travels on **stdin**, not argv. (4) **Lock safety:** `lock_path_safe` rejects `/`, `.`, `..`,
+  `$HOME`, and symlinks; `safe_release_lock` unlinks only the `pid` file then `rmdir`s — no
+  recursive deletion. (5) Inline routes are **conditional** INLINE CANDIDATEs (verify live on this
+  surface, else built-in/local fallback + state the limit; never claim from install alone).
+  (6) The budget report separates enabled **full-body inventory** from startup metadata and marks
+  the metadata status **UNKNOWN from files alone** (no false within/over certainty). (7) INT/TERM
+  restores focused + releases the lock + exits; the child is killed (verified) and output is
+  bounded + visibly truncated.
+  **Split-brain note:** the cloud session implemented the same packet in parallel; the validated
+  host version (`ac500c6`) was adopted and the parallel cloud commits were discarded (recoverable
+  via reflog), per the P-007 precedent. This closure adds the memory the host commit omitted.
+  **Residual limitations:** a live authenticated child needs a signed-in `claude` CLI (local OAuth
+  expired; proofs use a mock); the terminal-marker contract depends on the child cooperating (a
+  non-cooperating child → UNCONFIRMED, the safe default); stale-lock PID-liveness can be fooled by
+  PID reuse (bounded by the age cap; single-user host); output is truncated for display after
+  capture (host env kills the child promptly, so unbounded accumulation was not observed).
 - **Host specialist capabilities (P-014):** 21st.dev verified live in-session (read-only
   `get_usage`); `agent-reach` skill present in-session; Claude Watch + UI UX Pro Max are
   host-reported (installed/uploaded per user) and **not independently verifiable here** — no

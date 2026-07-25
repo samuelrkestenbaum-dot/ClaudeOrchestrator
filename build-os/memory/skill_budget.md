@@ -47,6 +47,13 @@ blindly keep redundant skills, and do not blindly delete useful ones.
 > and massively over-reports (observed 2,584 skills / 20M chars). Only **enabled** plugins load
 > at startup; count those, de-duped by installPath.
 
+> **Full SKILL.md bodies are NOT the startup metadata cost (P-017).** An enabled-set of ~1.7M
+> body chars can still load with no truncation warning, because the loader indexes frontmatter
+> name/description, not whole files. The audit therefore reports enabled **full-body inventory**
+> separately and marks the startup metadata status **UNKNOWN from files alone** — it does not
+> assert within/over budget from file bodies. A fresh `claude --debug` session is authoritative
+> for whether the real startup metadata is under budget.
+
 ## Applied host result (P-012)
 
 - `ecc@ecc` disabled; focused GSD, Superpowers, Codex, document/design, Context Mode,

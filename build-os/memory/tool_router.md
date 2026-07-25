@@ -271,6 +271,13 @@ Surface note: 21st.dev is a Desktop-verified connector and does **not** appear i
 CLI's `claude mcp list`; the other three are Claude Code skills/plugins. Do not assert one
 surface's state on another.
 
+**Inline directives are CONDITIONAL (P-017).** The prompt hook never claims one of these tools
+was used. For each inline route it emits an **INLINE CANDIDATE**: *first verify the named tool is
+connected and callable on THIS execution surface; if available, use it; if unavailable or
+disconnected, continue with the closest built-in/local fallback and state that limitation — do
+NOT claim a capability is available merely because it is installed.* No cross-surface shell probe
+is invented; availability is judged on the surface actually handling the request.
+
 ### Skills & slash commands (the `/` menu)
 
 Skills and slash commands are **first-class routing targets**, not just MCP/CLI
