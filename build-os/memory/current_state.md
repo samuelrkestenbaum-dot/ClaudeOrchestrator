@@ -11,7 +11,10 @@
 - **Primary branch / base:** `claude/add-build-os` (current integration base; no
   `main` present in this environment). Active work branch:
   `claude/orchestrator-tools-list-e0mdaz`.
-- **Build/test command:** `bash tests/build_os_tests.sh` (198 checks; no network; temp dirs)
+- **Build/test command:** `bash tests/build_os_tests.sh` (202 checks; no network; temp dirs).
+  Cross-platform green: the P-018 200KB capture-bound test now generates its payload **in-child**
+  (`MOCK_GEN_BYTES` / `MOCK_STREAM_CHUNKS`) instead of via an env var — the old env delivery
+  exceeded Linux `MAX_ARG_STRLEN` (~128KB) and failed only on Linux (P-018.1, tests-only fix).
   — proportionate-routing + tool-ranking rules, the SessionStart detector (enabledPlugins/
   native vs plugin-cache candidates), installer copy parity, managed-block replacement,
   global convergence (legacy routing supersession preserving unrelated notes, + arbitrary-

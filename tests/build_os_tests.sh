@@ -355,6 +355,13 @@ printf '%s\n' "$#" > "$MOCK_REC/argc"
 printf '%s' "${BUILD_OS_SPECIALIST_HANDOFF:-}" > "$MOCK_REC/guard"
 : > "$MOCK_REC/launched"
 [ -n "${MOCK_CLAUDE_SLEEP:-}" ] && sleep "$MOCK_CLAUDE_SLEEP"
+# P-018.1: generate/stream a large payload INSIDE the child, never through an env var or
+# argv (those hit Linux MAX_ARG_STRLEN ~128KB and fail execve before the real capture-time
+# bound ever runs; macOS has no such per-arg cap, which hid the defect there).
+[ -n "${MOCK_GEN_BYTES:-}" ] && { head -c "$MOCK_GEN_BYTES" </dev/zero | tr '\0' z; echo; }
+if [ -n "${MOCK_STREAM_CHUNKS:-}" ]; then
+  _i=0; while [ "$_i" -lt "$MOCK_STREAM_CHUNKS" ]; do head -c 4096 </dev/zero | tr '\0' y; echo; sleep 0.02; _i=$((_i+1)); done
+fi
 echo "${MOCK_CHILD_OUTPUT:-MOCK_CHILD_OUTPUT route=${BUILD_OS_SPECIALIST_HANDOFF:-}}"
 echo "[BUILD_OS_STATUS: ${MOCK_TERMINAL_STATUS:-COMPLETED}]"
 [ -n "${MOCK_AFTER_STATUS:-}" ] && echo "$MOCK_AFTER_STATUS"
@@ -692,8 +699,13 @@ SOUT="$(MOCK_AFTER_STATUS='I still need the source code.' run_handoff "review Ru
 { [ "$SEC" != 0 ] && grep -q "UNCONFIRMED" <<<"$SOUT"; } && ok "COMPLETED marker followed by text is rejected" || no "terminal-marker spoof accepted"
 is_focused && ok "focused restored after terminal spoof" || no "focused not restored after terminal spoof"
 MB="$WORK/p18b/bin"; REC="$WORK/p18b/rec"; PH="$WORK/p18b/home"; mkbin "$MB" "$REC"; seed_home "$PH"
-BOUT="$(MOCK_CHILD_OUTPUT="$(head -c 200000 </dev/zero | tr '\0' z)" HANDOFF_OUTPUT_MAX=1024 run_handoff "review Rust unsafe ownership code" "$PH" 2>&1)" || true
-{ grep -q "OUTPUT TRUNCATED at 1024" <<<"$BOUT" && [ "${#BOUT}" -lt 2500 ]; } && ok "streaming capture is hard-bounded before shell memory capture" || no "capture-time bound failed"
+# 200KB generated IN-CHILD (portable; proves the real capture-time bound on Linux + macOS).
+BOUT="$(MOCK_GEN_BYTES=200000 HANDOFF_OUTPUT_MAX=1024 run_handoff "review Rust unsafe ownership code" "$PH" 2>&1)" || true
+{ grep -q "OUTPUT TRUNCATED at 1024" <<<"$BOUT" && [ "${#BOUT}" -lt 2500 ]; } && ok "large in-child output is hard-bounded at capture time" || no "capture-time bound failed"
+# Streaming variant: continuous multi-chunk output (~245KB over ~1.2s) is bounded the same way.
+MB="$WORK/p18t/bin"; REC="$WORK/p18t/rec"; PH="$WORK/p18t/home"; mkbin "$MB" "$REC"; seed_home "$PH"
+TOUT="$(MOCK_STREAM_CHUNKS=60 HANDOFF_OUTPUT_MAX=1024 HANDOFF_TIMEOUT=30 run_handoff "review Rust unsafe ownership code" "$PH" 2>&1)" || true
+{ grep -q "OUTPUT TRUNCATED at 1024" <<<"$TOUT" && [ "${#TOUT}" -lt 2500 ]; } && ok "streaming child output is hard-bounded at capture time" || no "streaming capture-time bound failed"
 
 echo
 echo "==== RESULT: $PASS passed, $FAIL failed ===="
