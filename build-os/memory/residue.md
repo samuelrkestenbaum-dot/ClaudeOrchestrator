@@ -49,8 +49,10 @@
   fully **subsumed** (P-006 216-check suite; P-016/P-017 conditional-inline + non-fatal-bootstrap
   fallback; P-019 21st-live; P-020 Serena add-if-absent; P-021 UI-UX-Pro-Max-absent / watch
   fallback), so P-022 imported **zero machinery** (no `verify.sh`, no `tool_router` edit, no new
-  test) and its colliding "P-001" identity was not imported. **DELETING that remote branch is
-  external mutation → AWAITING-GO**, not done here.
+  test) and its colliding "P-001" identity was not imported. The local branch and tracking ref
+  were removed first; the managed Cloud Code proxy denied remote ref deletion with HTTP 403.
+  The superseded remote branch was then deleted through the authenticated GitHub web UI and
+  its absence was verified after a full page refresh. Canonical remained untouched.
 
 ## Known risks / debt
 
