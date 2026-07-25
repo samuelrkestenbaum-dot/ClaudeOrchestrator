@@ -262,14 +262,15 @@ cross-surface ACTIVE state.
 
 | Task type | Route to (inline) | Surface & verification (2026-07) |
 |---|---|---|
-| UI / component discovery | **21st.dev** MCP (`mcp__21st__*`) | Verified as a **Claude Desktop** connector; **absent from the local `claude mcp list`** (CLI) — route only on the Desktop surface |
+| UI / component discovery | **21st.dev** MCP (`mcp__21st__*` cloud; `mcp__21st-dev__*` local) | Verified live in Claude Desktop cloud Code and Mac-local Claude Code. The account connector securely holds cloud credentials, but Anthropic requires a per-call approval for web-connector tools; never bypass that with a broad wildcard or a plaintext cloud environment secret. |
 | External-platform reachability / web research | **Agent Reach** (`agent-reach` skill) | **Native skill present** in Claude Code (skill registry) |
 | Long-running supervision | **Claude Watch** v0.4.1 | **Enabled plugin; plugin skill present** (Claude Code) |
 | UI/UX design work | **UI UX Pro Max** v2.11.0 | **Enabled; native skill present** (Claude Code) |
 
-Surface note: 21st.dev is a Desktop-verified connector and does **not** appear in the local
-CLI's `claude mcp list`; the other three are Claude Code skills/plugins. Do not assert one
-surface's state on another.
+Surface note: 21st.dev uses different aliases by surface: account-level cloud connector `21st`
+and Mac-local MCP `21st-dev`. Resolve the live registry name before calling and do not infer one
+surface's health from the other. Cloud web-connector approval is an Anthropic UI gate, not a
+project-permission setting. The other three are Claude Code skills/plugins.
 
 **Inline directives are CONDITIONAL (P-017).** The prompt hook never claims one of these tools
 was used. For each inline route it emits an **INLINE CANDIDATE**: *first verify the named tool is
