@@ -707,6 +707,39 @@ MB="$WORK/p18t/bin"; REC="$WORK/p18t/rec"; PH="$WORK/p18t/home"; mkbin "$MB" "$R
 TOUT="$(MOCK_STREAM_CHUNKS=60 HANDOFF_OUTPUT_MAX=1024 HANDOFF_TIMEOUT=30 run_handoff "review Rust unsafe ownership code" "$PH" 2>&1)" || true
 { grep -q "OUTPUT TRUNCATED at 1024" <<<"$TOUT" && [ "${#TOUT}" -lt 2500 ]; } && ok "streaming child output is hard-bounded at capture time" || no "streaming capture-time bound failed"
 
+echo "== 24. P-019: least-privilege 21st.dev cloud + local permissions =="
+SETTINGS="$SRC/.claude/settings.json"
+python3 - "$SETTINGS" <<'PY' >/dev/null 2>&1
+import json, sys
+with open(sys.argv[1], encoding="utf-8") as f:
+    data = json.load(f)
+allowed = set(data.get("permissions", {}).get("allow", []))
+required = {
+    "mcp__21st__search",
+    "mcp__21st__get_component",
+    "mcp__21st-dev__search",
+    "mcp__21st-dev__get_component",
+}
+raise SystemExit(0 if required <= allowed else 1)
+PY
+[ "$?" -eq 0 ] && ok "cloud + local 21st read-only discovery tools are pre-authorized" || no "21st read-only permission aliases missing"
+python3 - "$SETTINGS" <<'PY' >/dev/null 2>&1
+import json, sys
+with open(sys.argv[1], encoding="utf-8") as f:
+    allowed = set(json.load(f).get("permissions", {}).get("allow", []))
+dangerous = {
+    "mcp__21st__*",
+    "mcp__21st-dev__*",
+    "mcp__21st__generate",
+    "mcp__21st__iterate_generation",
+    "mcp__21st__submit_component",
+    "mcp__21st__delete_component",
+    "mcp__21st__edit_profile",
+}
+raise SystemExit(0 if allowed.isdisjoint(dangerous) else 1)
+PY
+[ "$?" -eq 0 ] && ok "21st wildcard, mutation, and credit-spending tools are not pre-authorized" || no "dangerous 21st permission was pre-authorized"
+
 echo
 echo "==== RESULT: $PASS passed, $FAIL failed ===="
 [ "$FAIL" -eq 0 ]

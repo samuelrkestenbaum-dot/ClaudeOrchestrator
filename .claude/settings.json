@@ -1,4 +1,12 @@
 {
+  "permissions": {
+    "allow": [
+      "mcp__21st__search",
+      "mcp__21st__get_component",
+      "mcp__21st-dev__search",
+      "mcp__21st-dev__get_component"
+    ]
+  },
   "hooks": {
     "SessionStart": [
       {

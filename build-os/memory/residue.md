@@ -102,9 +102,9 @@
   `HANDOFF_LOCK_WAIT` (30s), `HANDOFF_LOCK_STALE` (1800s). Stale detection is primarily PID-liveness
   (`kill -0`) + an age fallback; a wrapped-around PID could in theory look alive (single-user host
   risk, bounded by the age cap). Fail-closed BUSY exit 75.
-  (6) **Surface inventory** — router separates Claude Desktop connector verification from the
-  local CLI; no cross-surface ACTIVE claim. In THIS session the 21st.dev MCP disconnected
-  (`mcp__21st__*` unavailable), matching the Desktop-only note.
+  (6) **Surface inventory** — router separates the account-level cloud alias `21st` from the
+  Mac-local alias `21st-dev`; no cross-surface ACTIVE claim. A fresh cloud Code session
+  successfully called `mcp__21st__search` and returned Dashboard Sidebar (id 14941).
   (7) **skill-budget-audit** — enabled-aware `--claude-dir` mode reports installed inventory vs
   startup-enabled (via `enabledPlugins` + `installed_plugins.json` installPath, de-duped); only
   the enabled set is budget-checked. `installed_plugins.json` lives at
