@@ -30,7 +30,18 @@
 
 ## Where we are
 
-- **Last closed packet:** P-021 — fix-to-closure (receipt `build-os/receipts/P-021.md`). **P-020
+- **Last closed packet:** P-022 — reconciliation of the post-settings-closure-audit branch
+  (`claude/post-settings-closure-audit-y59p8t`) into canonical (receipt
+  `build-os/receipts/P-022.md`). **Documentation-only; no behavior change; suite stays 216/216.**
+  The audit branch (two commits self-labeled "P-001": `571bf05`, `e3d8b6e`) is **reconciled /
+  superseded** — its behavior was already **subsumed** by P-006 (216-check suite), P-016/P-017
+  (conditional inline-candidate + non-fatal-bootstrap fallback), P-019 (21st live in Cloud),
+  P-020 (Serena add-if-absent), and P-021 (UI UX Pro Max absent / watch fallback), so **zero
+  machinery was imported** (no `verify.sh`, no `tool_router` edit, no new test). The audit's
+  "P-001" identity **collides** with canonical's existing P-001 and was **not** imported; the
+  audit's proposed **Sourcegraph** directory-connector is unverified/not-connected this session
+  and was **deliberately excluded** (no-route-to-unverified). Suite **216/216**.
+- **Prior:** P-021 — fix-to-closure (receipt `build-os/receipts/P-021.md`). **P-020
   proven on the real `~/.claude.json`**: `register-serena` logged *already present — left untouched*,
   byte-identical no-op, one Serena, and a **live `mcp__serena__list_memories` returned `{}`
   (callable)**. **21st.dev** diagnosed as an **Anthropic-managed account connector** (not in

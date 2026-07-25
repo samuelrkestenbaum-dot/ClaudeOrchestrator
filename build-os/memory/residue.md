@@ -44,6 +44,13 @@
   `send_later` for cross-turn) and updated routing truthfully. So the `claude-watch` ROUTE is fully
   functional even where the plugin is absent; the 21st + UI UX Pro Max capabilities themselves remain
   account/Cloud-side, degrading truthfully to their named fallbacks.
+- **Audit-branch reconciliation (P-022):** the remote audit branch
+  `claude/post-settings-closure-audit-y59p8t` is now **superseded** by canonical — its behavior was
+  fully **subsumed** (P-006 216-check suite; P-016/P-017 conditional-inline + non-fatal-bootstrap
+  fallback; P-019 21st-live; P-020 Serena add-if-absent; P-021 UI-UX-Pro-Max-absent / watch
+  fallback), so P-022 imported **zero machinery** (no `verify.sh`, no `tool_router` edit, no new
+  test) and its colliding "P-001" identity was not imported. **DELETING that remote branch is
+  external mutation → AWAITING-GO**, not done here.
 
 ## Known risks / debt
 
@@ -161,6 +168,9 @@
   host-reported (installed/uploaded per user) and **not independently verifiable here** — no
   ACTIVE claim. All are preserved across profile transitions and routed in `tool_router.md`
   → *Host specialist capabilities*.
+- **Side-branch duplication (P-022):** audit-style side branches can duplicate canonical
+  machinery (e.g. a parallel `verify.sh` structural suite + a colliding "P-001" identity) if not
+  reconciled promptly; reconcile such branches into canonical **before divergence grows**.
 - Snapshot leakage: Repomix output can embed code — the hardened config excludes
   secrets/env/deps/build, but **sharing a snapshot externally is a STOP**.
 
