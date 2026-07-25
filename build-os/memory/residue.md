@@ -23,14 +23,17 @@
   the required secret (`ANTHROPIC_API_KEY` / `CLAUDE_API_KEY`).
 - Carried from P-001: authorize Stripe + Cloudflare, enable Google/Microsoft
   connectors; session-MCP router rows for GitHub + Claude Code Remote.
-- **Cross-surface asymmetry (P-019, open — user/cloud-controlled):** two capabilities are
-  active on the Mac but not symmetric on the Claude Cloud surface, which caps cross-surface
-  orchestration below 10/10. **Serena** — active user-scope MCP on the Mac (pinned `68884f1`);
-  *installed but not registered as an active MCP* on Claude Cloud. User step: register it in the
-  Cloud MCP/connector settings — the repo must NOT add it to project `.mcp.json` (single-server
-  rule, P-008). **Claude Watch** — host plugin v0.4.1 enabled; absent from Claude Cloud's live
-  skill/plugin/connector registry. User step: install/enable it on the Cloud surface. Routing
-  already treats both as availability-conditional (verify-live-or-fallback), so nothing overclaims.
+- **Cross-surface asymmetry (P-019/P-020):** two capabilities are active on the Mac but not
+  symmetric on the Claude Cloud surface, which caps cross-surface orchestration below 10/10.
+  **Serena** — active user-scope MCP on the Mac (pinned `68884f1`); *installed but not registered*
+  on Claude Cloud. **P-020 closed the repo-addressable half:** `install-accelerators.sh` now
+  registers the pinned Serena into `~/.claude.json` **add-if-absent** (no duplicate on the Mac; no
+  secret; project `.mcp.json` still Serena-free per the single-server rule, P-008). Remaining
+  boundary: this only helps if the surface reads `~/.claude.json`; a Cloud task on Anthropic's
+  managed connector registry (as 21st.dev) still needs a Cloud-settings action. **Claude Watch** —
+  host plugin v0.4.1 enabled; absent from Claude Cloud's live registry; **no repo lever** —
+  install/enable it on the Cloud surface (a `claude plugin` / Cloud-UI step). Routing already
+  treats both as availability-conditional, so nothing overclaims.
 
 ## Known risks / debt
 

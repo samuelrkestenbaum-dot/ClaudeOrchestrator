@@ -11,7 +11,7 @@
 - **Primary branch / base:** `claude/add-build-os` (current integration base; no
   `main` present in this environment). Active work branch:
   `claude/orchestrator-tools-list-e0mdaz`.
-- **Build/test command:** `bash tests/build_os_tests.sh` (202 checks; no network; temp dirs).
+- **Build/test command:** `bash tests/build_os_tests.sh` (208 checks; no network; temp dirs).
   Cross-platform green: the P-018 200KB capture-bound test now generates its payload **in-child**
   (`MOCK_GEN_BYTES` / `MOCK_STREAM_CHUNKS`) instead of via an env var — the old env delivery
   exceeded Linux `MAX_ARG_STRLEN` (~128KB) and failed only on Linux (P-018.1, tests-only fix).
@@ -30,7 +30,17 @@
 
 ## Where we are
 
-- **Last closed packet:** P-019 — cross-surface truth (receipt `build-os/receipts/P-019.md`).
+- **Last closed packet:** P-020 — the SessionStart bootstrap (`install-accelerators.sh`) now
+  **registers the pinned Serena MCP add-if-absent**. It previously installed the Serena binary but
+  never wrote the `mcpServers` entry ("installed but not registered"); it now adds the canonical
+  pinned server to `~/.claude.json` **only if no `serena` entry exists** — closing the config-side
+  Serena gap on a surface that lacks it, while leaving the Mac's user-scope server byte-untouched
+  (single-server rule, P-008). No secret; project `.mcp.json` stays Serena-free. Suite **208/208**.
+  **Honest boundary:** this closes the gap only if the surface resolves MCPs from `~/.claude.json`;
+  a Claude Cloud task using Anthropic's managed connector registry (as 21st.dev does) still needs a
+  Cloud-settings action. **Claude Watch** (host plugin) has no repo lever — Cloud enable is a user
+  step.
+- **Prior:** P-019 — cross-surface truth (receipt `build-os/receipts/P-019.md`).
   21st.dev is **verified live in Claude Cloud**: a fresh cloud Code session called
   `mcp__21st__search` and returned "Dashboard Sidebar" by `arunjdass` (id 14941) — connected AND
   callable — but Anthropic's web-connector layer **approval-gates every call** (project settings do
