@@ -264,7 +264,7 @@ cross-surface ACTIVE state.
 |---|---|---|
 | UI / component discovery | **21st.dev** MCP (`mcp__21st__*` cloud; `mcp__21st-dev__*` local) | Verified live in Claude Desktop cloud Code and Mac-local Claude Code. The account connector securely holds cloud credentials, but Anthropic requires a per-call approval for web-connector tools; never bypass that with a broad wildcard or a plaintext cloud environment secret. |
 | External-platform reachability / web research | **Agent Reach** (`agent-reach` skill) | **Native skill present** in Claude Code (skill registry) |
-| Long-running supervision | **Claude Watch** v0.4.1 | **Enabled plugin; plugin skill present** (Claude Code) |
+| Long-running supervision | **Claude Watch** v0.4.1 → Cloud-native fallback | **Enabled plugin on the Mac**; **absent from Claude Cloud's live registry** → when Claude Watch is not callable on the surface, use the Cloud-native supervision lane: `build-os/tools/supervise.sh` (bounded in-turn watch, no plugin) + the session scheduling primitive (`send_later` / scheduled re-check) for cross-turn supervision |
 | UI/UX design work | **UI UX Pro Max** v2.11.0 | **Enabled; native skill present** (Claude Code) |
 
 Surface note: 21st.dev uses different aliases by surface: account-level cloud connector `21st`

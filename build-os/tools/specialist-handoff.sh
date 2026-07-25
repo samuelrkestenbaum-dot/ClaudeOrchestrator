@@ -188,15 +188,20 @@ restore_focused()  { activate_profile focused || true; }
 
 # ── Inline current-surface directive (no child, no profile switch) ────────────
 inline_directive() {
-  local route="$1" cap dir
+  local route="$1" cap dir fallback
   case "$route" in
-    21st)          cap="the 21st.dev component tools (mcp__21st__*)"; dir="find or scaffold UI components on the CURRENT surface" ;;
-    agent-reach)   cap="the Agent Reach skill";                       dir="do external-platform reachability / web research on the CURRENT surface" ;;
-    claude-watch)  cap="Claude Watch";                                dir="set up long-running supervision on the CURRENT surface" ;;
-    ui-ux-pro-max) cap="UI UX Pro Max";                               dir="do the UI/UX design work on the CURRENT surface" ;;
-    *)             cap="the routed capability";                       dir="handle this on the CURRENT surface" ;;
+    21st)          cap="the 21st.dev component tools (mcp__21st__*)"; dir="find or scaffold UI components on the CURRENT surface"
+                   fallback="hand-author the component or reuse an existing one in this repo, or report 21st.dev unavailable here" ;;
+    agent-reach)   cap="the Agent Reach skill";                       dir="do external-platform reachability / web research on the CURRENT surface"
+                   fallback="use built-in web search / WebFetch, or report external reachability unavailable" ;;
+    claude-watch)  cap="Claude Watch";                                dir="set up long-running supervision on the CURRENT surface"
+                   fallback="use the Cloud-native supervision lane — build-os/tools/supervise.sh for the in-turn bounded watch, plus the session scheduling primitive (send_later / a scheduled re-check) for cross-turn supervision" ;;
+    ui-ux-pro-max) cap="UI UX Pro Max";                               dir="do the UI/UX design work on the CURRENT surface"
+                   fallback="apply standard UI/UX best practices inline, or report the UI/UX specialist unavailable here" ;;
+    *)             cap="the routed capability";                       dir="handle this on the CURRENT surface"
+                   fallback="handle it inline or report it unavailable" ;;
   esac
-  echo "[specialist-handoff] route=$route — INLINE CANDIDATE: first verify that $cap is connected and callable on this execution surface. If available, use it to $dir; if unavailable or disconnected, continue with the closest built-in/local fallback and state that limitation. Do NOT claim the capability is available merely because it is installed. Do NOT switch profiles or launch a child."
+  echo "[specialist-handoff] route=$route — INLINE CANDIDATE: first verify that $cap is connected and callable on this execution surface. If available, use it to $dir; if unavailable or disconnected, use the fallback (${fallback}) and state that limitation. Do NOT claim the capability is available merely because it is installed. Do NOT switch profiles or launch a child."
   log_event "$route" INLINE 0 "$(event_id "$route")"
 }
 

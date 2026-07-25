@@ -748,6 +748,28 @@ import json,sys
 raise SystemExit(1 if "serena" in json.load(open(sys.argv[1])).get("mcpServers",{}) else 0)
 PY
 
+echo "== 25. P-021: Cloud-native long-running supervision fallback (claude-watch) =="
+SUP="$SRC/build-os/tools/supervise.sh"
+[ -x "$SUP" ] && ok "supervise.sh present + executable (Cloud-native; no plugin)" || no "supervise.sh missing/not executable"
+# already-true condition -> COMPLETED (exit 0)
+SUPO="$(bash "$SUP" --until "true" --interval 1 --timeout 5 2>&1)"; SEC=$?
+{ [ "$SEC" = 0 ] && grep -q "SUPERVISE_STATUS: COMPLETED" <<<"$SUPO"; } && ok "supervise: satisfied condition -> COMPLETED (exit 0)" || no "supervise COMPLETED wrong (ec=$SEC)"
+# never-true condition -> TIMEOUT (bounded, exit 124)
+SUPO="$(bash "$SUP" --until "false" --interval 1 --timeout 1 2>&1)"; SEC=$?
+{ [ "$SEC" = 124 ] && grep -q "SUPERVISE_STATUS: TIMEOUT" <<<"$SUPO"; } && ok "supervise: unmet condition -> TIMEOUT (exit 124, bounded)" || no "supervise TIMEOUT wrong (ec=$SEC)"
+# condition becomes true DURING the watch -> COMPLETED
+SUPMARK="$WORK/sup-done-$RANDOM"; rm -f "$SUPMARK"; ( sleep 1; : > "$SUPMARK" ) &
+SUPO="$(bash "$SUP" --until "test -f '$SUPMARK'" --interval 1 --timeout 10 2>&1)"; SEC=$?
+{ [ "$SEC" = 0 ] && grep -q "SUPERVISE_STATUS: COMPLETED" <<<"$SUPO"; } && ok "supervise: condition met during watch -> COMPLETED" || no "supervise did not detect condition change"
+wait 2>/dev/null
+# missing --until -> USAGE (exit 2)
+bash "$SUP" >/dev/null 2>&1; [ "$?" = 2 ] && ok "supervise: missing --until -> USAGE (exit 2)" || no "supervise usage guard failed"
+# routing truth: claude-watch names the Cloud-native supervision fallback + stays conditional
+grep -qi "supervise.sh" "$ROUTER" && ok "router names the Cloud-native supervision fallback (supervise.sh)" || no "router omits supervise.sh fallback"
+IWATCH="$(bash "$HANDOFF" detect "supervise this long-running overnight build with claude watch" /tmp 2>&1)"
+grep -qi "supervise.sh" <<<"$IWATCH" && ok "claude-watch inline directive names the supervise.sh fallback" || no "claude-watch directive omits Cloud-native fallback"
+{ grep -qi "verify that Claude Watch is connected" <<<"$IWATCH" && grep -qi "Do NOT claim" <<<"$IWATCH"; } && ok "claude-watch stays availability-conditional (no overclaim)" || no "claude-watch overclaims availability"
+
 echo
 echo "==== RESULT: $PASS passed, $FAIL failed ===="
 [ "$FAIL" -eq 0 ]
