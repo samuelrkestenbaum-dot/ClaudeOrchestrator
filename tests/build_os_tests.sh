@@ -707,6 +707,47 @@ MB="$WORK/p18t/bin"; REC="$WORK/p18t/rec"; PH="$WORK/p18t/home"; mkbin "$MB" "$R
 TOUT="$(MOCK_STREAM_CHUNKS=60 HANDOFF_OUTPUT_MAX=1024 HANDOFF_TIMEOUT=30 run_handoff "review Rust unsafe ownership code" "$PH" 2>&1)" || true
 { grep -q "OUTPUT TRUNCATED at 1024" <<<"$TOUT" && [ "${#TOUT}" -lt 2500 ]; } && ok "streaming child output is hard-bounded at capture time" || no "streaming capture-time bound failed"
 
+echo "== 24. P-020: bootstrap registers pinned Serena add-if-absent (no duplicate) =="
+ACC="$SRC/install-accelerators.sh"; SERPIN="68884f1190489685082dc3c3b56917e92a1de0e6"
+RD="$WORK/serena-reg"; mkdir -p "$RD"
+# A) no config file -> creates it with the pinned uvx Serena (no secret, no network)
+CLAUDE_CONFIG_PATH="$RD/none.json" bash "$ACC" register-serena >/dev/null 2>&1
+python3 - "$RD/none.json" "$SERPIN" <<'PY' && ok "registers pinned Serena when config is absent" || no "did not register Serena when config absent"
+import json,sys
+s=json.load(open(sys.argv[1]))["mcpServers"]["serena"]
+assert s["command"]=="uvx" and sys.argv[2] in " ".join(s["args"])
+PY
+# B) existing config -> adds Serena while preserving every other key
+printf '{"mcpServers":{"keep-me":{"command":"keep"}},"otherKey":123}\n' > "$RD/empty.json"
+CLAUDE_CONFIG_PATH="$RD/empty.json" bash "$ACC" register-serena >/dev/null 2>&1
+python3 - "$RD/empty.json" <<'PY' && ok "registers Serena while preserving unrelated config" || no "registration dropped unrelated config"
+import json,sys
+d=json.load(open(sys.argv[1]))
+assert "serena" in d["mcpServers"] and d["mcpServers"]["keep-me"]["command"]=="keep" and d["otherKey"]==123
+PY
+# C) Serena already present -> byte-identical no-op (single-server rule; never overwrite/duplicate)
+printf '{"mcpServers":{"serena":{"command":"EXISTING","args":["do-not-touch"]}}}\n' > "$RD/has.json"
+SBEF="$(cksum < "$RD/has.json")"
+CLAUDE_CONFIG_PATH="$RD/has.json" bash "$ACC" register-serena >/dev/null 2>&1
+SAFT="$(cksum < "$RD/has.json")"
+python3 - "$RD/has.json" <<'PY' && ok "existing Serena is left untouched (no overwrite, exactly one)" || no "overwrote/duplicated an existing Serena"
+import json,sys
+d=json.load(open(sys.argv[1]))
+assert d["mcpServers"]["serena"]["command"]=="EXISTING" and list(d["mcpServers"]).count("serena")==1
+PY
+[ "$SBEF" = "$SAFT" ] && ok "add-if-absent is a byte-identical no-op when Serena present" || no "registration mutated an existing-Serena config"
+# D) idempotent: a second run on the just-registered config keeps exactly one Serena
+CLAUDE_CONFIG_PATH="$RD/empty.json" bash "$ACC" register-serena >/dev/null 2>&1
+python3 - "$RD/empty.json" <<'PY' && ok "repeated registration does not duplicate Serena" || no "repeated registration duplicated Serena"
+import json,sys
+assert list(json.load(open(sys.argv[1]))["mcpServers"]).count("serena")==1
+PY
+# E) project .mcp.json stays Serena-free (nothing double-launches on the Mac's user-scope server)
+python3 - "$SRC/.mcp.json" <<'PY' && ok "project .mcp.json stays Serena-free (no double-launch)" || no "project .mcp.json now registers Serena"
+import json,sys
+raise SystemExit(1 if "serena" in json.load(open(sys.argv[1])).get("mcpServers",{}) else 0)
+PY
+
 echo
 echo "==== RESULT: $PASS passed, $FAIL failed ===="
 [ "$FAIL" -eq 0 ]
