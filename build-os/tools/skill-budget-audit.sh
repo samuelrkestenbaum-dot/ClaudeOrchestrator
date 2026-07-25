@@ -127,14 +127,12 @@ if mode == "enabled":
         else:
             disabled_rows.append((name, n, c))
 
-    over = en_chars > budget
     print("Skill-budget audit (enabled-aware): %s" % target)
     print("  installed inventory: %d skills across %d plugins  (~%d chars)  [on disk; NOT all load at startup]"
           % (inst_skills, inst_plugins, inst_chars))
-    print("  startup-enabled: %d skills across %d plugins  (~%d chars)  budget: %d"
+    print("  startup-enabled: %d skills across %d plugins  (~%d full-body inventory chars)  configured metadata budget: %d"
           % (en_skills, en_plugins, en_chars, budget))
-    print("  startup status: %s  (based on the ENABLED set only)"
-          % ("OVER BUDGET" if over else "within budget"))
+    print("  startup metadata status: UNKNOWN from files alone (full SKILL.md bodies are inventory, not measured startup metadata)")
     if en_rows:
         print("  enabled dominators (trim these first):")
         for name, n, c in sorted(en_rows, key=lambda r: r[1], reverse=True)[:15]:

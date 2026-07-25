@@ -349,12 +349,14 @@ mkbin() { mkdir -p "$1" "$2"; cat > "$1/claude" <<'EOF'
 #!/usr/bin/env bash
 mkdir -p "$MOCK_REC"
 echo "$PWD" > "$MOCK_REC/pwd"
-prompt=""; while [ $# -gt 0 ]; do [ "$1" = "-p" ] && prompt="${2:-}"; shift; done
+prompt="$(cat)"
 printf '%s' "$prompt" > "$MOCK_REC/prompt"
+printf '%s\n' "$#" > "$MOCK_REC/argc"
 printf '%s' "${BUILD_OS_SPECIALIST_HANDOFF:-}" > "$MOCK_REC/guard"
 : > "$MOCK_REC/launched"
 [ -n "${MOCK_CLAUDE_SLEEP:-}" ] && sleep "$MOCK_CLAUDE_SLEEP"
-echo "MOCK_CHILD_OUTPUT route=${BUILD_OS_SPECIALIST_HANDOFF:-}"
+echo "${MOCK_CHILD_OUTPUT:-MOCK_CHILD_OUTPUT route=${BUILD_OS_SPECIALIST_HANDOFF:-}}"
+echo "[BUILD_OS_STATUS: ${MOCK_TERMINAL_STATUS:-COMPLETED}]"
 exit "${MOCK_CLAUDE_EXIT:-0}"
 EOF
 chmod +x "$1/claude"; }
@@ -387,7 +389,8 @@ MB="$WORK/h2/bin"; REC="$WORK/h2/rec"; PH="$WORK/h2/home"; mkbin "$MB" "$REC"; s
 CWD="$WORK/h2/work"; mkdir -p "$CWD"
 OUT="$(run_handoff "please add ed25519 ecc support" "$CWD" 2>/dev/null)"; EC=$?
 [ -e "$REC/launched" ] && ok "ECC task launches a specialist child" || no "ECC task did not launch child"
-[ "$(cat "$REC/prompt" 2>/dev/null)" = "please add ed25519 ecc support" ] && ok "ECC handoff preserves the exact original prompt" || no "ECC prompt not preserved"
+grep -q '^please add ed25519 ecc support$' "$REC/prompt" 2>/dev/null && ok "ECC handoff preserves the exact original prompt in stdin" || no "ECC prompt not preserved"
+[ "$(cat "$REC/argc" 2>/dev/null)" = "1" ] && ok "ECC prompt is not exposed in child argv" || no "ECC prompt leaked into child argv"
 [ "$(cat "$REC/pwd" 2>/dev/null)" = "$CWD" ] && ok "ECC handoff preserves the original working directory" || no "ECC cwd not preserved"
 [ "$(cat "$REC/guard" 2>/dev/null)" = "ecc" ] && ok "ECC child carries recursion-guard env" || no "ECC child missing guard env"
 grep -q "MOCK_CHILD_OUTPUT" <<<"$OUT" && ok "ECC handoff surfaces the child result" || no "ECC child result not surfaced"
@@ -489,7 +492,7 @@ HOUT="$(printf '%s' "$P15_PAYLOAD" | HOME="$P15_HOME" TMPDIR="$P15_TMP" MOCK_REC
   CLAUDE_BIN="$P15_BIN/claude" HANDOFF_TIMEOUT=30 HANDOFF_LOG="$P15_REC/handoffs.log" \
   bash "$P15_HOME/.claude/hooks/prompt-router.sh" 2>&1)"
 grep -q "MOCK_CHILD_OUTPUT route=ecc" <<<"$HOUT" && ok "installed global hook resolves + runs the handoff (ECC child launched via copied tools)" || no "installed global hook did not find/run the handoff tool"
-grep -q "already handled this task" <<<"$HOUT" && ok "installed hook emits the specialist-handoff wrapper (not just the routing reminder)" || no "installed hook fell back to routing reminder only"
+grep -q "explicitly completed this task" <<<"$HOUT" && ok "installed hook emits the specialist-handoff completion wrapper" || no "installed hook fell back to routing reminder only"
 PH="$P15_HOME"; is_focused && ok "installed hook restores focused after the handoff (copied capability-profile works)" || no "installed hook left the profile non-focused"
 # Negative control: a focused prompt through the SAME installed hook must NOT hand off.
 FOUT="$(printf '%s' '{"hook_event_name":"UserPromptSubmit","prompt":"list the files in this repo","cwd":"'"$P15_HOME"'"}' \
@@ -533,7 +536,7 @@ for spec in "21st^find a shadcn component from 21st.dev^21st.dev" \
     CLAUDE_USER_DIR="$PH/.claude" CLAUDE_CONFIG_PATH="$PH/.claude.json" \
     HANDOFF_LOG="$REC/inline.log" HANDOFF_LOCK="$REC/$route.lock" \
     bash "$HANDOFF" detect "$iprompt" "$PH" 2>&1)"
-  grep -qi "REQUIRED" <<<"$IOUT"                 && ok "inline $route emits a REQUIRED directive"        || no "inline $route missing REQUIRED directive"
+  grep -qi "INLINE CANDIDATE" <<<"$IOUT"         && ok "inline $route emits an availability-aware directive" || no "inline $route missing availability-aware directive"
   grep -qiF "$iname" <<<"$IOUT"                   && ok "inline $route names the capability ($iname)"     || no "inline $route missing capability name"
   [ ! -e "$REC/launched" ]                        && ok "inline $route launches NO child"                || no "inline $route launched a child"
 done
@@ -641,7 +644,7 @@ grep -qi "installed inventory" <<<"$EOUT"                 && ok "audit reports i
 grep -qiE "startup[- ]enabled" <<<"$EOUT"                 && ok "audit reports the startup-enabled set separately"    || no "audit missing startup-enabled line"
 grep -qE "installed inventory:[[:space:]]*12 " <<<"$EOUT" && ok "list-schema installed inventory de-dupes + prefers user record (12 skills)" || no "list-schema installed inventory count wrong"
 grep -qE "startup[- ]enabled:[[:space:]]*1 " <<<"$EOUT"   && ok "startup set counts only enabled plugins (1 skill)"   || no "startup-enabled count wrong"
-grep -qiE "startup status:.*within budget" <<<"$EOUT"     && ok "disabled mega-bundle does NOT make startup OVER BUDGET" || no "startup falsely flagged over budget"
+grep -qiE "startup metadata status:.*unknown" <<<"$EOUT"  && ok "audit does not infer startup metadata cost from full bodies" || no "startup metadata verdict is not evidence-qualified"
 grep -qE "installed inventory:[[:space:]]*0 " <<<"$EOUT"  && no "list schema parsed as ZERO (real-host defect)" || ok "list-schema installed inventory is nonzero (real-host defect fixed)"
 # backward-compat: the legacy DICT schema still parses to the same counts
 cat > "$CBD/plugins/installed_plugins.json" <<JSON
@@ -653,6 +656,34 @@ JSON
 DOUT="$(bash "$AUDIT" --claude-dir "$CBD" 5000 2>/dev/null)"
 grep -qE "installed inventory:[[:space:]]*12 " <<<"$DOUT" && ok "dict-schema installed inventory still 12 (both schemas supported)" || no "dict-schema installed inventory regressed"
 grep -qE "startup[- ]enabled:[[:space:]]*1 " <<<"$DOUT"   && ok "dict-schema startup set still 1" || no "dict-schema startup count regressed"
+
+echo "== 22. P-017: adversarial completion, fallback, lock, and output controls =="
+# Exit zero without an explicit COMPLETED marker is not handled.
+MB="$WORK/p17u/bin"; REC="$WORK/p17u/rec"; PH="$WORK/p17u/home"; mkbin "$MB" "$REC"; seed_home "$PH"
+UOUT="$(MOCK_TERMINAL_STATUS=NEEDS_INPUT run_handoff "review Rust unsafe ownership code" "$PH" 2>&1)"; UEC=$?
+{ [ "$UEC" != 0 ] && grep -q "NEEDS_INPUT" <<<"$UOUT"; } && ok "exit-zero NEEDS_INPUT is not treated as completion" || no "semantic completion check failed"
+is_focused && ok "focused restored after NEEDS_INPUT" || no "focused not restored after NEEDS_INPUT"
+
+# The prompt hook must never claim a failed specialist completed the task.
+mkdir -p "$WORK/p17hooktmp"; HPAY='{"hook_event_name":"UserPromptSubmit","prompt":"review Rust unsafe ownership code","cwd":"/tmp","prompt_id":"p17-fail"}'
+HFAIL="$(printf '%s' "$HPAY" | TMPDIR="$WORK/p17hooktmp" CLAUDE_BIN=/usr/bin/false CAPABILITY_PROFILE_BIN=/usr/bin/true bash "$PROMPT_HOOK" 2>&1)"
+grep -q "not confirmed complete" <<<"$HFAIL" && ok "hook falls back to focused parent after child failure" || no "hook falsely suppresses parent after failure"
+grep -q "already handled this task" <<<"$HFAIL" && no "hook falsely claims failed child handled task" || ok "hook makes no false handled claim"
+
+# A malicious broad lock override is rejected and never removed.
+mkdir -p "$WORK/p17-lock-target"; printf 'keep\n' > "$WORK/p17-lock-target/keep"
+LOUT="$(HANDOFF_LOCK=/ HANDOFF_LOCK_WAIT=0 CLAUDE_BIN=/usr/bin/false CAPABILITY_PROFILE_BIN=/usr/bin/true bash "$HANDOFF" detect "review Rust unsafe ownership code" /tmp 2>&1)"; LEC=$?
+{ [ "$LEC" != 0 ] && [ -f "$WORK/p17-lock-target/keep" ]; } && ok "unsafe lock override rejected without deletion" || no "unsafe lock override handling failed"
+
+# Inline routes are availability-conditional and provide a fallback.
+I17="$(bash "$HANDOFF" detect "find a shadcn component from 21st.dev" /tmp 2>&1)"
+{ grep -qi "verify.*connected" <<<"$I17" && grep -qi "fallback" <<<"$I17"; } && ok "inline directive is availability-conditional with fallback" || no "inline directive overclaims availability"
+grep -qi "REQUIRED: use" <<<"$I17" && no "inline directive still unconditionally requires unavailable tool" || ok "inline directive makes no unconditional availability claim"
+
+# Child output is bounded.
+MB="$WORK/p17o/bin"; REC="$WORK/p17o/rec"; PH="$WORK/p17o/home"; mkbin "$MB" "$REC"; seed_home "$PH"
+OOUT="$(MOCK_CHILD_OUTPUT="$(head -c 5000 </dev/zero | tr '\0' x)" HANDOFF_OUTPUT_MAX=200 run_handoff "review Rust unsafe ownership code" "$PH" 2>&1)" || true
+grep -q "OUTPUT TRUNCATED" <<<"$OOUT" && ok "oversized child output is visibly truncated" || no "child output was not bounded"
 
 echo
 echo "==== RESULT: $PASS passed, $FAIL failed ===="

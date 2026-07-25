@@ -41,6 +41,7 @@ HANDOFF_LOG="${HANDOFF_LOG:-$HOME/.claude/build-os-handoffs.log}"
 HANDOFF_LOCK="${HANDOFF_LOCK:-$HOME/.claude/build-os-handoff.lock}"
 HANDOFF_LOCK_WAIT="${HANDOFF_LOCK_WAIT:-30}"
 HANDOFF_LOCK_STALE="${HANDOFF_LOCK_STALE:-1800}"
+HANDOFF_OUTPUT_MAX="${HANDOFF_OUTPUT_MAX:-131072}"
 
 # ── Capability registry ───────────────────────────────────────────────────────
 # Maintainable, precedence-ordered task-family rules — NOT one opaque regex.
@@ -144,7 +145,8 @@ acquire_lock() {
   while ! mkdir "$HANDOFF_LOCK" 2>/dev/null; do
     if lock_is_stale; then
       breaks=$((breaks + 1)); [ "$breaks" -gt 3 ] && return 1
-      rm -rf "$HANDOFF_LOCK" 2>/dev/null || true; continue
+      safe_release_lock || return 1
+      continue
     fi
     [ "$waited" -ge "$HANDOFF_LOCK_WAIT" ] && return 1
     sleep 1; waited=$((waited + 1))
@@ -152,7 +154,18 @@ acquire_lock() {
   printf '%s\n' "$$" > "$HANDOFF_LOCK/pid" 2>/dev/null || true
   return 0
 }
-release_lock() { rm -rf "$HANDOFF_LOCK" 2>/dev/null || true; }
+lock_path_safe() {
+  [ -n "$HANDOFF_LOCK" ] && [ "$HANDOFF_LOCK" != "/" ] &&
+    [ "$HANDOFF_LOCK" != "." ] && [ "$HANDOFF_LOCK" != ".." ] &&
+    [ "$HANDOFF_LOCK" != "$HOME" ] && [ "$HANDOFF_LOCK" != "$HOME/" ]
+}
+safe_release_lock() {
+  lock_path_safe || return 1
+  [ -L "$HANDOFF_LOCK" ] && return 1
+  [ -f "$HANDOFF_LOCK/pid" ] && rm -f "$HANDOFF_LOCK/pid" 2>/dev/null
+  rmdir "$HANDOFF_LOCK" 2>/dev/null
+}
+release_lock() { safe_release_lock || true; }
 
 # run_with_timeout SECS CMD...  -> 124 on timeout. Portable (timeout / gtimeout / perl).
 run_with_timeout() {
@@ -183,25 +196,27 @@ inline_directive() {
     ui-ux-pro-max) cap="UI UX Pro Max";                               dir="do the UI/UX design work on the CURRENT surface" ;;
     *)             cap="the routed capability";                       dir="handle this on the CURRENT surface" ;;
   esac
-  echo "[specialist-handoff] route=$route — REQUIRED: use $cap to $dir. This is an INLINE capability: do NOT switch capability profiles, do NOT launch a child session, and do NOT restore focused — no relaunch is needed."
+  echo "[specialist-handoff] route=$route — INLINE CANDIDATE: first verify that $cap is connected and callable on this execution surface. If available, use it to $dir; if unavailable or disconnected, continue with the closest built-in/local fallback and state that limitation. Do NOT claim the capability is available merely because it is installed. Do NOT switch profiles or launch a child."
   log_event "$route" INLINE 0 "$(event_id "$route")"
 }
 
 # ── Bounded specialist handoff (ecc / zeroize only) ───────────────────────────
 # handoff ROUTE PROMPT CWD
 handoff() {
-  local route="$1" prompt="$2" cwd="${3:-$PWD}" out ec eid status
+  local route="$1" prompt="$2" cwd="${3:-$PWD}" out ec eid status terminal
   eid="$(event_id "$route" "$prompt" "$cwd")"
   # Concurrency: acquire the global profile lock BEFORE any mutation. Fail closed —
   # BUSY means no profile change and no child, so a second handoff never races the
   # profile switch or leaves ECC/zeroize half-applied.
-  if ! acquire_lock; then
+  if ! lock_path_safe || ! acquire_lock; then
     echo "[specialist-handoff] RESULT: BUSY (route=$route) — another specialist handoff holds the profile lock (waited ${HANDOFF_LOCK_WAIT}s). No profile change and no child launched; retry shortly or run /capability-profile $route manually." >&2
     log_event "$route" BUSY 75 "$eid"
     return 75
   fi
   # (5) ALWAYS restore focused AND release the lock — even on failure / interruption.
-  trap 'restore_focused; release_lock' EXIT INT TERM
+  trap 'restore_focused; release_lock' EXIT
+  trap 'restore_focused; release_lock; exit 130' INT
+  trap 'restore_focused; release_lock; exit 143' TERM
   # (2) activate ONLY the required profile.
   if ! activate_profile "$route"; then
     echo "[specialist-handoff] ERROR: could not activate '$route' profile; staying focused." >&2
@@ -211,14 +226,31 @@ handoff() {
   echo "[specialist-handoff] route=$route — launching a fresh non-interactive Claude child (timeout ${HANDOFF_TIMEOUT}s)."
   # (3)+(4) launch the child with the exact task + bounded context, in the original cwd,
   # with the recursion guard set; capture output + exit status.
-  out="$( cd "$cwd" 2>/dev/null && run_with_timeout "$HANDOFF_TIMEOUT" \
-          env "BUILD_OS_SPECIALIST_HANDOFF=$route" "$CLAUDE_BIN" -p "$prompt" 2>&1 )"
+  # The task travels over stdin, never argv. The terminal marker is deliberately
+  # machine-readable: a zero process exit without it is not semantic completion.
+  out="$( cd "$cwd" 2>/dev/null && \
+          printf '%s\n\n%s\n' "$prompt" \
+            'When finished, end your final response with exactly one terminal marker: [BUILD_OS_STATUS: COMPLETED], [BUILD_OS_STATUS: NEEDS_INPUT], [BUILD_OS_STATUS: BLOCKED], or [BUILD_OS_STATUS: FAILED].' |
+          run_with_timeout "$HANDOFF_TIMEOUT" env "BUILD_OS_SPECIALIST_HANDOFF=$route" \
+            "$CLAUDE_BIN" -p 2>&1 )"
   ec=$?
-  printf '%s\n' "$out"
+  if [ "${#out}" -gt "$HANDOFF_OUTPUT_MAX" ]; then
+    printf '%s\n' "${out:0:$HANDOFF_OUTPUT_MAX}"
+    echo "[specialist-handoff] OUTPUT TRUNCATED at ${HANDOFF_OUTPUT_MAX} characters."
+  else
+    printf '%s\n' "$out"
+  fi
+  terminal="$(printf '%s\n' "$out" |
+    grep -oE '\[BUILD_OS_STATUS: (COMPLETED|NEEDS_INPUT|BLOCKED|FAILED)\]' |
+    tail -1 | sed 's/^\[BUILD_OS_STATUS: //; s/\]$//')"
   # Never silently claim success — always report the child's exit status.
-  if [ "$ec" -eq 0 ]; then
-    status=OK
-    echo "[specialist-handoff] RESULT: OK (route=$route, child exit=0). Focused mode restored."
+  if [ "$ec" -eq 0 ] && [ "$terminal" = "COMPLETED" ]; then
+    status=COMPLETED
+    echo "[specialist-handoff] RESULT: COMPLETED (route=$route, child exit=0). Focused mode restored."
+  elif [ "$ec" -eq 0 ]; then
+    status="${terminal:-UNCONFIRMED}"
+    ec=76
+    echo "[specialist-handoff] RESULT: $status (route=$route). Child did not explicitly confirm completion; focused parent must continue or obtain input." >&2
   elif [ "$ec" -eq 124 ]; then
     status=TIMEOUT
     echo "[specialist-handoff] RESULT: TIMEOUT after ${HANDOFF_TIMEOUT}s (route=$route). Child killed; focused mode restored. Re-run via /capability-profile $route if still needed." >&2
