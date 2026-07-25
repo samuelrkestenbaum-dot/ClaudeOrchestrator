@@ -135,10 +135,8 @@
   prompt/cwd). `install-global.sh` ships both tool scripts into `~/build-os/tools` (P-015).
   **Inline routes** (`21st`, `agent-reach`, `claude-watch`, `ui-ux-pro-max`) emit a **conditional**
   INLINE CANDIDATE (verify live on this surface, else built-in/local fallback + state the limit —
-  never claim use from install alone); no profile switch, no child. Surface-aware: 21st.dev is
-  verified live as cloud alias `21st` and Mac-local alias `21st-dev`; only read-only
-  `search`/`get_component` calls are pre-authorized, while mutations and credit-spending tools
-  still require approval. Agent Reach = native skill;
+  never claim use from install alone); no profile switch, no child. Surface-aware: 21st.dev =
+  Claude **Desktop** connector (absent from local `claude mcp list`); Agent Reach = native skill;
   UI UX Pro Max v2.11.0 + Claude Watch v0.4.1 = enabled Claude Code skills/plugins. No
   cross-surface ACTIVE claim.
 - **Gates hold:** external mutation (push/merge/deploy/secret/send/SaaS-write),
