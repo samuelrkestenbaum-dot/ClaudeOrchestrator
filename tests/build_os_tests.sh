@@ -357,6 +357,7 @@ printf '%s' "${BUILD_OS_SPECIALIST_HANDOFF:-}" > "$MOCK_REC/guard"
 [ -n "${MOCK_CLAUDE_SLEEP:-}" ] && sleep "$MOCK_CLAUDE_SLEEP"
 echo "${MOCK_CHILD_OUTPUT:-MOCK_CHILD_OUTPUT route=${BUILD_OS_SPECIALIST_HANDOFF:-}}"
 echo "[BUILD_OS_STATUS: ${MOCK_TERMINAL_STATUS:-COMPLETED}]"
+[ -n "${MOCK_AFTER_STATUS:-}" ] && echo "$MOCK_AFTER_STATUS"
 exit "${MOCK_CLAUDE_EXIT:-0}"
 EOF
 chmod +x "$1/claude"; }
@@ -684,6 +685,15 @@ grep -qi "REQUIRED: use" <<<"$I17" && no "inline directive still unconditionally
 MB="$WORK/p17o/bin"; REC="$WORK/p17o/rec"; PH="$WORK/p17o/home"; mkbin "$MB" "$REC"; seed_home "$PH"
 OOUT="$(MOCK_CHILD_OUTPUT="$(head -c 5000 </dev/zero | tr '\0' x)" HANDOFF_OUTPUT_MAX=200 run_handoff "review Rust unsafe ownership code" "$PH" 2>&1)" || true
 grep -q "OUTPUT TRUNCATED" <<<"$OOUT" && ok "oversized child output is visibly truncated" || no "child output was not bounded"
+
+echo "== 23. P-018: final-line terminal contract + capture-time bound =="
+MB="$WORK/p18s/bin"; REC="$WORK/p18s/rec"; PH="$WORK/p18s/home"; mkbin "$MB" "$REC"; seed_home "$PH"
+SOUT="$(MOCK_AFTER_STATUS='I still need the source code.' run_handoff "review Rust unsafe ownership code" "$PH" 2>&1)"; SEC=$?
+{ [ "$SEC" != 0 ] && grep -q "UNCONFIRMED" <<<"$SOUT"; } && ok "COMPLETED marker followed by text is rejected" || no "terminal-marker spoof accepted"
+is_focused && ok "focused restored after terminal spoof" || no "focused not restored after terminal spoof"
+MB="$WORK/p18b/bin"; REC="$WORK/p18b/rec"; PH="$WORK/p18b/home"; mkbin "$MB" "$REC"; seed_home "$PH"
+BOUT="$(MOCK_CHILD_OUTPUT="$(head -c 200000 </dev/zero | tr '\0' z)" HANDOFF_OUTPUT_MAX=1024 run_handoff "review Rust unsafe ownership code" "$PH" 2>&1)" || true
+{ grep -q "OUTPUT TRUNCATED at 1024" <<<"$BOUT" && [ "${#BOUT}" -lt 2500 ]; } && ok "streaming capture is hard-bounded before shell memory capture" || no "capture-time bound failed"
 
 echo
 echo "==== RESULT: $PASS passed, $FAIL failed ===="

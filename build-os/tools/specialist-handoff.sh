@@ -204,6 +204,7 @@ inline_directive() {
 # handoff ROUTE PROMPT CWD
 handoff() {
   local route="$1" prompt="$2" cwd="${3:-$PWD}" out ec eid status terminal
+  local capture_dir capture_file status_file truncated_file pipeline_pid marker_count final_line
   eid="$(event_id "$route" "$prompt" "$cwd")"
   # Concurrency: acquire the global profile lock BEFORE any mutation. Fail closed —
   # BUSY means no profile change and no child, so a second handoff never races the
@@ -214,9 +215,24 @@ handoff() {
     return 75
   fi
   # (5) ALWAYS restore focused AND release the lock — even on failure / interruption.
-  trap 'restore_focused; release_lock' EXIT
-  trap 'restore_focused; release_lock; exit 130' INT
-  trap 'restore_focused; release_lock; exit 143' TERM
+  capture_dir="$(mktemp -d "${TMPDIR:-/tmp}/build-os-handoff.XXXXXX")" || return 3
+  chmod 700 "$capture_dir" 2>/dev/null || true
+  capture_file="$capture_dir/output"; status_file="$capture_dir/status"; truncated_file="$capture_dir/truncated"
+  ( umask 077; : > "$capture_file"; : > "$status_file" )
+  pipeline_pid=""
+  cleanup_handoff() {
+    if [ -n "${pipeline_pid:-}" ] && kill -0 "$pipeline_pid" 2>/dev/null; then
+      command -v pkill >/dev/null 2>&1 && pkill -TERM -P "$pipeline_pid" 2>/dev/null || true
+      kill -TERM "$pipeline_pid" 2>/dev/null || true
+      wait "$pipeline_pid" 2>/dev/null || true
+    fi
+    restore_focused; release_lock
+    rm -f "$capture_file" "$status_file" "$truncated_file" 2>/dev/null || true
+    rmdir "$capture_dir" 2>/dev/null || true
+  }
+  trap 'cleanup_handoff' EXIT
+  trap 'cleanup_handoff; exit 130' INT
+  trap 'cleanup_handoff; exit 143' TERM
   # (2) activate ONLY the required profile.
   if ! activate_profile "$route"; then
     echo "[specialist-handoff] ERROR: could not activate '$route' profile; staying focused." >&2
@@ -228,21 +244,44 @@ handoff() {
   # with the recursion guard set; capture output + exit status.
   # The task travels over stdin, never argv. The terminal marker is deliberately
   # machine-readable: a zero process exit without it is not semantic completion.
-  out="$( cd "$cwd" 2>/dev/null && \
-          printf '%s\n\n%s\n' "$prompt" \
-            'When finished, end your final response with exactly one terminal marker: [BUILD_OS_STATUS: COMPLETED], [BUILD_OS_STATUS: NEEDS_INPUT], [BUILD_OS_STATUS: BLOCKED], or [BUILD_OS_STATUS: FAILED].' |
-          run_with_timeout "$HANDOFF_TIMEOUT" env "BUILD_OS_SPECIALIST_HANDOFF=$route" \
-            "$CLAUDE_BIN" -p 2>&1 )"
-  ec=$?
-  if [ "${#out}" -gt "$HANDOFF_OUTPUT_MAX" ]; then
-    printf '%s\n' "${out:0:$HANDOFF_OUTPUT_MAX}"
+  (
+    set +e
+    cd "$cwd" 2>/dev/null || exit 3
+    printf '%s\n\n%s\n' "$prompt" \
+      'When finished, end your final response with exactly one terminal marker: [BUILD_OS_STATUS: COMPLETED], [BUILD_OS_STATUS: NEEDS_INPUT], [BUILD_OS_STATUS: BLOCKED], or [BUILD_OS_STATUS: FAILED].' |
+      run_with_timeout "$HANDOFF_TIMEOUT" env "BUILD_OS_SPECIALIST_HANDOFF=$route" "$CLAUDE_BIN" -p 2>&1 |
+      python3 -c 'import os,sys
+p,n,flag=sys.argv[1],int(sys.argv[2]),sys.argv[3]
+kept=0; truncated=False
+with open(p,"wb") as f:
+  while True:
+    b=sys.stdin.buffer.read(65536)
+    if not b: break
+    room=max(0,n-kept)
+    if room:
+      w=b[:room]; f.write(w); kept+=len(w)
+    if len(b)>room: truncated=True
+if truncated: open(flag,"wb").close()' "$capture_file" "$HANDOFF_OUTPUT_MAX" "$truncated_file"
+    printf '%s\n' "${PIPESTATUS[1]}" > "$status_file"
+  ) &
+  pipeline_pid=$!
+  wait "$pipeline_pid"
+  pipeline_pid=""
+  ec="$(cat "$status_file" 2>/dev/null || echo 127)"
+  out="$(cat "$capture_file" 2>/dev/null)"
+  if [ -e "$truncated_file" ]; then
+    printf '%s\n' "$out"
     echo "[specialist-handoff] OUTPUT TRUNCATED at ${HANDOFF_OUTPUT_MAX} characters."
   else
     printf '%s\n' "$out"
   fi
-  terminal="$(printf '%s\n' "$out" |
-    grep -oE '\[BUILD_OS_STATUS: (COMPLETED|NEEDS_INPUT|BLOCKED|FAILED)\]' |
-    tail -1 | sed 's/^\[BUILD_OS_STATUS: //; s/\]$//')"
+  marker_count="$(printf '%s\n' "$out" | grep -cE '^\[BUILD_OS_STATUS: (COMPLETED|NEEDS_INPUT|BLOCKED|FAILED)\]$' || true)"
+  final_line="$(printf '%s\n' "$out" | awk 'NF { line=$0 } END { print line }')"
+  terminal=""
+  if [ "$marker_count" -eq 1 ] && printf '%s\n' "$final_line" |
+      grep -qE '^\[BUILD_OS_STATUS: (COMPLETED|NEEDS_INPUT|BLOCKED|FAILED)\]$'; then
+    terminal="$(printf '%s\n' "$final_line" | sed 's/^\[BUILD_OS_STATUS: //; s/\]$//')"
+  fi
   # Never silently claim success — always report the child's exit status.
   if [ "$ec" -eq 0 ] && [ "$terminal" = "COMPLETED" ]; then
     status=COMPLETED
