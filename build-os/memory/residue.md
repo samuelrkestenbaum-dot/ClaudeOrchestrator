@@ -34,6 +34,16 @@
   host plugin v0.4.1 enabled; absent from Claude Cloud's live registry; **no repo lever** —
   install/enable it on the Cloud surface (a `claude plugin` / Cloud-UI step). Routing already
   treats both as availability-conditional, so nothing overclaims.
+- **Fix-to-closure (P-021):** P-020 proven on the real `~/.claude.json` (byte-identical no-op log +
+  live `mcp__serena__list_memories` call). **21st.dev** = Anthropic-managed **account connector**
+  (approval-gated; no container/repo lever) — user action is Cloud connector settings; the per-call
+  approval is not weakened. **UI UX Pro Max** = user-account skill absent from this container (no
+  source to vendor) — user action is a Cloud enable / provide the package. **Claude Watch** = host
+  plugin absent in Cloud with no repo lever → shipped a **Cloud-native supervision fallback**
+  `build-os/tools/supervise.sh` (bounded polling watch; COMPLETED/TIMEOUT/USAGE; no plugin; pair with
+  `send_later` for cross-turn) and updated routing truthfully. So the `claude-watch` ROUTE is fully
+  functional even where the plugin is absent; the 21st + UI UX Pro Max capabilities themselves remain
+  account/Cloud-side, degrading truthfully to their named fallbacks.
 
 ## Known risks / debt
 

@@ -11,7 +11,7 @@
 - **Primary branch / base:** `claude/add-build-os` (current integration base; no
   `main` present in this environment). Active work branch:
   `claude/orchestrator-tools-list-e0mdaz`.
-- **Build/test command:** `bash tests/build_os_tests.sh` (208 checks; no network; temp dirs).
+- **Build/test command:** `bash tests/build_os_tests.sh` (216 checks; no network; temp dirs).
   Cross-platform green: the P-018 200KB capture-bound test now generates its payload **in-child**
   (`MOCK_GEN_BYTES` / `MOCK_STREAM_CHUNKS`) instead of via an env var — the old env delivery
   exceeded Linux `MAX_ARG_STRLEN` (~128KB) and failed only on Linux (P-018.1, tests-only fix).
@@ -30,7 +30,17 @@
 
 ## Where we are
 
-- **Last closed packet:** P-020 — the SessionStart bootstrap (`install-accelerators.sh`) now
+- **Last closed packet:** P-021 — fix-to-closure (receipt `build-os/receipts/P-021.md`). **P-020
+  proven on the real `~/.claude.json`**: `register-serena` logged *already present — left untouched*,
+  byte-identical no-op, one Serena, and a **live `mcp__serena__list_memories` returned `{}`
+  (callable)**. **21st.dev** diagnosed as an **Anthropic-managed account connector** (not in
+  `~/.claude.json`; approval-gated) — no container lever; user action = Cloud connector settings.
+  **UI UX Pro Max** is a user-account skill absent from this container — user action = Cloud enable /
+  provide package. **Claude Watch** has no repo lever, so shipped a **Cloud-native supervision
+  fallback**: `build-os/tools/supervise.sh` (bounded polling watch → COMPLETED/TIMEOUT/USAGE; no
+  plugin) + a truthful router/inline update naming it (still availability-conditional). Suite
+  **216/216**.
+- **Prior:** P-020 — the SessionStart bootstrap (`install-accelerators.sh`) now
   **registers the pinned Serena MCP add-if-absent**. It previously installed the Serena binary but
   never wrote the `mcpServers` entry ("installed but not registered"); it now adds the canonical
   pinned server to `~/.claude.json` **only if no `serena` entry exists** — closing the config-side
