@@ -23,6 +23,14 @@
   the required secret (`ANTHROPIC_API_KEY` / `CLAUDE_API_KEY`).
 - Carried from P-001: authorize Stripe + Cloudflare, enable Google/Microsoft
   connectors; session-MCP router rows for GitHub + Claude Code Remote.
+- **Cross-surface asymmetry (P-019, open — user/cloud-controlled):** two capabilities are
+  active on the Mac but not symmetric on the Claude Cloud surface, which caps cross-surface
+  orchestration below 10/10. **Serena** — active user-scope MCP on the Mac (pinned `68884f1`);
+  *installed but not registered as an active MCP* on Claude Cloud. User step: register it in the
+  Cloud MCP/connector settings — the repo must NOT add it to project `.mcp.json` (single-server
+  rule, P-008). **Claude Watch** — host plugin v0.4.1 enabled; absent from Claude Cloud's live
+  skill/plugin/connector registry. User step: install/enable it on the Cloud surface. Routing
+  already treats both as availability-conditional (verify-live-or-fallback), so nothing overclaims.
 
 ## Known risks / debt
 

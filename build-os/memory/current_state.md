@@ -30,7 +30,22 @@
 
 ## Where we are
 
-- **Last closed packet:** P-017 — post-release adversarial correction (7 runtime defects;
+- **Last closed packet:** P-019 — cross-surface truth (receipt `build-os/receipts/P-019.md`).
+  21st.dev is **verified live in Claude Cloud**: a fresh cloud Code session called
+  `mcp__21st__search` and returned "Dashboard Sidebar" by `arunjdass` (id 14941) — connected AND
+  callable — but Anthropic's web-connector layer **approval-gates every call** (project settings do
+  not bypass it), and the API key was never placed in the plaintext cloud env. Mac-local `21st-dev`
+  stays the zero-touch lane. **Two cross-surface asymmetries remain open (user/cloud-controlled,
+  not repo-fixable):** Serena is active user-scope on the Mac but *installed-not-registered* on the
+  Claude Cloud surface (registering it there is the user step; the repo must not add it to project
+  `.mcp.json` per the single-server rule); Claude Watch v0.4.1 is host-enabled but **absent from
+  Claude Cloud's live registry**. Routing already treats both as availability-conditional, so no
+  false claim is made. Suite **202/202** green.
+- **Prior:** P-018 (terminal-marker integrity: only a single valid final-line marker is
+  COMPLETED; bounded capture via a 0700 temp dir + streaming limiter; signal reaping) and **P-018.1**
+  (Linux portability of the 200KB capture-bound test — payload now generated in-child, not via an
+  env var that exceeded Linux `MAX_ARG_STRLEN`). Suite 198 → 200 → **202**.
+- **Prior:** P-017 — post-release adversarial correction (7 runtime defects;
   host-implemented on the Mac as `ac500c6`, adopted here; suite 198/0):
   1. **Failure propagation** — `prompt-router.sh` preserves the real `detect` exit and only
      an explicit `COMPLETED` suppresses parent work; otherwise it says the handoff was not
