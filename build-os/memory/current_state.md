@@ -40,7 +40,7 @@
   `~/build-os/.canonical-source` stamp → well-known attach locations → mirror, and falls back to the
   stamped SHA. **Live proof:** brand-new project provisioned by the global hook alone —
   `Orchestrator: ON`, canonical SHA == installed SHA (`7aef17d`), agents 5/5, tools 5, CLAUDE.md 58
-  lines, second startup a cache hit. Suite **256/256**.
+  lines, second startup a cache hit. Suite **256/256**. Re-verified end-to-end from the committed tip `752f73d` (stamp + installed SHA both `752f73d`; agents 5/5, tools 5/5, guidance full, project files preserved, second startup cached).
 - **Prior:** P-024 — default-branch promotion + measured activation
   boundary (receipt `build-os/receipts/P-024.md`). **`claude/add-build-os` fast-forwarded
   `7ef50e8..e66f43e`** (clean ancestor, 0 divergence, suite green, no force/rewrite), so newly
