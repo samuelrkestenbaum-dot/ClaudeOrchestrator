@@ -59,6 +59,31 @@ default for everything:
 touches shared/runtime logic, or stops being trivially reversible, stop and
 re-route to the full **Build / feature / bugfix** row.
 
+## Standing lessons (load-bearing — earned, not assumed)
+
+**A test title is a CONTRACT OVER ITS ASSERTIONS, not a statement of intent.**
+If a title names a property, an assertion must **fail** when that property is
+broken. A title that claims more than the body proves is the same defect class as
+an overclaiming receipt — it manufactures confidence that no evidence supports.
+Check it the only way that works: break the property and confirm a test dies.
+
+**A green suite is not proof that a guarantee is enforced.** A passing test says
+the code does something; only a **failing mutant** says the code is what makes it
+so. Before claiming an invariant is enforced, mutate it and watch a test die. If
+nothing dies, the invariant is either unenforced or untested — say which.
+
+**Prefer a deny-list to an allow-list for "is this input trusted".** When a
+vocabulary is expected to grow, an allow-list silently demotes every future member
+to untrusted, which fails *closed on paper* but breaks the feature in a way no
+current test can catch. A deny-list is safe **only** if a structural guard rejects
+unrecognized values first — so state the ordering and test it.
+
+**When a mutation cannot be killed, say so and narrow the claim.** Some properties
+are guaranteed by construction (an upstream encoding, a type, an unreachable
+branch) and no test can fail on them. Do not manufacture a test that appears to
+cover it. Prove the unreachability, narrow the title to what *is* asserted, and
+record the reasoning.
+
 ## Tool selection ranking (overlapping tools)
 
 When more than one capability could do the job, pick with this ranking (earlier

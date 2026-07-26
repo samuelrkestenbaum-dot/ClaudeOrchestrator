@@ -44,6 +44,31 @@ you run things and report exact results.
    is connected, do the best static/build smoke and say so. If no UI is involved,
    state "UI smoke: N/A".
 
+5. **Mutation check — the invariant proof.** A green suite proves the code does
+   something; only a **failing mutant** proves the code is what makes it so. For
+   each invariant the packet claims to enforce, break it in the source, re-run,
+   and report exactly which tests died:
+
+   ```
+   <mutation>  →  N failed / M passed  →  [test names that died]
+   ```
+
+   **A mutation that kills 0 tests is a finding, not a pass.** Report it loudly:
+   the invariant is either unenforced or untested — determine which, and say so.
+   Where the property turns out to be guaranteed by construction and no mutant is
+   possible, prove the unreachability rather than inventing a test that appears to
+   cover it.
+
+   Restore the source after **every** mutation (full-file `git checkout --`) and
+   verify byte-identity (`md5sum`) before the next one. End with
+   `git status --porcelain` empty. **Never leave a mutation behind.**
+
+6. **Assertion-title contract.** Spot-check that test titles are contracts over
+   their assertions, not statements of intent: if a title names a property, an
+   assertion must fail when that property is broken. Report every title that
+   claims more than its body proves. This is the most common way a suite looks
+   stronger than it is.
+
 ## Output
 
 A compact proof block:
