@@ -11,7 +11,7 @@
 - **Primary branch / base:** `claude/add-build-os` (current integration base; no
   `main` present in this environment). Active work branch:
   `claude/orchestrator-tools-list-e0mdaz`.
-- **Build/test command:** `bash tests/build_os_tests.sh` (**248 checks**; no network; temp dirs).
+- **Build/test command:** `bash tests/build_os_tests.sh` (**256 checks**; no network; temp dirs).
   Cross-platform green: the P-018 200KB capture-bound test now generates its payload **in-child**
   (`MOCK_GEN_BYTES` / `MOCK_STREAM_CHUNKS`) instead of via an env var — the old env delivery
   exceeded Linux `MAX_ARG_STRLEN` (~128KB) and failed only on Linux (P-018.1, tests-only fix).
@@ -30,7 +30,18 @@
 
 ## Where we are
 
-- **Last closed packet:** P-024 — default-branch promotion + measured activation
+- **Last closed packet:** P-025 — **zero-touch global bootstrap** (receipt `build-os/receipts/P-025.md`).
+  A one-time `install-global.sh` per environment now makes every newly attached project provision
+  itself with **no per-project command**. Fixed two defects that made globally-provisioned projects
+  second-class: the global bootstrap resolved the **home mirror** as its source (so `source_sha` was
+  `unknown` and drift detection was dead), and `install-global.sh` never mirrored
+  `global-claude-md.md` (so projects got a **3-line stub** CLAUDE.md instead of the 56-line
+  guidance). `project-bootstrap.sh` now resolves a genuine checkout via `$BUILD_OS_SOURCE` → the
+  `~/build-os/.canonical-source` stamp → well-known attach locations → mirror, and falls back to the
+  stamped SHA. **Live proof:** brand-new project provisioned by the global hook alone —
+  `Orchestrator: ON`, canonical SHA == installed SHA (`7aef17d`), agents 5/5, tools 5, CLAUDE.md 58
+  lines, second startup a cache hit. Suite **256/256**.
+- **Prior:** P-024 — default-branch promotion + measured activation
   boundary (receipt `build-os/receipts/P-024.md`). **`claude/add-build-os` fast-forwarded
   `7ef50e8..e66f43e`** (clean ancestor, 0 divergence, suite green, no force/rewrite), so newly
   attached projects get the current runtime. **Measured on a genuinely fresh project with a real
@@ -42,7 +53,7 @@
   `e66f43e` == canonical, agents 5/5, idempotent cache hit on re-run, project files preserved.
   Fixed a defect this exposed: a vendored copy (SRC==TARGET) cannot self-heal and now says so with
   an actionable REPAIR command instead of "no install needed". Suite **248/248**.
-- **Prior:** P-023 — project-agnostic bootstrap: P-023 — **project-agnostic bootstrap** (receipt
+- **Prior:** P-023 — **project-agnostic bootstrap** (receipt
   `build-os/receipts/P-023.md`). Attaching ClaudeOrchestrator to **any** Claude Code project now
   installs/activates the complete runtime with **no project-specific instructions**. New
   `build-os/tools/project-bootstrap.sh` resolves the effective project (`--target` >

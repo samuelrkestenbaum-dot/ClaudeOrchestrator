@@ -897,8 +897,17 @@ grep -q "Orchestrator: ON" <<<"$VVOUT" && ok "vendored copy self-verifies as ON"
 rm -f "$VP/build-os/tools/supervise.sh"
 VDOUT="$(bash "$VP/build-os/tools/project-bootstrap.sh" --target "$VP" --verify 2>&1)"
 grep -q "Orchestrator: DEGRADED" <<<"$VDOUT" && ok "incomplete vendored copy reports DEGRADED" || no "incomplete vendored copy did not report DEGRADED"
-grep -qi "cannot self-heal" <<<"$VDOUT" && ok "vendored copy states it cannot self-heal (no canonical source)" || no "vendored copy hides its inability to self-heal"
-grep -qi "REPAIR:" <<<"$VDOUT" && ok "DEGRADED output names an actionable repair command" || no "DEGRADED output lacks a repair command"
+grep -qi "REPAIR:" <<<"$VDOUT" && ok "DEGRADED output always names an actionable repair path" || no "DEGRADED output lacks a repair command"
+# Invariant: EITHER a runnable repair command (canonical source resolvable, P-025 detection)
+# OR an explicit "cannot self-heal" notice (no canonical source anywhere). Never silence.
+VREPAIR="$(grep -oE 'bash "[^"]+/project-bootstrap\.sh"' <<<"$VDOUT" | head -1 | sed 's/^bash "//; s/"$//')"
+if [ -n "$VREPAIR" ]; then
+  [ -f "$VREPAIR" ] && ok "repair command points at an existing bootstrap (runnable)" || no "repair command points at a missing script"
+  bash "$VREPAIR" --target "$VP" --force >/dev/null 2>&1
+  [ -x "$VP/build-os/tools/supervise.sh" ] && ok "the named repair command actually restores the runtime" || no "repair command did not restore the runtime"
+else
+  grep -qi "cannot self-heal" <<<"$VDOUT" && ok "with no canonical source, the copy states it cannot self-heal" || no "no repair command AND no cannot-self-heal notice"
+fi
 
 # --- I) router integrity: every routed local tool path exists ----------------------
 badpath=""
@@ -906,6 +915,37 @@ for t in $(grep -oE 'build-os/tools/[a-z-]+\.sh' "$ROUTER" | sort -u); do
   [ -e "$SRC/$t" ] || badpath="$badpath $t"
 done
 [ -z "$badpath" ] && ok "every build-os tool path referenced by the router exists" || no "router references dead tool paths:$badpath"
+
+echo "== 27. P-025: zero-touch global path — canonical-source detection, real SHA, full guidance =="
+GH="$WORK/p025-home"; GB="$WORK/p025-userbuildos"
+CLAUDE_USER_DIR="$GH" BUILD_OS_USER_DIR="$GB" bash "$SRC/install-global.sh" >/dev/null 2>&1
+[ -f "$GB/global-claude-md.md" ] && ok "install-global mirrors global-claude-md.md to user scope" || no "user-scope mirror lacks global-claude-md.md"
+[ -f "$GB/.canonical-source" ] && ok "install-global records a canonical-source stamp" || no "no canonical-source stamp recorded"
+python3 - "$GB/.canonical-source" "$SRC" <<'PY' && ok "canonical-source stamp records the source path and SHA" || no "canonical-source stamp incomplete"
+import json,sys
+d=json.load(open(sys.argv[1]))
+assert d.get("path")==sys.argv[2], d
+assert d.get("sha") and d["sha"]!="unknown", d
+PY
+# a project provisioned through the USER-SCOPE MIRROR must still get the FULL guidance + a real SHA
+GP="$WORK/p025-proj"; mkdir -p "$GP"
+BUILD_OS_USER_DIR="$GB" HOME="$GH-fakehome" bash "$GB/tools/project-bootstrap.sh" --target "$GP" >/dev/null 2>&1
+CANON_LINES="$(grep -c '' "$SRC/build-os/global-claude-md.md")"
+GOT_LINES="$(grep -c '' "$GP/CLAUDE.md" 2>/dev/null || echo 0)"
+[ "$GOT_LINES" -ge $((CANON_LINES - 2)) ] && ok "mirror-provisioned CLAUDE.md carries the FULL canonical guidance (not a stub)" || no "mirror-provisioned CLAUDE.md is a stub ($GOT_LINES vs $CANON_LINES lines)"
+python3 - "$GP/build-os/.install-manifest.json" <<'PY' && ok "mirror-provisioned manifest records a REAL source SHA (not unknown)" || no "mirror-provisioned manifest SHA is unknown"
+import json,sys
+m=json.load(open(sys.argv[1]))
+assert m.get("source_sha") and m["source_sha"]!="unknown", m.get("source_sha")
+PY
+# explicit BUILD_OS_SOURCE override is honored
+GP2="$WORK/p025-proj2"; mkdir -p "$GP2"
+BUILD_OS_SOURCE="$SRC" bash "$GB/tools/project-bootstrap.sh" --target "$GP2" >/dev/null 2>&1
+python3 - "$GP2/build-os/.install-manifest.json" "$(cd "$SRC" && git rev-parse HEAD)" <<'PY' && ok "BUILD_OS_SOURCE override selects the named canonical checkout" || no "BUILD_OS_SOURCE override ignored"
+import json,sys
+assert json.load(open(sys.argv[1]))["source_sha"]==sys.argv[2]
+PY
+grep -q "BUILD-OS:START" "$GP2/CLAUDE.md" && ok "override path still writes the managed CLAUDE.md block" || no "override path lost the managed block"
 
 echo
 echo "==== RESULT: $PASS passed, $FAIL failed ===="

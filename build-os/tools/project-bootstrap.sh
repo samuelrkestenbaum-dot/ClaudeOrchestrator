@@ -30,7 +30,50 @@ set -uo pipefail
 
 BUILD_OS_RUNTIME_VERSION="1.0.0"
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SRC="$(cd "$HERE/../.." && pwd)"          # ClaudeOrchestrator repo root (canonical source)
+SRC="$(cd "$HERE/../.." && pwd)"          # provisional source root
+
+# ── Canonical-source resolution (P-025) ───────────────────────────────────────
+# The globally-installed copy of this script lives at ~/build-os/tools/, so its
+# "$HERE/../.." is the HOME MIRROR, not a ClaudeOrchestrator checkout: that mirror has no
+# git history (source_sha would be "unknown", killing drift detection) and historically had
+# no global-claude-md.md (so projects got a 3-line stub instead of the real guidance).
+# Resolve a genuine checkout instead, in this order:
+#   1. $BUILD_OS_SOURCE                     (explicit override)
+#   2. the stamp recorded by install-global  (~/build-os/.canonical-source)
+#   3. well-known attach locations           (an attached ClaudeOrchestrator repo)
+#   4. the provisional SRC                   (mirror; SHA then taken from the stamp)
+USER_BUILD_OS="${BUILD_OS_USER_DIR:-$HOME/build-os}"
+STAMP="$USER_BUILD_OS/.canonical-source"
+STAMPED_SHA=""
+
+is_canonical_src() {  # a real ClaudeOrchestrator checkout, not a mirror
+  [ -n "${1:-}" ] && [ -f "$1/.claude/agents/build-orchestrator.md" ] \
+    && [ -f "$1/build-os/global-claude-md.md" ] && [ -d "$1/.git" ]
+}
+read_stamp() {  # -> prints "path<TAB>sha" from the JSON stamp
+  [ -f "$STAMP" ] || return 1
+  python3 - "$STAMP" <<'PY' 2>/dev/null
+import json,sys
+try:
+    d=json.load(open(sys.argv[1]))
+    print("%s\t%s" % (d.get("path",""), d.get("sha","")))
+except Exception: raise SystemExit(1)
+PY
+}
+resolve_source() {
+  local cand line sp ss
+  if is_canonical_src "${BUILD_OS_SOURCE:-}"; then SRC="$(cd "$BUILD_OS_SOURCE" && pwd)"; return 0; fi
+  if line="$(read_stamp)"; then
+    sp="${line%%$'\t'*}"; ss="${line##*$'\t'}"
+    STAMPED_SHA="$ss"
+    if is_canonical_src "$sp"; then SRC="$(cd "$sp" && pwd)"; return 0; fi
+  fi
+  for cand in "/home/user/ClaudeOrchestrator" "$HOME/ClaudeOrchestrator" \
+              "$(dirname "${TARGET:-$PWD}")/ClaudeOrchestrator"; do
+    if is_canonical_src "$cand"; then SRC="$(cd "$cand" && pwd)"; return 0; fi
+  done
+  return 0   # keep the provisional SRC (mirror); canonical_sha() falls back to the stamp
+}
 
 TARGET=""; FORCE=0; VERIFY=0; DRYRUN=0; QUIET=0
 while [ $# -gt 0 ]; do
@@ -49,6 +92,7 @@ done
 TARGET="${TARGET:-${CLAUDE_PROJECT_DIR:-$(pwd)}}"
 mkdir -p "$TARGET" 2>/dev/null || true
 TARGET="$(cd "$TARGET" 2>/dev/null && pwd)" || { echo "[bootstrap] ERROR: unusable target" >&2; exit 2; }
+resolve_source   # pick a genuine ClaudeOrchestrator checkout when SRC is only a mirror
 
 say() { [ "$QUIET" = 1 ] || printf '%s\n' "$*"; }
 
@@ -56,7 +100,15 @@ MANIFEST="$TARGET/build-os/.install-manifest.json"
 LOCK="$TARGET/build-os/.bootstrap.lock"
 LOCK_WAIT="${BUILD_OS_BOOTSTRAP_LOCK_WAIT:-15}"
 
-canonical_sha() { ( cd "$SRC" && git rev-parse HEAD 2>/dev/null ) || echo "unknown"; }
+# Real SHA from the resolved checkout; if we are running from the mirror, fall back to the
+# SHA recorded by install-global so drift detection still works (never silently "unknown").
+canonical_sha() {
+  local s
+  s="$( cd "$SRC" 2>/dev/null && git rev-parse HEAD 2>/dev/null )"
+  [ -n "$s" ] && { printf '%s' "$s"; return 0; }
+  [ -n "${STAMPED_SHA:-}" ] && { printf '%s' "$STAMPED_SHA"; return 0; }
+  printf 'unknown'
+}
 
 # Managed file list (relative paths), computed from the canonical source.
 managed_files() {

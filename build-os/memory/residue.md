@@ -224,3 +224,9 @@ _Append-only working notes._
   self-heal — it now reports DEGRADED **plus** an actionable REPAIR command instead of the
   misleading "no install needed". Open: interactive-surface hook execution is not exercisable from
   this non-interactive container beyond the current session's own evidence.
+- **Zero-touch requires a one-time global install per surface (P-025):** the global SessionStart hook
+  auto-provisions any attached project, but only after `install-global.sh` has been run once on that
+  environment (P-024's platform constraint: a newly attached repo cannot make Claude Code discover
+  its own hook). Proven live on the Linux cloud/CCR surface. **Open:** run the same one-time
+  installer on **Mac Claude Desktop**, then confirm with a real managed/interactive session on each
+  surface — `claude -p` never fires SessionStart hooks, so a `-p` run cannot be that confirmation.

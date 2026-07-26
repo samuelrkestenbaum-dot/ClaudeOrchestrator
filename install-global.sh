@@ -50,6 +50,23 @@ cp "$SRC/build-os/tools/"*.sh "$USER_BUILD_OS/tools/"
 chmod +x "$USER_BUILD_OS/tools/"*.sh
 echo "  + user-scope Build OS tools synchronized (specialist-handoff, capability-profile)"
 
+# The globally-installed bootstrap needs the canonical guidance AND a pointer back to this
+# checkout: without them a globally-provisioned project gets a stub CLAUDE.md and an
+# "unknown" source SHA (dead drift detection). Mirror the guidance and stamp the source.
+cp "$SRC/build-os/global-claude-md.md" "$USER_BUILD_OS/global-claude-md.md"
+python3 - "$USER_BUILD_OS/.canonical-source" "$SRC" "$( (cd "$SRC" && git rev-parse HEAD 2>/dev/null) || echo unknown )" <<'PY'
+import json, sys, datetime
+path, src, sha = sys.argv[1:4]
+json.dump({"path": src, "sha": sha,
+           "recorded_at": datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0).isoformat(),
+           "note": "Canonical ClaudeOrchestrator checkout for the global bootstrap. "
+                   "project-bootstrap.sh prefers this over the ~/build-os mirror so provisioned "
+                   "projects get the full guidance and a real source SHA."},
+          open(path, "w"), indent=2)
+open(path, "a").write("\n")
+PY
+echo "  + canonical-source stamp + guidance mirrored (global bootstrap can resolve the real checkout)"
+
 # 4) Merge hooks into ~/.claude/settings.json — preserves other keys, idempotent.
 python3 - "$DEST/settings.json" <<'PY'
 import json, sys
