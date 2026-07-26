@@ -11,7 +11,7 @@
 - **Primary branch / base:** `claude/add-build-os` (current integration base; no
   `main` present in this environment). Active work branch:
   `claude/orchestrator-tools-list-e0mdaz`.
-- **Build/test command:** `bash tests/build_os_tests.sh` (**245 checks**; no network; temp dirs).
+- **Build/test command:** `bash tests/build_os_tests.sh` (**248 checks**; no network; temp dirs).
   Cross-platform green: the P-018 200KB capture-bound test now generates its payload **in-child**
   (`MOCK_GEN_BYTES` / `MOCK_STREAM_CHUNKS`) instead of via an env var — the old env delivery
   exceeded Linux `MAX_ARG_STRLEN` (~128KB) and failed only on Linux (P-018.1, tests-only fix).
@@ -30,7 +30,19 @@
 
 ## Where we are
 
-- **Last closed packet:** P-023 — **project-agnostic bootstrap** (receipt
+- **Last closed packet:** P-024 — default-branch promotion + measured activation
+  boundary (receipt `build-os/receipts/P-024.md`). **`claude/add-build-os` fast-forwarded
+  `7ef50e8..e66f43e`** (clean ancestor, 0 divergence, suite green, no force/rewrite), so newly
+  attached projects get the current runtime. **Measured on a genuinely fresh project with a real
+  authenticated CLI session:** attachment alone installs **nothing**, and **`claude -p` does not
+  run SessionStart hooks at all** (project-scope *or* user-scope; control run inside
+  ClaudeOrchestrator itself also negative). Managed surfaces (web/cloud/interactive) **do** run
+  them. So activation is **one command** — `bash <ClaudeOrchestrator>/build-os/tools/project-bootstrap.sh`
+  — then automatic: live proof showed complete runtime, `Orchestrator: ON`, installed SHA
+  `e66f43e` == canonical, agents 5/5, idempotent cache hit on re-run, project files preserved.
+  Fixed a defect this exposed: a vendored copy (SRC==TARGET) cannot self-heal and now says so with
+  an actionable REPAIR command instead of "no install needed". Suite **248/248**.
+- **Prior:** P-023 — project-agnostic bootstrap: P-023 — **project-agnostic bootstrap** (receipt
   `build-os/receipts/P-023.md`). Attaching ClaudeOrchestrator to **any** Claude Code project now
   installs/activates the complete runtime with **no project-specific instructions**. New
   `build-os/tools/project-bootstrap.sh` resolves the effective project (`--target` >

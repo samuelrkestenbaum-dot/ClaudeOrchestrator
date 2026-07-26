@@ -213,3 +213,14 @@
 
 ---
 _Append-only working notes._
+- **Activation boundary — measured, not assumed (P-024):** *attaching* ClaudeOrchestrator executes
+  nothing by itself, and **`claude -p` does not run SessionStart hooks at all** (project-scope or
+  user-scope; a control run inside ClaudeOrchestrator itself was also negative; both projects show
+  `hasTrustDialogAccepted: false`). Managed surfaces (web / cloud task / interactive) **do** run
+  them — this session's own transcript is the evidence. Therefore the supported activation is **one
+  command per project**: `bash <ClaudeOrchestrator>/build-os/tools/project-bootstrap.sh`; after that
+  managed sessions keep the runtime current automatically. Do **not** claim attachment-only install.
+  Related fix: a **vendored** copy has `SRC == TARGET`, so it has no canonical source and cannot
+  self-heal — it now reports DEGRADED **plus** an actionable REPAIR command instead of the
+  misleading "no install needed". Open: interactive-surface hook execution is not exercisable from
+  this non-interactive container beyond the current session's own evidence.

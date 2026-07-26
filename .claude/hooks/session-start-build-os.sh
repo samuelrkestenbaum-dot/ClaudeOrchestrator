@@ -21,7 +21,7 @@ if [ -x "$BOOTSTRAP" ]; then
   if BOOT_OUT="$(BUILD_OS_BOOTSTRAP_LOCK_WAIT=5 timeout 60 bash "$BOOTSTRAP" --target "$ROOT" 2>&1)"; then
     case "$BOOT_OUT" in
       *"already up to date"*) BOOT_STATUS="up to date (cached)" ;;
-      *"nothing to install"*) BOOT_STATUS="source repo (no install needed)" ;;
+      *"nothing to install"*) BOOT_STATUS="vendored/source copy — no canonical source attached, so no install was performed" ;;
       *"installed/updated"*)  BOOT_STATUS="installed/updated" ;;
       *)                      BOOT_STATUS="ok" ;;
     esac

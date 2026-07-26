@@ -16,11 +16,25 @@ You were probably told something like *"look at ClaudeOrchestrator and install i
 as needed."* **In most cases you do not have to do anything** — see *Automatic
 bootstrap* directly below. The manual installers remain available as fallbacks.
 
-### Automatic bootstrap (P-023 — attach and go)
+### Activation (P-023/P-024) — one command, then automatic
 
-Attaching ClaudeOrchestrator to a project is sufficient. Its **SessionStart hook**
-(`.claude/hooks/session-start-build-os.sh`) is the entry point Claude Code actually
-executes, and it invokes:
+> **Platform boundary, measured — not assumed (P-024).** *Attaching* this repo does **not**
+> by itself execute anything. Live tests on a genuinely fresh project showed:
+> (a) with ClaudeOrchestrator merely present alongside a fresh project, a new session
+> installed **nothing**; (b) `claude -p` (non-interactive CLI) does **not** run SessionStart
+> hooks at all — neither project-scope nor user-scope, in an untrusted project. SessionStart
+> hooks **do** run on the managed surfaces (web / cloud task / interactive), which is how this
+> repo's own hook fires. So: run the one activation command below once per project; after that,
+> managed sessions execute the hook and the runtime keeps itself current automatically.
+
+**Activate (one command, from the project):**
+
+```bash
+bash /path/to/ClaudeOrchestrator/build-os/tools/project-bootstrap.sh
+```
+
+That is the whole setup. The same script is what the **SessionStart hook**
+(`.claude/hooks/session-start-build-os.sh`) invokes on every managed session thereafter:
 
 ```bash
 build-os/tools/project-bootstrap.sh --target <effective project dir>

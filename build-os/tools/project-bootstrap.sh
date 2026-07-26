@@ -118,6 +118,16 @@ PY
     say "  agents MISSING:$missing  (actionable gap — re-attach ClaudeOrchestrator or re-run the bootstrap)"
   fi
   say "  local tools: $( [ "$tools_ok" = 1 ] && echo 'specialist-handoff, capability-profile, supervise (present)' || echo 'INCOMPLETE — re-run the bootstrap' )"
+  # A vendored copy cannot repair itself: its SRC *is* the project, so there is no canonical
+  # source to copy from. Say so with the exact repair command instead of implying all is well.
+  if [ -n "$missing" ] || [ "$tools_ok" != 1 ]; then
+    if [ "$SRC" = "$TARGET" ]; then
+      say "  REPAIR: this is a vendored copy with no canonical source attached — it cannot self-heal."
+      say "          Attach ClaudeOrchestrator, then run:  bash <ClaudeOrchestrator>/build-os/tools/project-bootstrap.sh --target \"$TARGET\" --force"
+    else
+      say "  REPAIR: run  bash \"$SRC/build-os/tools/project-bootstrap.sh\" --target \"$TARGET\" --force"
+    fi
+  fi
   say "  NOTE: file presence is discoverability, not proof of callability — verify a live agent/tool call before routing."
   [ -z "$missing" ] && [ "$tools_ok" = 1 ] && return 0 || return 1
 }

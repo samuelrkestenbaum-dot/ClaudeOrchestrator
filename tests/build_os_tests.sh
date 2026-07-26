@@ -893,6 +893,13 @@ grep -q "Orchestrator: ON" <<<"$VVOUT" && ok "vendored copy self-verifies as ON"
 # atomic writes leave no temp artifacts behind
 [ -z "$(find "$VP" -name '*.bootstrap-tmp' 2>/dev/null)" ] && ok "atomic writes leave no .bootstrap-tmp artifacts" || no "stray .bootstrap-tmp artifacts left behind"
 
+# --- I3) a DEGRADED vendored copy must name an actionable repair, not "nothing to install"
+rm -f "$VP/build-os/tools/supervise.sh"
+VDOUT="$(bash "$VP/build-os/tools/project-bootstrap.sh" --target "$VP" --verify 2>&1)"
+grep -q "Orchestrator: DEGRADED" <<<"$VDOUT" && ok "incomplete vendored copy reports DEGRADED" || no "incomplete vendored copy did not report DEGRADED"
+grep -qi "cannot self-heal" <<<"$VDOUT" && ok "vendored copy states it cannot self-heal (no canonical source)" || no "vendored copy hides its inability to self-heal"
+grep -qi "REPAIR:" <<<"$VDOUT" && ok "DEGRADED output names an actionable repair command" || no "DEGRADED output lacks a repair command"
+
 # --- I) router integrity: every routed local tool path exists ----------------------
 badpath=""
 for t in $(grep -oE 'build-os/tools/[a-z-]+\.sh' "$ROUTER" | sort -u); do
