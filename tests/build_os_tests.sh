@@ -770,6 +770,136 @@ IWATCH="$(bash "$HANDOFF" detect "supervise this long-running overnight build wi
 grep -qi "supervise.sh" <<<"$IWATCH" && ok "claude-watch inline directive names the supervise.sh fallback" || no "claude-watch directive omits Cloud-native fallback"
 { grep -qi "verify that Claude Watch is connected" <<<"$IWATCH" && grep -qi "Do NOT claim" <<<"$IWATCH"; } && ok "claude-watch stays availability-conditional (no overclaim)" || no "claude-watch overclaims availability"
 
+echo "== 26. P-023: project-agnostic bootstrap — complete runtime, manifest, transactional =="
+BOOT="$SRC/build-os/tools/project-bootstrap.sh"
+[ -x "$BOOT" ] && ok "project-bootstrap.sh present + executable" || no "project-bootstrap.sh missing/not executable"
+
+# --- A) a completely NEW generic project receives EVERY required file -------------
+NP="$WORK/p023-new"; mkdir -p "$NP"; ( cd "$NP" && git init -q 2>/dev/null || true )
+NPOUT="$(bash "$BOOT" --target "$NP" 2>&1)"; NPEC=$?
+[ "$NPEC" = 0 ] && ok "bootstrap succeeds on a fresh generic project" || no "bootstrap failed on fresh project (ec=$NPEC)"
+missing=""
+for rel in .claude/agents/build-orchestrator.md .claude/agents/builder.md .claude/agents/qa.md \
+           .claude/agents/reviewer.md .claude/agents/archivist.md \
+           .claude/hooks/session-start-build-os.sh .claude/hooks/prompt-router.sh \
+           .claude/hooks/hook-once.sh .claude/settings.json \
+           build-os/tools/capability-profile.sh build-os/tools/supervise.sh \
+           build-os/tools/specialist-handoff.sh \
+           build-os/memory/tool_router.md build-os/memory/skill_budget.md \
+           build-os/global-claude-md.md CLAUDE.md; do
+  [ -e "$NP/$rel" ] || missing="$missing $rel"
+done
+[ -z "$missing" ] && ok "fresh project receives the COMPLETE runtime (agents/commands/hooks/tools/memory/guidance)" || no "fresh project missing:$missing"
+for t in capability-profile.sh supervise.sh specialist-handoff.sh; do
+  [ -x "$NP/build-os/tools/$t" ] || missing="$missing $t"
+done
+[ -z "$missing" ] && ok "installed tools keep their executable bit" || no "installed tools not executable:$missing"
+grep -q "BUILD-OS:START" "$NP/CLAUDE.md" && ok "managed CLAUDE.md block installed" || no "managed CLAUDE.md block missing"
+python3 - "$NP/.claude/settings.json" <<'PY' && ok "SessionStart + UserPromptSubmit wired in project settings" || no "project settings hooks not wired"
+import json,sys
+h=json.load(open(sys.argv[1])).get("hooks",{})
+def has(ev,s):
+    return any(s in str(x.get("command","")) for g in h.get(ev,[]) for x in g.get("hooks",[]))
+assert has("SessionStart","session-start-build-os.sh"), "SessionStart"
+assert has("UserPromptSubmit","prompt-router.sh"), "UserPromptSubmit"
+PY
+
+# --- B) installation manifest ------------------------------------------------------
+MAN="$NP/build-os/.install-manifest.json"
+[ -f "$MAN" ] && ok "installation manifest written" || no "installation manifest missing"
+python3 - "$MAN" <<'PY' && ok "manifest records source SHA, runtime version, timestamp, hashes, agents, tools, preserved" || no "manifest incomplete"
+import json,sys
+m=json.load(open(sys.argv[1]))
+for k in ("source_sha","runtime_version","installed_at","files","agents","tools","preserved"):
+    assert k in m, k
+assert isinstance(m["files"],dict) and m["files"], "files hashes"
+assert set(["build-orchestrator","builder","qa","reviewer","archivist"]) <= set(m["agents"]), m["agents"]
+PY
+
+# --- C) idempotent + cached (second run performs no re-copy) -----------------------
+NPOUT2="$(bash "$BOOT" --target "$NP" 2>&1)"
+grep -qiE "up to date|skipped|no change" <<<"$NPOUT2" && ok "second run is cached/idempotent (no redundant copy)" || no "second run did not report cache/skip"
+python3 - "$MAN" <<'PY' && ok "manifest still valid after repeated install" || no "manifest corrupted by repeat install"
+import json,sys; json.load(open(sys.argv[1]))
+PY
+
+# --- D) project-specific state SURVIVES an upgrade from a partial installation -----
+UP="$WORK/p023-upgrade"; mkdir -p "$UP/.claude/agents" "$UP/build-os/memory" "$UP/build-os/receipts" "$UP/src"
+printf 'stale-agent\n'            > "$UP/.claude/agents/build-orchestrator.md"   # partial + stale
+printf 'PROJECT STATE KEEP ME\n'  > "$UP/build-os/memory/current_state.md"
+printf 'PROJECT RESIDUE KEEP ME\n'> "$UP/build-os/memory/residue.md"
+printf 'PROJECT RECEIPT KEEP ME\n'> "$UP/build-os/receipts/P-001.md"
+printf 'product code keep me\n'   > "$UP/src/app.js"
+printf '# My project\nCustom instructions KEEP ME\n' > "$UP/CLAUDE.md"
+printf '{"hooks":{},"customKey":"KEEP ME"}\n' > "$UP/.claude/settings.json"
+bash "$BOOT" --target "$UP" >/dev/null 2>&1
+keptall=1
+grep -q "PROJECT STATE KEEP ME"   "$UP/build-os/memory/current_state.md" || keptall=0
+grep -q "PROJECT RESIDUE KEEP ME" "$UP/build-os/memory/residue.md"       || keptall=0
+grep -q "PROJECT RECEIPT KEEP ME" "$UP/build-os/receipts/P-001.md"       || keptall=0
+grep -q "product code keep me"    "$UP/src/app.js"                       || keptall=0
+grep -q "Custom instructions KEEP ME" "$UP/CLAUDE.md"                    || keptall=0
+python3 -c 'import json,sys; sys.exit(0 if json.load(open(sys.argv[1])).get("customKey")=="KEEP ME" else 1)' "$UP/.claude/settings.json" || keptall=0
+[ "$keptall" = 1 ] && ok "upgrade preserves project memory, receipts, product files, custom CLAUDE.md + settings" || no "upgrade clobbered project-specific state"
+grep -q "stale-agent" "$UP/.claude/agents/build-orchestrator.md" && no "stale managed agent was NOT refreshed" || ok "stale managed agent refreshed from canonical"
+[ -x "$UP/build-os/tools/supervise.sh" ] && ok "partial installation gains the previously-missing tools/" || no "upgrade did not add tools/"
+
+# --- E) transactional: a failed install rolls back, leaving the prior runtime intact
+RB="$WORK/p023-rollback"; mkdir -p "$RB"
+bash "$BOOT" --target "$RB" >/dev/null 2>&1
+# Seed a LOCAL edit so the byte-identical assertion can actually fail: without this the forced
+# reinstall copies identical bytes from the same source and the check would pass vacuously.
+printf '\nLOCAL-EDIT-ROLLBACK-MARKER\n' >> "$RB/.claude/agents/qa.md"
+PRIOR="$(cksum < "$RB/.claude/agents/qa.md" 2>/dev/null)"
+RBOUT="$(BUILD_OS_BOOTSTRAP_FAIL=validate bash "$BOOT" --target "$RB" --force 2>&1)"; RBEC=$?
+[ "$RBEC" != 0 ] && ok "injected mid-install failure exits non-zero (not silent)" || no "failed install reported success"
+grep -qiE "rollback|restored" <<<"$RBOUT" && ok "failed install reports rollback" || no "failed install did not report rollback"
+{ [ "$(cksum < "$RB/.claude/agents/qa.md" 2>/dev/null)" = "$PRIOR" ] && grep -q "LOCAL-EDIT-ROLLBACK-MARKER" "$RB/.claude/agents/qa.md"; } && ok "rollback restores the prior installation byte-identically (local edit preserved)" || no "rollback left a corrupted installation"
+
+# --- F) concurrency: a held lock never corrupts an installation --------------------
+CC="$WORK/p023-concurrent"; mkdir -p "$CC/build-os"
+LOCKDIR="$CC/build-os/.bootstrap.lock"; mkdir -p "$LOCKDIR"; sleep 30 & CCPID=$!; printf '%s\n' "$CCPID" > "$LOCKDIR/pid"
+CCOUT="$(BUILD_OS_BOOTSTRAP_LOCK_WAIT=1 bash "$BOOT" --target "$CC" 2>&1)"; CCEC=$?
+kill "$CCPID" 2>/dev/null; wait "$CCPID" 2>/dev/null
+{ [ "$CCEC" != 0 ] && grep -qiE "busy|lock" <<<"$CCOUT"; } && ok "concurrent bootstrap fails closed as BUSY (no corruption)" || no "concurrent bootstrap did not fail closed (ec=$CCEC)"
+[ ! -e "$CC/.claude/agents/qa.md" ] && ok "BUSY bootstrap installed nothing (no partial write)" || no "BUSY bootstrap left a partial installation"
+rm -rf "$LOCKDIR"
+
+# --- G) health/verify: DEGRADED when a required agent is missing, ON when complete --
+VOUT="$(bash "$BOOT" --target "$NP" --verify 2>&1)"
+grep -q "Orchestrator: ON" <<<"$VOUT" && ok "verify reports Orchestrator: ON for a complete installation" || no "verify did not report ON"
+grep -qE "canonical|source SHA" <<<"$VOUT" && ok "verify reports canonical/installed SHA" || no "verify omits SHA"
+rm -f "$NP/.claude/agents/qa.md"
+DOUT="$(bash "$BOOT" --target "$NP" --verify 2>&1)"
+grep -q "Orchestrator: DEGRADED" <<<"$DOUT" && ok "missing required agent -> DEGRADED (not a false ON)" || no "missing agent still reported ON"
+grep -qi "qa" <<<"$DOUT" && ok "DEGRADED names the missing agent (actionable gap)" || no "DEGRADED does not name the gap"
+
+# --- H) attachment proof: SessionStart alone provisions a fresh project ------------
+AP="$WORK/p023-attach"; mkdir -p "$AP" "$WORK/p023-attach-tmp" "$WORK/p023-attach-home"
+printf '{"session_id":"attach","hook_event_name":"SessionStart","source":"startup"}' \
+  | CLAUDE_PROJECT_DIR="$AP" TMPDIR="$WORK/p023-attach-tmp" HOME="$WORK/p023-attach-home" \
+    bash "$SRC/.claude/hooks/session-start-build-os.sh" >"$WORK/p023-attach.out" 2>&1 || true
+{ [ -f "$AP/.claude/hooks/session-start-build-os.sh" ] && [ -x "$AP/build-os/tools/supervise.sh" ]; } \
+  && ok "SessionStart alone provisions a fresh project (attachment is sufficient)" || no "SessionStart did not provision the project"
+grep -qE "Orchestrator: (ON|DEGRADED)" "$WORK/p023-attach.out" && ok "SessionStart prints an honest ON/DEGRADED status line" || no "SessionStart status line missing"
+grep -qiE "agents|tools|fallback|SHA" "$WORK/p023-attach.out" && ok "SessionStart summary reports agents/tools/SHA evidence" || no "SessionStart summary lacks evidence"
+
+# --- I2) the project's OWN vendored copy must not report a permanent false DRIFT ----
+VP="$WORK/p023-vendored"; mkdir -p "$VP"; ( cd "$VP" && git init -q 2>/dev/null || true )
+bash "$BOOT" --target "$VP" >/dev/null 2>&1
+VVOUT="$(bash "$VP/build-os/tools/project-bootstrap.sh" --target "$VP" --verify 2>&1)"
+grep -q "DRIFT" <<<"$VVOUT" && no "vendored copy reports a permanent false DRIFT" || ok "vendored copy reports no false DRIFT (self-hosted provenance)"
+grep -q "Orchestrator: ON" <<<"$VVOUT" && ok "vendored copy self-verifies as ON" || no "vendored copy did not self-verify"
+# atomic writes leave no temp artifacts behind
+[ -z "$(find "$VP" -name '*.bootstrap-tmp' 2>/dev/null)" ] && ok "atomic writes leave no .bootstrap-tmp artifacts" || no "stray .bootstrap-tmp artifacts left behind"
+
+# --- I) router integrity: every routed local tool path exists ----------------------
+badpath=""
+for t in $(grep -oE 'build-os/tools/[a-z-]+\.sh' "$ROUTER" | sort -u); do
+  [ -e "$SRC/$t" ] || badpath="$badpath $t"
+done
+[ -z "$badpath" ] && ok "every build-os tool path referenced by the router exists" || no "router references dead tool paths:$badpath"
+
 echo
 echo "==== RESULT: $PASS passed, $FAIL failed ===="
 [ "$FAIL" -eq 0 ]
