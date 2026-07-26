@@ -5,20 +5,36 @@
 > on close. One packet at a time.
 
 - **Status:** none active
-- **Packet id:** _<id, e.g. P-001>_
-- **Title:** _<short title>_
+- **Packet id:** —
+- **Title:** —
+
+## Last closed
+
+- **P-023 — Project-agnostic bootstrap.** Closed 2026-07-26. Receipt:
+  `build-os/receipts/P-023.md`. Commit `b908453` (base `0f831fd`,
+  `origin/claude/add-build-os`). Suite 223/19 (RED) → **245/0** (GREEN); test section 26
+  (+29 checks); Commit-1 green in isolation at 245/0 in a detached worktree; safety grep
+  clean. Reviewer **FIX-THEN-PASS** (4 defects, all fixed); Codex second-eyes unavailable
+  on this surface → single-reviewer pass.
+
+## Next (candidates — not yet declared)
+
+- Commit the P-023 `README.md` documentation change (uncommitted in the working tree).
+- Decide Context Mode routing enablement (stays a non-secret pilot).
+- Name a target repo + approve a secret for the GH Actions templates.
+- Authorize / enable the deferred connectors.
 
 ## Goal / "done" criteria
 
-- _<the single, testable outcome that means this packet is done>_
+- _<filled when the orchestrator declares the next packet>_
 
 ## In scope
 
-- _<files / surfaces this packet may touch>_
+- _<declared on open>_
 
 ## Out of scope (explicit)
 
-- _<things that look related but are NOT this packet — surface as new packets>_
+- _<declared on open>_
 
 ## Branch base
 
@@ -30,4 +46,4 @@
 2. **Commit 2 (optional, same packet):** _<follow-through that keeps suite green>_
 
 ---
-_Initialized empty. Define/confirm a packet here before delegating to builder._
+_Confirmed by orchestrator. Builder implements exactly this scope._

@@ -11,7 +11,7 @@
 - **Primary branch / base:** `claude/add-build-os` (current integration base; no
   `main` present in this environment). Active work branch:
   `claude/orchestrator-tools-list-e0mdaz`.
-- **Build/test command:** `bash tests/build_os_tests.sh` (216 checks; no network; temp dirs).
+- **Build/test command:** `bash tests/build_os_tests.sh` (**245 checks**; no network; temp dirs).
   Cross-platform green: the P-018 200KB capture-bound test now generates its payload **in-child**
   (`MOCK_GEN_BYTES` / `MOCK_STREAM_CHUNKS`) instead of via an env var — the old env delivery
   exceeded Linux `MAX_ARG_STRLEN` (~128KB) and failed only on Linux (P-018.1, tests-only fix).
@@ -30,7 +30,30 @@
 
 ## Where we are
 
-- **Last closed packet:** P-022 — reconciliation of the post-settings-closure-audit branch
+- **Last closed packet:** P-023 — **project-agnostic bootstrap** (receipt
+  `build-os/receipts/P-023.md`). Attaching ClaudeOrchestrator to **any** Claude Code project now
+  installs/activates the complete runtime with **no project-specific instructions**. New
+  `build-os/tools/project-bootstrap.sh` resolves the effective project (`--target` >
+  `CLAUDE_PROJECT_DIR` > cwd) and installs the **MANAGED** set (agents, commands, hooks,
+  `build-os/tools/*.sh` incl. `capability-profile.sh` / `supervise.sh` / `specialist-handoff.sh` /
+  `skill-budget-audit.sh`, `tool_router.md`, `skill_budget.md`, `global-claude-md.md`, the managed
+  `CLAUDE.md` block, and `settings.json` SessionStart+UserPromptSubmit wiring merged idempotently)
+  while **PRESERVING** `current_state.md`, `residue.md`, `packets/`, `receipts/`, product files,
+  non-managed `CLAUDE.md` content, and unrelated settings keys (seeded only when absent). It is
+  **transactional** (stage → backup → atomic promote → validate → rollback), uses a `mkdir`-atomic
+  lock with fail-closed BUSY and no recursive deletion of env-controlled paths, skips redundant work
+  via a content-hash + source-SHA cache, and writes `build-os/.install-manifest.json` (source SHA,
+  runtime version 1.0.0, timestamp, per-file sha256, agents, tools, preserved).
+  `.claude/hooks/session-start-build-os.sh` now invokes it (bounded 60s, non-fatal) and replaces the
+  unconditional "Orchestrator: ON" with a **verify-driven ON/DEGRADED** line naming missing
+  agents/tools, canonical vs installed SHA, bootstrap outcome, and the caveat that **file presence is
+  discoverability, not proof of callability**. Closed the previously-observed omissions (absent
+  `tools/`, `capability-profile.sh`, `supervise.sh`, `skill_budget.md`, `global-claude-md.md`).
+  Suite **223/19 (RED) → 245/0 (GREEN)**; test section 26 (+29 checks); all 216 prior checks
+  preserved; Commit-1 `b908453` green in isolation at 245/0 in a detached worktree.
+  Reviewer **FIX-THEN-PASS**, all 4 defects fixed; **Codex second-eyes unavailable** on this surface
+  (no `codex` on PATH) → single-reviewer pass.
+- **Prior:** P-022 — reconciliation of the post-settings-closure-audit branch
   (`claude/post-settings-closure-audit-y59p8t`) into canonical (receipt
   `build-os/receipts/P-022.md`). **Documentation-only; no behavior change; suite stays 216/216.**
   The audit branch (two commits self-labeled "P-001": `571bf05`, `e3d8b6e`) is **reconciled /
@@ -128,7 +151,8 @@
 - **Prior:** P-015 — global install ships the specialist handoff tools (installed hook resolves
   + runs the handoff end-to-end). P-014 — zero-touch specialist orchestration.
 - **Now:** none active.
-- **Next (candidates):** decide Context Mode routing enablement (stays non-secret pilot);
+- **Next (candidates):** commit the P-023 `README.md` documentation change (currently uncommitted);
+  decide Context Mode routing enablement (stays non-secret pilot);
   name a target repo + approve
   a secret for the GH Actions; authorize/enable the deferred connectors.
 

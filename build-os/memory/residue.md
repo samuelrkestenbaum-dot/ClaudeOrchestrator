@@ -54,6 +54,15 @@
   The superseded remote branch was then deleted through the authenticated GitHub web UI and
   its absence was verified after a full page refresh. Canonical remained untouched.
 
+- **Project-agnostic bootstrap (P-023):** `build-os/tools/project-bootstrap.sh` + the SessionStart
+  hook make attachment to an arbitrary project zero-instruction. **MANAGED vs PRESERVED is the rule
+  to remember:** `tool_router.md` is **MANAGED** and refreshed on **every** bootstrap, so any
+  project-specific routing must live in `current_state.md` / `residue.md` or the user-scope router
+  (per the 3-tier fallback) — otherwise it is overwritten. `current_state.md`, `residue.md`,
+  `packets/`, `receipts/`, product files, non-managed `CLAUDE.md` content, and unrelated
+  `settings.json` keys are preserved. Documented in `README.md` — **that README change is still
+  uncommitted in the working tree** at close.
+
 ## Known risks / debt
 
 - **Ephemerality → solved via committed bootstrap (P-004):** the remote container is
@@ -173,6 +182,18 @@
 - **Side-branch duplication (P-022):** audit-style side branches can duplicate canonical
   machinery (e.g. a parallel `verify.sh` structural suite + a colliding "P-001" identity) if not
   reconciled promptly; reconcile such branches into canonical **before divergence grows**.
+- **Bootstrap honesty boundary (P-023):** agent **callability** was proven only by **real agent
+  invocations in that session** (orchestrator → builder → qa → reviewer → archivist). The bootstrap
+  itself can verify **discoverability from files only**, and the ON/DEGRADED startup line says so
+  explicitly ("file presence is discoverability, not proof of callability"). Never upgrade a
+  DEGRADED/ON file-presence report into an activation claim.
+- **Single-reviewer pass (P-023):** **Codex second-eyes is NOT available on this surface** (no
+  `codex` on `PATH`), so P-023 closed on one reviewer. Reviewer returned **FIX-THEN-PASS** with 4
+  defects, all fixed: (1) permanent false `DRIFT` on a vendored copy (`SRC == TARGET` now reports
+  provenance), (2) unchecked truncate-then-write of `settings.json`/`CLAUDE.md` (now atomic
+  temp + `os.replace`, status-checked, rollback on failure), (3) unchecked `mktemp -d` that could
+  write at filesystem root (now fails closed), (4) a vacuous rollback assertion (now seeds a local
+  edit so it can fail). Re-run an independent second-eyes pass on this surface once `codex` exists.
 - Snapshot leakage: Repomix output can embed code — the hardened config excludes
   secrets/env/deps/build, but **sharing a snapshot externally is a STOP**.
 

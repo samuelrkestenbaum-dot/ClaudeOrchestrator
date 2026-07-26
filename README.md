@@ -13,9 +13,57 @@ Claude Code's native tools and to external tools / MCP servers **when connected*
 ## 🤖 If you are a Claude Code session reading this repo
 
 You were probably told something like *"look at ClaudeOrchestrator and install it
-as needed."* Do this:
+as needed."* **In most cases you do not have to do anything** — see *Automatic
+bootstrap* directly below. The manual installers remain available as fallbacks.
 
-1. **Install into the project the user is currently working in** (most common):
+### Automatic bootstrap (P-023 — attach and go)
+
+Attaching ClaudeOrchestrator to a project is sufficient. Its **SessionStart hook**
+(`.claude/hooks/session-start-build-os.sh`) is the entry point Claude Code actually
+executes, and it invokes:
+
+```bash
+build-os/tools/project-bootstrap.sh --target <effective project dir>
+```
+
+which installs/updates the **complete** runtime into that project — agents, commands,
+hooks, `build-os/tools/` (`specialist-handoff.sh`, `capability-profile.sh`,
+`supervise.sh`, `skill-budget-audit.sh`), `tool_router.md`, `skill_budget.md`,
+`global-claude-md.md`, the managed `CLAUDE.md` block, and the `.claude/settings.json`
+SessionStart + UserPromptSubmit wiring. It is:
+
+- **idempotent + cached** — skips entirely when the canonical SHA and every managed
+  file hash already match (fast startup);
+- **transactional** — stages, backs up, promotes atomically, and **rolls back** to the
+  prior installation on any failure;
+- **lock-guarded** — a `mkdir`-atomic lock makes concurrent SessionStarts fail closed
+  as BUSY rather than corrupt an install;
+- **non-destructive** — `current_state.md`, `residue.md`, packets, receipts, product
+  files, custom `CLAUDE.md` content, and unrelated settings keys are **never**
+  overwritten (only seeded when absent);
+- **manifest-backed** — writes `build-os/.install-manifest.json` (canonical source SHA,
+  runtime version, timestamp, per-file sha256, agents, tools, preserved files) so any
+  session can detect drift;
+- **honest** — startup prints `Orchestrator: ON` only when the required runtime is
+  actually present, otherwise `Orchestrator: DEGRADED` naming the missing agent/tool.
+  File presence is discoverability, **not** proof of callability — verify a live
+  agent/tool call before routing.
+
+Run it manually any time: `build-os/tools/project-bootstrap.sh --target DIR`
+(`--verify` for a health report, `--force` to reinstall, `--dry-run` to preview).
+
+> **Managed vs preserved — know which is which.** `build-os/memory/tool_router.md` is
+> **MANAGED**: it is the canonical routing matrix and is refreshed from ClaudeOrchestrator
+> on every bootstrap, so project-local edits to that file are replaced. Put project-specific
+> routing in `build-os/memory/current_state.md` / `residue.md` (both **preserved**), or in a
+> user-scope `~/build-os/memory/tool_router.md` — the router's documented 3-tier fallback is
+> *project → user-scope → embedded lanes*. `current_state.md`, `residue.md`, `packets/`,
+> `receipts/`, product files, non-managed `CLAUDE.md` content, and unrelated
+> `.claude/settings.json` keys are never overwritten.
+
+### Manual installers (fallbacks)
+
+1. **Install into the project the user is currently working in**:
    ```bash
    # from a clone of THIS repo:
    /path/to/ClaudeOrchestrator/install-project.sh /path/to/their/project
