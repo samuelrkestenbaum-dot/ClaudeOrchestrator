@@ -54,7 +54,13 @@ mkdir -p "$FHOME/.claude/skills/native-skill" \
 cat > "$FHOME/.claude/settings.json" <<'JSON'
 { "enabledPlugins": { "trailofbits": ["static-analysis"], "claude-hud": ["claude-hud"] } }
 JSON
-OUT="$(HOME="$FHOME" CLAUDE_PROJECT_DIR="$FPROJ" bash "$HOOK" 2>/dev/null)"
+# Claude Code invokes a SessionStart hook with a JSON payload of this shape on stdin and
+# then closes it (the real event also carries transcript_path and cwd, which this detector
+# does not read). The hook reads stdin to EOF, so a payload MUST be supplied here: inheriting the
+# caller's stdin blocks forever on an interactive terminal (see section 27). TMPDIR is
+# isolated to $WORK so the hook-once guard starts fresh on every run.
+SESSION_PAYLOAD='{"session_id":"build-os-detector-test","hook_event_name":"SessionStart","source":"startup"}'
+OUT="$(printf '%s' "$SESSION_PAYLOAD" | HOME="$FHOME" CLAUDE_PROJECT_DIR="$FPROJ" TMPDIR="$WORK/s2tmp" bash "$HOOK" 2>/dev/null)"
 grep -q "Enabled plugins (settings):.*static-analysis" <<<"$OUT" && ok "reports enabledPlugins from settings" || no "reports enabledPlugins from settings"
 grep -q "Skills (native user/project):.*native-skill"  <<<"$OUT" && ok "reports native skills"                || no "reports native skills"
 grep -q "Plugin-cache candidates.*cache-skill"         <<<"$OUT" && ok "cache entry labeled candidate"        || no "cache entry labeled candidate"
@@ -813,6 +819,114 @@ else
       no "chained maintenance suite exited $MEC while reporting 0 failures — see $MAINT_LOG"
     fi
   fi
+fi
+
+echo "== 27. Hook invocations must never inherit the caller's stdin (no interactive hang) =="
+# Claude Code delivers a JSON payload on stdin and CLOSES it; the hooks therefore read
+# stdin to EOF (hook-once.sh: payload="$(cat)"; prompt-router.sh: PAYLOAD="$(cat ...)").
+# That is the correct hook contract. But a TEST that runs a hook without supplying that
+# payload inherits the caller's stdin, which on an interactive terminal never reaches
+# EOF — so the suite blocks forever with no output explaining why. README documents
+# `bash tests/build_os_tests.sh` as the repo suite command, so that hang is what a
+# customer on a TTY hits.
+#
+# What these checks do and do NOT do — stated plainly, because the distinction matters:
+#   * Check (b), the static scan, is the actual regression detector. It never runs a
+#     hook, so it cannot hang, and it names the exact offending statement.
+#   * Check (a) is BOUNDED (timeout) and wires up its own invocations — it reuses
+#     section 2's payload string but none of section 2's stdin wiring — so it can never
+#     fail BECAUSE of a regression at an invocation site such as the section-2 call. It
+#     is an executable proof of the mechanism — a hook fed its payload terminates even
+#     while stdin stays open — not a detector for any particular line.
+#   * LIMIT: on a TTY, a re-broken section-2 call hangs the suite at section 2 and 27
+#     is never reached. Check (b) is the protection, and it fires in CI / any non-TTY
+#     run (and on a TTY for every site except one that is already hanging the suite
+#     ahead of it). Section 27 prevents the bug from being re-introduced; it does not
+#     rescue a run that is already blocked.
+
+# (a) Behavioral: a hook, invoked the way this suite invokes it, must COMPLETE even
+#     while the caller's stdin stays open and idle. A FIFO whose write end is held open
+#     reproduces an interactive terminal without ever sending EOF. Both stdin-reading
+#     hooks are covered.
+PIN_FIFO="$WORK/stdin-idle.fifo"
+mkfifo "$PIN_FIFO"
+( exec 9>"$PIN_FIFO"; sleep 120 ) & PIN_HOLDER=$!
+if timeout 60 bash -c \
+     'printf "%s" "$2" | HOME="$3" CLAUDE_PROJECT_DIR="$4" TMPDIR="$5" bash "$1" >/dev/null 2>&1' \
+     _ "$HOOK" "$SESSION_PAYLOAD" "$FHOME" "$FPROJ" "$WORK/pin-tmp" < "$PIN_FIFO"; then
+  ok "SessionStart hook completes with an open-but-idle stdin (no interactive hang)"
+else
+  no "SessionStart hook hung or failed while stdin stayed open — suite hangs on a TTY"
+fi
+PIN_PHOME="$WORK/pin-home"; mkdir -p "$PIN_PHOME/.claude"
+printf '{"enabledPlugins":{},"skillListingBudgetFraction":0.18}\n' > "$PIN_PHOME/.claude/settings.json"
+printf '{"mcpServers":{"keep-me":{"command":"keep"}}}\n' > "$PIN_PHOME/.claude.json"
+PIN_PPAYLOAD='{"hook_event_name":"UserPromptSubmit","prompt":"list the files in this repo","cwd":"'"$PIN_PHOME"'","prompt_id":"pin-27"}'
+if timeout 60 bash -c \
+     'printf "%s" "$2" | HOME="$3" TMPDIR="$4" bash "$1" >/dev/null 2>&1' \
+     _ "$PROMPT_HOOK" "$PIN_PPAYLOAD" "$PIN_PHOME" "$WORK/pin-ptmp" < "$PIN_FIFO"; then
+  ok "UserPromptSubmit hook completes with an open-but-idle stdin (no interactive hang)"
+else
+  no "UserPromptSubmit hook hung or failed while stdin stayed open — suite hangs on a TTY"
+fi
+kill "$PIN_HOLDER" 2>/dev/null; wait "$PIN_HOLDER" 2>/dev/null
+
+# (b) Static: EVERY hook invocation in this file — SessionStart and UserPromptSubmit,
+#     whether written as "$HOOK" / "$PROMPT_HOOK" or as a literal .claude/hooks/*.sh
+#     path — must be fed its payload (or have stdin explicitly closed). Deleting the
+#     payload pipe from any one of them turns this assertion red and names the offending
+#     statement (its first physical line, with the whole joined statement printed).
+#     Physical lines are joined into logical ones first, because several sites put the
+#     payload pipe on a preceding continuation line (e.g. the section-15 invocations).
+#     Exempt: comment lines (they execute nothing) and the lines carrying the marker
+#     `stdin-pin-exempt` below — the scanner's own PIN_RE definition and the case
+#     statement that applies the marker. That exemption is DEFENSIVE, not an active
+#     filter: as written today neither marked line matches PIN_RE (the definition spells
+#     the pattern as `\$` and `[^"`, where a real invocation has `$` and a path), so
+#     deleting the exemption leaves the count unchanged. It is kept so that a future
+#     re-quoting of PIN_RE cannot make the scanner match its own source and report
+#     itself as a finding.
+#     The scan is only as good as PIN_RE, so a minimum site count is asserted below:
+#     if a rename or refactor makes the pattern stop matching, the pin fails instead of
+#     passing vacuously on zero sites.
+PIN_RE='bash "\$(HOOK|PROMPT_HOOK)"|bash "[^"]*/\.claude/hooks/[^"]*\.sh"'  # stdin-pin-exempt
+# Today's inventory is 10 executable sites: 3 SessionStart via "$HOOK" (sections 2, 7)
+# and 7 UserPromptSubmit — 4 via "$PROMPT_HOOK" (sections 7, 18, 22) and 3 written as a
+# literal .claude/hooks/prompt-router.sh path (sections 9, 16). Raise this floor when
+# sites are added; lowering it is a deliberate act that says the suite really did shed a
+# site, not that the scanner stopped seeing one.
+PIN_MIN_SITES=10
+PIN_LEAK=""; PIN_COUNT=0; pin_buf=""; pin_lno=0; pin_start=0
+while IFS= read -r pin_raw || [ -n "$pin_raw" ]; do
+  pin_lno=$((pin_lno+1))
+  [ -n "$pin_buf" ] || pin_start=$pin_lno
+  # Join bash line-continuations: a trailing backslash, or a trailing pipe.
+  if [[ "$pin_raw" == *\\ ]]; then pin_buf="${pin_buf}${pin_raw%\\} "; continue; fi
+  if [[ "$pin_raw" =~ \|[[:space:]]*$ ]]; then pin_buf="${pin_buf}${pin_raw} "; continue; fi
+  pin_line="${pin_buf}${pin_raw}"; pin_buf=""
+  case "$pin_line" in *stdin-pin-exempt*) continue ;; esac   # stdin-pin-exempt
+  [[ "$pin_line" =~ ^[[:space:]]*# ]] && continue
+  pin_rest="$pin_line"
+  while [[ "$pin_rest" =~ $PIN_RE ]]; do
+    pin_m="${BASH_REMATCH[0]}"
+    pin_pre="${pin_rest%%"$pin_m"*}"
+    pin_rest="${pin_rest#*"$pin_m"}"
+    PIN_COUNT=$((PIN_COUNT+1))
+    if [[ "$pin_pre" != *"|"* && "$pin_line" != *"< /dev/null"* && "$pin_line" != *"</dev/null"* ]]; then
+      PIN_LEAK="${PIN_LEAK}      | line ${pin_start}: ${pin_line}"$'\n'
+    fi
+  done
+done < "$SRC/tests/build_os_tests.sh"
+if [ "$PIN_COUNT" -ge "$PIN_MIN_SITES" ]; then
+  ok "stdin scanner sees $PIN_COUNT hook-invocation sites (>= $PIN_MIN_SITES, not vacuous)"
+else
+  no "stdin scanner matched only $PIN_COUNT hook-invocation sites (expected >= $PIN_MIN_SITES) — it has gone blind, so its verdict below is meaningless"
+fi
+if [ -z "$PIN_LEAK" ]; then
+  ok "all $PIN_COUNT hook invocations in the suite supply stdin (never inherit the terminal)"
+else
+  no "hook invocation(s) inherit the caller's stdin — the suite will hang on a TTY"
+  printf '%s' "$PIN_LEAK"
 fi
 
 echo
