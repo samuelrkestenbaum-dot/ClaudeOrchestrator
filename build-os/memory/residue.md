@@ -54,6 +54,36 @@
   The superseded remote branch was then deleted through the authenticated GitHub web UI and
   its absence was verified after a full page refresh. Canonical remained untouched.
 
+- **License model is an OPEN OWNER DECISION (`gravito_release_metadata_a`):** `LICENSE` ships
+  proprietary **All Rights Reserved** (Samuel Kestenbaum) as the deliberately most-conservative
+  **placeholder**, chosen because it grants nothing by accident and can be loosened later (BSL,
+  dual, or open) without clawing back a right already given — loosening is easy, retracting a
+  grant is not. **This is not a settled licensing decision.** No pricing, entitlement scheme, or
+  terms of service are defined anywhere, and none should be invented without the owner.
+- **No tags exist → rollback is UNPROVEN (`gravito_release_metadata_a`):** `VERSION` is `0.1.0`
+  and `CHANGELOG.md` documents update = re-run the installer at a newer checkout, rollback =
+  check out an earlier tag/commit and re-run. The **update** half is covered (the cold-install
+  suite asserts a byte-identical re-install); the **rollback** half is the intended procedure,
+  **not a verified one** — no tag exists to roll back *to* by name and no rollback has been
+  executed end-to-end and measured. This is P-B territory. Tagging is the **operator's call**
+  and was not done. Note the asymmetry that a rollback would not undo: uninstall/downgrade never
+  removes `build-os/memory/archive/`, the only copy of anything already rotated out.
+- **Proof is single-platform (carried from P-A):** every measurement — both suites, the
+  cold-install proof, the maintenance layer — was taken on **one Linux machine's**
+  `node`/`git`/`bash`. The `sha256sum` / `shasum` branch exists for macOS but has **not** been
+  executed, and no other platform was tested at all. Also stated in
+  `build-os/maintenance/PORTING.md` and in `CHANGELOG.md` → *Known limits*.
+- **`init-build-os.sh` seeding leak (open, being fixed in parallel):** `init-build-os.sh` seeds a
+  new project's scaffolds from **this repo's LIVE memory files**, so a customer's fresh
+  `build-os/` can arrive carrying this repo's state. Flagged `BLOCKED` in
+  `build-os/maintenance/PORTING.md`. P-A added nothing to the leak (its two scaffold additions
+  come from clean templates) and did not fix it. A **sibling packet in this same session** is
+  fixing it — at the time this note was written that fix had **not** landed, so treat the leak as
+  open until that packet's own receipt says otherwise.
+- **Single-model review throughout (P-A + stdin-hang):** every reviewer verdict in this work was
+  produced by **one model**. Codex second-eyes was checked and **unavailable on every pass**.
+  No verdict here has independent second-model corroboration.
+
 ## Known risks / debt
 
 - **Ephemerality → solved via committed bootstrap (P-004):** the remote container is

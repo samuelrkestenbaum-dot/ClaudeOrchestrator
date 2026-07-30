@@ -10,8 +10,19 @@
   plan → build → prove → review → record system.
 - **Primary branch / base:** `claude/add-build-os` (current integration base; no
   `main` present in this environment). Active work branch:
-  `claude/orchestrator-tools-list-e0mdaz`.
-- **Build/test command:** `bash tests/build_os_tests.sh` (216 checks; no network; temp dirs).
+  `claude/project-handoff-merge-ramhds` (tip `641527f`, pushed).
+- **Version:** `0.1.0` (`VERSION`), pre-1.0 — **installable, not yet API-stable**.
+  Changelog: `CHANGELOG.md`. License: `LICENSE` — proprietary, All Rights Reserved,
+  a deliberately conservative **placeholder**; the license model is still an open
+  owner decision. **No tags exist in this repo yet.**
+- **Build/test command:** `bash tests/build_os_tests.sh` (488 checks; no network; temp dirs).
+  It **chains** every sibling suite in `tests/` through one `chain_suite` function and folds their
+  counts into its own totals — 221 native + 61 cold-install + 73 lane-enforcement + 91 scaffold-seeding
+  + 42 release-metadata = 488. A sibling suite present on disk but not chained is itself a failure,
+  so a new suite cannot become discoverable-only. The maintenance layer also has its
+  own suite, `./build-os/maintenance/run-tests.sh` (144 checks, node --test). Both are offline and
+  deterministic. Pinned separately: `bash tests/release_metadata_tests.sh` (release metadata +
+  a staleness guard on THIS line — if the count above goes stale again, that suite goes red).
   Cross-platform green: the P-018 200KB capture-bound test now generates its payload **in-child**
   (`MOCK_GEN_BYTES` / `MOCK_STREAM_CHUNKS`) instead of via an env var — the old env delivery
   exceeded Linux `MAX_ARG_STRLEN` (~128KB) and failed only on Linux (P-018.1, tests-only fix).
@@ -30,7 +41,35 @@
 
 ## Where we are
 
-- **Last closed packet:** P-022 — reconciliation of the post-settings-closure-audit branch
+- **Last closed packet:** `gravito_test_harness_stdin_hang_a` — the documented test command no
+  longer hangs on an interactive terminal (receipt
+  `build-os/receipts/gravito_test_harness_stdin_hang_a.md`, commit `641527f`).
+  `tests/build_os_tests.sh` §2 invoked the SessionStart hook with the **caller's stdin
+  inherited**; the hook reads stdin to EOF (`payload="$(cat)"`), so on a TTY the suite blocked
+  forever with no output — on the exact command the README advertises. Diagnosis was
+  **hook-correct / test-wrong**: the hook contract is right and is unchanged. Fixed by feeding
+  the realistic SessionStart JSON payload, plus a stdin pin (§27) that is behavioural (a FIFO
+  held open under `timeout`) **and** static (a scanner covering all **10** hook-invocation sites
+  — 3 SessionStart + 7 UserPromptSubmit — with a minimum-site-count **vacuity floor**, because an
+  earlier draft grepped only `bash "$HOOK"` and saw 3). **Before: exit 124. After: exit 0,
+  281 passed / 0 failed at `641527f`** (488 now that three sibling suites are chained).** Known limit, stated in-file: on a TTY a re-broken §2 call hangs before
+  §27 is reached; check (b) is the protection and fires in CI / any non-TTY run.
+- **Prior:** `gravito_productization_pa_maintenance_upstream_a` (**P-A**) — the memory
+  maintenance + safety layer is upstreamed into the product (receipt
+  `build-os/receipts/gravito_productization_pa_maintenance_upstream_a.md`, commits `c30f77d`
+  + `5b956c0`). Ports rotation / tripwire / the sanctioned test wrapper (8 files) from a
+  reference deployment into `build-os/maintenance/`, with installer wiring into **both**
+  customer entry points, a `PORTING.md` manifest, a **contract-only** `standing_gates.md`
+  template (the reference deployment's live hard-stop inventory was deliberately NOT ported),
+  `GRAVITO:MANAGED` ownership markers + a `.gravito-managed` manifest, and a **61-test
+  cold-install suite chained into the documented command** rather than left discoverable-only.
+  Load-bearing adaptation: all three `FILE_SPECS` delimiters are now `^## ` (the reference
+  delimiter found **zero** blocks in a scaffolded file, and a delimiter matching nothing does not
+  error — it reported a no-op at exit 0, i.e. a file that silently never rotates), and a
+  zero-block parse of a file that HAS content now warns on stderr instead of printing the same
+  `already rotated (no-op)` line it printed for two benign states. Reviewer verdict **pass**,
+  after one **fix-then-pass** round (5 items). Suites at `641527f`: **281 / 144 / 61**, all 0 fail (the 281 is now 488).
+- **Prior:** P-022 — reconciliation of the post-settings-closure-audit branch
   (`claude/post-settings-closure-audit-y59p8t`) into canonical (receipt
   `build-os/receipts/P-022.md`). **Documentation-only; no behavior change; suite stays 216/216.**
   The audit branch (two commits self-labeled "P-001": `571bf05`, `e3d8b6e`) is **reconciled /

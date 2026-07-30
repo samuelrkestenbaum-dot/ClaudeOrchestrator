@@ -41,11 +41,23 @@ cp "$SRC/.claude/hooks/"*.sh "$DEST/.claude/hooks/"
 chmod +x "$DEST/.claude/hooks/"*.sh
 echo "  + agents, commands, hooks"
 
-# Memory scaffold — never overwrite existing project state
+# Memory scaffold — never overwrite existing project state.
+#
+# SEEDED FROM templates/, NEVER FROM THIS REPO'S LIVE build-os/memory. The
+# templates mirror the destination layout path-for-path and carry contract text
+# plus empty starting values only; this repo's own build-os/ is its operational
+# state, not a customer artifact.
 for rel in build-os/memory/tool_router.md build-os/memory/current_state.md \
            build-os/memory/residue.md build-os/packets/active_packet.md \
            build-os/receipts/README.md; do
-  if [ -e "$DEST/$rel" ]; then echo "  = $rel (exists, kept)"; else cp "$SRC/$rel" "$DEST/$rel"; echo "  + $rel"; fi
+  if [ -e "$DEST/$rel" ]; then
+    echo "  = $rel (exists, kept)"
+  elif [ ! -f "$SRC/templates/$rel" ]; then
+    echo "  ! missing template: templates/$rel — refusing to seed from live memory." >&2
+    exit 1
+  else
+    cp "$SRC/templates/$rel" "$DEST/$rel"; echo "  + $rel"
+  fi
 done
 
 # Memory maintenance + safety layer. Managed files are replaced on every run;

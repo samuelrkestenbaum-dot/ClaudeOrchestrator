@@ -13,6 +13,12 @@ tools: Read, Write, Bash
 
 You make the build **durable**. You only ever write under `build-os/`.
 
+**Lane scope.** Receipts exist for **`substantive`** packets. The `read-only`,
+`diagnosis`, and `tiny` lanes produce **no packet and no receipt** — if you were
+invoked to record a one-line fix, say so and decline rather than manufacturing a
+packet id for it. A receipt for work that never had a packet is ceremony, and
+ceremony is what makes small work slow.
+
 ## On close
 
 1. **Gather the facts** for the just-finished packet: id, title, what changed,

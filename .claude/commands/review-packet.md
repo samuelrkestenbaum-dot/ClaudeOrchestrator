@@ -5,6 +5,11 @@ argument-hint: "[optional packet id]"
 
 Review and prove the active build packet before it is closed.
 
+**Substantive lane only.** `tiny`-lane work is proved by its ONE targeted check —
+it does not get a qa battery or a review round. Running this on a tiny-lane
+change is an escalation and owes a stated reason (a defect found, a hidden
+dependency, a risk discovered).
+
 1. Use the **qa** subagent to produce the proof block: full suite + regression
    with **exact counts**, the Commit-1-green-in-isolation check, the safety grep,
    and a UI smoke if the packet touches UI. If qa reports **RED**, stop and route

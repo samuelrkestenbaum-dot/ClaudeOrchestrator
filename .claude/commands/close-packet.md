@@ -5,6 +5,10 @@ argument-hint: "[optional packet id]"
 
 Close the active build packet by recording it durably.
 
+**Substantive lane only.** Receipts exist for `substantive` packets. If the work
+was `read-only`, `diagnosis`, or `tiny`, there is no packet to close and no
+receipt to write — say so and stop rather than manufacturing one.
+
 Use the **archivist** subagent to:
 
 1. Gather the packet facts: id, title, what changed, the qa proof block (exact

@@ -9,6 +9,10 @@ set -uo pipefail
 
 SRC="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 ROUTER="$SRC/build-os/memory/tool_router.md"
+# What install-global.sh SEEDS at user scope. Deliberately the template, not the
+# live router above: a stranger's install must not receive this repo's operator
+# inventory. Pinning against $ROUTER is what previously let that leak stand.
+SEED_ROUTER="$SRC/templates/build-os/memory/tool_router.md"
 HOOK="$SRC/.claude/hooks/session-start-build-os.sh"
 PASS=0; FAIL=0
 ok(){ PASS=$((PASS+1)); echo "  PASS: $1"; }
@@ -93,7 +97,7 @@ cflag=1
 for f in $src_agents; do cmp -s "$SRC/.claude/agents/$f" "$GHOME/agents/$f" || cflag=0; done
 for f in $src_hooks;  do cmp -s "$SRC/.claude/hooks/$f"  "$PPROJ/.claude/hooks/$f" || cflag=0; done
 [ "$cflag" = 1 ] && ok "copied engine files are byte-identical to source" || no "copied engine files differ from source"
-cmp -s "$ROUTER" "$GROUTER/memory/tool_router.md" && ok "global router is byte-identical to source" || no "global router differs from source"
+cmp -s "$SEED_ROUTER" "$GROUTER/memory/tool_router.md" && ok "global router is byte-identical to the TEMPLATE (no operator inventory installed)" || no "global router is not the template — operator inventory may be leaking to user scope"
 
 echo "== 4. Managed-block replacement (re-run refreshes stale; no skip, no duplicate) =="
 MHOME="$WORK/muser"
@@ -138,7 +142,7 @@ else
   ok "known legacy routing stack removed"
 fi
 test "$(grep -c 'BUILD-OS:START' "$LHOME/CLAUDE.md")" -eq 1 && ok "legacy convergence writes one managed block" || no "legacy convergence block count"
-cmp -s "$ROUTER" "$LROUTER/memory/tool_router.md" && ok "arbitrary repo receives current user router" || no "arbitrary repo router is stale"
+cmp -s "$SEED_ROUTER" "$LROUTER/memory/tool_router.md" && ok "arbitrary repo receives the template router" || no "arbitrary repo router is not the template"
 
 echo "== 6. P-008 rules: DURABLY CONFIGURED report, 3-tier router fallback, canonical MCP =="
 # install-global reports DURABLY CONFIGURED and makes NO ACTIVE claim
@@ -793,33 +797,58 @@ grep -qi "supervise.sh" <<<"$IWATCH" && ok "claude-watch inline directive names 
 # ITS COUNTS ARE FOLDED INTO THIS FILE'S TOTALS rather than collapsed into a
 # single pass/fail. One `ok` for "61 assertions passed" would report the same
 # green if 60 of them silently stopped running.
-echo "== 26. Memory maintenance + safety layer (chained cold-install suite) =="
-MAINT_SUITE="$SRC/tests/build_os_maintenance_tests.sh"
-if [ ! -f "$MAINT_SUITE" ]; then
-  no "tests/build_os_maintenance_tests.sh is missing — the maintenance layer has no cold-install proof"
-else
-  MAINT_LOG="$WORK/build_os_maintenance_tests.log"
-  bash "$MAINT_SUITE" > "$MAINT_LOG" 2>&1
-  MEC=$?
-  MRES="$(grep -E '^==== RESULT: [0-9]+ passed, [0-9]+ failed ====$' "$MAINT_LOG" | tail -1)"
-  if [ -z "$MRES" ]; then
-    # No RESULT line at all means it died partway. Its own assertions cannot be
-    # trusted to have run, so this is one failure and the log is named.
-    no "chained maintenance suite produced no RESULT line (exit $MEC) — see $MAINT_LOG"
-    tail -5 "$MAINT_LOG" | sed 's/^/      | /'
-  else
-    MPASS="$(printf '%s' "$MRES" | sed -E 's/^==== RESULT: ([0-9]+) passed.*/\1/')"
-    MFAIL="$(printf '%s' "$MRES" | sed -E 's/.* ([0-9]+) failed ====$/\1/')"
-    PASS=$((PASS + MPASS)); FAIL=$((FAIL + MFAIL))
-    echo "  CHAINED: $MPASS passed, $MFAIL failed (tests/build_os_maintenance_tests.sh)"
-    [ "$MFAIL" -gt 0 ] && grep '^  FAIL: ' "$MAINT_LOG" | sed 's/^  /      /'
-    # A zero-failure report with a non-zero exit is itself a defect: the two
-    # disagree, and the exit code is the one the caller acts on.
-    if [ "$MEC" -ne 0 ] && [ "$MFAIL" -eq 0 ]; then
-      no "chained maintenance suite exited $MEC while reporting 0 failures — see $MAINT_LOG"
-    fi
+echo "== 26. Chained sibling suites (cold-install, lanes, scaffold templates, release metadata) =="
+# chain_suite <relative-path> <what-it-covers>
+#
+# Every sibling suite is invoked through this one function so the failure
+# handling below is written once and cannot drift between call sites. A suite
+# that dies before printing RESULT is one failure with its log named; a suite
+# reporting zero failures while exiting non-zero is itself a failure, because
+# the two disagree and the exit code is what the caller acts on.
+chain_suite() {
+  local rel="$1" covers="$2"
+  local path="$SRC/$rel" log res spass sfail sec
+  if [ ! -f "$path" ]; then
+    no "$rel is missing — $covers has no executable proof"
+    return
   fi
-fi
+  log="$WORK/$(basename "$rel").log"
+  # RELEASE_METADATA_IN_LIVE tells the release-metadata suite it is running
+  # inside this file, so its opt-in live re-run cannot recurse into us.
+  RELEASE_METADATA_IN_LIVE=1 bash "$path" > "$log" 2>&1
+  sec=$?
+  res="$(grep -E '^==== RESULT: [0-9]+ passed, [0-9]+ failed ====$' "$log" | tail -1)"
+  if [ -z "$res" ]; then
+    no "chained suite $rel produced no RESULT line (exit $sec) — see $log"
+    tail -5 "$log" | sed 's/^/      | /'
+    return
+  fi
+  spass="$(printf '%s' "$res" | sed -E 's/^==== RESULT: ([0-9]+) passed.*/\1/')"
+  sfail="$(printf '%s' "$res" | sed -E 's/.* ([0-9]+) failed ====$/\1/')"
+  PASS=$((PASS + spass)); FAIL=$((FAIL + sfail))
+  echo "  CHAINED: $spass passed, $sfail failed ($rel)"
+  [ "$sfail" -gt 0 ] && grep '^  FAIL: ' "$log" | sed 's/^  /      /'
+  if [ "$sec" -ne 0 ] && [ "$sfail" -eq 0 ]; then
+    no "chained suite $rel exited $sec while reporting 0 failures — see $log"
+  fi
+}
+
+chain_suite "tests/build_os_maintenance_tests.sh" "the memory maintenance + safety layer"
+chain_suite "tests/lane_enforcement_tests.sh"     "lane proportionality and fan-out"
+chain_suite "tests/scaffold_seeding_tests.sh"     "customer scaffold seeding"
+chain_suite "tests/release_metadata_tests.sh"     "version, license and changelog"
+
+# A chained suite that is added to the repo but never wired here would be
+# discoverable-only — the exact defect chaining exists to prevent. Assert the
+# wiring covers every sibling suite present on disk.
+UNWIRED=""
+for f in "$SRC"/tests/*.sh; do
+  b="tests/$(basename "$f")"
+  [ "$b" = "tests/build_os_tests.sh" ] && continue
+  grep -qF "chain_suite \"$b\"" "$SRC/tests/build_os_tests.sh" || UNWIRED="$UNWIRED $b"
+done
+[ -z "$UNWIRED" ] && ok "every sibling suite in tests/ is chained here (none discoverable-only)" \
+                  || no "sibling suite(s) present but never chained:$UNWIRED"
 
 echo "== 27. Hook invocations must never inherit the caller's stdin (no interactive hang) =="
 # Claude Code delivers a JSON payload on stdin and CLOSES it; the hooks therefore read

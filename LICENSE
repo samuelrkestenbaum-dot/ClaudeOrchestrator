@@ -1,0 +1,58 @@
+ClaudeOrchestrator — Build OS for Claude Code
+
+Copyright (c) 2026 Samuel Kestenbaum. All Rights Reserved.
+
+This software and its accompanying documentation, configuration, scripts, and
+other materials contained in this repository (together, the "Software") are the
+proprietary and confidential property of Samuel Kestenbaum (the "Owner").
+
+NO LICENSE IS GRANTED
+
+No right or license of any kind is granted to you by this file. In particular,
+and without limitation, you may not use, copy, reproduce, install, execute,
+modify, adapt, translate, create derivative works of, merge, publish,
+distribute, sublicense, sell, lease, lend, host, or otherwise exploit the
+Software, in whole or in part, in any form or by any means, and you may not
+permit any third party to do so, except under a separate written commercial
+agreement signed by the Owner that expressly grants those rights.
+
+Any such separate written agreement governs the scope, duration, and conditions
+of your rights. In the event of a conflict between this file and such an
+agreement, the signed agreement controls.
+
+RESERVATION OF RIGHTS
+
+All rights not expressly granted in a signed written agreement are reserved by
+the Owner. No rights are granted by implication, estoppel, waiver, course of
+dealing, or otherwise. Making the Software visible — including publishing this
+repository or providing access to it — is not a license and does not waive any
+right.
+
+The Owner's names, logos, and trademarks are not licensed by this file.
+
+NO WARRANTY
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE, TITLE, AND NONINFRINGEMENT. THE OWNER DOES
+NOT WARRANT THAT THE SOFTWARE WILL BE UNINTERRUPTED, ERROR-FREE, SECURE, OR
+THAT IT WILL MEET ANY REQUIREMENT.
+
+NO LIABILITY
+
+TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT SHALL THE OWNER
+BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+CONTRACT, TORT (INCLUDING NEGLIGENCE), OR OTHERWISE, ARISING FROM, OUT OF, OR
+IN CONNECTION WITH THE SOFTWARE OR THE USE OF OR OTHER DEALINGS IN THE
+SOFTWARE, INCLUDING ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+CONSEQUENTIAL DAMAGES, OR ANY LOSS OF PROFITS, REVENUE, DATA, OR GOODWILL.
+
+THIRD-PARTY MATERIALS
+
+The Software may reference, invoke, or interoperate with third-party software,
+services, plugins, and models that are not covered by this file and remain
+subject to their own licenses and terms. Nothing here grants any right in them.
+
+CONTACT
+
+For licensing enquiries, contact the Owner.

@@ -37,7 +37,16 @@ echo "  + agents, commands, hooks copied"
 CLAUDE_USER_DIR="$DEST" bash "$SRC/repair-host-integrations.sh"
 
 # Keep the user-scope router authoritative for repos without project Build OS.
-cp "$SRC/build-os/memory/tool_router.md" "$USER_BUILD_OS/memory/tool_router.md"
+#
+# NOTE — THIS IS THE ONE SEEDING PATH STILL SOURCED FROM LIVE MEMORY, ON PURPOSE
+# SEEDED FROM THE TEMPLATE, like the two project scaffolds. This line used to copy
+# this repo's LIVE router, which propagated whatever operator-specific connector
+# inventory it carried into every install at user scope — the same leak class the
+# project scaffolds (init-build-os.sh, install-project.sh) were fixed for, and the
+# reason `tests/build_os_tests.sh` now pins this against `templates/` rather than
+# against `build-os/memory/`. The live router stays a working document for THIS
+# repo; it is not a product artifact and must never be what a stranger installs.
+cp "$SRC/templates/build-os/memory/tool_router.md" "$USER_BUILD_OS/memory/tool_router.md"
 echo "  + user-scope tool router synchronized"
 
 # Ship the Build OS tools the global prompt hook depends on. The installed

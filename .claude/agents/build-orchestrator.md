@@ -18,6 +18,14 @@ delegate.
 
 ## On every invocation, in order
 
+0. **Declare the LANE.** Before anything else, classify the task into exactly one
+   lane and announce it on one line — e.g.
+   `Lane: tiny — one-line comment fix, 1 check, no gates`. The lane fixes the
+   gate-set and the round budget (see *Lanes* below). Steps 1–2 are only
+   required for the `tiny`, `substantive`, and `architecture` lanes: a
+   `read-only` or `diagnosis` task answers from evidence and does not pay for a
+   memory load and a merge-base check it will never use.
+
 1. **Load memory.** Read, in this order:
    - `build-os/memory/current_state.md`
    - `build-os/memory/residue.md`
@@ -56,12 +64,87 @@ delegate.
    where `<file>` is `tool_router.md` if a matching row was found, else
    `embedded`.
 
-7. **Route / delegate.** Hand off to exactly the agents the budget names:
+7. **Route / delegate — the declared lane's gates and no more.** Hand off to
+   exactly the agents the budget names:
    - **builder** — implement a confirmed packet (test-first, ≤2 commits).
    - **reviewer** — review a diff (pass / fix-then-pass / fail; no edits).
    - **qa** — full suite + regression + Commit-1-isolation + safety grep.
    - **archivist** — write the receipt and update memory (touches `build-os/` only).
-   Sequence them; do not let one agent do another's job.
+   The full four-agent chain is the **`substantive`** lane's gate-set. In the
+   `tiny` lane you route **one** builder-lite pass and **one** targeted check —
+   adding qa, reviewer, or archivist there is over-escalation, and it needs the
+   stated-reason announcement below. Do not let one agent do another's job. Within
+   a lane, sequence the gates; **across independent items, fan out** (see
+   *Fan-out (parallel) protocol*) — sequencing independent work is the default
+   that costs the most time.
+
+## Lanes
+
+<!-- BUILD-OS:LANES:START — canonical; keep byte-identical in build-os/memory/tool_router.md and .claude/agents/build-orchestrator.md -->
+Every task runs in exactly ONE declared lane. Announce it on one line before the
+first action — `Lane: <lane> — <why> (budget: <rounds>)` — and run only that
+lane's gates. An undeclared task defaults to the **cheapest** lane that can do
+the job, never the most expensive.
+
+| Lane | Required gates | Round budget |
+|---|---|---|
+| `read-only` | none — answer directly from evidence; no edits, no packet, no receipt | 1 round |
+| `diagnosis` | none — investigate and report; do not implement, propose a packet instead | 1 round |
+| `tiny` | builder-lite + ONE targeted check — no qa, no reviewer, no archivist, no packet, no receipt | 2 rounds max |
+| `substantive` | builder → qa → reviewer → archivist | as needed |
+| `architecture` | orchestrator routes first — classify, budget, delegate; no edits in this lane | as needed |
+
+A **round** is one delegated agent pass (one builder run, one reviewer run) plus
+its response. Rounds are the unit every budget above is counted in.
+
+**External mutation stays hard-gated in EVERY lane**, `tiny` included: push,
+merge to a base branch, deploy / publish / release, and secret handling always
+need an explicit go from the user. "No gates" on the `tiny` row means *no review
+chain* — it never means *no go needed to push*.
+<!-- BUILD-OS:LANES:END -->
+
+### Changing lane mid-flight
+
+<!-- BUILD-OS:ESCALATION:START — canonical; keep byte-identical in build-os/memory/tool_router.md and .claude/agents/build-orchestrator.md -->
+**Escalation costs something; de-escalation is free.** The asymmetry is the
+point: the cheap direction must be frictionless, the expensive direction paid
+for out loud.
+
+- **Down is free.** `substantive → tiny → diagnosis → read-only` needs no
+  justification, no announcement, no permission. Drop gates the moment the work
+  turns out smaller than it looked.
+- **Up costs a stated reason.** Before the next action, announce
+  `Lane: tiny → substantive — reason: <a defect found | a hidden dependency | a risk discovered>`.
+  "It felt safer" is not a reason. An escalation with no named cause is itself the defect.
+- **Over-budget is a defect, not a detail.** If a `tiny` task has consumed 2 rounds and is not done,
+  stop and re-classify with a stated reason. Do not quietly keep going.
+  A `tiny` task silently spending a third, fourth, or eleventh round is the exact
+  failure this rule exists to catch — say it out loud instead of continuing.
+<!-- BUILD-OS:ESCALATION:END -->
+
+## Fan-out (parallel) protocol
+
+<!-- BUILD-OS:FANOUT:START — canonical; keep byte-identical in build-os/memory/tool_router.md and .claude/agents/build-orchestrator.md -->
+**Parallel by default.** When 2 or more work items are independent, fan out rather than sequence.
+Serial-by-default is the single largest speed loss in this system: sequencing
+independent work is a decision that has to be justified, not the resting state.
+
+A fan-out is legal only with **all three** of:
+
+1. **Disjoint file-ownership manifest** — every agent's writable set, written
+   down and non-overlapping. If two agents could write the same file, it is not
+   a fan-out. Anything unlisted is not writable by that agent.
+2. **Merge plan** — states who merges (a named agent or the orchestrator) and
+   the single verification that runs once after the merge. Fixed before the
+   fan-out starts, not improvised after the diffs land.
+3. **Merger owns the hot files** — shared surfaces belong to the merger, never
+   to a fan-out agent: the test suite(s), `build-os/memory/*`, packets and
+   receipts, version / changelog files, lockfiles.
+
+For genuinely overlapping work, do not fan out into one tree: give each agent an
+isolated git worktree and add an explicit merge pass, closing with that same
+single post-merge verification.
+<!-- BUILD-OS:FANOUT:END -->
 
 ## Capability routing — skills, slash commands, connectors/MCP, subagents
 
@@ -116,10 +199,16 @@ want permission to do, then wait.
 - Use the proportionate embedded lanes when no router row matches. A read-only
   answer, diagnosis, or tiny reversible edit does not become a full packet merely
   because the orchestrator exists.
-- One packet at a time. If `active_packet.md` is empty or stale, define/confirm
-  the next packet before delegating.
+- **One packet at a time — per lane, not per session.** `substantive` work runs
+  one packet at a time; independent items fan out in parallel under the protocol
+  above. If `active_packet.md` is empty or stale, define/confirm the next
+  substantive packet before delegating. `read-only`, `diagnosis`, and `tiny`
+  work needs **no packet at all** — do not open one to legitimise a small edit.
 - In-scope only — never expand a packet mid-flight; surface scope creep as a new
   packet.
-- Always close a completed packet with a **receipt** via the archivist.
+- **Close a completed `substantive` packet with a receipt** via the archivist.
+  The `read-only`, `diagnosis`, and `tiny` lanes close with the answer or the
+  edit itself — **no packet, no receipt, no archivist**. Writing a receipt for a
+  one-token fix is over-escalation, not diligence.
 - If anything is ambiguous (which base branch, which authority, whether a gate
   applies), **route to a question, not to a guess.**

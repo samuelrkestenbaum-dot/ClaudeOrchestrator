@@ -4,19 +4,66 @@ The routing matrix. The **build-orchestrator** reads this on every invocation,
 matches the task to a row, and declares its Tool Budget from it. If no row
 matches, it routes from embedded defaults and says so.
 
+## Lanes — declare one out loud, before acting
+
+A lane is **declared, not implied**. Proportionality that lives only in prose
+gets ignored; this table is the gate-set, and the round budget is the contract.
+
+<!-- BUILD-OS:LANES:START — canonical; keep byte-identical in build-os/memory/tool_router.md and .claude/agents/build-orchestrator.md -->
+Every task runs in exactly ONE declared lane. Announce it on one line before the
+first action — `Lane: <lane> — <why> (budget: <rounds>)` — and run only that
+lane's gates. An undeclared task defaults to the **cheapest** lane that can do
+the job, never the most expensive.
+
+| Lane | Required gates | Round budget |
+|---|---|---|
+| `read-only` | none — answer directly from evidence; no edits, no packet, no receipt | 1 round |
+| `diagnosis` | none — investigate and report; do not implement, propose a packet instead | 1 round |
+| `tiny` | builder-lite + ONE targeted check — no qa, no reviewer, no archivist, no packet, no receipt | 2 rounds max |
+| `substantive` | builder → qa → reviewer → archivist | as needed |
+| `architecture` | orchestrator routes first — classify, budget, delegate; no edits in this lane | as needed |
+
+A **round** is one delegated agent pass (one builder run, one reviewer run) plus
+its response. Rounds are the unit every budget above is counted in.
+
+**External mutation stays hard-gated in EVERY lane**, `tiny` included: push,
+merge to a base branch, deploy / publish / release, and secret handling always
+need an explicit go from the user. "No gates" on the `tiny` row means *no review
+chain* — it never means *no go needed to push*.
+<!-- BUILD-OS:LANES:END -->
+
+### Changing lane mid-flight
+
+<!-- BUILD-OS:ESCALATION:START — canonical; keep byte-identical in build-os/memory/tool_router.md and .claude/agents/build-orchestrator.md -->
+**Escalation costs something; de-escalation is free.** The asymmetry is the
+point: the cheap direction must be frictionless, the expensive direction paid
+for out loud.
+
+- **Down is free.** `substantive → tiny → diagnosis → read-only` needs no
+  justification, no announcement, no permission. Drop gates the moment the work
+  turns out smaller than it looked.
+- **Up costs a stated reason.** Before the next action, announce
+  `Lane: tiny → substantive — reason: <a defect found | a hidden dependency | a risk discovered>`.
+  "It felt safer" is not a reason. An escalation with no named cause is itself the defect.
+- **Over-budget is a defect, not a detail.** If a `tiny` task has consumed 2 rounds and is not done,
+  stop and re-classify with a stated reason. Do not quietly keep going.
+  A `tiny` task silently spending a third, fourth, or eleventh round is the exact
+  failure this rule exists to catch — say it out loud instead of continuing.
+<!-- BUILD-OS:ESCALATION:END -->
+
 > Columns: **Task type** · **Authority** · **Route (agents)** · **Tools** ·
 > **Gate / stop**
 
 | Task type | Authority | Route (agents) | Tools | Gate / stop |
 |---|---|---|---|---|
-| Read-only answer / question | build | build-orchestrator *or direct* (no builder chain) | Read, Grep, Glob | answer only; no edits, no packet, no qa/reviewer/archivist |
-| Diagnosis / triage (no edits) | build | qa *or direct* (no builder chain) | Read, Grep, Glob, Bash (read-only) | report findings only; if a fix is needed, propose a packet — don't implement here |
-| Tiny reversible local edit | build | builder-lite (single agent, direct) | Read, Grep, Glob, Edit, Write, Bash | in-scope, local, trivially reversible; ≤1 commit; **no qa/reviewer/archivist unless risk**; escalate to the Build row if it grows |
-| Build / feature / bugfix | build | builder → qa → reviewer → archivist | Read, Grep, Glob, Edit, Write, Bash | ≤2 commits; Commit-1 green in isolation; no push/merge |
-| Architecture / "what's next" / planning | build | build-orchestrator only (no edits) | Read, Grep, Glob, Bash | route to a packet, don't implement |
+| Read-only answer / question — lane `read-only` | build | build-orchestrator *or direct* (no builder chain) | Read, Grep, Glob | answer only; no edits, no packet, no qa/reviewer/archivist; 1 round |
+| Diagnosis / triage (no edits) — lane `diagnosis` | build | qa *or direct* (no builder chain) | Read, Grep, Glob, Bash (read-only) | report findings only; if a fix is needed, propose a packet — don't implement here; 1 round |
+| Tiny reversible local edit — lane `tiny` | build | builder-lite (single agent, direct) | Read, Grep, Glob, Edit, Write, Bash | in-scope, local, trivially reversible; ≤1 commit; **no qa/reviewer/archivist/packet/receipt**; **2 rounds max** — over budget, stop and re-classify with a reason |
+| Build / feature / bugfix — lane `substantive` | build | builder → qa → reviewer → archivist | Read, Grep, Glob, Edit, Write, Bash | ≤2 commits; Commit-1 green in isolation; no push/merge |
+| Architecture / "what's next" / planning — lane `architecture` | build | build-orchestrator only (no edits) | Read, Grep, Glob, Bash | route to a packet, don't implement |
 | Design / UI | design-ui (frontend only) | builder (frontend scope) → qa (UI smoke) → reviewer → archivist | Read, Grep, Glob, Edit, Write, Bash | frontend files only; no backend/runtime reach-in |
 | Marketing / media | marketing-media | builder (marketing/media packet scope) → reviewer → archivist | Read, Grep, Glob, Edit, Write, Bash | only inside marketing/media packets; no product code |
-| Agent swarm / parallel work | agent-swarm | build-orchestrator fan-out → per-task builders → reviewer (merge) → archivist | Read, Grep, Glob, Edit, Write, Bash | parallelizable work only; explicit **merge plan** required |
+| Agent swarm / parallel work (default for ≥2 independent items) | agent-swarm | build-orchestrator fan-out → per-task builders → reviewer (merge) → archivist | Read, Grep, Glob, Edit, Write, Bash | parallelizable work only; **disjoint file-ownership manifest + merge plan + merger owns hot files** — see *Fan-out (parallel) protocol* |
 | QA / proof / regression | build | qa | Read, Grep, Glob, Bash | report exact counts; RED blocks close |
 | Review / second-eyes | build | reviewer | Read, Grep, Glob, Bash | no edits; verdict only |
 | Close / receipt / memory | build | archivist | Read, Write, Bash | touches `build-os/` only |
@@ -26,13 +73,13 @@ matches, it routes from embedded defaults and says so.
 
 ## Embedded defaults (no matching row)
 
-- Route from the requested outcome, using the smallest safe lane:
-  - read-only answer / explanation → direct; `Read, Grep, Glob`
-  - diagnosis / triage → direct or `qa`; read-only tools; report, do not fix
-  - tiny reversible local edit → `builder-lite` + one targeted check
-  - substantive feature / bugfix / multi-file build → `builder → qa → reviewer
+- Route from the requested outcome, using the smallest safe lane (declare it):
+  - `read-only` answer / explanation → direct; `Read, Grep, Glob`; 1 round
+  - `diagnosis` / triage → direct or `qa`; read-only tools; report, do not fix; 1 round
+  - `tiny` reversible local edit → `builder-lite` + one targeted check; 2 rounds max
+  - `substantive` feature / bugfix / multi-file build → `builder → qa → reviewer
     → archivist`
-  - architecture, ambiguous scope, or gated work → `build-orchestrator`
+  - `architecture`, ambiguous scope, or gated work → `build-orchestrator`
 - Stop before external mutation. Announce
   `Orchestrator: ON — routing from embedded`.
 
@@ -41,23 +88,69 @@ matches, it routes from embedded defaults and says so.
 Add a row per new task type. Keep the **Gate / stop** column honest — every row
 that can cross a merge/deploy/secret/push boundary must say **STOP** there.
 
+## Fan-out (parallel) protocol
+
+<!-- BUILD-OS:FANOUT:START — canonical; keep byte-identical in build-os/memory/tool_router.md and .claude/agents/build-orchestrator.md -->
+**Parallel by default.** When 2 or more work items are independent, fan out rather than sequence.
+Serial-by-default is the single largest speed loss in this system: sequencing
+independent work is a decision that has to be justified, not the resting state.
+
+A fan-out is legal only with **all three** of:
+
+1. **Disjoint file-ownership manifest** — every agent's writable set, written
+   down and non-overlapping. If two agents could write the same file, it is not
+   a fan-out. Anything unlisted is not writable by that agent.
+2. **Merge plan** — states who merges (a named agent or the orchestrator) and
+   the single verification that runs once after the merge. Fixed before the
+   fan-out starts, not improvised after the diffs land.
+3. **Merger owns the hot files** — shared surfaces belong to the merger, never
+   to a fan-out agent: the test suite(s), `build-os/memory/*`, packets and
+   receipts, version / changelog files, lockfiles.
+
+For genuinely overlapping work, do not fan out into one tree: give each agent an
+isolated git worktree and add an explicit merge pass, closing with that same
+single post-merge verification.
+<!-- BUILD-OS:FANOUT:END -->
+
+### Worked example (three-agent fan-out on this repo)
+
+Three independent items — a maintenance-layer fix, an installer/template change,
+and a lane-enforcement change — fanned out with the manifest below:
+
+| Agent | Writable set (exclusive) | Forbidden |
+|---|---|---|
+| Agent A — lanes | `.claude/agents/*.md`, `.claude/commands/*.md`, `build-os/memory/tool_router.md`, `CLAUDE.md`, `build-os/global-claude-md.md`, new `tests/lane_enforcement_tests.sh` | installers, templates, `VERSION`, other test suites |
+| Agent B — installers | `init-build-os.sh`, `install-project.sh`, `templates/*`, `VERSION`, `CHANGELOG.md` | agents, router, memory, other suites |
+| Agent C — maintenance | `build-os/maintenance/*`, `tests/build_os_maintenance_tests.sh` | agents, router, installers |
+
+Merge plan: **the orchestrator merges**, in the order A → B → C, and owns every
+hot file (`build-os/memory/current_state.md`, `build-os/memory/residue.md`, packets,
+receipts, `tests/build_os_tests.sh`). Fan-out agents leave work **uncommitted**;
+the orchestrator commits. Single post-merge verification: `bash
+tests/build_os_tests.sh && bash tests/lane_enforcement_tests.sh && bash
+tests/build_os_maintenance_tests.sh`, each reporting its own `==== RESULT: N
+passed, M failed ====` line.
+
 ## Proportionate routing (don't over-orchestrate)
 
-Match the route to the task's real weight. The full `builder → qa → reviewer →
-archivist` chain is for **build / feature / bugfix** work — it is **not** the
-default for everything:
+Match the route to the task's real weight — the declared **lane** *is* that
+match. The full `builder → qa → reviewer → archivist` chain belongs to the
+`substantive` lane only; it is **not** the default for everything:
 
 - **Read-only answers / questions** → answer directly (or via build-orchestrator);
   Read/Grep/Glob only; no packet, no builder chain.
 - **Diagnosis / triage (no edits)** → investigate and report (qa or direct);
   read-only Bash allowed; if a fix is warranted, *propose a packet* instead of
   implementing inline.
-- **Tiny reversible local edit** → a single builder-lite pass; ≤1 commit; skip
-  qa/reviewer/archivist **unless** the edit carries real risk.
+- **Tiny reversible local edit** → a single builder-lite pass and ONE targeted
+  check; ≤1 commit; **2 rounds max**; no qa, no reviewer, no archivist, no
+  packet, no receipt.
 
 **Escalate, never silently expand.** The moment a "tiny" edit needs new files,
 touches shared/runtime logic, or stops being trivially reversible, stop and
-re-route to the full **Build / feature / bugfix** row.
+re-route to the full **Build / feature / bugfix** row — announcing the lane
+change and its reason (see *Changing lane mid-flight* above). Re-routing
+*downward* to a cheaper lane needs no announcement at all.
 
 ## Standing lessons (load-bearing — earned, not assumed)
 
