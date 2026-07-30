@@ -48,6 +48,20 @@ cd /path/to/your/other-project
 
 Without it, the orchestrator still routes — it just has no saved memory yet.
 
+That same command also installs the **memory maintenance layer** into
+`build-os/maintenance/` (rotation, the real-memory tripwire, the sanctioned test
+wrapper) and seeds `build-os/memory/standing_gates.md` from a template. It is
+safe to re-run: managed files are replaced, your files are never overwritten. In
+a repo that already has a `package.json`, one script is added:
+
+```bash
+npm run test:build-os-memory     # == ./build-os/maintenance/run-tests.sh
+```
+
+In a repo that has none, no `package.json` is created — run the wrapper by path.
+The managed/yours split and the exact uninstall boundary are in
+`build-os/maintenance/PORTING.md`.
+
 ## 2. Claude Code on the web / remote environments
 
 Web sessions run in **ephemeral containers** cloned fresh from a repo and then
@@ -137,6 +151,12 @@ rm -f  ~/.claude/hooks/{session-start-build-os,prompt-router}.sh
 # then remove the two Build OS hook entries from ~/.claude/settings.json
 # and delete the <!-- BUILD-OS:START --> … <!-- BUILD-OS:END --> block in ~/.claude/CLAUDE.md
 ```
+
+To remove the maintenance layer from a project, delete every path listed in that
+project's `build-os/maintenance/.gravito-managed`. Nothing under
+`build-os/memory/` is removed — including `standing_gates.md` and
+`build-os/memory/archive/`, which holds the **only** copy of anything already
+rotated out of the live files. Removing the layer does not un-rotate memory.
 
 ## Notes
 

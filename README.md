@@ -81,6 +81,49 @@ Commands: `/next-packet` (route), `/review-packet` (qa + reviewer),
 - **Full proof + safety grep** before a packet closes.
 - **Close with a receipt.**
 
+## Memory maintenance (`build-os/maintenance/`)
+
+Build OS memory only grows: every closed packet appends. Past the agent's 256 KB
+Read limit a memory file stops being readable at all, and a session starts blind
+to its own state. The maintenance layer keeps the newest N blocks live and moves
+the tail into an append-only archive, with byte-exact conservation verified
+before anything is written.
+
+```bash
+./build-os/maintenance/rotate-memory.sh            # DRY RUN (the default)
+./build-os/maintenance/rotate-memory.sh --apply    # actually write
+./build-os/maintenance/run-tests.sh                # the sanctioned test command
+```
+
+It is delivered by `install-project.sh` and `init-build-os.sh`. Read
+[`build-os/maintenance/PORTING.md`](build-os/maintenance/PORTING.md) for the
+managed-vs-yours file split, the uninstall boundary, and the port manifest.
+
+Two things are worth knowing before you rely on it:
+
+- **Rotation is by RECENCY ONLY.** It makes no guarantee about which content
+  survives *by meaning*. Anything that must never rotate belongs in
+  `build-os/memory/standing_gates.md`, which is absent from the tool's
+  `FILE_SPECS` and is therefore never read, written or created by it.
+- **The test wrapper detects; it does not prevent.** `run-tests.sh` preloads a
+  real-memory tripwire and fingerprints your real memory either side of the run,
+  so a run that moved it cannot report success. Its header states the one
+  guarantee that buys and enumerates the four paths it does not cover.
+
+## Tests
+
+```bash
+bash tests/build_os_tests.sh              # the repo suite
+./build-os/maintenance/run-tests.sh       # the maintenance layer's own suite
+```
+
+The first one also **runs** `tests/build_os_maintenance_tests.sh` — the
+cold-install proof for the maintenance layer, which installs it into a blank
+repo and checks the uninstall boundary — and folds its assertions into its own
+totals. It is chained rather than merely referenced here, because a second suite
+you have to remember is a second suite that gets skipped. Both commands are
+offline, deterministic, and confined to temp dirs.
+
 ## Extending to the ecosystem
 
 The orchestrator routes to external tools / MCP servers when connected. To wire a
@@ -98,9 +141,12 @@ agent-swarm) and how each maps to a Build OS authority/gate is in
 .claude/commands/      next-packet, review-packet, close-packet
 .claude/hooks/         session-start-build-os.sh, prompt-router.sh
 .claude/settings.json  wires the hooks (SessionStart + UserPromptSubmit)
-build-os/memory/       tool_router.md, current_state.md, residue.md
+build-os/memory/       tool_router.md, current_state.md, residue.md,
+                       standing_gates.md (never rotated), archive/ (rotated tail)
 build-os/packets/      active_packet.md
 build-os/receipts/     one receipt per closed packet
+build-os/maintenance/  memory rotation + the real-memory tripwire + the
+                       sanctioned test wrapper (see PORTING.md)
 install-global.sh      install to ~/.claude (whole machine)
 install-project.sh     vendor into a target repo
 connect-project.sh     add the web auto-install bootstrap to a target repo
