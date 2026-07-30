@@ -4,52 +4,65 @@
 > the builder implements exactly this and nothing else; the archivist clears it
 > on close. One packet at a time.
 
-- **Status:** in flight — implemented, **uncommitted**; awaiting qa → reviewer →
-  archivist. The orchestrator merges and commits (this packet ran in parallel
-  with sibling packets under strict file ownership).
-- **Packet id:** `gravito_release_metadata_a`
-- **Title:** Give the product a version, a changelog, a license, and current memory
+- **Status:** in flight — implemented and committed locally; awaiting qa →
+  reviewer → archivist. Nothing pushed.
+- **Packet id:** `gravito_speed_benchmark_a`
+- **Lane:** `substantive` (builder → qa → reviewer → archivist)
+- **Title:** Build the instrument that turns "20x-100x faster" from an argument
+  into a measurement
 
 ## Goal / "done" criteria
 
-- The repo carries `VERSION` (`0.1.0`), `CHANGELOG.md` (Keep a Changelog), and
-  `LICENSE`, and `build-os/memory/` reflects reality rather than the stale
-  "216 checks / last closed P-022" snapshot — with the whole thing pinned by
-  `bash tests/release_metadata_tests.sh`, which goes **red** if the memory's
-  claimed test count goes stale again.
+`build-os/metrics/` carries a working, dependency-free measurement instrument —
+a recorder, an append-only store seeded from this project's real history with
+every row attributed, a report generator, a fixed versioned task corpus, and a
+written A/B protocol — pinned by `bash tests/speed_benchmark_tests.sh`.
+
+**The deliverable is the instrument, not a flattering number.** The A/B against
+raw Claude Code is specified and explicitly **not run**, because it cannot be run
+from this harness: a Claude Code session is not launchable from a bash test, so
+*both* arms are unautomatable here. Empty cells carry stated reasons; nothing is
+fabricated to fill them.
 
 ## In scope
 
-- `VERSION`, `CHANGELOG.md`, `LICENSE`
-- `build-os/memory/current_state.md`, `build-os/memory/residue.md`
+- `build-os/metrics/` (new directory: `record-packet.sh`, `report-speed.sh`,
+  `packet_metrics.tsv`, `task_corpus.md`, `COMPARISON_PROTOCOL.md`, `README.md`)
+- `tests/speed_benchmark_tests.sh` (one new suite)
+- `tests/build_os_tests.sh` — the one `chain_suite` line that wires the new suite
+- `build-os/memory/current_state.md`, `build-os/memory/residue.md` (check count
+  and the instrument's standing limits)
+- `CHANGELOG.md` → `[Unreleased]`
 - `build-os/packets/active_packet.md`
-- `build-os/receipts/` (new files only)
-- `tests/release_metadata_tests.sh` (one new file)
 
 ## Out of scope (explicit)
 
-- **Sibling-owned this session:** `.claude/**`, `CLAUDE.md`,
-  `build-os/global-claude-md.md`, `build-os/memory/tool_router.md`,
-  `build-os/memory/skill_budget.md`, `init-build-os.sh`, `install-*.sh`,
-  `connect-project.sh`, `templates/**`, `build-os/maintenance/**`,
-  `tests/build_os_tests.sh`, `tests/build_os_maintenance_tests.sh`.
-- **Tagging** — the operator's call. No tags were created.
-- **Pricing, entitlement keys, terms of service** — not invented; the license
-  model is an open owner decision (see `residue.md`).
-- **Committing / pushing** — left unstaged for the orchestrator.
+- **Running the A/B.** Not possible from here; specified in
+  `COMPARISON_PROTOCOL.md` for a human or a driver script to execute later. This
+  is the P-B / pilot input.
+- **Any telemetry, phone-home, or transmitting collector.** The store is local,
+  in-repo and operator-owned, and a test greps the scripts to keep it that way.
+- **Building the corpus tasks as executable fixtures.** The corpus is a frozen
+  specification; turning `T1`–`T4` into runnable fixtures is a follow-on packet.
+- **Automatic round/wall-clock capture.** Those cells are self-reported today.
+  Instrumenting them automatically is a follow-on packet.
+- **`/home/user/empathiq-website`** — untouched reference deployment at `cb2bb7d`.
+- **Pushing, merging, tagging, `git config`.** Local commits only.
 
 ## Branch base
 
-- `claude/project-handoff-merge-ramhds` at `641527f`; merge-base with
-  `origin/claude/add-build-os` = `7ef50e8`. Verified.
+- `claude/project-handoff-merge-ramhds` at `68cae7a`; merge-base with
+  `origin/claude/add-build-os` = `7ef50e8`. Verified before building.
 
 ## Plan (≤2 commits)
 
-1. **Commit 1 (green in isolation):** `tests/release_metadata_tests.sh` written
-   first (red: 12 passed / 30 failed, exit 1), then `VERSION`, `LICENSE`,
-   `CHANGELOG.md` and the `build-os/memory/` + `build-os/receipts/` refresh that
-   turn it green. Single logical change; the orchestrator commits.
-2. **Commit 2 (optional):** none required.
+1. **Commit 1 (green in isolation):** `tests/speed_benchmark_tests.sh` written
+   first (red: 29 passed / 99 failed, exit 1 — the instrument did not exist),
+   then the instrument, the seeded store, the docs, the chain wiring, and the
+   memory/changelog count move 488 → 616 that turns it green.
+2. **Commit 2:** record this packet's own row in the store, measured from
+   Commit 1, plus the residue note. The instrument's first real use is measuring
+   the commit that introduced it.
 
 ---
-_Set by the builder for `gravito_release_metadata_a`. The archivist clears this on close._
+_Set by the builder for `gravito_speed_benchmark_a`. The archivist clears this on close._

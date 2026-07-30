@@ -39,8 +39,35 @@ deprecation cycle. Pin a commit if you need stability.
   value using fictional tools. Pinned by `tests/scaffold_seeding_tests.sh`,
   including a canary that plants a fake connector in live memory and asserts it
   never reaches a customer scaffold.
+- **A packet speed measurement instrument** (`build-os/metrics/`). The project has
+  argued a "20x-100x faster" multiplier with **zero instrumentation**; this adds
+  the instrument and, deliberately, not the number. A dependency-free recorder
+  (`record-packet.sh`) appends one validated row per packet to an append-only
+  16-column TSV store; a report generator (`report-speed.sh`) renders rounds per
+  lane, throughput per wall-clock minute, fan-out speedup, and round-budget
+  compliance *with its denominator printed beside it*. The store is seeded with
+  four rows from this project's real history, each attributed, and three of them
+  are checkable against `git show --numstat` — `--verify-git` fails any row whose
+  file/insertion/deletion figures contradict git. A fixed, versioned task corpus
+  (`task_corpus.md`) and a written A/B protocol (`COMPARISON_PROTOCOL.md`) make
+  future runs comparable rather than anecdotal.
+  **The A/B has not been run, and cannot be run from this harness** — a Claude
+  Code session is not launchable from a bash test, so *both* arms are
+  unautomatable here. The baseline column is therefore empty with a stated
+  reason, and the 20x-100x claim remains **unmeasured** rather than illustrated.
+  Local, in-repo, operator-owned: **no telemetry, nothing is transmitted.**
+  Pinned by `tests/speed_benchmark_tests.sh` (128 checks), whose load-bearing
+  assertions are that report totals equal the sum of the *rendered* rows, that
+  every seeded row carries an attribution, that a row contradicting git fails,
+  and that a report over zero rows refuses loudly instead of printing an empty
+  green table.
 - All sibling suites are chained into `bash tests/build_os_tests.sh`, which now
-  reports **488 passed** and fails if any suite in `tests/` is left unchained.
+  reports **616 passed** and fails if any suite in `tests/` is left unchained.
+  That guard was verified in the direction that matters: adding
+  `tests/speed_benchmark_tests.sh` to `tests/` turned the parent suite **red**
+  (487 passed, 1 failed) until it was explicitly wired. The guard *forces*
+  wiring; it does not perform it, so a new suite cannot become
+  discoverable-only.
 
 ## [0.1.0] - 2026-07-30
 

@@ -797,7 +797,7 @@ grep -qi "supervise.sh" <<<"$IWATCH" && ok "claude-watch inline directive names 
 # ITS COUNTS ARE FOLDED INTO THIS FILE'S TOTALS rather than collapsed into a
 # single pass/fail. One `ok` for "61 assertions passed" would report the same
 # green if 60 of them silently stopped running.
-echo "== 26. Chained sibling suites (cold-install, lanes, scaffold templates, release metadata) =="
+echo "== 26. Chained sibling suites (cold-install, lanes, scaffold templates, release metadata, speed metrics) =="
 # chain_suite <relative-path> <what-it-covers>
 #
 # Every sibling suite is invoked through this one function so the failure
@@ -837,6 +837,7 @@ chain_suite "tests/build_os_maintenance_tests.sh" "the memory maintenance + safe
 chain_suite "tests/lane_enforcement_tests.sh"     "lane proportionality and fan-out"
 chain_suite "tests/scaffold_seeding_tests.sh"     "customer scaffold seeding"
 chain_suite "tests/release_metadata_tests.sh"     "version, license and changelog"
+chain_suite "tests/speed_benchmark_tests.sh"      "the packet speed measurement instrument"
 
 # A chained suite that is added to the repo but never wired here would be
 # discoverable-only — the exact defect chaining exists to prevent. Assert the

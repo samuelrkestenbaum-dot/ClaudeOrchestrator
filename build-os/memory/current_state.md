@@ -15,10 +15,10 @@
   Changelog: `CHANGELOG.md`. License: `LICENSE` — proprietary, All Rights Reserved,
   a deliberately conservative **placeholder**; the license model is still an open
   owner decision. **No tags exist in this repo yet.**
-- **Build/test command:** `bash tests/build_os_tests.sh` (488 checks; no network; temp dirs).
+- **Build/test command:** `bash tests/build_os_tests.sh` (616 checks; no network; temp dirs).
   It **chains** every sibling suite in `tests/` through one `chain_suite` function and folds their
   counts into its own totals — 221 native + 61 cold-install + 73 lane-enforcement + 91 scaffold-seeding
-  + 42 release-metadata = 488. A sibling suite present on disk but not chained is itself a failure,
+  + 42 release-metadata + 128 speed-metrics = 616. A sibling suite present on disk but not chained is itself a failure,
   so a new suite cannot become discoverable-only. The maintenance layer also has its
   own suite, `./build-os/maintenance/run-tests.sh` (144 checks, node --test). Both are offline and
   deterministic. Pinned separately: `bash tests/release_metadata_tests.sh` (release metadata +
@@ -52,7 +52,7 @@
   held open under `timeout`) **and** static (a scanner covering all **10** hook-invocation sites
   — 3 SessionStart + 7 UserPromptSubmit — with a minimum-site-count **vacuity floor**, because an
   earlier draft grepped only `bash "$HOOK"` and saw 3). **Before: exit 124. After: exit 0,
-  281 passed / 0 failed at `641527f`** (488 now that three sibling suites are chained).** Known limit, stated in-file: on a TTY a re-broken §2 call hangs before
+  281 passed / 0 failed at `641527f`** (616 now that four further sibling suites are chained).** Known limit, stated in-file: on a TTY a re-broken §2 call hangs before
   §27 is reached; check (b) is the protection and fires in CI / any non-TTY run.
 - **Prior:** `gravito_productization_pa_maintenance_upstream_a` (**P-A**) — the memory
   maintenance + safety layer is upstreamed into the product (receipt
