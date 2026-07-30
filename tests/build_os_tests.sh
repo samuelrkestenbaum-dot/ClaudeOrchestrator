@@ -770,6 +770,51 @@ IWATCH="$(bash "$HANDOFF" detect "supervise this long-running overnight build wi
 grep -qi "supervise.sh" <<<"$IWATCH" && ok "claude-watch inline directive names the supervise.sh fallback" || no "claude-watch directive omits Cloud-native fallback"
 { grep -qi "verify that Claude Watch is connected" <<<"$IWATCH" && grep -qi "Do NOT claim" <<<"$IWATCH"; } && ok "claude-watch stays availability-conditional (no overclaim)" || no "claude-watch overclaims availability"
 
+# ---------------------------------------------------------------------------
+# CHAINED SUITE: the memory maintenance + safety layer's cold-install proof.
+#
+# WHY IT IS INVOKED HERE AND NOT MERELY POINTED AT FROM A DOC. A second suite
+# that has to be REMEMBERED is a suite that gets skipped, and the layer it covers
+# rewrites Build OS memory — the one thing in this repo where a silent regression
+# is unrecoverable. A documentation-only pointer rots; an invoked suite cannot.
+#
+# THE COST WAS MEASURED BEFORE CHOOSING: this file ran ~11.5 s alone,
+# tests/build_os_maintenance_tests.sh ~13.0 s alone, so chaining roughly doubles
+# a wall time that is still well under half a minute. It is deterministic,
+# offline, and confined to its own mktemp dirs, exactly like this file, so
+# nothing about the combined run is less repeatable than the parts.
+#
+# ITS COUNTS ARE FOLDED INTO THIS FILE'S TOTALS rather than collapsed into a
+# single pass/fail. One `ok` for "61 assertions passed" would report the same
+# green if 60 of them silently stopped running.
+echo "== 26. Memory maintenance + safety layer (chained cold-install suite) =="
+MAINT_SUITE="$SRC/tests/build_os_maintenance_tests.sh"
+if [ ! -f "$MAINT_SUITE" ]; then
+  no "tests/build_os_maintenance_tests.sh is missing — the maintenance layer has no cold-install proof"
+else
+  MAINT_LOG="$WORK/build_os_maintenance_tests.log"
+  bash "$MAINT_SUITE" > "$MAINT_LOG" 2>&1
+  MEC=$?
+  MRES="$(grep -E '^==== RESULT: [0-9]+ passed, [0-9]+ failed ====$' "$MAINT_LOG" | tail -1)"
+  if [ -z "$MRES" ]; then
+    # No RESULT line at all means it died partway. Its own assertions cannot be
+    # trusted to have run, so this is one failure and the log is named.
+    no "chained maintenance suite produced no RESULT line (exit $MEC) — see $MAINT_LOG"
+    tail -5 "$MAINT_LOG" | sed 's/^/      | /'
+  else
+    MPASS="$(printf '%s' "$MRES" | sed -E 's/^==== RESULT: ([0-9]+) passed.*/\1/')"
+    MFAIL="$(printf '%s' "$MRES" | sed -E 's/.* ([0-9]+) failed ====$/\1/')"
+    PASS=$((PASS + MPASS)); FAIL=$((FAIL + MFAIL))
+    echo "  CHAINED: $MPASS passed, $MFAIL failed (tests/build_os_maintenance_tests.sh)"
+    [ "$MFAIL" -gt 0 ] && grep '^  FAIL: ' "$MAINT_LOG" | sed 's/^  /      /'
+    # A zero-failure report with a non-zero exit is itself a defect: the two
+    # disagree, and the exit code is the one the caller acts on.
+    if [ "$MEC" -ne 0 ] && [ "$MFAIL" -eq 0 ]; then
+      no "chained maintenance suite exited $MEC while reporting 0 failures — see $MAINT_LOG"
+    fi
+  fi
+fi
+
 echo
 echo "==== RESULT: $PASS passed, $FAIL failed ===="
 [ "$FAIL" -eq 0 ]

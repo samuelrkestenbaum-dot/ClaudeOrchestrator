@@ -1,0 +1,182 @@
+{
+  "GRAVITO": "MANAGED — shipped by build-os/maintenance/install-maintenance.sh; edits in an installed repo are replaced on the next install.",
+  "README": "DELIBERATELY DANGEROUS SOURCE SHAPES, kept in a file that cannot execute.\n\nEvery string below is a fragment of JavaScript that a scanner must report.\nThey live in JSON, not in a .mjs file, for one reason: a control planted in\na suite file is indistinguishable, to any scan of that file, from the defect\nit imitates. The previous round kept them inline and paid for it twice — the\nscanner had to compose its own module specifier from fragments so its own\ncontrols would not be counted, and that exemption device was then used to\nobtain a real spawn API while every count still read zero.\n\nJSON has no import syntax and no evaluation. Nothing here can run.\n\nPLACEHOLDERS: {{CLEAN}} is the clean baseline source, {{REPO_PATH}} is a\nfixture repo path, {{REVERSE_ALIAS_CHAIN}} is a generated alias chain.\n\nWHAT CHECKS THIS FILE: every entry is exercised. `mustReport` entries must\neach produce a finding containing their needle and `mustPass` entries must\nproduce none, with both table lengths pinned in the test titles, so an entry\nthat stops discriminating fails the run rather than sitting here decoratively.",
+  "clean": "\nimport { spawnSync } from \"node:child_process\";\nconst REPO_ROOT = path.resolve(HERE, \"..\", \"..\");\nfunction run(args, opts = {}) {\n  requireScratchRoot(\"run\", args, opts);\n  const res = spawnSync(\"bash\", [SCRIPT, ...args], {\n    encoding: \"utf8\",\n  });\n  return res;\n}\nfunction runJson(args, opts = {}) {\n  requireScratchRoot(\"runJson\", args, opts);\n  const res = run([...args, \"--json\"], opts);\n  return res;\n}\nfunction runNodeJson(mjs, args, opts = {}) {\n  requireScratchRoot(\"runNodeJson\", args, opts);\n  const res = spawnSync(process.execPath, [mjs, ...args, \"--json\"], {\n    encoding: \"utf8\",\n  });\n  return res;\n}\ntest(\"ok\", () => {\n  const root = makeRoot(\"x\");\n  assert.equal(run([\"--root\", root, \"--keep\", \"10\", \"--apply\"]).status, 0);\n  assert.equal(run([\"--help\"]).status, 0);\n  assert.throws(() => run([\"--root\", REPO_ROOT]), /inside the REAL repo root/);\n});\n",
+  "allowedChildProcessImportLine": "import { spawnSync } from \"node:child_process\";",
+  "childProcessModule": "child_process",
+  "mustReport": [
+    {
+      "label": "a live call with no --root at all",
+      "source": "{{CLEAN}}test(\"bad\", () => { run([\"--keep\", \"10\", \"--apply\"]); });\n",
+      "needle": "NO --root"
+    },
+    {
+      "label": "DEAD CODE: a rootless call that is never executed",
+      "source": "{{CLEAN}}function DEAD() { return run([\"--keep\", \"10\", \"--apply\"]); }\n",
+      "needle": "NO --root"
+    },
+    {
+      "label": "--root REPO_ROOT",
+      "source": "{{CLEAN}}test(\"bad\", () => { run([\"--root\", REPO_ROOT, \"--keep\", \"10\"]); });\n",
+      "needle": "names `REPO_ROOT`"
+    },
+    {
+      "label": "--root through a one-hop alias",
+      "source": "{{CLEAN}}const realRoot = REPO_ROOT;\ntest(\"bad\", () => { run([\"--root\", realRoot]); });\n",
+      "needle": "names `realRoot`"
+    },
+    {
+      "label": "--root through a two-hop alias",
+      "source": "{{CLEAN}}const a = REPO_ROOT;\nconst b = a;\ntest(\"bad\", () => { runJson([\"--root\", b]); });\n",
+      "needle": "names `b`"
+    },
+    {
+      "label": "--root as a path.join derivation of the repo root",
+      "source": "{{CLEAN}}test(\"bad\", () => { run([\"--root\", path.join(REPO_ROOT, \"build-os\")]); });\n",
+      "needle": "names `REPO_ROOT`"
+    },
+    {
+      "label": "--root recomputed from HERE with two .. steps",
+      "source": "{{CLEAN}}test(\"bad\", () => { run([\"--root\", path.resolve(HERE, \"..\", \"..\")]); });\n",
+      "needle": "derives a root from `HERE`"
+    },
+    {
+      "label": "--root as the literal repo path",
+      "source": "{{CLEAN}}test(\"bad\", () => { run([\"--root\", \"{{REPO_PATH}}/build-os\"]); });\n",
+      "needle": "embeds the literal repo path"
+    },
+    {
+      "label": "a relative --root with the repo root as cwd",
+      "source": "{{CLEAN}}test(\"bad\", () => { run([\"--root\", \".\"], { cwd: REPO_ROOT }); });\n",
+      "needle": "names `REPO_ROOT`"
+    },
+    {
+      "label": "runNodeJson with no --root",
+      "source": "{{CLEAN}}test(\"bad\", () => { runNodeJson(mjs, [\"--keep\", \"10\", \"--apply\"]); });\n",
+      "needle": "NO --root"
+    },
+    {
+      "label": "a direct spawn of the tool, bypassing every wrapper",
+      "source": "{{CLEAN}}test(\"bad\", () => { spawnSync(\"bash\", [SCRIPT, \"--apply\"]); });\n",
+      "needle": "a child-process call outside the"
+    },
+    {
+      "label": "a second child-process import",
+      "source": "{{CLEAN}}import { execFileSync } from \"node:child_process\";\n",
+      "needle": "not the one asserted import statement"
+    },
+    {
+      "label": "a require of the child-process module",
+      "source": "{{CLEAN}}const cp = require(\"child_process\");\n",
+      "needle": "not the one asserted import statement"
+    },
+    {
+      "label": "a dynamic import of the child-process module",
+      "source": "{{CLEAN}}const cp = await import(\"node:child_process\");\n",
+      "needle": "not the one asserted import statement"
+    },
+    {
+      "label": "a call whose argument list is never closed",
+      "source": "{{CLEAN}}test(\"bad\", () => { run([\"--root\", root, \"--keep\", \"10\"\n",
+      "needle": "never closed"
+    },
+    {
+      "label": "a SECOND copy of the exempt wrapper-to-wrapper delegation",
+      "source": "{{CLEAN}}function runOther(args, opts) {\n  const res = run([...args, \"--json\"], opts);\n  return res;\n}\n",
+      "needle": "appears 2 times, expected 1"
+    },
+    {
+      "label": "a 12-hop alias chain DECLARED IN REVERSE ORDER — the shape the old `pass < 8` bound gave up on",
+      "source": "{{CLEAN}}{{REVERSE_ALIAS_CHAIN}}test(\"bad\", () => { run([\"--root\", z12]); });\n",
+      "needle": "names `z12`"
+    },
+    {
+      "label": "a specifier COMPOSED FROM FRAGMENTS in a require",
+      "source": "{{CLEAN}}const cp = require(\"node:\" + \"child\" + \"_pro\" + \"cess\");\n",
+      "needle": "not the one asserted import statement"
+    },
+    {
+      "label": "a specifier COMPOSED FROM FRAGMENTS in a dynamic import",
+      "source": "{{CLEAN}}const cp = await import(\"node:\" + \"child\" + \"_process\");\n",
+      "needle": "not the one asserted import statement"
+    },
+    {
+      "label": "a spawn API obtained through createRequire with a composed specifier",
+      "source": "{{CLEAN}}const cp = createRequire(import.meta.url)(\"node:\" + \"child\" + \"_pro\" + \"cess\");\n",
+      "needle": "INDIRECT MODULE ACQUISITION"
+    },
+    {
+      "label": "a spawn API obtained through an eval call",
+      "source": "{{CLEAN}}const cp = await eval('import(\"node:child_\" + \"process\")');\n",
+      "needle": "INDIRECT MODULE ACQUISITION"
+    },
+    {
+      "label": "a loader reached through a compiled function body",
+      "source": "{{CLEAN}}const cp = await new Function(\"return import('node:child_process')\")();\n",
+      "needle": "INDIRECT MODULE ACQUISITION"
+    },
+    {
+      "label": "the binding back-door",
+      "source": "{{CLEAN}}const cp = process.binding(\"spawn_sync\");\n",
+      "needle": "INDIRECT MODULE ACQUISITION"
+    },
+    {
+      "label": "the gated wrapper body deleted, so nothing routes through the gate",
+      "source": "\nimport { spawnSync } from \"node:child_process\";\nconst REPO_ROOT = path.resolve(HERE, \"..\", \"..\");\nfunction run(args, opts = {}) {\n  requireScratchRoot(\"run\", args, opts);\n  const res = null; ({\n    encoding: \"utf8\",\n  });\n  return res;\n}\nfunction runJson(args, opts = {}) {\n  requireScratchRoot(\"runJson\", args, opts);\n  const res = run([...args, \"--json\"], opts);\n  return res;\n}\nfunction runNodeJson(mjs, args, opts = {}) {\n  requireScratchRoot(\"runNodeJson\", args, opts);\n  const res = spawnSync(process.execPath, [mjs, ...args, \"--json\"], {\n    encoding: \"utf8\",\n  });\n  return res;\n}\ntest(\"ok\", () => {\n  const root = makeRoot(\"x\");\n  assert.equal(run([\"--root\", root, \"--keep\", \"10\", \"--apply\"]).status, 0);\n  assert.equal(run([\"--help\"]).status, 0);\n  assert.throws(() => run([\"--root\", REPO_ROOT]), /inside the REAL repo root/);\n});\n",
+      "needle": "appears 0 times, expected 1"
+    }
+  ],
+  "mustPass": [
+    {
+      "label": "the clean baseline",
+      "source": "{{CLEAN}}"
+    },
+    {
+      "label": "a --help-only invocation",
+      "source": "{{CLEAN}}test(\"ok\", () => { run([\"--help\", \"--json\"]); });\n"
+    },
+    {
+      "label": "a bad root inside assert.throws is a negative control",
+      "source": "{{CLEAN}}test(\"ok\", () => { assert.throws(() => run([\"--root\", REPO_ROOT, \"--apply\"]), /x/); });\n"
+    },
+    {
+      "label": "a multi-line assert.throws is still a negative control",
+      "source": "{{CLEAN}}test(\"ok\", () => {\n  assert.throws(\n    () => run([\"--keep\", \"10\", \"--apply\"]),\n    /x/\n  );\n});\n"
+    }
+  ],
+  "acquisitionProbes": {
+    "base": "import fs from \"node:fs\";\nconst x = 1;\n",
+    "moduleImports": [
+      {
+        "label": "a plain import",
+        "source": "import { spawnSync } from \"node:child_process\";\n"
+      },
+      {
+        "label": "a composed require",
+        "source": "const cp = require(\"node:\" + \"child\" + \"_pro\" + \"cess\");\n"
+      },
+      {
+        "label": "a composed dynamic import",
+        "source": "const cp = await import(\"node:child\" + \"_process\");\n"
+      }
+    ],
+    "indirect": [
+      {
+        "label": "createRequire",
+        "source": "const r = createRequire(import.meta.url);\n"
+      },
+      {
+        "label": "an eval call",
+        "source": "const m = eval(\"x\");\n"
+      },
+      {
+        "label": "a new Function call",
+        "source": "const f = new Function(\"return 1\");\n"
+      },
+      {
+        "label": "the binding back-door",
+        "source": "const b = process.binding(\"fs\");\n"
+      }
+    ]
+  }
+}

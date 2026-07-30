@@ -40,5 +40,10 @@ copy_if_absent "build-os/memory/residue.md"
 copy_if_absent "build-os/packets/active_packet.md"
 copy_if_absent "build-os/receipts/README.md"
 
+# Memory maintenance + safety layer (rotation, tripwire, sanctioned test
+# wrapper, standing-gates template). Managed files are replaced on every run;
+# build-os/memory/standing_gates.md is seeded only if absent.
+"$SRC/build-os/maintenance/install-maintenance.sh" "$DEST"
+
 echo "Done. The orchestrator will read/write build-os/ in this repo."
 echo "Tip: fill in build-os/memory/current_state.md with this project's basics."

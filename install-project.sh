@@ -48,6 +48,11 @@ for rel in build-os/memory/tool_router.md build-os/memory/current_state.md \
   if [ -e "$DEST/$rel" ]; then echo "  = $rel (exists, kept)"; else cp "$SRC/$rel" "$DEST/$rel"; echo "  + $rel"; fi
 done
 
+# Memory maintenance + safety layer. Managed files are replaced on every run;
+# the customer's build-os/memory/standing_gates.md is seeded only if absent, and
+# nothing here touches the memory files scaffolded above.
+"$SRC/build-os/maintenance/install-maintenance.sh" "$DEST"
+
 # Merge .claude/settings.json hooks (project scope → $CLAUDE_PROJECT_DIR paths)
 python3 - "$DEST/.claude/settings.json" "$REGISTER_SESSION_HOOK" <<'PY'
 import json, sys
