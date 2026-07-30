@@ -59,10 +59,37 @@ fabricated to fill them.
 1. **Commit 1 (green in isolation):** `tests/speed_benchmark_tests.sh` written
    first (red: 29 passed / 99 failed, exit 1 — the instrument did not exist),
    then the instrument, the seeded store, the docs, the chain wiring, and the
-   memory/changelog count move 488 → 616 that turns it green.
-2. **Commit 2:** record this packet's own row in the store, measured from
-   Commit 1, plus the residue note. The instrument's first real use is measuring
-   the commit that introduced it.
+   memory/changelog count move 488 → 616 that turns it green. Re-verified in a
+   fresh clone at `f9e09c9`: **616 passed / 0 failed**.
+2. **Commit 2 (also green):** the follow-through the Commit-1 isolation run
+   earned, plus the review round folded in. Running the suite in a
+   **history-stripped** tree turned 7 assertions red for a reason that was not a
+   defect, so §11 now names the missing precondition explicitly. Adds a
+   **duplicate-`packet_id` guard** (a second row for the same packet would be
+   double-counted by every total *and* the report's self-checks would still pass
+   — the hardest wrong number to notice), the recording convention, and residue.
+
+   **Fix round folded into this same commit** (reviewer: 6 items; qa: 1), keeping
+   the ≤2-commit contract: the report's *finding* is hoisted above §1 so the
+   caveat arrives before the two impressive numbers; §5's speedup carries its
+   three qualifiers inline (no control arm, transcript-sourced, agent-execution
+   only — a structural upper bound); the protocol's DNF rule is re-denominated in
+   wall-clock minutes (a rounds-denominated rule could never fire on arm A) with
+   rounds demoted to an arm-B-only diagnostic; two held-constants added (reasoning
+   effort, fresh session), one pre-registered primary endpoint declared, a
+   **16-run reduced-N plan** named as the one to actually run, and the operator's
+   unblindable authorship named as a limit; the corpus stops claiming to span the
+   lane ladder and records its blind spot; and `--verify-git` now **exits
+   non-zero** on a fabricated commit instead of printing `UNVERIFIABLE` and
+   exiting 0. Count move **488 → 616 → 657** (speed suite 128 → 169), matching
+   `CHANGELOG.md` and `current_state.md`.
+
+   **This packet deliberately records no row of its own.** The store is
+   append-only and one-row-per-packet, so a row written before qa and review had
+   run could never be corrected. The convention is now written down: the
+   archivist appends the row at close, when every column is knowable at once.
+   Writing a partial row would have been exactly the fabrication this packet
+   exists to refuse.
 
 ---
 _Set by the builder for `gravito_speed_benchmark_a`. The archivist clears this on close._

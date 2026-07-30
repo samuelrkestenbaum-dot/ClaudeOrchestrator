@@ -182,6 +182,17 @@ reject "a tab inside a field"       --packet x --lane tiny --evidence estimate -
 reject "evidence=git with no commit" --packet x --lane tiny --evidence git --note "claims git evidence but names no commit"
 reject "a malformed commit id"      --packet x --lane tiny --evidence git --commits zzz --note "not a hex object name"
 reject "a malformed date"           --packet x --lane tiny --date 30-07-2026 --evidence estimate --note "dates are ISO 8601 or -"
+# One row per packet. A second row for a packet already in the store would be
+# double-counted by every total in the report, and the totals would still look
+# internally consistent — the hardest kind of wrong number to notice.
+reject "a duplicate packet_id"      --packet demo_alpha --lane tiny --evidence estimate --note "demo_alpha is already recorded in this store"
+DUPMSG="$(bash "$REC" --store "$RT" --packet demo_alpha --lane tiny --evidence estimate --note "duplicate again, to read the message" 2>&1)"
+printf '%s' "$DUPMSG" | grep -qi 'already' \
+  && ok "the duplicate refusal names the collision" || no "the duplicate refusal does not explain itself: $DUPMSG"
+# And the guard must not block a genuinely new packet id.
+add "$RT" --packet demo_alpha_2 --lane tiny --evidence estimate --note "a different packet id, must still be accepted"
+[ $? = "0" ] && ok "the duplicate guard does not block a new packet id" || no "the duplicate guard rejected a new packet id"
+BEFORE="$(nrows "$RT")"
 
 echo "== 6. --validate catches a corrupted store, and refuses an empty one =="
 BAD="$WORK/bad.tsv"; cp "$RT" "$BAD"
@@ -255,6 +266,34 @@ for spec in "9:8:insertions" "11:9:tests added" "4:4:rounds"; do
     || no "rendered TOTAL $label ($t) contradicts the store's sum ($s)"
 done
 
+echo "== 7b. A column nobody measured totals to \"-\", never to 0 =="
+# Summing an empty set to 0 is how "defects escaped: 0" gets published for a
+# column that was never audited. It has the same shape as a real zero-defect
+# record and none of the evidence. Caught in the live seeded report, where every
+# defects_escaped cell is "-" and the TOTAL row read 0.
+ZERO="$WORK/allempty.tsv"
+add "$ZERO" --packet z_one --lane tiny --rounds 1 --insertions 10 --evidence estimate \
+    --note "no defect columns recorded at all for this row"
+add "$ZERO" --packet z_two --lane tiny --rounds 1 --insertions 20 --evidence estimate \
+    --note "no defect columns recorded for this row either"
+bash "$REP" --store "$ZERO" > "$WORK/zrep.md" 2>&1
+ZT="$(rep_total "$WORK/zrep.md")"
+[ "$(cell "$ZT" 10)" = "-" ] \
+  && ok "an entirely unmeasured defects-gated column totals to \"-\"" \
+  || no "an entirely unmeasured defects-gated column totalled to \"$(cell "$ZT" 10)\" — an unaudited column must never read as a measured zero"
+[ "$(cell "$ZT" 11)" = "-" ] \
+  && ok "an entirely unmeasured defects-escaped column totals to \"-\"" \
+  || no "an entirely unmeasured defects-escaped column totalled to \"$(cell "$ZT" 11)\" — that is a fabricated clean record"
+[ "$(cell "$ZT" 8)" = "30" ] \
+  && ok "a column that WAS measured still totals normally (10 + 20 = 30)" \
+  || no "a measured column totalled to \"$(cell "$ZT" 8)\", expected 30 — the empty-set guard has gone too far"
+# And the live report must show it, since no packet in the corpus has been audited.
+bash "$REP" --store "$STORE" > "$WORK/liverep.md" 2>&1
+LT="$(rep_total "$WORK/liverep.md")"
+[ "$(cell "$LT" 11)" = "-" ] \
+  && ok "the live seeded report totals defects-escaped as \"-\" (no post-close audit has ever run)" \
+  || no "the live seeded report claims a defects-escaped total of \"$(cell "$LT" 11)\" — no packet in the corpus was ever audited for escapes"
+
 echo "== 8. The report renders the sections a buyer would read =="
 for spec in "Rounds per lane:rounds-per-lane table" \
             "Round-budget compliance:round-budget compliance" \
@@ -275,6 +314,67 @@ grep -qE '\| *fix_one *\|.* 10\.0' "$RPT" && ok "throughput renders fix_one's 10
 grep -qiE 'denominator|of [0-9]+ budgeted' "$RPT" \
   && ok "compliance states its denominator (a rate over n=1 must not read as a rate)" \
   || no "compliance rate is printed without stating its denominator"
+
+echo "== 8b. The finding is stated BEFORE the first table, not buried in §6 =="
+# ORDERING IS THE ASSERTION, not presence. A reader skims top-down: totals, then
+# insertions/min, then a speedup with an "x" on it, and stops. If the one thing
+# this report does not show — that Build OS is faster than anything — appears only
+# in §6, the skimmer has already formed the opposite belief from two impressive
+# numbers. §8 above only proves the disclosure exists SOMEWHERE. This proves it
+# arrives first, so the ordering cannot silently regress.
+FIND_LN="$(grep -n 'does not show that Build OS is faster than anything' "$RPT" | head -n1 | cut -d: -f1)"
+S1_LN="$(grep -n '^## 1\. Per-packet record' "$RPT" | head -n1 | cut -d: -f1)"
+FIRSTTBL_LN="$(grep -n '^| ' "$RPT" | head -n1 | cut -d: -f1)"
+if [ -n "$FIND_LN" ]; then
+  ok "the report states plainly that it does not show Build OS is faster than anything"
+else
+  no "the report never states plainly that it does not show Build OS is faster than anything"
+fi
+if [ -n "$FIND_LN" ] && [ -n "$S1_LN" ] && [ "$FIND_LN" -lt "$S1_LN" ]; then
+  ok "that finding (line $FIND_LN) precedes the §1 marker (line $S1_LN)"
+else
+  no "the finding does not precede §1 (finding=${FIND_LN:-absent} §1=${S1_LN:-absent}) — a skimmer reads the totals and the speedup before ever meeting the caveat"
+fi
+if [ -n "$FIND_LN" ] && [ -n "$FIRSTTBL_LN" ] && [ "$FIND_LN" -lt "$FIRSTTBL_LN" ]; then
+  ok "the finding precedes the report's very first table row (line $FIRSTTBL_LN)"
+else
+  no "the finding appears after the first table row (finding=${FIND_LN:-absent} first table=${FIRSTTBL_LN:-absent})"
+fi
+# The finding must say WHY, or it reads as ritual modesty rather than a fact.
+PREAMBLE="$(sed -n "1,${S1_LN:-1}p" "$RPT")"
+printf '%s' "$PREAMBLE" | grep -qi 'baseline arm' \
+  && ok "the preamble names the absent baseline arm as the reason" \
+  || no "the preamble does not name the missing baseline arm — the finding has no stated cause"
+printf '%s' "$PREAMBLE" | grep -qiE 'cannot be produced|none can be' \
+  && ok "the preamble states the baseline cannot be produced from this harness" \
+  || no "the preamble does not state that no baseline can be produced here"
+
+echo "== 8c. §5's speedup carries its qualifiers inline =="
+# §5 is the section that gets pasted into a deck on its own. Every qualifier that
+# makes 2.77x honest must travel WITH the number, in the same section — a caveat
+# two sections away does not survive a copy-paste.
+awk '/^## 5\./{f=1} /^## 6\./{f=0} f' "$RPT" > "$WORK/s5.txt"
+[ -s "$WORK/s5.txt" ] && ok "§5 is extractable as a standalone block (as a reader would paste it)" \
+  || no "§5 could not be extracted from the report"
+s5have(){ grep -qiE "$1" "$WORK/s5.txt"; }
+s5have 'no control arm|not a comparison against anything' \
+  && ok "§5 says inline that there is no control arm" \
+  || no "§5 does not say inline that no control arm exists — pasted alone it reads as a Build-OS-vs-nothing result"
+s5have 'within Build OS|parallel-vs-serial' \
+  && ok "§5 says inline that the comparison is parallel-vs-serial WITHIN Build OS" \
+  || no "§5 does not scope the comparison to within Build OS"
+s5have 'transcript-sourced|not reproducible from this repos' \
+  && ok "§5 says inline that the serial figure is transcript-sourced, not reproducible from the repo" \
+  || no "§5 does not state inline that the serial equivalent is not reproducible from this repository"
+s5have 'agent execution only|agent-execution only' \
+  && ok "§5 says inline that the figure covers agent execution only" \
+  || no "§5 does not state inline that the figure excludes everything but agent execution"
+s5have 'merge' && s5have 'orchestration' \
+  && ok "§5 names the merge and orchestration costs that parallelism adds as excluded" \
+  || no "§5 does not name the excluded merge/orchestration cost"
+s5have 'upper bound' \
+  && ok "§5 calls the speedup a structural upper bound rather than a realized saving" \
+  || no "§5 does not label the speedup an upper bound — it reads as a saving somebody actually experienced"
 
 echo "== 9. Vacuity guard — a report from zero rows fails loudly =="
 bash "$REP" --store "$EMPTY" > "$WORK/vac.out" 2>"$WORK/vac.err"
@@ -324,6 +424,22 @@ datarows "$STORE" | awk -F'\t' '{for(i=4;i<=13;i++) if($i=="-"){print; exit}}' |
   || no "no seeded cell is empty — every unknown appears to have been filled in with a guess"
 
 echo "== 11. A row that contradicts git fails =="
+# PRECONDITION, named out loud before the checks that depend on it. Everything in
+# §11 and §12 falsifies a seeded claim against THIS repository's history. A tree
+# with that history stripped — a shallow clone, or a `git archive` export re-inited
+# as a fresh repo — cannot run these checks at all, and the failures it produces
+# read like defects in the verifier when they are nothing of the kind. This
+# assertion exists so the log says which it is, once, before seven confusing lines.
+MISSING_HIST=""
+for c in 641527f c30f77d 5b956c0 68cae7a; do
+  git -C "$SRC" cat-file -e "${c}^{commit}" 2>/dev/null || MISSING_HIST="$MISSING_HIST $c"
+done
+if [ -z "$MISSING_HIST" ]; then
+  ok "the pinned commits §11/§12 verify against are present in this checkout"
+else
+  no "PRECONDITION UNMET — commit(s) absent from this checkout:$MISSING_HIST. §11/§12 falsify seeded claims against git history; without it their failures mean the HISTORY is missing, not that the verifier is broken"
+fi
+
 # The one class of claim this repo can falsify cheaply. 641527f is 1 file,
 # 115 insertions, 1 deletion — verified from git in this session.
 GOOD="$WORK/git_good.tsv"
@@ -372,6 +488,40 @@ grep -q 'UNVERIFIABLE' "$WORK/vg4.out" \
   && ok "--verify-git reports UNVERIFIABLE for a commit absent from the repo" \
   || { no "--verify-git does not distinguish an absent commit from a verified one"; sed 's/^/      | /' "$WORK/vg4.out"; }
 
+echo "== 11b. A fabricated commit makes --verify-git EXIT non-zero, not just print =="
+# THE HOLE THIS CLOSES. --verify-git printed "UNVERIFIABLE <packet> <sha>" and then
+# exited 0, as long as at least one OTHER row verified. A skeptic who checks only
+# "$?" — which is the entire point of a falsifiable artifact — would read that 0 as
+# "the store agrees with git" while a fabricated commit sat in it. For a tool whose
+# whole pitch is "check me against your own history", the exit code must carry the
+# finding, not just the transcript.
+FAB="$WORK/git_fabricated.tsv"
+add "$FAB" --packet fab_real --date 2026-07-30 --lane tiny --files 1 --insertions 115 \
+    --deletions 1 --commits 641527f --evidence git \
+    --note "a genuinely git-backed row, so the run is not vacuous and 1 row verifies"
+add "$FAB" --packet fab_invented --date 2026-07-30 --lane tiny --files 3 --insertions 900 \
+    --deletions 4 --commits deadbee --evidence git \
+    --note "names a fabricated commit that does not exist in this repository"
+bash "$REC" --store "$FAB" --verify-git --repo "$SRC" > "$WORK/vg5.out" 2>&1
+VG5=$?
+grep -q 'VERIFIED' "$WORK/vg5.out" \
+  && ok "the fabricated-SHA fixture still verifies its one real row (the check is not vacuous)" \
+  || { no "the fabricated-SHA fixture verified no row at all — this fixture proves nothing"; sed 's/^/      | /' "$WORK/vg5.out"; }
+grep -q 'UNVERIFIABLE  fab_invented' "$WORK/vg5.out" \
+  && ok "--verify-git names the fabricated row as UNVERIFIABLE" \
+  || { no "--verify-git did not report the fabricated row"; sed 's/^/      | /' "$WORK/vg5.out"; }
+[ "$VG5" != "0" ] \
+  && ok "--verify-git exits non-zero ($VG5) when a row names a commit absent from the repo" \
+  || { no "--verify-git exited 0 with a fabricated commit in the store — a skeptic checking only \$? would be told the store agrees with git"; sed 's/^/      | /' "$WORK/vg5.out"; }
+grep -qi 'refus\|unverifiable' "$WORK/vg5.out" \
+  && ok "--verify-git says on stderr why it refused" || no "--verify-git refused silently"
+# The existing guarantee must survive the new one: a store where EVERY row verifies
+# still exits 0. A verifier that fails on everything is as useless as one that
+# passes on everything.
+bash "$REC" --store "$GOOD" --verify-git --repo "$SRC" > "$WORK/vg6.out" 2>&1
+[ $? = "0" ] && ok "--verify-git still exits 0 when every named commit exists and matches" \
+  || { no "--verify-git now fails a store that fully verifies — the new guard is too broad"; sed 's/^/      | /' "$WORK/vg6.out"; }
+
 echo "== 12. The live seeded store verifies against git =="
 bash "$REC" --store "$STORE" --verify-git --repo "$SRC" > "$WORK/lvg.out" 2>&1
 LVG=$?
@@ -404,6 +554,29 @@ done
 [ -z "$BADLANE" ] && ok "every lane the corpus assigns exists in the router" || no "corpus assigns lane(s) the router does not define:$BADLANE"
 grep -qiE 'round budget|budget' "$CORPUS" && ok "corpus states a round budget per task" || no "corpus states no round budget"
 
+echo "== 13b. The corpus states its own coverage gaps rather than implying none =="
+# A corpus that says it "spans the lane ladder" while omitting two of the five
+# lanes is describing itself inaccurately in its own opening sentence. The
+# selection biases matter more than the tasks: they are what a buyer would find.
+havei "$CORPUS" "read-only" && havei "$CORPUS" "diagnosis" \
+  && ok "the corpus names the lanes it does NOT cover (read-only, diagnosis)" \
+  || no "the corpus does not name the lanes it leaves untested — it implies full ladder coverage"
+grep -qiE 'over-?sampl|over-?weight|25% of the corpus|best case' "$CORPUS" \
+  && ok "the corpus states the T4 over-weighting caveat (fan-out is 25% of the corpus)" \
+  || no "the corpus does not admit that three-way fan-out is over-represented relative to real work"
+# The three missing task SHAPES. These are the corpus's blind spot, not a backlog:
+# it measures building, and the product sells judgment.
+for spec in "unfamiliar:debugging an unfamiliar codebase" \
+            "input size:read-a-lot / write-a-little" \
+            "don't build it:a task whose right answer is not to build"; do
+  needle="${spec%%:*}"; label="${spec#*:}"
+  havei "$CORPUS" "$needle" && ok "corpus names the missing shape: $label" \
+    || no "corpus does not name the missing task shape: $label"
+done
+grep -qiE 'blind spot' "$CORPUS" \
+  && ok "the corpus calls those omissions a blind spot in plain words" \
+  || no "the corpus lists gaps without calling them a blind spot"
+
 echo "== 14. The comparison protocol is specified, and honestly NOT run =="
 for spec in "held constant:what is held constant" \
             "runs:the number of runs" \
@@ -420,6 +593,46 @@ if grep -qiE '\bsleep [0-9]|simulat(e|ed) (a |the )?(run|session|a/b)' "$PROTO" 
 else
   ok "nothing in the instrument or protocol simulates a run"
 fi
+
+echo "== 14b. The protocol is actually RUNNABLE on both arms, and pre-registered =="
+# A stopping rule denominated in ROUNDS cannot fire on arm A, because arm A is raw
+# Claude Code and consumes zero delegated agent passes by definition. A DNF rule
+# only one arm can trigger is not a stopping rule; it is a rule that silently
+# exempts the control from ever failing to converge.
+grep -qiE 'wall.?clock (minutes|min)[^.]*(stop|DNF|exceed)|(stop|DNF)[^.]*wall.?clock' "$PROTO" \
+  && ok "the stopping rule is denominated in wall-clock, a unit BOTH arms have" \
+  || no "the stopping rule is not denominated in a cross-arm unit — a rounds-only DNF can never fire on arm A"
+grep -qiE 'arm B only|B-only|only arm B' "$PROTO" \
+  && ok "the protocol marks rounds as an arm-B-only diagnostic rather than a both-arms measure" \
+  || no "the protocol still presents rounds as measured on both arms while arm A has none"
+# Two held constants that void the result if they move and nothing else catches them.
+grep -qiE 'reasoning effort|thinking budget' "$PROTO" \
+  && ok "reasoning effort / thinking budget is held constant (a separate knob from the model)" \
+  || no "reasoning effort / thinking budget is not held constant — arm B could run hotter and nothing would catch it"
+grep -qiE 'fresh session|cold context' "$PROTO" \
+  && ok "fresh session / cold context is held constant (session state, not just filesystem state)" \
+  || no "the protocol holds filesystem state constant but not session state — the larger confound"
+# One pre-registered primary endpoint, declared before run 1.
+grep -qiE 'pre-?register' "$PROTO" \
+  && ok "the protocol pre-registers its analysis" \
+  || no "the protocol pre-registers nothing — five outcome families over four tasks is a garden of forking paths"
+grep -qiE 'primary endpoint' "$PROTO" \
+  && ok "the protocol declares ONE primary endpoint" \
+  || no "the protocol names no primary endpoint, so any of five outcomes can be reported as the finding"
+# The design that will actually be executed, not just the one that sounds rigorous.
+grep -qiE '16 runs' "$PROTO" \
+  && ok "the protocol names a reduced-N plan (16 runs) as the recommended execution" \
+  || no "the protocol offers only the 40-run design — 20-30 operator-hours, which means it will not be run at all"
+grep -qiE 'ranges overlap' "$PROTO" \
+  && ok "the reduced-N plan carries its pre-registered overlap rule" \
+  || no "the reduced-N plan states no decision rule, so a null result can be narrated as a win"
+# The operator cannot be blinded, and is the author.
+grep -qiE 'blind' "$PROTO" \
+  && ok "the protocol states the operator cannot be blinded to which arm he is in" \
+  || no "the protocol does not admit the blinding failure — the same objection it raises against an agent measuring itself"
+grep -qiE "author" "$PROTO" \
+  && ok "the protocol names the operator's authorship of the product as a limit" \
+  || no "the protocol does not name the operator as the product's author"
 
 echo "== 15. Local only — no telemetry, no phone-home =="
 NET="$(grep -nEi 'curl|wget|nc -|netcat|https?://[a-z]|ftp://|telemetry|phone.?home|analytics|api\.|POST ' "$REC" "$REP" 2>/dev/null \

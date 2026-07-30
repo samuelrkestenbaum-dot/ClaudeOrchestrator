@@ -111,6 +111,21 @@ Note the tension the instrument deliberately preserves: git says 47.5 minutes
 elapsed between that packet's commit and the one before it. Both figures are true
 about different things, and neither is a "how long the packet took" number.
 
+## When a row is written, and by whom
+
+**One row per packet, appended by the archivist at close.** Not by the builder
+mid-flight. The reason is arithmetic, not ceremony: the store is append-only and
+the recorder refuses a duplicate `packet_id`, so a row written before the figures
+are final can never be corrected. At close, and only at close, every column is
+knowable at once — both commits exist, the round count is final, and qa has
+reported.
+
+This packet (`gravito_speed_benchmark_a`) deliberately has **no row of its own**
+in the seeded store for exactly that reason. It had not closed when its own
+instrument was committed. Writing a partial row for it — Commit 1's diff with an
+empty round count — would have put a number in the store that the store could
+never fix, which is the failure mode this whole file argues against.
+
 ## Using it
 
 ```sh
@@ -136,6 +151,10 @@ build-os/metrics/report-speed.sh
 These are refusals, not warnings — each exits non-zero:
 
 - **Record a row with no attribution.** No evidence class, no note, no row.
+- **Record a second row for a packet already in the store.** Every total would
+  double-count it, and the report's own self-checks would still pass, because a
+  double-counted row is internally consistent. That is the hardest class of wrong
+  number to notice, so it is refused at the door.
 - **Record a `git`/`mixed` row that names no commit.** An uncheckable claim of
   git backing is worse than an honest estimate.
 - **Pass a row that contradicts git.** `--verify-git` sums `git show --numstat`
@@ -143,8 +162,20 @@ These are refusals, not warnings — each exits non-zero:
   deletions.
 - **Report success having verified nothing.** A verifier that checked zero rows
   exits non-zero; that is how a blinded check would otherwise stay green forever.
+- **Pass a store containing a commit this repository does not have.**
+  `--verify-git` exits non-zero on any `UNVERIFIABLE` row, not only on a
+  `MISMATCH`. It used to print `UNVERIFIABLE <packet> <sha>` and still exit 0 as
+  long as some *other* row verified — so a fabricated commit could sit in the
+  store while `$?` reported agreement with git. A skeptic checks the exit code;
+  an unverifiable row is an **unmade check**, not a passed one. (On a shallow
+  clone or a history-stripped export this is the correct answer too: fetch the
+  history and re-run.)
 - **Render a report from zero rows.** An empty table with a clean exit looks like
   proof. It is refused, loudly, on stderr.
+- **Total an unmeasured column to `0`.** If no row measured a column, its total
+  prints `-`. Summing an empty set to `0` would publish a clean record nobody
+  ever audited — it has the same shape as a real zero-defect result and none of
+  the evidence. `defects_escaped` in the seeded report is exactly this case.
 - **Render a report whose totals do not match its rows.** The renderer
   self-checks rows-read against rows-rendered and refuses on any mismatch — a
   report that drops a row is worse than no report, because its totals still look
@@ -172,6 +203,25 @@ future packet appends one row — not as evidence for a claim about speed.
   not, and nothing in this repository can falsify them.
 - **Per-packet attribution can be destroyed by the merge policy.** The seeded
   fan-out merged three packets into one commit, so its three constituent packets
-  are permanently unattributable. One commit per packet is a measurement
-  requirement, not a style preference.
+  are **unattributable from git alone — recoverable only if the disjoint
+  file-ownership manifest was recorded**, which for that fan-out it was not.
+  One commit per packet is a measurement requirement, not a style preference —
+  **with a stated fallback**: one commit per packet *where the merge allows it*;
+  otherwise record the disjoint manifest in the receipt so attribution stays
+  recoverable **by path**. The fallback exists because the absolute rule collides
+  with "Commit-1 green in isolation" on a fan-out merge, and an absolute rule that
+  collides with merge mechanics is one that gets quietly broken instead of
+  followed.
+- **A row can never be corrected.** Append-only plus one-row-per-packet means a
+  figure that was not final when the row was written is never recorded at all.
+  There is no supersede mechanism, and adding one is a follow-on packet. The
+  mitigation today is the convention above: write the row at close, or not yet.
+- **`--verify-git` needs this repository's history, and says so.** The seeded
+  rows are falsified against commits `641527f`, `c30f77d`, `5b956c0` and
+  `68cae7a`. A shallow clone, or an export re-initialised as a fresh repository,
+  does not contain them — every git-backed row then reports `UNVERIFIABLE` and
+  the verifier exits non-zero rather than passing on an empty check. This was
+  found by running the suite in a history-stripped tree, and
+  `tests/speed_benchmark_tests.sh` §11 now names the missing precondition
+  explicitly so the failure is not mistaken for a broken verifier.
 - **No baseline arm exists.** See `COMPARISON_PROTOCOL.md`.

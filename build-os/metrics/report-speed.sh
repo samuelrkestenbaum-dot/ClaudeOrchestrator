@@ -55,6 +55,11 @@ OUT="$(awk -F'\t' -v store="$STORE" -v gen="$GEN_DATE" '
 function isnum(x){ return (x != "-" && x != "" && x ~ /^[0-9]+(\.[0-9]+)?$/) }
 function fmt(x){ if (x == int(x)) return sprintf("%d", x); return sprintf("%.1f", x) }
 function cel(x){ return (isnum(x) ? x : "-") }
+# A total over a column NOBODY MEASURED must print "-", not 0. Summing an empty
+# set to 0 is how "defects escaped: 0" gets published for a column that was never
+# audited — a fabricated clean record with the same shape as a real one. If no row
+# contributed a number, the total is an admission, not an arithmetic result.
+function totcel(c){ return (totn[c] > 0 ? fmt(tot[c]) : "-") }
 
 BEGIN { budget["read-only"]=1; budget["diagnosis"]=1; budget["tiny"]=2 }
 
@@ -78,7 +83,7 @@ END {
   for (i=1; i<=n; i++) {
     v[4]=rd[i]; v[5]=wm[i]; v[6]=sm[i]; v[7]=ag[i]; v[8]=fl[i]
     v[9]=ins[i]; v[10]=del[i]; v[11]=ta[i]; v[12]=dg[i]; v[13]=de[i]
-    for (c=4; c<=13; c++) { if (isnum(v[c])) tot[c]+=v[c]; else empty[c]++ }
+    for (c=4; c<=13; c++) { if (isnum(v[c])) { tot[c]+=v[c]; totn[c]++ } else empty[c]++ }
 
     L=ln[i]
     if (!(L in lseen)) { lseen[L]=1; lorder[++nl]=L }
@@ -98,10 +103,32 @@ END {
   printf "- **Rows rendered:** %d\n", n
   printf "- **Generated:** %s by `build-os/metrics/report-speed.sh`\n", gen
   print ""
-  print "Every number below is copied from a row in the store, or is arithmetic over"
-  print "those rows. Nothing is modelled, extrapolated, or benchmarked against a system"
-  print "that was not actually run. A cell that reads `-` was never measured; §6 lists"
-  print "which ones and states why."
+  # THE FINDING GOES FIRST, ABOVE THE FIRST TABLE. Everything under this line is
+  # method-honesty — "the numbers were not made up" — and method-honesty is not
+  # finding-honesty. Rendered in the old order a skimmer met a total, then an
+  # insertions-per-minute rate, then a figure with an "x" after it, and stopped;
+  # the one thing this report does not establish sat in §6, four screens down,
+  # where nobody who had already formed a belief would go looking. The ordering is
+  # the disclosure, so tests/speed_benchmark_tests.sh §8b pins it to the position,
+  # not merely to the presence of the words.
+  print "> **FINDING, before any number below.**"
+  print ">"
+  print "> **This report does not show that Build OS is faster than anything.**"
+  print ">"
+  print "> No baseline arm exists in this store — no run of the same work with Build OS"
+  print "> switched off — and none can be produced from this harness, so every figure"
+  print "> here describes Build OS measured against itself. The totals, the"
+  print "> throughput rates and the fan-out speedup are internal descriptive statistics,"
+  print "> **not a comparison**, and none of them is evidence that this system is faster"
+  print "> than working without it. The multiplier this project has argued (\"20x-100x\") is"
+  print "> **unmeasured** here: neither supported nor refuted by anything below. §6 lists"
+  print "> every cell this instrument could not fill and why; `COMPARISON_PROTOCOL.md`"
+  print "> specifies the A/B that would be needed and states plainly that it has not run."
+  print ""
+  print "With that established: every number below is copied from a row in the store, or is"
+  print "arithmetic over those rows. Nothing is modelled, extrapolated, or benchmarked"
+  print "against a system that was not actually run. A cell that reads `-` was never"
+  print "measured; §6 lists which ones and states why."
   print ""
 
   # ---- 1. per-packet -------------------------------------------------------
@@ -117,11 +144,13 @@ END {
     rendered++
   }
   printf "| **TOTAL (%d rows)** | - | - | %s | %s | %s | %s | %s | %s | %s | %s | - |\n",
-    n, fmt(tot[4]+0), fmt(tot[5]+0), fmt(tot[7]+0), fmt(tot[8]+0),
-    fmt(tot[9]+0), fmt(tot[11]+0), fmt(tot[12]+0), fmt(tot[13]+0)
+    n, totcel(4), totcel(5), totcel(7), totcel(8),
+    totcel(9), totcel(11), totcel(12), totcel(13)
   print "<!-- REPORT:PACKETS:END -->"
   print ""
-  printf "Totals skip `-` cells; they are sums of what was recorded, not of what happened.\n"
+  print "Totals skip `-` cells; they are sums of what was recorded, not of what happened."
+  print "A total is itself `-` when **no** row measured that column, because summing an"
+  print "empty set to `0` would publish a clean record nobody ever audited."
   print ""
 
   # ---- 2. rounds per lane --------------------------------------------------
@@ -195,6 +224,26 @@ END {
     printf "| %s | %s | %s | %s | %.2fx |\n", pid[i], cel(ag[i]), wm[i], sm[i], sm[i]/wm[i]
   }
   if (fn == 0) print "| _none_ | - | - | - | - |"
+  print ""
+  # THREE QUALIFIERS THAT MUST TRAVEL WITH THE NUMBER. §5 is the section most
+  # likely to be lifted out and pasted into a deck on its own, and on its own the
+  # bare multiplier asserts something none of these rows measured. A caveat two
+  # sections away does not survive a copy-paste, so it lives here instead.
+  print "**Read these three qualifiers with the number, every time it is quoted.**"
+  print ""
+  print "1. **It is not a comparison against anything.** This is parallel-vs-serial"
+  print "   *within* Build OS. There is **no control arm** here and no raw-Claude-Code run"
+  print "   exists, so a speedup in this table says nothing whatever about Build OS versus"
+  print "   not using Build OS."
+  print "2. **It is transcript-sourced, and not reproducible from this repository.** The"
+  print "   serial equivalent came from a session record, not from re-running the same"
+  print "   work serially. A reader holding only this repo cannot re-derive it."
+  print "   `task_corpus.md` (`T4`) requires a measured serial re-run for exactly this"
+  print "   reason, and records that the seeded row does not meet its own requirement."
+  print "3. **It covers agent execution only.** Orchestration, qa, review and the merge —"
+  print "   the costs parallelism *adds* — are excluded from both sides. That makes this a"
+  print "   structural **upper bound** no operator could actually realize, not a"
+  print "   wall-clock saving anyone experienced."
   print ""
   print "Speedup is `serial equivalent / parallel wall`, computed from the row — it is"
   print "never a figure typed into the store. The serial equivalent is only as good as"

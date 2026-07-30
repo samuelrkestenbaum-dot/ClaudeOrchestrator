@@ -150,7 +150,7 @@ if [ "$MODE" = "validate" ]; then
   [ -f "$STORE" ] || die "store not found: $STORE"
   h="$(head -n1 "$STORE")"
   [ "$h" = "$HEADER" ] || die "store header does not match the 16-column schema: $STORE"
-  n=0; bad=0
+  n=0; bad=0; seen=""
   while IFS= read -r line; do
     n=$((n+1))
     nf="$(printf '%s' "$line" | awk -F'\t' '{print NF}')"
@@ -161,6 +161,11 @@ if [ "$MODE" = "validate" ]; then
     IFS="$TAB" read -r c1 c2 c3 c4 c5 c6 c7 c8 c9 c10 c11 c12 c13 c14 c15 c16 <<<"$line"
     validate_fields "$c1" "$c2" "$c3" "$c4" "$c5" "$c6" "$c7" "$c8" "$c9" "$c10" \
                     "$c11" "$c12" "$c13" "$c14" "$c15" "$c16" "row $n ($c1)" || bad=$((bad+1))
+    case " $seen " in
+      *" $c1 "*) printf 'record-packet: row %s (%s) is a duplicate packet_id — already recorded above; every total in the report would double-count it\n' "$n" "$c1" >&2
+                 bad=$((bad+1)) ;;
+      *) seen="${seen:-} $c1" ;;
+    esac
   done < <(datarows "$STORE")
   if [ "$n" -eq 0 ]; then
     printf 'record-packet: REFUSED — %s has 0 data rows. An empty store is not a valid store; it is an unmeasured system.\n' "$STORE" >&2
@@ -227,6 +232,18 @@ if [ "$MODE" = "verify" ]; then
     printf 'record-packet: REFUSED — 0 rows were actually checked against git. A verifier that verified nothing must not report success.\n' >&2
     exit 2
   fi
+  # A ROW NAMING A COMMIT THIS REPOSITORY DOES NOT CONTAIN IS A FAILED CHECK, and
+  # the exit code has to say so. It used to print "UNVERIFIABLE <packet> <sha>" and
+  # then exit 0 as long as some other row verified — so a fabricated commit sat in
+  # the store while "$?" reported agreement with git. The entire pitch of this
+  # instrument is that a skeptic can falsify it against their own history, and a
+  # skeptic checks the exit code. An unverifiable row is not a pass with a note; it
+  # is the absence of the check that was claimed.
+  if [ "$unverifiable" -gt 0 ]; then
+    printf 'record-packet: REFUSED — %s row(s) name commits this repository does not contain (or whose diff git cannot report).\n' "$unverifiable" >&2
+    printf 'That is an unmade check, not a passed one. If this is a shallow clone or a history-stripped export, fetch the full history and re-run; if the commit was never real, the row is fabricated.\n' >&2
+    exit 2
+  fi
   exit 0
 fi
 
@@ -243,6 +260,14 @@ done
 validate_fields "$f_packet" "$f_date" "$f_lane" "$f_rounds" "$f_wall" "$f_serial" \
                 "$f_agents" "$f_files" "$f_ins" "$f_del" "$f_tests" "$f_dg" "$f_de" \
                 "$f_commits" "$f_evidence" "$f_note" "record" || exit 2
+
+# ONE ROW PER PACKET. A second row for a packet already in the store would be
+# summed into every total in the report, and the report's own self-checks would
+# still pass, because a double-counted row is internally consistent. That is the
+# hardest class of wrong number to notice, so it is refused at the door.
+if [ -f "$STORE" ] && datarows "$STORE" | cut -f1 | grep -qxF "$f_packet"; then
+  die "packet_id \"$f_packet\" is already recorded in $STORE — one row per packet. A second row would be double-counted by every total in the report. See README.md > Known weaknesses for why a row is never rewritten."
+fi
 
 ensure_store "$STORE"
 printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \

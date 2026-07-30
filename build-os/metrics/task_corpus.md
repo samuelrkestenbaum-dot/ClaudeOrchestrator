@@ -14,10 +14,19 @@ version. If `T3` is made easier and the number goes up, that is not a speedup.
 
 ## The tasks
 
-Four tasks, chosen to span the lane ladder rather than to flatter it: one that
-should cost almost nothing, one that sits exactly on the `tiny`/`substantive`
-boundary where mis-classification is most expensive, one genuinely substantive,
-and one that only parallelism can help with.
+Four tasks: one that should cost almost nothing, one that sits exactly on the
+`tiny`/`substantive` boundary where mis-classification is most expensive, one
+genuinely substantive, and one that only parallelism can help with.
+
+**They do not span the lane ladder, and this document previously claimed they
+did.** The four cover `tiny`, `substantive` and `agent-swarm`. **`read-only` and
+`diagnosis` have no task at all** — two of the five lanes are untested, and they
+are the two cheapest lanes, which is where an orchestrating system's overhead is
+proportionally largest. A result over this corpus is a result about building, not
+about the whole router.
+
+See **Known coverage gaps** at the foot of this file before quoting anything
+measured over these four tasks.
 
 | id | task | expected lane | round budget |
 |---|---|---|---|
@@ -91,3 +100,49 @@ build-os/metrics/record-packet.sh \
 The `--note` must name the **corpus version**, the **task id**, the **run
 number**, and the **arm**. A row that cannot be traced back to a specific run of a
 specific task is not comparable to anything and should not have been recorded.
+
+## Known coverage gaps
+
+Recorded here as **stated gaps, not as a backlog**. Adding a task would be a new
+corpus version (see the freezing rule), and none is added here. What follows is
+what a reader should hold against any number this corpus ever produces.
+
+### The corpus over-samples the product's best case
+
+`T4` — a genuinely independent three-way fan-out with a disjoint file-ownership
+manifest — is **25% of the corpus and carries the largest round cap**, while being
+a small fraction of real work. Most real work is not cleanly separable, and the
+cases that are get spotted and set up deliberately. Weighting the one shape
+parallelism helps most at a quarter of the corpus tilts every aggregate toward the
+product's strongest case, and any average across `T1`–`T4` inherits that tilt.
+
+The counterweight is deliberate and should be kept: **`T1` is the task on which
+this system loses**, and it is annotated with this repository's own worst measured
+result — a one-token stdin fix that burned 6 rounds against a 2-round budget. A
+corpus with no task the product loses on is a demo.
+
+### Three task shapes are missing, and they are where the real claim lives
+
+1. **Debugging an unfamiliar codebase.** Every task here presupposes the defect is
+   *already located*: `T2` says "a defect reproducible in exactly one source
+   file". Nothing in this corpus measures **finding** it — the search, the wrong
+   hypotheses, the reading. That is a large share of real engineering time and the
+   corpus is silent on it.
+2. **Read-a-lot / write-a-little.** All four tasks are specified by output size —
+   one comment, one file, three files, three work items. **Not one is specified by
+   input size.** A task that requires reading 40 files to make a 3-line change
+   exercises completely different machinery, and the corpus contains no instance
+   of it.
+3. **A task whose right answer is "don't build it."** Currently *unmeasurable*
+   under this framing: every task's "Done when" presupposes a build happened, so a
+   correct refusal scores as a failure to complete. Measuring it needs an
+   acceptance criterion that can be satisfied by not building — which does not
+   exist here.
+
+**This is the corpus's known blind spot, and it should be named as one: the
+corpus measures *building*, and the product sells *judgment*.** Lane
+classification, refusing scope, choosing not to fan out, and
+stopping early are the behaviours the router exists to produce, and this corpus
+scores almost none of them. A strong result over `T1`–`T4` would be evidence about
+throughput on well-specified build tasks and would not be evidence for the claim
+the product actually makes.

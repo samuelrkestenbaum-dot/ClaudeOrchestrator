@@ -56,13 +56,16 @@ deprecation cycle. Pin a commit if you need stability.
   unautomatable here. The baseline column is therefore empty with a stated
   reason, and the 20x-100x claim remains **unmeasured** rather than illustrated.
   Local, in-repo, operator-owned: **no telemetry, nothing is transmitted.**
-  Pinned by `tests/speed_benchmark_tests.sh` (128 checks), whose load-bearing
+  Pinned by `tests/speed_benchmark_tests.sh` (169 checks), whose load-bearing
   assertions are that report totals equal the sum of the *rendered* rows, that
   every seeded row carries an attribution, that a row contradicting git fails,
-  and that a report over zero rows refuses loudly instead of printing an empty
-  green table.
+  that a row naming a commit this repository does not contain makes `--verify-git`
+  **exit non-zero** rather than merely print `UNVERIFIABLE`, that the report's
+  "this shows no comparison" finding is rendered **above** the first table rather
+  than four screens below it, and that a report over zero rows refuses loudly
+  instead of printing an empty green table.
 - All sibling suites are chained into `bash tests/build_os_tests.sh`, which now
-  reports **616 passed** and fails if any suite in `tests/` is left unchained.
+  reports **657 passed** and fails if any suite in `tests/` is left unchained.
   That guard was verified in the direction that matters: adding
   `tests/speed_benchmark_tests.sh` to `tests/` turned the parent suite **red**
   (487 passed, 1 failed) until it was explicitly wired. The guard *forces*

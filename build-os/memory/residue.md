@@ -80,9 +80,91 @@
   come from clean templates) and did not fix it. A **sibling packet in this same session** is
   fixing it — at the time this note was written that fix had **not** landed, so treat the leak as
   open until that packet's own receipt says otherwise.
-- **Single-model review throughout (P-A + stdin-hang):** every reviewer verdict in this work was
-  produced by **one model**. Codex second-eyes was checked and **unavailable on every pass**.
-  No verdict here has independent second-model corroboration.
+- **THE SPEED CLAIM IS STILL UNMEASURED (`gravito_speed_benchmark_a`):** the instrument now
+  exists (`build-os/metrics/`), the number does not. **No A/B against raw Claude Code has been
+  run, and none can be run from this harness** — a Claude Code session is not launchable from a
+  bash test and agent invocations are not scriptable, so **both** arms are unautomatable here,
+  not just the control. "20x-100x" is therefore neither supported nor refuted by anything in this
+  repo; the store is silent on it and says so. **Do not quote a multiplier.** The executable
+  design is written down in `build-os/metrics/COMPARISON_PROTOCOL.md` (two arms, **9**
+  held-constant variables — now including **reasoning effort/thinking budget** and a **fresh
+  session per run**, the two confounds that void a result while leaving the model string
+  identical; **one pre-registered primary endpoint** = median wall-clock to acceptance on `T3`,
+  everything else secondary; a **wall-clock-denominated DNF rule** because a rounds-denominated
+  one could never fire on arm A, which delegates to nobody; rounds demoted to an **arm-B-only
+  diagnostic**; human operator holds the clock, alternating run order) against the frozen corpus
+  in `task_corpus.md` (v1.0.0: `T1` comment fix, `T2` single-file bugfix with a test, `T3`
+  multi-file feature, `T4` three-way fan-out). **The recommended execution is the reduced-N plan:
+  a floor of 4 tasks × 2 arms × 2 runs = 16 runs, 20 at most** (the two optional extra runs go to
+  `T1` and `T2`, the cheapest to repeat), reported as ranges, with the pre-registered rule *"if the
+  ranges overlap at all, the honest report is 'no detectable difference at this N'."* 16 is enough
+  to **refute** 20x (a 20x effect gives non-overlapping ranges at N=2) and honestly insufficient to
+  establish 1.3x, which nobody is selling; the N=5/40-run design is kept as the fuller one but is
+  20–30 operator-hours and will not happen. **This is P-B / pilot territory and needs a human, not
+  an agent** — an agent measuring its own speedup is not evidence. **And the human is not neutral
+  either:** the operator is the product's author and **cannot be blinded** to which arm he is in,
+  which the protocol now states as a limit it cannot fix from the inside.
+- **What the instrument can prove today (`gravito_speed_benchmark_a`):** that four specific
+  packets produced specific git-checkable amounts of change; that one of them (a one-token stdin
+  fix, retro-classified `tiny`) burned **6 rounds against a 2-round budget**; that a reference
+  deployment's rotation utility took **11 rounds** and was sound at **3**; and that one fan-out
+  ran 13.7 min parallel against a 37.9 min serial transcript figure (**2.77x**). Three rows are
+  falsifiable against `git show --numstat` and are verified on every suite run. **Sample size is
+  4 and the round-budget compliance denominator is 1** — the report prints that denominator next
+  to the percentage on purpose.
+- **Instrument limits, carried (`gravito_speed_benchmark_a`):** (1) **Rounds, wall-clock, agents
+  and both defect columns are self-reported** — nothing counts them automatically, and
+  `--verify-git` can only falsify files/insertions/deletions. (2) **`defects_escaped` is empty
+  across the whole corpus because no post-close defect audit has ever been run** — empty means
+  *unaudited*, never *zero*. (3) **A row can never be corrected**: the store is append-only and
+  one-row-per-packet, with no supersede mechanism, so a row must be written at close or not yet
+  — which is why this packet has **no row of its own**. (4) **`--verify-git` needs this repo's
+  history**; a shallow clone or a history-stripped export reports `UNVERIFIABLE` and exits
+  non-zero (found by running the suite in a stripped tree; §11 now names the precondition).
+  (5) **The corpus tasks `T1`–`T4` are a frozen specification, not executable fixtures** —
+  turning them into runnable fixtures is a follow-on packet, as is automatic round/wall-clock
+  capture and a supersede mechanism. (6) **`--verify-git` now exits non-zero on `UNVERIFIABLE`,
+  not only on `MISMATCH`** — it previously printed the unverifiable row and still exited 0 as long
+  as one other row verified, so a fabricated commit could sit in the store while `$?` said the
+  store agreed with git. An unmade check is not a passed check, and a falsifiable artifact is only
+  falsifiable if the exit code carries the finding.
+- **THE CORPUS MEASURES BUILDING; THE PRODUCT SELLS JUDGMENT (`gravito_speed_benchmark_a`):**
+  `task_corpus.md` now records its own blind spot rather than claiming to "span the lane ladder"
+  (it does not — **`read-only` and `diagnosis` have no task at all**, and those are the two lanes
+  where orchestration overhead is proportionally largest). It also over-samples the best case:
+  `T4`, a clean three-way fan-out, is **25% of the corpus with the largest cap** while being a
+  small fraction of real work. Three task shapes are **missing and named as gaps, not queued as
+  work**: (a) **debugging an unfamiliar codebase** — every task presupposes the defect is already
+  located, so nothing measures *finding* it; (b) **read-a-lot / write-a-little** — all four tasks
+  are specified by output size, none by input size; (c) **a task whose right answer is "don't
+  build it"** — currently unmeasurable, since every "Done when" presupposes a build happened. The
+  counterweight to keep: **`T1` is deliberately the task where Build OS loses**, annotated with
+  this repo's own worst result (6 rounds for a one-token fix). A corpus with no losing task is a
+  demo.
+- **Per-packet attribution is destroyed by one-commit merges (`gravito_speed_benchmark_a`):** the
+  seeded fan-out merged three packets into a single commit (`68cae7a`), so its three constituent
+  packets are **unattributable from git alone — recoverable if the disjoint file-ownership manifest
+  was recorded**, which for that fan-out it was not. The instrument can measure the fan-out but not
+  its parts. **One commit per packet is a measurement requirement, not a style preference — with a
+  stated fallback:** one commit per packet *where the merge allows it*; otherwise **record the
+  disjoint manifest in the receipt** so attribution stays recoverable by path. The fallback is not
+  a loophole, it is the reason the rule survives: as an absolute it collides with "Commit-1 green
+  in isolation" on fan-out merges, and absolute rules that collide with merge mechanics get quietly
+  broken rather than followed. Related:
+  git says 47.5 min elapsed between `641527f` and `68cae7a` while the transcript says the fan-out
+  itself was 13.7 min. Both are true about different things, and **neither is a "how long the
+  packet took" number** — which is why wall-clock is never reconstructed from commit timestamps.
+- **No telemetry, by design and by test (`gravito_speed_benchmark_a`):** the metrics store is a
+  local, in-repo, operator-owned file. Nothing transmits, phones home, or reports usage, and
+  `tests/speed_benchmark_tests.sh` §15 greps the scripts to keep it that way. Adding a collector
+  would be a separate packet **and** an explicit gate.
+- **Single-model review throughout (P-A + stdin-hang + `gravito_speed_benchmark_a`):** every
+  reviewer verdict in this work was produced by **one model**. Codex second-eyes was checked and
+  **unavailable on every pass** — including this packet's review and its fix round, so the six
+  reviewer items and the qa exit-code finding folded in here also carry **no independent
+  second-model corroboration**. That matters more than usual for this packet, whose deliverable is
+  an honesty instrument: the artifact that judges whether claims are overstated was itself judged
+  by a single model.
 
 ## Known risks / debt
 
