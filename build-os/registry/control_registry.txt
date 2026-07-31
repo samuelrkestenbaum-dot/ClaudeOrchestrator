@@ -13,7 +13,7 @@
 #
 # AN ENTRY IS NOT A LINE. Entries are cut at different granularities: some
 # classify a single comparison, and `tests.nonvacuity_minimums` classifies a
-# family of 34 fitted constants across 12 files. So "14 of 75 declare a
+# family of 34 fitted constants across 12 files. So "14 of 78 declare a
 # mismatch" is a fact about this file's granularity, not a count of the
 # heuristics that can stop a build — that number is 56, hand-counted in
 # MISMATCHES.md's summary table. Quote both or quote the larger one.
@@ -23,7 +23,7 @@
 #   grep -B4 '^runtime_authority: gate'   what can stop a run
 #   grep '^authority_mismatch: declared'  what is over-authorised (14 entries)
 #
-#   # gate on unvalidated evidence — 11 of 75, the sharpest number here:
+#   # gate on unvalidated evidence — 11 of 78, the sharpest number here:
 #   awk -F': ' '/^control: /{c=$2} /^runtime_authority: gate/{g=1} \
 #     /^empirical_status: unvalidated/{u=1} /^$/{if(g&&u)print c; g=0; u=0}' \
 #     control_registry.txt
@@ -997,7 +997,7 @@ inputs: every tests/*.sh present on disk, against the chain_suite call sites in 
 output: the list of sibling suites that are present but never chained
 owning_module: tests/build_os_tests.sh
 consuming_policies: the top-level suite's FAIL count and exit status — which is the repo's single verification command
-evidence_refs: tests/build_os_tests.sh:858; tests/build_os_tests.sh:860; tests/build_os_tests.sh:861
+evidence_refs: tests/build_os_tests.sh:859; tests/build_os_tests.sh:861; tests/build_os_tests.sh:862
 failure_behavior: one FAIL naming every unwired suite; the run exits non-zero
 rollback_behavior: read-only
 promotion_requirement: n/a
@@ -1033,7 +1033,7 @@ inputs: the count of hook-invocation sites the static scanner matches in this su
 output: pass, or "it has gone blind, so its verdict below is meaningless"
 owning_module: tests/build_os_tests.sh
 consuming_policies: the suite's FAIL count
-evidence_refs: tests/build_os_tests.sh:937; tests/build_os_tests.sh:959; tests/build_os_tests.sh:962
+evidence_refs: tests/build_os_tests.sh:938; tests/build_os_tests.sh:960; tests/build_os_tests.sh:963
 failure_behavior: one FAIL; the run exits non-zero
 rollback_behavior: read-only
 promotion_requirement: n/a
@@ -1141,7 +1141,7 @@ inputs: the router, the guidance files, the hooks, the installers, and eleven ch
 output: ==== RESULT: N passed, M failed ====
 owning_module: tests/build_os_tests.sh
 consuming_policies: the repository's single verification command; swarm-merge.sh runs it as the post-merge verification
-evidence_refs: tests/build_os_tests.sh:972; tests/build_os_tests.sh:973
+evidence_refs: tests/build_os_tests.sh:973; tests/build_os_tests.sh:974
 failure_behavior: exits non-zero when FAIL is non-zero
 rollback_behavior: read-only; all fixtures live in mktemp dirs
 promotion_requirement: n/a
@@ -1422,3 +1422,61 @@ promotion_requirement: n/a
 demotion_requirement: unchain it from tests/build_os_tests.sh and it stops gating anything
 authority_mismatch: none
 notes: Reconciles the crosswalk against the census in BOTH directions, so a control added to the registry and never bound fails here — the §21 lesson (derived membership beats asserted membership) applied on a new axis. Class A because every assertion is an invariant over two artefacts — a binding names a control that exists, a restated class equals the registry's, a claimed authority equals the strongest one actually held — rather than a fitted threshold. It states no numeric floor of its own, so it is not a member of the tests.nonvacuity_minimums family.
+
+# =============================================================================
+# build-os/tools/evidence-policy.sh — the evidence axis of the licence table
+# =============================================================================
+
+control: evidence.policy_matrix
+class: C
+implementation_status: implemented
+empirical_status: red_driven
+runtime_authority: advise
+nervous_system_role: conscience
+inputs: every stanza's class, empirical_status and runtime_authority, read from the control registry
+output: one line per control exercising more authority than class AND evidence together license, each naming its class licence, its evidence licence, the composed minimum, and WHICH AXIS binds it; then per-axis totals
+owning_module: build-os/tools/evidence-policy.sh
+consuming_policies: none that acts automatically — the report is read by the operator, who decides. tests/evidence_policy_tests.sh consumes it as the object under test.
+evidence_refs: build-os/tools/evidence-policy.sh:170; build-os/tools/evidence-policy.sh:269; build-os/tools/evidence-policy.sh:270; build-os/tools/evidence-policy.sh:317; build-os/tools/evidence-policy.sh:324
+failure_behavior: none — it prints its findings and exits 0 however many there are. A breach is REPORTED and the run continues.
+rollback_behavior: none needed — it reads files and prints; it writes nothing, anywhere, and the registry is byte-identical after a run
+promotion_requirement: an authority envelope that makes automatic re-authorisation a legitimate act, plus a measured basis for where `unvalidated` caps. Both are absent. Promotion to `gate` is a governance action for the operator and is NOT implied by this control being useful.
+demotion_requirement: it drops to `observe` the day nobody reads the report; it is not `load_bearing` today and does not claim to be, because no live policy consumes its output
+authority_mismatch: none
+notes: THE SECOND AXIS OF THE LICENCE TABLE. README §3's table is one-dimensional — class -> authority — so `empirical_status` licenses nothing and forbids nothing, and a control MEASURED AND FOUND NOT TO DISCRIMINATE can stop a build with no rule objecting. This adds the evidence axis and composes the two by MINIMUM: a control may do what both allow. THE SHARP RULE is that `refuted` caps at `observe` at every class, because class is a claim about the KIND of thing checked while evidence is a claim about whether the check WORKS, and a hard invariant whose test does not detect violations is an unchecked invariant, not a well-classified one. THE EXPENSIVE RULE is that `unvalidated` caps at `advise` — the highest rung that keeps a person between an unverified number and its consequence. `red_driven` is deliberately NOT capped: it establishes the one property a gate needs (the check can fire), and its real weakness — silence when it should not be silent — is a question about a chosen threshold, which is the CLASS axis's job. There is NO composite score: blending the axes would need weights nobody here can derive and would hide which axis is saturated, so both are printed on every finding. IT SHIPS AT `advise` AND MUST NOT GATE, for three reasons. It is chosen policy, not a definition, so a matrix that GATED on the rule "chosen thresholds may not gate" would be self-refuting exactly as bandwidth.active_packet_singleton was found to be. Gating would demote controls immediately and automatically — the system re-authorising itself with no operator in the loop — and the authority envelope that would make that legitimate does not exist. And it follows the precedent that new Class-C controls ship at `advise`. THE LIMIT, stated rather than implied: it takes `empirical_status` AT THE AUTHOR'S WORD. It observes DECLARED evidence, not evidence; nothing re-runs a red drive, checks that a refutation was recorded, or notices evidence going stale. On the census as it stands it names 19 of 78 out of licence — 14 the class axis already saw and 5 it structurally could not, four of them class-A gates on `unvalidated` evidence carrying `authority_mismatch: none`.
+
+control: evidence.derivation_nonvacuity
+class: A
+implementation_status: implemented
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: reflex
+inputs: the parse result of the registry the matrix was asked to judge — how many stanzas resolved to a (class, empirical_status, runtime_authority) triple the matrix has a row for, and how many did not
+output: pass, or a refusal naming every stanza that could not be classified
+owning_module: build-os/tools/evidence-policy.sh
+consuming_policies: build-os/tools/evidence-policy.sh's own check path — exit 2 suppresses the report entirely rather than printing a partial one
+evidence_refs: build-os/tools/evidence-policy.sh:259; build-os/tools/evidence-policy.sh:308; build-os/tools/evidence-policy.sh:314
+failure_behavior: prints the unclassifiable stanzas by id with the reason each failed, then refuses on stderr and exits 2 without printing any licence finding
+rollback_behavior: none needed — the refusal happens before anything is reported, and the tool writes nothing
+promotion_requirement: already gates; nothing above this authority exists
+demotion_requirement: it stops gating the day the matrix is allowed to report on a census it could only partly read
+authority_mismatch: none
+notes: THE ONLY AUTHORITY IN THIS FILE ABOVE `advise`, and it governs the DERIVATION rather than any control's licence. A matrix that silently skipped the stanzas it could not classify would report a clean licence for a census it did not read — the blinded-scanner failure scan-controls.sh refuses in three separate places, one layer along. So three states refuse: an absent registry, a registry parsing to zero controls, and any stanza missing a field or carrying an `empirical_status` token the matrix has no cap for. The last is the one that matters most: an unrecognised evidence level must never fall through to permissive, because that is exactly how a matrix stops discriminating while still printing green. Class A because each is a defect in the derivation and not a matter of degree — a report over zero controls is not a lenient report, it is a false one. It earned its keep on its first run: an off-by-one in the field parser made every one of the 75 live stanzas unclassifiable, and this refused rather than reporting a clean licence for the whole census.
+
+control: suite.evidence_policy
+class: A
+implementation_status: load_bearing
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: immune
+inputs: the evidence-policy tool, README §3's licence table, scan-controls.sh's EMP_STATUSES ontology, the live registry, and synthetic registries built to sit on each side of every rule
+output: a RESULT line
+owning_module: tests/evidence_policy_tests.sh
+consuming_policies: tests/build_os_tests.sh chains it, so a non-zero exit fails the whole suite; build-os/tools/evidence-policy.sh is unusable as evidence without it
+evidence_refs: tests/evidence_policy_tests.sh:265; tests/evidence_policy_tests.sh:288; tests/evidence_policy_tests.sh:305; tests/evidence_policy_tests.sh:327; tests/evidence_policy_tests.sh:364; tests/evidence_policy_tests.sh:378; tests/evidence_policy_tests.sh:459
+failure_behavior: prints each failing assertion with its reason and exits 1
+rollback_behavior: read-only outside its own mktemp dir, which the trap removes
+promotion_requirement: n/a
+demotion_requirement: unchain it from tests/build_os_tests.sh and it stops gating anything
+authority_mismatch: none
+notes: Drives the three claims that are otherwise the author's word. First, THAT IT ADVISES: `check` must exit 0 on a violating registry AND on the live one, which violates the matrix — the bandwidth.packet_commit_ceiling device, applied to the more contestable claim, since a matrix gating on "chosen thresholds may not gate" would refute itself. Second, THAT THE SHARP RULE HOLDS AT EVERY CLASS: `refuted` is driven across all five classes rather than asserted once, because "class cannot rescue it" is precisely the claim. Third, THAT NEITHER AXIS IS INVENTED: the class axis is read back out of README §3 and the evidence axis out of scan-controls.sh's EMP_STATUSES and out of the tokens occurring live, so the matrix cannot restate the settled table differently or add a level fitted to a hypothetical census. It also asserts the tool hard-codes no control id — the derivation is not a stored list — and that the registry is byte-identical after a run. Class A because every assertion is an invariant over a printed model or an exit code, not a fitted threshold; it states no numeric floor, so it is not a member of the tests.nonvacuity_minimums family.

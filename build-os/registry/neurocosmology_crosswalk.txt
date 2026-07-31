@@ -41,8 +41,8 @@
 # strongest kind any ONE of them holds — and section 7 of the suite enforces
 # exactly that maximum, no more. So `binding_quality: instantiates` states that
 # at least one binding instantiates and states NOTHING about the others:
-# homeostasis carries it on the strength of 1 binding out of 20, and
-# epistemic_quality on 12 out of 22. Grepping `^binding_quality: instantiates`
+# homeostasis carries it on the strength of 1 binding out of 21, and
+# epistemic_quality on 12 out of 24. Grepping `^binding_quality: instantiates`
 # answers "which primitives have any real contact at all"; it does NOT answer
 # "which primitives are covered", and using it for the second question is the
 # same inflation the nominal rule above exists to refuse. For coverage, use the
@@ -86,7 +86,7 @@ system_representation: priority; severity; urgency; dependency-unlock value; att
 observable_proxies: the fixed ordering of the speed report's sections
 binding_quality: nominal
 claimed_max_authority: advise
-known_limitations: NOMINAL ONLY, and it should be read as empty by anyone applying a strict standard. `metrics.report.disclosure_ordering` is the sole ordering of anything in the census, it takes `inputs: none`, and its order was chosen once by a human — so the system orders exactly one thing, a page layout, by constant. No control assigns severity, priority or urgency; the registry has no severity field; and `runtime_authority: rank` — the authority tier that exists precisely to order work or select between options — is held by ZERO of 75 controls, as is `observe`. Nothing here computes what pulls hardest from state.
+known_limitations: NOMINAL ONLY, and it should be read as empty by anyone applying a strict standard. `metrics.report.disclosure_ordering` is the sole ordering of anything in the census, it takes `inputs: none`, and its order was chosen once by a human — so the system orders exactly one thing, a page layout, by constant. No control assigns severity, priority or urgency; the registry has no severity field; and `runtime_authority: rank` — the authority tier that exists precisely to order work or select between options — is held by ZERO of 78 controls, as is `observe`. Nothing here computes what pulls hardest from state.
 
 primitive: valence
 universal_function: which directions are attractive and which are harmful
@@ -150,7 +150,7 @@ system_representation: evidence coverage; receipts; calibration; claim-state rec
 observable_proxies: git numstat recomputation of claimed row values; vacuity refusals across seven surfaces; occupancy and length floors on evidence rows; the tree-derived discovery rule
 binding_quality: instantiates
 claimed_max_authority: gate
-known_limitations: TWENTY-TWO BINDINGS, AND THE COUNT OVERSTATES THE CONTACT. 50 of the 75 controls in this registry are `red_driven` and only 3 are `field_observed`, so most of what binds here has been shown to fire on a defect its own author planted, and nothing more. The bindings divide sharply. A small group compares a claim against something the claimant did not write — `metrics.record.verify_git` against git numstat, `adoption.lane_size_check` against measured churn, `registry.discovery_rule` against the tree — and those genuinely instantiate the primitive. The larger group checks SHAPE, OCCUPANCY, LENGTH or VACUITY: `adoption.boundary_manifest` validates that a manifest is well-formed and not that the boundary it declares is true, which is why it sits with its siblings `adoption.schema_invariant` and `adoption.store_validate` rather than above them; `metrics.record.note_minimum` passes twelve repeated characters, `adoption.junk_row_thresholds` scores a row of plausible fabrications as full, and seven separate "the scan found nothing" refusals prove only that a check was not blind — a necessary condition for evidence and never a sufficient one. `maint.tripwire_coverage_scan` is registered `refuted`: measured, and found not to discriminate. Nothing here is `calibrated` except two threshold controls fitted to n=4 packets of this repository's own history. Reading "22 of 75" as dense epistemic coverage would be the overclaim the registry exists to prevent.
+known_limitations: TWENTY-FOUR BINDINGS, AND THE COUNT OVERSTATES THE CONTACT. 53 of the 78 controls in this registry are `red_driven` and only 3 are `field_observed`, so most of what binds here has been shown to fire on a defect its own author planted, and nothing more. The bindings divide sharply. A small group compares a claim against something the claimant did not write — `metrics.record.verify_git` against git numstat, `adoption.lane_size_check` against measured churn, `registry.discovery_rule` against the tree — and those genuinely instantiate the primitive. The larger group checks SHAPE, OCCUPANCY, LENGTH or VACUITY: `adoption.boundary_manifest` validates that a manifest is well-formed and not that the boundary it declares is true, which is why it sits with its siblings `adoption.schema_invariant` and `adoption.store_validate` rather than above them; `metrics.record.note_minimum` passes twelve repeated characters, `adoption.junk_row_thresholds` scores a row of plausible fabrications as full, and seven separate "the scan found nothing" refusals prove only that a check was not blind — a necessary condition for evidence and never a sufficient one. `maint.tripwire_coverage_scan` is registered `refuted`: measured, and found not to discriminate. Nothing here is `calibrated` except two threshold controls fitted to n=4 packets of this repository's own history. Reading "24 of 78" as dense epistemic coverage would be the overclaim the registry exists to prevent.
 
 primitive: latent_state
 universal_function: hidden state beneath the explicit claims
@@ -729,3 +729,24 @@ runtime_authority: gate
 binding_kind: proxies
 rationale: Test state over the crosswalk artefact, the live registry and CROSSWALK.md, driven against six fixtures damaged to fail one guard each. It binds here rather than to epistemic_quality for the same reason the other thirteen suites do: a suite's function is property preservation, and its own empirical status is red_driven.
 
+
+control: evidence.policy_matrix
+binds_to: epistemic_quality
+class: C
+runtime_authority: advise
+binding_kind: proxies
+rationale: Licenses runtime authority by how good the system's contact with reality is — the primitive's function, stated at the level of policy rather than of any one measurement. A PROXY and not an instance, for two reasons that compound. It observes DECLARED evidence, not evidence: `empirical_status` is what a control's author wrote about it, so the matrix reconciles a claim against another claim by the same claimant, which is precisely the line this primitive's known_limitations draws between its instantiating and its proxying bindings. And it EXITS 0, so the judgement it produces cannot bind the controls it judges. What it does add, and no binding here had before, is that the primitive's own axis now LICENSES something: until this, `epistemic_quality` was measured everywhere and consulted nowhere when authority was granted.
+
+control: evidence.derivation_nonvacuity
+binds_to: epistemic_quality
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: A vacuity refusal over the matrix's own derivation: it refuses when the census parses to zero controls, or when any stanza carries a field the matrix cannot classify. It belongs with the seven other "the scan found nothing" refusals this primitive's known_limitations names, and carries their limit exactly — proving a check was not blind is a necessary condition for evidence and never a sufficient one. It says nothing about whether the licences the matrix then reports are right.
+
+control: suite.evidence_policy
+binds_to: homeostasis
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Test state over the evidence-policy tool: that the sharp rule holds at every class, that a comma-composite resolves to its minimum, that neither axis is invented, and that the matrix reports a violating registry and still exits 0. It binds here rather than to epistemic_quality for the same reason the other fourteen suites do: a suite's function is property preservation, and its own empirical status is red_driven.

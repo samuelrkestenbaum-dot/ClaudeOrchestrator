@@ -41,7 +41,7 @@ That buys the same four properties the TSV was chosen for, at this shape:
 - **Greppable without a parser.** `grep '^class: C' control_registry.txt` counts
   the heuristics. `grep -B4 '^runtime_authority: gate'` finds what gates.
   `grep -c '^control: '` is the census size. The number worth reading first is
-  **`gate` on `unvalidated` evidence — 11 of 75**: eleven controls can stop the
+  **`gate` on `unvalidated` evidence — 11 of 78**: eleven controls can stop the
   build and nothing has established that any of them discriminates. The one-line
   `awk` that derives it is in `control_registry.txt`'s header.
 - **Diffable at field granularity.** Changing one control's authority is a
@@ -162,12 +162,153 @@ its mismatch at exit 0, silently, while the report went on naming it.
 **An entry is not a line.** Entries are cut at different granularities:
 `metrics.record.note_minimum` classifies one comparison, and
 `tests.nonvacuity_minimums` classifies a family of 34 fitted constants across 12
-test files. So "14 of 75 declare a mismatch" is a fact about this file's
+test files. So "14 of 78 declare a mismatch" is a fact about this file's
 granularity, not a count of the heuristics that can stop a build — that number is
 **56**, in `MISMATCHES.md`'s summary table. The family's membership is not
 trusted: `tests/control_registry_tests.sh` §21 rescans the tree for the shape and
 fails if the entry and the tree disagree in either direction, and §22 fails if
 any `path:line` is ever claimed by two entries.
+
+### 3a. The second axis: evidence
+
+The table above is **one-dimensional**, and that is a hole rather than a
+simplification. It licenses on `class` alone, so a control's `empirical_status`
+— whether anybody ever established that the check **works** — licenses nothing
+and forbids nothing. Under it, a control that was **measured and found not to
+discriminate** may stop a build and no rule here objects. That is not a
+hypothetical: the census records `refuted` controls, and one of them gates.
+
+So there is a second axis. It **extends** the table above; it does not replace or
+contradict it. The class column is settled and is copied unchanged into
+`build-os/tools/evidence-policy.sh`, where
+`tests/evidence_policy_tests.sh` §4 reads it back **out of this section** and
+fails on any disagreement — the new axis cannot restate the old one differently
+and call the difference policy.
+
+| `empirical_status` | licensed authority | why that level |
+|---|---|---|
+| `calibrated` | `gate` | thresholds derived from a measured distribution. |
+| `field_observed` | `gate` | it has fired on a real defect nobody planted. |
+| `red_driven` | `gate` | it has been shown to fire on a synthetic defect. |
+| `unvalidated` | `advise` | nothing has established that it discriminates. |
+| `refuted` | `observe` | it was measured and found **not** to discriminate. |
+
+**The composition rule, stated explicitly:**
+
+> **`licensed = MIN(class-licensed, evidence-licensed)`** over the authority
+> ladder `none < observe < advise < rank < gate`. A control may do what **both**
+> axes allow, and no more.
+
+The minimum, and not an average or a product, because the two are independent
+**necessary** conditions: being the right *kind* of thing to gate does not make a
+broken check work, and a working check does not make a chosen threshold an
+invariant. Either failing is disqualifying on its own, and the minimum is what
+that looks like arithmetically. The composed table:
+
+| class \ evidence | `calibrated` | `field_observed` | `red_driven` | `unvalidated` | `refuted` |
+|---|---|---|---|---|---|
+| `A` hard invariant | `gate` | `gate` | `gate` | `advise` | `observe` |
+| `B` deterministic metric | `rank` | `rank` | `rank` | `advise` | `observe` |
+| `C` heuristic policy | `advise` | `advise` | `advise` | `advise` | `observe` |
+| `D` learned model | `observe` | `observe` | `observe` | `observe` | `observe` |
+| `R` research functional | `observe` | `observe` | `observe` | `observe` | `observe` |
+
+**A comma-composite `empirical_status` resolves by MINIMUM** — the weakest
+component governs. That is conservative in general, and in the one case that
+matters it gives the honest answer without needing a timestamp this format does
+not carry: **`refuted` dominates a `red_driven` that preceded it**, because a
+later refutation *supersedes* an earlier red drive. The opposite reading — "it
+red-drove once, so it is fine" — is how a measurement that found nothing gets
+outvoted by the measurement that corrected it. So `red_driven,refuted` licenses
+exactly what bare `refuted` licenses.
+
+Three of those rows carry the argument:
+
+- **`refuted` may not `gate`, regardless of class.** This is the sharp rule, and
+  the only one here that resolves a real defect *mechanically* rather than by
+  judgement. A control empirically shown not to discriminate cannot license a
+  stop, and **class cannot rescue it**, because class is a claim about the KIND
+  of thing being checked while evidence is a claim about whether the check WORKS.
+  A hard invariant whose test does not detect violations is not a hard invariant
+  with good paperwork; it is an unchecked invariant. It caps at `observe` rather
+  than `advise` for a further reason: presenting a signal *known* not to
+  discriminate to a decision-maker who cannot see that it is dead is worse than
+  recording it and letting nothing read it. `observe` keeps the measurement, so a
+  later re-validation has history to work from, without letting anything act on
+  it.
+- **`unvalidated` caps at `advise`.** The expensive rule. `advise` and not
+  `rank`, because `rank` lets a control order work or select between options with
+  **no human in the loop**: an unverified signal silently choosing what happens
+  next differs from an unverified signal stopping a build only in how loudly it
+  fails. `advise` is the highest rung that keeps a person between the unverified
+  number and the consequence, which is exactly the guarantee "nobody has checked
+  this" requires. This is the rule that costs: it puts every gate-on-`unvalidated`
+  control out of licence, class A included.
+- **`red_driven` is deliberately NOT capped**, even though §2 rightly calls it
+  weaker than it looks. A red drive establishes the one property a gate
+  structurally needs — **that the check can fire**. What it does not establish is
+  the converse, that the check stays quiet when it should, and that is a question
+  about a *chosen threshold* — which is the class axis's job. Capping it here
+  too would charge the same weakness twice, put 53 of 78 controls out of licence
+  in a single edit, and produce a matrix that flags nearly everything and
+  therefore discriminates nothing.
+
+**There is no composite evidence score, and there will not be one.** The obvious
+shape is `q = w1*class + w2*evidence`, one number, one threshold. It is refused
+for the two reasons `bandwidth-check.sh` refuses a composite load score one layer
+along: the **weights are unjustifiable** — nothing here has measured how being
+the wrong class trades off against having no evidence — and worse, **one number
+hides which axis is saturated**. An operator told "control quality 0.4" learns
+nothing actionable; "class licenses `advise`, evidence licenses `advise`, it
+exercises `gate`" names two separate things to fix. So the two axes are printed
+**separately on every finding**, and every finding names the axis that binds it.
+
+**The matrix ADVISES. It does not gate**, and that is the load-bearing decision
+rather than a soft start. It is registered as `evidence.policy_matrix`, Class C,
+`runtime_authority: advise`, `authority_mismatch: none`. Three reasons:
+
+1. It is **chosen policy, not a definition**. Where `unvalidated` caps is a
+   judgement — defensible, and still a judgement. A matrix that *gated* on the
+   rule "chosen thresholds may not gate" would be self-refuting in exactly the way
+   `bandwidth.active_packet_singleton` was found to be.
+2. Gating would demote **19 controls immediately and automatically** — the system
+   re-authorising itself with no operator in the loop. The authority envelope that
+   would make automatic re-authorisation a legitimate act does not exist yet.
+3. Precedent, endorsed on review: **new Class-C controls ship at `advise`;
+   promotion to `gate` is a separate governance action.**
+
+The one thing the tool *does* refuse (`evidence.derivation_nonvacuity`, Class A,
+`gate`) is a derivation it cannot trust: an absent registry, a registry parsing to
+zero controls, or a stanza carrying an `empirical_status` token the matrix has no
+row for. An unrecognised evidence level must never fall through to permissive.
+
+**The finding, derived and not remembered.** `evidence-policy.sh check` computes
+the out-of-licence set from the registry on every run; no control id appears in
+its source. On the census as it stands:
+
+```
+build-os/tools/evidence-policy.sh matrix   # the two axes and the composed grid
+build-os/tools/evidence-policy.sh check    # the out-of-licence list; always exit 0
+```
+
+- **19 of 78 controls are out of licence** under the composed matrix.
+- **14** of those the class axis already saw — they are exactly the 14 carrying
+  `authority_mismatch: declared`, so the new axis reproduces the old finding
+  rather than replacing it.
+- **5 are visible only to the evidence axis**, and they are the point of the
+  exercise: four class-A gates on `unvalidated` evidence
+  (`maint.tripwire_armed_precondition`, `maint.rotate_node_precondition`,
+  `tools.handoff_lock`, `tools.capability_profile_usage`), each carrying
+  `authority_mismatch: none` because the class table licenses them — plus
+  `maint.source_scan_mask`, which advises on `refuted` evidence.
+- **1 control gates on evidence containing `refuted`** —
+  `maint.tripwire_coverage_scan`. It is already declared, but its declaration
+  *understates* it: the class axis caps it at `advise`, the evidence axis at
+  `observe`.
+
+**This section re-authorises nothing.** Naming what is out of licence is not
+demoting it. Every `class`, `runtime_authority`, `authority_mismatch` and
+`empirical_status` in the census is exactly what it was before this axis existed.
 
 ---
 
@@ -252,7 +393,7 @@ in `scan-controls.sh`, with its reason beside it, where `grep` finds it;
 `scan-controls.sh patterns` prints the list and its size, so an allowance
 quietly growing is visible without reading the file. **It is empty today.**
 
-The registry carries **257** `evidence_refs`. That number is not remembered: the
+The registry carries **272** `evidence_refs`. That number is not remembered: the
 same total was previously written down in three artefacts as 218, 184 and 184
 against a live 224, because each was a hand count frozen at a different moment.
 `tests/control_registry_tests.sh` §25 recomputes it from the registry and fails

@@ -72,11 +72,11 @@ the concept without performing the function and **is not coverage**.
 | valence | 0 | 0 | 0 | 0 | — | — |
 | agency | 4 | 2 | 1 | 1 | A | gate |
 | energy | 3 | 0 | 3 | 0 | C | advise, gate |
-| homeostasis | 20 | 1 | 19 | 0 | A | advise, gate |
+| homeostasis | 21 | 1 | 20 | 0 | A | advise, gate |
 | integration_bandwidth | 2 | 1 | 1 | 0 | C | advise, gate |
 | boundary | 4 | 0 | 4 | 0 | A | advise, gate |
 | ethical_admissibility | 2 | 1 | 0 | 1 | A | gate |
-| epistemic_quality | 22 | 12 | 9 | 1 | A, B, C | advise, gate |
+| epistemic_quality | 24 | 12 | 11 | 1 | A, B, C | advise, gate |
 | latent_state | 5 | 4 | 1 | 0 | A, C | advise, gate |
 | durability | 1 | 0 | 1 | 0 | A | gate |
 | gated_plasticity | 4 | 4 | 0 | 0 | A, B, C | advise, gate |
@@ -102,7 +102,7 @@ never in the disclosure. The demotions took `boundary`, `durability` and
 `ethical_admissibility` **nominal-only** alongside `mass` and `wisdom`.
 
 **Two thirds of the crosswalk sits in two primitives.** `epistemic_quality` and
-`homeostasis` hold 42 of 75 bindings. That concentration is the honest result,
+`homeostasis` hold 45 of 78 bindings. That concentration is the honest result,
 not a tidy one, and it says something plain: this system is overwhelmingly built
 to *check whether an artefact is sound* and *whether the tests still pass*.
 
@@ -160,9 +160,9 @@ The prediction was that the **valuation half** — `meaning_metric`, `mass`,
 and nothing here orders or selects.
 
 **The mechanism is confirmed exactly.** `runtime_authority: rank` — the tier that
-exists to order work or select between options — is held by **0 of 75** controls,
-and so is `observe`: the ladder is still used at **two rungs of five**. 64 are
-`gate` and 11 are `advise`.
+exists to order work or select between options — is held by **0 of 78** controls,
+and so is `observe`: the ladder is still used at **two rungs of five**. 66 are
+`gate` and 12 are `advise`.
 
 **The "every one answers yes/no about an artefact that already exists" half of
 this finding is no longer true, and the exception is worth naming rather than
@@ -278,9 +278,9 @@ remains blind to it.** The scan's own scope is the second limit: twelve named
 files from one packet, so egress introduced anywhere else in the tree is
 invisible to it.
 
-**`epistemic_quality` — 22 bindings, 12 instantiating, and the count overstates
+**`epistemic_quality` — 24 bindings, 12 instantiating, and the count overstates
 the contact.**
-50 of 75 controls are `red_driven` and only **3** are `field_observed`. The
+53 of 78 controls are `red_driven` and only **3** are `field_observed`. The
 bindings divide sharply. A small group compares a claim against something the
 claimant did not write — `metrics.record.verify_git` against git numstat,
 `adoption.lane_size_check` against measured churn, `registry.discovery_rule`
@@ -293,7 +293,7 @@ twelve repeated characters,
 and seven separate "the scan found nothing" refusals prove only that a check was
 not blind — necessary for evidence, never sufficient. One binding,
 `maint.tripwire_coverage_scan`, is registered `refuted`: measured, and found not
-to discriminate. Reading "22 of 75" as dense epistemic coverage would be exactly
+to discriminate. Reading "24 of 78" as dense epistemic coverage would be exactly
 the overclaim this registry exists to prevent.
 
 **`boundary` — every boundary here is detective, not preventive, so 0 of 4
