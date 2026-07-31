@@ -1,0 +1,63 @@
+# Fan-out ownership manifest — the input to build-os/tools/swarm-merge.sh.
+#
+# This is not a synthetic example. It is this repository's own three-way fan-out
+# (commit 68cae7a: lanes / scaffold-seeding / release-metadata), written in the
+# format the tool reads. Copy it, replace the agents, keep the shape.
+#
+#   swarm-merge.sh validate --manifest <this> --repo .   # BEFORE any agent runs
+#   swarm-merge.sh verify   --manifest <this> --repo .   # after the diffs land
+#   swarm-merge.sh merge    --manifest <this> --repo .   # stage + verify once
+#
+# Directives (one per line; `#` comments; unknown directives are REFUSED):
+#   merger      <name>                       who merges — required, exactly one
+#   verify      <command …>                  the single post-merge verification
+#   agent       <name> [evidence=<path>]     a fan-out agent; evidence is an
+#                                            optional path list or git worktree
+#                                            that lets an out-of-set write be
+#                                            caught by NAME as well as by path
+#   own         <agent> <path-or-glob>       that agent's exclusive writable set
+#   merger-own  <path-or-glob>               a surface the merger writes
+#   hot         <path-or-glob>               extra merger-reserved surface
+#   hot-release <glob> <agent> <reason …>    releases ONE reserved claim to ONE
+#                                            agent, for a stated reason
+#
+# Globs: `*` stops at `/`, `**` crosses it, `?` is one character, a trailing `/`
+# means everything beneath. Anything else is literal.
+
+merger orchestrator
+verify bash tests/build_os_tests.sh
+
+agent A-lanes
+own A-lanes .claude/agents/*.md
+own A-lanes .claude/commands/*.md
+own A-lanes build-os/memory/tool_router.md
+own A-lanes CLAUDE.md
+own A-lanes build-os/global-claude-md.md
+own A-lanes tests/lane_enforcement_tests.sh
+
+agent B-scaffold-seeding
+own B-scaffold-seeding init-build-os.sh
+own B-scaffold-seeding install-global.sh
+own B-scaffold-seeding install-project.sh
+own B-scaffold-seeding templates/**
+own B-scaffold-seeding tests/scaffold_seeding_tests.sh
+
+agent C-release-metadata
+own C-release-metadata VERSION
+own C-release-metadata LICENSE
+own C-release-metadata CHANGELOG.md
+own C-release-metadata tests/release_metadata_tests.sh
+
+# Three merger-reserved surfaces released deliberately, because authoring them
+# WAS the packet. Each release names the exact claim, the agent, and why.
+hot-release build-os/memory/tool_router.md A-lanes the lanes packet exists to author the router rows; no sibling agent reads or writes that file
+hot-release VERSION C-release-metadata the release-metadata packet is the reason a VERSION file exists in this repository at all
+hot-release CHANGELOG.md C-release-metadata release-metadata authors the Keep-a-Changelog history as its entire deliverable
+
+# Hot by default and left that way: memory, packets, receipts, metrics, the
+# verification suite named in `verify`, and lockfiles. The merger writes these.
+merger-own build-os/memory/current_state.md
+merger-own build-os/memory/residue.md
+merger-own build-os/packets/active_packet.md
+merger-own build-os/receipts/**
+merger-own tests/build_os_tests.sh

@@ -202,6 +202,56 @@ tests/build_os_tests.sh && bash tests/lane_enforcement_tests.sh && bash
 tests/build_os_maintenance_tests.sh`, each reporting its own `==== RESULT: N
 passed, M failed ====` line.
 
+### The merge is the serial fraction — run it with `swarm-merge.sh`
+
+Every fan-out above ended with a **hand merge**: staging disjoint sets, wiring
+the hot files, running one verification. That is serial work bolted to the end of
+parallel work, and it **grows with width** — the one term that must not.
+`build-os/tools/swarm-merge.sh` takes the ownership manifest and mechanises the
+part of it that is mechanical:
+
+| Step | Command | When |
+|---|---|---|
+| Disjointness + hot-file reservation | `swarm-merge.sh validate --manifest M --repo .` | **before any agent runs** |
+| Each agent's real diff vs its declared set | `swarm-merge.sh verify --manifest M --repo .` | after the diffs land |
+| Stage per-agent sets, run ONE verification | `swarm-merge.sh merge --manifest M --repo . [--commit MSG]` | at the merge |
+
+The **manifest format** (see `build-os/tools/fanout_manifest.example`, which is
+the worked example above written out in full):
+
+```
+merger      orchestrator
+verify      bash tests/build_os_tests.sh
+agent       A-lanes [evidence=<path list or git worktree>]
+own         A-lanes .claude/agents/*.md
+merger-own  build-os/receipts/**
+hot         <extra merger-reserved glob>
+hot-release <glob> <agent> <reason of >= 30 chars>
+```
+
+Three things worth knowing before trusting it:
+
+- **Hot files are reserved to the merger by default** — `build-os/memory/**`,
+  packets, receipts, metrics, `VERSION`, `CHANGELOG.md`, lockfiles, and whatever
+  suite the `verify` command names. A fan-out agent claiming one is rejected by
+  name and path. `hot-release` releases exactly one claim to exactly one agent
+  for a stated reason, because the real fan-out above legitimately owned
+  `VERSION`, `CHANGELOG.md` and the router; a rule that rejects the fan-out that
+  actually happened is a rule that gets switched off.
+- **Isolation is a shared tree by default.** Worktrees buy per-agent attribution
+  and cost a checkout each; disjoint sets rarely need them. Without an
+  `evidence=` source an out-of-set write is still caught **by path**, but it is
+  reported `UNATTRIBUTED` rather than pinned on an agent the tool cannot
+  identify.
+- **It refuses rather than guesses.** Two claimants for one real path, an
+  unmerged conflict, a rename, a non-empty index, an unstaged remainder, or a red
+  verification each stop the merge with the index restored exactly as found.
+  Nothing is committed unless `--commit` is passed, and nothing is ever pushed.
+
+It cannot spawn the fan-out — bash cannot dispatch agents. Cutting the packets,
+writing the manifest, authoring the merger's own hot-file edits and taking the
+commit decision stay with the orchestrator.
+
 ## Proportionate routing (don't over-orchestrate)
 
 Match the route to the task's real weight — the declared **lane** *is* that

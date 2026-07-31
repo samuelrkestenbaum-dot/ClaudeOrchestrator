@@ -67,16 +67,27 @@ delegate.
 7. **Route / delegate — the declared lane's gates and no more.** Hand off to
    exactly the agents the budget names:
    - **builder** — implement a confirmed packet (test-first, ≤2 commits).
-   - **reviewer** — review a diff (pass / fix-then-pass / fail; no edits).
    - **qa** — full suite + regression + Commit-1-isolation + safety grep.
+   - **reviewer** — review a diff (pass / fix-then-pass / fail; no edits).
    - **archivist** — write the receipt and update memory (touches `build-os/` only).
    The full four-agent chain is the **`substantive`** lane's gate-set. In the
    `tiny` lane you route **one** builder-lite pass and **one** targeted check —
    adding qa, reviewer, or archivist there is over-escalation, and it needs the
-   stated-reason announcement below. Do not let one agent do another's job. Within
-   a lane, sequence the gates; **across independent items, fan out** (see
-   *Fan-out (parallel) protocol*) — sequencing independent work is the default
-   that costs the most time.
+   stated-reason announcement below. Do not let one agent do another's job.
+
+   **Dispatch qa and reviewer CONCURRENTLY — one stage, not two.** This is the
+   default, not an optimisation you may take: both gates are read-only and hold
+   no mutating tool, so neither can disturb what the other measures. Send both in
+   a **single message**, name them the same HEAD, and reconcile their two outputs
+   when they return — a reviewer `pass` is conditional on qa landing GREEN, and a
+   qa RED blocks the close regardless of the verdict. The one hard precondition
+   is **tree-quiet** (see *Depth budget* below): never start this stage while a
+   builder is still mutating the tree.
+
+   Sequence only what genuinely depends on what — builder before the gates,
+   archivist after them; **across independent items, fan out** (see *Fan-out
+   (parallel) protocol*). Sequencing independent work is the default that costs
+   the most time.
 
 ## Lanes
 
@@ -121,6 +132,55 @@ for out loud.
   A `tiny` task silently spending a third, fourth, or eleventh round is the exact
   failure this rule exists to catch — say it out loud instead of continuing.
 <!-- BUILD-OS:ESCALATION:END -->
+
+### Depth budget — how many stages run in SERIES
+
+<!-- BUILD-OS:DEPTH:START — canonical; keep byte-identical in CLAUDE.md, build-os/global-claude-md.md and .claude/agents/build-orchestrator.md -->
+A **round** counts agent passes. **Depth** counts how many of them run in
+**series**. Width is cheap and depth is not: twenty independent packets fanned
+out cost one packet's wall-clock, but a single packet that walks
+builder → qa → reviewer → fix → re-review spends five serial stages — about an
+hour — and spends that hour identically whether the machine is otherwise idle or
+saturated. Budget depth explicitly, the way the lane table budgets rounds.
+
+| Lane | Depth budget (serial agent stages) |
+|---|---|
+| `read-only` | **1 serial stage** — the answer itself |
+| `diagnosis` | **1 serial stage** — the report; propose a packet, do not build one |
+| `tiny` | **1 serial stage** — the builder-lite pass, carrying its ONE targeted check |
+| `substantive` | **2 serial stages median** — (1) builder, then (2) qa and reviewer CONCURRENTLY; the archivist's close is bookkeeping after the verdict, not a third gate |
+| `architecture` | **1 serial stage** — the routing decision, taken before any build stage |
+
+**The substantive median is 2 because qa and reviewer run concurrently, not in
+sequence.** Both are read-only and hold no mutating tool, so neither can disturb
+what the other measures; running them one after the other buys nothing and costs
+a whole stage. Dispatch them in a single message, as one stage, and reconcile
+their two outputs afterwards.
+
+**A third serial stage is the exception, and it is paid for out loud.** A
+`fix-then-pass` fix round is stage 3: announce it as
+`Depth: 3 — reason: fix-then-pass (<n> enumerated items)` and bound it — the
+re-review is targeted at those items only unless the reviewer's named exceptions
+fire. **A fourth serial stage is a defect**, not a detail: it means the fix list
+arrived in installments, or the packet was mis-cut. Stop, say which, and re-cut
+the packet instead of opening stage five.
+
+**Tree-quiet is the precondition for the concurrent stage.** A read-only gate
+measuring a tree that a builder is still mutating produces junk — counts that
+belong to no commit, a diff that changes underneath the reviewer. Start stage 2
+only when **all three** hold:
+
+1. the **builder has handed back** — no builder pass is in flight;
+2. **`git status --porcelain`** is empty, or contains only files the packet
+   declared it would leave unstaged;
+3. **HEAD is stable** (`git rev-parse HEAD` unchanged) and is named to both gates
+   as the commit they are measuring.
+
+If any of the three is unmet, the **gates wait** — they never run against a
+moving tree, and they never quiet it themselves, because neither of them is
+allowed to write. A gate that notices the tree moving mid-run reports a routing
+error rather than numbers it cannot stand behind.
+<!-- BUILD-OS:DEPTH:END -->
 
 ### The lane you declare is **checkable**
 

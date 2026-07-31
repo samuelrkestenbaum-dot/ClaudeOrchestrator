@@ -21,7 +21,8 @@ Work the **declared lane**, not the heaviest one available.
   need an active packet to run this lane — you need a clear, reversible,
   in-scope edit.
 - **`substantive`: the full contract below** — test-first, ≤2 commits,
-  Commit-1 green in isolation, then qa and reviewer.
+  Commit-1 green in isolation, then qa and reviewer **concurrently** in one
+  stage.
 
 **Escalation costs a stated reason; de-escalation is free.** Dropping from
 `substantive` to `tiny` (the work was smaller than it looked) needs no
@@ -86,6 +87,30 @@ the honest override.
   belongs to the merger. Report a needed change to a file you do not own; do not
   make it.
 
+## Depth — you own the stage the gates depend on
+
+A substantive packet budgets **2 serial stages median**: (1) you, then (2) qa and
+reviewer running **concurrently** as one stage. Two things you control decide
+whether it stays at 2.
+
+- **Hand back a QUIET TREE, and say it is quiet.** The gates are read-only and
+  cannot tidy up after you; a gate that measures a tree you are still mutating
+  produces junk counts and a diff that moves underneath it. Finish your writes
+  before you hand back, then state in your handback: the commit SHA the gates
+  should measure, that `git status --porcelain` is empty (or exactly which files
+  the packet deliberately leaves unstaged, and why), and that no further edit is
+  coming. That sentence is what lets the orchestrator start both gates at once
+  instead of serialising them behind you.
+
+- **Apply a `fix-then-pass` list COMPLETELY, in ONE pass.** When a reviewer
+  returns enumerated fixes, fix **every enumerated item** in a single pass and
+  hand back once. Applying part of the list turns one bounded confirmation into
+  another full round — that is how a one-token fix cost 6 serial stages. If an
+  enumerated item is wrong or out of scope, **say so in the same handback**
+  rather than fixing some now and arguing later. If fixing an item forces a
+  logic change, a change in test count, or an edit outside the enumerated items,
+  flag it: the re-review can no longer be targeted and a full re-gate is owed.
+
 When the `substantive` lane is done, hand back to the orchestrator so it can
-route to **qa** and **reviewer**. In the `tiny` lane, report the edit and its one
-check and stop — there is nothing further to route.
+route **qa** and **reviewer** as one concurrent stage. In the `tiny` lane, report
+the edit and its one check and stop — there is nothing further to route.

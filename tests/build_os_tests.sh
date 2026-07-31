@@ -842,6 +842,8 @@ chain_suite "tests/metrics_adoption_tests.sh"     "the metrics adoption guard"
 chain_suite "tests/pilot_kit_tests.sh"            "the buyer-facing pilot kit"
 chain_suite "tests/entitlement_tests.sh"          "version, licence identity and the access-gated posture"
 chain_suite "tests/lane_declaration_tests.sh"     "declared lane vs observable size"
+chain_suite "tests/gate_depth_tests.sh"           "gate depth: concurrent gates + bounded fix round"
+chain_suite "tests/swarm_merge_tests.sh"          "fan-out manifest validation and merge"
 
 # A chained suite that is added to the repo but never wired here would be
 # discoverable-only — the exact defect chaining exists to prevent. Assert the
