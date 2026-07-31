@@ -51,6 +51,77 @@ for out loud.
   failure this rule exists to catch — say it out loud instead of continuing.
 <!-- BUILD-OS:ESCALATION:END -->
 
+### A declared lane is **checkable**, not merely stated
+
+The lane you declare is cross-examined against git by
+`build-os/metrics/check-adoption.sh`, which runs at close. This exists because
+declaring `tiny` waives **qa, the reviewer, the archivist, the receipt and the
+metrics row** — five gates turned off by one self-asserted word. Until that word
+could be contradicted by evidence, the whole enforcement chain rested on the
+honesty of the agent it was meant to check.
+
+**Only lanes that waive gates are size-checked.** `read-only`, `diagnosis` and
+`tiny` are. `substantive`, `architecture` and `agent-swarm` have **no upper
+bound at all** — they already pay for the full chain, so their size is not
+evidence against them.
+
+<!-- BUILD-OS:LANE-SIZE:START — canonical; the same two numbers are compiled into build-os/metrics/check-adoption.sh and pinned literally by tests/lane_declaration_tests.sh. Drift between the three is a defect. -->
+| Constant | Value | Derivation (from `build-os/metrics/packet_metrics.tsv`) |
+|---|---|---|
+| `LANE_TINY_MAX_FILES` | `13` | **median** `files` over the 4 size-measurable non-waived-lane rows — {7, 8, 18, 32} → (8+18)/2 |
+| `LANE_TINY_MAX_CHURN` | `2213` | **median** `insertions + deletions` over the same 4 rows — {852, 2005, 2422, 9818} → (2005+2422)/2 = 2213.5, floored |
+<!-- BUILD-OS:LANE-SIZE:END -->
+
+A waived-lane declaration is **contradicted** when git says the packet touched
+at least that many files **or** churned at least that many lines. The two
+signals fire independently.
+
+**Why the median and not the minimum.** The smallest packet this repo ever ran
+`substantive` was 7 files / 852 lines; the largest thing it ever ran `tiny` was
+1 file / 116 lines. There is a wide empty band between the two populations, and
+the line is drawn at the **far** side of it. That is a deliberate trade:
+**specificity over sensitivity.** A check that flags legitimate work is switched
+off inside a week, and a switched-off check is worse than none because it leaves
+the belief that it is running. So a `tiny` mis-declared over 8 files / 2005
+lines **passes** — half the calibration set survives being relabelled. What does
+not survive is the egregious case: a "tiny" that rewrote 30 files or churned
+2000+ lines.
+
+**Some `tiny` work has no commit at all** — a read-only answer, a diagnosis, an
+edit not yet committed. Those are unmeasurable and pass. An absent diff is not
+evidence of a large one.
+
+**The escape hatch, and its price.** A mechanical rename across 40 files is
+genuinely `tiny` in judgment. Record it — never argue with the threshold and
+never raise it:
+
+```
+LANE-OVERRIDE: mechanical rename across 40 files, no behaviour change, suite untouched
+```
+
+in the receipt **or** in the metrics row's `note`. It must name the **measured
+file count**, so it can only be written by someone who looked at the real size —
+a boilerplate override copied from another packet is rejected. Every honoured
+override prints `LANE-OVERRIDDEN` on every run and is enumerable with
+`grep -rn LANE-OVERRIDE build-os/`. There is no silent pass, and a malformed
+override **fails** rather than degrading into one.
+
+**Do not clear a failure by moving a threshold.** The numbers are pinned
+literally in `tests/lane_declaration_tests.sh`; changing them costs a reviewed
+edit to three files at once. The guard also prints the store's *currently*
+recomputed medians beside the enforced ones so drift is visible — but it never
+auto-follows them, because a threshold that tracks the store is
+attacker-controlled: record a few large packets and the `tiny` ceiling rises to
+meet them.
+
+**What this does NOT catch, said plainly.** `gravito_test_harness_stdin_hang_a`
+is recorded `lane=tiny rounds=6` against a 2-round budget — this system's worst
+compliance record. Its *size* is 1 file / 116 lines, which is genuinely tiny, so
+this check passes it and should. That failure was a **budget** breach, not a
+mis-declaration. Different defect, different guard; **the round-budget guard is
+not built.** Rounds are transcript-only today and nothing git-observable attests
+to them, so no check here can enforce the 2-round budget.
+
 > Columns: **Task type** · **Authority** · **Route (agents)** · **Tools** ·
 > **Gate / stop**
 

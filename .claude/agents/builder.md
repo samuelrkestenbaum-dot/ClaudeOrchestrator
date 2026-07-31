@@ -32,6 +32,21 @@ before your next action:
 is not done, **that is a defect in the classification** — stop, say so, and hand
 back for re-classification instead of quietly starting round three.
 
+**Your lane is checked against your diff.** `build-os/metrics/check-adoption.sh`
+cross-examines every `read-only` / `diagnosis` / `tiny` declaration against what
+git says the packet did — files touched and lines changed — using the thresholds
+in `build-os/memory/tool_router.md`. So the practical rule while you build: if a
+`tiny` edit is growing into many files or a large diff, **escalate before you
+commit**, because the size is going to be visible either way. Escalating is a
+sentence; being contradicted by your own diff at close is a defect. There is no
+upper bound on `substantive`, so escalation never costs you a size finding.
+
+If the work genuinely is `tiny` despite a large diff — a mechanical rename
+across 40 files — say so in your handback so the archivist can record a
+`LANE-OVERRIDE:` line naming the measured file count. Do **not** shave the diff
+to get under a threshold, and do not raise the threshold: both are worse than
+the honest override.
+
 ## Preconditions (verify before writing code — `substantive` lane)
 
 - There is an active packet in `build-os/packets/active_packet.md` and the

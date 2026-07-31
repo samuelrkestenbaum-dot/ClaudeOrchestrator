@@ -33,6 +33,19 @@ ceremony is what makes small work slow.
      `build-os/metrics/check-adoption.sh` — a receipt that declares a waived
      lane (`read-only`, `diagnosis`, `tiny`) owes no metrics row; a receipt that
      declares nothing is treated as `substantive` and does.
+
+     **That line is cross-checked, not taken on trust.** A waived lane switches
+     off qa, the reviewer, this agent, the receipt and the row all at once, so
+     the guard cross-examines the declaration against git: the files and lines
+     of the packet's commits, against `LANE_TINY_MAX_FILES` /
+     `LANE_TINY_MAX_CHURN` in `build-os/memory/tool_router.md`. Write the lane
+     the work actually was. Do not label a packet `tiny` to save the paperwork —
+     the paperwork is what the diff is compared against.
+   - **Keep the `## Commits` section accurate**, because it is where the
+     cross-check reads the packet's shas from when no row names them. Base and
+     merge-base shas belong in the preamble and are deliberately ignored;
+     putting one in `## Commits` would attribute another packet's diff to this
+     one.
    - Scope (in / explicitly out).
    - Commits (hashes + one-line each) and the branch base.
    - QA proof: exact test counts, Commit-1-isolation result, safety-grep result,
@@ -89,6 +102,25 @@ ceremony is what makes small work slow.
    The guard requires that manifest whenever a row names more than one commit.
    An absolute rule that collides with merge mechanics just gets broken quietly;
    the fallback is what makes this one followable.
+
+   **Recording a lane override.** Sometimes a large diff is genuinely `tiny` in
+   judgment — a mechanical rename across 40 files. That is allowed, and it is
+   never allowed silently. Write one line, in the receipt **or** in the row's
+   `--note`:
+
+   ```
+   LANE-OVERRIDE: mechanical rename across 40 files, no behaviour change, suite untouched
+   ```
+
+   It must name the packet's **measured file count** (take it from
+   `git show --numstat`), and carry a real clause of justification — a
+   boilerplate override copied from another packet is rejected, and so is a
+   one-word one. Every honoured override prints `LANE-OVERRIDDEN` on every run
+   and is enumerable with `grep -rn LANE-OVERRIDE build-os/`. **Never** clear a
+   lane finding by editing a threshold: they are pinned in
+   `tests/lane_declaration_tests.sh` and documented in the router, and the guard
+   refuses to auto-follow the store precisely so nobody can raise the ceiling by
+   recording big packets.
 
 4. **Update memory:**
    - `build-os/memory/current_state.md` — advance the "where we are" snapshot.

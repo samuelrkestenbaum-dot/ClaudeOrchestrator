@@ -151,10 +151,12 @@ keep it honest, and each one is a failure mode it was built against:
   *or* says in the note why rounds is `-`, and carries a note long enough to
   attribute its numbers. Anything less is reported as **HOLLOW**, which is worse
   than MISSING — a dash-filled row is a missing row wearing evidence.
-- **It never taxes the small lanes.** `read-only`, `diagnosis` and `tiny` close
-  with no packet and no receipt, so they never enter the scan; a receipt that
-  declares one of those lanes is skipped by name. A guard that invents work for
-  a one-line fix is a guard that gets switched off.
+- **It never taxes the small lanes — but it no longer takes them on trust.**
+  `read-only`, `diagnosis` and `tiny` close with no packet and no receipt, so
+  they owe no row; a receipt that declares one of those lanes is waived by name.
+  A guard that invents work for a one-line fix is a guard that gets switched
+  off. What changed is that the *declaration* is now cross-examined against git
+  — see **the lane cross-check** below.
 - **Historical receipts are exempted by a date, not by a list.**
   `adoption_boundaries.tsv` declares exactly two obligations
   (`row_required_after`, `single_commit_required_after`), each with one date and
@@ -170,11 +172,66 @@ keep it honest, and each one is a failure mode it was built against:
   nothing is in scope empties the guard, and a guard that cannot fail must not
   report success.
 
+### The lane cross-check — a declared lane is checkable
+
+The waiver above was, until recently, the largest remaining hole in the whole
+enforcement chain. `**Lane:** tiny` is self-asserted, and declaring it waives
+**qa, the reviewer, the archivist, the receipt and the metrics row**. Five gates
+switched off by one unverified word, with nothing anywhere comparing that word to
+the packet's actual size. An agent that learned to declare `tiny` for everything
+would get a Build OS with no gates, and nothing would go red.
+
+So every declaration of a gate-waiving lane — on a **receipt** *or* in the
+store's **`lane` column** (tiny work legitimately closes with a row and no
+receipt) — is measured against git:
+
+| Constant | Value | Derivation |
+|---|---|---|
+| `LANE_TINY_MAX_FILES` | 13 | **median** `files` over the 4 size-measurable non-waived-lane rows in `packet_metrics.tsv` — {7, 8, 18, 32} |
+| `LANE_TINY_MAX_CHURN` | 2213 | **median** `insertions + deletions` over the same 4 rows — {852, 2005, 2422, 9818}, floored from 2213.5 |
+
+A declaration is **LANE-CONTRADICTED** when git says the packet touched at least
+`LANE_TINY_MAX_FILES` files **or** churned at least `LANE_TINY_MAX_CHURN` lines.
+The two signals fire independently. Commits come from the row's `commits` column
+when it has one (already reconciled against git by `--verify-git`), otherwise
+from the receipt's `## Commits` section only — preambles quote base and
+merge-base shas, and measuring those would fabricate a violation.
+
+- **Specificity over sensitivity, deliberately.** The thresholds are the
+  **median** of the substantive distribution, not its minimum. A `tiny`
+  mis-declared over 8 files / 2005 lines passes; half the calibration set
+  survives being relabelled. False positives are what get a check like this
+  deleted, and a deleted check is worse than none because the belief it is
+  running outlives it.
+- **`substantive`, `architecture` and `agent-swarm` have no upper bound.** Size
+  is only evidence against a lane that waives gates.
+- **No commit, no finding.** Read-only answers and diagnoses leave no diff.
+- **The escape hatch is recorded, never silent.** A mechanical rename across 40
+  files is genuinely tiny in judgment; record it with a `LANE-OVERRIDE:` line in
+  the receipt or the row's note, naming the **measured file count**. Boilerplate
+  and one-word overrides are rejected as `LANE-OVERRIDE-BAD`. Honoured ones
+  print `LANE-OVERRIDDEN` on every run and are enumerable with
+  `grep -rn LANE-OVERRIDE build-os/`.
+- **It refuses rather than passing unmoored.** Zero non-waived, size-measurable
+  rows means the thresholds have no calibration basis here, and that is a
+  refusal. The scan also prints the store's *currently* recomputed medians beside
+  the enforced ones so drift is visible — but never auto-follows them, because a
+  self-tuning threshold is attacker-controlled: record a few large packets and
+  the `tiny` ceiling rises to meet them.
+
 **What it cannot catch:** a wrong number honestly recorded. It checks that a
 closing packet recorded something meaningful and that the commits are real — not
 that the round count is true. It also only walks receipt → row, so a row with no
 receipt (the reference corpus rows are exactly this) is not flagged, and a
 receipt whose filename does not match its `packet_id` reads as missing.
+
+**And what the lane cross-check specifically cannot catch — round budgets.**
+`gravito_test_harness_stdin_hang_a` is recorded `lane=tiny rounds=6` against a
+2-round budget, this system's worst compliance record. Its size is 1 file / 116
+changed lines, which is genuinely tiny, so the cross-check passes it and should.
+That failure was a **budget** breach, not a mis-declaration — a different defect
+needing a different guard. **No round-budget guard exists**: rounds are
+transcript-only and nothing git-observable attests to them.
 
 ## Using it
 

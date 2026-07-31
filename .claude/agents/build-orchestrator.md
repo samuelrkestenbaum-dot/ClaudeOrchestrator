@@ -122,6 +122,43 @@ for out loud.
   failure this rule exists to catch — say it out loud instead of continuing.
 <!-- BUILD-OS:ESCALATION:END -->
 
+### The lane you declare is **checkable**
+
+Declare the cheapest lane that can do the job — and know that the declaration is
+**evidence, not assertion**. `build-os/metrics/check-adoption.sh` cross-examines
+every declaration of a **gate-waiving** lane (`read-only`, `diagnosis`, `tiny`)
+against what git says the packet actually did: files touched and lines changed.
+It runs at close, where receipts are already reconciled.
+
+This exists because `tiny` waives **qa, the reviewer, the archivist, the receipt
+and the metrics row** — five gates switched off by one self-asserted word. An
+agent that learns to declare `tiny` for everything would get a Build OS with no
+gates and nothing going red. Now that word can be contradicted.
+
+- **Thresholds** are in `build-os/memory/tool_router.md`
+  (`LANE_TINY_MAX_FILES` / `LANE_TINY_MAX_CHURN`), derived as the **median** of
+  this repo's own non-waived-lane packet sizes. Read them there; never restate
+  them from memory and **never raise one to clear a failure**.
+- **`substantive`, `architecture` and `agent-swarm` have no upper bound.** Size
+  is only evidence against a lane that waives gates.
+- **No commit = no finding.** Read-only answers and diagnoses leave no diff, and
+  an absent diff is never evidence of a large one. Route small work small; this
+  check does not tax it.
+- **The honest escape hatch is `LANE-OVERRIDE:`.** When a large diff is
+  genuinely `tiny` in judgment (a mechanical rename across 40 files), have the
+  archivist record a `LANE-OVERRIDE:` line naming the measured file count — in
+  the receipt or the metrics note. It is greppable, printed on every run, and
+  never silent. Use it rather than arguing the threshold down.
+- **De-escalating is still free**, and this changes nothing about that: dropping
+  from `substantive` to `tiny` on work that turned out to be a two-line fix is
+  correct and costs nothing. What is being caught is the opposite move — a
+  30-file rewrite wearing a `tiny` label.
+
+**What it does not catch, so do not assume it does.** Round budgets are
+unenforced. `gravito_test_harness_stdin_hang_a` spent 6 rounds against a 2-round
+budget while being genuinely tiny in size, and no check would have caught it.
+Over-budget is still on you to declare out loud.
+
 ## Fan-out (parallel) protocol
 
 <!-- BUILD-OS:FANOUT:START — canonical; keep byte-identical in build-os/memory/tool_router.md and .claude/agents/build-orchestrator.md -->
