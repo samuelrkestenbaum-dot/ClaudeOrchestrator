@@ -27,15 +27,17 @@ control is a governance action and belongs to the operator.
    `tests.nonvacuity_minimums`. Four of the eleven are Class A — an invariant on
    `unvalidated` evidence is *legal* under the licence table and still means
    nobody has watched it fire.
-2. **13 of 75 entries exercise `gate` on a class that does not license it.**
-   `grep -c '^authority_mismatch: declared' control_registry.txt`. All 13 are
-   Class C heuristics, all 13 can exit non-zero, and none of them was wrong to
-   build.
-3. **An entry is not a line, and 13 badly understates the instances.**
+2. **14 of 75 entries exercise `gate` on a class that does not license it.**
+   `grep -c '^authority_mismatch: declared' control_registry.txt`. All 14 are
+   Class C heuristics, all 14 can exit non-zero, and none of them was wrong to
+   build. The fourteenth arrived by **demotion on review** rather than by
+   registration — see §14, which is the only entry in this file whose class was
+   argued rather than assigned.
+3. **An entry is not a line, and 14 badly understates the instances.**
    `tests.nonvacuity_minimums` is **one entry covering 34 fitted constants in 12
    test files** (§10 lists all 34; the scan that reproduces the membership is in
    `tests/control_registry_tests.sh` §21). Counting decision *sites* rather than
-   registry *entries*, the 13 entries below name **55** fitted constants,
+   registry *entries*, the 14 entries below name **56** fitted constants,
    thresholds and prose regexes that can stop this build. The first version of
    this file said "six" for the family and "thirteen heuristics" for the total.
    Both were wrong, in the direction that flatters the census.
@@ -69,12 +71,13 @@ the control as `UNREPORTED`.
 | `tools.handoff_timeouts` | C | gate | advise | `build-os/tools/specialist-handoff.sh:151` | 3 |
 | `tools.supervise_timeout` | C | gate | advise | `build-os/tools/supervise.sh:49` | 2 |
 | `registry.discovery_rule` | C | gate | advise | `build-os/registry/scan-controls.sh:385` | 2 |
+| `bandwidth.active_packet_singleton` | C | gate | advise | `build-os/tools/bandwidth-check.sh:136` | 1 |
 
 <!-- MISMATCH-TABLE:END -->
 
 **`sites` is a hand count**, taken from the sections below, of the distinct
 fitted constants, thresholds and prose regexes inside each entry — not a grep.
-It totals **55**. It is in the table because the entry count (13) is the number
+It totals **56**. It is in the table because the entry count (14) is the number
 that gets quoted, and the entry count is a property of how finely this registry
 was cut, not of how much heuristic authority the repository actually carries.
 
@@ -278,7 +281,7 @@ this control.**
 |---|---|---|
 | `tests/pilot_kit_tests.sh` | `:97 :115 :117 :176 :255 :304 :316 :327 :334 :367 :458` | 3 speed mentions, 10 router lane lines, 10 onboarding lane lines, 8 runnable blocks, 8 blocks executed, 20 paths, 5 links, 5 scripts, 6 criteria, 6 executable checks, 6 both-direction pairs |
 | `tests/entitlement_tests.sh` | `:126 :136 :345 :481` | 5 stamped roots, 5 licence copies, 12 packet files, 3 quoted licence lines |
-| `tests/control_registry_tests.sh` | `:79 :184 :440 :668` | 20 entries, 20 surfaces, 5 declared mismatches, 40 assertions |
+| `tests/control_registry_tests.sh` | `:79 :184 :440 :772` | 20 entries, 20 surfaces, 5 declared mismatches, 40 assertions |
 | `tests/release_metadata_tests.sh` | `:121 :200 :315` | 200 licence bytes, 3 rollback lines, 2 receipts |
 | `tests/speed_benchmark_tests.sh` | `:397 :531 :542` | 4 store rows, 3 git-verified rows, 4 corpus rows |
 | `tests/lane_declaration_tests.sh` | `:493 :496` | 12 fixture stores, 15 fixture receipts |
@@ -423,18 +426,82 @@ It is fail-closed and the trade looks right. It is also exactly the shape of
 thing this registry exists to make visible, so exempting it would have been the
 least defensible entry in the file.
 
+## 14. `bandwidth.active_packet_singleton` — the one that was demoted on review
+
+**Gates at** `build-os/tools/bandwidth-check.sh:136` —
+`[ "$NPKT" -gt "$CEILING_PACKETS" ]`, which raises the gating flag and exits 2 at
+`:203`.
+**The threshold** is `CEILING_PACKETS=1` (`:79`).
+
+Every other entry in this file was registered with its mismatch already declared.
+This one was **registered Class A, carrying no mismatch, and demoted to Class C
+on review.** It is here because the demotion was *argued*, not because somebody
+noticed a stale label.
+
+**The argument it was registered on.** The ceiling of one is not a fitted number;
+it is the artefact's own *definition*. `active_packet.md` says it holds "the one
+packet currently in flight", so two declared ids is a **malformed artefact**
+rather than a policy breach — the same shape as two metrics rows for one packet,
+and `metrics.record.one_row_per_packet` is Class A for exactly that reason. The
+entry recorded the counter-argument — *"one at a time is also a policy somebody
+chose"* — and then kept Class A anyway. **An entry that states the case against
+itself and does not answer it has not survived the case against itself.**
+
+**Why it failed, in ascending order of cost:**
+
+1. **The "definition" is a docstring inside the file being checked.** "One packet
+   at a time" appears **nowhere in `CLAUDE.md`**, where this repository's working
+   contract lives. Grep finds it in exactly one place: line 5 of
+   `build-os/packets/active_packet.md` — the prose header of the artefact this
+   control reads. A ceiling whose authority comes from a sentence inside its own
+   input is a chosen threshold one edit away from being a different number.
+2. **The analogy does not hold.** A second metrics row silently corrupts
+   `report-speed.sh`'s totals: a real computation with a real consumer. This
+   control's `consuming_policies` is *its own exit code*, and nothing in the
+   repository acts on it. Violating this ceiling contradicts a prose sentence and
+   corrupts no number.
+3. **The packet's own two artefacts contradicted each other.** The registry
+   claimed the ceiling was "not a chosen policy but a definition". The crosswalk,
+   in the same commit, earned `binding_kind: instantiates` on the grounds that
+   "**a WIP limit** is named verbatim in this primitive's `system_representation`".
+   A WIP limit *is* a chosen policy threshold. Both could not stand, and the
+   crosswalk's was the one doing load-bearing work.
+
+**The near-miss, recorded because it is why this needed an argument at all.**
+§10's inclusion rule excludes `N <= 1` from the fitted-constant family, on the
+grounds that "the scan found at least one thing" **is** an invariant.
+`CEILING_PACKETS=1` is a `1`, and it is tempting to read the exclusion as
+covering it. **It does not** — the rule fails on all three of its own clauses. It
+scopes to a comparison **in `tests/*.sh`** (this lives in a tool). It covers a
+constant that **floors how much a scanner or driver covered** (this is an *upper
+bound on permitted state*). And its excluded case is *"at least one"* (this is
+compared `-gt`, in the refusal direction — *at most* one). Same numeral, opposite
+direction. **An exclusion rule read by its constant instead of by its clauses
+would have certified this entry silently**, which is the failure mode this whole
+file exists to catch.
+
+**What did not change, and why that is the point.** The authority stays `gate`.
+Moving it to `advise` would have made the mismatch vanish, and that is precisely
+the move this registry forbids: **re-authorising a control is the operator's
+decision, not a reclassifier's.** So the control goes on refusing a second
+declared packet, and this file now says out loud that the number it refuses on is
+a heuristic. `binding_kind: instantiates` stands too — a WIP limit is exactly
+what `integration_bandwidth` names, and this control *is* one rather than
+standing in for one. Six other entries in this census are Class C and
+instantiating; the combination is ordinary, and only the class was ever wrong.
+
 ---
 
 ## What this list is not
 
-It is **not** a defect list. Twelve of these thirteen entries cover controls that
-have caught something or plausibly would; several are the best-argued code in the
+It is **not** a defect list. Thirteen of these fourteen entries cover controls
+that have caught something or plausibly would; several are the best-argued code in the
 repository, and `check-adoption.sh` in particular reasons about its own
 thresholds more carefully than most production systems ever do.
 
-The claim is narrower, and it is the whole point of the registry: **fifty-five
+The claim is narrower, and it is the whole point of the registry: **fifty-six
 fitted constants, thresholds and prose regexes can stop a build here, grouped
-into thirteen registry entries, and until this file existed, nothing anywhere
+into fourteen registry entries, and until this file existed, nothing anywhere
 said so.** A reader of `check-adoption.sh` learns that its thresholds are a
 median of four packets only by reading a hundred lines of comment. A reader of
 `supervise.sh` learns nothing at all. Whether that authority should stand is a

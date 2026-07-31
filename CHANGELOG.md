@@ -14,6 +14,88 @@ deprecation cycle. Pin a commit if you need stability.
 
 ### In flight (not landed at the released commit)
 
+- **Two census gaps closed: the egress scan is registered, and
+  `integration_bandwidth` gets its first controls.** The crosswalk found both.
+  Census **71 → 75** entries, `evidence_refs` **235 → 257**, authorities
+  **61 → 64 `gate`** and **10 → 11 `advise`** (`rank` and `observe` remain
+  **0 of 75** — the ladder is still used at two rungs of five). All six
+  machine-reconciled columns of `CROSSWALK.md` were recomputed, not edited:
+  75 bindings, **29 instantiate / 40 proxy / 6 nominal**, and **8 of 17**
+  primitives now hold at least one instantiating binding.
+  - **`entitlement.egress_scan` — Class A, `gate`, `red_driven`.** A real
+    security invariant was already running inside `tests/entitlement_tests.sh`:
+    it greps the entitlement packet's twelve files for network calls, carries a
+    **planted `curl` positive control** and a **prose negative control**, and
+    floors its own coverage. It owned no entry. The census's only view of it was
+    the suite's `RESULT` line plus its vacuity floor — so the registry could see
+    *this scanner is not blind* and could never see *nothing performs egress*.
+    That is README §4's known hole #1, *"a new control added inside an
+    already-registered file"*, **closed for the instance that motivated the
+    disclosure**; the hole itself is structural and stays open.
+  - **`ethical_admissibility` comes off nominal-only for the first time.** The
+    egress scan **instantiates** rather than proxies: unlike every binding under
+    `boundary`, the prohibited *act* never occurs — only the code that would
+    perform it, and that code cannot land while the suite is chained.
+  - **THE RULING, AND IT IS NOT A CAVEAT.** This control **does not enforce the
+    external boundary**. *Never push, merge, deploy, publish or touch secrets*
+    is enforced by the operator's **permission system**, a process boundary
+    outside this repository — and that is the right place for it, because
+    anything that could bypass the permission system bypasses a repo-side check
+    trivially, so a repo-side gate would convert a real external boundary into a
+    checkbox that looks enforced and is not. The scan reads a fileset. Both
+    artefacts say so, and two suites assert that they still say so.
+  - **`build-os/tools/bandwidth-check.sh` — the first controls that limit what
+    may be ABSORBED rather than judge what already exists.** Every other entry
+    in the census answers yes/no about an artefact already written, which is why
+    `rank` is held by nobody. **Each capacity dimension is enforced separately;
+    there is no composite load score** — the weights would be unjustifiable and
+    one number hides *which* dimension is saturated, so every ceiling carries
+    its own authority and every refusal names its dimension.
+    - **`packets`** — `bandwidth.active_packet_singleton`, **Class C at `gate`,
+      mismatch declared** — and it is the fourteenth entry in `MISMATCHES.md`
+      because it was **argued down, not registered there**. It went in as Class A
+      on the claim that its ceiling is `active_packet.md`'s own *definition*
+      ("the one packet currently in flight") rather than a fitted number. Review
+      rejected that: **"one packet at a time" is nowhere in `CLAUDE.md`** — it
+      exists only in the prose header of the very file the control reads, which
+      makes it a WIP limit somebody chose, and the packet's own crosswalk record
+      had already called it one in order to earn its binding. The tempting escape
+      — that §10 excludes `N <= 1` from the fitted-constant family — **does not
+      apply**: that rule covers coverage *floors* in `tests/*.sh`, and this is an
+      upper bound on permitted state inside a tool, compared in the refusal
+      direction. Same numeral, opposite direction. **The authority was left at
+      `gate`**, because clearing a mismatch by re-authorising the control is the
+      operator's decision and not a reclassifier's. `MISMATCHES.md` §14 carries
+      the full argument. Zero is a legitimate idle state; an absent artefact
+      reports `UNOBSERVABLE` and does **not** refuse, which also means deleting
+      the file evades it — recorded, not closed.
+    - **`commits`** — `bandwidth.packet_commit_ceiling`, Class C, **`advise`**,
+      and deliberately not a gate. Two commits per packet is a constant the
+      working contract chose; nothing measured it, and **a heuristic does not
+      become a gate by being useful**. It reports the breach and exits 0. The
+      base is self-declared by the agent it constrains, so only its
+      *resolvability* is checkable — anything else reports `UNOBSERVABLE`
+      rather than a count against a guessed base.
+    - **`write_sets` — DECLINED.** Observable from a fan-out manifest, but **no
+      ceiling on concurrent write sets is declared anywhere**, and enforcing one
+      would mean inventing a constant.
+    - **`depth` — DECLINED.** Rounds and serial agent stages are
+      **transcript-only**; nothing in git attests to them. **A control that
+      claims a limit it cannot observe is worse than an absent control**, so the
+      dimension is printed as declined, with its reason, on every run.
+  - **Red-driven throughout.** Two packets in flight refuses naming the
+    dimension; three commits reports `EXCEEDED` and still exits 0, so the
+    `advise` claim is executed rather than asserted; four fixtures prove
+    `UNOBSERVABLE` is reported rather than faked; each new binding removed trips
+    the anti-omission guard; the egress control deregistered from the census
+    trips both the binding-count and the ghost check. The ceiling constant is
+    read back from the line the census cites, so tool and registry cannot drift.
+  - **No fitted `-ge N` was added.** Every new floor is derived from the artefact
+    it measures, so `tests.nonvacuity_minimums` is unchanged at 34 members and
+    §21's tree scan still reconciles.
+  - Suite **1338 → 1418** passed, 0 failed (+41 `tests/bandwidth_tests.sh`,
+    +25 crosswalk, +14 registry). `scan-controls.sh check` exits 0.
+
 - **A Neurocosmology crosswalk: what each control is FOR.** The registry says
   what kind of evidence a control is and how much authority it exercises; it
   could not say what universal function the control instantiates.

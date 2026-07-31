@@ -162,9 +162,9 @@ its mismatch at exit 0, silently, while the report went on naming it.
 **An entry is not a line.** Entries are cut at different granularities:
 `metrics.record.note_minimum` classifies one comparison, and
 `tests.nonvacuity_minimums` classifies a family of 34 fitted constants across 12
-test files. So "13 of 75 declare a mismatch" is a fact about this file's
+test files. So "14 of 75 declare a mismatch" is a fact about this file's
 granularity, not a count of the heuristics that can stop a build — that number is
-**55**, in `MISMATCHES.md`'s summary table. The family's membership is not
+**56**, in `MISMATCHES.md`'s summary table. The family's membership is not
 trusted: `tests/control_registry_tests.sh` §21 rescans the tree for the shape and
 fails if the entry and the tree disagree in either direction, and §22 fails if
 any `path:line` is ever claimed by two entries.

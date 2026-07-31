@@ -73,7 +73,7 @@ the concept without performing the function and **is not coverage**.
 | agency | 4 | 2 | 1 | 1 | A | gate |
 | energy | 3 | 0 | 3 | 0 | C | advise, gate |
 | homeostasis | 20 | 1 | 19 | 0 | A | advise, gate |
-| integration_bandwidth | 2 | 1 | 1 | 0 | A, C | advise, gate |
+| integration_bandwidth | 2 | 1 | 1 | 0 | C | advise, gate |
 | boundary | 4 | 0 | 4 | 0 | A | advise, gate |
 | ethical_admissibility | 2 | 1 | 0 | 1 | A | gate |
 | epistemic_quality | 22 | 12 | 9 | 1 | A, B, C | advise, gate |
@@ -134,8 +134,12 @@ of 2 serial stages — and **not one was a registered control**. Two of the four
 now are, and the other two are **declined out loud rather than left implied**:
 
 - **Built.** `bandwidth.active_packet_singleton` refuses a second declared packet
-  (`gate`, Class A — the ceiling is `active_packet.md`'s own definition, not a
-  fitted number). `bandwidth.packet_commit_ceiling` counts commits against the
+  (`gate`, Class C, **mismatch declared**). It was registered Class A, on the
+  argument that its ceiling is `active_packet.md`'s own definition rather than a
+  fitted number, and **demoted on review**: "one packet at a time" is not in
+  `CLAUDE.md` at all, only in the prose header of the file the control reads, so
+  it is a WIP limit somebody chose. `MISMATCHES.md` §14 carries the argument.
+  `bandwidth.packet_commit_ceiling` counts commits against the
   packet's declared base and **advises** (`advise`, Class C — two is a constant
   the working contract chose, and a heuristic does not become a gate by being
   useful).
