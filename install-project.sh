@@ -118,4 +118,22 @@ with open(claude_md, "w") as f:
 print("  %s CLAUDE.md Build OS block" % ("~ replaced" if had else "+ added"))
 PY
 
+# Stamp the installed copy — version, source commit, and a sha256 of every engine
+# file placed above, with a byte-identical copy of LICENSE beside each stamp. This
+# is what lets a session in THIS repo state which version and which licence it is
+# running under without asking a human, and what makes a half-upgraded or
+# hand-patched install detectable (see .claude/hooks/build-os-identity.sh).
+# Never fatal: a missing stamp is reported as missing, never as verified.
+IDENTITY_SH="$SRC/.claude/hooks/build-os-identity.sh"
+ENGINE_RELS=()
+for f in "$DEST/.claude/agents/"*.md;   do [ -e "$f" ] && ENGINE_RELS+=("agents/$(basename "$f")"); done
+for f in "$DEST/.claude/commands/"*.md; do [ -e "$f" ] && ENGINE_RELS+=("commands/$(basename "$f")"); done
+for f in "$DEST/.claude/hooks/"*.sh;    do [ -e "$f" ] && ENGINE_RELS+=("hooks/$(basename "$f")"); done
+if bash "$IDENTITY_SH" stamp --source "$SRC" --root "$DEST/.claude" --scope project -- "${ENGINE_RELS[@]}" \
+   && bash "$IDENTITY_SH" stamp --source "$SRC" --root "$DEST/build-os" --scope project --; then
+  :
+else
+  echo "  ! identity stamp NOT written — this install cannot state its version/licence" >&2
+fi
+
 echo "Done. Commit .claude/ + build-os/ (+ CLAUDE.md) to this repo to make it permanent."

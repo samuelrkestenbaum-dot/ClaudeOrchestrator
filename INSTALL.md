@@ -1,5 +1,20 @@
 # Installing Build OS everywhere
 
+> ### ⚖️ Before you install: this is **proprietary**, not open source
+>
+> © 2026 Samuel Kestenbaum, **All Rights Reserved**, and **access-gated** —
+> access to this repository is *granted*, never assumed. Paid access to the
+> repository **is** the entitlement: there is no licence key to enter, no
+> activation step, and nothing here phones home.
+>
+> Cloning, seeing, or already having a copy **is not a licence**. Installing and
+> running the Software is permitted only under a separate written agreement
+> signed by the Owner — installing it is itself one of the acts
+> [`LICENSE`](LICENSE) reserves. If you do not have that agreement, stop here.
+>
+> Full terms in plain English, including what is deliberately *not* enforced in
+> code: [`docs/ENTITLEMENT.md`](docs/ENTITLEMENT.md).
+
 The files in `.claude/` and `build-os/` make Build OS active **in this repo
 only** (project scope). To make the orchestrator run automatically in **every**
 Claude Code session of **every** project — without copying files or prompting
@@ -27,10 +42,26 @@ cd ClaudeOrchestrator
 ./install-global.sh
 ```
 
-That copies the 5 agents, 3 commands, and 2 hooks into `~/.claude/`, **merges**
-the two hooks into `~/.claude/settings.json` (without touching your other
-settings), and appends the Build OS guidance to `~/.claude/CLAUDE.md` (guarded by
-markers). It is **idempotent** — safe to re-run to update.
+That copies the 5 agents, 4 commands, and the hook scripts into `~/.claude/`,
+**merges** the two registered hooks into `~/.claude/settings.json` (without
+touching your other settings), and appends the Build OS guidance to
+`~/.claude/CLAUDE.md` (guarded by markers). It is **idempotent** — safe to re-run
+to update.
+
+It also **stamps the installed copy** so it can state what it is: each installed
+root gets a `build-os-identity` file (version, source commit, source tree state,
+licence, and a sha256 of every file placed) plus `BUILD-OS-LICENSE`, a
+byte-identical copy of [`LICENSE`](LICENSE) — so the terms travel with the
+software instead of staying behind in the repo:
+
+```bash
+bash ~/.claude/hooks/build-os-identity.sh verify ~/.claude   # 0 = OK, 1 = DRIFT, 2 = unstamped
+```
+
+Every session prints the same verdict as one line at start-up. A copy whose
+engine files no longer match its own stamp reports `DRIFT` rather than continuing
+to claim a version it is not. This is drift detection, not DRM — see
+[`docs/ENTITLEMENT.md`](docs/ENTITLEMENT.md#what-is-not-enforced-technically).
 
 From then on, **every** Claude Code session on that machine starts with
 `Orchestrator: ON` and lists `build-orchestrator` + `builder`/`reviewer`/`qa`/
@@ -71,10 +102,13 @@ mechanism for setup is a **SessionStart hook committed to the target repo**
 
 > **Will the bootstrap (A/C/on-demand) work in *your* environment?** Those paths
 > clone ClaudeOrchestrator at session start, so they need two things:
-> - **The repo is cloneable.** ClaudeOrchestrator is **public**, so the clone
->   needs no credentials and works even from a session whose credentials are
->   scoped to a *different* single repo. (If you make it private again, the env
->   must have access to it.)
+> - **The repo is cloneable *by that session*.** Under the access-gated posture
+>   ClaudeOrchestrator is **private**, so the environment must carry a credential
+>   with read access to it; a session whose credentials are scoped to a
+>   *different* single repo will fail to clone. (This is the entitlement
+>   mechanism doing its only job. Note the converse, which is the whole point of
+>   [`docs/ENTITLEMENT.md`](docs/ENTITLEMENT.md): if a repository *is* visible to
+>   you, that visibility **is not a licence**.)
 > - **Network egress to `github.com` is allowed** by the environment's network
 >   policy. Most allow it; a maximally-locked-down policy may not.
 >
@@ -147,7 +181,9 @@ de-dupes (won't add the hooks twice) and the CLAUDE.md block is marker-guarded.
 ```bash
 rm -f  ~/.claude/agents/{build-orchestrator,builder,reviewer,qa,archivist}.md
 rm -f  ~/.claude/commands/{next-packet,review-packet,close-packet}.md
-rm -f  ~/.claude/hooks/{session-start-build-os,prompt-router}.sh
+rm -f  ~/.claude/hooks/{session-start-build-os,prompt-router,hook-once,build-os-identity}.sh
+rm -f  ~/.claude/{build-os-identity,BUILD-OS-LICENSE}      # the identity stamp + licence copy
+rm -f  ~/build-os/{build-os-identity,BUILD-OS-LICENSE}
 # then remove the two Build OS hook entries from ~/.claude/settings.json
 # and delete the <!-- BUILD-OS:START --> … <!-- BUILD-OS:END --> block in ~/.claude/CLAUDE.md
 ```

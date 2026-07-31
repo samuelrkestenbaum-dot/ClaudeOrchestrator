@@ -14,6 +14,20 @@ build_os_hook_once "SessionStart" || exit 0
 echo "Orchestrator: ON — Build OS wired. Reminder: invoke the build-orchestrator subagent PROACTIVELY before any build packet (architecture, next steps, tool routing, \"keep going\"). It will announce its routing line 'Orchestrator: ON — routing from <file|embedded>' when it runs."
 echo
 
+# WHAT THIS COPY IS, AND UNDER WHAT LICENCE — exactly ONE line, every session.
+# A session should never have to ask a human which version it is running or
+# whether it is allowed to. The line also carries the verification verdict, so a
+# copy whose engine files drifted from its own stamp says DRIFT here instead of
+# quietly reporting a version it no longer is. One line, because a banner gets
+# deleted by whoever has to read it every session.
+if [ -r "$HOOK_DIR/build-os-identity.sh" ]; then
+  # shellcheck source=build-os-identity.sh
+  source "$HOOK_DIR/build-os-identity.sh"
+  bosi_line "$(cd "$HOOK_DIR/.." 2>/dev/null && pwd)" "$ROOT/build-os" "${HOME:-/nonexistent}/build-os" 2>/dev/null \
+    || echo "Build OS: identity check unavailable — licence: see LICENSE / docs/ENTITLEMENT.md"
+  echo
+fi
+
 # Auto-provision persistent local accelerators (P-004): non-blocking, non-fatal,
 # fast-skip-if-present. Serena/Repomix/ccusage only; no secrets/network egress
 # beyond public package registries. Context Mode / Trail of Bits / Claude HUD /

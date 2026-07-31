@@ -840,6 +840,7 @@ chain_suite "tests/release_metadata_tests.sh"     "version, license and changelo
 chain_suite "tests/speed_benchmark_tests.sh"      "the packet speed measurement instrument"
 chain_suite "tests/metrics_adoption_tests.sh"     "the metrics adoption guard"
 chain_suite "tests/pilot_kit_tests.sh"            "the buyer-facing pilot kit"
+chain_suite "tests/entitlement_tests.sh"          "version, licence identity and the access-gated posture"
 
 # A chained suite that is added to the repo but never wired here would be
 # discoverable-only — the exact defect chaining exists to prevent. Assert the

@@ -38,7 +38,6 @@ CLAUDE_USER_DIR="$DEST" bash "$SRC/repair-host-integrations.sh"
 
 # Keep the user-scope router authoritative for repos without project Build OS.
 #
-# NOTE — THIS IS THE ONE SEEDING PATH STILL SOURCED FROM LIVE MEMORY, ON PURPOSE
 # SEEDED FROM THE TEMPLATE, like the two project scaffolds. This line used to copy
 # this repo's LIVE router, which propagated whatever operator-specific connector
 # inventory it carried into every install at user scope — the same leak class the
@@ -131,6 +130,28 @@ with open(claude_md, "w") as f:
     f.write(new)
 print("  %s CLAUDE.md Build OS block" % ("~ replaced" if had else "+ added"))
 PY
+
+# 6) Stamp the installed copy so it can say WHAT IT IS and WHAT LICENCE IT RUNS
+#    UNDER without asking a human — version, source commit, and a sha256 of every
+#    file placed above, plus a byte-identical copy of LICENSE beside each stamp.
+#    Written LAST, after repair-host-integrations.sh, so the stamp describes the
+#    files as they finally sit on disk rather than as they were mid-install.
+#    Never fatal: an installed engine that cannot self-identify is a defect worth
+#    reporting, not a reason to leave a half-installed user scope behind. The
+#    SessionStart hook then reports `identity: no stamp found`, which is honest.
+IDENTITY_SH="$SRC/.claude/hooks/build-os-identity.sh"
+ENGINE_RELS=()
+for f in "$DEST/agents/"*.md;   do [ -e "$f" ] && ENGINE_RELS+=("agents/$(basename "$f")"); done
+for f in "$DEST/commands/"*.md; do [ -e "$f" ] && ENGINE_RELS+=("commands/$(basename "$f")"); done
+for f in "$DEST/hooks/"*.sh;    do [ -e "$f" ] && ENGINE_RELS+=("hooks/$(basename "$f")"); done
+TOOL_RELS=()
+for f in "$USER_BUILD_OS/tools/"*.sh; do [ -e "$f" ] && TOOL_RELS+=("tools/$(basename "$f")"); done
+if bash "$IDENTITY_SH" stamp --source "$SRC" --root "$DEST" --scope user -- "${ENGINE_RELS[@]}" \
+   && bash "$IDENTITY_SH" stamp --source "$SRC" --root "$USER_BUILD_OS" --scope user -- "${TOOL_RELS[@]}"; then
+  :
+else
+  echo "  ! identity stamp NOT written — this install cannot state its version/licence" >&2
+fi
 
 echo
 echo "Done. Build OS is DURABLY CONFIGURED at user scope (agents, commands, hooks,"

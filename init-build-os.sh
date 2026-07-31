@@ -61,6 +61,18 @@ copy_if_absent "build-os/receipts/README.md"
 # build-os/memory/standing_gates.md is seeded only if absent.
 "$SRC/build-os/maintenance/install-maintenance.sh" "$DEST"
 
+# Stamp the scaffold with the version and licence it came from, and drop a
+# byte-identical copy of LICENSE beside it. This scaffold carries no engine files,
+# so the stamp covers the licence copy only — but it still answers "which version
+# and licence produced this?" without a human, and still goes red if it is edited.
+# Never fatal: a missing stamp is reported as missing, never as verified.
+if bash "$SRC/.claude/hooks/build-os-identity.sh" \
+     stamp --source "$SRC" --root "$DEST/build-os" --scope project --; then
+  :
+else
+  echo "  ! identity stamp NOT written — this scaffold cannot state its version/licence" >&2
+fi
+
 echo "Done. The orchestrator will read/write build-os/ in this repo."
 echo "Tip: fill in build-os/memory/current_state.md with this project's basics."
 echo "     build-os/memory/tool_router.md ships with ZERO connector rows — add a row"

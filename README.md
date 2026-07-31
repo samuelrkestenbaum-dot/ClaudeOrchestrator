@@ -8,6 +8,22 @@ instead of drifting. It is the *conductor*, not a bundle of tools; it routes to
 Claude Code's native tools and to external tools / MCP servers **when connected**
 (see [`INTEGRATIONS.md`](INTEGRATIONS.md)).
 
+> ### ⚖️ Proprietary — this is **not open source**
+>
+> ClaudeOrchestrator is © 2026 Samuel Kestenbaum, **All Rights Reserved**, and it
+> is **access-gated**: access to this repository is *granted*, never assumed.
+> Paid access to the repository **is** the entitlement — there is no licence key,
+> no activation, and no phone-home.
+>
+> Being able to see, clone, or fork a repository **is not a licence**; the
+> licence says so in as many words. You may use, install, or run this software
+> **only** under a separate written agreement signed by the Owner.
+>
+> Read [`LICENSE`](LICENSE) first, then
+> [`docs/ENTITLEMENT.md`](docs/ENTITLEMENT.md) — what access grants, what happens
+> at team scale, how to verify an installed copy is genuine, and what is
+> deliberately **not** enforced in code.
+
 ---
 
 ## 🤖 If you are a Claude Code session reading this repo
@@ -53,11 +69,25 @@ cd ClaudeOrchestrator
 
 On demand, in any session: just ask Claude to **"install the Build OS."**
 
-This repo is **public**, so the web `connect`/bootstrap and on-demand paths clone
-it without credentials — even from a session scoped to a *different* repo —
-provided the environment allows `github.com` egress. If egress is blocked, vendor
-with `install-project.sh` (zero network). See [`INSTALL.md`](INSTALL.md).
+The web `connect`/bootstrap and on-demand paths clone this repo at session start,
+so they need the session's environment to (a) hold a credential that can read it
+and (b) allow `github.com` egress. **Under the access-gated posture the repo is
+private, so a credential is required** — a session scoped to a *different* repo
+will not be able to clone it. If access or egress is unavailable, vendor with
+`install-project.sh` (zero network) from a clone you already have.
 Full matrix of options: [`INSTALL.md`](INSTALL.md).
+
+Whatever this repository's visibility happens to be at any moment, **visibility
+is not a licence** — see [`docs/ENTITLEMENT.md`](docs/ENTITLEMENT.md).
+
+Every install stamps the copy it produces (`build-os-identity` +
+`BUILD-OS-LICENSE` in each installed root), so a session states its version,
+commit and licence on one line at start-up, and a copy that has drifted from its
+own stamp says so instead of quietly claiming a version it no longer is:
+
+```bash
+bash <root>/.claude/hooks/build-os-identity.sh verify <root>   # 0 = OK, 1 = DRIFT, 2 = unstamped
+```
 
 ## The roster
 
@@ -139,7 +169,8 @@ agent-swarm) and how each maps to a Build OS authority/gate is in
 ```
 .claude/agents/        build-orchestrator, builder, reviewer, qa, archivist
 .claude/commands/      next-packet, review-packet, close-packet
-.claude/hooks/         session-start-build-os.sh, prompt-router.sh
+.claude/hooks/         session-start-build-os.sh, prompt-router.sh, hook-once.sh,
+                       build-os-identity.sh (stamps/verifies an installed copy)
 .claude/settings.json  wires the hooks (SessionStart + UserPromptSubmit)
 build-os/memory/       tool_router.md, current_state.md, residue.md,
                        standing_gates.md (never rotated), archive/ (rotated tail)
@@ -147,6 +178,8 @@ build-os/packets/      active_packet.md
 build-os/receipts/     one receipt per closed packet
 build-os/maintenance/  memory rotation + the real-memory tripwire + the
                        sanctioned test wrapper (see PORTING.md)
+docs/ENTITLEMENT.md    what access grants, what LICENSE leaves ambiguous, and
+                       what is NOT enforced technically
 install-global.sh      install to ~/.claude (whole machine)
 install-project.sh     vendor into a target repo
 connect-project.sh     add the web auto-install bootstrap to a target repo
