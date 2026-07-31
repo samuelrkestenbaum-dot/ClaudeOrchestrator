@@ -41,7 +41,7 @@ That buys the same four properties the TSV was chosen for, at this shape:
 - **Greppable without a parser.** `grep '^class: C' control_registry.txt` counts
   the heuristics. `grep -B4 '^runtime_authority: gate'` finds what gates.
   `grep -c '^control: '` is the census size. The number worth reading first is
-  **`gate` on `unvalidated` evidence — 11 of 70**: eleven controls can stop the
+  **`gate` on `unvalidated` evidence — 11 of 71**: eleven controls can stop the
   build and nothing has established that any of them discriminates. The one-line
   `awk` that derives it is in `control_registry.txt`'s header.
 - **Diffable at field granularity.** Changing one control's authority is a
@@ -162,7 +162,7 @@ its mismatch at exit 0, silently, while the report went on naming it.
 **An entry is not a line.** Entries are cut at different granularities:
 `metrics.record.note_minimum` classifies one comparison, and
 `tests.nonvacuity_minimums` classifies a family of 34 fitted constants across 12
-test files. So "13 of 70 declare a mismatch" is a fact about this file's
+test files. So "13 of 71 declare a mismatch" is a fact about this file's
 granularity, not a count of the heuristics that can stop a build — that number is
 **55**, in `MISMATCHES.md`'s summary table. The family's membership is not
 trusted: `tests/control_registry_tests.sh` §21 rescans the tree for the shape and
@@ -252,7 +252,7 @@ in `scan-controls.sh`, with its reason beside it, where `grep` finds it;
 `scan-controls.sh patterns` prints the list and its size, so an allowance
 quietly growing is visible without reading the file. **It is empty today.**
 
-The registry carries **227** `evidence_refs`. That number is not remembered: the
+The registry carries **235** `evidence_refs`. That number is not remembered: the
 same total was previously written down in three artefacts as 218, 184 and 184
 against a live 224, because each was a hand count frozen at a different moment.
 `tests/control_registry_tests.sh` §25 recomputes it from the registry and fails
@@ -271,3 +271,11 @@ probability, no causal attribution, no learned risk model, no adaptive threshold
 and no manifold state. Every entry classifies a control **that already runs in
 this repository today**. The registry is the prerequisite for deciding whether
 any of that is worth building; it is not a down payment on it.
+
+`CROSSWALK.md` and `neurocosmology_crosswalk.txt` add **one axis and no
+mathematics**: they bind each registered control to the universal function it
+instantiates, and record what each binding misses. That file uses the words this
+section disclaims — *collective coherence*, *goal ecology* — as **labels for
+slots**, and its main result is which slots are **empty**. It computes none of
+them, creates no control, and grants no authority; every class and authority it
+names is a copy of one already recorded here.

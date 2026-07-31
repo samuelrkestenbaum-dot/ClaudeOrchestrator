@@ -14,7 +14,7 @@ control is a governance action and belongs to the operator.
 
 ## Three numbers, each with its derivation
 
-1. **11 of 70 classified controls gate on `unvalidated` evidence.** Eleven
+1. **11 of 71 classified controls gate on `unvalidated` evidence.** Eleven
    controls can stop the build and nothing has established that any of them
    discriminates — no measurement, no red drive, no field observation. This is
    the sharpest number in the census and the one to read first.
@@ -27,7 +27,7 @@ control is a governance action and belongs to the operator.
    `tests.nonvacuity_minimums`. Four of the eleven are Class A — an invariant on
    `unvalidated` evidence is *legal* under the licence table and still means
    nobody has watched it fire.
-2. **13 of 70 entries exercise `gate` on a class that does not license it.**
+2. **13 of 71 entries exercise `gate` on a class that does not license it.**
    `grep -c '^authority_mismatch: declared' control_registry.txt`. All 13 are
    Class C heuristics, all 13 can exit non-zero, and none of them was wrong to
    build.

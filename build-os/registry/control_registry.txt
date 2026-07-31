@@ -13,7 +13,7 @@
 #
 # AN ENTRY IS NOT A LINE. Entries are cut at different granularities: some
 # classify a single comparison, and `tests.nonvacuity_minimums` classifies a
-# family of 34 fitted constants across 12 files. So "13 of 70 declare a
+# family of 34 fitted constants across 12 files. So "13 of 71 declare a
 # mismatch" is a fact about this file's granularity, not a count of the
 # heuristics that can stop a build — that number is 55, hand-counted in
 # MISMATCHES.md's summary table. Quote both or quote the larger one.
@@ -23,7 +23,7 @@
 #   grep -B4 '^runtime_authority: gate'   what can stop a run
 #   grep '^authority_mismatch: declared'  what is over-authorised (13 entries)
 #
-#   # gate on unvalidated evidence — 11 of 70, the sharpest number here:
+#   # gate on unvalidated evidence — 11 of 71, the sharpest number here:
 #   awk -F': ' '/^control: /{c=$2} /^runtime_authority: gate/{g=1} \
 #     /^empirical_status: unvalidated/{u=1} /^$/{if(g&&u)print c; g=0; u=0}' \
 #     control_registry.txt
@@ -948,7 +948,7 @@ inputs: every tests/*.sh present on disk, against the chain_suite call sites in 
 output: the list of sibling suites that are present but never chained
 owning_module: tests/build_os_tests.sh
 consuming_policies: the top-level suite's FAIL count and exit status — which is the repo's single verification command
-evidence_refs: tests/build_os_tests.sh:856; tests/build_os_tests.sh:858; tests/build_os_tests.sh:859
+evidence_refs: tests/build_os_tests.sh:857; tests/build_os_tests.sh:859; tests/build_os_tests.sh:860
 failure_behavior: one FAIL naming every unwired suite; the run exits non-zero
 rollback_behavior: read-only
 promotion_requirement: n/a
@@ -984,7 +984,7 @@ inputs: the count of hook-invocation sites the static scanner matches in this su
 output: pass, or "it has gone blind, so its verdict below is meaningless"
 owning_module: tests/build_os_tests.sh
 consuming_policies: the suite's FAIL count
-evidence_refs: tests/build_os_tests.sh:935; tests/build_os_tests.sh:957; tests/build_os_tests.sh:960
+evidence_refs: tests/build_os_tests.sh:936; tests/build_os_tests.sh:958; tests/build_os_tests.sh:961
 failure_behavior: one FAIL; the run exits non-zero
 rollback_behavior: read-only
 promotion_requirement: n/a
@@ -1056,7 +1056,7 @@ inputs: the router, the guidance files, the hooks, the installers, and eleven ch
 output: ==== RESULT: N passed, M failed ====
 owning_module: tests/build_os_tests.sh
 consuming_policies: the repository's single verification command; swarm-merge.sh runs it as the post-merge verification
-evidence_refs: tests/build_os_tests.sh:970; tests/build_os_tests.sh:971
+evidence_refs: tests/build_os_tests.sh:971; tests/build_os_tests.sh:972
 failure_behavior: exits non-zero when FAIL is non-zero
 rollback_behavior: read-only; all fixtures live in mktemp dirs
 promotion_requirement: n/a
@@ -1319,3 +1319,21 @@ promotion_requirement: n/a
 demotion_requirement: n/a
 authority_mismatch: none
 notes: Red-drives the load-bearing rule, the R/D ceiling, the laundering ban, an unregistered control, a phantom entry, both halves of the vacuity guard and an unresolvable evidence reference.
+
+control: suite.neurocosmology_crosswalk
+class: A
+implementation_status: load_bearing
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: immune
+inputs: the crosswalk artefact, the live registry, CROSSWALK.md, and ten fixtures damaged to fail one guard each
+output: a RESULT line
+owning_module: tests/neurocosmology_crosswalk_tests.sh
+consuming_policies: tests/build_os_tests.sh chains it, so a non-zero exit fails the whole suite; build-os/registry/neurocosmology_crosswalk.txt is unusable as evidence without it
+evidence_refs: tests/neurocosmology_crosswalk_tests.sh:102; tests/neurocosmology_crosswalk_tests.sh:106; tests/neurocosmology_crosswalk_tests.sh:167; tests/neurocosmology_crosswalk_tests.sh:189; tests/neurocosmology_crosswalk_tests.sh:215; tests/neurocosmology_crosswalk_tests.sh:387; tests/neurocosmology_crosswalk_tests.sh:429; tests/neurocosmology_crosswalk_tests.sh:507
+failure_behavior: prints each failing assertion with its reason and exits 1
+rollback_behavior: read-only — it writes only inside its own mktemp dir, which the trap removes
+promotion_requirement: n/a
+demotion_requirement: unchain it from tests/build_os_tests.sh and it stops gating anything
+authority_mismatch: none
+notes: Reconciles the crosswalk against the census in BOTH directions, so a control added to the registry and never bound fails here — the §21 lesson (derived membership beats asserted membership) applied on a new axis. Class A because every assertion is an invariant over two artefacts — a binding names a control that exists, a restated class equals the registry's, a claimed authority equals the strongest one actually held — rather than a fitted threshold. It states no numeric floor of its own, so it is not a member of the tests.nonvacuity_minimums family.

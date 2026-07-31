@@ -1,0 +1,703 @@
+# Build OS — Neurocosmology crosswalk.
+#
+# The control registry answers "what kind of evidence is this control, and how
+# much authority does it exercise?". This file answers the second question:
+# WHAT UNIVERSAL FUNCTION DOES IT INSTANTIATE? Gravito is not computing
+# Neurocosmology; it is operationalizing components of it, and this file records
+# which components, at what strength, and — the load-bearing part — what each
+# binding MISSES.
+#
+# THIS FILE CLASSIFIES. IT IMPLEMENTS NO MATHEMATICS, CREATES NO CONTROL, AND
+# GRANTS NO AUTHORITY. There is no potential, no coherence measure, no goal
+# ecology, no value-of-information term and no learned model here, and none may
+# be added by editing this file. A binding is a claim ABOUT a control that
+# already runs; every `class` and `runtime_authority` below is a COPY of that
+# control's registry entry, kept deliberately redundant so the two files can be
+# checked against each other. Where they disagree, the registry is right and
+# this file is stale.
+#
+# TWO RECORD SHAPES, one field per line, a blank line between records:
+#   `primitive:` records  — the 17 universal primitives (7 fields)
+#   `control:` records    — one binding per registered control (6 fields)
+#
+# THE BINDING RULE. A control binds to the primitive whose FUNCTION it performs,
+# not the primitive whose VOCABULARY its name shares. `adoption.boundary_manifest`
+# bounds a claim, not a write scope, so it is epistemic_quality and not boundary.
+# Exactly one primitive per control; where two fit, the tie goes to the primitive
+# whose failure mode the control exists to prevent.
+#
+# binding_kind, strongest first — and only `instantiates` is coverage:
+#   instantiates  the control performs the primitive's function.
+#   proxies       it observes a stand-in for the function, and the stand-in's
+#                 gap is named in the primitive's known_limitations.
+#   nominal       it touches the concept without performing the function.
+#                 A nominal binding is INFORMATION, NOT COVERAGE. Counting it as
+#                 coverage is the inflation this crosswalk exists to refuse.
+#   unbound       the control instantiates no primitive (rationale states why).
+#
+# `binding_kind` is a CONTROL-record field. `binding_quality`, on a PRIMITIVE
+# record, is a DIFFERENT QUANTITY and is read wrongly if taken for a summary: it
+# is the MAXIMUM binding_kind over that primitive's bound controls — the
+# strongest kind any ONE of them holds — and section 7 of the suite enforces
+# exactly that maximum, no more. So `binding_quality: instantiates` states that
+# at least one binding instantiates and states NOTHING about the others:
+# homeostasis carries it on the strength of 1 binding out of 19, and
+# epistemic_quality on 12 out of 22. Grepping `^binding_quality: instantiates`
+# answers "which primitives have any real contact at all"; it does NOT answer
+# "which primitives are covered", and using it for the second question is the
+# same inflation the nominal rule above exists to refuse. For coverage, use the
+# honest-coverage recipe below, which COUNTS instantiating bindings per
+# primitive rather than maximising over them.
+#
+#   grep -c '^primitive: '                  the 17 primitives
+#   grep -c '^control: '                    the bindings — must equal the census size
+#   grep '^binding_quality: unbound'        the primitives NOTHING binds to
+#   grep -c '^binding_kind: nominal'        bindings that are not coverage
+#
+#   # honest coverage — instantiating bindings only, per primitive:
+#   awk -F': ' '/^binds_to: /{p=$2} /^binding_kind: instantiates/{print p}' \
+#     neurocosmology_crosswalk.txt | sort | uniq -c | sort -rn
+#
+# Pinned by tests/neurocosmology_crosswalk_tests.sh.
+
+# =============================================================================
+# THE 17 PRIMITIVES
+# =============================================================================
+
+primitive: reachability
+universal_function: which futures are accessible from the current state
+system_representation: affected-state graph; plan DAG; executable paths; available tools; authority-constrained actions
+observable_proxies: the startup capability inventory — enabled plugins, native skills, and plugin-cache entries marked CANDIDATE
+binding_quality: nominal
+claimed_max_authority: advise
+known_limitations: ONE BINDING, AND IT IS NOMINAL — this primitive has no coverage at any strength. It was carried as `proxies` until the reading was tightened: a proxy observes a stand-in that CO-VARIES with the function, and a list of tool names does not co-vary with which futures are reachable. It is an INVENTORY rather than a graph. Nothing in this repository constructs an affected-state graph, a plan DAG, or a set of executable paths, and nothing enumerates the futures an action opens or closes. `hooks.session_capability_report` lists capability NAMES and honestly marks the uncertain ones CANDIDATE — a list of nouns where the primitive requires a structure over verbs — and it exits 0 whatever it finds. Reachability as a computed object does not exist here.
+
+primitive: meaning_metric
+universal_function: which of the accessible futures matter
+system_representation: product objective; acceptance criteria; task value; strategic priority
+observable_proxies: none
+binding_quality: unbound
+claimed_max_authority: none
+known_limitations: EMPTY, and the near-miss is named precisely so nobody fills the slot by relabelling. Acceptance criteria DO exist here in quantity — each of the fourteen test suites is a set of them — but an acceptance criterion is a BINARY PREDICATE OVER AN ARTEFACT THAT ALREADY EXISTS, and a meaning metric is a MEASURE OVER FUTURES. This registry holds 71 controls that can say "this is wrong" and none that can say "this is worth more than that". Binding the suites here would be exactly the inflation this crosswalk exists to refuse.
+
+primitive: mass
+universal_function: what pulls hardest on behaviour
+system_representation: priority; severity; urgency; dependency-unlock value; attention weight
+observable_proxies: the fixed ordering of the speed report's sections
+binding_quality: nominal
+claimed_max_authority: advise
+known_limitations: NOMINAL ONLY, and it should be read as empty by anyone applying a strict standard. `metrics.report.disclosure_ordering` is the sole ordering of anything in the census, it takes `inputs: none`, and its order was chosen once by a human — so the system orders exactly one thing, a page layout, by constant. No control assigns severity, priority or urgency; the registry has no severity field; and `runtime_authority: rank` — the authority tier that exists precisely to order work or select between options — is held by ZERO of 71 controls. Nothing here computes what pulls hardest from state.
+
+primitive: valence
+universal_function: which directions are attractive and which are harmful
+system_representation: benefit; harm; expected loss; user impact
+observable_proxies: none
+binding_quality: unbound
+claimed_max_authority: none
+known_limitations: EMPTY. The nearest thing is `authority_mismatch: declared`, which labels 13 entries as carrying more authority than their class licenses — a DIRECTION of risk, but hand-assigned, binary, and attached to a control rather than to any future. Nothing computes benefit, harm, expected loss or user impact. The metrics store carries a `defects_gated` column that counts caught harm after the fact; it has no notion whatever of the magnitude of what was caught, so a typo and a data-loss bug increment it identically.
+
+primitive: agency
+universal_function: the ability to produce movement
+system_representation: tools; permissions; authority leases; effective execution capability
+observable_proxies: PATH resolution of required binaries; the handoff lock's acquired or BUSY state and its pid liveness; the capability-profile subcommand
+binding_quality: instantiates
+claimed_max_authority: gate
+known_limitations: Four bindings, and all four are BINARY PRECONDITIONS — is the tool on PATH, is the lock free, is the subcommand valid. `tools.handoff_lock` is a genuine authority lease and the closest thing here to agency as a quantity, but it is one bit, and `tools.capability_profile_usage` is NOMINAL: it validates a subcommand's arguments, guarding the switch that sets effective capability without ever observing capability. Nothing represents degrees of capability and nothing models what an agent can actually accomplish. Decisively: the permission system that really constrains agent action is EXTERNAL to this repository, so the census is structurally blind to the largest determinant of agency in the running system.
+
+primitive: energy
+universal_function: the capacity to act and to integrate
+system_representation: compute budget; context budget; WIP; tool availability; latency; agent capacity
+observable_proxies: a 900-second supervise budget; 900, 30 and 1800-second handoff budgets; a 30000-character startup skill budget
+binding_quality: proxies
+claimed_max_authority: gate
+known_limitations: THREE BINDINGS, NONE INSTANTIATING, and every constant inside them is unvalidated or assumed. `tools.skill_budget_audit` is the only real capacity accounting and it still only proxies: 30000 is an assumed platform constant its own entry says must be verified, SKILL.md byte size only approximates token cost, and it EXITS 0 WHEN OVER BUDGET, so the one control that measures capacity cannot act on its own measurement — a measurement that cannot bind the measurer is a stand-in for capacity management, not an instance of it. The two timeout controls treat wall-clock as a stand-in for capacity, which is the crudest proxy available: a run that is slow because it is thorough and a run that is slow because it is stuck produce the same number.
+
+primitive: homeostasis
+universal_function: staying stable while operating
+system_representation: runtime health; test state; repo cleanliness; dependency integrity; recovery
+observable_proxies: fourteen suite RESULT lines; merge preconditions over git status; post-merge verification; hook idempotence; static assertions over the maintenance layer's own source
+binding_quality: instantiates
+claimed_max_authority: gate
+known_limitations: THE LARGEST COUNT IN THIS CROSSWALK AND THE ONE MOST AT RISK OF BEING MISREAD. Fourteen of its nineteen bindings are test suites, and a suite's empirical status is `red_driven` — the registry README's concession applies here at full force: a check written against a fixture written by the same author in the same hour mostly proves the two agree. A green suite is evidence that PLANTED defects are caught. It is not a measurement of system health. There is no runtime health signal in this system at all, and nothing observes the system WHILE it operates: every binding here is a pre-condition or a post-condition around a run, never a state variable during one. `suite.build_os_maintenance` is the only binding that exercises recovery, and it does so against a cold install in a scratch repo rather than against a damaged live one.
+
+primitive: integration_bandwidth
+universal_function: how much change can be safely absorbed
+system_representation: WIP limits; review capacity; merge bandwidth; evidence capacity
+observable_proxies: none
+binding_quality: unbound
+claimed_max_authority: none
+known_limitations: EMPTY — and this one was not predicted, which makes it worth stating plainly. The system HAS bandwidth conventions: one active packet at a time, at most two commits per packet, a bounded fix round, a median depth of two serial stages. NOT ONE of them is a registered control. They live as prose in CLAUDE.md and are honoured by agent compliance, so the census cannot see the system's entire theory of how much work may be in flight. The nearest registered thing is `adoption.lane_size_check`'s churn ceiling, which bounds a DECLARED lane after the commits already exist — it audits the label, it does not limit what may be absorbed. `tools.handoff_lock` does limit concurrency to one, but as a lease over a resource rather than as a capacity model, which is why it binds to agency.
+
+primitive: boundary
+universal_function: which movements are permitted
+system_representation: action classes; write scopes; policy rules; authority ceilings
+observable_proxies: hash snapshots of the real memory files taken in-process and again in-shell; presence of the tripwire module; the GRAVITO:MANAGED banner set
+binding_quality: proxies
+claimed_max_authority: gate
+known_limitations: EVERY BOUNDARY HERE IS DETECTIVE, NOT PREVENTIVE, SO NOT ONE OF THE FOUR INSTANTIATES. The tripwire and the shell fingerprint both work by hashing before and after and naming what changed — so the prohibited write HAPPENS, and is then reported. That is worth having, and `maint.real_memory_tripwire` is field_observed against a real suite that destroyed live memory at exit 0, but it is not what the primitive means: a boundary that constrained reachable futures would refuse the write. The counter-argument is real and is recorded rather than discarded: both are `gate`, so the offending change cannot LAND even though the write does — the boundary is enforced at COMMIT granularity, not at WRITE granularity. That is why they proxy the primitive rather than failing to touch it, and it is also the precise size of the gap: any damage done between the write and the commit is out of scope for every boundary control in the census. Three of the four bindings police one narrow scope, the memory files. The authority ceilings that DO exist — the class-to-authority licence table — are enforced by `registry.reconciliation`, which binds to epistemic_quality because it checks that a mismatch is DECLARED, never that it is permitted.
+
+primitive: ethical_admissibility
+universal_function: which futures must not be entered at all
+system_representation: legal; security; privacy; safety; policy invariants
+observable_proxies: file digests and LICENSE on an installed copy
+binding_quality: nominal
+claimed_max_authority: gate
+known_limitations: THE SHARPEST FINDING IN THIS CROSSWALK. One binding, and it is NOMINAL: a provenance check, which touches admissibility without performing it. Its own rationale concedes the whole distance — a digest match proves the files are unmodified and does not establish that any particular USE of them is permitted — so it is information about identity, not a constraint on which futures may be entered. The strongest rule this system states about itself — no external mutation without explicit go, never push, merge, deploy, publish or touch secrets — has ZERO registered controls. Nothing in the census gates a push, a deploy, a publish or a credential read. That rule is honoured by agent compliance and by an external permission system, and the census is blind to both. There IS a real security invariant in the tree — the egress scan that keeps "local only, no telemetry" falsifiable rather than asserted — but it lives INSIDE `suite.entitlement` and is not separately registered, so it binds to homeostasis as part of a suite instead of here as an invariant. That is README section 4's known hole number 1, "a new control added inside an already-registered file", restated in this framework's vocabulary: the census cannot see the one admissibility control it actually has.
+
+primitive: epistemic_quality
+universal_function: how good the system's contact with reality is
+system_representation: evidence coverage; receipts; calibration; claim-state reconciliation
+observable_proxies: git numstat recomputation of claimed row values; vacuity refusals across seven surfaces; occupancy and length floors on evidence rows; the tree-derived discovery rule
+binding_quality: instantiates
+claimed_max_authority: gate
+known_limitations: TWENTY-TWO BINDINGS, AND THE COUNT OVERSTATES THE CONTACT. 46 of the 71 controls in this registry are `red_driven` and only 3 are `field_observed`, so most of what binds here has been shown to fire on a defect its own author planted, and nothing more. The bindings divide sharply. A small group compares a claim against something the claimant did not write — `metrics.record.verify_git` against git numstat, `adoption.lane_size_check` against measured churn, `registry.discovery_rule` against the tree — and those genuinely instantiate the primitive. The larger group checks SHAPE, OCCUPANCY, LENGTH or VACUITY: `adoption.boundary_manifest` validates that a manifest is well-formed and not that the boundary it declares is true, which is why it sits with its siblings `adoption.schema_invariant` and `adoption.store_validate` rather than above them; `metrics.record.note_minimum` passes twelve repeated characters, `adoption.junk_row_thresholds` scores a row of plausible fabrications as full, and seven separate "the scan found nothing" refusals prove only that a check was not blind — a necessary condition for evidence and never a sufficient one. `maint.tripwire_coverage_scan` is registered `refuted`: measured, and found not to discriminate. Nothing here is `calibrated` except two threshold controls fitted to n=4 packets of this repository's own history. Reading "22 of 71" as dense epistemic coverage would be the overclaim the registry exists to prevent.
+
+primitive: latent_state
+universal_function: hidden state beneath the explicit claims
+system_representation: contradiction detection; unstated dependencies; claim-state gap; drift
+observable_proxies: row counts at four render stages; receipt stems against store rows; module specifiers recovered from source; suites on disk against suites chained; RESULT lines against exit codes
+binding_quality: instantiates
+claimed_max_authority: gate
+known_limitations: Five bindings, and every one is a PAIRWISE EQUALITY between two places that were already supposed to agree. That is contradiction detection at its narrowest: each check is told in advance which two things to compare, so it can only find a divergence somebody already anticipated. Nothing here searches for unstated dependencies in general — `maint.source_scan_mask` recovers declared module specifiers with a heuristic lexer and is itself registered `refuted`. Nothing carries state across runs, so DRIFT in the temporal sense is not observed at all; all five fire within a single invocation. The claim-state gap this system actually suffers from — an artefact whose prose has quietly stopped describing the tree — is caught only at the specific pairings someone thought to write down.
+
+primitive: durability
+universal_function: what persists through time
+system_representation: D1, D7, D30 and D90 retention; rollback; rework; escaped regressions
+observable_proxies: byte conservation across a memory rotation
+binding_quality: proxies
+claimed_max_authority: gate
+known_limitations: ONE BINDING, AND IT INSTANTIATES NOTHING: it measures durability across a single TRANSFORMATION rather than across TIME, and it touches NONE of the five representations this record declares — not D1, D7, D30 or D90 retention, not rollback, not rework, not escaped regressions. `maint.rotation_conservation` proves no byte is lost when memory is rotated; it says nothing about whether anything survives a week. The temporal quantities the primitive names are not merely unmeasured — for one of them the INSTRUMENT EXISTS AND IS EMPTY: `packet_metrics.tsv` carries a `defects_escaped` column and it reads `-` in all 6 of 6 rows, so the system has built a place to record escaped regressions and has never recorded one. Nothing computes D1, D7, D30 or D90. Nothing measures rework. And `rollback_behavior` is a prose field on every one of the 71 registry entries that no control ever executes, tests or verifies.
+
+primitive: gated_plasticity
+universal_function: changing the rules safely
+system_representation: amendment lane; staged policy changes; rollback; quorum; external authorization
+observable_proxies: a justified override token that must cite the measured value; a computed-but-unauthorised threshold drift report; two cross-file pinnings of a threshold and a budget
+binding_quality: instantiates
+claimed_max_authority: gate
+known_limitations: THE BEST-SERVED PRIMITIVE RELATIVE TO ITS SIZE, and the only one where the system's own design reasoning matches the primitive's intent explicitly: `adoption.threshold_drift_advisory` computes what the rule WOULD become and refuses to be promoted, on the stated grounds that a threshold following the data is a control surface for whoever writes the data. What is missing is everything social. There is no quorum, no external authorization, no staging and no rollback of a rule change. An amendment here is a commit by whoever is at the keyboard; these guards ensure a rule cannot change in ONE PLACE ONLY, not that the change was ever authorised. `adoption.lane_override` is a real amendment lane, but it is policed for FORM — a justification of sufficient length that names the measured file count — and never for merit.
+
+primitive: collective_coherence
+universal_function: alignment across multiple agents
+system_representation: shared canonical state; conflict graph; plan agreement; cross-agent reconciliation
+observable_proxies: pairwise glob overlap; per-path ownership cardinality; hot-file reservations and releases; claimed versus actual changed paths
+binding_quality: instantiates
+claimed_max_authority: gate
+known_limitations: Five bindings, and structurally they are the most faithful group in this crosswalk — `swarm.disjointness` really does compute a conflict graph, before the conflict. The limitation is that all five reason over FILE PATHS and nothing else. Two agents editing disjoint files can still hold contradictory beliefs, implement incompatible designs, or duplicate each other's work entirely, and every one of these controls passes them without comment. Coherence is enforced as non-collision in a namespace, which is the cheapest available proxy for agreement. All five are also `red_driven` against fixture manifests; not one has been exercised by a real fan-out that actually went wrong.
+
+primitive: goal_ecology
+universal_function: balancing several legitimate objectives at once
+system_representation: speed; correctness; safety; cost; maintainability; learning; human attention
+observable_proxies: none
+binding_quality: unbound
+claimed_max_authority: none
+known_limitations: EMPTY, and the trade-offs are real but FROZEN. The lane table trades speed against scrutiny, the depth budget trades wall-clock against serial gates, and the skill budget trades capability against context — three genuine multi-objective trades, each resolved once by a human and written down as a constant. A constant is the RESULT of a balance, not the act of balancing. No control weighs two objectives against each other at runtime, and it could not: because nothing computes valence and nothing computes mass, there is no quantity for such a control to weigh.
+
+primitive: wisdom
+universal_function: choosing the right scale and horizon to act at
+system_representation: routing across line, file, feature, system and governance scales; regret-aware scale selection
+observable_proxies: a keyword classification of the user's prompt into a lane
+binding_quality: nominal
+claimed_max_authority: advise
+known_limitations: ONE BINDING, NOMINAL, and it is the only control in the census that SELECTS rather than judges — which is exactly why the prediction that this half is empty is very nearly right rather than exactly right. `hooks.prompt_router` reads prompt text and names a lane, but it classifies by keyword, is `unvalidated`, exits 0 on every path including its own dedup miss, is enforced by nothing, and — decisively — receives NO OUTCOME FEEDBACK, so it cannot be regret-aware in any sense the primitive would recognise. The system's other scale machinery, `adoption.lane_size_check`, binds to epistemic_quality because it AUDITS a scale claim after the commits already exist rather than choosing a scale. Selecting a scale and being judged on that selection are different acts, and only the first is present here, in its weakest possible form.
+
+# =============================================================================
+# THE BINDINGS — one per registered control
+# =============================================================================
+
+control: metrics.record.schema_invariant
+binds_to: epistemic_quality
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Validates the shape of an evidence row before it is written, so the store cannot accumulate rows that mean nothing. Shape is a proxy for soundness: a perfectly well-formed row can still be false.
+
+control: metrics.record.note_minimum
+binds_to: epistemic_quality
+class: C
+runtime_authority: gate
+binding_kind: nominal
+rationale: A 12-character floor on the attributing note. It enforces the PRESENCE of prose, not attribution — twelve repeated characters pass. The invariant underneath it (a row must carry a note) would instantiate; the length does not.
+
+control: metrics.record.one_row_per_packet
+binds_to: epistemic_quality
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Key uniqueness stops a double-counted packet silently inflating every downstream total. It protects the arithmetic over the evidence, not the evidence's correspondence to what happened.
+
+control: metrics.record.store_validate
+binds_to: epistemic_quality
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Re-runs the write-path validator over the whole store and refuses a zero-row store as unmeasured rather than valid. Whole-file shape checking; still shape.
+
+control: metrics.record.verify_git
+binds_to: epistemic_quality
+class: A
+runtime_authority: gate
+binding_kind: instantiates
+rationale: The strongest epistemic control in the census: each row's claimed files, insertions and deletions are recomputed from `git show --numstat`, an artefact the claimant did not author. This is contact with reality rather than agreement with a fixture.
+
+control: metrics.record.verify_git_vacuity
+binds_to: epistemic_quality
+class: A
+runtime_authority: gate
+binding_kind: instantiates
+rationale: Refuses when zero rows were actually compared. A verifier that verified nothing and reported success is precisely the failure this primitive names.
+
+control: metrics.report.empty_store_refusal
+binds_to: epistemic_quality
+class: A
+runtime_authority: gate
+binding_kind: instantiates
+rationale: Refuses to render a report over no data. Reporting on an empty store is the minimal overclaim, and it is refused outright.
+
+control: metrics.report.render_reconciliation
+binds_to: latent_state
+class: A
+runtime_authority: gate
+binding_kind: instantiates
+rationale: Counts rows at four pipeline stages — counted, read, rendered, skipped-as-ragged — and fails on disagreement. A row dropped between stages is state the rendered output does not mention and cannot reveal.
+
+control: metrics.report.unmeasured_total_is_dash
+binds_to: epistemic_quality
+class: A
+runtime_authority: advise
+binding_kind: instantiates
+rationale: Prints `-` where no row contributed rather than 0. Refusing to present absence as a measurement is epistemic quality in the purest form available here.
+
+control: metrics.report.disclosure_ordering
+binds_to: mass
+class: A
+runtime_authority: advise
+binding_kind: nominal
+rationale: The ONLY ordering of any kind in the census, and it takes `inputs: none` — a fixed section order a human chose once, placing the caveat above the numbers. It allocates a reader's attention without computing what deserves it. Ordering by constant is not mass.
+
+control: adoption.boundary_manifest
+binds_to: epistemic_quality
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Dates and reasons the scope within which an adoption claim is valid, so grandfathering cannot quietly shrink the evidence base. Bound by function rather than by name: it bounds a CLAIM, not a write scope. PROXIES only — it validates that the manifest is WELL-FORMED, never that the boundary it declares is true, which is the shape-and-occupancy check the primitive's own known_limitations criticises and puts it level with `adoption.schema_invariant` and `adoption.store_validate` rather than above them.
+
+control: adoption.receipt_row_reconciliation
+binds_to: latent_state
+class: A
+runtime_authority: gate
+binding_kind: instantiates
+rationale: Two internal records of the same packets — receipt stems and store rows — must agree, and a MISSING is the gap between what governance recorded and what measurement recorded. Field-observed: the only binding in this crosswalk that has fired on a defect nobody planted.
+
+control: adoption.junk_row_thresholds
+binds_to: epistemic_quality
+class: C
+runtime_authority: gate
+binding_kind: proxies
+rationale: Counts filled cells and note length to call a row HOLLOW. Cell occupancy is a proxy for substance, and a row of plausible fabrications is fully occupied.
+
+control: adoption.single_commit_attribution
+binds_to: epistemic_quality
+class: C
+runtime_authority: gate
+binding_kind: proxies
+rationale: Checks commit count, and greps the receipt for `file-ownership manifest` or `attribution by path`. The commit-count half is real attribution; the grep half detects a PHRASE, not the practice the phrase names.
+
+control: adoption.lane_size_check
+binds_to: epistemic_quality
+class: C
+runtime_authority: gate
+binding_kind: instantiates
+rationale: Recomputes files and churn from git numstat and fails a declared lane the measurement contradicts. Its SUBJECT is scale, which is wisdom's territory; its FUNCTION is checking a claim against ground truth, which is this one. It never selects a lane.
+
+control: adoption.lane_override
+binds_to: gated_plasticity
+class: C
+runtime_authority: gate
+binding_kind: instantiates
+rationale: A named, length-checked exception that must cite the measured file count. This is an amendment lane: the rule bends only in writing, with the evidence against it quoted in the justification.
+
+control: adoption.vacuity_guards
+binds_to: epistemic_quality
+class: A
+runtime_authority: gate
+binding_kind: instantiates
+rationale: Refuses whenever the scan checked nothing. The most repeated epistemic idea in the system, registered once as an entry.
+
+control: adoption.threshold_drift_advisory
+binds_to: gated_plasticity
+class: B
+runtime_authority: advise
+binding_kind: instantiates
+rationale: Computes what the thresholds WOULD become from the store's medians, prints the drift, and is deliberately given no authority — its own entry states it must not be promoted, because a threshold that follows the data is a control surface for whoever writes the data. Rule change made visible and kept manual.
+
+control: swarm.manifest_wellformed
+binds_to: collective_coherence
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: The shared plan must parse before any agent acts on it. Well-formedness is a precondition for agreement, not agreement itself.
+
+control: swarm.disjointness
+binds_to: collective_coherence
+class: C
+runtime_authority: gate
+binding_kind: instantiates
+rationale: Every pair of ownership globs is tested for overlap. This is a conflict graph, computed, before the conflict.
+
+control: swarm.hot_file_reservation
+binds_to: collective_coherence
+class: C
+runtime_authority: gate
+binding_kind: instantiates
+rationale: Reserves the shared canonical surfaces — suites, memory, changelog — to the merger, with named releases. Shared canonical state, explicitly owned rather than hoped about.
+
+control: swarm.ambiguity_refusal
+binds_to: collective_coherence
+class: A
+runtime_authority: gate
+binding_kind: instantiates
+rationale: Refuses any concrete path matched by more than one agent's globs. Coherence requires ownership to be a function and not a relation.
+
+control: swarm.conformance_verify
+binds_to: collective_coherence
+class: A
+runtime_authority: gate
+binding_kind: instantiates
+rationale: Reconciles what each agent actually changed against what it claimed, per path. Cross-agent reconciliation after the fact.
+
+control: swarm.merge_preconditions
+binds_to: homeostasis
+class: A
+runtime_authority: gate
+binding_kind: instantiates
+rationale: Refuses to merge into a tree carrying unmerged codes, a pre-staged index, or paths left unstaged after the plan runs. Repo cleanliness as a precondition for absorbing change.
+
+control: swarm.post_merge_verification
+binds_to: homeostasis
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Runs the manifest's single verify command once after the merge. Test state used as a health signal; that suite's own coverage is the ceiling on what this can say.
+
+control: swarm.fanout_vacuity
+binds_to: epistemic_quality
+class: A
+runtime_authority: gate
+binding_kind: instantiates
+rationale: Refuses whenever the validation would have been trivially satisfiable — no agents, no claims, or no changed paths at all.
+
+control: maint.real_memory_tripwire
+binds_to: boundary
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Real memory files must not change while tests run. PROXIES rather than instantiates: size and hash at module load and again at process exit are a STAND-IN for a write scope, not a write scope — the check is DETECTIVE, so the prohibited write lands and is then named. Being `gate` it does stop the change from being committed, which is why it proxies the primitive rather than merely touching it; the boundary is enforced at commit granularity, never at write granularity.
+
+control: maint.tripwire_coverage_scan
+binds_to: epistemic_quality
+class: C
+runtime_authority: gate
+binding_kind: proxies
+rationale: Measures whether every sibling test actually requests the tripwire first. Coverage of a guard. Registered `refuted` — measured, and found not to discriminate, which is the most useful thing any entry in this registry says about itself.
+
+control: maint.source_scan_failclosed
+binds_to: epistemic_quality
+class: A
+runtime_authority: gate
+binding_kind: instantiates
+rationale: Throws rather than returning a partial answer on source it cannot parse. Refusing to certify what it cannot see is the fail-closed half of epistemic quality.
+
+control: maint.source_scan_mask
+binds_to: latent_state
+class: C
+runtime_authority: advise
+binding_kind: proxies
+rationale: Recovers the module specifiers a file actually requests — dependencies nobody declared. A heuristic lexer, and registered `refuted`, so it is a proxy that has already been measured and found wanting.
+
+control: maint.shell_fingerprint
+binds_to: boundary
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: The same write-scope stand-in as the tripwire, observed from OUTSIDE the node process by sha256 before and after. An independent second observation of one boundary, which is why it catches what an in-process guard cannot — but it too reports a completed write rather than refusing it, so it PROXIES the primitive on the same terms.
+
+control: maint.toolchain_preresolution
+binds_to: agency
+class: A
+runtime_authority: gate
+binding_kind: instantiates
+rationale: Resolves sha256sum/shasum, find and sort once at startup or refuses to proceed. Establishes that the capacity to act exists before acting, rather than degrading silently mid-run.
+
+control: maint.suite_discovery_nonvacuity
+binds_to: epistemic_quality
+class: A
+runtime_authority: gate
+binding_kind: instantiates
+rationale: Refuses when zero test files were discovered. A suite that found no tests must not be able to report success.
+
+control: maint.tripwire_armed_precondition
+binds_to: boundary
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Requires the tripwire module to be PRESENT beside the wrapper. Presence is a proxy for armed, and a present-but-broken tripwire passes this. Registered `unvalidated`.
+
+control: maint.rotation_conservation
+binds_to: durability
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Every original byte must appear in exactly one of the retained or archived strings. Persistence across a destructive TRANSFORMATION standing in for persistence through TIME, which is what the primitive means — so it PROXIES. It is the census's only durability binding of any kind, and it touches none of the five representations the primitive declares.
+
+control: maint.rotation_zero_block_warning
+binds_to: epistemic_quality
+class: B
+runtime_authority: advise
+binding_kind: proxies
+rationale: Warns when a file parsed to zero blocks although its text has content, meaning the delimiter matched nothing. A vacuity signal, but only `advise`: it warns and the rotation proceeds anyway.
+
+control: maint.rotate_node_precondition
+binds_to: agency
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Refuses to exec the .mjs when `node` does not resolve on PATH. Capacity to act, checked at exactly one binary.
+
+control: maint.rootscan_static_assertions
+binds_to: homeostasis
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Reads the maintenance layer's own source AS DATA and asserts its guards are still shaped as written. Integrity of the safety layer, asserted against source text rather than against behaviour.
+
+control: maint.rotation_suite
+binds_to: homeostasis
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Drives the rotation tool against scratch fixture roots. Test state, red-driven.
+
+control: maint.managed_set_replacement
+binds_to: boundary
+class: A
+runtime_authority: advise
+binding_kind: proxies
+rationale: The GRAVITO:MANAGED banner set defines which files an install may overwrite in a customer's repository. A write scope over someone else's tree — and the only `motor` control here that is merely `implemented` and `unvalidated`.
+
+control: identity.stamp_and_verify
+binds_to: ethical_admissibility
+class: A
+runtime_authority: gate
+binding_kind: nominal
+rationale: The census's ONLY binding to an inadmissible-future primitive, and it is NOMINAL: a provenance check. Digests and LICENSE make an installed copy's IDENTITY falsifiable, and a digest match proves the files are unmodified — but it does not establish that any particular USE of them is permitted, which is the whole of what the primitive asks. Identity is not admissibility, so this touches the concept without standing in for it.
+
+control: hooks.session_capability_report
+binds_to: reachability
+class: B
+runtime_authority: advise
+binding_kind: nominal
+rationale: Reports which skills and plugins are present, separating CANDIDATES from evidence. NOMINAL, not a proxy: an inventory of available tools is a flat list of nouns, and it does not co-vary with the graph of accessible futures the primitive names — knowing a tool exists says nothing about which states it can reach. It exits 0 whatever it finds, so it cannot even fail.
+
+control: hooks.prompt_router
+binds_to: wisdom
+class: C
+runtime_authority: advise
+binding_kind: nominal
+rationale: The only control in the census that SELECTS rather than judges: it reads prompt text and names a lane. But it classifies by keyword, is `unvalidated`, exits 0 on every path including its own dedup miss, is enforced by nothing, and receives no outcome feedback at all — so it selects a scale without any of the regret-awareness the primitive means.
+
+control: hooks.once_dedup
+binds_to: homeostasis
+class: A
+runtime_authority: advise
+binding_kind: proxies
+rationale: Marks a hook event as fired so it cannot fire twice in one session. Idempotence of side effects, which is stability while operating, at one narrow surface.
+
+control: tools.supervise_timeout
+binds_to: energy
+class: C
+runtime_authority: gate
+binding_kind: proxies
+rationale: Polls a shell condition against a 900-second budget. A wall-clock ceiling is the crudest available proxy for capacity to act, and the 900 is `unvalidated`.
+
+control: tools.handoff_lock
+binds_to: agency
+class: A
+runtime_authority: gate
+binding_kind: instantiates
+rationale: Acquired or BUSY, with pid liveness checked inside the lock. This is an authority lease: it confers the right to proceed and revokes it when the holder dies.
+
+control: tools.handoff_timeouts
+binds_to: energy
+class: C
+runtime_authority: gate
+binding_kind: proxies
+rationale: Three time constants — 900, 30 and 1800 seconds — bounding how long a handoff, a lock wait and a stale lock may consume. Time standing in for capacity; all three are `unvalidated`.
+
+control: tools.capability_profile_usage
+binds_to: agency
+class: A
+runtime_authority: gate
+binding_kind: nominal
+rationale: Validates the ARGUMENTS of the subcommand that switches capability profiles. NOMINAL: argument validation on the switch that sets effective capability, without ever observing capability itself — it shares the primitive's vocabulary and performs none of its function.
+
+control: tools.skill_budget_audit
+binds_to: energy
+class: C
+runtime_authority: advise
+binding_kind: proxies
+rationale: Sums the bytes of every startup-enabled SKILL.md against a 30000-character budget. The census's one real capacity accounting, and still a PROXY: bytes stand in for token cost, the 30000 is an assumed platform constant its own entry says must be verified, and it EXITS 0 WHEN OVER BUDGET — the one control that measures capacity cannot act on its own measurement, so it reports capacity rather than governing it.
+
+control: chain.suite_wiring_guard
+binds_to: latent_state
+class: A
+runtime_authority: gate
+binding_kind: instantiates
+rationale: Lists suites that exist on disk but are never chained. A test file that is present and never runs is exactly hidden state beneath an explicit claim of coverage.
+
+control: chain.result_reconciliation
+binds_to: latent_state
+class: A
+runtime_authority: gate
+binding_kind: instantiates
+rationale: A chained suite's RESULT line and its process exit status must agree. Two statements of one outcome, where the disagreement is the finding.
+
+control: tests.stdin_scan_nonvacuity
+binds_to: epistemic_quality
+class: C
+runtime_authority: gate
+binding_kind: instantiates
+rationale: The suite checks that its own scanner still matches hook invocation sites, and declares its verdict meaningless if it has gone blind.
+
+control: tests.nonvacuity_minimums
+binds_to: epistemic_quality
+class: C
+runtime_authority: gate
+binding_kind: proxies
+rationale: A family of 34 fitted `-ge N` floors asserting each scanner covered enough. The floors are snapshots of the tree on the day each was written, which is exactly why §21 re-derives the family from the tree instead of trusting the entry.
+
+control: gatedepth.sentinel_drift
+binds_to: gated_plasticity
+class: A
+runtime_authority: gate
+binding_kind: instantiates
+rationale: The depth budget stated between sentinels in three agent-guidance files must be identical. A governing rule may not change in one place only.
+
+control: lanedecl.threshold_pinning
+binds_to: gated_plasticity
+class: A
+runtime_authority: gate
+binding_kind: instantiates
+rationale: LANE_TINY_MAX_FILES and LANE_TINY_MAX_CHURN must read the same in the enforcing script and in the router humans actually read. The rule and its published statement move together or not at all.
+
+control: suite.build_os
+binds_to: homeostasis
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Test state over the router, the guidance files, the hooks, the installers and eleven chained siblings. Red-driven: green means planted defects are caught, not that the system is well.
+
+control: suite.build_os_maintenance
+binds_to: homeostasis
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Cold-installs the maintenance layer into a scratch repo and executes damage drivers against it. The nearest thing in the census to a recovery test.
+
+control: suite.entitlement
+binds_to: homeostasis
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Test state over VERSION, LICENSE, the identity stamps and an egress scan. The egress scan is a genuine security invariant, but it lives INSIDE this suite and is not separately registered, so it binds here as test state rather than to ethical_admissibility as an invariant.
+
+control: suite.gate_depth
+binds_to: homeostasis
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Test state over the agent definitions and the depth-budget blocks.
+
+control: suite.lane_declaration
+binds_to: homeostasis
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Test state over declared lane versus observable size, driven against planted fixtures and the live repository.
+
+control: suite.lane_enforcement
+binds_to: homeostasis
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Test state over the router's and the orchestrator's lane rows.
+
+control: suite.metrics_adoption
+binds_to: homeostasis
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Test state over the adoption guard, driven against fixture receipt sets, stores and boundary manifests.
+
+control: suite.pilot_kit
+binds_to: homeostasis
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Test state over the buyer-facing docs, their links, their executable steps and their speed claims.
+
+control: suite.release_metadata
+binds_to: homeostasis
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Test state over VERSION, LICENSE and CHANGELOG.md.
+
+control: suite.scaffold_seeding
+binds_to: homeostasis
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Test state over the templates tree and a scaffolded scratch project.
+
+control: suite.speed_benchmark
+binds_to: homeostasis
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Test state over the recorder, the store, the report generator and the corpus.
+
+control: suite.swarm_merge
+binds_to: homeostasis
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Test state over fixture manifests and scratch git repositories.
+
+control: suite.control_registry
+binds_to: homeostasis
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Test state over the live registry, the live tree and eleven fixture registries built to fail.
+
+control: registry.reconciliation
+binds_to: epistemic_quality
+class: A
+runtime_authority: gate
+binding_kind: instantiates
+rationale: Reconciles the registry, MISMATCHES.md and an independent scan of the tree, refusing when the three disagree. The census's own guard against describing a system that no longer exists.
+
+control: registry.discovery_rule
+binds_to: epistemic_quality
+class: C
+runtime_authority: gate
+binding_kind: instantiates
+rationale: Derives the set of refusal-capable surfaces from the tree by pattern, needing no cooperation from any author. Derived membership rather than asserted membership — the §21 lesson, applied at file granularity.
+
+control: suite.neurocosmology_crosswalk
+binds_to: homeostasis
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Test state over the crosswalk artefact, the live registry and CROSSWALK.md, driven against six fixtures damaged to fail one guard each. It binds here rather than to epistemic_quality for the same reason the other thirteen suites do: a suite's function is property preservation, and its own empirical status is red_driven.
+
