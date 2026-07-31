@@ -93,7 +93,7 @@ deprecation cycle. Pin a commit if you need stability.
   - **No fitted `-ge N` was added.** Every new floor is derived from the artefact
     it measures, so `tests.nonvacuity_minimums` is unchanged at 34 members and
     §21's tree scan still reconciles.
-  - Suite **1338 → 1418** passed, 0 failed (+41 `tests/bandwidth_tests.sh`,
+  - Suite 1338 → **1418 passed**, 0 failed (+41 `tests/bandwidth_tests.sh`,
     +25 crosswalk, +14 registry). `scan-controls.sh check` exits 0.
 
 - **A Neurocosmology crosswalk: what each control is FOR.** The registry says

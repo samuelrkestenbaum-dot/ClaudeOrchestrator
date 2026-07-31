@@ -17,20 +17,18 @@
   Changelog: `CHANGELOG.md`. License: `LICENSE` — proprietary, All Rights Reserved,
   a deliberately conservative **placeholder**; the license model is still an open
   owner decision. **No tags exist in this repo yet.**
-- **Build/test command:** `bash tests/build_os_tests.sh` (657 checks; no network; temp dirs)
-  — **THAT 657 IS STALE, AND IS PINNED STALE ON PURPOSE. The live total at `2a3c9b3` is
-  1418 passed / 0 failed**, measured on a quiet tree at close of
-  `gravito_census_gaps_egress_bandwidth_a`. The token cannot be corrected from
-  `build-os/` alone: `tests/release_metadata_tests.sh` §5 requires `CHANGELOG.md` to contain the
-  literal string `<count> passed`, CHANGELOG line 96 reads `Suite **1338 → 1418** passed` (bolded,
-  so `grep -qF "1418 passed"` misses), and writing `1418 checks` here therefore turns the suite RED
-  (measured: 41 passed, 1 failed). CHANGELOG.md is outside the archivist's write gate. **The fix is a
-  one-line CHANGELOG edit in a follow-on packet — see residue.**
-  **AND THE GUARD DOES NOT DETECT STALENESS.** It detects cross-file *disagreement*; two stale files
-  that agree pass it. Proven at `2a3c9b3`: the suite is green at 1418/0 while this line claims 657,
-  a number 761 checks stale. The check that actually works is opt-in and NOT enabled by the chained
-  suite — `RELEASE_METADATA_LIVE_SUITE=1 bash tests/release_metadata_tests.sh` reports
+- **Build/test command:** `bash tests/build_os_tests.sh` (1418 checks; no network; temp dirs)
+  — measured on a quiet tree at close of `gravito_census_gaps_egress_bandwidth_a`.
+  This token stood **761 checks stale at 657** until that close, and the reason it
+  survived is worth keeping: **THE GUARD DOES NOT DETECT STALENESS.** It detects
+  cross-file *disagreement* — `tests/release_metadata_tests.sh` §5 checks that
+  `CHANGELOG.md` contains the literal `<count> passed` matching this line — so **two
+  stale files that agree pass it**. Proven at `2a3c9b3`: the suite was green at 1418/0
+  while this line claimed 657. The check that actually works is opt-in and **still NOT
+  enabled by the chained suite** — `RELEASE_METADATA_LIVE_SUITE=1 bash
+  tests/release_metadata_tests.sh` compares against a live run and correctly reported
   `live suite total (1418 passed) contradicts current_state.md's claim (657)`.
+  Correcting the number does not fix the guard; see residue.
   It **chains** 14 sibling suites in `tests/` through one `chain_suite` function and folds their
   counts into its own totals. A sibling suite present on disk but not chained is itself a failure,
   so a new suite cannot become discoverable-only. **The per-suite breakdown that used to sit here was
