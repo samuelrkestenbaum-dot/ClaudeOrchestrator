@@ -14,6 +14,110 @@ deprecation cycle. Pin a commit if you need stability.
 
 ### In flight (not landed at the released commit)
 
+- **A control registry, with the actual instances.** `build-os/registry/`
+  classifies all **70** consequential controls that already run in this
+  repository: evidentiary class (`R` research / `A` hard invariant / `B`
+  deterministic metric / `C` heuristic policy / `D` learned model), separately
+  declared implementation status, empirical status, the runtime authority each
+  one **actually exercises** (`none < observe < advise < rank < gate`), its
+  nervous-system role, the policy that consumes it, and a `path:line` citation
+  of the code that gates. The store is one field per line — greppable, diffable
+  at field granularity, readable by an agent with no parser — for the same
+  reason `packet_metrics.tsv` is a TSV, at a shape where a 17-column TSV would
+  not be readable.
+  - **The finding, in `build-os/registry/MISMATCHES.md`.** Three numbers, each
+    with the one-line derivation beside it: **11 of the 70 gate on `unvalidated`
+    evidence** — eleven controls can stop the build and nothing has established
+    that any of them discriminates, which is the sharpest of the three;
+    **13 of the 70 exercise `gate` on a class that does not license it**; and,
+    because an entry is not a line, **55 distinct fitted constants, thresholds
+    and prose regexes** across those 13 entries. The lane size check refuses work
+    on the median of a four-packet sample; the real-memory tripwire's coverage
+    scan calls itself "a convenience check, not a boundary", prints the one-line
+    source shape that beats it, and then throws; three chosen durations decide
+    whether one process may break another's lock; **34** "not vacuous" minimums,
+    in 12 test suites, are the counts that existed the day they were written —
+    including the one gating this packet's own suite. Every one is listed with
+    the line that gates. **They are recorded, not repaired** — re-authorising a
+    control is a governance action for the operator, not a builder's edit.
+  - **The rule against laundering is now a check, not a sentence.** "Do not clear
+    a mismatch by changing the class" was stated in three headers and enforced
+    nowhere: relabelling `tools.supervise_timeout` `class: A` with
+    `authority_mismatch: none` left `scan-controls.sh check` at exit 0, silently,
+    while `MISMATCHES.md` went on naming it. Section 8 closes it by reading the
+    report's summary table back as an **anchor** — every control named there must
+    still be `declared`, and every declared control must appear there — so
+    clearing a mismatch costs an edit to the accusation, in prose, where a
+    reviewer reads it. Red-driven in both directions, plus the blinded-table
+    case.
+  - `scan-controls.sh` reconciles the registry against a non-cooperative scan of
+    the tree: every file that can terminate a run non-zero must own a `gate`
+    entry, and every `gate` entry must own such a file, so a gating control added
+    in a new file with no registration fails. Its largest hole — a control added
+    inside an already-registered file — is named rather than implied away. The
+    registry classifies its own scanner and its own suite, and lists the
+    scanner's discovery rule as over-authorised.
+  - **No mathematical system was built.** No potential functional, coherence
+    measure, goal ecology, value-of-information calculation, completion
+    probability, causal attribution, learned risk model, adaptive threshold or
+    manifold state. The registry is the census that would have to precede any of
+    that; it is not a down payment on it.
+  - **The family entry is reconciled against the tree, not against itself.**
+    `tests.nonvacuity_minimums` groups a dozen suites' vacuity floors into one
+    record, and its first version cited 5 lines and claimed 6 constants where
+    there were 34 — a census undercounting itself by 28, in the entry whose
+    subject is undercounted heuristics. `tests/control_registry_tests.sh` §21 now
+    executes the membership rule instead of trusting it: rescan `tests/*.sh`,
+    subtract three exclusions that must each be justified in `MISMATCHES.md`, and
+    fail if the result differs from the entry's `evidence_refs` in either
+    direction. §22 fails if any `path:line` is claimed by two entries — which is
+    how `tests/pilot_kit_tests.sh:97` came to be classified both `C`/declared and
+    `A`/none at the same time.
+  - **A citation must land on something — the hand sweep, converted into a
+    check.** The registry carries 227 `evidence_refs` and, until now, nothing
+    machine-checked that one pointed at anything meaningful: they were verified
+    to be *inside* the file and nothing else. So a citation could satisfy
+    "cites evidence" **vacuously** — two entries cited `#!/usr/bin/env bash`,
+    one cited `/**`, one cited a header comment, and one was off by one onto the
+    comment above the line it meant. Each verification round found more of them
+    by hand and cast a wider net than the last, which is what a hand sweep over
+    two hundred citations does. `scan-controls.sh` now refuses a ref resolving
+    to a **blank line, a comment-only line, a shebang, or a lone closer**
+    (`fi`, `done`, `esac`, `else`, `}`, `)`, `{`, `]`, `;;`) as `VACUOUS-REF`,
+    red-driven in both directions: a ref repointed at a comment fails, and a ref
+    at a constant's **definition** still passes, because a threshold control is
+    often best cited at the line that defines its number. **What it does not
+    catch is stated rather than glossed:** any statement that is not a decision
+    — an `echo`, an assignment, a bare call — passes. Against the defect that
+    motivated it, it catches two of the three bad `tools.supervise_timeout` refs
+    and not the `echo`. The exemption route, `EVIDENCE_VACUITY_ALLOW`, is
+    greppable and printed by `scan-controls.sh patterns`, and is empty.
+  - **Three artefacts stated the ref total and all three were wrong** — 218, 184
+    and 184 against a live 224 — because each was a hand count frozen at a
+    different moment. The two prose copies now state no total; the README states
+    one and §25 recomputes it from the registry and fails on disagreement.
+  - **Two anchor defects.** A control's row pasted **twice** into
+    `MISMATCHES.md`'s summary table passed at exit 0 and raised the reconciled
+    count, because the count counted rows rather than distinct ids; duplicates
+    are now refused and the count is distinct. And the report's own justification
+    for excluding one line from the non-vacuity family was **false** — it claimed
+    a double classification that does not exist — so it is restated on the ground
+    that actually holds (a string-length floor, not a coverage floor). The
+    membership count of 34 is unchanged.
+  - **A fifth thing the reconciliation does not cover, now named.** An entry can
+    shed authority without relabelling its class, by **narrowing its
+    `evidence_refs`** until the line that gates is outside its declared scope.
+    That is the same edit as a legitimate re-scoping — it is what corrected the
+    `suite.*` entries here — and only the `-ge N` family is policed against the
+    tree. Recorded in the README and in `scan-controls.sh`'s header beside the
+    other four.
+  - Pinned by `tests/control_registry_tests.sh` (78 assertions), chained from
+    `tests/build_os_tests.sh`. Twenty-two red drives, including `load_bearing`
+    with no consuming policy, Class `D` at `gate`, an unregistered control
+    planted in the tree, a blinded scan, a mismatch cleared by relabelling, a
+    report accusing an unclassified control, an id certifying itself reported off
+    a longer id's row, a duplicated anchor row, and a citation repointed at a
+    comment.
 - **`init-build-os.sh` seeding leak.** `init-build-os.sh` seeds a new project's
   scaffolds from **this repository's live memory files**, so a customer's fresh
   `build-os/` can arrive carrying this repo's state. The defect is documented in
