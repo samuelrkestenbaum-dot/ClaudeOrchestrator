@@ -151,7 +151,10 @@ install-global.sh      install to ~/.claude (whole machine)
 install-project.sh     vendor into a target repo
 connect-project.sh     add the web auto-install bootstrap to a target repo
 init-build-os.sh       scaffold build-os/ memory only
-templates/             session-start-bootstrap.sh — copied into a target repo as
+templates/             everything a customer repo is seeded FROM, never this
+                       repo's live state: build-os/ scaffold templates (memory,
+                       packets, receipts) plus tool_router.example.md, and
+                       session-start-bootstrap.sh — copied into a target repo as
                        .claude/hooks/session-start.sh by connect-project.sh
 CLAUDE.md INSTALL.md INTEGRATIONS.md
 ```
