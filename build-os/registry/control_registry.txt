@@ -13,7 +13,7 @@
 #
 # AN ENTRY IS NOT A LINE. Entries are cut at different granularities: some
 # classify a single comparison, and `tests.nonvacuity_minimums` classifies a
-# family of 34 fitted constants across 12 files. So "13 of 71 declare a
+# family of 34 fitted constants across 12 files. So "13 of 75 declare a
 # mismatch" is a fact about this file's granularity, not a count of the
 # heuristics that can stop a build — that number is 55, hand-counted in
 # MISMATCHES.md's summary table. Quote both or quote the larger one.
@@ -23,7 +23,7 @@
 #   grep -B4 '^runtime_authority: gate'   what can stop a run
 #   grep '^authority_mismatch: declared'  what is over-authorised (13 entries)
 #
-#   # gate on unvalidated evidence — 11 of 71, the sharpest number here:
+#   # gate on unvalidated evidence — 11 of 75, the sharpest number here:
 #   awk -F': ' '/^control: /{c=$2} /^runtime_authority: gate/{g=1} \
 #     /^empirical_status: unvalidated/{u=1} /^$/{if(g&&u)print c; g=0; u=0}' \
 #     control_registry.txt
@@ -935,6 +935,51 @@ authority_mismatch: none
 notes: THE THIRD CORRECTLY-SCOPED CONTROL, and the best example in the repository. 30000 is an assumed platform constant, the byte size of a SKILL.md is an approximation of its token cost, and the whole thing exits 0 regardless. A chosen threshold that refuses to gate on itself. CORRECTED: :21 was a header comment; the entry now cites :180, the only place the budget is actually compared (total_chars > budget), beside :33, the exit 0 that makes the verdict advisory.
 
 # =============================================================================
+# build-os/tools/bandwidth-check.sh — work-in-flight capacity, one ceiling per
+# dimension. The only entries here that LIMIT WHAT MAY BE ABSORBED rather than
+# judge an artefact that already exists; kept as two records, not one, because
+# the two dimensions carry different evidentiary classes and therefore different
+# licences, and blending them into a single score is the anti-pattern the tool's
+# own header refuses.
+# =============================================================================
+
+control: bandwidth.active_packet_singleton
+class: A
+implementation_status: implemented
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: reflex
+inputs: the number of `**Packet id:**` declarations in build-os/packets/active_packet.md
+output: OK / EXCEEDED / UNOBSERVABLE for the `packets` dimension, and on EXCEEDED a refusal naming that dimension
+owning_module: build-os/tools/bandwidth-check.sh
+consuming_policies: the tool's own exit code — exit 2 refuses the run; tests/bandwidth_tests.sh drives the compliant case, the two-packet case and the absent-artefact case
+evidence_refs: build-os/tools/bandwidth-check.sh:79; build-os/tools/bandwidth-check.sh:134; build-os/tools/bandwidth-check.sh:136; build-os/tools/bandwidth-check.sh:138; build-os/tools/bandwidth-check.sh:203
+failure_behavior: prints `bandwidth: packets EXCEEDED` with the observed count and the ceiling, then refuses on stderr naming the saturated dimension, and exits 2
+rollback_behavior: read-only — it reads two files and runs read-only git plumbing, and writes nothing anywhere
+promotion_requirement: it becomes load_bearing the day a live policy — a hook, the orchestrator's routing, or a pre-commit path — acts on its exit code. Nothing does today, so `implemented` is the honest status and `load_bearing` would be a claim about a consumer that does not exist.
+demotion_requirement: raise the ceiling above one and the invariant argument below collapses, at which point this is a chosen threshold and the class must move to C
+authority_mismatch: none
+notes: THE FIRST CONTROL IN THIS CENSUS WHOSE FUNCTION IS LIMITING WHAT MAY BE ABSORBED rather than judging an artefact that already exists — every other entry answers yes/no about something already written, which is why `runtime_authority: rank` is held by nobody. Class A, on a narrow argument made explicit so it can be attacked: the ceiling is not a fitted number but the artefact's OWN DEFINITION — `active_packet.md`'s header states it holds "the one packet currently in flight" — so two declared ids is a malformed artefact in the same sense two rows for one packet is, and `metrics.record.one_row_per_packet` is Class A for exactly that reason. THE COUNTER-ARGUMENT IS RECORDED RATHER THAN ANSWERED: "one packet at a time" is also a policy somebody chose, and the day an operator chooses two this becomes a threshold and a class-C heuristic. Zero ids is a legitimate idle state and passes. AN ABSENT ARTEFACT REPORTS UNOBSERVABLE AND DOES NOT REFUSE — a gate must not fire on evidence it does not have — which also means deleting the file evades it; that hole is real, is not closed here, and is the price of the previous sentence. It bounds work in flight ONLY: it does not, and cannot, enforce the external-mutation rule, which lives in the operator's permission system outside this repository.
+
+control: bandwidth.packet_commit_ceiling
+class: C
+implementation_status: implemented
+empirical_status: red_driven
+runtime_authority: advise
+nervous_system_role: conscience
+inputs: the branch base the active packet declares, and `git rev-list --count <base>..HEAD` over this repository
+output: OK / EXCEEDED / UNOBSERVABLE for the `commits` dimension, with the observed count and the ceiling beside it
+owning_module: build-os/tools/bandwidth-check.sh
+consuming_policies: an operator reading the run's output — nothing acts on it automatically, by design; tests/bandwidth_tests.sh drives a three-commit breach and asserts the run still exits 0
+evidence_refs: build-os/tools/bandwidth-check.sh:80; build-os/tools/bandwidth-check.sh:166; build-os/tools/bandwidth-check.sh:170; build-os/tools/bandwidth-check.sh:178; build-os/tools/bandwidth-check.sh:179
+failure_behavior: prints `bandwidth: commits EXCEEDED` naming the dimension and the count, and exits 0 — it reports the breach and does not stop the run
+rollback_behavior: read-only
+promotion_requirement: raising it to `gate` is a governance decision for the operator; it would require declaring the mismatch in this entry and adding a row to MISMATCHES.md, and it is not taken by whoever edits this file
+demotion_requirement: n/a
+authority_mismatch: none
+notes: DELIBERATELY NOT A GATE, and that is this entry's whole content. Two commits per packet is a constant the working contract chose; nothing measured it, and no distribution establishes that a third commit absorbs more change than a second. A heuristic does not become a gate by being useful, so this sits exactly at the top of its class-C licence — `advise` — and declares no mismatch, where the reflex in this repository has been to gate and declare one. It is also the census's eleventh `advise` entry against sixty-something gates, on a ladder whose middle rungs were unused. SECOND WEAKNESS, NAMED RATHER THAN IMPLIED AWAY: the base is SELF-DECLARED, in prose, in the packet file, by the same agent this dimension constrains. What is checkable is only that the declaration RESOLVES — the sha must exist in this repository and be an ancestor of HEAD — and every other shape reports UNOBSERVABLE rather than a count, because a count taken against a guessed base is worse than no count at all.
+
+# =============================================================================
 # tests/ — controls that refuse rather than report
 # =============================================================================
 
@@ -948,7 +993,7 @@ inputs: every tests/*.sh present on disk, against the chain_suite call sites in 
 output: the list of sibling suites that are present but never chained
 owning_module: tests/build_os_tests.sh
 consuming_policies: the top-level suite's FAIL count and exit status — which is the repo's single verification command
-evidence_refs: tests/build_os_tests.sh:857; tests/build_os_tests.sh:859; tests/build_os_tests.sh:860
+evidence_refs: tests/build_os_tests.sh:858; tests/build_os_tests.sh:860; tests/build_os_tests.sh:861
 failure_behavior: one FAIL naming every unwired suite; the run exits non-zero
 rollback_behavior: read-only
 promotion_requirement: n/a
@@ -984,7 +1029,7 @@ inputs: the count of hook-invocation sites the static scanner matches in this su
 output: pass, or "it has gone blind, so its verdict below is meaningless"
 owning_module: tests/build_os_tests.sh
 consuming_policies: the suite's FAIL count
-evidence_refs: tests/build_os_tests.sh:936; tests/build_os_tests.sh:958; tests/build_os_tests.sh:961
+evidence_refs: tests/build_os_tests.sh:937; tests/build_os_tests.sh:959; tests/build_os_tests.sh:962
 failure_behavior: one FAIL; the run exits non-zero
 rollback_behavior: read-only
 promotion_requirement: n/a
@@ -1002,13 +1047,13 @@ inputs: how many artefacts, files, links, scripts, blocks, rows, receipts or quo
 output: pass, or a FAIL declaring the scan vacuous
 owning_module: tests/entitlement_tests.sh
 consuming_policies: the FAIL count of twelve suites (pilot_kit, entitlement, control_registry, release_metadata, speed_benchmark, lane_declaration, metrics_adoption, build_os_maintenance, lane_enforcement, swarm_merge, scaffold_seeding, gate_depth), every one chained into tests/build_os_tests.sh
-evidence_refs: tests/pilot_kit_tests.sh:97; tests/pilot_kit_tests.sh:115; tests/pilot_kit_tests.sh:117; tests/pilot_kit_tests.sh:176; tests/pilot_kit_tests.sh:255; tests/pilot_kit_tests.sh:304; tests/pilot_kit_tests.sh:316; tests/pilot_kit_tests.sh:327; tests/pilot_kit_tests.sh:334; tests/pilot_kit_tests.sh:367; tests/pilot_kit_tests.sh:458; tests/entitlement_tests.sh:126; tests/entitlement_tests.sh:136; tests/entitlement_tests.sh:345; tests/entitlement_tests.sh:481; tests/control_registry_tests.sh:79; tests/control_registry_tests.sh:184; tests/control_registry_tests.sh:440; tests/control_registry_tests.sh:668; tests/release_metadata_tests.sh:121; tests/release_metadata_tests.sh:200; tests/release_metadata_tests.sh:315; tests/speed_benchmark_tests.sh:397; tests/speed_benchmark_tests.sh:531; tests/speed_benchmark_tests.sh:542; tests/lane_declaration_tests.sh:493; tests/lane_declaration_tests.sh:496; tests/metrics_adoption_tests.sh:418; tests/metrics_adoption_tests.sh:421; tests/build_os_maintenance_tests.sh:88; tests/lane_enforcement_tests.sh:56; tests/swarm_merge_tests.sh:404; tests/scaffold_seeding_tests.sh:241; tests/gate_depth_tests.sh:73
+evidence_refs: tests/pilot_kit_tests.sh:97; tests/pilot_kit_tests.sh:115; tests/pilot_kit_tests.sh:117; tests/pilot_kit_tests.sh:176; tests/pilot_kit_tests.sh:255; tests/pilot_kit_tests.sh:304; tests/pilot_kit_tests.sh:316; tests/pilot_kit_tests.sh:327; tests/pilot_kit_tests.sh:334; tests/pilot_kit_tests.sh:367; tests/pilot_kit_tests.sh:458; tests/entitlement_tests.sh:126; tests/entitlement_tests.sh:136; tests/entitlement_tests.sh:345; tests/entitlement_tests.sh:481; tests/control_registry_tests.sh:79; tests/control_registry_tests.sh:184; tests/control_registry_tests.sh:440; tests/control_registry_tests.sh:772; tests/release_metadata_tests.sh:121; tests/release_metadata_tests.sh:200; tests/release_metadata_tests.sh:315; tests/speed_benchmark_tests.sh:397; tests/speed_benchmark_tests.sh:531; tests/speed_benchmark_tests.sh:542; tests/lane_declaration_tests.sh:493; tests/lane_declaration_tests.sh:496; tests/metrics_adoption_tests.sh:418; tests/metrics_adoption_tests.sh:421; tests/build_os_maintenance_tests.sh:88; tests/lane_enforcement_tests.sh:56; tests/swarm_merge_tests.sh:404; tests/scaffold_seeding_tests.sh:241; tests/gate_depth_tests.sh:73
 failure_behavior: a FAIL per blind scanner; the run exits non-zero
 rollback_behavior: read-only
 promotion_requirement: n/a
 demotion_requirement: n/a
 authority_mismatch: declared
-notes: ONE ENTRY COVERING A FAMILY OF 34, IN 12 FILES — corrected from 5 refs and a claim of "six", which undercounted by 28 and was falsifiable with one grep. THE INCLUSION RULE, so the membership can be re-derived rather than trusted: a comparison in tests/*.sh of the form `-ge N` or `-gt N` with N > 1 that floors how much a scanner or driver COVERED, and whose failure makes every assertion downstream of it meaningless. N <= 1 is excluded deliberately — "the scan found at least one thing" IS the invariant and is Class A; every constant above 1 is a snapshot of the tree on the day it was written. The scan finds 37 such lines; three are excluded with stated reasons (build_os_maintenance_tests.sh:193, a self-constructed fixture's size; pilot_kit_tests.sh:340, a length floor on failure text; speed_benchmark_tests.sh:405, which mirrors metrics.record.note_minimum and would otherwise be classified twice). 34 remain and all 34 are this control; tests/control_registry_tests.sh section 21 reconciles the scan against this entry so the membership cannot drift silently again. Includes control_registry_tests.sh:389 — `[ "$PASS" -ge 40 ]`, the count of assertions that existed the day THIS packet was written, gating THIS packet's own suite. The vacuity principle is Class A and is one of the best things in this repository; all 34 constants implementing it are Class C, and they are what compares. MISMATCHES.md section 10 lists every member.
+notes: ONE ENTRY COVERING A FAMILY OF 34, IN 12 FILES — corrected from 5 refs and a claim of "six", which undercounted by 28 and was falsifiable with one grep. THE INCLUSION RULE, so the membership can be re-derived rather than trusted: a comparison in tests/*.sh of the form `-ge N` or `-gt N` with N > 1 that floors how much a scanner or driver COVERED, and whose failure makes every assertion downstream of it meaningless. N <= 1 is excluded deliberately — "the scan found at least one thing" IS the invariant and is Class A; every constant above 1 is a snapshot of the tree on the day it was written. The scan finds 37 such lines; three are excluded with stated reasons (build_os_maintenance_tests.sh:193, a self-constructed fixture's size; pilot_kit_tests.sh:340, a length floor on failure text; speed_benchmark_tests.sh:405, which mirrors metrics.record.note_minimum and would otherwise be classified twice). 34 remain and all 34 are this control; tests/control_registry_tests.sh section 21 reconciles the scan against this entry so the membership cannot drift silently again. Includes control_registry_tests.sh:772 — `[ "$PASS" -ge 40 ]`, the count of assertions that existed the day THIS packet was written, gating THIS packet's own suite. The vacuity principle is Class A and is one of the best things in this repository; all 34 constants implementing it are Class C, and they are what compares. MISMATCHES.md section 10 lists every member.
 
 control: gatedepth.sentinel_drift
 class: A
@@ -1046,6 +1091,42 @@ demotion_requirement: n/a
 authority_mismatch: none
 notes: The CHECK is an invariant — two files must state the same number — even though the NUMBER it pins is the Class C median recorded under adoption.lane_size_check. This is the distinction worth keeping straight: pinning a heuristic is not itself heuristic, and it is what makes the heuristic reviewable rather than drifting.
 
+control: entitlement.egress_scan
+class: A
+implementation_status: load_bearing
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: immune
+inputs: every line of the twelve files the entitlement packet owns, classified against a fixed egress pattern set, with two narrow exemptions (a line marked egress-scan-exempt, and the bounded control-fixture block)
+output: pass, or one `file:line:text` per code line that performs network egress
+owning_module: tests/entitlement_tests.sh
+consuming_policies: the FAIL count of tests/entitlement_tests.sh, which tests/build_os_tests.sh chains, so a single hit takes the whole suite non-zero
+evidence_refs: tests/entitlement_tests.sh:312; tests/entitlement_tests.sh:326; tests/entitlement_tests.sh:350; tests/entitlement_tests.sh:353; tests/entitlement_tests.sh:369; tests/entitlement_tests.sh:377
+failure_behavior: prints every offending file:line:text and fails the suite, which exits non-zero
+rollback_behavior: read-only — it reads the twelve files and writes only its two control fixtures inside the suite's own mktemp dir
+promotion_requirement: already load_bearing; widening the fileset from twelve named files to the tree would raise its coverage, not its status
+demotion_requirement: it stops gating the moment tests/entitlement_tests.sh is unchained from tests/build_os_tests.sh, or the moment the fileset is emptied — which is why its own non-vacuity floor is registered separately, to tests.nonvacuity_minimums
+authority_mismatch: none
+notes: WHAT IT DOES, EXACTLY: it greps a twelve-file fileset for network-call shapes and refuses if any code line matches. That is the whole of it. IT DOES NOT ENFORCE THE EXTERNAL BOUNDARY AND MUST NOT BE READ AS DOING SO — the rule "never push, merge, deploy, publish or touch secrets" is enforced by the operator's permission system, a process boundary outside this repository; anything that could bypass that permission system bypasses a repo-side check trivially, and a repo-side gate there would convert a real external boundary into a checkbox that looks enforced and is not. `red_driven` is earned rather than assumed: the block carries a PLANTED-DEFECT FIXTURE (a telemetry `curl` written to a temp file, which must be flagged) and a negative control (a comment mentioning curl, which must not be), so every run proves the scanner is neither blind nor trigger-happy. THE SCOPE IS THE LIMIT: twelve named files from one packet, not the tree, so egress introduced anywhere else is invisible to it. REGISTERED SEPARATELY FROM suite.entitlement because it is a security invariant in its own right and not test state: until now the census's only view of it was that suite's RESULT line plus its own vacuity floor, so the registry could see "this scanner is not blind" and could never see "nothing performs egress". That is README section 4's known hole number one — a control added inside an already-registered file — closed here with the live instance that motivated the disclosure.
+
+control: suite.bandwidth
+class: A
+implementation_status: load_bearing
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: immune
+inputs: the bandwidth tool, the live registry, and scratch git repositories built to sit inside, outside and beyond the reach of each ceiling
+output: a RESULT line
+owning_module: tests/bandwidth_tests.sh
+consuming_policies: tests/build_os_tests.sh chains it, so a non-zero exit fails the whole suite; build-os/tools/bandwidth-check.sh is unusable as evidence without it
+evidence_refs: tests/bandwidth_tests.sh:150; tests/bandwidth_tests.sh:173; tests/bandwidth_tests.sh:185; tests/bandwidth_tests.sh:215; tests/bandwidth_tests.sh:275; tests/bandwidth_tests.sh:300
+failure_behavior: prints each failing assertion with its reason and exits 1
+rollback_behavior: read-only outside its own mktemp dir, which the trap removes; it configures no git identity outside that dir, using `git -c` per invocation
+promotion_requirement: n/a
+demotion_requirement: unchain it from tests/build_os_tests.sh and it stops gating anything
+authority_mismatch: none
+notes: Drives the two claims that are otherwise the author's word. First, that the two ceilings carry DIFFERENT AUTHORITIES: a second packet in flight must exit 2 and a third commit must exit 0, and both are asserted, so `advise` on the commit ceiling is executed rather than declared. Second, that an unobservable dimension is DECLINED rather than faked: four separate fixtures — no branch base, a base that is not a commit, a base that is not an ancestor of HEAD, and an absent packet artefact — must each yield UNOBSERVABLE rather than a number. It also pins the ceiling constant against the line the census cites, so tool and registry cannot drift, and asserts that neither declined dimension owns a registry entry.
+
 control: suite.build_os
 class: A
 implementation_status: load_bearing
@@ -1056,7 +1137,7 @@ inputs: the router, the guidance files, the hooks, the installers, and eleven ch
 output: ==== RESULT: N passed, M failed ====
 owning_module: tests/build_os_tests.sh
 consuming_policies: the repository's single verification command; swarm-merge.sh runs it as the post-merge verification
-evidence_refs: tests/build_os_tests.sh:971; tests/build_os_tests.sh:972
+evidence_refs: tests/build_os_tests.sh:972; tests/build_os_tests.sh:973
 failure_behavior: exits non-zero when FAIL is non-zero
 rollback_behavior: read-only; all fixtures live in mktemp dirs
 promotion_requirement: n/a
@@ -1312,7 +1393,7 @@ inputs: the live registry, the live tree, and eleven fixture registries built to
 output: a RESULT line
 owning_module: tests/control_registry_tests.sh
 consuming_policies: chained from tests/build_os_tests.sh
-evidence_refs: tests/control_registry_tests.sh:672; tests/control_registry_tests.sh:673
+evidence_refs: tests/control_registry_tests.sh:776; tests/control_registry_tests.sh:777
 failure_behavior: exits non-zero when FAIL is non-zero
 rollback_behavior: read-only outside its mktemp dir
 promotion_requirement: n/a
@@ -1326,11 +1407,11 @@ implementation_status: load_bearing
 empirical_status: red_driven
 runtime_authority: gate
 nervous_system_role: immune
-inputs: the crosswalk artefact, the live registry, CROSSWALK.md, and ten fixtures damaged to fail one guard each
+inputs: the crosswalk artefact, the live registry, CROSSWALK.md, and fifteen fixtures damaged to fail one guard each
 output: a RESULT line
 owning_module: tests/neurocosmology_crosswalk_tests.sh
 consuming_policies: tests/build_os_tests.sh chains it, so a non-zero exit fails the whole suite; build-os/registry/neurocosmology_crosswalk.txt is unusable as evidence without it
-evidence_refs: tests/neurocosmology_crosswalk_tests.sh:102; tests/neurocosmology_crosswalk_tests.sh:106; tests/neurocosmology_crosswalk_tests.sh:167; tests/neurocosmology_crosswalk_tests.sh:189; tests/neurocosmology_crosswalk_tests.sh:215; tests/neurocosmology_crosswalk_tests.sh:387; tests/neurocosmology_crosswalk_tests.sh:429; tests/neurocosmology_crosswalk_tests.sh:507
+evidence_refs: tests/neurocosmology_crosswalk_tests.sh:102; tests/neurocosmology_crosswalk_tests.sh:106; tests/neurocosmology_crosswalk_tests.sh:167; tests/neurocosmology_crosswalk_tests.sh:189; tests/neurocosmology_crosswalk_tests.sh:215; tests/neurocosmology_crosswalk_tests.sh:387; tests/neurocosmology_crosswalk_tests.sh:429; tests/neurocosmology_crosswalk_tests.sh:610
 failure_behavior: prints each failing assertion with its reason and exits 1
 rollback_behavior: read-only — it writes only inside its own mktemp dir, which the trap removes
 promotion_requirement: n/a

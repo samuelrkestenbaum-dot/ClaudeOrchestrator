@@ -14,7 +14,7 @@ control is a governance action and belongs to the operator.
 
 ## Three numbers, each with its derivation
 
-1. **11 of 71 classified controls gate on `unvalidated` evidence.** Eleven
+1. **11 of 75 classified controls gate on `unvalidated` evidence.** Eleven
    controls can stop the build and nothing has established that any of them
    discriminates — no measurement, no red drive, no field observation. This is
    the sharpest number in the census and the one to read first.
@@ -27,7 +27,7 @@ control is a governance action and belongs to the operator.
    `tests.nonvacuity_minimums`. Four of the eleven are Class A — an invariant on
    `unvalidated` evidence is *legal* under the licence table and still means
    nobody has watched it fire.
-2. **13 of 71 entries exercise `gate` on a class that does not license it.**
+2. **13 of 75 entries exercise `gate` on a class that does not license it.**
    `grep -c '^authority_mismatch: declared' control_registry.txt`. All 13 are
    Class C heuristics, all 13 can exit non-zero, and none of them was wrong to
    build.
@@ -64,7 +64,7 @@ the control as `UNREPORTED`.
 | `swarm.disjointness` | C | gate | advise | `build-os/tools/swarm-merge.sh:381` | 1 |
 | `swarm.hot_file_reservation` | C | gate | advise | `build-os/tools/swarm-merge.sh:311` | 3 |
 | `maint.tripwire_coverage_scan` | C | gate | advise | `build-os/maintenance/real-memory-tripwire.mjs:447` | 1 |
-| `tests.stdin_scan_nonvacuity` | C | gate | advise | `tests/build_os_tests.sh:960` | 1 |
+| `tests.stdin_scan_nonvacuity` | C | gate | advise | `tests/build_os_tests.sh:959` | 1 |
 | `tests.nonvacuity_minimums` | C | gate | advise | `tests/entitlement_tests.sh:126` (+33 more, §10) | 34 |
 | `tools.handoff_timeouts` | C | gate | advise | `build-os/tools/specialist-handoff.sh:151` | 3 |
 | `tools.supervise_timeout` | C | gate | advise | `build-os/tools/supervise.sh:49` | 2 |
@@ -241,7 +241,7 @@ being the easiest thing to write inside a module body.
 
 ## 9. `tests.stdin_scan_nonvacuity`
 
-**Gates at** `tests/build_os_tests.sh:960`. **Threshold** `PIN_MIN_SITES=10`
+**Gates at** `tests/build_os_tests.sh:959`. **Threshold** `PIN_MIN_SITES=10`
 (`:935`, tested at `:957`).
 
 "The scanner must not be blind" is Class A. `10` is the number of hook-invocation
@@ -339,7 +339,7 @@ their scope. `tests/control_registry_tests.sh` §22 fails the suite if any
 
 ### The self-indictment
 
-`tests/control_registry_tests.sh:668` is `[ "$PASS" -ge 40 ]`, whose failure
+`tests/control_registry_tests.sh:772` is `[ "$PASS" -ge 40 ]`, whose failure
 branch reaches `[ "$FAIL" -eq 0 ]` and stops the run. **40 is the number of
 assertions that existed the day this packet was written** — the packet whose
 subject is fitted constants that gate. It went unflagged in the first version.

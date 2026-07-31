@@ -490,6 +490,109 @@ SHORTKL="$(grep -c . "$WORK/kl.txt" || true)"; SHORTKL="${SHORTKL:-0}"
   && ok "every known_limitations says more about what is missed than the record says about what was intended" \
   || { no "$SHORTKL known_limitations field(s) are perfunctory — the field that carries the honesty is the field being skipped"; head -3 "$WORK/kl.txt" | sed 's/^/      | /'; }
 
+echo "== 14. The two primitives that moved, and what may not be claimed about them =="
+# Sections 5, 7 and 10 already reconcile these numerically. What they cannot see
+# is the CLAIM: a binding may be correctly counted and still assert something the
+# operator ruled out. So the two bindings added by this packet are named, their
+# kinds are pinned, and the sentence each one is forbidden to imply is asserted
+# in the artefact where a reader meets it.
+bkind(){ awk -F'\t' -v c="$1" '$1==c{print $5; exit}' "$WORK/bind.tsv"; }
+bprim(){ awk -F'\t' -v c="$1" '$1==c{print $2; exit}' "$WORK/bind.tsv"; }
+pqual(){ awk -F'\t' -v p="$1" '$1==p{print $2; exit}' "$WORK/prim.tsv"; }
+
+# --- ethical_admissibility: off nominal-only, and only just ------------------
+[ "$(bprim entitlement.egress_scan)" = "ethical_admissibility" ] \
+  && ok "the egress scan binds to ethical_admissibility, not to a suite's homeostasis" \
+  || no "entitlement.egress_scan binds to '$(bprim entitlement.egress_scan)'"
+[ "$(bkind entitlement.egress_scan)" = "instantiates" ] \
+  && ok "it INSTANTIATES: the prohibited act never occurs, so it is preventive where every boundary binding is detective" \
+  || no "entitlement.egress_scan is kind '$(bkind entitlement.egress_scan)'"
+{ [ "$(pqual ethical_admissibility)" != "nominal" ] && [ "$(pqual ethical_admissibility)" != "unbound" ]; } \
+  && ok "ethical_admissibility is off nominal-only for the first time (binding_quality: $(pqual ethical_admissibility))" \
+  || no "ethical_admissibility is still '$(pqual ethical_admissibility)' despite an instantiating binding"
+grep -qE '^binding_quality: nominal' <(awk '/^primitive: ethical_admissibility$/{f=1} f{print} f&&/^known_limitations: /{exit}' "$XW") \
+  && no "the ethical_admissibility record still declares itself nominal-only" \
+  || ok "the record itself no longer declares nominal-only coverage"
+# THE RULING, asserted from the crosswalk side as well as the census side: this
+# control scans a fileset. It does not enforce the external-mutation rule, whose
+# enforcement is a process boundary outside this repository.
+EA="$WORK/ea.txt"
+awk '/^primitive: ethical_admissibility$/{f=1} f{print} f&&/^known_limitations: /{exit}' "$XW" > "$EA"
+[ -s "$EA" ] && ok "the ethical_admissibility record is readable (not vacuous)" \
+             || no "the ethical_admissibility record could not be extracted"
+grep -qi 'permission system' "$EA" \
+  && ok "it still states that the strongest enforcement is the operator's permission system" \
+  || no "the record no longer names the external permission system"
+grep -qiE 'outside (this repository|the census)' "$EA" \
+  && ok "it still places that enforcement OUTSIDE the census" \
+  || no "the record no longer places the strongest enforcement outside the census"
+grep -qiE 'zero registered controls|no registered control' "$EA" \
+  && ok "it still records that the push/deploy/publish/secrets rule has zero registered controls" \
+  || no "the record has quietly stopped saying that the hardest rule is unregistered"
+EGB="$WORK/egb.txt"
+awk '/^control: entitlement.egress_scan$/{f=1} f{print} f&&/^rationale: /{exit}' "$XW" > "$EGB"
+grep -qiE 'does not enforce the external-mutation rule|IT DOES NOT ENFORCE' "$EGB" \
+  && ok "the binding's own rationale disclaims enforcing the external-mutation rule" \
+  || no "the binding does not disclaim the one thing it may not be read as doing"
+
+# --- integration_bandwidth: from zero to two, with the declines recorded ------
+BWN=0
+for c in bandwidth.active_packet_singleton bandwidth.packet_commit_ceiling; do
+  BWN=$((BWN+1))
+  [ "$(bprim "$c")" = "integration_bandwidth" ] \
+    && ok "$c binds to integration_bandwidth" \
+    || no "$c binds to '$(bprim "$c")'"
+done
+[ "$BWN" -gt 0 ] && ok "$BWN bandwidth binding(s) checked (not vacuous)" || no "no bandwidth bindings to check"
+[ "$(bkind bandwidth.active_packet_singleton)" = "instantiates" ] \
+  && ok "the singleton ceiling INSTANTIATES — the first control here that limits intake rather than judging output" \
+  || no "bandwidth.active_packet_singleton is kind '$(bkind bandwidth.active_packet_singleton)'"
+[ "$(bkind bandwidth.packet_commit_ceiling)" = "proxies" ] \
+  && ok "the commit ceiling only PROXIES — it measures and then exits 0, so its number cannot bind its producer" \
+  || no "bandwidth.packet_commit_ceiling is kind '$(bkind bandwidth.packet_commit_ceiling)'"
+[ "$(pqual integration_bandwidth)" != "unbound" ] \
+  && ok "integration_bandwidth is no longer empty (binding_quality: $(pqual integration_bandwidth))" \
+  || no "integration_bandwidth is still unbound"
+grep -qF 'integration_bandwidth' <(awk -F'\t' '{print $1}' "$WORK/prim.tsv") \
+  && ok "it is still one of the declared 17 primitives" || no "integration_bandwidth vanished from the primitive set"
+IB="$WORK/ib.txt"
+awk '/^primitive: integration_bandwidth$/{f=1} f{print} f&&/^known_limitations: /{exit}' "$XW" > "$IB"
+grep -qi 'transcript' "$IB" \
+  && ok "depth is recorded as DECLINED because rounds are transcript-only — the unobservable dimension is named, not omitted" \
+  || no "the record does not say why depth is unimplemented"
+grep -qiE 'no ceiling|inventing a constant' "$IB" \
+  && ok "open write sets are recorded as declined because no ceiling is declared — inventing one is refused in writing" \
+  || no "the record does not say why open write sets are unimplemented"
+grep -qiE 'two of four|two of the four|only the first two' "$IB" \
+  && ok "the record states how much of the convention set is covered, rather than implying all of it" \
+  || no "the record does not state which fraction of the bandwidth conventions is covered"
+# The report must not go on calling this primitive empty.
+awk '/^## 3\./{f=1} /^## 4\./{f=0} f' "$DOC" | grep -qE '^- \*\*`integration_bandwidth`\*\* — \*\*not predicted' \
+  && no "CROSSWALK.md still lists integration_bandwidth among the empty primitives" \
+  || ok "CROSSWALK.md no longer lists integration_bandwidth as empty"
+
+echo "== 15. RED DRIVES on the new bindings — each removal must be caught =="
+# The generic anti-omission drive in section 9 removes one arbitrary control.
+# These remove THESE controls, because a guard proven on a neighbour is not a
+# guard proven on the thing the packet added.
+for c in entitlement.egress_scan bandwidth.active_packet_singleton bandwidth.packet_commit_ceiling suite.bandwidth; do
+  awk -v c="$c" 'BEGIN{RS="";ORS="\n\n"} $0 !~ ("^control: " c "\n")' "$XW" > "$WORK/rm_$c.txt"
+  LEFT="$(comm -13 <(xw_bindings "$WORK/rm_$c.txt" | cut -f1 | sort) "$WORK/reg_ids.txt")"
+  printf '%s\n' "$LEFT" | grep -qxF "$c" \
+    && ok "RED: $c dropped from the crosswalk is caught as SILENTLY UNBOUND by the anti-omission guard" \
+    || no "RED FAILED: dropping $c passed the anti-omission guard"
+done
+# ...and the other direction: the egress control DEREGISTERED from the census.
+# This is the drive that matters most for part one, because deregistering is how
+# a control goes back to being invisible: the crosswalk keeps its binding, the
+# suite keeps passing, and only a reconciliation against the census notices.
+awk 'BEGIN{RS="";ORS="\n\n"} $0 !~ /^control: entitlement\.egress_scan\n/' "$REG" > "$WORK/reg_noeg.txt"
+NR2="$(reg_controls "$WORK/reg_noeg.txt" | grep -c . || true)"; NR2="${NR2:-0}"
+GHOST2="$(comm -23 "$WORK/xw_ids.txt" <(reg_controls "$WORK/reg_noeg.txt" | cut -f1 | sort))"
+{ [ "$NB" -ne "$NR2" ] && printf '%s\n' "$GHOST2" | grep -qxF 'entitlement.egress_scan'; } \
+  && ok "RED: the egress control deregistered from the census is caught twice — binding count $NB no longer equals census size $NR2, and the binding is named as a ghost" \
+  || no "RED FAILED: removing entitlement.egress_scan from the registry left the crosswalk reconciling cleanly"
+
 echo "== 13. This suite is chained, and is not vacuous about itself =="
 grep -qF 'chain_suite "tests/neurocosmology_crosswalk_tests.sh"' "$SRC/tests/build_os_tests.sh" \
   && ok "this suite is chained from tests/build_os_tests.sh (not discoverable-only)" \

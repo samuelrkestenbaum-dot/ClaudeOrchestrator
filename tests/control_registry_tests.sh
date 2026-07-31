@@ -661,6 +661,110 @@ SD="$(statedrefs "$WORK/stale_claim.md")"
   && ok "a stale hand-written total (99999) is detected by the same extractor — the check fails on drift rather than sleeping through it" \
   || no "the stated-total extractor does not detect a stale total, so section 25 would pass whatever the artefacts claim"
 
+echo "== 26. The egress scan is a control in its own right, cited INSIDE its own block =="
+# WHAT THIS CLOSES. README section 4's known hole number one is "a new control
+# added inside an already-registered file". The egress scan was the live
+# instance: a real security invariant with a planted-defect fixture and a
+# negative control, living inside tests/entitlement_tests.sh, visible to the
+# census only through that suite's RESULT line and through its own vacuity floor
+# (registered to tests.nonvacuity_minimums). So the registry could see "this
+# scanner is not blind" and could never see "nothing performs egress".
+#
+# WHAT IS PINNED HERE, AND WHY EACH PART. Registration alone is cheap; an entry
+# whose citations wander outside the block it claims to classify would put the
+# census back where it started. So the block is located by its own markers and
+# every citation must land inside it — and at least one must land inside the
+# CONTROL-FIXTURE block, because a planted-defect fixture is what `red_driven`
+# MEANS and an entry claiming it without citing one is claiming a fixture nobody
+# has to have written.
+ENT="$SRC/tests/entitlement_tests.sh"
+EG_START="$(grep -n '7. no network egress' "$ENT" | head -1 | cut -d: -f1)"
+EG_END="$(grep -n '^# CONTROL-FIXTURE:END' "$ENT" | head -1 | cut -d: -f1)"
+FIX_START="$(grep -n '^# CONTROL-FIXTURE:START' "$ENT" | head -1 | cut -d: -f1)"
+{ [ -n "$EG_START" ] && [ -n "$EG_END" ] && [ "$EG_END" -gt "$EG_START" ]; } \
+  && ok "the egress block is locatable by its own markers (lines $EG_START-$EG_END) — this section is not vacuous" \
+  || no "the egress block could not be located in tests/entitlement_tests.sh, so everything below is meaningless"
+grep -qxF 'control: entitlement.egress_scan' "$REG" \
+  && ok "the egress scan owns a registry entry of its own (entitlement.egress_scan)" \
+  || no "the egress scan is still invisible to the census as a control"
+[ "$(fval "$REG" entitlement.egress_scan owning_module)" = "tests/entitlement_tests.sh" ] \
+  && ok "it is owned by the file it actually lives in" \
+  || no "entitlement.egress_scan names the wrong owning_module"
+EG_OUT=0; EG_IN_FIX=0; EG_N=0
+for ref in $(fval "$REG" entitlement.egress_scan evidence_refs | tr ';' ' '); do
+  [ -n "$ref" ] || continue
+  EG_N=$((EG_N+1))
+  rl="${ref##*:}"
+  case "$ref" in tests/entitlement_tests.sh:*) ;; *) EG_OUT=$((EG_OUT+1)); echo "      | cites another file: $ref"; continue ;; esac
+  { [ "$rl" -ge "$EG_START" ] && [ "$rl" -le "$EG_END" ]; } \
+    || { EG_OUT=$((EG_OUT+1)); echo "      | cites a line outside the egress block: $ref"; }
+  { [ "$rl" -ge "$FIX_START" ] && [ "$rl" -le "$EG_END" ]; } && EG_IN_FIX=$((EG_IN_FIX+1))
+done
+[ "$EG_N" -gt 0 ] && ok "$EG_N citation(s) parsed from the entry (not vacuous)" \
+                  || no "the entry cites nothing, so the containment check below is meaningless"
+[ "$EG_OUT" -eq 0 ] \
+  && ok "every citation lands inside the egress block — the entry classifies the control it claims to" \
+  || no "$EG_OUT citation(s) fall outside the block this entry classifies"
+if [ "$(fval "$REG" entitlement.egress_scan empirical_status)" = "red_driven" ]; then
+  [ "$EG_IN_FIX" -gt 0 ] \
+    && ok "it claims red_driven AND cites the planted-defect fixture that earns the claim" \
+    || no "it claims red_driven but cites no line of the control-fixture block"
+else
+  no "entitlement.egress_scan does not claim red_driven, though the block carries both a positive and a negative control"
+fi
+# The scan's non-vacuity floor stays with the FAMILY, not with this entry. One
+# path:line, one class — section 22 already enforces it; this states the intent
+# where a reader meets it, because the floor is Class C and the scan is Class A.
+printf '%s\n' "$(fval "$REG" entitlement.egress_scan evidence_refs)" | grep -qF ":$(grep -n 'SCANNED" -ge' "$ENT" | head -1 | cut -d: -f1)" \
+  && no "the egress entry has absorbed its own fitted vacuity floor, which belongs to tests.nonvacuity_minimums (Class C, declared)" \
+  || ok "the entry does NOT cite its own fitted vacuity floor — that line stays with the Class C family that owns it"
+
+echo "== 26a. THE RULING: this control does NOT enforce the external boundary =="
+# The rule "never push, merge, deploy, publish or touch secrets" is enforced by
+# the operator's permission system — a process boundary outside this repository.
+# Anything that could bypass that permission system bypasses a repo-side check
+# trivially, so a repo-side gate would convert a real external boundary into a
+# checkbox that looks enforced and is not. The census is allowed to record a
+# scanner over a fileset. It is not allowed to let that scanner be read as the
+# boundary, so the disclaimer is asserted rather than trusted to good intentions.
+EG_STANZA="$WORK/eg_stanza.txt"
+awk '/^control: entitlement.egress_scan$/{f=1} f{print} f&&/^notes: /{exit}' "$REG" > "$EG_STANZA"
+[ -s "$EG_STANZA" ] && ok "the entitlement.egress_scan stanza is readable (not vacuous)" \
+                    || no "the stanza could not be extracted, so the assertions below are meaningless"
+grep -qi 'permission system' "$EG_STANZA" \
+  && ok "the entry names the operator's permission system as where the real boundary lives" \
+  || no "the entry never names the external permission system"
+grep -qiE 'does not enforce the external boundary|IT DOES NOT ENFORCE THE EXTERNAL BOUNDARY' "$EG_STANZA" \
+  && ok "the entry states outright that it does NOT enforce the external boundary" \
+  || no "the entry does not disclaim enforcement of the external boundary — the one claim this control may not make"
+grep -qiE 'outside this repository|outside the census' "$EG_STANZA" \
+  && ok "the entry places that boundary OUTSIDE this repository, where it actually is" \
+  || no "the entry does not locate the external boundary outside this repository"
+grep -qiE 'checkbox that looks enforced' "$EG_STANZA" \
+  && ok "the entry records WHY a repo-side gate would be worse than none: a checkbox that looks enforced and is not" \
+  || no "the entry omits the reason a repo-side gate is refused"
+# ...and the crosswalk must not undo it from the other side.
+XWF="$SRC/build-os/registry/neurocosmology_crosswalk.txt"
+awk '/^primitive: ethical_admissibility$/{f=1} f{print} f&&/^known_limitations: /{exit}' "$XWF" \
+  | grep -qiE 'permission system' \
+  && ok "the crosswalk's ethical_admissibility record still states that its strongest enforcement is the external permission system" \
+  || no "the crosswalk no longer records that this primitive's strongest enforcement lives outside the census"
+
+echo "== 26b. RED DRIVE — a citation dragged OUTSIDE the egress block is caught =="
+# The check above is only worth having if it fails on the edit it exists to
+# catch: an entry that keeps its id and quietly widens its scope. The fixture is
+# the live entry with one ref repointed at line 1 of the same file.
+FAKE_REFS="tests/entitlement_tests.sh:1; tests/entitlement_tests.sh:350"
+RD_OUT=0
+for ref in $(printf '%s' "$FAKE_REFS" | tr ';' ' '); do
+  [ -n "$ref" ] || continue
+  rl="${ref##*:}"
+  { [ "$rl" -ge "$EG_START" ] && [ "$rl" -le "$EG_END" ]; } || RD_OUT=$((RD_OUT+1))
+done
+[ "$RD_OUT" -gt 0 ] \
+  && ok "RED: a ref repointed outside the egress block is reported ($RD_OUT of 2) by the same containment test" \
+  || no "RED FAILED: a citation outside the block passed the containment test, so the entry's scope is unpoliced"
+
 echo "== 20. This suite is chained, and is not vacuous about itself =="
 grep -qF 'chain_suite "tests/control_registry_tests.sh"' "$SRC/tests/build_os_tests.sh" \
   && ok "this suite is chained from tests/build_os_tests.sh (not discoverable-only)" \

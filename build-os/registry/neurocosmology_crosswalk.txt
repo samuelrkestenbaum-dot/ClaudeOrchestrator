@@ -41,7 +41,7 @@
 # strongest kind any ONE of them holds — and section 7 of the suite enforces
 # exactly that maximum, no more. So `binding_quality: instantiates` states that
 # at least one binding instantiates and states NOTHING about the others:
-# homeostasis carries it on the strength of 1 binding out of 19, and
+# homeostasis carries it on the strength of 1 binding out of 20, and
 # epistemic_quality on 12 out of 22. Grepping `^binding_quality: instantiates`
 # answers "which primitives have any real contact at all"; it does NOT answer
 # "which primitives are covered", and using it for the second question is the
@@ -78,7 +78,7 @@ system_representation: product objective; acceptance criteria; task value; strat
 observable_proxies: none
 binding_quality: unbound
 claimed_max_authority: none
-known_limitations: EMPTY, and the near-miss is named precisely so nobody fills the slot by relabelling. Acceptance criteria DO exist here in quantity — each of the fourteen test suites is a set of them — but an acceptance criterion is a BINARY PREDICATE OVER AN ARTEFACT THAT ALREADY EXISTS, and a meaning metric is a MEASURE OVER FUTURES. This registry holds 71 controls that can say "this is wrong" and none that can say "this is worth more than that". Binding the suites here would be exactly the inflation this crosswalk exists to refuse.
+known_limitations: EMPTY, and the near-miss is named precisely so nobody fills the slot by relabelling. Acceptance criteria DO exist here in quantity — each of the fifteen test suites is a set of them — but an acceptance criterion is a BINARY PREDICATE OVER AN ARTEFACT THAT ALREADY EXISTS, and a meaning metric is a MEASURE OVER FUTURES. This registry holds 75 controls that can say "this is wrong" and none that can say "this is worth more than that". Binding the suites here would be exactly the inflation this crosswalk exists to refuse.
 
 primitive: mass
 universal_function: what pulls hardest on behaviour
@@ -86,7 +86,7 @@ system_representation: priority; severity; urgency; dependency-unlock value; att
 observable_proxies: the fixed ordering of the speed report's sections
 binding_quality: nominal
 claimed_max_authority: advise
-known_limitations: NOMINAL ONLY, and it should be read as empty by anyone applying a strict standard. `metrics.report.disclosure_ordering` is the sole ordering of anything in the census, it takes `inputs: none`, and its order was chosen once by a human — so the system orders exactly one thing, a page layout, by constant. No control assigns severity, priority or urgency; the registry has no severity field; and `runtime_authority: rank` — the authority tier that exists precisely to order work or select between options — is held by ZERO of 71 controls. Nothing here computes what pulls hardest from state.
+known_limitations: NOMINAL ONLY, and it should be read as empty by anyone applying a strict standard. `metrics.report.disclosure_ordering` is the sole ordering of anything in the census, it takes `inputs: none`, and its order was chosen once by a human — so the system orders exactly one thing, a page layout, by constant. No control assigns severity, priority or urgency; the registry has no severity field; and `runtime_authority: rank` — the authority tier that exists precisely to order work or select between options — is held by ZERO of 75 controls, as is `observe`. Nothing here computes what pulls hardest from state.
 
 primitive: valence
 universal_function: which directions are attractive and which are harmful
@@ -115,18 +115,18 @@ known_limitations: THREE BINDINGS, NONE INSTANTIATING, and every constant inside
 primitive: homeostasis
 universal_function: staying stable while operating
 system_representation: runtime health; test state; repo cleanliness; dependency integrity; recovery
-observable_proxies: fourteen suite RESULT lines; merge preconditions over git status; post-merge verification; hook idempotence; static assertions over the maintenance layer's own source
+observable_proxies: fifteen suite RESULT lines; merge preconditions over git status; post-merge verification; hook idempotence; static assertions over the maintenance layer's own source
 binding_quality: instantiates
 claimed_max_authority: gate
-known_limitations: THE LARGEST COUNT IN THIS CROSSWALK AND THE ONE MOST AT RISK OF BEING MISREAD. Fourteen of its nineteen bindings are test suites, and a suite's empirical status is `red_driven` — the registry README's concession applies here at full force: a check written against a fixture written by the same author in the same hour mostly proves the two agree. A green suite is evidence that PLANTED defects are caught. It is not a measurement of system health. There is no runtime health signal in this system at all, and nothing observes the system WHILE it operates: every binding here is a pre-condition or a post-condition around a run, never a state variable during one. `suite.build_os_maintenance` is the only binding that exercises recovery, and it does so against a cold install in a scratch repo rather than against a damaged live one.
+known_limitations: THE LARGEST COUNT IN THIS CROSSWALK AND THE ONE MOST AT RISK OF BEING MISREAD. Fifteen of its twenty bindings are test suites, and a suite's empirical status is `red_driven` — the registry README's concession applies here at full force: a check written against a fixture written by the same author in the same hour mostly proves the two agree. A green suite is evidence that PLANTED defects are caught. It is not a measurement of system health. There is no runtime health signal in this system at all, and nothing observes the system WHILE it operates: every binding here is a pre-condition or a post-condition around a run, never a state variable during one. `suite.build_os_maintenance` is the only binding that exercises recovery, and it does so against a cold install in a scratch repo rather than against a damaged live one.
 
 primitive: integration_bandwidth
 universal_function: how much change can be safely absorbed
 system_representation: WIP limits; review capacity; merge bandwidth; evidence capacity
-observable_proxies: none
-binding_quality: unbound
-claimed_max_authority: none
-known_limitations: EMPTY — and this one was not predicted, which makes it worth stating plainly. The system HAS bandwidth conventions: one active packet at a time, at most two commits per packet, a bounded fix round, a median depth of two serial stages. NOT ONE of them is a registered control. They live as prose in CLAUDE.md and are honoured by agent compliance, so the census cannot see the system's entire theory of how much work may be in flight. The nearest registered thing is `adoption.lane_size_check`'s churn ceiling, which bounds a DECLARED lane after the commits already exist — it audits the label, it does not limit what may be absorbed. `tools.handoff_lock` does limit concurrency to one, but as a lease over a resource rather than as a capacity model, which is why it binds to agency.
+observable_proxies: the number of packet ids declared in build-os/packets/active_packet.md; the commit count between a packet's declared base and HEAD
+binding_quality: instantiates
+claimed_max_authority: gate
+known_limitations: NO LONGER EMPTY, AND THE TWO BINDINGS COVER TWO OF FOUR CONVENTIONS. The working contract states four bandwidth rules — one active packet, at most two commits per packet, bounded open write sets, a median depth of two serial stages — and only the first two are observable from this repository's own artefacts. `bandwidth.active_packet_singleton` refuses a second declared packet and is the first control in the census that limits what may be absorbed rather than judging what already exists. `bandwidth.packet_commit_ceiling` only PROXIES: it measures and then exits 0, so it cannot bind the thing it measures, and its base is self-declared by the agent it constrains. THE TWO UNIMPLEMENTED DIMENSIONS ARE DECLINED OUT LOUD RATHER THAN QUIETLY MISSING. Depth is TRANSCRIPT-ONLY: nothing in git attests to how many agent passes ran in series, one commit can be one stage or five, and a control claiming to enforce a limit it cannot observe would be worse than an absent one. Open write sets are observable from a fan-out manifest, but NO ceiling on their number is declared anywhere, so enforcing one would mean inventing a constant — the anti-pattern that a composite load score would also be. Nothing here models review capacity, merge bandwidth or evidence capacity, and nothing observes capacity WHILE work is in flight: both bindings read state between actions, never during one.
 
 primitive: boundary
 universal_function: which movements are permitted
@@ -139,10 +139,10 @@ known_limitations: EVERY BOUNDARY HERE IS DETECTIVE, NOT PREVENTIVE, SO NOT ONE 
 primitive: ethical_admissibility
 universal_function: which futures must not be entered at all
 system_representation: legal; security; privacy; safety; policy invariants
-observable_proxies: file digests and LICENSE on an installed copy
-binding_quality: nominal
+observable_proxies: file digests and LICENSE on an installed copy; a fixed egress pattern set matched against the twelve files of the entitlement packet
+binding_quality: instantiates
 claimed_max_authority: gate
-known_limitations: THE SHARPEST FINDING IN THIS CROSSWALK. One binding, and it is NOMINAL: a provenance check, which touches admissibility without performing it. Its own rationale concedes the whole distance — a digest match proves the files are unmodified and does not establish that any particular USE of them is permitted — so it is information about identity, not a constraint on which futures may be entered. The strongest rule this system states about itself — no external mutation without explicit go, never push, merge, deploy, publish or touch secrets — has ZERO registered controls. Nothing in the census gates a push, a deploy, a publish or a credential read. That rule is honoured by agent compliance and by an external permission system, and the census is blind to both. There IS a real security invariant in the tree — the egress scan that keeps "local only, no telemetry" falsifiable rather than asserted — but it lives INSIDE `suite.entitlement` and is not separately registered, so it binds to homeostasis as part of a suite instead of here as an invariant. That is README section 4's known hole number 1, "a new control added inside an already-registered file", restated in this framework's vocabulary: the census cannot see the one admissibility control it actually has.
+known_limitations: OFF NOMINAL-ONLY FOR THE FIRST TIME, AND THE MOVE IS SMALLER THAN IT LOOKS. `entitlement.egress_scan` genuinely instantiates: it refuses an artefact that would enter an inadmissible future — a build of this product that transmits to a remote host — and, unlike every binding under `boundary`, the prohibited ACT never occurs, so it is preventive rather than detective. Its scope is twelve named files from one packet, not the tree, so egress introduced anywhere else is invisible to it. The other binding remains NOMINAL: a provenance check, whose own rationale concedes the distance, because a digest match proves the files are unmodified and never that any particular USE of them is permitted. THE STRONGEST RULE THIS SYSTEM STATES ABOUT ITSELF STILL HAS ZERO REGISTERED CONTROLS, and this is the sentence to read twice: no external mutation without explicit go — never push, merge, deploy, publish or touch secrets — is enforced by the operator's PERMISSION SYSTEM, a process boundary outside this repository, and nothing in the census gates a push, a deploy, a publish or a credential read. That is not an oversight to be closed by a control here: anything able to bypass the permission system bypasses a repo-side check trivially, so a repo-side gate would convert a real external boundary into a checkbox that looks enforced and is not. This primitive's strongest enforcement lives OUTSIDE the census and the census remains blind to it. What did change is README section 4's known hole number 1 — a control added inside an already-registered file — closed for the one instance that motivated it: the egress scan was previously visible only as part of `suite.entitlement`'s test state.
 
 primitive: epistemic_quality
 universal_function: how good the system's contact with reality is
@@ -150,7 +150,7 @@ system_representation: evidence coverage; receipts; calibration; claim-state rec
 observable_proxies: git numstat recomputation of claimed row values; vacuity refusals across seven surfaces; occupancy and length floors on evidence rows; the tree-derived discovery rule
 binding_quality: instantiates
 claimed_max_authority: gate
-known_limitations: TWENTY-TWO BINDINGS, AND THE COUNT OVERSTATES THE CONTACT. 46 of the 71 controls in this registry are `red_driven` and only 3 are `field_observed`, so most of what binds here has been shown to fire on a defect its own author planted, and nothing more. The bindings divide sharply. A small group compares a claim against something the claimant did not write — `metrics.record.verify_git` against git numstat, `adoption.lane_size_check` against measured churn, `registry.discovery_rule` against the tree — and those genuinely instantiate the primitive. The larger group checks SHAPE, OCCUPANCY, LENGTH or VACUITY: `adoption.boundary_manifest` validates that a manifest is well-formed and not that the boundary it declares is true, which is why it sits with its siblings `adoption.schema_invariant` and `adoption.store_validate` rather than above them; `metrics.record.note_minimum` passes twelve repeated characters, `adoption.junk_row_thresholds` scores a row of plausible fabrications as full, and seven separate "the scan found nothing" refusals prove only that a check was not blind — a necessary condition for evidence and never a sufficient one. `maint.tripwire_coverage_scan` is registered `refuted`: measured, and found not to discriminate. Nothing here is `calibrated` except two threshold controls fitted to n=4 packets of this repository's own history. Reading "22 of 71" as dense epistemic coverage would be the overclaim the registry exists to prevent.
+known_limitations: TWENTY-TWO BINDINGS, AND THE COUNT OVERSTATES THE CONTACT. 50 of the 75 controls in this registry are `red_driven` and only 3 are `field_observed`, so most of what binds here has been shown to fire on a defect its own author planted, and nothing more. The bindings divide sharply. A small group compares a claim against something the claimant did not write — `metrics.record.verify_git` against git numstat, `adoption.lane_size_check` against measured churn, `registry.discovery_rule` against the tree — and those genuinely instantiate the primitive. The larger group checks SHAPE, OCCUPANCY, LENGTH or VACUITY: `adoption.boundary_manifest` validates that a manifest is well-formed and not that the boundary it declares is true, which is why it sits with its siblings `adoption.schema_invariant` and `adoption.store_validate` rather than above them; `metrics.record.note_minimum` passes twelve repeated characters, `adoption.junk_row_thresholds` scores a row of plausible fabrications as full, and seven separate "the scan found nothing" refusals prove only that a check was not blind — a necessary condition for evidence and never a sufficient one. `maint.tripwire_coverage_scan` is registered `refuted`: measured, and found not to discriminate. Nothing here is `calibrated` except two threshold controls fitted to n=4 packets of this repository's own history. Reading "22 of 75" as dense epistemic coverage would be the overclaim the registry exists to prevent.
 
 primitive: latent_state
 universal_function: hidden state beneath the explicit claims
@@ -166,7 +166,7 @@ system_representation: D1, D7, D30 and D90 retention; rollback; rework; escaped 
 observable_proxies: byte conservation across a memory rotation
 binding_quality: proxies
 claimed_max_authority: gate
-known_limitations: ONE BINDING, AND IT INSTANTIATES NOTHING: it measures durability across a single TRANSFORMATION rather than across TIME, and it touches NONE of the five representations this record declares — not D1, D7, D30 or D90 retention, not rollback, not rework, not escaped regressions. `maint.rotation_conservation` proves no byte is lost when memory is rotated; it says nothing about whether anything survives a week. The temporal quantities the primitive names are not merely unmeasured — for one of them the INSTRUMENT EXISTS AND IS EMPTY: `packet_metrics.tsv` carries a `defects_escaped` column and it reads `-` in all 6 of 6 rows, so the system has built a place to record escaped regressions and has never recorded one. Nothing computes D1, D7, D30 or D90. Nothing measures rework. And `rollback_behavior` is a prose field on every one of the 71 registry entries that no control ever executes, tests or verifies.
+known_limitations: ONE BINDING, AND IT INSTANTIATES NOTHING: it measures durability across a single TRANSFORMATION rather than across TIME, and it touches NONE of the five representations this record declares — not D1, D7, D30 or D90 retention, not rollback, not rework, not escaped regressions. `maint.rotation_conservation` proves no byte is lost when memory is rotated; it says nothing about whether anything survives a week. The temporal quantities the primitive names are not merely unmeasured — for one of them the INSTRUMENT EXISTS AND IS EMPTY: `packet_metrics.tsv` carries a `defects_escaped` column and it reads `-` in all 6 of 6 rows, so the system has built a place to record escaped regressions and has never recorded one. Nothing computes D1, D7, D30 or D90. Nothing measures rework. And `rollback_behavior` is a prose field on every one of the 75 registry entries that no control ever executes, tests or verifies.
 
 primitive: gated_plasticity
 universal_function: changing the rules safely
@@ -491,6 +491,20 @@ runtime_authority: gate
 binding_kind: nominal
 rationale: The census's ONLY binding to an inadmissible-future primitive, and it is NOMINAL: a provenance check. Digests and LICENSE make an installed copy's IDENTITY falsifiable, and a digest match proves the files are unmodified — but it does not establish that any particular USE of them is permitted, which is the whole of what the primitive asks. Identity is not admissibility, so this touches the concept without standing in for it.
 
+control: entitlement.egress_scan
+binds_to: ethical_admissibility
+class: A
+runtime_authority: gate
+binding_kind: instantiates
+rationale: THE FIRST INSTANTIATING BINDING THIS PRIMITIVE HAS EVER HELD. It refuses an artefact that would enter an inadmissible future — a build of this product that transmits to a remote host — and unlike every binding under `boundary` it is not detective: the prohibited ACT never occurs, only the code that would perform it, and that code cannot land while the suite is chained. Its scope is the limit and it is exact: twelve named files from one packet, not the tree. IT DOES NOT ENFORCE THE EXTERNAL-MUTATION RULE and no reading of this binding should suggest it does — push, merge, deploy, publish and secrets are held by the operator's permission system outside this repository, which remains this primitive's strongest enforcement and remains invisible to the census.
+
+control: suite.bandwidth
+binds_to: homeostasis
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Test state over the capacity tool: that each ceiling refuses or advises with its own authority, and that an unobservable dimension is declined rather than faked. Red-driven, so green means planted breaches are caught, not that work in flight is healthy.
+
 control: hooks.session_capability_report
 binds_to: reachability
 class: B
@@ -546,6 +560,20 @@ class: C
 runtime_authority: advise
 binding_kind: proxies
 rationale: Sums the bytes of every startup-enabled SKILL.md against a 30000-character budget. The census's one real capacity accounting, and still a PROXY: bytes stand in for token cost, the 30000 is an assumed platform constant its own entry says must be verified, and it EXITS 0 WHEN OVER BUDGET — the one control that measures capacity cannot act on its own measurement, so it reports capacity rather than governing it.
+
+control: bandwidth.active_packet_singleton
+binds_to: integration_bandwidth
+class: A
+runtime_authority: gate
+binding_kind: instantiates
+rationale: THE FIRST INSTANTIATING BINDING THIS PRIMITIVE HAS EVER HELD, and the first control in the census whose function is limiting what may be absorbed rather than judging what already exists. A WIP limit is named verbatim in this primitive's system_representation, and this one refuses: more than one packet declared in flight exits 2 naming the dimension. What it does NOT do is bound review capacity, merge bandwidth or evidence capacity, and it observes nothing while work is in flight — it reads a file between actions.
+
+control: bandwidth.packet_commit_ceiling
+binds_to: integration_bandwidth
+class: C
+runtime_authority: advise
+binding_kind: proxies
+rationale: Counts commits between the packet's declared base and HEAD against a ceiling of two. A PROXY and not an instance, for the same reason `tools.skill_budget_audit` proxies energy: it measures the quantity and then EXITS 0, so the one number it produces cannot bind the producer. Commit count is also a stand-in for absorbed change rather than the thing itself — one commit can carry a thousand lines or one — and the base it measures against is self-declared by the agent it constrains.
 
 control: chain.suite_wiring_guard
 binds_to: latent_state
