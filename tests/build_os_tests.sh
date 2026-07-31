@@ -844,6 +844,7 @@ chain_suite "tests/entitlement_tests.sh"          "version, licence identity and
 chain_suite "tests/lane_declaration_tests.sh"     "declared lane vs observable size"
 chain_suite "tests/gate_depth_tests.sh"           "gate depth: concurrent gates + bounded fix round"
 chain_suite "tests/swarm_merge_tests.sh"          "fan-out manifest validation and merge"
+chain_suite "tests/control_registry_tests.sh"     "the control registry: class, authority and the anti-shelfware scan"
 
 # A chained suite that is added to the repo but never wired here would be
 # discoverable-only — the exact defect chaining exists to prevent. Assert the

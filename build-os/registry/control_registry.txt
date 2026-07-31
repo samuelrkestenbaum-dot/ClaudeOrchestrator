@@ -1,0 +1,1321 @@
+# Build OS — control registry.
+#
+# One record per consequential control that ALREADY RUNS in this repository.
+# One field per line; a blank line separates records; `#` at column 0 is a
+# comment. See README.md for the ontology, the licence table, and why this
+# format rather than a TSV.
+#
+# THIS FILE CLASSIFIES; IT DOES NOT RE-AUTHORISE. Where a control exercises more
+# authority than its class licenses, the entry says so (`authority_mismatch:
+# declared`) and MISMATCHES.md names the line that gates. Changing the authority
+# is a governance action and belongs to the operator, not to whoever edits this
+# file.
+#
+# AN ENTRY IS NOT A LINE. Entries are cut at different granularities: some
+# classify a single comparison, and `tests.nonvacuity_minimums` classifies a
+# family of 34 fitted constants across 12 files. So "13 of 70 declare a
+# mismatch" is a fact about this file's granularity, not a count of the
+# heuristics that can stop a build — that number is 55, hand-counted in
+# MISMATCHES.md's summary table. Quote both or quote the larger one.
+#
+#   grep -c '^control: '            how many controls are classified
+#   grep '^class: C'                how many are heuristics
+#   grep -B4 '^runtime_authority: gate'   what can stop a run
+#   grep '^authority_mismatch: declared'  what is over-authorised (13 entries)
+#
+#   # gate on unvalidated evidence — 11 of 70, the sharpest number here:
+#   awk -F': ' '/^control: /{c=$2} /^runtime_authority: gate/{g=1} \
+#     /^empirical_status: unvalidated/{u=1} /^$/{if(g&&u)print c; g=0; u=0}' \
+#     control_registry.txt
+
+# =============================================================================
+# build-os/metrics/record-packet.sh — the write path of the measurement store
+# =============================================================================
+
+control: metrics.record.schema_invariant
+class: A
+implementation_status: load_bearing
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: reflex
+inputs: the 16 field values of one proposed metrics row (packet id, date, lane, ten numerics, commits, evidence class, note)
+output: pass, or a per-field list of the reasons the row is not writable
+owning_module: build-os/metrics/record-packet.sh
+consuming_policies: record-packet.sh's own append path (exit 2 refuses the write); check-adoption.sh reuses it via --validate before it will accept any adoption claim
+evidence_refs: build-os/metrics/record-packet.sh:108; build-os/metrics/record-packet.sh:110; build-os/metrics/record-packet.sh:117; build-os/metrics/record-packet.sh:121; build-os/metrics/record-packet.sh:262
+failure_behavior: prints every reason at once on stderr and exits 2 without touching the store; nothing partial is written
+rollback_behavior: none needed — the refusal happens before the append, and the store is append-only
+promotion_requirement: already load_bearing; nothing above this status exists
+demotion_requirement: it stops being load_bearing the day check-adoption.sh stops calling --validate and nothing else acts on the exit code
+authority_mismatch: none
+notes: A genuine hard invariant — a lane outside the router's set, or an evidence class of `git` with no commit named, is a defect in the row and not a matter of degree. The A licence reaches gate, so this is aligned.
+
+control: metrics.record.note_minimum
+class: C
+implementation_status: load_bearing
+empirical_status: unvalidated
+runtime_authority: gate
+nervous_system_role: reflex
+inputs: the character length of a row's note field
+output: pass, or "note is shorter than 12 chars"
+owning_module: build-os/metrics/record-packet.sh
+consuming_policies: metrics.record.schema_invariant folds it into the same refusal; check-adoption.sh raises the same idea to 40 chars for a row it audits
+evidence_refs: build-os/metrics/record-packet.sh:51; build-os/metrics/record-packet.sh:119
+failure_behavior: refuses the write, exit 2
+rollback_behavior: none needed — nothing is written
+promotion_requirement: n/a
+demotion_requirement: drop the length test and keep only "a note is present", which is the invariant underneath the number
+authority_mismatch: declared
+notes: 12 is a judgement about how long an attributing sentence has to be. It is not derived from anything, and no measurement establishes that a 12-character note attributes a number better than an 11-character one. The INVARIANT underneath it (a row must carry a note) is Class A; the LENGTH is Class C and it is what actually gates.
+
+control: metrics.record.one_row_per_packet
+class: A
+implementation_status: load_bearing
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: reflex
+inputs: the proposed packet_id, and column 1 of every existing data row
+output: pass, or a refusal naming the packet already recorded
+owning_module: build-os/metrics/record-packet.sh
+consuming_policies: the append path; every total in report-speed.sh depends on it, because a double-counted row is internally consistent and so invisible downstream
+evidence_refs: build-os/metrics/record-packet.sh:268; build-os/metrics/record-packet.sh:164
+failure_behavior: refuses the append with exit 2 and points at README.md's "Known weaknesses"
+rollback_behavior: none needed
+promotion_requirement: n/a
+demotion_requirement: would require report-speed.sh to deduplicate, which it does not
+authority_mismatch: none
+notes: Uniqueness of a key is an invariant, not a threshold. Aligned.
+
+control: metrics.record.store_validate
+class: A
+implementation_status: load_bearing
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: immune
+inputs: an entire metrics store file — its header, its field counts, and every row through the same validator the write path uses
+output: "validate: N rows, M invalid", and a per-row reason for each invalid one
+owning_module: build-os/metrics/record-packet.sh
+consuming_policies: check-adoption.sh refuses the whole adoption claim if this fails; tests/speed_benchmark_tests.sh and tests/metrics_adoption_tests.sh both drive it
+evidence_refs: build-os/metrics/record-packet.sh:149; build-os/metrics/record-packet.sh:157; build-os/metrics/record-packet.sh:170; build-os/metrics/record-packet.sh:175
+failure_behavior: prints each bad row and exits 2; a store with 0 data rows is refused outright rather than reported as valid
+rollback_behavior: read-only; nothing to roll back
+promotion_requirement: n/a
+demotion_requirement: remove check-adoption.sh's call at line 198 and it becomes a developer convenience
+authority_mismatch: none
+notes: Includes its own vacuity refusal — an empty store is "an unmeasured system", not a valid one.
+
+control: metrics.record.verify_git
+class: A
+implementation_status: load_bearing
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: immune
+inputs: each row's commits column, and `git show --numstat` over those commits
+output: VERIFIED / MISMATCH / UNVERIFIABLE per row, plus a three-number summary
+owning_module: build-os/metrics/record-packet.sh
+consuming_policies: check-adoption.sh refuses any adoption claim over a store that fails it; tests/speed_benchmark_tests.sh drives both the mismatch and the fabricated-commit paths
+evidence_refs: build-os/metrics/record-packet.sh:213; build-os/metrics/record-packet.sh:227; build-os/metrics/record-packet.sh:242
+failure_behavior: exits 2 on any mismatch, and also on any row naming a commit the repository does not contain
+rollback_behavior: read-only
+promotion_requirement: n/a
+demotion_requirement: n/a
+authority_mismatch: none
+notes: The INPUT is a Class B deterministic metric (git's numstat). The CONTROL is the invariant "a recorded figure equals what git says", which is Class A and licensed to gate. Worth stating explicitly because it is the shape most often confused: a metric feeding an invariant does not make the invariant a metric.
+
+control: metrics.record.verify_git_vacuity
+class: A
+implementation_status: load_bearing
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: immune
+inputs: the count of rows that were actually compared against git
+output: a refusal when that count is zero
+owning_module: build-os/metrics/record-packet.sh
+consuming_policies: the --verify-git exit code, which check-adoption.sh acts on
+evidence_refs: build-os/metrics/record-packet.sh:231
+failure_behavior: "0 rows were actually checked against git" on stderr, exit 2
+rollback_behavior: read-only
+promotion_requirement: n/a
+demotion_requirement: n/a
+authority_mismatch: none
+notes: A verifier that verified nothing must not report success. Aligned, and the archetype for every other vacuity guard in this repository.
+
+# =============================================================================
+# build-os/metrics/report-speed.sh — the read path
+# =============================================================================
+
+control: metrics.report.empty_store_refusal
+class: A
+implementation_status: load_bearing
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: reflex
+inputs: the data-row count of the store
+output: the report, or a refusal
+owning_module: build-os/metrics/report-speed.sh
+consuming_policies: report-speed.sh's exit code; tests/speed_benchmark_tests.sh
+evidence_refs: build-os/metrics/report-speed.sh:46
+failure_behavior: "A report over an empty store is not a green report" on stderr, exit 2
+rollback_behavior: read-only
+promotion_requirement: n/a
+demotion_requirement: n/a
+authority_mismatch: none
+notes: An empty table looks like proof. Aligned.
+
+control: metrics.report.render_reconciliation
+class: A
+implementation_status: load_bearing
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: immune
+inputs: rows counted in the store, rows the renderer read, rows it rendered, rows it skipped as ragged
+output: RENDERCHECK triple, consumed and stripped before output
+owning_module: build-os/metrics/report-speed.sh
+consuming_policies: report-speed.sh refuses to print at all if the three disagree; tests/speed_benchmark_tests.sh pins the totals against an independent sum
+evidence_refs: build-os/metrics/report-speed.sh:291; build-os/metrics/report-speed.sh:304; build-os/metrics/report-speed.sh:310
+failure_behavior: exits 2 and prints nothing — "a report that drops rows is worse than no report, because its totals still look right"
+rollback_behavior: read-only
+promotion_requirement: n/a
+demotion_requirement: n/a
+authority_mismatch: none
+notes: Self-reconciliation of an output against its own input. Aligned.
+
+control: metrics.report.unmeasured_total_is_dash
+class: A
+implementation_status: load_bearing
+empirical_status: unvalidated
+runtime_authority: advise
+nervous_system_role: conscience
+inputs: per-column counts of rows that contributed a number
+output: a total, or "-" where no row contributed
+owning_module: build-os/metrics/report-speed.sh
+consuming_policies: the rendered report a human reads; tests/speed_benchmark_tests.sh pins that an all-empty column totals "-" and not 0
+evidence_refs: build-os/metrics/report-speed.sh:62; build-os/metrics/report-speed.sh:146
+failure_behavior: none — it cannot fail; it changes what is printed
+rollback_behavior: n/a
+promotion_requirement: it would become decision_contributing only if some policy read the "-" and branched on it; today only a reader does
+demotion_requirement: n/a
+authority_mismatch: none
+notes: An invariant on the OUTPUT ("summing an empty set publishes a clean record nobody audited") exercising only advisory authority. This is what a correctly-scoped control looks like: it could not stop a run if it wanted to.
+
+control: metrics.report.disclosure_ordering
+class: A
+implementation_status: load_bearing
+empirical_status: unvalidated
+runtime_authority: advise
+nervous_system_role: conscience
+inputs: none — it is a fixed ordering of the report's own sections
+output: the FINDING block, printed above the first table
+owning_module: build-os/metrics/report-speed.sh
+consuming_policies: the reader; tests/speed_benchmark_tests.sh §8b pins the POSITION, not merely the presence of the words
+evidence_refs: build-os/metrics/report-speed.sh:114; build-os/metrics/report-speed.sh:232
+failure_behavior: none at runtime; a regression is caught by the suite, not by the script
+rollback_behavior: n/a
+promotion_requirement: n/a
+demotion_requirement: n/a
+authority_mismatch: none
+notes: "This report does not show that Build OS is faster than anything" is printed before any number. Classified because it is a real control on what a reader believes, even though it can never exit non-zero.
+
+# =============================================================================
+# build-os/metrics/check-adoption.sh — the guard against shelfware
+# =============================================================================
+
+control: adoption.boundary_manifest
+class: A
+implementation_status: load_bearing
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: reflex
+inputs: adoption_boundaries.tsv — its header, its two fixed obligation keys, their dates and their stated reasons
+output: two dated boundaries, or a refusal
+owning_module: build-os/metrics/check-adoption.sh
+consuming_policies: everything downstream in the same script; tests/metrics_adoption_tests.sh drives six separate refusals through it
+evidence_refs: build-os/metrics/check-adoption.sh:161; build-os/metrics/check-adoption.sh:170; build-os/metrics/check-adoption.sh:174; build-os/metrics/check-adoption.sh:175
+failure_behavior: exit 2 on an unknown obligation key, a duplicate key, a future date, or an unreasoned exemption
+rollback_behavior: read-only
+promotion_requirement: n/a
+demotion_requirement: n/a
+authority_mismatch: none
+notes: The 24-character minimum on a boundary's reason is a chosen number and is strictly Class C; it is folded here rather than split out because the surrounding structure — fixed keys, no per-packet exemptions, no future dates — is invariant and is what carries the control. This is a judgement call and it is the kind of place a class label hides a heuristic.
+
+control: adoption.receipt_row_reconciliation
+class: A
+implementation_status: load_bearing
+empirical_status: field_observed
+runtime_authority: gate
+nervous_system_role: immune
+inputs: every receipt filename stem under build-os/receipts/, and column 1 of every store row
+output: RECORDED / MISSING per in-scope receipt
+owning_module: build-os/metrics/check-adoption.sh
+consuming_policies: check-adoption.sh's exit code; tests/metrics_adoption_tests.sh
+evidence_refs: build-os/metrics/check-adoption.sh:478; build-os/metrics/check-adoption.sh:480; build-os/metrics/check-adoption.sh:591
+failure_behavior: names each unrecorded packet and exits 2
+rollback_behavior: read-only
+promotion_requirement: n/a
+demotion_requirement: n/a
+authority_mismatch: none
+notes: field_observed because the gap it exists against — packets closing with no row — is the state this repository was actually in when the guard was written.
+
+control: adoption.junk_row_thresholds
+class: C
+implementation_status: load_bearing
+empirical_status: unvalidated
+runtime_authority: gate
+nervous_system_role: reflex
+inputs: how many of a row's 11 measurable cells are filled, and how long its note is
+output: RECORDED, or HOLLOW with the reasons
+owning_module: build-os/metrics/check-adoption.sh
+consuming_policies: check-adoption.sh's exit code (a HOLLOW row counts as a violation); tests/metrics_adoption_tests.sh
+evidence_refs: build-os/metrics/check-adoption.sh:73; build-os/metrics/check-adoption.sh:76; build-os/metrics/check-adoption.sh:494; build-os/metrics/check-adoption.sh:508; build-os/metrics/check-adoption.sh:513
+failure_behavior: reports HOLLOW and exits 2
+rollback_behavior: read-only
+promotion_requirement: n/a
+demotion_requirement: report HOLLOW without counting it as a violation, which would move it to advise
+authority_mismatch: declared
+notes: MIN_MEASURED=4 of 11 and MIN_NOTE=40 characters are stated in the file as reasoning ("roughly one clause of provenance"), not as derivations. No distribution was measured. A row with 3 filled cells is refused and one with 4 is accepted, and nothing establishes that the boundary is there. Useful, and a heuristic.
+
+control: adoption.single_commit_attribution
+class: C
+implementation_status: load_bearing
+empirical_status: unvalidated
+runtime_authority: gate
+nervous_system_role: reflex
+inputs: the number of commits a row names, the receipt's close date against the boundary, and a case-insensitive grep of the receipt for "file-ownership manifest" or "attribution by path"
+output: RECORDED, or UNATTRIBUTED
+owning_module: build-os/metrics/check-adoption.sh
+consuming_policies: check-adoption.sh's exit code; tests/metrics_adoption_tests.sh
+evidence_refs: build-os/metrics/check-adoption.sh:518; build-os/metrics/check-adoption.sh:519; build-os/metrics/check-adoption.sh:524
+failure_behavior: reports UNATTRIBUTED and exits 2
+rollback_behavior: read-only
+promotion_requirement: n/a
+demotion_requirement: n/a
+authority_mismatch: declared
+notes: The rule underneath ("one commit per packet, or a manifest that makes attribution recoverable") is a policy the working contract states. The IMPLEMENTATION is a prose grep for three phrasings, which passes any receipt containing those words in any context and fails any manifest phrased differently. A prose grep standing in for a structural fact is a heuristic, and this one gates.
+
+control: adoption.lane_size_check
+class: C
+implementation_status: load_bearing
+empirical_status: calibrated,red_driven
+runtime_authority: gate
+nervous_system_role: reflex
+inputs: a receipt's or a row's declared lane; git numstat over the packet's commits (files touched, lines added+removed)
+output: LANE-OK / LANE-UNMEASURED / LANE-CONTRADICTED / LANE-OVERRIDDEN / LANE-OVERRIDE-BAD
+owning_module: build-os/metrics/check-adoption.sh
+consuming_policies: check-adoption.sh's exit code; the thresholds are pinned in build-os/memory/tool_router.md and by tests/lane_declaration_tests.sh
+evidence_refs: build-os/metrics/check-adoption.sh:130; build-os/metrics/check-adoption.sh:131; build-os/metrics/check-adoption.sh:409; build-os/metrics/check-adoption.sh:426; build-os/metrics/check-adoption.sh:575
+failure_behavior: prints LANE-CONTRADICTED naming the file count and churn, and exits 2
+rollback_behavior: read-only
+promotion_requirement: n/a
+demotion_requirement: print the contradiction without adding to LANE_VIOL, which would move it to advise
+authority_mismatch: declared
+notes: THE CLEAREST CASE IN THE REPOSITORY. LANE_TINY_MAX_FILES=13 and LANE_TINY_MAX_CHURN=2213 are the MEDIAN of a four-packet sample of this repository's own history — the file says so, at lines 92-104, and the derivation is honest and well argued. It is still a heuristic fitted to n=4. The script's own comment concedes it trades recall away and that half the calibration set survives being relabelled. A median of four observations of one repository is not an invariant, and it exits 2.
+
+control: adoption.lane_override
+class: C
+implementation_status: load_bearing
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: reflex
+inputs: a LANE-OVERRIDE token in the receipt or the row's note; the length of its justification; whether the justification names the measured file count
+output: honoured / absent / malformed
+owning_module: build-os/metrics/check-adoption.sh
+consuming_policies: adoption.lane_size_check consumes it directly; a malformed override is itself counted as a violation
+evidence_refs: build-os/metrics/check-adoption.sh:134; build-os/metrics/check-adoption.sh:332; build-os/metrics/check-adoption.sh:336; build-os/metrics/check-adoption.sh:420
+failure_behavior: LANE-OVERRIDE-BAD, counted as a violation, exit 2
+rollback_behavior: read-only
+promotion_requirement: n/a
+demotion_requirement: n/a
+authority_mismatch: declared
+notes: The 40-character minimum is inherited from MIN_NOTE, which is itself unvalidated. "The justification must contain the digits of the measured file count" is a clever proof-of-work, and it is also a regex — a justification that happens to contain the number for another reason passes. A half-written override being a violation in its own right is the right call; the thresholds deciding "half-written" are heuristic.
+
+control: adoption.vacuity_guards
+class: A
+implementation_status: load_bearing
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: immune
+inputs: the store's row count, the receipt count, the in-scope count after grandfathering and waivers, and the size of the lane calibration basis
+output: a refusal whenever the scan checked nothing
+owning_module: build-os/metrics/check-adoption.sh
+consuming_policies: check-adoption.sh's exit code; tests/metrics_adoption_tests.sh drives four of them separately
+evidence_refs: build-os/metrics/check-adoption.sh:192; build-os/metrics/check-adoption.sh:222; build-os/metrics/check-adoption.sh:571; build-os/metrics/check-adoption.sh:587
+failure_behavior: exit 2 with a reason naming which half of the vacuity was hit
+rollback_behavior: read-only
+promotion_requirement: n/a
+demotion_requirement: n/a
+authority_mismatch: none
+notes: "A guard that cannot fail must not pass" is an invariant about the guard itself, and it is the property that makes every threshold above it worth anything. The empty-basis refusal at line 571 is defence in depth and the script says it is not independently falsifiable from here; that is honest and does not change the class.
+
+control: adoption.threshold_drift_advisory
+class: B
+implementation_status: decision_contributing
+empirical_status: calibrated
+runtime_authority: advise
+nervous_system_role: sensor
+inputs: the store's current medians of files and churn over non-waived-lane rows with measurable commits
+output: a printed comparison against the pinned thresholds, with a [DRIFT] marker when they differ
+owning_module: build-os/metrics/check-adoption.sh
+consuming_policies: a human re-deriving the thresholds; deliberately consumed by NO automatic policy
+evidence_refs: build-os/metrics/check-adoption.sh:445; build-os/metrics/check-adoption.sh:448; build-os/metrics/check-adoption.sh:450
+failure_behavior: none — it prints and continues, by design
+rollback_behavior: n/a
+promotion_requirement: it must NOT be promoted. The file argues the case: a threshold that auto-follows the store is attacker-controlled, because anyone wanting a larger `tiny` allowance records a few large packets until the ceiling rises to meet them.
+demotion_requirement: n/a
+authority_mismatch: none
+notes: THE MODEL CASE. A deterministic metric that is computed every run, printed every run, and deliberately given no authority at all — because letting it gate would be an adaptive threshold, and an adaptive threshold is a control surface for whoever writes the data.
+
+# =============================================================================
+# build-os/tools/swarm-merge.sh — the fan-out ownership validator and merge driver
+# =============================================================================
+
+control: swarm.manifest_wellformed
+class: A
+implementation_status: load_bearing
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: reflex
+inputs: every line of a fan-out manifest — directives, agent names, globs, the merger, the verify command
+output: a parsed manifest, or a refusal naming the line
+owning_module: build-os/tools/swarm-merge.sh
+consuming_policies: all three subcommands run do_validate first; tests/swarm_merge_tests.sh
+evidence_refs: build-os/tools/swarm-merge.sh:184; build-os/tools/swarm-merge.sh:188; build-os/tools/swarm-merge.sh:221; build-os/tools/swarm-merge.sh:284
+failure_behavior: exit 2 naming the line number and the directive
+rollback_behavior: read-only at this stage; nothing has been staged
+promotion_requirement: n/a
+demotion_requirement: n/a
+authority_mismatch: none
+notes: "A typo'd directive is an unenforced rule, so it is refused rather than ignored" is an invariant about the manifest language. Aligned.
+
+control: swarm.disjointness
+class: C
+implementation_status: load_bearing
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: reflex
+inputs: every pair of ownership globs in the manifest
+output: OVERLAP violations, or silence
+owning_module: build-os/tools/swarm-merge.sh
+consuming_policies: do_validate's violation count; tests/swarm_merge_tests.sh
+evidence_refs: build-os/tools/swarm-merge.sh:140; build-os/tools/swarm-merge.sh:146; build-os/tools/swarm-merge.sh:329; build-os/tools/swarm-merge.sh:381
+failure_behavior: exit 2 listing every colliding pair, before any agent runs
+rollback_behavior: nothing is written
+promotion_requirement: n/a
+demotion_requirement: n/a
+authority_mismatch: declared
+notes: HARD TO CLASSIFY, AND THE FIRST ATTEMPT GOT THE ERROR DIRECTION BACKWARDS. Glob disjointness over a KNOWN path set is decidable and would be Class A; that is what the concrete-path pass at line 363 does. But that pass is guarded by `[ -n "$REPO" ]` and REPO defaults to "" (:80), so it does not run unless --repo is given, and even then it iterates paths that ALREADY EXIST — files the agents are about to create, which is the normal fan-out case, are covered by neither pass. The pre-flight pass at line 329 decides whether two globs could ever collide by instantiating each into ONE canonical probe string (`**`->`pdir/pfile`, `*`->`pseg`, `?`->`p`) and testing it against the other's regex. This entry originally called that "a sound-in-one-direction approximation" and offered `a*b` vs `a?c` as the illustration. That is the harmless direction. The real failure is that IT CERTIFIES COLLIDING MANIFESTS AS DISJOINT: `src/*.ts` vs `src/foo*` are passed as disjoint and both match `src/foo.ts`; `*/x.py` vs `app/*` are passed as disjoint and both match `app/x.py`. Two agents are then told they own separate files and they do not. Class stays C, for a changed reason — not "fitted to a sample" but "unsound in the direction that matters". A reviewer could reasonably call this B, and B at gate is a mismatch too, so the entry stays listed either way. The five-class ontology has no slot for "approximate decision procedure with false negatives", which is what this is. Repairing the tool is a separate packet; this entry records.
+
+control: swarm.hot_file_reservation
+class: C
+implementation_status: load_bearing
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: reflex
+inputs: a fixed default list of shared surfaces, plus any hot globs the manifest adds, plus verification-suite paths derived from the verify command's tokens; and every hot-release's agent, claim and reason
+output: HOT-CLAIM / HOT-WRITE violations, or an honoured release
+owning_module: build-os/tools/swarm-merge.sh
+consuming_policies: do_validate and do_verify violation counts; tests/swarm_merge_tests.sh
+evidence_refs: build-os/tools/swarm-merge.sh:228; build-os/tools/swarm-merge.sh:238; build-os/tools/swarm-merge.sh:311; build-os/tools/swarm-merge.sh:315; build-os/tools/swarm-merge.sh:353
+failure_behavior: exit 2 naming the agent, the path and the hot rule it tripped
+rollback_behavior: nothing is written
+promotion_requirement: n/a
+demotion_requirement: n/a
+authority_mismatch: declared
+notes: Three heuristics inside one gate. (1) The default hot list is a chosen inventory of file names — `Gemfile.lock` is hot, an unlisted lockfile is not. (2) The verification-suite derivation extracts hot paths by matching token suffixes (`*.sh`, `*.bats`, `*_test.py`, ...) out of the verify command, which is a parse of a shell string by extension. (3) The 30-character minimum on a release reason, and the "two releases may not share one reason" rule, are judgements about what a considered reason looks like. All three refuse a fan-out. The underlying policy — the merger owns shared surfaces — is Class A; nothing that implements it here is.
+
+control: swarm.ambiguity_refusal
+class: A
+implementation_status: load_bearing
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: reflex
+inputs: for each concrete repository path, the set of agents whose globs match it
+output: AMBIGUOUS when that set has more than one member
+owning_module: build-os/tools/swarm-merge.sh
+consuming_policies: do_validate and do_verify; do_merge inherits it
+evidence_refs: build-os/tools/swarm-merge.sh:371; build-os/tools/swarm-merge.sh:497
+failure_behavior: exit 2 — "refusing rather than picking one"
+rollback_behavior: index restored; nothing written
+promotion_requirement: n/a
+demotion_requirement: n/a
+authority_mismatch: none
+notes: Over concrete paths this is exact set membership, not an approximation. Refusing to name an author it cannot prove is the invariant, and it is licensed to gate.
+
+control: swarm.conformance_verify
+class: A
+implementation_status: load_bearing
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: immune
+inputs: git status over the target repo (staged, unstaged, untracked); each agent's evidence path list or worktree
+output: OUT-OF-SET / UNCLAIMED / HOT-WRITE / EVIDENCE-STALE per path
+owning_module: build-os/tools/swarm-merge.sh
+consuming_policies: do_verify's exit code; do_merge refuses to stage anything if it fails; tests/swarm_merge_tests.sh
+evidence_refs: build-os/tools/swarm-merge.sh:472; build-os/tools/swarm-merge.sh:479; build-os/tools/swarm-merge.sh:495; build-os/tools/swarm-merge.sh:507
+failure_behavior: exit 2 with the path named; where no evidence source exists the author is reported UNATTRIBUTED rather than guessed
+rollback_behavior: nothing is staged before this passes
+promotion_requirement: n/a
+demotion_requirement: n/a
+authority_mismatch: none
+notes: "Every changed path is inside a declared set or merger-owned" is an invariant over an observed set. Aligned.
+
+control: swarm.merge_preconditions
+class: A
+implementation_status: load_bearing
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: reflex
+inputs: git's rename/copy and unmerged status codes; whether the index already holds staged changes; whether any agent's evidence is a separate worktree; whether any changed path is left unstaged after the plan runs
+output: a refusal, or a staged index that exactly equals the changed set
+owning_module: build-os/tools/swarm-merge.sh
+consuming_policies: do_merge; tests/swarm_merge_tests.sh
+evidence_refs: build-os/tools/swarm-merge.sh:422; build-os/tools/swarm-merge.sh:424; build-os/tools/swarm-merge.sh:526; build-os/tools/swarm-merge.sh:571
+failure_behavior: exit 2 after `git reset -q`, leaving the index as it was found
+rollback_behavior: rollback() restores the index on every refusal path; no working-tree file is written, moved or deleted at any point
+promotion_requirement: n/a
+demotion_requirement: n/a
+authority_mismatch: none
+notes: A rename spans two paths and a conflict has no single owner; refusing both rather than interpreting them is the invariant. Aligned.
+
+control: swarm.post_merge_verification
+class: A
+implementation_status: load_bearing
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: motor
+inputs: the manifest's single verify command, run once, in the target repo
+output: the suite's own output, and its exit status
+owning_module: build-os/tools/swarm-merge.sh
+consuming_policies: do_merge; the commit only happens if this is green AND --commit was passed
+evidence_refs: build-os/tools/swarm-merge.sh:577; build-os/tools/swarm-merge.sh:581; build-os/tools/swarm-merge.sh:587
+failure_behavior: rolls the index back and exits 2, quoting the suite's own RESULT line
+rollback_behavior: `git reset -q`; nothing is committed; the tool never pushes, merges, checks out, stashes or hard-resets
+promotion_requirement: n/a
+demotion_requirement: n/a
+authority_mismatch: none
+notes: The only `motor` control in this registry that writes git state, and the only one that can create a commit. It is gated on its own verification being green and on an explicit --commit flag, and it never reaches a remote.
+
+control: swarm.fanout_vacuity
+class: A
+implementation_status: load_bearing
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: immune
+inputs: the agent count, each agent's claim count, and whether the repository has any changed paths at all
+output: a refusal whenever the validation would have been trivially satisfiable
+owning_module: build-os/tools/swarm-merge.sh
+consuming_policies: do_validate and do_verify; tests/swarm_merge_tests.sh
+evidence_refs: build-os/tools/swarm-merge.sh:289; build-os/tools/swarm-merge.sh:292; build-os/tools/swarm-merge.sh:295; build-os/tools/swarm-merge.sh:457
+failure_behavior: exit 2 — "an empty manifest is trivially disjoint and proves nothing"
+rollback_behavior: nothing written
+promotion_requirement: n/a
+demotion_requirement: n/a
+authority_mismatch: none
+notes: "A fan-out of one is not a fan-out" is a definition, not a threshold. Aligned.
+
+# =============================================================================
+# build-os/maintenance/ — the layer that protects real Build OS memory
+# =============================================================================
+
+control: maint.real_memory_tripwire
+class: A
+implementation_status: load_bearing
+empirical_status: red_driven,field_observed
+runtime_authority: gate
+nervous_system_role: immune
+inputs: size and sha256 of the four watched real memory files, and a recursive size+hash snapshot of build-os/memory/archive/, taken at module load and again at process exit
+output: a drift list, empty or not
+owning_module: build-os/maintenance/real-memory-tripwire.mjs
+consuming_policies: the process exit code (process.exitCode = 1), which node's test runner reports as a failed file and run-tests.sh propagates; tests/build_os_maintenance_tests.sh drives it
+evidence_refs: build-os/maintenance/real-memory-tripwire.mjs:314; build-os/maintenance/real-memory-tripwire.mjs:342; build-os/maintenance/real-memory-tripwire.mjs:360
+failure_behavior: writes the drift to stderr and sets process.exitCode = 1; it hashes, it does not intercept, so the write still happened
+rollback_behavior: NONE — this control cannot undo a write. Recovery is `git restore` by a human, and the file says so.
+promotion_requirement: n/a
+demotion_requirement: n/a
+authority_mismatch: none
+notes: field_observed in the strongest sense available here: the defect it exists against (a suite file that destroyed live memory at exit 0) actually happened in the reference deployment. Its own header enumerates four uncovered paths, including a hostile exit handler and a detached write landing after node exits. A control that names its own gaps is still Class A over the gap it does cover.
+
+control: maint.tripwire_coverage_scan
+class: C
+implementation_status: load_bearing
+empirical_status: red_driven,refuted
+runtime_authority: gate
+nervous_system_role: reflex
+inputs: the source text of every *.test.mjs beside the tripwire, masked for comments and strings, reduced to its module request specifiers
+output: a COVERAGE finding per file that does not request the tripwire first
+owning_module: build-os/maintenance/real-memory-tripwire.mjs
+consuming_policies: the module throws at import when any finding exists, which aborts the whole run under the preload; tests/build_os_maintenance_tests.sh asserts the wrapper refuses an uncovered file
+evidence_refs: build-os/maintenance/real-memory-tripwire.mjs:394; build-os/maintenance/real-memory-tripwire.mjs:405; build-os/maintenance/real-memory-tripwire.mjs:447
+failure_behavior: throws an Error during module load, aborting every suite file in the directory by name
+rollback_behavior: n/a — it throws before anything runs
+promotion_requirement: n/a
+demotion_requirement: collect the findings and print them instead of throwing, which would match the authority the file's own header says it has
+authority_mismatch: declared
+notes: THE MOST UNCOMFORTABLE ENTRY HERE, because the file itself already says it. Its own header calls this "a convenience check, not a boundary", says the mask "is a heuristic and is defeatable", and prints the exact one-line source shape that beats it (two regexes in division position, blanking the span that holds a real import). `refuted` is recorded honestly: the detection claim was measured FALSE for the bare `node --test` path. And it throws. A control that documents its own defeat and then aborts the run on its verdict is exercising gate on a heuristic — which is defensible as fail-closed, and is exactly the decision that should be the operator's rather than implied by an exception.
+
+control: maint.source_scan_failclosed
+class: A
+implementation_status: load_bearing
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: reflex
+inputs: JavaScript source text
+output: masked source, folded specifiers, or a thrown Error
+owning_module: build-os/maintenance/source-scan.mjs
+consuming_policies: maint.tripwire_coverage_scan and rotate-memory.rootscan.test.mjs both consume its output and inherit its throws
+evidence_refs: build-os/maintenance/source-scan.mjs:131; build-os/maintenance/source-scan.mjs:217
+failure_behavior: throws rather than returning a partial mask when concatenation folding does not converge or a string/comment span is unbalanced
+rollback_behavior: pure text functions; no state
+promotion_requirement: n/a
+demotion_requirement: n/a
+authority_mismatch: none
+notes: "Refuse to answer rather than answer from a mask you could not build" is an invariant. The heuristic is the mask itself, classified separately below.
+
+control: maint.source_scan_mask
+class: C
+implementation_status: load_bearing
+empirical_status: refuted
+runtime_authority: advise
+nervous_system_role: sensor
+inputs: JavaScript source text
+output: the list of module request specifiers a heuristic lexer can see, in source order
+owning_module: build-os/maintenance/source-scan.mjs
+consuming_policies: maint.tripwire_coverage_scan, which gates on it; rotate-memory.rootscan.test.mjs, which counts on it
+evidence_refs: build-os/maintenance/source-scan.mjs:210; build-os/maintenance/source-scan.mjs:327
+failure_behavior: none of its own — it returns what it can see; the consumer decides
+rollback_behavior: pure
+promotion_requirement: it must not be promoted; it has been defeated three times and the maintainers stopped writing new mask heuristics deliberately
+demotion_requirement: n/a
+authority_mismatch: none
+notes: EXACTLY THE DISTINCTION §15.6 IS ABOUT. This is load_bearing — removing it changes outcomes, because two other controls consume it — while exercising only `advise`. Its `refuted` status is real and documented: a real import can be hidden from it. The gate is its consumer's, not its own, and that is why the consumer is the entry that carries the mismatch.
+
+control: maint.shell_fingerprint
+class: A
+implementation_status: load_bearing
+empirical_status: red_driven,field_observed
+runtime_authority: gate
+nervous_system_role: immune
+inputs: sha256 of the four watched real memory files and of every file under the real archive, taken in the shell before and after the node run
+output: two fingerprint blocks, compared
+owning_module: build-os/maintenance/run-tests.sh
+consuming_policies: the wrapper's exit code, which is what any caller acts on; tests/build_os_maintenance_tests.sh
+evidence_refs: build-os/maintenance/run-tests.sh:312; build-os/maintenance/run-tests.sh:317; build-os/maintenance/run-tests.sh:319
+failure_behavior: prints a diff of the two fingerprints on stderr and exits 1, whatever node reported
+rollback_behavior: NONE — it compares, it does not sandbox. Recovery is `git restore` by a human.
+promotion_requirement: n/a
+demotion_requirement: n/a
+authority_mismatch: none
+notes: The one guarantee this layer actually makes, stated as one sentence in its own header with four named exclusions. It is mutually redundant with maint.real_memory_tripwire — measured: no SINGLE edit to either line yields green-with-damage.
+
+control: maint.toolchain_preresolution
+class: A
+implementation_status: load_bearing
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: reflex
+inputs: PATH resolution of sha256sum/shasum, find and sort, performed once at startup
+output: captured absolute tool paths, or a refusal
+owning_module: build-os/maintenance/run-tests.sh
+consuming_policies: fingerprint() and the suite discovery both use only the captured paths
+evidence_refs: build-os/maintenance/run-tests.sh:252; build-os/maintenance/run-tests.sh:257; build-os/maintenance/run-tests.sh:286
+failure_behavior: exit 6 with no tests run when find or sort is missing — "refusing to run a suite this script cannot enumerate"
+rollback_behavior: nothing has run
+promotion_requirement: n/a
+demotion_requirement: n/a
+authority_mismatch: none
+notes: Fail-closed toolchain resolution. The residual — a PATH already hostile at invocation — is named in the header and is not closed; the control is still an invariant over the window it covers.
+
+control: maint.suite_discovery_nonvacuity
+class: A
+implementation_status: load_bearing
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: immune
+inputs: the count of *.test.mjs files found beside the wrapper
+output: the suite list, or a refusal
+owning_module: build-os/maintenance/run-tests.sh
+consuming_policies: the wrapper's own exit code
+evidence_refs: build-os/maintenance/run-tests.sh:307
+failure_behavior: exit 6 — "refusing to pass vacuously"
+rollback_behavior: nothing has run
+promotion_requirement: n/a
+demotion_requirement: n/a
+authority_mismatch: none
+notes: Measured against a planted `find` that prints nothing and exits 0.
+
+control: maint.tripwire_armed_precondition
+class: A
+implementation_status: load_bearing
+empirical_status: unvalidated
+runtime_authority: gate
+nervous_system_role: reflex
+inputs: the presence of real-memory-tripwire.mjs beside the wrapper
+output: proceed, or refuse
+owning_module: build-os/maintenance/run-tests.sh
+consuming_policies: the wrapper's exit code
+evidence_refs: build-os/maintenance/run-tests.sh:237
+failure_behavior: exit 6 — "refusing to run unarmed"
+rollback_behavior: nothing has run
+promotion_requirement: n/a
+demotion_requirement: n/a
+authority_mismatch: none
+notes: unvalidated: I found no test that deletes the tripwire and asserts the wrapper refuses. The mechanism is two lines and obviously correct by reading, which is exactly the argument that was wrong about the two lines named in this file's own "unpinned by any test" paragraph.
+
+control: maint.rotation_conservation
+class: A
+implementation_status: load_bearing
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: reflex
+inputs: the original bytes of each memory file, the segment partition, the retained and archived byte strings, and the composed output
+output: a rotation plan, or a thrown RotateError with a specific exit code
+owning_module: build-os/maintenance/rotate-memory.mjs
+consuming_policies: rotate-memory.sh's exit status; if ANY file fails conservation, NOTHING is written for ANY file
+evidence_refs: build-os/maintenance/rotate-memory.mjs:296; build-os/maintenance/rotate-memory.mjs:347; build-os/maintenance/rotate-memory.mjs:351; build-os/maintenance/rotate-memory.mjs:885
+failure_behavior: throws at EXIT.CONSERVATION / EXIT.RETENTION / EXIT.CEILING before any write
+rollback_behavior: dry-run is the default and every check runs before the write, so there is nothing to roll back; the archive is append-only and never rewritten
+promotion_requirement: n/a
+demotion_requirement: n/a
+authority_mismatch: none
+notes: Byte conservation is the definition of correctness for this tool, so it is a hard invariant by construction. The size ceiling NEVER auto-reduces N — that refusal to adapt is deliberate and is the same argument as adoption.threshold_drift_advisory.
+
+control: maint.rotation_zero_block_warning
+class: B
+implementation_status: decision_contributing
+empirical_status: red_driven
+runtime_authority: advise
+nervous_system_role: sensor
+inputs: a file's parsed block count and whether its original text has any non-whitespace
+output: a WARNING on stderr naming the file and the delimiter that matched nothing; totalBlocks and originalHasContent in --json
+owning_module: build-os/maintenance/rotate-memory.mjs
+consuming_policies: a human reading stderr, or a caller reading --json; deliberately consumed by no policy that changes the exit code
+evidence_refs: build-os/maintenance/rotate-memory.mjs:1212; build-os/maintenance/rotate-memory.mjs:1216
+failure_behavior: none — "the exit code is deliberately unchanged"
+rollback_behavior: n/a
+promotion_requirement: it should not be promoted: an empty or not-yet-written memory file parses to zero blocks legitimately, so failing a run on it would be wrong
+demotion_requirement: n/a
+authority_mismatch: none
+notes: A second correctly-scoped control. The observation is real and reproducible, the consequence would be wrong, so it advises and does not gate.
+
+control: maint.rotate_node_precondition
+class: A
+implementation_status: load_bearing
+empirical_status: unvalidated
+runtime_authority: gate
+nervous_system_role: reflex
+inputs: whether `node` resolves on PATH
+output: proceed to exec the .mjs, or refuse
+owning_module: build-os/maintenance/rotate-memory.sh
+consuming_policies: the wrapper's exit status
+evidence_refs: build-os/maintenance/rotate-memory.sh:103; build-os/maintenance/rotate-memory.sh:105
+failure_behavior: exit 6 with "node is required but was not found on PATH"
+rollback_behavior: nothing has run
+promotion_requirement: n/a
+demotion_requirement: n/a
+authority_mismatch: none
+notes: Small, and registered anyway: the scan finds this file, and an unclassified surface is exactly what the reconciliation exists to surface.
+
+control: maint.rootscan_static_assertions
+class: A
+implementation_status: load_bearing
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: immune
+inputs: the source of the maintenance layer's own files, read AS DATA — the tripwire's watched list, run-tests.sh's WATCHED array, FILE_SPECS, the fingerprint comparison line, the package.json script, and the deliberately dangerous shapes in rootscan-controls.json
+output: pass, or a named assertion failure
+owning_module: build-os/maintenance/rotate-memory.rootscan.test.mjs
+consuming_policies: node's test runner exit status, propagated by run-tests.sh and chained into tests/build_os_maintenance_tests.sh
+evidence_refs: build-os/maintenance/rotate-memory.rootscan.test.mjs:1606; build-os/maintenance/rotate-memory.rootscan.test.mjs:1613
+failure_behavior: a failed test file, non-zero exit
+rollback_behavior: read-only
+promotion_requirement: n/a
+demotion_requirement: n/a
+authority_mismatch: none
+notes: This is the control that pins the two lines that "turn detection into a failed run" — both of which were, at one point, unpinned by any test while their detection halves were well covered.
+
+control: maint.rotation_suite
+class: A
+implementation_status: load_bearing
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: immune
+inputs: the rotation tool, driven against scratch fixture roots only
+output: pass/fail per assertion
+owning_module: build-os/maintenance/rotate-memory.test.mjs
+consuming_policies: node's test runner exit status; run-tests.sh; tests/build_os_maintenance_tests.sh
+evidence_refs: build-os/maintenance/rotate-memory.test.mjs:4260; build-os/maintenance/rotate-memory.test.mjs:4291
+failure_behavior: a failed test file, non-zero exit
+rollback_behavior: read-only with respect to the real tree; the tripwire proves it
+promotion_requirement: n/a
+demotion_requirement: n/a
+authority_mismatch: none
+notes: Carries an executed mutation driver that pins the tripwire's `process.exitCode = 1`. CORRECTED: its sole evidence_ref was :1, the `/**` opening a block comment — the same vacuous-citation defect as the two hook entries, and NOT on the enumerated fix list; it was found by running the new VACUOUS-REF check over every ref rather than by another hand sweep, which is the point of having the check. It now cites :4260, the test that requires the sandboxed tripwire to exit 1, and :4291, the mutation that removes the enforcement line.
+
+control: maint.managed_set_replacement
+class: A
+implementation_status: implemented
+empirical_status: unvalidated
+runtime_authority: advise
+nervous_system_role: motor
+inputs: the GRAVITO:MANAGED banner set and .gravito-managed
+output: files copied into an installed repo, replacing prior managed copies
+owning_module: build-os/maintenance/install-maintenance.sh
+consuming_policies: an operator running the installer; nothing automatic consumes it
+evidence_refs: build-os/maintenance/install-maintenance.sh:128
+failure_behavior: none that stops anything — it prints what it could not do and continues; it never exits non-zero
+rollback_behavior: none; a managed file's local edits are lost on install, which is what the banner warns about
+promotion_requirement: n/a
+demotion_requirement: n/a
+authority_mismatch: none
+notes: Registered because it mutates a customer tree. It is the only `motor` control here that never gates on anything, which is worth noticing rather than approving.
+
+# =============================================================================
+# .claude/hooks/ and build-os/tools/
+# =============================================================================
+
+control: identity.stamp_and_verify
+class: A
+implementation_status: load_bearing
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: immune
+inputs: an installed copy's VERSION, LICENSE and file digests
+output: a machine-readable identity stamp, or a verification verdict
+owning_module: .claude/hooks/build-os-identity.sh
+consuming_policies: tests/entitlement_tests.sh drives stamp/verify and the tamper path; installers call it at install time
+evidence_refs: .claude/hooks/build-os-identity.sh:127; .claude/hooks/build-os-identity.sh:299
+failure_behavior: returns 2 or 3 with a reason; refuses outright to write a stamp covering zero files; exits 64 on an unknown subcommand
+rollback_behavior: a failed stamp writes nothing
+promotion_requirement: n/a
+demotion_requirement: n/a
+authority_mismatch: none
+notes: The zero-file refusal at line 127 is a vacuity guard on an identity claim: a stamp over nothing verifies forever.
+
+control: hooks.session_capability_report
+class: B
+implementation_status: decision_contributing
+empirical_status: unvalidated
+runtime_authority: advise
+nervous_system_role: sensor
+inputs: ~/.claude/settings.json enabledPlugins, native user/project skill directories, and the plugin cache
+output: a startup report separating enabled plugins, native skills and plugin-cache CANDIDATES, with a VERIFY LIVE note
+owning_module: .claude/hooks/session-start-build-os.sh
+consuming_policies: the agent reading the session preamble; tests/build_os_tests.sh §2 pins that the cache never leaks into the native set
+evidence_refs: .claude/hooks/session-start-build-os.sh:136; .claude/hooks/session-start-build-os.sh:151
+failure_behavior: none — it cannot exit non-zero, and a missing file yields an empty section
+rollback_behavior: n/a
+promotion_requirement: n/a
+demotion_requirement: n/a
+authority_mismatch: none
+notes: The whole design of this control is that a cache entry is a CANDIDATE and not evidence. That is the same "computable is not operationally meaningful" distinction the registry exists for, applied to capability detection, and it correctly stops at advise. CORRECTED: its sole evidence_ref was :1, the shebang. It now cites :136, where the native skill set is read from user and project scope ONLY, and :151, which prints the plugin cache under a VERIFY LIVE label — the two lines that make the candidate/evidence distinction real.
+
+control: hooks.prompt_router
+class: C
+implementation_status: decision_contributing
+empirical_status: unvalidated
+runtime_authority: advise
+nervous_system_role: conscience
+inputs: the user's prompt text
+output: an injected routing note naming the lane and the tools
+owning_module: .claude/hooks/prompt-router.sh
+consuming_policies: the agent, which may ignore it; nothing enforces the routing
+evidence_refs: .claude/hooks/prompt-router.sh:11; .claude/hooks/prompt-router.sh:54
+failure_behavior: exits 0 on every path, including its own dedup miss
+rollback_behavior: n/a
+promotion_requirement: n/a
+demotion_requirement: n/a
+authority_mismatch: none
+notes: Keyword classification of a prompt is a heuristic, and it is correctly limited to advise — it injects text, and an agent decides. If this ever gated, it would be the single largest authority mismatch in the system.
+
+control: hooks.once_dedup
+class: A
+implementation_status: load_bearing
+empirical_status: unvalidated
+runtime_authority: advise
+nervous_system_role: memory
+inputs: the hook event name and the session id from the payload, against a marker under TMPDIR
+output: first-firing / already-fired
+owning_module: .claude/hooks/hook-once.sh
+consuming_policies: prompt-router.sh and session-start-build-os.sh both short-circuit on it
+evidence_refs: .claude/hooks/hook-once.sh:44; .claude/hooks/hook-once.sh:50
+failure_behavior: none — it exits 0 either way; the caller branches
+rollback_behavior: the marker lives in TMPDIR and dies with it
+promotion_requirement: n/a
+demotion_requirement: n/a
+authority_mismatch: none
+notes: Idempotence of a side effect is an invariant; it suppresses output rather than stopping anything, so advise is the right ceiling. CORRECTED: this entry's sole evidence_ref was :1, the shebang — a citation that satisfied "cites evidence" vacuously rather than naming anything. It now cites :44, where the event/session/instance key is composed, and :50, the atomic mkdir that IS the first-firing decision.
+
+control: tools.supervise_timeout
+class: C
+implementation_status: implemented
+empirical_status: unvalidated
+runtime_authority: gate
+nervous_system_role: reflex
+inputs: a shell condition, polled at --interval, against a --timeout budget
+output: SUPERVISE_STATUS: COMPLETED / TIMEOUT / USAGE
+owning_module: build-os/tools/supervise.sh
+consuming_policies: whoever invoked it and reads exit 124; the router names it as the claude-watch fallback
+evidence_refs: build-os/tools/supervise.sh:21; build-os/tools/supervise.sh:46; build-os/tools/supervise.sh:49
+failure_behavior: exit 124 with SUPERVISE_STATUS: TIMEOUT
+rollback_behavior: it starts nothing and owns nothing; the watched work is unaffected
+promotion_requirement: n/a
+demotion_requirement: report TIMEOUT at exit 0 and let the caller decide
+authority_mismatch: declared
+notes: The default 900-second timeout and 5-second interval are chosen numbers with no derivation anywhere (:21), the threshold test is :46 and the exit is :49. This is a mild case — the caller supplies the budget and the failure is legible — but it is a chosen threshold terminating a run, and the licence table does not have an exception for mild. CORRECTED: this entry originally cited :16 (a header comment), :47 (an echo) and :50 (a `fi`) — three lines, none of which compares or exits. scan-controls.sh only checks that a cited line is inside the file, not that it does anything, so the miscitation survived the scanner; it was caught by resolving every ref in the registry by hand. The scanner now refuses a ref that lands on a blank line, a comment, a shebang or a lone closer (VACUOUS-REF) — which would have caught the :16 comment and the :50 `fi`, and NOT the :47 echo. The remaining half of the hole is open and is named in the README.
+
+control: tools.handoff_lock
+class: A
+implementation_status: load_bearing
+empirical_status: unvalidated
+runtime_authority: gate
+nervous_system_role: reflex
+inputs: the existence of the lock directory, and the liveness of the pid inside it
+output: acquired / BUSY
+owning_module: build-os/tools/specialist-handoff.sh
+consuming_policies: the handoff path refuses to change the capability profile or launch a child without the lock
+evidence_refs: build-os/tools/specialist-handoff.sh:145; build-os/tools/specialist-handoff.sh:154; build-os/tools/specialist-handoff.sh:218
+failure_behavior: RESULT: BUSY on stderr; no profile change and no child launched
+rollback_behavior: cleanup_handoff removes the lock; INT and TERM traps are installed
+promotion_requirement: n/a
+demotion_requirement: n/a
+authority_mismatch: none
+notes: `mkdir` as a mutual-exclusion primitive is exact. The invariant is "one handoff mutates the profile at a time".
+
+control: tools.handoff_timeouts
+class: C
+implementation_status: load_bearing
+empirical_status: unvalidated
+runtime_authority: gate
+nervous_system_role: reflex
+inputs: elapsed seconds against HANDOFF_TIMEOUT (900), HANDOFF_LOCK_WAIT (30) and HANDOFF_LOCK_STALE (1800)
+output: TIMEOUT, BUSY, or a stale-lock break
+owning_module: build-os/tools/specialist-handoff.sh
+consuming_policies: the handoff path kills the child at timeout and restores focused mode; the stale threshold decides whether another process's lock may be taken
+evidence_refs: build-os/tools/specialist-handoff.sh:39; build-os/tools/specialist-handoff.sh:42; build-os/tools/specialist-handoff.sh:43; build-os/tools/specialist-handoff.sh:151; build-os/tools/specialist-handoff.sh:300
+failure_behavior: kills the child (TERM then KILL), prints RESULT: TIMEOUT, exits non-zero
+rollback_behavior: focused mode is restored; the lock is released
+promotion_requirement: n/a
+demotion_requirement: n/a
+authority_mismatch: declared
+notes: Three chosen durations, none derived. The 1800-second staleness threshold is the sharpest: crossing it lets one process BREAK ANOTHER PROCESS'S LOCK, so a heuristic number is deciding a mutual-exclusion question. Nothing measured establishes that a handoff holding a lock for 1801 seconds is dead.
+
+control: tools.capability_profile_usage
+class: A
+implementation_status: implemented
+empirical_status: unvalidated
+runtime_authority: gate
+nervous_system_role: reflex
+inputs: the subcommand argument
+output: a profile switch, or a usage refusal
+owning_module: build-os/tools/capability-profile.sh
+consuming_policies: specialist-handoff.sh calls it; an operator calls it via /capability-profile
+evidence_refs: build-os/tools/capability-profile.sh:13; build-os/tools/capability-profile.sh:14
+failure_behavior: usage message on stderr, exit 2
+rollback_behavior: an unknown subcommand changes nothing
+promotion_requirement: n/a
+demotion_requirement: n/a
+authority_mismatch: none
+notes: Argument validation. Registered because the scan finds the file, not because it is interesting.
+
+control: tools.skill_budget_audit
+class: C
+implementation_status: decision_contributing
+empirical_status: unvalidated
+runtime_authority: advise
+nervous_system_role: sensor
+inputs: enabledPlugins, installed_plugins.json install paths, and the byte size of every SKILL.md in the startup-enabled set
+output: an installed-inventory count and, separately, the startup-enabled character total against a 30000 budget
+owning_module: build-os/tools/skill-budget-audit.sh
+consuming_policies: an operator reading the report; build-os/memory/skill_budget.md
+evidence_refs: build-os/tools/skill-budget-audit.sh:33; build-os/tools/skill-budget-audit.sh:180
+failure_behavior: none — it exits 0 even when the enabled set is over budget, and even when the target directory does not exist
+rollback_behavior: read-only
+promotion_requirement: it would need the 30000 figure to be verified against the platform rather than assumed
+demotion_requirement: n/a
+authority_mismatch: none
+notes: THE THIRD CORRECTLY-SCOPED CONTROL, and the best example in the repository. 30000 is an assumed platform constant, the byte size of a SKILL.md is an approximation of its token cost, and the whole thing exits 0 regardless. A chosen threshold that refuses to gate on itself. CORRECTED: :21 was a header comment; the entry now cites :180, the only place the budget is actually compared (total_chars > budget), beside :33, the exit 0 that makes the verdict advisory.
+
+# =============================================================================
+# tests/ — controls that refuse rather than report
+# =============================================================================
+
+control: chain.suite_wiring_guard
+class: A
+implementation_status: load_bearing
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: immune
+inputs: every tests/*.sh present on disk, against the chain_suite call sites in tests/build_os_tests.sh
+output: the list of sibling suites that are present but never chained
+owning_module: tests/build_os_tests.sh
+consuming_policies: the top-level suite's FAIL count and exit status — which is the repo's single verification command
+evidence_refs: tests/build_os_tests.sh:856; tests/build_os_tests.sh:858; tests/build_os_tests.sh:859
+failure_behavior: one FAIL naming every unwired suite; the run exits non-zero
+rollback_behavior: read-only
+promotion_requirement: n/a
+demotion_requirement: n/a
+authority_mismatch: none
+notes: "A chained suite that is added to the repo but never wired here would be discoverable-only" is the same anti-shelfware invariant this registry's own reconciliation implements one level up. It is a merger-owned hot file; adding a suite without wiring it turns it red on purpose.
+
+control: chain.result_reconciliation
+class: A
+implementation_status: load_bearing
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: immune
+inputs: each chained suite's RESULT line and its process exit status
+output: folded pass/fail counts, or a failure naming the disagreement
+owning_module: tests/build_os_tests.sh
+consuming_policies: the top-level PASS/FAIL totals
+evidence_refs: tests/build_os_tests.sh:820; tests/build_os_tests.sh:822; tests/build_os_tests.sh:832
+failure_behavior: a suite that prints no RESULT is one failure with its log named; a suite reporting zero failures while exiting non-zero is itself a failure
+rollback_behavior: read-only
+promotion_requirement: n/a
+demotion_requirement: n/a
+authority_mismatch: none
+notes: Counts are folded rather than collapsed, because one `ok` for "61 assertions passed" reports the same green if 60 of them silently stopped running.
+
+control: tests.stdin_scan_nonvacuity
+class: C
+implementation_status: load_bearing
+empirical_status: unvalidated
+runtime_authority: gate
+nervous_system_role: immune
+inputs: the count of hook-invocation sites the static scanner matches in this suite's own source
+output: pass, or "it has gone blind, so its verdict below is meaningless"
+owning_module: tests/build_os_tests.sh
+consuming_policies: the suite's FAIL count
+evidence_refs: tests/build_os_tests.sh:935; tests/build_os_tests.sh:957; tests/build_os_tests.sh:960
+failure_behavior: one FAIL; the run exits non-zero
+rollback_behavior: read-only
+promotion_requirement: n/a
+demotion_requirement: n/a
+authority_mismatch: declared
+notes: PIN_MIN_SITES=10 is the number of sites that happened to exist when it was written. The INVARIANT is "the scanner must not be blind"; the NUMBER is a snapshot of this file's current shape, and deleting two legitimate invocation sites fails the suite. Every "not vacuous" minimum in this repository has this shape.
+
+control: tests.nonvacuity_minimums
+class: C
+implementation_status: load_bearing
+empirical_status: unvalidated
+runtime_authority: gate
+nervous_system_role: immune
+inputs: how many artefacts, files, links, scripts, blocks, rows, receipts or quoted lines each scanner or driver found, in any suite under tests/
+output: pass, or a FAIL declaring the scan vacuous
+owning_module: tests/entitlement_tests.sh
+consuming_policies: the FAIL count of twelve suites (pilot_kit, entitlement, control_registry, release_metadata, speed_benchmark, lane_declaration, metrics_adoption, build_os_maintenance, lane_enforcement, swarm_merge, scaffold_seeding, gate_depth), every one chained into tests/build_os_tests.sh
+evidence_refs: tests/pilot_kit_tests.sh:97; tests/pilot_kit_tests.sh:115; tests/pilot_kit_tests.sh:117; tests/pilot_kit_tests.sh:176; tests/pilot_kit_tests.sh:255; tests/pilot_kit_tests.sh:304; tests/pilot_kit_tests.sh:316; tests/pilot_kit_tests.sh:327; tests/pilot_kit_tests.sh:334; tests/pilot_kit_tests.sh:367; tests/pilot_kit_tests.sh:458; tests/entitlement_tests.sh:126; tests/entitlement_tests.sh:136; tests/entitlement_tests.sh:345; tests/entitlement_tests.sh:481; tests/control_registry_tests.sh:79; tests/control_registry_tests.sh:184; tests/control_registry_tests.sh:440; tests/control_registry_tests.sh:668; tests/release_metadata_tests.sh:121; tests/release_metadata_tests.sh:200; tests/release_metadata_tests.sh:315; tests/speed_benchmark_tests.sh:397; tests/speed_benchmark_tests.sh:531; tests/speed_benchmark_tests.sh:542; tests/lane_declaration_tests.sh:493; tests/lane_declaration_tests.sh:496; tests/metrics_adoption_tests.sh:418; tests/metrics_adoption_tests.sh:421; tests/build_os_maintenance_tests.sh:88; tests/lane_enforcement_tests.sh:56; tests/swarm_merge_tests.sh:404; tests/scaffold_seeding_tests.sh:241; tests/gate_depth_tests.sh:73
+failure_behavior: a FAIL per blind scanner; the run exits non-zero
+rollback_behavior: read-only
+promotion_requirement: n/a
+demotion_requirement: n/a
+authority_mismatch: declared
+notes: ONE ENTRY COVERING A FAMILY OF 34, IN 12 FILES — corrected from 5 refs and a claim of "six", which undercounted by 28 and was falsifiable with one grep. THE INCLUSION RULE, so the membership can be re-derived rather than trusted: a comparison in tests/*.sh of the form `-ge N` or `-gt N` with N > 1 that floors how much a scanner or driver COVERED, and whose failure makes every assertion downstream of it meaningless. N <= 1 is excluded deliberately — "the scan found at least one thing" IS the invariant and is Class A; every constant above 1 is a snapshot of the tree on the day it was written. The scan finds 37 such lines; three are excluded with stated reasons (build_os_maintenance_tests.sh:193, a self-constructed fixture's size; pilot_kit_tests.sh:340, a length floor on failure text; speed_benchmark_tests.sh:405, which mirrors metrics.record.note_minimum and would otherwise be classified twice). 34 remain and all 34 are this control; tests/control_registry_tests.sh section 21 reconciles the scan against this entry so the membership cannot drift silently again. Includes control_registry_tests.sh:389 — `[ "$PASS" -ge 40 ]`, the count of assertions that existed the day THIS packet was written, gating THIS packet's own suite. The vacuity principle is Class A and is one of the best things in this repository; all 34 constants implementing it are Class C, and they are what compares. MISMATCHES.md section 10 lists every member.
+
+control: gatedepth.sentinel_drift
+class: A
+implementation_status: load_bearing
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: immune
+inputs: the depth-budget block extracted between fixed sentinels from build-orchestrator.md, CLAUDE.md and global-claude-md.md, and the numeric budget stated in each
+output: identical / drifted, plus the distinct values seen
+owning_module: tests/gate_depth_tests.sh
+consuming_policies: the suite's FAIL count
+evidence_refs: tests/gate_depth_tests.sh:238; tests/gate_depth_tests.sh:265; tests/gate_depth_tests.sh:271
+failure_behavior: prints the diff and fails; also fails if the extraction itself is empty, so a comparison of nothing is not agreement
+rollback_behavior: read-only
+promotion_requirement: n/a
+demotion_requirement: n/a
+authority_mismatch: none
+notes: Textual identity of a canonical block across three files is an invariant, and the check carries its own vacuity guard. CORRECTED: the vacuity-guard ref was :264, the second line of the comment ABOVE the guard. Off by one, and in the direction that cites prose instead of code. It is :265, the [ "$MATCHED" -ge "${#DEPTH_FILES[@]}" ] test itself.
+
+control: lanedecl.threshold_pinning
+class: A
+implementation_status: load_bearing
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: immune
+inputs: LANE_TINY_MAX_FILES and LANE_TINY_MAX_CHURN as stated in check-adoption.sh and in build-os/memory/tool_router.md
+output: agreement, or a failure
+owning_module: tests/lane_declaration_tests.sh
+consuming_policies: the suite's FAIL count
+evidence_refs: tests/lane_declaration_tests.sh:186; tests/lane_declaration_tests.sh:187; tests/lane_declaration_tests.sh:240
+failure_behavior: a FAIL; the run exits non-zero
+rollback_behavior: read-only
+promotion_requirement: n/a
+demotion_requirement: n/a
+authority_mismatch: none
+notes: The CHECK is an invariant — two files must state the same number — even though the NUMBER it pins is the Class C median recorded under adoption.lane_size_check. This is the distinction worth keeping straight: pinning a heuristic is not itself heuristic, and it is what makes the heuristic reviewable rather than drifting.
+
+control: suite.build_os
+class: A
+implementation_status: load_bearing
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: immune
+inputs: the router, the guidance files, the hooks, the installers, and eleven chained sibling suites
+output: ==== RESULT: N passed, M failed ====
+owning_module: tests/build_os_tests.sh
+consuming_policies: the repository's single verification command; swarm-merge.sh runs it as the post-merge verification
+evidence_refs: tests/build_os_tests.sh:970; tests/build_os_tests.sh:971
+failure_behavior: exits non-zero when FAIL is non-zero
+rollback_behavior: read-only; all fixtures live in mktemp dirs
+promotion_requirement: n/a
+demotion_requirement: n/a
+authority_mismatch: none
+notes: The root of the verification tree. Everything below it inherits its authority.
+
+control: suite.build_os_maintenance
+class: A
+implementation_status: load_bearing
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: immune
+inputs: a cold install of the maintenance layer into a scratch repo, plus executed damage drivers
+output: a RESULT line
+owning_module: tests/build_os_maintenance_tests.sh
+consuming_policies: chained from tests/build_os_tests.sh
+evidence_refs: tests/build_os_maintenance_tests.sh:295; tests/build_os_maintenance_tests.sh:371; tests/build_os_maintenance_tests.sh:372
+failure_behavior: exits non-zero when FAIL is non-zero
+rollback_behavior: read-only with respect to the real tree
+promotion_requirement: n/a
+demotion_requirement: n/a
+authority_mismatch: none
+notes: Checks that its damage driver actually damaged something (:295) before believing the detection it then asserts. The non-vacuity floor at :88 (the installed suite must run >= 100 tests) is NOT part of this entry: it is a fitted Class C constant and belongs to tests.nonvacuity_minimums. This entry previously cited it while declaring authority_mismatch: none, and admitted it in this very note — the mismatch was in the notes field and nowhere the scanner could see it.
+
+control: suite.entitlement
+class: A
+implementation_status: load_bearing
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: immune
+inputs: VERSION, LICENSE, the identity stamps, and an egress scan of the packaged files
+output: a RESULT line
+owning_module: tests/entitlement_tests.sh
+consuming_policies: chained from tests/build_os_tests.sh
+evidence_refs: tests/entitlement_tests.sh:578; tests/entitlement_tests.sh:579
+failure_behavior: exits non-zero when FAIL is non-zero
+rollback_behavior: read-only
+promotion_requirement: n/a
+demotion_requirement: n/a
+authority_mismatch: none
+notes: The egress scan is the control that keeps "local only, no telemetry" falsifiable rather than asserted.
+
+control: suite.gate_depth
+class: A
+implementation_status: load_bearing
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: immune
+inputs: the agent definitions and the depth-budget blocks
+output: a RESULT line
+owning_module: tests/gate_depth_tests.sh
+consuming_policies: chained from tests/build_os_tests.sh
+evidence_refs: tests/gate_depth_tests.sh:67
+failure_behavior: exits non-zero when FAIL is non-zero
+rollback_behavior: read-only
+promotion_requirement: n/a
+demotion_requirement: n/a
+authority_mismatch: none
+notes: Opens with an explicit vacuity guard on its own scanner.
+
+control: suite.lane_declaration
+class: A
+implementation_status: load_bearing
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: immune
+inputs: fixture repos with planted receipts and rows, and the live repository
+output: a RESULT line
+owning_module: tests/lane_declaration_tests.sh
+consuming_policies: chained from tests/build_os_tests.sh
+evidence_refs: tests/lane_declaration_tests.sh:210; tests/lane_declaration_tests.sh:220
+failure_behavior: exits non-zero when FAIL is non-zero
+rollback_behavior: read-only
+promotion_requirement: n/a
+demotion_requirement: n/a
+authority_mismatch: none
+notes: Asserts the live cross-check is not red AND that its green is not vacuous — both halves, which is rarer than it should be.
+
+control: suite.lane_enforcement
+class: A
+implementation_status: load_bearing
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: immune
+inputs: the router's and the orchestrator's lane rows
+output: a RESULT line
+owning_module: tests/lane_enforcement_tests.sh
+consuming_policies: chained from tests/build_os_tests.sh
+evidence_refs: tests/lane_enforcement_tests.sh:49; tests/lane_enforcement_tests.sh:202; tests/lane_enforcement_tests.sh:203
+failure_behavior: exits non-zero when FAIL is non-zero
+rollback_behavior: read-only
+promotion_requirement: n/a
+demotion_requirement: n/a
+authority_mismatch: none
+notes: Classifies one thing: the suite exits non-zero when FAIL is non-zero. The vacuity guard on its row scanner (:56, >= 5 lane rows on each side) is NOT part of this entry — it is a fitted Class C constant belonging to tests.nonvacuity_minimums. This entry previously cited :57 while declaring authority_mismatch: none, and named the guard in this note as though naming it were declaring it.
+
+control: suite.metrics_adoption
+class: A
+implementation_status: load_bearing
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: immune
+inputs: fixture receipt sets, stores and boundary manifests, plus the live repository
+output: a RESULT line
+owning_module: tests/metrics_adoption_tests.sh
+consuming_policies: chained from tests/build_os_tests.sh
+evidence_refs: tests/metrics_adoption_tests.sh:156; tests/metrics_adoption_tests.sh:428; tests/metrics_adoption_tests.sh:429
+failure_behavior: exits non-zero when FAIL is non-zero
+rollback_behavior: read-only
+promotion_requirement: n/a
+demotion_requirement: n/a
+authority_mismatch: none
+notes: Drives every one of check-adoption.sh's refusals separately, including the boundary abuses.
+
+control: suite.pilot_kit
+class: A
+implementation_status: load_bearing
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: immune
+inputs: the buyer-facing docs, their links, their executable steps and their speed claims
+output: a RESULT line
+owning_module: tests/pilot_kit_tests.sh
+consuming_policies: chained from tests/build_os_tests.sh
+evidence_refs: tests/pilot_kit_tests.sh:486; tests/pilot_kit_tests.sh:487
+failure_behavior: exits non-zero when FAIL is non-zero
+rollback_behavior: read-only
+promotion_requirement: n/a
+demotion_requirement: n/a
+authority_mismatch: none
+notes: Its acceptance-criteria driver checks each criterion both passes on a compliant repo and FAILS on a violating one — falsifiability, tested. SCOPE, stated because it was wrong before: this entry classifies ONE thing — the suite exits non-zero when FAIL is non-zero, which is an invariant. The eleven non-vacuity floors inside the same file (:97 :115 :117 :176 :255 :304 :316 :327 :334 :367 :458) are Class C and belong to tests.nonvacuity_minimums. This entry used to cite :97, so that one line carried two contradictory classifications at once.
+
+control: suite.release_metadata
+class: A
+implementation_status: load_bearing
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: immune
+inputs: VERSION, LICENSE, CHANGELOG.md
+output: a RESULT line
+owning_module: tests/release_metadata_tests.sh
+consuming_policies: chained from tests/build_os_tests.sh
+evidence_refs: tests/release_metadata_tests.sh:349; tests/release_metadata_tests.sh:350
+failure_behavior: exits non-zero when FAIL is non-zero
+rollback_behavior: read-only
+promotion_requirement: n/a
+demotion_requirement: n/a
+authority_mismatch: none
+notes: Its opt-in live re-run is suppressed when chained, so it cannot recurse into its parent.
+
+control: suite.scaffold_seeding
+class: A
+implementation_status: load_bearing
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: immune
+inputs: the templates/ tree and a scaffolded scratch project
+output: a RESULT line
+owning_module: tests/scaffold_seeding_tests.sh
+consuming_policies: chained from tests/build_os_tests.sh
+evidence_refs: tests/scaffold_seeding_tests.sh:352; tests/scaffold_seeding_tests.sh:353
+failure_behavior: exits non-zero when FAIL is non-zero
+rollback_behavior: read-only outside its scratch dirs
+promotion_requirement: n/a
+demotion_requirement: n/a
+authority_mismatch: none
+notes: Pins that a stranger's install receives the TEMPLATE router and not this repository's operator inventory.
+
+control: suite.speed_benchmark
+class: A
+implementation_status: load_bearing
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: immune
+inputs: the recorder, the store, the report generator and the corpus
+output: a RESULT line
+owning_module: tests/speed_benchmark_tests.sh
+consuming_policies: chained from tests/build_os_tests.sh
+evidence_refs: tests/speed_benchmark_tests.sh:514; tests/speed_benchmark_tests.sh:528
+failure_behavior: exits non-zero when FAIL is non-zero
+rollback_behavior: read-only
+promotion_requirement: n/a
+demotion_requirement: n/a
+authority_mismatch: none
+notes: Pins the report's totals against an independent sum, and pins the FINDING block's POSITION rather than merely its presence.
+
+control: suite.swarm_merge
+class: A
+implementation_status: load_bearing
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: immune
+inputs: fixture manifests and scratch git repositories
+output: a RESULT line
+owning_module: tests/swarm_merge_tests.sh
+consuming_policies: chained from tests/build_os_tests.sh
+evidence_refs: tests/swarm_merge_tests.sh:531; tests/swarm_merge_tests.sh:532
+failure_behavior: exits non-zero when FAIL is non-zero
+rollback_behavior: read-only outside its scratch repos
+promotion_requirement: n/a
+demotion_requirement: n/a
+authority_mismatch: none
+notes: Drives the disjointness, hot-file, ambiguity and merge-precondition refusals.
+
+# =============================================================================
+# build-os/registry/ — this registry's own machinery, registered rather than exempt
+# =============================================================================
+
+control: registry.reconciliation
+class: A
+implementation_status: load_bearing
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: immune
+inputs: control_registry.txt, MISMATCHES.md, and the independent scan of the tree
+output: a per-violation report, or a two-line summary
+owning_module: build-os/registry/scan-controls.sh
+consuming_policies: tests/control_registry_tests.sh, chained into tests/build_os_tests.sh
+evidence_refs: build-os/registry/scan-controls.sh:265; build-os/registry/scan-controls.sh:319; build-os/registry/scan-controls.sh:327; build-os/registry/scan-controls.sh:336; build-os/registry/scan-controls.sh:432; build-os/registry/scan-controls.sh:442
+failure_behavior: exit 2 listing every violation, with an explicit instruction not to clear a LAUNDERED violation by changing the class
+rollback_behavior: read-only; writes nothing anywhere
+promotion_requirement: n/a
+demotion_requirement: n/a
+authority_mismatch: none
+notes: The enum checks, the load-bearing rule, the R/D ceiling and the vacuity refusals are invariants over the registry's own text, and they are what this control gates on. Section 8 (:337) added the REVERSE reconciliation: a control named in MISMATCHES.md's summary table must still carry authority_mismatch: declared. Without it, relabelling a heuristic class: A cleared the licence test silently while the report went on accusing the control — demonstrated, at exit 0, before the check existed. "Do not clear a mismatch by changing the class" was a sentence in a header until then.
+
+control: registry.discovery_rule
+class: C
+implementation_status: load_bearing
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: sensor
+inputs: every .sh and .mjs file under build-os/, tests/ and .claude/hooks/, matched against five refusal patterns
+output: the set of refusal-capable control surfaces
+owning_module: build-os/registry/scan-controls.sh
+consuming_policies: registry.reconciliation, which refuses on any unregistered surface or phantom entry
+evidence_refs: build-os/registry/scan-controls.sh:126; build-os/registry/scan-controls.sh:129; build-os/registry/scan-controls.sh:274; build-os/registry/scan-controls.sh:385
+failure_behavior: an unregistered surface is a violation and the run exits 2; a scan finding zero surfaces refuses outright
+rollback_behavior: read-only
+promotion_requirement: n/a
+demotion_requirement: report unregistered surfaces without counting them as violations
+authority_mismatch: declared
+notes: MY OWN GUARD, CLASSIFIED HONESTLY. Three directories, two extensions and five regular expressions are a chosen approximation of "what is a control", not a definition of one. It misses a refusal spelled some other way, it misses every control added inside an already-registered file, and it is blind outside those three directories. Then it exits 2 on its verdict. It is fail-closed and I believe it is the right trade, but a heuristic deciding whether a build stops is precisely what this registry exists to make visible, and exempting the registry's own scanner would have been the least defensible entry in the file.
+
+control: suite.control_registry
+class: A
+implementation_status: load_bearing
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: immune
+inputs: the live registry, the live tree, and eleven fixture registries built to fail
+output: a RESULT line
+owning_module: tests/control_registry_tests.sh
+consuming_policies: chained from tests/build_os_tests.sh
+evidence_refs: tests/control_registry_tests.sh:672; tests/control_registry_tests.sh:673
+failure_behavior: exits non-zero when FAIL is non-zero
+rollback_behavior: read-only outside its mktemp dir
+promotion_requirement: n/a
+demotion_requirement: n/a
+authority_mismatch: none
+notes: Red-drives the load-bearing rule, the R/D ceiling, the laundering ban, an unregistered control, a phantom entry, both halves of the vacuity guard and an unresolvable evidence reference.
