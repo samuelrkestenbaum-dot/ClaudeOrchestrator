@@ -10,19 +10,34 @@
   plan → build → prove → review → record system.
 - **Primary branch / base:** `claude/add-build-os` (current integration base; no
   `main` present in this environment). Active work branch:
-  `claude/project-handoff-merge-ramhds` (tip `641527f`, pushed).
+  `claude/project-handoff-merge-ramhds` (tip `2a3c9b3`, **UNPUSHED** — everything since
+  `641527f` is local-only and awaiting explicit go). Merge-base with
+  `origin/claude/add-build-os` = `7ef50e8`.
 - **Version:** `0.1.0` (`VERSION`), pre-1.0 — **installable, not yet API-stable**.
   Changelog: `CHANGELOG.md`. License: `LICENSE` — proprietary, All Rights Reserved,
   a deliberately conservative **placeholder**; the license model is still an open
   owner decision. **No tags exist in this repo yet.**
-- **Build/test command:** `bash tests/build_os_tests.sh` (657 checks; no network; temp dirs).
-  It **chains** every sibling suite in `tests/` through one `chain_suite` function and folds their
-  counts into its own totals — 221 native + 61 cold-install + 73 lane-enforcement + 91 scaffold-seeding
-  + 42 release-metadata + 169 speed-metrics = 657. A sibling suite present on disk but not chained is itself a failure,
-  so a new suite cannot become discoverable-only. The maintenance layer also has its
+- **Build/test command:** `bash tests/build_os_tests.sh` (657 checks; no network; temp dirs)
+  — **THAT 657 IS STALE, AND IS PINNED STALE ON PURPOSE. The live total at `2a3c9b3` is
+  1418 passed / 0 failed**, measured on a quiet tree at close of
+  `gravito_census_gaps_egress_bandwidth_a`. The token cannot be corrected from
+  `build-os/` alone: `tests/release_metadata_tests.sh` §5 requires `CHANGELOG.md` to contain the
+  literal string `<count> passed`, CHANGELOG line 96 reads `Suite **1338 → 1418** passed` (bolded,
+  so `grep -qF "1418 passed"` misses), and writing `1418 checks` here therefore turns the suite RED
+  (measured: 41 passed, 1 failed). CHANGELOG.md is outside the archivist's write gate. **The fix is a
+  one-line CHANGELOG edit in a follow-on packet — see residue.**
+  **AND THE GUARD DOES NOT DETECT STALENESS.** It detects cross-file *disagreement*; two stale files
+  that agree pass it. Proven at `2a3c9b3`: the suite is green at 1418/0 while this line claims 657,
+  a number 761 checks stale. The check that actually works is opt-in and NOT enabled by the chained
+  suite — `RELEASE_METADATA_LIVE_SUITE=1 bash tests/release_metadata_tests.sh` reports
+  `live suite total (1418 passed) contradicts current_state.md's claim (657)`.
+  It **chains** 14 sibling suites in `tests/` through one `chain_suite` function and folds their
+  counts into its own totals. A sibling suite present on disk but not chained is itself a failure,
+  so a new suite cannot become discoverable-only. **The per-suite breakdown that used to sit here was
+  removed, not updated:** it was a hand-maintained sum that nothing machine-checks, and it had gone
+  stale twice. Run the command for the split. The maintenance layer also has its
   own suite, `./build-os/maintenance/run-tests.sh` (144 checks, node --test). Both are offline and
-  deterministic. Pinned separately: `bash tests/release_metadata_tests.sh` (release metadata +
-  a staleness guard on THIS line — if the count above goes stale again, that suite goes red).
+  deterministic. Pinned separately: `bash tests/release_metadata_tests.sh`.
   Cross-platform green: the P-018 200KB capture-bound test now generates its payload **in-child**
   (`MOCK_GEN_BYTES` / `MOCK_STREAM_CHUNKS`) instead of via an env var — the old env delivery
   exceeded Linux `MAX_ARG_STRLEN` (~128KB) and failed only on Linux (P-018.1, tests-only fix).
@@ -41,7 +56,41 @@
 
 ## Where we are
 
-- **Last closed packet:** `gravito_test_harness_stdin_hang_a` — the documented test command no
+- **Last closed packet:** `gravito_census_gaps_egress_bandwidth_a` — the two cheapest census
+  gaps the crosswalk found are closed (receipt
+  `build-os/receipts/gravito_census_gaps_egress_bandwidth_a.md`, commits `86c8f93` + `2a3c9b3`,
+  base `321dced`). `entitlement.egress_scan` (Class A, gate, red_driven) is registered and bound to
+  `ethical_admissibility`, which takes that primitive **off nominal-only for the first time**.
+  `build-os/tools/bandwidth-check.sh` gives `integration_bandwidth` its first bindings:
+  `bandwidth.active_packet_singleton` (**Class C after demotion on review**, gate, mismatch declared
+  — the 14th) and `bandwidth.packet_commit_ceiling` (Class C, **advise**). Two capacity dimensions
+  were **declined out loud**: `write_sets` (observable, but no ceiling is declared anywhere) and
+  `depth` (transcript-only).
+  **Census: 75 controls / 75 bindings; 64 gate / 11 advise / 0 rank / 0 observe; 14 declared
+  mismatches; evidence_refs 235 → 257; inst/proxy/nominal 27/38/6 → 29/40/6; primitives with ≥1
+  instantiating binding 6 → 8; empty primitives 4 → 3; class A54 / B3 / C18.**
+  **`rank` and `observe` are still 0 of 75** — the authority ladder has five rungs and this census
+  uses two, which is why the two bandwidth dimensions were split into separate entries instead of
+  reaching for `gate` a third time.
+  Verdict **pass as fixed**: qa GREEN (1418/0, own parser, baseline reconstructed from a fresh
+  clone, all twelve derived quantities matched), reviewer `fix-then-pass` twice.
+  **The two gates disagreed on the central question** — qa ruled the singleton control Class A, the
+  reviewer ruled it Class C wearing an A label, and the reviewer won. **The mechanical guards did
+  not catch it:** `scan-controls.sh` reconciles class *labels* and cannot reconcile the *arguments*
+  behind them, so the contradiction passed every automated check clean. **The fix for that is the
+  reviewer stage, not another scanner.** Both verdicts were **single-model** — `codex` is absent, so
+  the declared second-eyes row at `tool_router.md:368` went unfulfilled on both passes.
+  **Precedent set, forward-facing only:** new Class-C controls ship at `advise` by default;
+  promotion to `gate` is a separate governance action. It does **not** generalise backward to the
+  existing 13.
+- **Prior, and NOT RECEIPTED in this file:** several packets landed between the stdin-hang close and
+  this one and were never folded into this snapshot — `gravito_fanout_lanes_scaffold_release_a`
+  (`68cae7a`), `gravito_metrics_adoption_guard_a` (`9633928`), `gravito_pilot_kit_a` (`cb8e072`),
+  plus the lane-declaration (`d30aeab`), swarm-merge (`785a851`), control-registry (`ce5ca66` +
+  `e8f34ed`) and crosswalk (`be9de88` + `321dced`) packets. Only the first three have receipts of
+  any kind; the registry packets have **none**. Treat the "Prior" entries below as a record that
+  stops at `641527f`.
+- **Prior:** `gravito_test_harness_stdin_hang_a` — the documented test command no
   longer hangs on an interactive terminal (receipt
   `build-os/receipts/gravito_test_harness_stdin_hang_a.md`, commit `641527f`).
   `tests/build_os_tests.sh` §2 invoked the SessionStart hook with the **caller's stdin
@@ -166,10 +215,23 @@
   `tests/build_os_tests.sh` — 189/189 green (RED 148/38 → GREEN 186/0; +3 list-schema checks → 189/0).
 - **Prior:** P-015 — global install ships the specialist handoff tools (installed hook resolves
   + runs the handoff end-to-end). P-014 — zero-touch specialist orchestration.
-- **Now:** none active.
-- **Next (candidates):** decide Context Mode routing enablement (stays non-secret pilot);
-  name a target repo + approve
-  a secret for the GH Actions; authorize/enable the deferred connectors.
+- **Now:** none active. `gravito_census_gaps_egress_bandwidth_a` is **closed**; the branch is
+  **unpushed** and stays that way pending explicit go.
+- **Next (candidates), cheapest first — all from this close's residue:**
+  1. **The stale-count fix that this close could not make** — one literal `1418 passed` in
+     `CHANGELOG.md` plus the matching `1418 checks` token here. Needs a lane that may write outside
+     `build-os/`. Consider also flipping the live cross-check on by default, since the guard named
+     "staleness guard" currently cannot detect staleness.
+  2. **Machine-check `MISMATCHES.md` §10's file/lines table** — the `:668` drift survived a green
+     suite because nothing verifies it. Highest value per line of the six.
+  3. **`tests/entitlement_tests.sh:296-305`'s hardcoded 12-file `PACKET_FILES` list** — already
+     two files behind after this packet.
+  4. **`swarm-merge.sh` glob-overlap false negatives** (`src/*.ts` vs `src/foo*`).
+  5. **Assert `active_packet.md` exists and is tracked** — the singleton gate's disclosed evasion.
+  6. **`maint.tripwire_coverage_scan` — registered `refuted` and still gating.** Strongest demotion
+     candidate in the census; **BLOCKED on the authority envelope, an operator decision.**
+  Carried, unrelated: decide Context Mode routing enablement (stays non-secret pilot); name a target
+  repo + approve a secret for the GH Actions; authorize/enable the deferred connectors.
 
 ## Stable facts (slow-changing)
 

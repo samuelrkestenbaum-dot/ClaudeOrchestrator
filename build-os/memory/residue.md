@@ -166,6 +166,75 @@
   an honesty instrument: the artifact that judges whether claims are overstated was itself judged
   by a single model.
 
+### From `gravito_census_gaps_egress_bandwidth_a` (2026-07-31, receipt `build-os/receipts/gravito_census_gaps_egress_bandwidth_a.md`)
+
+- **(a) `swarm-merge.sh`'s disjointness check has FALSE NEGATIVES.** Two globs that overlap on a
+  real path are not reported as overlapping — `src/*.ts` and `src/foo*` **both match `src/foo.ts`**
+  and the check passes. The backstop at `:363` does not close it: it only covers **pre-existing**
+  paths, and only when `--repo` is passed. So a fan-out manifest can be declared disjoint, pass
+  validation, and still have two agents owning the same file — which is the one thing the manifest
+  exists to prevent. CLAUDE.md's fan-out gate rests on this check.
+- **(b) `tests/entitlement_tests.sh:296-305`'s hardcoded 12-file `PACKET_FILES` list decays
+  silently as the tree grows.** It is a hand-maintained fileset with no vacuity floor and no
+  derivation from the tree, so files added after it was written are simply not scanned and nothing
+  reports the gap. **This packet added two shell files it does not cover**, so the list is already
+  behind. A scanner that silently covers less of the tree each packet is worse than one that fails.
+- **(c) Nothing asserts `active_packet.md` exists and is tracked.** This is
+  `bandwidth.active_packet_singleton`'s **own disclosed evasion**: deleting or untracking the file
+  makes the singleton gate pass trivially. Disclosed in the entry, not closed.
+- **(d) `maint.tripwire_coverage_scan` is registered `refuted` and still gates.** The reviewer
+  called it **the strongest demotion candidate in the census** — a control whose empirical status is
+  `refuted` should not hold `gate` authority. **BLOCKED on the authority envelope:** clearing it
+  means re-authorising a control, which is the operator's decision and not a builder's. Carried
+  deliberately, not overlooked.
+- **(e) Nothing machine-checks `MISMATCHES.md` §10's file/lines table.** The
+  `entitlement.egress_scan` technique-limit disclosure was added, but the table itself is
+  hand-maintained. **This is exactly how the `:668` drift survived a green suite:** commit 1's
+  104-line insert moved an assertion from `:668` to `:772`, the reference was bumped in three places
+  and missed in the table, and `:668` had drifted onto a comment line — so the file contradicted
+  itself about the same assertion while every automated check stayed green. Highest value per line
+  of the follow-ons here.
+- **(f) `current_state.md`'s suite count is PINNED STALE and only half fixable.** The live total is
+  **1418**; the guard-bound token still reads **657**. Measured, both directions:
+  writing `1418 checks` turns the suite **RED** (`41 passed, 1 failed`) because
+  `tests/release_metadata_tests.sh` §5 requires `CHANGELOG.md` to contain the literal
+  `<count> passed` and CHANGELOG line 96 reads `Suite **1338 → 1418** passed` (bolded, so `grep -qF`
+  misses). **`CHANGELOG.md` is outside the archivist's write gate**, so the archivist cannot make
+  the matching edit. The fix is one literal string in CHANGELOG plus the token here, in a lane that
+  may write outside `build-os/`.
+- **(g) THE STALENESS GUARD DOES NOT DETECT STALENESS.** Worse than (f) and the reason (f) survived
+  three packets. §5 checks cross-file **agreement**, not liveness — **two stale files that agree
+  pass**. Proven at `2a3c9b3`: the suite is green at 1418/0 while `current_state.md` claims 657, a
+  number **761 checks stale**. The check that actually works exists and is **opt-in and not enabled
+  by the chained suite**: `RELEASE_METADATA_LIVE_SUITE=1 bash tests/release_metadata_tests.sh`
+  correctly reports `live suite total (1418 passed) contradicts current_state.md's claim (657)`.
+  A guard that is named for a failure mode it cannot detect by default is a false comfort.
+- **(h) THE MECHANICAL GUARDS DID NOT CATCH THIS PACKET'S CENTRAL DEFECT — and no scanner can.**
+  `bandwidth.active_packet_singleton` shipped as **Class A** with an argument that did not support
+  it, and **passed every automated check clean**, because `scan-controls.sh` reconciles class
+  **labels** across files and cannot reconcile the **arguments** behind them. The guard surface is
+  now thorough enough to *feel* comprehensive while being blind to the exact failure mode the
+  registry exists to prevent: a control overstating its own evidence. **The fix is the reviewer
+  stage, not another scanner** — recorded explicitly so a future packet does not respond to this by
+  building a label-checker that cannot, in principle, work. The reviewer's ruling, kept because it
+  is the commercial argument and not only the honest one: *"a system that demotes its own new
+  control's class on review is the demo."*
+- **(i) Precedent set, FORWARD-FACING ONLY:** new Class-C controls ship at **`advise`** by default;
+  promotion to `gate` is a **separate governance action**. `bandwidth.packet_commit_ceiling` is the
+  first control under it. **This does NOT generalise backward to the existing 13 declared
+  mismatches** — the reviewer ruled they are **not one population** and must not be swept by a
+  single rule. Do not let a future cleanup packet apply this retroactively.
+- **(j) `rank` and `observe` remain 0 of 75.** The authority ladder has five rungs and the census
+  uses two (64 gate / 11 advise). A 64/11/0/0 distribution carries almost no information. Not a
+  defect with a fix attached — a standing observation about whether the ladder is real.
+- **(k) Second-eyes was declared and NOT delivered, on both passes.**
+  `build-os/memory/tool_router.md:368` routes reviewer second-eyes to Codex (`codex` CLI /
+  Codex-for-Claude-Code plugin). **`codex` is not on PATH and no Codex plugin is installed**, so the
+  row went unfulfilled in **both** the review and the re-review. **Record as an unfulfilled declared
+  capability, not a pass.** It matters more than usual here: the defect that mattered most was a
+  judgement call about the strength of an argument — precisely what a second model is for. Either
+  install Codex or stop declaring the row.
+
 ## Known risks / debt
 
 - **Ephemerality → solved via committed bootstrap (P-004):** the remote container is
@@ -300,7 +369,11 @@
 - Production boundaries default-OFF: secrets, OAuth, DDL, remote-DB writes,
   payments, flags, canaries, telemetry, deploys, merges, external sends — each a
   separate explicit approval.
-- Feature-branch push only (`claude/orchestrator-tools-list-e0mdaz`); no PR/merge.
+- **`claude/project-handoff-merge-ramhds` is UNPUSHED at `2a3c9b3`.** Everything since `641527f`
+  — including both commits of `gravito_census_gaps_egress_bandwidth_a` — is **local-only**. No push,
+  no merge, no tag, no PR, no deploy. Awaiting explicit go.
+- **Re-authorising `maint.tripwire_coverage_scan`** (registered `refuted`, still gating) is an
+  **operator decision**, not a builder's. Deliberately not taken.
 
 ---
 _Append-only working notes._
