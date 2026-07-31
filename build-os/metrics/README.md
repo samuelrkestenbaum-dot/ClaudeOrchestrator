@@ -39,6 +39,8 @@ costs you history and nothing else.
 | `packet_metrics.tsv` | the append-only store — 16 tab-separated columns, one row per packet |
 | `record-packet.sh` | the recorder: appends one **validated** row; also `--validate` and `--verify-git` |
 | `report-speed.sh` | the report generator: renders the store, totals it, and refuses to render an empty one |
+| `check-adoption.sh` | the adoption guard: reconciles `build-os/receipts/*.md` against the store and fails when a packet closed without recording |
+| `adoption_boundaries.tsv` | the one dated grandfather boundary per obligation — the guard's entire exemption mechanism |
 | `task_corpus.md` | the fixed, versioned task corpus that makes future runs comparable |
 | `COMPARISON_PROTOCOL.md` | how a real A/B would be run — specified, and openly not run |
 
@@ -125,6 +127,54 @@ in the seeded store for exactly that reason. It had not closed when its own
 instrument was committed. Writing a partial row for it — Commit 1's diff with an
 empty round count — would have put a number in the store that the store could
 never fix, which is the failure mode this whole file argues against.
+
+### And something checks that it happened — `check-adoption.sh`
+
+The obligation above used to be a convention. The recorder refused a bad row and
+the report refused an empty store, but **nothing failed when nobody recorded at
+all**, and the predictable end state of that gap is a store frozen at its seed
+rows while every artifact around it says the system is measured. That is
+shelfware, and it is the most likely way this instrument dies.
+
+```bash
+build-os/metrics/check-adoption.sh            # 0 = adopted, 2 = refused
+build-os/metrics/check-adoption.sh --verbose  # also lists what it skipped, and why
+```
+
+It reconciles the arrival log against the store: every `build-os/receipts/<id>.md`
+must have a row whose `packet_id` is that receipt's filename stem. Four things
+keep it honest, and each one is a failure mode it was built against:
+
+- **It cannot be satisfied by junk.** A row counts as recording the packet only
+  if it names a lane and a date, names commits this repository actually
+  contains, fills at least 4 of the 11 measurable cells, gives a rounds count
+  *or* says in the note why rounds is `-`, and carries a note long enough to
+  attribute its numbers. Anything less is reported as **HOLLOW**, which is worse
+  than MISSING — a dash-filled row is a missing row wearing evidence.
+- **It never taxes the small lanes.** `read-only`, `diagnosis` and `tiny` close
+  with no packet and no receipt, so they never enter the scan; a receipt that
+  declares one of those lanes is skipped by name. A guard that invents work for
+  a one-line fix is a guard that gets switched off.
+- **Historical receipts are exempted by a date, not by a list.**
+  `adoption_boundaries.tsv` declares exactly two obligations
+  (`row_required_after`, `single_commit_required_after`), each with one date and
+  a stated reason. There is deliberately **no per-packet exemption syntax** — an
+  exception list that can grow is shelfware with extra steps — and both dates
+  are pinned literally by `tests/metrics_adoption_tests.sh`, so moving one costs
+  a reviewed edit. A receipt's effective date comes from git (when the file
+  entered history) and falls back to its `**Date:**` line, so a brand-new
+  receipt fails closed and omitting the date is not a dodge.
+- **It refuses instead of passing vacuously.** Zero receipts found, zero rows in
+  the store, or zero receipts *in scope* are all refusals. That last one is what
+  stops the boundary being used as an off switch: pushing it forward until
+  nothing is in scope empties the guard, and a guard that cannot fail must not
+  report success.
+
+**What it cannot catch:** a wrong number honestly recorded. It checks that a
+closing packet recorded something meaningful and that the commits are real — not
+that the round count is true. It also only walks receipt → row, so a row with no
+receipt (the reference corpus rows are exactly this) is not flagged, and a
+receipt whose filename does not match its `packet_id` reads as missing.
 
 ## Using it
 

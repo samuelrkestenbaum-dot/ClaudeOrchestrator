@@ -838,6 +838,7 @@ chain_suite "tests/lane_enforcement_tests.sh"     "lane proportionality and fan-
 chain_suite "tests/scaffold_seeding_tests.sh"     "customer scaffold seeding"
 chain_suite "tests/release_metadata_tests.sh"     "version, license and changelog"
 chain_suite "tests/speed_benchmark_tests.sh"      "the packet speed measurement instrument"
+chain_suite "tests/metrics_adoption_tests.sh"     "the metrics adoption guard"
 
 # A chained suite that is added to the repo but never wired here would be
 # discoverable-only — the exact defect chaining exists to prevent. Assert the
