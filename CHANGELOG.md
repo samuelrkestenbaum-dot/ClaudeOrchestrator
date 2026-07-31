@@ -14,8 +14,73 @@ deprecation cycle. Pin a commit if you need stability.
 
 ### In flight (not landed at the released commit)
 
+- **A Neurocosmology crosswalk: what each control is FOR.** The registry says
+  what kind of evidence a control is and how much authority it exercises; it
+  could not say what universal function the control instantiates.
+  `build-os/registry/neurocosmology_crosswalk.txt` binds each of the **71**
+  registered controls to exactly one of **17** primitives — reachability,
+  meaning metric, mass, valence, agency, energy, homeostasis, integration
+  bandwidth, boundary, ethical admissibility, epistemic quality, latent state,
+  durability, gated plasticity, collective coherence, goal ecology, wisdom — and
+  records, per primitive, what the bindings **miss**. It is a **separate stanza
+  file, not an 18th field** on each control record: a census must not be edited
+  by an interpretation, the load-bearing `known_limitations` field is
+  per-primitive rather than per-control, and keeping each binding's class and
+  authority as a **deliberate copy** is what makes a one-sided edit detectable.
+  - **No mathematics was implemented.** No Φ, no coherence measure, no goal
+    ecology, no value-of-information term, no learned model; no control created
+    and no authority granted. A conceptual equation must not control production
+    before its quantities are computable. A test asserts the artefact is inert
+    data and owns no control.
+  - **The finding is which slots are EMPTY.** `runtime_authority: rank` — the
+    tier that exists to order work or select between options — is held by
+    **0 of 71** controls; 61 gate, 10 advise, and every one answers yes/no about
+    an artefact that already exists. So **`meaning_metric`, `valence`,
+    `goal_ecology` and `integration_bandwidth` have zero bound controls**, and
+    `mass` and `wisdom` carry one **nominal** binding each: the only ordering in
+    the system takes `inputs: none`, and the only control that selects gets no
+    outcome feedback. `integration_bandwidth` is the one nobody predicted — the
+    whole theory of work-in-flight (one packet, ≤2 commits, a bounded fix round)
+    is prose in `CLAUDE.md` and not a registered control.
+  - **The coverage is deliberately not flattered.** Of 71 bindings only **27
+    instantiate**; 38 are proxies and 6 are nominal, nominal is recorded as
+    information rather than as coverage, and **only 6 of the 17 primitives hold
+    even one instantiating binding**. `homeostasis` holds 19 bindings and
+    exactly **one** instantiates, because 14 are `red_driven` test suites and a
+    green suite is evidence that *planted* defects are caught.
+    `epistemic_quality` holds 22 and its entry says plainly that the count
+    overstates the contact: 46 of 71 controls are `red_driven`, 3 are
+    `field_observed`, one is `refuted`.
+  - **The count got worse on review, and that is the working direction.** The
+    first draft read 32 / 36 / 3. Review demoted **eight** bindings — five from
+    `instantiates` to `proxies`, three from `proxies` to `nominal` — in every
+    case because the label disagreed with the entry's own `known_limitations`,
+    which had already conceded the gap. That is the exact defect the crosswalk
+    exists to catch, found inside the crosswalk. It takes `boundary`,
+    `durability` and `energy` to **zero instantiating bindings** and makes
+    `reachability` and `ethical_admissibility` **nominal-only** alongside `mass`
+    and `wisdom` — four primitives whose entire coverage is, by this file's own
+    rule, not coverage.
+  - **Sharpest result:** `ethical_admissibility` has one binding, a provenance
+    check. The strongest rule this system states about itself — never push,
+    merge, deploy, publish or touch secrets without explicit go — has **no
+    registered control**. The one real security invariant, the egress scan,
+    lives inside `suite.entitlement` and is not separately registered, which is
+    the registry README's known hole #1 stated in this framework's vocabulary.
+  - Pinned by `tests/neurocosmology_crosswalk_tests.sh` (**40** assertions, 10
+    red drives) with membership **derived from the census in both directions**,
+    so a control added to the registry and never bound fails. **Every cell** of
+    the coverage table — `bound`, `inst`, `proxy`, `nom`, `classes` and
+    `authorities` — is recomputed from the artefact, after review found that
+    reconciling only the first two left a row free to claim `authorities: rank`,
+    a tier **0 of 71** controls hold, and still pass. Three existing guards
+    fired on this packet's own work and were obeyed rather than worked around:
+    `scan-controls.sh` demanded the new suite be registered (entry 71), and §21
+    caught a fitted 120-character floor inside it and then a fitted `-ge 2` in
+    the new reconciliation's own red drive — both now derived, not fitted.
+
 - **A control registry, with the actual instances.** `build-os/registry/`
-  classifies all **70** consequential controls that already run in this
+  classifies all **71** consequential controls that already run in this
   repository: evidentiary class (`R` research / `A` hard invariant / `B`
   deterministic metric / `C` heuristic policy / `D` learned model), separately
   declared implementation status, empirical status, the runtime authority each
@@ -26,10 +91,10 @@ deprecation cycle. Pin a commit if you need stability.
   reason `packet_metrics.tsv` is a TSV, at a shape where a 17-column TSV would
   not be readable.
   - **The finding, in `build-os/registry/MISMATCHES.md`.** Three numbers, each
-    with the one-line derivation beside it: **11 of the 70 gate on `unvalidated`
+    with the one-line derivation beside it: **11 of the 71 gate on `unvalidated`
     evidence** — eleven controls can stop the build and nothing has established
     that any of them discriminates, which is the sharpest of the three;
-    **13 of the 70 exercise `gate` on a class that does not license it**; and,
+    **13 of the 71 exercise `gate` on a class that does not license it**; and,
     because an entry is not a line, **55 distinct fitted constants, thresholds
     and prose regexes** across those 13 entries. The lane size check refuses work
     on the median of a four-packet sample; the real-memory tripwire's coverage
@@ -74,7 +139,7 @@ deprecation cycle. Pin a commit if you need stability.
     how `tests/pilot_kit_tests.sh:97` came to be classified both `C`/declared and
     `A`/none at the same time.
   - **A citation must land on something — the hand sweep, converted into a
-    check.** The registry carries 227 `evidence_refs` and, until now, nothing
+    check.** The registry carries 233 `evidence_refs` and, until now, nothing
     machine-checked that one pointed at anything meaningful: they were verified
     to be *inside* the file and nothing else. So a citation could satisfy
     "cites evidence" **vacuously** — two entries cited `#!/usr/bin/env bash`,
