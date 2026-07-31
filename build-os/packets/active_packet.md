@@ -4,42 +4,62 @@
 > the builder implements exactly this and nothing else; the archivist clears it
 > on close. One packet at a time.
 
-- **Status:** **none active.**
+- **Packet id:** `gravito_evidence_policy_matrix_a`
+- **Status:** **built; qa and reviewer returned; fix round applied — awaiting
+  re-review.**
+- **Lane:** substantive.
 
-The last packet, `gravito_census_gaps_egress_bandwidth_a`, is **CLOSED** —
-receipt at `build-os/receipts/gravito_census_gaps_egress_bandwidth_a.md`,
-commits `86c8f93` + `2a3c9b3` on `claude/project-handoff-merge-ramhds`
-(base `321dced`). Verdict **pass as fixed**: qa GREEN at 1418/0, reviewer
-`fix-then-pass` twice, both fix rounds landed and re-verified. **Nothing pushed.**
+## Branch base
 
-Its findings and its six open follow-ons are in the receipt and in
-`build-os/memory/residue.md`; the "where we are" snapshot is in
-`build-os/memory/current_state.md`.
+- `claude/project-handoff-merge-ramhds` at `6b01173`; verified before building
+  (`git merge-base HEAD 6b01173` = `6b01173`, tree clean).
 
-## No packet is staged
+## What it built
 
-The next packet is not chosen. `build-os/memory/current_state.md` → *Next
-(candidates)* lists the six follow-ons cheapest-first; the orchestrator picks
-one and writes it here before any builder runs.
+The **second axis of the licence table**: `class x empirical_status -> licensed
+authority`. README §3 licensed on `class` alone, so a control's
+`empirical_status` licensed nothing and forbade nothing, and a control measured
+and found not to discriminate could stop a build with no rule objecting.
 
-**Do not treat this file as a to-do list.** It holds exactly one packet, or
-nothing. A candidate list is not a packet — it has no scope boundary, no branch
-base, no commit plan, and nothing a builder is authorised to implement.
+- `build-os/registry/README.md` **§3a** — the evidence axis, the composed grid,
+  and the composition rule stated explicitly: `licensed = MIN(class-licensed,
+  evidence-licensed)`. Extends §3; does not replace it.
+- `build-os/tools/evidence-policy.sh` (new) — `matrix` prints the model, `check`
+  **derives** the out-of-licence set from the registry. **No control id appears
+  in its source.**
+- `tests/evidence_policy_tests.sh` (new, 67 assertions), chained from
+  `tests/build_os_tests.sh`. §5a — added in the fix round — reconciles README
+  §3a's evidence **cap** table against the tool's `EVIDENCE_AXIS` in both
+  directions; without it the README's copy of the caps was guarded by nothing.
+- Three entries registered: `evidence.policy_matrix` (C, `advise`, mismatch
+  **none**), `evidence.derivation_nonvacuity` (A, `gate`),
+  `suite.evidence_policy` (A, `gate`). Census **75 → 78**.
 
-## Note on this file's own control
+## The finding — derived, not remembered
 
-`bandwidth.active_packet_singleton` (Class C, `gate`, `authority_mismatch:
-declared`) reads this file to enforce a ceiling of one packet in flight. Two
-things a maintainer should know before trusting it:
+**19 of 78 out of licence.** 14 are the class axis's existing declared
+mismatches, reproduced exactly. **5 are visible only to the evidence axis**:
+four class-A gates on `unvalidated` evidence carrying `authority_mismatch:
+none`, plus `maint.source_scan_mask` advising on `refuted` evidence. **1**
+control gates on `refuted` evidence (`maint.tripwire_coverage_scan`) — already
+declared, but the declaration understates it.
 
-1. **Its ceiling comes from the prose header above, not from `CLAUDE.md`.**
-   "One packet at a time" appears nowhere in the working contract. That is why
-   the control was **demoted from Class A to Class C on review** — the ceiling
-   rests on a docstring inside the control's own input, which makes it a WIP
-   limit somebody chose rather than a definition.
-2. **Deleting or untracking this file makes the gate pass trivially.** That
-   evasion is disclosed in the registry entry and is **open** — nothing asserts
-   this file exists and is tracked (residue item (c)).
+## The authority decision
+
+**The matrix ships at `advise` and does not gate.** It is chosen policy, not a
+definition; a matrix that gated on "chosen thresholds may not gate" would be
+self-refuting. Gating would demote 19 controls automatically with no operator in
+the loop, and the authority envelope that would make that legitimate is **step 2
+and does not exist yet**.
+
+**Nothing was re-authorised.** No existing control's `class`,
+`runtime_authority`, `authority_mismatch` or `empirical_status` changed.
+
+## Out of scope, and deliberately not done
+
+Any change to an existing control's authority (steps 2 and 3),
+`build-os/memory/*` (archivist territory), `/home/user/empathiq-website`.
+**Nothing pushed, merged, tagged or deployed. Local commits only.**
 
 ---
-_Cleared by the archivist on close of `gravito_census_gaps_egress_bandwidth_a`._
+_Written by the builder on handback. The archivist clears this file on close._

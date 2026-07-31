@@ -84,7 +84,7 @@ the concept without performing the function and **is not coverage**.
 | goal_ecology | 0 | 0 | 0 | 0 | — | — |
 | wisdom | 1 | 0 | 0 | 1 | C | advise |
 
-75 bindings: **29 instantiate, 40 proxy, 6 nominal**, and **only 8 of the 17
+78 bindings: **29 instantiate, 43 proxy, 6 nominal**, and **only 8 of the 17
 primitives hold even one instantiating binding.** Every cell in this table —
 the four counts *and* the `classes` and `authorities` columns — is recomputed
 from the artefact by §10 of the suite and fails on drift; nothing in it is
@@ -117,7 +117,7 @@ framework's own vocabulary.
 - **`meaning_metric`** — nothing represents which futures matter. Acceptance
   criteria exist in quantity, but an acceptance criterion is a *binary predicate
   over an artefact that already exists*, and a meaning metric is a *measure over
-  futures*. There are 75 controls that can say "this is wrong" and none that can
+  futures*. There are 78 controls that can say "this is wrong" and none that can
   say "this is worth more than that".
 - **`valence`** — nothing computes benefit, harm, expected loss or user impact.
   `defects_gated` counts caught harm; a typo and a data-loss bug increment it
@@ -317,7 +317,7 @@ regressions.
 `packet_metrics.tsv` carries a `defects_escaped` column and it reads `-` in
 **all 6 of 6 rows**: the system built a place to record escaped regressions and
 has never recorded one. Nothing computes D₁/D₇/D₃₀/D₉₀, nothing measures rework,
-and `rollback_behavior` is a prose field on all 75 entries that no control ever
+and `rollback_behavior` is a prose field on all 78 entries that no control ever
 executes or verifies.
 
 **`collective_coherence` — coherence is enforced as non-collision.** All five

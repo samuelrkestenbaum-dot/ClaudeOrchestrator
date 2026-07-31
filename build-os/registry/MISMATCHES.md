@@ -245,7 +245,7 @@ being the easiest thing to write inside a module body.
 ## 9. `tests.stdin_scan_nonvacuity`
 
 **Gates at** `tests/build_os_tests.sh:960`. **Threshold** `PIN_MIN_SITES=10`
-(`:935`, tested at `:957`).
+(`:938`, tested at `:960`).
 
 "The scanner must not be blind" is Class A. `10` is the number of hook-invocation
 sites that existed the day it was written. Legitimately deleting two of them

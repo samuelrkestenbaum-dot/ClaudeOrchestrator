@@ -78,7 +78,7 @@ system_representation: product objective; acceptance criteria; task value; strat
 observable_proxies: none
 binding_quality: unbound
 claimed_max_authority: none
-known_limitations: EMPTY, and the near-miss is named precisely so nobody fills the slot by relabelling. Acceptance criteria DO exist here in quantity — each of the fifteen test suites is a set of them — but an acceptance criterion is a BINARY PREDICATE OVER AN ARTEFACT THAT ALREADY EXISTS, and a meaning metric is a MEASURE OVER FUTURES. This registry holds 75 controls that can say "this is wrong" and none that can say "this is worth more than that". Binding the suites here would be exactly the inflation this crosswalk exists to refuse.
+known_limitations: EMPTY, and the near-miss is named precisely so nobody fills the slot by relabelling. Acceptance criteria DO exist here in quantity — each of the fifteen test suites is a set of them — but an acceptance criterion is a BINARY PREDICATE OVER AN ARTEFACT THAT ALREADY EXISTS, and a meaning metric is a MEASURE OVER FUTURES. This registry holds 78 controls that can say "this is wrong" and none that can say "this is worth more than that". Binding the suites here would be exactly the inflation this crosswalk exists to refuse.
 
 primitive: mass
 universal_function: what pulls hardest on behaviour

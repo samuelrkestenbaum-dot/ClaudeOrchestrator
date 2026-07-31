@@ -37,14 +37,36 @@
 #                               establishes the one property a gate structurally
 #                               needs — THAT THE CHECK CAN FIRE. What it does not
 #                               establish is the converse, that it stays quiet
-#                               when it should, and that is a question about a
-#                               chosen threshold. Questions about chosen
-#                               thresholds are what the CLASS axis exists to
-#                               answer. Capping `red_driven` here as well would
-#                               charge the same weakness twice, put 50 of 75
-#                               controls out of licence in one edit, and produce
-#                               a matrix that flags nearly everything and
-#                               therefore discriminates nothing.
+#                               when it should. For a CLASS C control that is a
+#                               question about a CHOSEN THRESHOLD, and chosen
+#                               thresholds are exactly what the class axis exists
+#                               to charge — so capping here too would charge the
+#                               same weakness twice.
+#                               THE KNOWN LIMIT OF THAT ARGUMENT, STATED RATHER
+#                               THAN IMPLIED AWAY: it holds at Class C and it
+#                               does NOT hold at Classes A and B, which carry no
+#                               fitted threshold for the class axis to charge. A
+#                               red-driven Class-A check that only ever detects
+#                               the one violation shape its own author planted is
+#                               charged by NEITHER axis: the class axis has no
+#                               chosen threshold to object to, and the evidence
+#                               axis takes the red drive at face value. So at A
+#                               and B this rule rests on the CONSEQUENTIAL half
+#                               below and not on the principled half above, and
+#                               the consequential half is doing the load-bearing
+#                               work precisely where the principled half is
+#                               weakest. That gap is real. It is not a reason to
+#                               change the rule here, because closing it needs
+#                               evidence that a check STAYS QUIET when it should
+#                               — something nothing in this repository measures,
+#                               and something this file could not verify anyway
+#                               (see WHAT IT DOES NOT DO, below).
+#                               THE CONSEQUENTIAL HALF, with the number derived
+#                               rather than remembered: capping `red_driven` at
+#                               `advise` would put 66 of 78 controls out of
+#                               licence in a single edit — 47 of them NEWLY, on
+#                               top of the 19 already named — and a matrix that
+#                               flags nearly everything discriminates nothing.
 #   unvalidated     -> advise   NOTHING has established that it discriminates.
 #                               THE EXPENSIVE RULE. `advise` and not `rank`,
 #                               because `rank` lets a control order work or
@@ -104,10 +126,22 @@
 # other finding refuses would mean either (a) the matrix gates by accident — the
 # one thing it must not do — or (b) a second, quieter exit path threaded through
 # a gate, which is precisely how a chosen policy leaks into an invariant's
-# authority. One file, one authority contract, is what makes `advise` provably
-# `advise` rather than `advise` until someone edits a branch. It also keeps the
-# two axes structurally separate: §5 of the scanner enforces the class axis and
-# this file enforces nothing, which is the difference the design is claiming.
+# authority. Keeping the matrix out of a file whose every finding refuses is what
+# makes `advise` provably `advise` rather than `advise` until someone edits a
+# branch. It also keeps the two axes structurally separate: §5 of the scanner
+# enforces the class axis and this file enforces nothing about any control's
+# licence, which is the difference the design is claiming.
+#
+# NOT "ONE FILE, ONE AUTHORITY CONTRACT" — THIS FILE IS NOT THAT, AND SAYING SO
+# WOULD OVERCLAIM. It carries two exit paths: the advisory `check` path that
+# exits 0 whatever it finds, and `evidence.derivation_nonvacuity`, a Class-A gate
+# that exits 2. What makes that safe is not that the file has one contract but
+# that the two govern DIFFERENT OBJECTS — the gate governs the DERIVATION (can
+# this census be read at all), never any control's licence — and that the gate
+# suppresses the advisory VERDICT rather than being threaded through it. (Per-
+# control lines already streamed to stdout are not retracted; what the refusal
+# withholds is the summary, and exit 2 is what no consumer can misread.) That
+# separation is what scan-controls.sh could not have offered.
 #
 # THIS TOOL ADVISES. `check` EXITS 0 WHATEVER IT FINDS. Three reasons, all of
 # which belong in the registry entry as well:
@@ -173,7 +207,7 @@ LADDER="none observe advise rank gate"
 rank_of(){ case "$1" in none) echo 0 ;; observe) echo 1 ;; advise) echo 2 ;; rank) echo 3 ;; gate) echo 4 ;; *) echo -1 ;; esac; }
 name_of(){ case "$1" in 0) echo none ;; 1) echo observe ;; 2) echo advise ;; 3) echo rank ;; 4) echo gate ;; *) echo '?' ;; esac; }
 axis_cap(){ # <axis-string> <key> -> licensed authority, or the empty string
-  local a t; for t in $2; do :; done
+  local a
   for a in $1; do case "$a" in "$2":*) printf '%s' "${a#*:}"; return 0 ;; esac; done
   return 1
 }
@@ -182,7 +216,7 @@ CMD="${1:-}"
 [ $# -gt 0 ] && shift
 case "$CMD" in
   matrix|check) ;;
-  -h|--help|help) sed -n '2,150p' "${BASH_SOURCE[0]}"; exit 0 ;;
+  -h|--help|help) sed -n '2,185p' "${BASH_SOURCE[0]}"; exit 0 ;;
   "") refuse "no command — expected one of: matrix, check" ;;
   *)  refuse "unknown command \"$CMD\" — expected one of: matrix, check" ;;
 esac
@@ -191,7 +225,7 @@ while [ $# -gt 0 ]; do
   case "$1" in
     --repo)     [ $# -ge 2 ] || refuse "--repo needs a value";     REPO="$2"; shift 2 ;;
     --registry) [ $# -ge 2 ] || refuse "--registry needs a value"; REGISTRY="$2"; shift 2 ;;
-    -h|--help)  sed -n '2,150p' "${BASH_SOURCE[0]}"; exit 0 ;;
+    -h|--help)  sed -n '2,185p' "${BASH_SOURCE[0]}"; exit 0 ;;
     *) refuse "unknown option \"$1\"" ;;
   esac
 done

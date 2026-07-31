@@ -14,6 +14,117 @@ deprecation cycle. Pin a commit if you need stability.
 
 ### In flight (not landed at the released commit)
 
+- **The licence table gets a second axis: `class x empirical_status -> licensed
+  authority`.** README §3's table licensed on **class alone**, so a control's
+  `empirical_status` — whether anybody ever established that the check *works* —
+  licensed nothing and forbade nothing. Under it a control **measured and found
+  not to discriminate** could stop a build with no rule objecting. §3a adds the
+  evidence axis and composes the two by **`licensed = MIN(class-licensed,
+  evidence-licensed)`**: a control may do what *both* allow. Census **75 → 78**
+  entries, `evidence_refs` **257 → 274**, authorities **64 → 66 `gate`** and
+  **11 → 12 `advise`**. `CROSSWALK.md`'s six machine-reconciled columns were
+  recomputed, not edited: **78 bindings**, `epistemic_quality` **22 → 24** and
+  `homeostasis` **20 → 21**.
+  - **The sharp rule: `refuted` may not `gate`, at any class**, and caps at
+    `observe`. It is the one rule here that resolves a real defect
+    *mechanically* rather than by judgement. **Class cannot rescue it** — class
+    is a claim about the KIND of thing checked, evidence a claim about whether
+    the check WORKS, and a hard invariant whose test does not detect violations
+    is an *unchecked* invariant, not a well-classified one. `observe` rather than
+    `advise` because presenting a signal *known* to be dead to a decision-maker
+    who cannot see that is worse than recording it and letting nothing read it.
+  - **The expensive rule: `unvalidated` caps at `advise`.** Not `rank`, because
+    `rank` orders work with **no human in the loop** — an unverified signal
+    silently choosing what happens next differs from one stopping a build only in
+    how loudly it fails. This is the rule that costs, and the count is the
+    finding, not a reason to soften it.
+  - **`red_driven` is deliberately NOT capped.** A red drive establishes the one
+    property a gate structurally needs — *that the check can fire*. Its real
+    weakness, silence when it should not be silent, is at **Class C** a question
+    about a chosen threshold, which is the **class** axis's job, so capping here
+    too would charge the same weakness twice. **The known limit, stated rather
+    than implied away: that argument fails at Classes A and B**, which carry no
+    fitted threshold for the class axis to charge — a red-driven Class-A check
+    that only detects the shape its author planted is charged by *neither* axis,
+    so at A and B the rule rests on the consequentialist half alone, which is
+    where the principled half is weakest. The consequentialist half, derived:
+    capping `red_driven` at `advise` would put **66 of 78** controls out of
+    licence in one edit, **47 of them newly** — a matrix that flags nearly
+    everything discriminates nothing. (**53** is a different number: the count of
+    controls whose `empirical_status` is exactly `red_driven`, which is what
+    `CROSSWALK.md` uses it for.)
+  - **A finding for the operator: step 4 (S1) collides with this axis, twice.**
+    S1 is slated to arrive at `runtimeAuthority: rank` with
+    `empiricalStatus: untested`. At `rank` on evidence that establishes nothing it
+    **ships out of licence on day one** under the expensive rule; and `untested`
+    is **not one of the five evidence tokens**, so
+    `evidence.derivation_nonvacuity` would **refuse the whole derivation at exit
+    2** rather than flag S1 — an unrecognised level must never fall through to
+    permissive. Both are named here and **neither is resolved**: choosing between
+    "add `untested` as a sixth token" and "S1 arrives carrying `unvalidated`" is a
+    governance action for the operator, and adding a token to make a planned
+    control fit is exactly the move this axis exists to make visible.
+  - **Comma-composites resolve by MINIMUM, so `refuted` dominates.** A later
+    refutation *supersedes* an earlier red drive, and the minimum encodes that
+    without needing a timestamp the format does not carry. `red_driven,refuted`
+    licenses exactly what bare `refuted` does.
+  - **THE FINDING — 19 of 78 out of licence, derived on every run and stored
+    nowhere.** No control id appears in the tool's source; a hand-maintained list
+    decays the way `PACKET_FILES` and MISMATCHES.md §10's table did. **14** are
+    the class axis's existing declared mismatches, reproduced exactly. **5 are
+    visible only to the evidence axis**, and they are the point: four **class-A
+    gates on `unvalidated` evidence** — `maint.tripwire_armed_precondition`,
+    `maint.rotate_node_precondition`, `tools.handoff_lock`,
+    `tools.capability_profile_usage` — each carrying `authority_mismatch: none`
+    *because the class table licenses them*, plus `maint.source_scan_mask`, which
+    advises on `refuted` evidence. **One control gates on `refuted` evidence**,
+    `maint.tripwire_coverage_scan`; it is already declared, but the declaration
+    **understates** it — class caps it at `advise`, evidence at `observe`.
+  - **NO composite score, and there will not be one.** Blending the axes would
+    need weights nobody here can derive and would hide **which axis is
+    saturated**. Both are printed on every finding, with the axis that binds it
+    named — the same refusal `bandwidth-check.sh` makes one layer along.
+  - **THE AUTHORITY DECISION, AND IT IS THE LOAD-BEARING ONE: the matrix ships
+    at `advise` and MUST NOT gate.** `evidence.policy_matrix` is Class C,
+    `advise`, `authority_mismatch: none`. It is **chosen policy, not a
+    definition** — a matrix that *gated* on the rule "chosen thresholds may not
+    gate" would be self-refuting exactly as `bandwidth.active_packet_singleton`
+    was found to be. Gating would demote **19 controls immediately and
+    automatically**, the system re-authorising itself with no operator in the
+    loop, and the authority envelope that would make that legitimate **does not
+    exist yet**. And it follows the precedent the reviewer endorsed: new Class-C
+    controls ship at `advise`; promotion is a separate governance action.
+  - **NOTHING WAS RE-AUTHORISED.** No existing control's `class`,
+    `runtime_authority`, `authority_mismatch` or `empirical_status` changed.
+    Naming what is out of licence is not demoting it.
+  - **The one thing it refuses** is a derivation it cannot trust
+    (`evidence.derivation_nonvacuity`, Class A, `gate`): an absent registry, a
+    registry parsing to zero controls, or a stanza carrying an evidence token the
+    matrix has no row for — because an unrecognised level must never fall through
+    to permissive. It earned its keep on its first run: an off-by-one in the
+    field parser made all 75 live stanzas unclassifiable, and it refused rather
+    than reporting a clean licence for the entire census.
+  - **A field-order oddity, checked and dismissed.** An earlier `awk` pass
+    suggested one stanza carried `empirical_status` without a preceding
+    `runtime_authority`. All **78** stanzas share one identical 17-field order,
+    in which `empirical_status` precedes `runtime_authority` **everywhere**. Not
+    a malformed entry; an artefact of the scan.
+  - **`tests/evidence_policy_tests.sh` — 67 assertions, chained.** It drives the
+    claims that would otherwise be the author's word: `check` exits 0 on a
+    violating registry **and on the live one, which violates the matrix**; the
+    sharp rule is driven across **all five classes**; the class axis is read back
+    **out of README §3** and the evidence axis's levels out of `scan-controls.sh`'s
+    `EMP_STATUSES` *and* the tokens occurring live, so neither axis can be
+    invented; and the registry is byte-identical after a run.
+  - **§5a, added on review: the evidence axis's CAPS are reconciled too.** The
+    first version reconciled the class table and the evidence *levels* but left
+    README §3a's **cap column** an unchecked duplicate of the tool's
+    `EVIDENCE_AXIS` — a README saying `unvalidated -> gate` against a tool capping
+    it at `advise` left the whole suite green. That is the same drift surface that
+    put a stale count in three files at once, so it is now diffed in both
+    directions and red-driven both ways: a cap changed to another rung fails the
+    diff, a cap changed to a non-rung fails the row count.
+
 - **Two census gaps closed: the egress scan is registered, and
   `integration_bandwidth` gets its first controls.** The crosswalk found both.
   Census **71 → 75** entries, `evidence_refs` **235 → 257**, authorities

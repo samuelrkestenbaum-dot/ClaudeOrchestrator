@@ -247,11 +247,31 @@ Three of those rows carry the argument:
 - **`red_driven` is deliberately NOT capped**, even though §2 rightly calls it
   weaker than it looks. A red drive establishes the one property a gate
   structurally needs — **that the check can fire**. What it does not establish is
-  the converse, that the check stays quiet when it should, and that is a question
-  about a *chosen threshold* — which is the class axis's job. Capping it here
-  too would charge the same weakness twice, put 53 of 78 controls out of licence
-  in a single edit, and produce a matrix that flags nearly everything and
-  therefore discriminates nothing.
+  the converse, that the check stays quiet when it should. At **Class C** that is
+  a question about a *chosen threshold*, which is exactly what the class axis
+  exists to charge, so capping here too would charge the same weakness twice.
+
+  **The known limit of that argument, and it is not a small one.** The principled
+  half above holds at Class C and **fails at Classes A and B**, which carry *no
+  fitted threshold* for the class axis to charge. A red-driven Class-A check that
+  only ever detects the one violation shape its own author planted is charged by
+  **neither axis**: the class axis has no chosen threshold to object to, and the
+  evidence axis takes the red drive at face value. So at A and B this rule rests
+  on the consequentialist half below and not on the principled half above — and
+  the consequentialist half is doing the load-bearing work precisely where the
+  principled half is weakest. The gap is real and is stated rather than implied
+  away. It is not a reason to change the rule here: closing it requires evidence
+  that a check *stays quiet when it should*, which nothing in this repository
+  measures and which this matrix could not verify anyway, since it takes
+  `empirical_status` at the author's word.
+
+  **The consequentialist half, derived rather than remembered.** Capping
+  `red_driven` at `advise` would put **66 of 78 controls out of licence in a
+  single edit — 47 of them newly**, on top of the 19 already named below. A
+  matrix that flags nearly everything discriminates nothing. (For scale, and not
+  to be confused with it: **53** is the number of controls whose
+  `empirical_status` is exactly `red_driven`, which is the figure CROSSWALK.md
+  uses for a different question.)
 
 **There is no composite evidence score, and there will not be one.** The obvious
 shape is `q = w1*class + w2*evidence`, one number, one threshold. It is refused
@@ -309,6 +329,38 @@ build-os/tools/evidence-policy.sh check    # the out-of-licence list; always exi
 **This section re-authorises nothing.** Naming what is out of licence is not
 demoting it. Every `class`, `runtime_authority`, `authority_mismatch` and
 `empirical_status` in the census is exactly what it was before this axis existed.
+
+#### A finding for the operator: step 4 collides with this axis, twice
+
+Step 4 of the roadmap is **S1**, slated to arrive at `runtimeAuthority: rank`
+carrying `empiricalStatus: untested`. Both halves of that collide with what this
+section just established, and neither collision is resolved here — **naming them
+before S1 is designed is the deliverable**, because both are cheap to design
+around and expensive to retrofit.
+
+1. **S1 ships out of licence on day one.** `rank` is above `advise`, and the
+   expensive rule caps *any* control whose evidence has established nothing at
+   `advise` — the whole point being that `rank` orders work with no human in the
+   loop. A control arriving at `rank` with no evidence is precisely the case the
+   rule was written to catch, so the matrix will name S1 the first time it runs
+   against it. That is the rule working, not the rule mis-firing.
+2. **Worse: `untested` is not one of the five evidence tokens.** The ontology
+   carries `unvalidated`, `red_driven`, `field_observed`, `calibrated`,
+   `refuted`, and nothing else. A stanza carrying `untested` is **unclassifiable**
+   — so `evidence.derivation_nonvacuity` (Class A, `gate`) would **refuse the
+   entire derivation at exit 2** rather than flag S1, and the matrix would report
+   nothing at all about *any* control until the token was reconciled. That is
+   deliberate and it is not a bug: an unrecognised evidence level must never fall
+   through to permissive. But it means a single unrecognised token takes the whole
+   report down, which is worth knowing *before* it happens rather than after.
+
+**This is not resolved here, and resolving it is not this section's call.** The
+two available moves — *add `untested` as a sixth token with its own cap*, or
+*have S1 arrive carrying `unvalidated`, which is what "nobody has checked it yet"
+already means here* — differ in what they claim about the ontology, and choosing
+between them is a governance action for the operator. Adding a token to make a
+planned control fit would be fitting the rule to the case; that is exactly the
+move this axis exists to make visible, so it is named and left open.
 
 ---
 
@@ -393,7 +445,7 @@ in `scan-controls.sh`, with its reason beside it, where `grep` finds it;
 `scan-controls.sh patterns` prints the list and its size, so an allowance
 quietly growing is visible without reading the file. **It is empty today.**
 
-The registry carries **272** `evidence_refs`. That number is not remembered: the
+The registry carries **274** `evidence_refs`. That number is not remembered: the
 same total was previously written down in three artefacts as 218, 184 and 184
 against a live 224, because each was a hand count frozen at a different moment.
 `tests/control_registry_tests.sh` §25 recomputes it from the registry and fails

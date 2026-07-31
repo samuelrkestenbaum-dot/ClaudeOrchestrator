@@ -81,6 +81,8 @@ EVIDENCE="unvalidated red_driven field_observed calibrated refuted"
 LADDER="none observe advise rank gate"
 NCELL=0
 for _c in $CLASSES; do for _e in $EVIDENCE; do NCELL=$((NCELL+1)); done; done
+NEV=0
+for _e in $EVIDENCE; do NEV=$((NEV+1)); done
 
 in_list(){ local v="$1" l; for l in $2; do [ "$v" = "$l" ] && return 0; done; return 1; }
 rank_of(){ case "$1" in none) echo 0 ;; observe) echo 1 ;; advise) echo 2 ;; rank) echo 3 ;; gate) echo 4 ;; *) echo -1 ;; esac; }
@@ -233,6 +235,45 @@ done < "$WORK/live_ev.txt"
 [ -z "$UNCOVERED" ] \
   && ok "every empirical_status token occurring in the live registry has a cap on the evidence axis" \
   || no "evidence token(s) occurring live and licensed by nothing:$UNCOVERED"
+
+echo "== 5a. THE EVIDENCE AXIS'S CAPS ARE A COPY OF README §3a, not a second table =="
+# WHY THIS EXISTS, AND WHY IT WAS MISSING. §4 reconciles the CLASS axis against
+# README §3, and §5 reconciles the evidence axis's LEVELS against the ontology and
+# the live census. Until this block nothing reconciled the evidence axis's CAPS:
+# README §3a's cap column was an unchecked duplicate of the tool's EVIDENCE_AXIS,
+# so the README could say `unvalidated -> gate` while the tool capped it at
+# `advise` and every assertion in this suite would still pass. That is the same
+# drift surface — a number restated in a second place that nothing compares — that
+# put a stale out-of-licence count in three files at once. So the cap table is
+# read back OUT OF THE README and diffed against the axis the tool prints, which
+# catches a change on either side.
+#
+# `NF==5` restricts this to THREE-column tables — `| a | b | c |` — so the
+# composed class x evidence grid in the same section, which is six columns wide,
+# cannot be mistaken for a second cap table. Requiring the cap to be a rung of the
+# ladder drops the header and separator rows; a cap edited to something that is
+# not a rung drops its row instead, which the row count below then catches.
+sed -n '/^### 3a\./,/^## 4/p' "$RREADME" \
+  | awk -F'|' -v lad=" $LADDER " 'NF==5 { e=$2; a=$3;
+      gsub(/[`*[:space:]]/,"",e); gsub(/[`*[:space:]]/,"",a);
+      if (e != "" && index(lad," " a " ") > 0) print e"="a }' \
+  | sort -u > "$WORK/readme_ev.txt"
+NRE="$(grep -c . "$WORK/readme_ev.txt" || true)"; NRE="${NRE:-0}"
+[ "$NRE" = "$NEV" ] \
+  && ok "README §3a's evidence table yields all $NEV cap rows (this comparison is not vacuous)" \
+  || { no "README §3a parsed to $NRE cap row(s), not $NEV — the evidence axis's caps cannot be reconciled"; sed 's/^/      | /' "$WORK/readme_ev.txt"; }
+awk '$1=="axis:" && $2=="evidence"{for(i=3;i<=NF;i++) if($i ~ /:/){split($i,p,":"); print p[1]"="p[2]}}' \
+  "$WORK/out.txt" | sort -u > "$WORK/tool_ev_caps.txt"
+NTE="$(grep -c . "$WORK/tool_ev_caps.txt" || true)"; NTE="${NTE:-0}"
+[ "$NTE" = "$NEV" ] \
+  && ok "the tool printed all $NEV evidence caps to compare against (this comparison is not vacuous)" \
+  || { no "the tool printed $NTE evidence cap(s), not $NEV"; dump; }
+if diff -q "$WORK/readme_ev.txt" "$WORK/tool_ev_caps.txt" >/dev/null 2>&1; then
+  ok "the tool's evidence axis equals README §3a's cap table exactly, row for row"
+else
+  no "the tool's evidence axis and README §3a's cap table disagree"
+  diff "$WORK/readme_ev.txt" "$WORK/tool_ev_caps.txt" | sed 's/^/      | /' | head -8
+fi
 
 echo "== 6. Every cell of the class x evidence grid is stated, once =="
 run matrix >/dev/null
