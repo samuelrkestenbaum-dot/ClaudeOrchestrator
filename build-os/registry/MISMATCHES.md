@@ -70,7 +70,7 @@ the control as `UNREPORTED`.
 | `tests.nonvacuity_minimums` | C | gate | advise | `tests/entitlement_tests.sh:126` (+33 more, §10) | 34 |
 | `tools.handoff_timeouts` | C | gate | advise | `build-os/tools/specialist-handoff.sh:151` | 3 |
 | `tools.supervise_timeout` | C | gate | advise | `build-os/tools/supervise.sh:49` | 2 |
-| `registry.discovery_rule` | C | gate | advise | `build-os/registry/scan-controls.sh:387` | 2 |
+| `registry.discovery_rule` | C | gate | advise | `build-os/registry/scan-controls.sh:397` | 2 |
 | `bandwidth.active_packet_singleton` | C | gate | advise | `build-os/tools/bandwidth-check.sh:136` | 1 |
 
 <!-- MISMATCH-TABLE:END -->
@@ -299,23 +299,35 @@ because Class C licenses `advise` and the class axis is structurally blind to it
 It is one of the five findings only the evidence axis reaches, and all four
 resolutions are closed to it:
 
-- **Demote to `observe`?** `observe` is defined in `README.md` §2 as *"it measures
-  and records. Nothing reads the result."* Two controls read its result — this
-  section's scan gates on it, and `rotate-memory.rootscan.test.mjs` counts on it —
-  and it is `load_bearing` precisely because they do. Demoting it would not lower
-  its authority; it would write a falsehood. `scan-controls.sh` now refuses that
-  combination as `OBSERVE-LB`, and `tests/evidence_policy_tests.sh` §20b drives it
-  red.
-  **The radius is not specific to this control.** `OBSERVE-LB` forecloses
+- **Demote to `observe`?** **This was the closed resolution, and the ladder
+  correction has REOPENED it.** The original argument ran: `observe` was defined
+  in `README.md` §2 by **non-consumption** — it measures and records, and nothing
+  reads the result — while two controls *do* read this one's result (this
+  section's scan gates on it, and `rotate-memory.rootscan.test.mjs` counts on
+  it), and it is `load_bearing` precisely because they do. On that definition
+  demoting it would not have lowered its authority; it would have written a
+  falsehood.
+  **The radius was never specific to this control.** `OBSERVE-LB` foreclosed
   `observe` for **67 of the 81** registered controls — every entry that is
-  `load_bearing` and names a consumer — and **0 of 81 sit at `observe` today**.
-  So the evidence axis's `refuted → observe` cap has **no legal spelling for any
-  wired-in control**: it can be stated as a finding and never written as a row.
-  Compounding it, README §2 defines `none` as *"nothing consumes it"* and
-  `observe` as *"it measures and records. Nothing reads the result."* — **both
-  bottom rungs are defined by non-consumption**, so the ladder has no rung
-  meaning *"it is read, but may cause nothing."* That is a gap in the ladder,
-  not a fact about this entry.
+  `load_bearing` and names a consumer — with **0 of 81 sitting at `observe`**. So
+  the evidence axis's `refuted → observe` cap had **no legal spelling for any
+  wired-in control**: it could be stated as a finding and never written as a row.
+  The cause was definitional. **Both** bottom rungs were defined by
+  non-consumption, so the ladder had no rung meaning *"it is read, but may cause
+  nothing"* — a gap in the ladder, not a fact about this entry.
+  **The operator has since corrected the ladder** (`README.md` §2): `observe` now
+  means the output may be recorded and **consumed for visibility** while causing
+  **no operational consequence**, and a sixth rung `execute` sits above `gate`
+  for output that directly causes mutation. Being consumed is therefore no longer
+  a bar to `observe`. `OBSERVE-LB` survives on the **narrower** ground that
+  `load_bearing` asserts *removing it changes outcomes*, which IS an operational
+  consequence — and it has **moved off the gating path** to
+  `scan-controls.sh`'s advisory channel, because an advisory axis whose
+  prescribed demotion is blocked by a gate is not advisory.
+  **Nothing about this control was changed by that correction**: it is still
+  Class `C`, still `refuted`, still at `advise`, and still out of licence on the
+  evidence axis. What changed is that the remedy is now *writable* rather than
+  merely *prescribable*, and writing it remains the operator's move.
 - **Retire it?** That breaks both consumers.
 - **Improve the evidence?** Its own `promotion_requirement` forbids it: three
   defeats, and the maintainers stopped writing mask heuristics deliberately.
@@ -328,24 +340,47 @@ have* and *does anything read it*, and those come apart exactly here.
 
 **This is not a second demonstration of the `runtime_authority` /
 `deployment_mode` split, and it must not be counted as one.** The decisive test:
-splitting output semantics out of `runtime_authority` would **not** fix this
-control. Even with an `outputSemantics` concept in hand, `observe` still means
-*nothing reads the result*, two controls still read this one's result, and the
-mask still cannot sit on that rung. The collision here is between
-`runtime_authority`'s **consumption clause** and **`implementation_status`** — a
-redundancy between two fields that **both already exist** — not a missing third
-concept. **The remedy is NOT small, and an earlier draft of this paragraph said
-it was — wrongly, in the direction that flatters the fix.** Consumption is
-asserted in **six** places, not one: README §2's *two* bottom rungs (`none`,
-"nothing consumes it", and `observe`, "Nothing reads the result" — both are
-consumption clauses), README §3b's `shadow` row, `authority_envelopes.txt`'s
-header, and both tools' headers. And the decisive one: **the foreclosure is
-enforced by code, not by prose.** `scan-controls.sh`'s `OBSERVE-LB` keys on
-`[ "$aut" = "observe" ]` and hard-codes the semantics in its own refusal message,
-so deleting every line of README prose leaves it refusing at exit 2 and the
-demotion still unwritable for all 67. A remedy its own guard survives is not a
-remedy. That edit is **not made here** — it is named, with its true radius, and
-belongs to its own packet. Nothing about this control has been changed.
+splitting output semantics out of `runtime_authority` would **not** have fixed
+this control. Even with an `outputSemantics` concept in hand, `observe` would
+still have been defined by non-consumption, two controls would still read this
+one's result, and the mask still could not sit on that rung. The collision was
+between `runtime_authority`'s **consumption clause** and
+**`implementation_status`** — a redundancy between two fields that **both already
+exist** — not a missing third concept. **The remedy was NOT small, and an earlier
+draft of this paragraph said it was — wrongly, in the direction that flatters the
+fix.** Consumption was asserted in **six** places, not one: README §2's *two*
+bottom rungs (both were consumption clauses), README §3b's `shadow` row,
+`authority_envelopes.txt`'s header, and both tools' headers. And the decisive
+one: **the foreclosure was enforced by code, not by prose.**
+`scan-controls.sh`'s `OBSERVE-LB` keys on `[ "$aut" = "observe" ]` and hard-coded
+the semantics in its own refusal message, so deleting every line of README prose
+would have left it refusing at exit 2 and the demotion still unwritable for all
+67. **A remedy its own guard survives is not a remedy.**
+
+**That remedy has since been applied, at SEVEN sites and in the code.** The
+ladder was redefined by **consequence** rather than consumption, `execute` was
+added above `gate`, and `OBSERVE-LB`'s message and exit behaviour were both
+rewritten — it now **reports** on the advisory channel instead of refusing at
+exit 2. `tests/evidence_policy_tests.sh` §21 sweeps all **seven** sites **by
+content**, so a site left behind fails the suite rather than being discovered
+later. **Nothing about this control was changed by any of it.**
+
+**Six was the count this section originally recorded, and seven is the count
+that was found.** The seventh is `control_registry.txt` itself, which carried the
+retired rule in two live fields of this very entry — the fields an operator reads
+*while deciding*. **That the count moved is the finding, not a typo:** a remedy
+whose site list is written from prose rather than measured is a remedy that will
+be short by however many sites nobody thought of, which is why §21 sweeps by
+**content** and names its sites rather than counting them.
+
+**And the sweep was itself short, in exactly the shape it was built to catch.**
+§21 originally greped one wording of the retired rule — *"nothing reads the
+result"*, the README's — while the deployment axis states the same rule in a
+**second** wording. Two sites shipped past it carrying the second wording, in the
+two files that **own** that axis. That is the packet's own headline defect
+(`VACUOUS-REF` checks *resolvability*, never *identity*) reproduced one level up
+inside its own new guard. §21 now also refuses a consumption clause on any line
+mapping something **onto** `observe`, which is what catches the second wording.
 
 ### A fifth outcome is missing from the framework — recorded, not built
 
@@ -353,9 +388,14 @@ The operator's step-3 ruling offers four outcomes: **demote**, **correct the
 class**, **improve the evidence**, **retire**. Both controls in this packet
 worked all four and closed all four, which is a legitimate result — but the
 pattern behind it is worth naming. **For 67 of 81 controls (83% of the census),
-demotion ONTO THE RUNG THE `refuted` CAP PRESCRIBES is unspellable**, because
-`OBSERVE-LB` and the ladder's two non-consumption bottom rungs leave no `observe`
-row a wired-in control can be lowered onto. The qualifier matters and an earlier
+demotion ONTO THE RUNG THE `refuted` CAP PRESCRIBES was unspellable**, because
+`OBSERVE-LB` and the ladder's two non-consumption bottom rungs left no `observe`
+row a wired-in control could be lowered onto. **The ladder correction removed
+that blockage** — `observe` is now defined by consequence, so a control may be
+consumed for visibility and sit there — but the fifth-outcome point survives the
+fix and is why it is kept: the framework offered four outcomes and one of them
+was unavailable to five-sixths of the census for definitional reasons nobody had
+noticed. The qualifier matters and an earlier
 draft dropped it: `gate` -> `advise` remains perfectly spellable — 13 of 81 sit
 at `advise` today — and it is the demotion this packet actually measured.
 `maint.tripwire_coverage_scan` closed "demote" because demoting it was measured
@@ -472,7 +512,7 @@ their scope. `tests/control_registry_tests.sh` §22 fails the suite if any
 
 ### The self-indictment
 
-`tests/control_registry_tests.sh:772` is `[ "$PASS" -ge 40 ]`, whose failure
+`tests/control_registry_tests.sh:774` is `[ "$PASS" -ge 40 ]`, whose failure
 branch reaches `[ "$FAIL" -eq 0 ]` and stops the run. **40 is the number of
 assertions that existed the day this packet was written** — the packet whose
 subject is fitted constants that gate. It went unflagged in the first version.
@@ -533,7 +573,7 @@ than curated.
 
 ## 13. `registry.discovery_rule` — this packet's own guard
 
-**Gates at** `build-os/registry/scan-controls.sh:387` (an unregistered surface is
+**Gates at** `build-os/registry/scan-controls.sh:397` (an unregistered surface is
 a violation) and `:454` (`exit 2`).
 **The heuristic** is three directories (`:126`) and five refusal patterns
 (`:129`).
@@ -619,6 +659,129 @@ a heuristic. `binding_kind: instantiates` stands too — a WIP limit is exactly
 what `integration_bandwidth` names, and this control *is* one rather than
 standing in for one. Six other entries in this census are Class C and
 instantiating; the combination is ordinary, and only the class was ever wrong.
+
+---
+
+## 15. THE MUTATION CENSUS — surveyed, reported, and deliberately NOT acted on
+
+The ladder gained a sixth rung, `execute`, meaning *the output may **directly
+cause mutation***. That immediately raises a census question: **which of the 81
+controls actually perform a write, and are they correctly classed?** All 81 were
+surveyed. **Nothing below has been re-authorised** — no `class`,
+`runtime_authority`, `authority_mismatch` or `empirical_status` was changed by
+the packet that wrote this section, and **moving a control to `execute` is a
+re-authorisation that only the operator may make.**
+
+**The headline is not the one the question expects.** Almost no control is
+mis-classed as `gate`-when-it-should-be-`execute`, because **the controls are
+checks and the mutations belong to the modules the checks live in**. A control
+like `swarm.disjointness` outputs a refusal; the `git commit` in the same file is
+not its output. The registry's `owning_module` granularity puts many controls in
+one mutating file without any of them being the mutation.
+
+**The registry already names the world-changing role, and only twice.**
+`nervous_system_role: motor` — *"it changes the world"* — is carried by exactly
+**2 of 81** entries (against 39 `immune`, 27 `reflex`, 6 `conscience`, 6
+`sensor`, 1 `memory`):
+
+| control | class | authority | role | what it actually does |
+|---|---|---|---|---|
+| `maint.managed_set_replacement` | A | **`advise`** | `motor` | *"files copied into an installed repo, replacing prior managed copies"* |
+| `swarm.post_merge_verification` | A | `gate` | `motor` | runs the verification, and **rolls the git index back** on failure |
+
+**`maint.managed_set_replacement` is the sharpest finding in this survey, and it
+is not at `gate` — it is at `advise`.** Its own declared `output` is *files
+copied into an installed repo*, its `failure_behavior` is *"none that stops
+anything — it prints what it could not do and continues; it never exits
+non-zero"*, and its `rollback_behavior` is *"none; a managed file's local edits
+are lost on install"*. Under the corrected ladder `advise` means *the output may
+influence a human or a higher-authority control*. **Copying files over a user's
+edits is not influence.** On the corrected ladder this is `execute` — **two rungs
+up** — and it is the one entry in the census where the recorded authority and the
+recorded behaviour disagree about the *kind* of thing the control is, rather than
+about how far it reaches. It is also `unvalidated`, so nobody has watched it.
+
+**The modules that durably mutate, none of which is registered AS a mutation.**
+Verified by reading the write sites and discarding everything that writes only
+into a `mktemp` sandbox — which is what excludes every test suite, and also
+`real-memory-tripwire.mjs`, which turns out to write nothing at all:
+
+- `build-os/maintenance/rotate-memory.mjs` — `writeFileSync` to a staging path
+  then `renameSync` **onto the live memory file**. The most consequential write
+  in the system.
+- `build-os/tools/swarm-merge.sh` — **creates a commit**, but only behind an
+  explicit `--commit` opt-in; the default path stages and verifies and stops.
+  Worth noting because `swarm.post_merge_verification`'s `rollback_behavior`
+  states *"nothing is committed"*, which is true of the default path and not of
+  the tool.
+- `build-os/metrics/record-packet.sh` — appends a row to the live metrics store.
+- `.claude/hooks/build-os-identity.sh` — writes the identity stamp into the repo.
+- `build-os/tools/specialist-handoff.sh` — takes a lock file under `$HOME`.
+
+**The gap this exposes is a coverage gap, not a misclassification.** Five modules
+perform durable writes and **not one of those write ACTIONS is a registered
+control at any authority** — the registry covers the checks that guard them. That
+is precisely the thing `execute` was added to be able to express, and expressing
+it means **writing new entries**, which is registration, which is the operator's.
+
+**Two governance questions are recorded here and answered nowhere:**
+
+1. **Should Class A license `execute`?** Today no class does, so `execute` is a
+   rung with no licensed occupant. That is deliberate: adding a rung must not
+   grant anyone anything.
+2. **Should `maint.managed_set_replacement` move from `advise` to `execute`,**
+   and should the five mutating actions above be registered in their own right?
+
+Both are re-authorisations. **Neither is performed here.**
+
+---
+
+## 16. THE LADDER'S SPELLING IS NOT SWEPT — recorded as a packet, not built here
+
+`tests/evidence_policy_tests.sh` §21 sweeps the **semantics** of `observe` across
+seven named sites, by content, in both of the retired rule's wordings. **It does
+not sweep the ladder's SPELLING**, and that omission has a measured cost: adding
+`execute` above `gate` left the five-rung enumeration
+`none < observe < advise < rank < gate` behind in **five** live places, and every
+one of them was found by a human reading the diff rather than by the suite.
+**This section originally said four**, and the fifth was found by the re-review
+after the correction shipped — in a file this packet had already edited. It
+escaped every sweep, mine and the reviewer's, because **the enumeration wraps
+across a line break**: `none < observe < advise` on one line, `< rank < gate)` on
+the next. No same-line grep can see it; a multiline scan finds it immediately.
+The undercount is left visible above rather than silently corrected, because a
+completeness claim that was wrong is the evidence for why this guard is needed.
+
+The sharpest of the four was **a passing test whose transcript printed a false
+ladder**: `tests/authority_envelope_tests.sh` and `tests/evidence_policy_tests.sh`
+each compared the tool's printed ladder against the **six**-rung `$LADDER` — the
+assertion was correct — and then reported success with a hard-coded **five**-rung
+string. The proof was right and the **evidence it emitted was wrong**, which is
+the worst of the four because it is the one a reader would have trusted.
+
+**Why it is a separate packet and not part of the fix that found it:**
+
+- **The site set is different.** The drift landed in `tests/*.sh` `ok` messages, a
+  README-declaration probe, and a rank comment — **none** of which are among §21's
+  seven semantic sites. Sweeping it means declaring and justifying a second,
+  larger site list.
+- **The check is a different shape.** §21 asks *"does this line carry a forbidden
+  clause?"*. This asks *"does this enumeration STOP at `gate`?"* — and the
+  five-rung string is a **prefix of the correct six-rung one**, so a naive grep
+  matches the right answer as readily as the wrong one. It needs a
+  continuation test, not a containment test.
+- **Bolting a second new guard onto a bounded fix round is how fix lists arrive in
+  installments**, which is the failure the round budget exists to prevent.
+
+**The five sites were repaired by hand and are listed so the packet can prove it
+found them all** — a claim it got wrong once already, which is the point:
+`build-os/tools/authority-envelope.sh` (the S1 argument), `README.md` §2's
+composition rule, both suites' `ok` messages (now derived from `$LADDER` rather
+than typed), `tests/control_registry_tests.sh`'s rank comment, and
+`tests/neurocosmology_crosswalk_tests.sh`'s LADDER-order comment — the
+line-wrapped one, added last. **A hand repair with no guard behind it is exactly
+the state this section exists to record**, and a hand repair that miscounted its
+own site list is the sharpest evidence available that the guard is owed.
 
 ---
 

@@ -18,7 +18,8 @@
 #
 #   THE COMPOSITION RULE:  licensed = MIN(L_class, L_evidence, L_deployment)
 #   over the registry's own authority ladder, none < observe < advise < rank <
-#   gate. A control may do what ALL THREE allow, and no more. The minimum, and
+#   gate < execute. A control may do what ALL THREE allow, and no more. The
+#   minimum, and
 #   not an average or a product, because these are independent NECESSARY
 #   conditions: being the right KIND of thing to gate does not make a broken
 #   check work, a working check does not make a chosen threshold an invariant,
@@ -109,18 +110,39 @@
 #                               `advise`: presenting a signal KNOWN not to
 #                               discriminate to a decision-maker who cannot see
 #                               that it is dead is worse than recording it and
-#                               letting nothing read it. `observe` keeps the
+#                               letting nothing ACT on it. `observe` keeps the
 #                               measurement — so a later re-validation has
 #                               history to work from — without letting anything
 #                               act on it.
 #
+# `observe` IS DEFINED BY CONSEQUENCE, NOT BY CONSUMPTION, AND THIS CAP IS WHY.
+# The rung means: the output MAY be recorded and consumed FOR VISIBILITY, and it
+# causes NO OPERATIONAL CONSEQUENCE. It was formerly defined by NON-CONSUMPTION
+# — measuring and recording, with nothing reading the result — which made this
+# cap UNREACHABLE, because `none` was also
+# defined by non-consumption, so the ladder had no rung meaning "it is read, but
+# it may cause nothing", which is exactly where a refuted-but-wired-in control
+# belongs. The cap was foreclosed for 67 of 81 controls and 0 sat there. The cap
+# VALUE did not move; what moved is that it is now a legal destination.
+#
 # THE DEPLOYMENT AXIS, defined in authority-envelope.sh and used here. It answers
 # the question neither of the two above asks: WHAT HAPPENS TO THE OUTPUT?
 #
-#   shadow             -> observe  it produces output and NOTHING CONSUMES IT.
+#   shadow             -> observe  its output may be watched; it has NO
+#                                  OPERATIONAL CONSEQUENCE.
 #   human_confirmed    -> advise   a person sits between signal and consequence.
 #   bounded_autonomous -> rank     acts unattended, inside declared bounds.
-#   autonomous         -> gate     no additional cap. THE DEFAULT.
+#   autonomous         -> execute  no additional cap. THE DEFAULT.
+#
+# `autonomous` CAPS AT THE TOP RUNG, WHICHEVER RUNG THAT IS. Its cap has only
+# ever been justified by POSITION — "no additional cap" — never by the token
+# `gate`. When `execute` was added above `gate`, holding this mode at `gate`
+# would have turned a documented NON-cap into a real cap on every control that
+# predates this axis, demoting the whole census with no operator in the loop,
+# and would have made `execute` unreachable on this axis for everyone — the same
+# unreachable-rung defect that forced the ladder correction. It grants nobody
+# `execute`, because the composition is a MINIMUM and the CLASS axis still caps
+# Class A at `gate`. Class is where a licence decision belongs.
 #
 # COMMA-COMPOSITES RESOLVE BY MINIMUM. `empirical_status` may carry more than one
 # value (`red_driven,refuted`). The resolved cap is the MINIMUM over the
@@ -252,15 +274,16 @@ EVIDENCE_AXIS="unvalidated:advise red_driven:gate field_observed:gate calibrated
 # THE DEPLOYMENT AXIS is owned by build-os/tools/authority-envelope.sh and copied
 # here the way the class axis is copied from README §3. The suites reconcile the
 # two, so this cannot quietly restate the third axis differently. A control with
-# no envelope takes DEPLOYMENT_DEFAULT, which caps at `gate` — no additional cap
+# no envelope takes DEPLOYMENT_DEFAULT, which caps at `execute`, the TOP rung —
+# no additional cap
 # — because that is the only default that changes nothing for a census written
 # before this axis existed.
-DEPLOYMENT_AXIS="shadow:observe human_confirmed:advise bounded_autonomous:rank autonomous:gate"
+DEPLOYMENT_AXIS="shadow:observe human_confirmed:advise bounded_autonomous:rank autonomous:execute"
 DEPLOYMENT_DEFAULT="autonomous"
-LADDER="none observe advise rank gate"
+LADDER="none observe advise rank gate execute"
 
-rank_of(){ case "$1" in none) echo 0 ;; observe) echo 1 ;; advise) echo 2 ;; rank) echo 3 ;; gate) echo 4 ;; *) echo -1 ;; esac; }
-name_of(){ case "$1" in 0) echo none ;; 1) echo observe ;; 2) echo advise ;; 3) echo rank ;; 4) echo gate ;; *) echo '?' ;; esac; }
+rank_of(){ case "$1" in none) echo 0 ;; observe) echo 1 ;; advise) echo 2 ;; rank) echo 3 ;; gate) echo 4 ;; execute) echo 5 ;; *) echo -1 ;; esac; }
+name_of(){ case "$1" in 0) echo none ;; 1) echo observe ;; 2) echo advise ;; 3) echo rank ;; 4) echo gate ;; 5) echo execute ;; *) echo '?' ;; esac; }
 axis_cap(){ # <axis-string> <key> -> licensed authority, or the empty string
   local a
   for a in $1; do case "$a" in "$2":*) printf '%s' "${a#*:}"; return 0 ;; esac; done
@@ -349,8 +372,8 @@ awk -v class_axis="$CLASS_AXIS" -v evidence_axis="$EVIDENCE_AXIS" \
     -v deployment_axis="$DEPLOYMENT_AXIS" -v deployment_default="$DEPLOYMENT_DEFAULT" \
     -v modefile="$TMPMODE" '
 function rank(a){ if(a=="none")return 0; if(a=="observe")return 1; if(a=="advise")return 2;
-                  if(a=="rank")return 3; if(a=="gate")return 4; return -1 }
-function nameof(r){ return r==0?"none":r==1?"observe":r==2?"advise":r==3?"rank":r==4?"gate":"?" }
+                  if(a=="rank")return 3; if(a=="gate")return 4; if(a=="execute")return 5; return -1 }
+function nameof(r){ return r==0?"none":r==1?"observe":r==2?"advise":r==3?"rank":r==4?"gate":r==5?"execute":"?" }
 BEGIN{
   n=split(class_axis,ca," ");    for(i=1;i<=n;i++){ split(ca[i],p,":"); CCAP[p[1]]=p[2] }
   n=split(evidence_axis,ea," "); for(i=1;i<=n;i++){ split(ea[i],p,":"); ECAP[p[1]]=p[2] }
@@ -388,7 +411,8 @@ function flush(   i,k,cr,er,dr,lr,ar,ax,tok,ntok,t,bad,why,dm){
   nread++
   cr=rank(CCAP[CLS[cur]]); ar=rank(AUTH[cur])
   # THE THIRD TERM. A control with no envelope declares no deployment mode and
-  # takes the default, which caps at `gate` — no additional cap. That is the only
+  # takes the default, which caps at `execute`, the TOP rung — no additional cap.
+  # That is the only
   # default that leaves a census written before this axis existed exactly where
   # the operator put it.
   dm = (cur in MODE) ? MODE[cur] : deployment_default

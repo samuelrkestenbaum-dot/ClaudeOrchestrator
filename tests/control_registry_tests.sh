@@ -49,13 +49,15 @@ trap 'rm -rf "$WORK"' EXIT
 CLASSES="R A B C D"
 IMPL_STATUSES="specified implemented runtime_observed decision_contributing load_bearing"
 EMP_STATUSES="unvalidated red_driven field_observed calibrated refuted"
-AUTHORITIES="none observe advise rank gate"
+AUTHORITIES="none observe advise rank gate execute"
 ROLES="sensor reflex immune memory conscience motor"
 MISMATCH_VALUES="none declared"
 FIELDS="control class implementation_status empirical_status runtime_authority nervous_system_role inputs output owning_module consuming_policies evidence_refs failure_behavior rollback_behavior promotion_requirement demotion_requirement authority_mismatch notes"
-# The licence table, as authority ranks (none=0 observe=1 advise=2 rank=3 gate=4).
+# The licence table, as authority ranks
+# (none=0 observe=1 advise=2 rank=3 gate=4 execute=5). No class licenses
+# `execute`, so lic_of() tops out at 4 while rank_of() below runs to 5.
 lic_of(){ case "$1" in A) echo 4 ;; B) echo 3 ;; C) echo 2 ;; D) echo 1 ;; R) echo 1 ;; *) echo -1 ;; esac; }
-rank_of(){ case "$1" in none) echo 0 ;; observe) echo 1 ;; advise) echo 2 ;; rank) echo 3 ;; gate) echo 4 ;; *) echo -1 ;; esac; }
+rank_of(){ case "$1" in none) echo 0 ;; observe) echo 1 ;; advise) echo 2 ;; rank) echo 3 ;; gate) echo 4 ;; execute) echo 5 ;; *) echo -1 ;; esac; }
 in_list(){ local v="$1" l; for l in $2; do [ "$v" = "$l" ] && return 0; done; return 1; }
 
 # Field value for a control id, or empty.
@@ -424,7 +426,7 @@ grep -qF "owning_module: build-os/registry/scan-controls.sh" "$REG" \
 
 echo "== 18. The README declares the ontology the entries are written against =="
 for term in "ControlClass" "ImplementationStatus" "EmpiricalStatus" "RuntimeAuthority" \
-            "nervous_system_role" "none < observe < advise < rank < gate"; do
+            "nervous_system_role" "none < observe < advise < rank < gate < execute"; do
   grep -qF "$term" "$RREADME" && ok "README declares: $term" || no "README never declares: $term"
 done
 grep -qE 'not load-bearing merely because|not load.bearing merely because' "$RREADME" \

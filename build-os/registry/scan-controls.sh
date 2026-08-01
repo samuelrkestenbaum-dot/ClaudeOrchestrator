@@ -77,6 +77,15 @@ CMD="${1:-}"
 
 refuse(){ printf 'scan-controls: REFUSED — %s\n' "$*" >&2; exit 2; }
 viol(){ VIOL=$((VIOL+1)); printf '  %s\n' "$*"; }
+# THE ADVISORY CHANNEL. A finding that is REPORTED and does NOT affect the exit
+# code. It exists because this scanner had exactly one check — OBSERVE-LB — whose
+# subject matter belongs to an ADVISORY system (the evidence axis, which exits 0
+# by design and says so in its own output) while the check itself refused at
+# exit 2. The result was that the advisory system could recommend a demotion and
+# this gate would then forbid the operator from applying it. An advisory axis
+# whose recommendations are blocked by a gate is not advisory. Reported findings
+# are printed and counted; only `viol` sets the exit code.
+advise_note(){ ADVISORY=$((ADVISORY+1)); printf '  %s\n' "$*"; }
 in_list(){ local v="$1" l; for l in $2; do [ "$v" = "$l" ] && return 0; done; return 1; }
 
 case "$CMD" in
@@ -102,7 +111,7 @@ done
 CLASSES="R A B C D"
 IMPL_STATUSES="specified implemented runtime_observed decision_contributing load_bearing"
 EMP_STATUSES="unvalidated red_driven field_observed calibrated refuted"
-AUTHORITIES="none observe advise rank gate"
+AUTHORITIES="none observe advise rank gate execute"
 ROLES="sensor reflex immune memory conscience motor"
 MISMATCH_VALUES="none declared"
 FIELDS="control class implementation_status empirical_status runtime_authority nervous_system_role inputs output owning_module consuming_policies evidence_refs failure_behavior rollback_behavior promotion_requirement demotion_requirement authority_mismatch notes"
@@ -117,7 +126,7 @@ FIELDS="control class implementation_status empirical_status runtime_authority n
 #                                      being useful)
 #   D learned model       -> observe
 #   R research functional -> observe
-rank_of(){ case "$1" in none) echo 0 ;; observe) echo 1 ;; advise) echo 2 ;; rank) echo 3 ;; gate) echo 4 ;; *) echo -1 ;; esac; }
+rank_of(){ case "$1" in none) echo 0 ;; observe) echo 1 ;; advise) echo 2 ;; rank) echo 3 ;; gate) echo 4 ;; execute) echo 5 ;; *) echo -1 ;; esac; }
 lic_of(){  case "$1" in A) echo 4 ;; B) echo 3 ;; C) echo 2 ;; D) echo 1 ;; R) echo 1 ;; *) echo -1 ;; esac; }
 
 # --- the discovery rule ------------------------------------------------------
@@ -279,6 +288,7 @@ printf 'scan-controls: %s registered control(s) in %s vs %s refusal-capable surf
 get(){ awk -F'\t' -v i="$1" -v f="$2" '$1==i && $2==f {print $3; exit}' "$FLAT"; }
 
 VIOL=0
+ADVISORY=0
 GATEMODS=""
 LOADBEARING=0
 DECLARED_MM=0
@@ -318,7 +328,7 @@ while IFS= read -r id; do
     if [ -z "$cons" ] || [ "$cons" = "NONE" ] || [ "$cons" = "-" ]; then
       viol "LOAD-BEARING $id claims load_bearing and names no consuming policy. A control is not load_bearing because it is implemented; it is load_bearing when a live policy consumes it, its result changes behaviour, and removing it changes outcomes. Name the policy or demote the status."
     elif [ "$aut" = "observe" ]; then
-      viol "OBSERVE-LB  $id claims load_bearing at authority \"observe\" while naming a consuming policy: $cons. Those cannot both be true. \"observe\" means it measures and records and NOTHING READS THE RESULT; load_bearing means a live policy consumes it and removing it changes outcomes. This fires where an evidence cap is applied as an instruction: a \"refuted\" control is capped at observe, but a capped control that still has consumers cannot be lowered onto that rung by editing its row — the cap is a finding about the control, not a spelling for it. Either remove the consumers first, and say what replaces the signal they read, or leave the authority where it is and leave the finding standing."
+      advise_note "OBSERVE-LB  $id claims load_bearing at authority \"observe\" (consumed by: $cons). REPORTED, NOT REFUSED. Under the corrected ladder \"observe\" means the output may be recorded and CONSUMED FOR VISIBILITY while causing NO OPERATIONAL CONSEQUENCE — so being consumed is no longer the contradiction, and the premise this check was built on is gone. What survives is narrower and is a question about CONSEQUENCE: load_bearing asserts that the result changes behaviour and that REMOVING IT CHANGES OUTCOMES, which is an operational consequence. So one of the two is mis-stated — either the control does have consequence and is not at \"observe\", or it does not and is not load_bearing. THIS IS ADVISORY BECAUSE THE AXIS THAT PRESCRIBES THE DEMOTION IS ADVISORY: the evidence axis caps a \"refuted\" control at \"observe\", exits 0, and states in its own output that re-authorising is the operator's. A gate here refused the operator the very demotion that advisory system recommends, which is incoherent. Resolve it by demoting implementation_status to decision_contributing if nothing depends on the outcome, or by leaving the authority where it is and leaving the finding standing — both are governance moves and neither is performed here."
     fi
   fi
 
@@ -335,7 +345,7 @@ while IFS= read -r id; do
   if [ "$a_rank" -gt 0 ] && [ "$l_rank" -ge 0 ] && [ "$a_rank" -gt "$l_rank" ]; then
     DECLARED_MM=$((DECLARED_MM+1))
     if [ "$mm" != "declared" ]; then
-      viol "LAUNDERED   $id exercises \"$aut\" on a class-$cls licence, which reaches only \"$(case "$l_rank" in 0) echo none ;; 1) echo observe ;; 2) echo advise ;; 3) echo rank ;; 4) echo gate ;; esac)\", but declares authority_mismatch: $mm. Exceeding the licence is permitted and recorded; doing it silently is not. Set authority_mismatch: declared and list it in the mismatch report — or, if the classification is wrong, fix the CLASS, and be ready to say why the thresholds are not a heuristic."
+      viol "LAUNDERED   $id exercises \"$aut\" on a class-$cls licence, which reaches only \"$(case "$l_rank" in 0) echo none ;; 1) echo observe ;; 2) echo advise ;; 3) echo rank ;; 4) echo gate ;; 5) echo execute ;; esac)\", but declares authority_mismatch: $mm. Exceeding the licence is permitted and recorded; doing it silently is not. Set authority_mismatch: declared and list it in the mismatch report — or, if the classification is wrong, fix the CLASS, and be ready to say why the thresholds are not a heuristic."
     fi
     # The id must appear as a WHOLE TOKEN. Control ids nest —
     # `metrics.record.verify_git` is a prefix of
@@ -447,6 +457,7 @@ done < <(printf '%s\n' "$IDS")
 
 printf 'scan-controls: %s load_bearing, %s over-authorised (declared), %s unregistered surface(s), %s phantom entr(ies), %s report row(s) reconciled\n' \
   "$LOADBEARING" "$DECLARED_MM" "$UNREG" "$PHANTOM" "$NREP"
+printf 'scan-controls: %s advisory finding(s) — reported, and deliberately NOT affecting the exit code.\n' "$ADVISORY"
 
 if [ "$VIOL" -gt 0 ]; then
   printf 'scan-controls: REFUSED — %s violation(s) reconciling %s against %s.\n' "$VIOL" "$REGISTRY" "$REPO" >&2

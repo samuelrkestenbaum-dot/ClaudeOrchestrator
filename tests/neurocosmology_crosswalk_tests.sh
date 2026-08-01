@@ -50,11 +50,11 @@ PRIMITIVES="reachability meaning_metric mass valence agency energy homeostasis \
 integration_bandwidth boundary ethical_admissibility epistemic_quality \
 latent_state durability gated_plasticity collective_coherence goal_ecology wisdom"
 KINDS="instantiates proxies nominal unbound"
-AUTHORITIES="none observe advise rank gate"
+AUTHORITIES="none observe advise rank gate execute"
 PFIELDS="primitive universal_function system_representation observable_proxies binding_quality claimed_max_authority known_limitations"
 BFIELDS="control binds_to class runtime_authority binding_kind rationale"
 
-rank_of(){ case "$1" in none) echo 0 ;; observe) echo 1 ;; advise) echo 2 ;; rank) echo 3 ;; gate) echo 4 ;; *) echo -1 ;; esac; }
+rank_of(){ case "$1" in none) echo 0 ;; observe) echo 1 ;; advise) echo 2 ;; rank) echo 3 ;; gate) echo 4 ;; execute) echo 5 ;; *) echo -1 ;; esac; }
 kind_rank(){ case "$1" in unbound) echo 0 ;; nominal) echo 1 ;; proxies) echo 2 ;; instantiates) echo 3 ;; *) echo -1 ;; esac; }
 in_list(){ local v="$1" l; for l in $2; do [ "$v" = "$l" ] && return 0; done; return 1; }
 
@@ -327,7 +327,7 @@ echo "== 10. The report states the coverage the artefact actually carries =="
 # Derived columns straight from the bindings:
 #   primitive \t bound \t inst \t proxy \t nom \t classes \t authorities
 # Authorities are emitted in the registry's LADDER order (none < observe < advise
-# < rank < gate) rather than alphabetically, so the table may list them the way
+# < rank < gate < execute) rather than alphabetically, so the table may list them the way
 # the registry declares them without failing for a cosmetic reason. An empty
 # column is the same em dash the table uses, so "nothing bound" is compared too.
 xw_columns(){

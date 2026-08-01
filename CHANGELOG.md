@@ -14,6 +14,171 @@ deprecation cycle. Pin a commit if you need stability.
 
 ### In flight (not landed at the released commit)
 
+- **The authority ladder was measuring the wrong property, and it has been
+  corrected: `observe` is now defined by CONSEQUENCE rather than by consumption,
+  and a sixth rung `execute` sits above `gate`.** The previous packet proved
+  `refuted → observe` was an **unreachable remedy** — foreclosed for **67 of 81**
+  controls with **0** sitting there. The cause was definitional: `none` and
+  `observe` were **both** defined by non-consumption, so the ladder had **no rung
+  meaning "it is read, but it may cause nothing"**, which is exactly where a
+  refuted-but-wired-in control belongs. The ladder is now
+  `none < observe < advise < rank < gate < execute`, where `observe` means the
+  output may be recorded and **consumed for visibility** while causing **no
+  operational consequence**, and `execute` means the output may **directly cause
+  mutation**. Suite **1636 passed**, 0 failed (+19, all in the evidence-policy
+  suite). `evidence-policy.sh check` still reports **19 of 81** out of licence,
+  split **6/5/8 — unmoved**, `scan-controls.sh check` still exits 0, and the
+  maintenance suite is 144/144.
+  - **A redefinition that re-authorised nobody, which is the whole point.** No
+    `class`, `runtime_authority`, `authority_mismatch` or `empirical_status`
+    changed. The cap `refuted → observe` did not move; what moved is that it is
+    now a **legal destination** rather than an instruction that could be
+    prescribed and never written. **No class licenses `execute`** — Class A still
+    reaches `gate` — so the new rung has no licensed occupant, and a test asserts
+    that **no cell** of the 25-cell class/evidence grid reaches it.
+  - **The remedy had to land in SEVEN places, not one.** The previous packet
+    recorded that consumption was asserted in **six** sites and that *a remedy
+    touching only the README is not a remedy*, because the foreclosure was
+    enforced by **code**. All six were rewritten — `README.md` §2's two bottom
+    rungs and §3b's `shadow` row, `authority_envelopes.txt`'s header, and the
+    headers of `authority-envelope.sh` and `evidence-policy.sh` — plus
+    `scan-controls.sh`'s hard-coded refusal text. A **seventh** was found during
+    the build: `control_registry.txt` carried the retired rule in two live fields
+    of `maint.source_scan_mask`, including a `demotion_requirement` telling the
+    operator that *"demotion becomes available only when nothing consumes it"* —
+    the field read **while deciding**. `tests/evidence_policy_tests.sh` §21 now
+    sweeps all seven **by content**, and the rule is absolute: the retired clause
+    may not appear even inside a quotation, because no grep can tell a quotation
+    from a definition. Three of this packet's own edits tripped that rule and
+    were rewritten rather than exempted.
+  - **The new guard reproduced this packet's own headline defect, and that is
+    the finding worth keeping.** The headline was that `VACUOUS-REF` checks
+    **resolvability, never identity** — it confirms a citation lands *somewhere*
+    and never that it lands on the *right* thing. §21 was then built in the same
+    shape one level up: it greped **one** wording of the retired rule (the
+    README's, *"nothing reads the result"*) while the retired rule has **two** —
+    the deployment axis states it as *"nothing consumes it"*. **Two sites shipped
+    past the sweep carrying the second wording**, and they were the two files
+    that **own** the deployment axis: `authority-envelope.sh`'s `shadow` row and
+    `control_registry.txt`'s `envelope.grant_composition` notes. §21 now also
+    refuses a consumption clause on **any line that maps something onto
+    `observe`** — scoped to the mapping lines because *"nothing consumes it"*,
+    unlike the README's wording, is **also** the correct phrasing of the third
+    axis's motivation and cannot be banned outright. Driven red first: the new
+    assertion fails on exactly those two sites and no others
+    (`120 passed, 1 failed`), and goes green once both are corrected
+    (`121 passed, 0 failed`).
+  - **The ladder's SPELLING is still unswept — recorded as its own packet**
+    (`MISMATCHES.md` §16). Adding a sixth rung left the five-rung enumeration
+    behind in **four** live places, all found by reading the diff rather than by
+    the suite. The sharpest was **a passing test whose transcript printed a false
+    ladder**: both suites compared against the six-rung `$LADDER` — the assertion
+    was right — and then reported success with a hard-coded five-rung string. All
+    four were repaired by hand and the `ok` messages now derive from `$LADDER`
+    instead of restating it. **The guard is deliberately not bolted on here:** the
+    drift lands in a different site set (`tests/*.sh`, not the seven semantic
+    sites) and needs a different check — the five-rung string is a **prefix** of
+    the correct six-rung one, so it needs a continuation test, not a containment
+    test.
+  - **What the correction COST, stated in the direction that does not flatter
+    it.** The `observe`/`advise` boundary is now **intent-based and no longer
+    mechanically checkable**. `gate` has a test (*exits non-zero*), `execute` has
+    one (*performs a durable write*), `none` has one (*names no consuming
+    policy*). `observe` **used to** have one — non-consumption is greppable, and
+    `OBSERVE-LB` was built out of that grep — and defining the rung by consequence
+    removes it, because nothing in the tree can decide whether a consumer's use of
+    an output is *visibility* or *influence*. **Three of six rungs are now
+    separated by the registering author's assertion alone.** That was the right
+    trade — the checkable boundary is exactly what made the rung unreachable —
+    but it is a real loss of enforceability, recorded in `README.md` §2.
+  - **The reading NOT taken on `autonomous → execute`, recorded the way §3's S1
+    collision records both of its readings.** *An operator who authorised
+    **autonomy** did not thereby authorise **mutation**;* those are different
+    permissions, and on that reading the cap belongs at `gate` with a **fifth**
+    deployment mode declared for mutation. **Not adopted, structurally:** the
+    deployment axis states a **ceiling**, not a grant, and `L_effective` is a
+    **minimum** — so the row says *"this axis imposes no cap"*, not *"an
+    autonomous control may mutate"*, and the **class** axis still withholds
+    `execute` from every class. Adopting it would also re-create the defect just
+    removed: a rung reachable on no axis. **Whether a fifth deployment mode should
+    exist survives as a live question** and is recorded in `README.md` §3b.
+  - **`OBSERVE-LB` moved off the gating path, because the axis it enforces is
+    advisory.** The guard refused `load_bearing` at `observe` at **exit 2**, so
+    the evidence axis could *recommend* a demotion and this scanner would then
+    *forbid* the operator from applying it. Under the corrected ladder its
+    premise dissolves outright — being consumed at `observe` is now legal — but a
+    **narrower** tension survives and is about consequence: `load_bearing`
+    asserts that *removing it changes outcomes*. So the check was kept, re-keyed
+    to consequence, and moved to a new **advisory channel** in `scan-controls.sh`
+    that prints and counts but never sets the exit code. The red drive now proves
+    **both** halves: the finding still fires **by name**, and the scan exits 0 —
+    while a genuine violation still refuses at exit 2, so only this one check
+    moved.
+  - **`autonomous` now caps at `execute`, and staying at `gate` would have been
+    the silent demotion.** That mode's cap was only ever justified by
+    **position** — *"no additional cap"* — never by the token `gate`. Holding it
+    at `gate` once `execute` existed would have turned a documented **non**-cap
+    into a real cap on every control that predates the axis, and would have made
+    `execute` unreachable on that axis for everyone — reproducing the exact
+    unreachable-rung defect being fixed. It grants nobody `execute`, because the
+    composition is a **minimum** and the class axis still caps Class A at `gate`.
+    The test that pinned this was itself the hazard: it read
+    `= "$(rank_of gate)"`, which after the change would have *demanded* the
+    default demote the census; it now asserts against the **top of the ladder**,
+    derived.
+  - **The mutation census — surveyed, reported, acted on in no way** (`MISMATCHES.md`
+    §15). A rung meaning "directly causes mutation" invites the question of which
+    controls already mutate. Almost none is mis-classed at `gate`, because **the
+    controls are checks and the mutations belong to the modules they live in**.
+    The registry's own `motor` role — *"it changes the world"* — is carried by
+    **2 of 81** entries, and the sharp one is **not** at `gate`: 
+    `maint.managed_set_replacement` sits at **`advise`** while its declared output
+    is *"files copied into an installed repo, replacing prior managed copies"*,
+    its failure behaviour is *"none that stops anything"* and its rollback is
+    *"none; a managed file's local edits are lost on install"*. Five modules
+    durably mutate — `rotate-memory.mjs` renames onto the live memory file,
+    `swarm-merge.sh` commits behind `--commit`, `record-packet.sh` appends to the
+    store, the identity hook writes its stamp, `specialist-handoff.sh` takes a
+    lock — and **not one of those write actions is a registered control at any
+    authority**. That is a coverage gap, and closing it means writing new
+    entries, which is registration, which is the operator's. **Whether Class A
+    should license `execute`** and **whether that control should move** are
+    recorded and answered nowhere.
+  - **27 `evidence_refs` silently drifted, and the guard caught 7.** Inserting
+    lines into the three tools moved every `path:line` citation below the
+    insertion. `VACUOUS-REF` flagged only the **7** that happened to land on a
+    blank or comment line; the other **20** landed on live code and cited the
+    **wrong** line while passing every check. All 27 were repointed by
+    **recomputing against base content**, not by shifting numbers, and every ref
+    now cites byte-identical content to before. This is the hazard `MISMATCHES.md`
+    already names — a citation guard that checks *resolvability* cannot check
+    *identity*.
+  - **`active_packet.md`'s SHAPE is load-bearing, and base was already red.**
+    `./build-os/maintenance/run-tests.sh` was **143/144** at the base commit, not
+    the expected 144/144: `rotate-memory.mjs` splits that file on `^## ` and the
+    two-pass rotation proof needs **≥3 blocks**, while the previous close left it
+    with **2**. Repaired by giving this packet's declaration real sections. The
+    sharper hazard is recorded where the assertion states it — **a count of 0
+    means the delimiter never matches and nothing can ever rotate out of the
+    file** — so a prose-only rewrite of that file could disarm its own rotation.
+    **It does not do so *silently*, and the earlier wording here saying it did
+    was wrong.** Measured: a zero-block file is byte-identical after `--apply`,
+    the exit code is **0**, and **no test fails** — but `rotate-memory.mjs`
+    prints `WARNING: <path>: the block delimiter /^## / matched NOTHING …
+    NOTHING CAN EVER ROTATE OUT OF IT` to stderr. That warning is present at the
+    base commit too and `rotate-memory.mjs` was **not touched** by this packet.
+    So the failure mode is precisely **an ignorable warning** — loud enough to
+    read, attached to no exit code and no assertion — which is a real hazard and
+    a different one from silence.
+  - **Declaration-before-build is now attested by git, with no third commit.**
+    The previous close recorded a genuine tension: the packet must be declared
+    before the first edit, but with the declaration in the same commit as the
+    build git cannot corroborate the ordering, and the cap is two commits. It
+    needs neither a third commit nor a hook — **Commit 1 was spent on the
+    declaration alone**. Nothing required the docs to be the second commit.
+    `bandwidth.active_packet_singleton` still refuses **two** declared packets
+    and permits **zero**, so the floor remains unbuilt.
+
 - **The two `refuted` controls were taken to the four outcomes, and both came
   back "no change" — one of them because demoting it was MEASURED to destroy
   live memory.** `refuted` is the only evidence state where the question looks

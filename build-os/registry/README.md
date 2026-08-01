@@ -99,15 +99,56 @@ hour, mostly proves the two agree.
 
 ### RuntimeAuthority
 
-`none < observe < advise < rank < gate`
+`none < observe < advise < rank < gate < execute`
 
 | value | what the control may do |
 |---|---|
-| `none` | nothing consumes it. |
-| `observe` | it measures and records. Nothing reads the result. |
-| `advise` | its output is presented to a decision-maker who may ignore it. |
-| `rank` | its output orders work, or selects between options. |
-| `gate` | its output can stop the run. **In this repository, a control that exits non-zero is exercising `gate`, whatever its author called it.** |
+| `none` | it has no runtime output and no consumer. |
+| `observe` | its output may be recorded and **consumed for visibility**. It causes **no operational consequence**. |
+| `advise` | its output may influence a human, or a higher-authority control. |
+| `rank` | its output may order already-permitted alternatives. |
+| `gate` | its output may allow or prohibit. **In this repository, a control that exits non-zero is exercising `gate`, whatever its author called it.** |
+| `execute` | its output may **directly cause mutation** — it changes the world rather than permitting a change. |
+
+**The ladder measures CONSEQUENCE, not consumption.** This is a correction, and
+the reason it was needed is worth keeping. `none` and `observe` were *both*
+formerly defined by **non-consumption** — the one saying nothing consumed the
+output, the other saying nothing read it — so the ladder had **no rung meaning
+"it is read, but it may cause nothing"**. That is exactly the state
+a control must occupy when the evidence axis caps it at `observe` while other
+controls still read it, so the cap `refuted → observe` could be *stated as a
+finding and never written as a row*: it was foreclosed for **67 of 81**
+controls, and **0** sat there. Redefining `observe` by consequence makes the cap
+a **legal destination** instead of an unreachable instruction. It moves no cap
+and re-authorises nobody.
+
+**`execute` is a rung, not a licence.** It exists so that a control which
+*directly mutates* is distinguishable from one that merely *prohibits*; `gate`
+stops a run, `execute` changes state. **No class licenses it** — the table in §3
+is unchanged, Class A still reaches `gate` — so adding the rung grants nobody
+anything. Whether Class A *should* license `execute`, and which currently
+`gate`-registered controls actually perform writes, are **governance questions
+recorded for the operator and deliberately not answered here.**
+
+**What the correction COST: the `observe`/`advise` boundary is now INTENT-BASED,
+and it used to be mechanically checkable.** Stated here rather than implied away,
+because omitting it would be an asymmetry in the direction that flatters the fix
+— this file's own phrase, turned on this file. Three rungs carry a test any
+reader can run against the tree: `gate` is *"exits non-zero"*, `execute` is
+*"performs a durable write"*, `none` is *"names no consuming policy"*. `observe`
+used to carry one too — **non-consumption is greppable**, and `OBSERVE-LB` was
+built out of exactly that grep. Defining the rung by **consequence** removes it:
+nothing in this repository can decide from the source whether a consumer's use of
+an output is *visibility* or *influence*, so the line between `observe` and
+`advise` now rests on the registering author's assertion. **Three of the six
+rungs are separated by assertion rather than by measurement.** That was the right
+trade — the checkable boundary is exactly what made the rung unreachable, and a
+mechanical test that forbids the only legal destination is worse than a judgement
+that permits it — but it is a real loss of enforceability and not a free
+redefinition. What remains mechanical is the **surrounding** claim: a control at
+`observe` whose removal changes outcomes is still reported, now on the advisory
+channel, because *"removing it changes outcomes"* is a consequence claim and the
+two cannot both be true.
 
 ### nervous_system_role
 
@@ -196,8 +237,8 @@ and call the difference policy.
 **The composition rule, stated explicitly:**
 
 > **`licensed = MIN(class-licensed, evidence-licensed)`** over the authority
-> ladder `none < observe < advise < rank < gate`. A control may do what **both**
-> axes allow, and no more.
+> ladder `none < observe < advise < rank < gate < execute`. A control may do what
+> **both** axes allow, and no more.
 
 The minimum, and not an average or a product, because the two are independent
 **necessary** conditions: being the right *kind* of thing to gate does not make a
@@ -398,21 +439,63 @@ to choose** from **permission to act**.
 
 | `deployment_mode` | licensed authority | why that level |
 |---|---|---|
-| `shadow` | `observe` | it produces output and **nothing consumes it**. |
+| `shadow` | `observe` | its output may be watched, and it has **no operational consequence**. |
 | `human_confirmed` | `advise` | a person sits between the signal and the consequence. |
 | `bounded_autonomous` | `rank` | it acts unattended, inside declared bounds. |
-| `autonomous` | `gate` | no additional cap. **The default.** |
+| `autonomous` | `execute` | no additional cap. **The default.** |
 
 > **`L_effective = MIN(L_class, L_evidence, L_deployment)`** over the same ladder
-> `none < observe < advise < rank < gate`. A control may do what **all three**
-> allow, and no more.
+> `none < observe < advise < rank < gate < execute`. A control may do what **all
+> three** allow, and no more.
+
+**Why `autonomous` caps at the TOP rung, and why that is not a promotion.** This
+mode's cap has only ever been justified by its **position** — *"no additional
+cap"* — and never by the token `gate`. When `execute` was added above `gate`,
+leaving `autonomous` at `gate` would have converted a documented **non**-cap into
+a **real** cap on every one of the controls that predate this axis and therefore
+take the default, demoting the whole census in one commit with no operator in the
+loop — the self-re-authorisation this axis exists to prevent, run in reverse. It
+would also have made `execute` **unreachable on the deployment axis for every
+control**, which is precisely the unreachable-rung defect that forced the ladder
+correction in the first place. So the cap tracks the top of the ladder.
+
+This grants nobody `execute`, because the composition is a **minimum**: the class
+axis still caps Class A at `gate`, so no control can reach `execute` through the
+deployment axis alone. The axis that withholds `execute` is **class**, which is
+where a licence decision belongs.
+
+**The reading NOT taken, recorded the way §3's S1 collision records both of
+its readings.** There is a real argument the other way, and it is not the weak
+one:
+
+> **READING B — an operator who authorised AUTONOMY did not thereby authorise
+> MUTATION.** `autonomous` is a statement about whether a human sits in the loop.
+> `execute` is a statement about whether the world changes. Those are different
+> permissions, and a mode whose whole content is *"it acts unattended"* arguably
+> should not be the row that carries the ladder's mutation rung. On this reading
+> the cap belongs at `gate` and a **fifth** mode should be declared for
+> mutation — leaving `autonomous` meaning "unattended, but still may not write".
+
+**It is not adopted, and the reason is structural rather than a preference.** The
+deployment axis is a **cap**, not a grant: every row states the *ceiling* a mode
+imposes, and `L_effective` is the **minimum** of three terms. So this row does
+not say *"an autonomous control may mutate"*; it says *"this axis imposes no
+ceiling of its own"* — and the class axis, which is the axis that decides
+licences, still withholds `execute` from every class including A. Reading B
+answers a question the axis is not asking. Adopting it would also re-introduce
+the exact defect the ladder correction removed: a rung reachable on no axis,
+foreclosed by a cap that was only ever meant to say *"no cap"*. **Whether a fifth
+deployment mode should exist is a live question** — Reading B's substance
+survives as that question — and it is recorded here for the operator, not settled
+here.
 
 #### An envelope can only LOWER `L_effective` — read this before planning with it
 
 Because the composition is a **minimum**, the deployment term can only pull
 `L_effective` **down**. **An envelope can never raise a control above `L_class`
-or `L_evidence`.** The default `autonomous` caps at `gate`, which is the top of
-the ladder and therefore no cap at all; every other mode is strictly below it. So
+or `L_evidence`.** The default `autonomous` caps at `execute`, which is the top
+of the ladder and therefore no cap at all; every other mode is strictly below it.
+So
 the *only* thing an operator can do to `L_effective` by writing a record is
 **reduce** it.
 

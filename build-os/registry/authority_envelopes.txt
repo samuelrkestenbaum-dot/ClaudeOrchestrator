@@ -48,7 +48,7 @@
 #                       a file:line — the operator's standing direction.
 #   scope               where the grant applies, and where it does not.
 #   granted_authority   a rung on the ladder none < observe < advise < rank <
-#                       gate. This is what the actor may DO.
+#                       gate < execute. This is what the actor may DO.
 #   evidence_basis      the evidence relied on. Prose, and deliberately not a
 #                       token: the evidence AXIS already carries the token, and
 #                       this field is where a human says what they actually
@@ -80,9 +80,18 @@
 # axes, and they are not the same risk. `deployment_mode` separates PERMISSION
 # TO RANK from PERMISSION TO CHOOSE from PERMISSION TO ACT.
 #
-#   shadow              -> observe   It produces output and NOTHING CONSUMES IT.
-#                                    `observe` is what "recorded, and nothing
-#                                    acts on it" means on the ladder.
+#   shadow              -> observe   Its output may be watched and it causes
+#                                    no operational consequence. `observe` is what
+#                                    "recorded, and nothing ACTS on it" means on
+#                                    the ladder — the rung is defined by
+#                                    CONSEQUENCE, not by consumption. It used to
+#                                    read "nothing consumes it", which made the
+#                                    evidence axis's `refuted -> observe` cap
+#                                    UNREACHABLE for every wired-in control,
+#                                    because `none` was defined by
+#                                    non-consumption too and no rung was left
+#                                    meaning "it is read, but it may cause
+#                                    nothing".
 #   human_confirmed     -> advise    A person sits between the signal and the
 #                                    consequence. `advise` and not `rank`, by
 #                                    the ladder's OWN definition of `rank`: the
@@ -96,7 +105,17 @@
 #                                    `gate`, because `gate` is the UNBOUNDED
 #                                    stop and "bounded" is precisely the refusal
 #                                    of it.
-#   autonomous          -> gate      No additional cap.
+#   autonomous          -> execute   No additional cap. It caps at whatever the
+#                                    TOP rung is, because this mode's cap has
+#                                    only ever been justified by POSITION and
+#                                    never by the token `gate`. Holding it at
+#                                    `gate` once `execute` was added above would
+#                                    turn a documented NON-cap into a real cap
+#                                    on the whole census, and would foreclose
+#                                    `execute` on this axis for everyone. It
+#                                    grants nobody `execute`: the composition is
+#                                    a MINIMUM and the CLASS axis still caps
+#                                    Class A at `gate`.
 #
 # THE DEFAULT FOR A CONTROL WITH NO ENVELOPE IS `autonomous`, AND THE DEFENCE
 # MATTERS MORE THAN THE VALUE. Every control registered before this axis existed
@@ -117,7 +136,7 @@
 #
 # COMPOSITION:  L_effective = MIN(L_class, L_evidence, L_deployment)
 #
-# over the ladder none < observe < advise < rank < gate. Three independent
+# over the ladder none < observe < advise < rank < gate < execute. Three independent
 # NECESSARY conditions, so the minimum and not an average: being the right kind
 # of thing does not make a broken check work, a working check does not make a
 # chosen threshold an invariant, and neither of them makes it safe for the

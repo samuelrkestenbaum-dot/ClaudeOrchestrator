@@ -20,7 +20,14 @@
 # `deployment_mode` is what separates PERMISSION TO RANK from PERMISSION TO
 # CHOOSE from PERMISSION TO ACT:
 #
-#   shadow              -> observe   produces output; NOTHING CONSUMES IT.
+#   shadow              -> observe   its output MAY be watched, and it causes NO
+#                                    OPERATIONAL CONSEQUENCE. The rung is defined
+#                                    by CONSEQUENCE, not by consumption. This row
+#                                    used to be written as a non-consumption
+#                                    clause, which — with `none` written the same
+#                                    way — is precisely what made the evidence
+#                                    axis's `refuted` cap unreachable for every
+#                                    wired-in control.
 #   human_confirmed     -> advise    a person sits between signal and
 #                                    consequence. `advise` and not `rank` by the
 #                                    ladder's OWN definition of `rank` — the
@@ -33,7 +40,16 @@
 #                                    bounds. It may order and select; it may not
 #                                    `gate`, because `gate` is the UNBOUNDED stop
 #                                    and "bounded" is the refusal of exactly that.
-#   autonomous          -> gate      no additional cap.
+#   autonomous          -> execute   no additional cap. It caps at the TOP rung
+#                                    because this row's justification has only
+#                                    ever been its POSITION — "no additional cap"
+#                                    — and never the token it happened to name.
+#                                    When `execute` was added above `gate`,
+#                                    holding this row at `gate` would have turned
+#                                    a documented NON-cap into a real cap on the
+#                                    whole pre-existing census. It grants nobody
+#                                    `execute`: the composition is a MINIMUM and
+#                                    no class licenses that rung.
 #
 # COMPOSITION GAINS A THIRD MIN TERM:
 #
@@ -65,7 +81,7 @@
 # `empiricalStatus: untested` / `runtimeAuthority: rank` / `deploymentMode:
 # shadow`. AS LITERALLY SPECIFIED, MIN() CANNOT PRODUCE `rank` FOR IT.
 # `heuristic_policy` is Class C; `README.md` §3 licenses Class C at `advise`;
-# the ladder is none < observe < advise < rank < gate, so `rank` is strictly
+# the ladder is none < observe < advise < rank < gate < execute, so `rank` is strictly
 # above L_class and the minimum can never exceed `advise` whatever the other two
 # terms say. Two readings, and they claim different things:
 #
@@ -85,6 +101,24 @@
 # `observe` in the axis below and S1 as declared would still be out of licence.
 # This is the same treatment the evidence-matrix packet gave the S1 collision it
 # found: record it, do not quietly fix it. THE OPERATOR DECIDES.
+#
+# THE OPERATOR SINCE DECIDED SOMETHING ADJACENT, AND IT IS NOT READING 2. The
+# ladder now measures CONSEQUENCE rather than CONSUMPTION at its bottom rung:
+# `observe` means the output MAY be recorded and consumed FOR VISIBILITY and
+# causes NO OPERATIONAL CONSEQUENCE. It was formerly defined by NON-CONSUMPTION
+# — as measuring and recording with nothing reading the result — which, with
+# `none` ALSO defined by non-consumption, left the ladder no rung meaning "it is
+# read, but it may cause nothing", so
+# the evidence axis's `refuted -> observe` cap was foreclosed for 67 of 81
+# controls and 0 sat there. A sixth rung `execute` (the output may DIRECTLY
+# CAUSE MUTATION) now sits above `gate`, so "may prohibit" and "may change the
+# world" are no longer the same claim.
+#
+# THAT IS STILL NOT READING 2. `shadow` continues to cap at `observe`; what
+# changed is what `observe` MEANS, not where any mode caps. No class licenses
+# `execute` and no control was moved onto it. Whether Class A should license
+# `execute`, and which currently-`gate` controls actually perform writes, are
+# recorded for the operator and NOT answered here.
 #
 # THE ONE PENDING EXTENSION. The operator ruled that `untested` (has not yet
 # produced live outputs against real tasks) and `unvalidated` (has operated, but
@@ -162,8 +196,8 @@
 # Stated here because it is the single easiest thing to assume backwards. The
 # composition is a MINIMUM, so the deployment term can only pull the result DOWN.
 # AN ENVELOPE CAN NEVER RAISE A CONTROL ABOVE `L_class` OR `L_evidence`. The
-# default `autonomous` caps at `gate`, the top of the ladder and therefore no cap
-# at all, and every other mode is strictly below it — so the only effect an
+# default `autonomous` caps at `execute`, the top of the ladder and therefore no
+# cap at all, and every other mode is strictly below it — so the only effect an
 # operator can have on `L_effective` by writing a record is to REDUCE it.
 #
 # That is deliberate, and it is the property most worth keeping: this validator
@@ -206,8 +240,8 @@ refuse(){ printf 'authority-envelope: REFUSED — %s\n' "$*" >&2; exit 2; }
 # --- the third axis, defined exactly once ------------------------------------
 # The ladder is the registry's own and is printed rather than assumed, so a
 # reader never has to trust that this file and README §3 agree about the order.
-LADDER="none observe advise rank gate"
-DEPLOYMENT_AXIS="shadow:observe human_confirmed:advise bounded_autonomous:rank autonomous:gate"
+LADDER="none observe advise rank gate execute"
+DEPLOYMENT_AXIS="shadow:observe human_confirmed:advise bounded_autonomous:rank autonomous:execute"
 # THE DEFAULT. `autonomous`, i.e. no additional cap. Defended at length in the
 # header: it is the only value that leaves 78 pre-existing controls where the
 # operator put them.
@@ -219,8 +253,8 @@ SCHEMA_FIELDS="envelope issuer actor control scope granted_authority evidence_ba
 CLASS_AXIS="A:gate B:rank C:advise D:observe R:observe"
 EVIDENCE_AXIS="unvalidated:advise red_driven:gate field_observed:gate calibrated:gate refuted:observe"
 
-rank_of(){ case "$1" in none) echo 0 ;; observe) echo 1 ;; advise) echo 2 ;; rank) echo 3 ;; gate) echo 4 ;; *) echo -1 ;; esac; }
-name_of(){ case "$1" in 0) echo none ;; 1) echo observe ;; 2) echo advise ;; 3) echo rank ;; 4) echo gate ;; *) echo '?' ;; esac; }
+rank_of(){ case "$1" in none) echo 0 ;; observe) echo 1 ;; advise) echo 2 ;; rank) echo 3 ;; gate) echo 4 ;; execute) echo 5 ;; *) echo -1 ;; esac; }
+name_of(){ case "$1" in 0) echo none ;; 1) echo observe ;; 2) echo advise ;; 3) echo rank ;; 4) echo gate ;; 5) echo execute ;; *) echo '?' ;; esac; }
 axis_cap(){ # <axis-string> <key> -> licensed authority, or the empty string
   local a
   for a in $1; do case "$a" in "$2":*) printf '%s' "${a#*:}"; return 0 ;; esac; done

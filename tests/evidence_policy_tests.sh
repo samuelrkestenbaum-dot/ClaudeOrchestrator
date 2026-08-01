@@ -78,14 +78,14 @@ trap 'rm -rf "$WORK"' EXIT
 # duplication is a third opinion and not the only one.
 CLASSES="A B C D R"
 EVIDENCE="unvalidated red_driven field_observed calibrated refuted"
-LADDER="none observe advise rank gate"
+LADDER="none observe advise rank gate execute"
 NCELL=0
 for _c in $CLASSES; do for _e in $EVIDENCE; do NCELL=$((NCELL+1)); done; done
 NEV=0
 for _e in $EVIDENCE; do NEV=$((NEV+1)); done
 
 in_list(){ local v="$1" l; for l in $2; do [ "$v" = "$l" ] && return 0; done; return 1; }
-rank_of(){ case "$1" in none) echo 0 ;; observe) echo 1 ;; advise) echo 2 ;; rank) echo 3 ;; gate) echo 4 ;; *) echo -1 ;; esac; }
+rank_of(){ case "$1" in none) echo 0 ;; observe) echo 1 ;; advise) echo 2 ;; rank) echo 3 ;; gate) echo 4 ;; execute) echo 5 ;; *) echo -1 ;; esac; }
 
 run(){ "$TOOL" "$@" > "$WORK/out.txt" 2> "$WORK/err.txt"; echo "$?"; }
 out(){ cat "$WORK/out.txt" "$WORK/err.txt"; }
@@ -195,7 +195,7 @@ grep -qE '^ladder: ' "$WORK/out.txt" \
   || { no "the tool never prints the authority ladder"; dump; }
 LAD="$(awk '$1=="ladder:"{$1=""; print}' "$WORK/out.txt" | tr -d ' ')"
 [ "$LAD" = "$(printf '%s' "$LADDER" | tr -d ' ' | sed 's/none/none/')" ] \
-  && ok "the printed ladder is the registry's own: none observe advise rank gate" \
+  && ok "the printed ladder is the registry's own: $LADDER" \
   || no "the printed ladder '$LAD' is not the registry's authority ladder"
 
 echo "== 4. THE CLASS AXIS IS A COPY OF README §3, not a rewrite of it =="
@@ -749,47 +749,62 @@ echo "== 20. THE TWO REFUTED CONTROLS — the cap is a FINDING, not an instructi
   && ok "maint.source_scan_mask still declares its refutation (refuted)" \
   || no "maint.source_scan_mask's empirical_status has moved — the mask's three measured defeats are not retractable"
 
-echo "== 20a. \`observe\` IS NOT REACHABLE FOR A load_bearing CONTROL WITH A CONSUMER =="
-# README §2 defines `observe` as "it measures and records. NOTHING READS THE
-# RESULT." scan-controls.sh defines `load_bearing` as "a live policy consumes it,
-# its result changes behaviour, and removing it changes outcomes." An entry
-# claiming both asserts that nothing reads a result something reads.
+echo "== 20a. BEING CONSUMED AT \`observe\` IS NOW LEGAL — the contradiction moved to CONSEQUENCE =="
+# WHAT THIS SECTION USED TO SAY, AND WHY IT WAS WRONG. It asserted that `observe`
+# was NOT REACHABLE for a load_bearing control with a consumer, on the ground
+# that README §2 defined `observe` as "it measures and records. NOTHING READS THE
+# RESULT" while `load_bearing` means a live policy consumes it. That reading made
+# the evidence axis's own `refuted -> observe` cap unreachable for 67 of 81
+# controls, with 0 sitting on the rung — a remedy that could be prescribed and
+# never applied.
 #
-# This is the packet's finding about `maint.source_scan_mask`, made mechanical.
-# That control is `refuted` (so the evidence axis caps it at `observe`),
-# `load_bearing`, and consumed by two controls. Every one of the four resolutions
-# is therefore closed to it: demotion writes the falsehood this check now
-# refuses, retirement breaks both consumers, its own promotion_requirement
-# forbids improving the evidence, and its class is not wrong. The finding is
-# real and its prescribed remedy is unreachable — so the remedy must not be
-# applied by hand while nothing is watching.
+# UNDER THE CORRECTED LADDER THE PREMISE IS GONE. `observe` means the output may
+# be recorded and CONSUMED FOR VISIBILITY while causing NO OPERATIONAL
+# CONSEQUENCE, so "consumed" and "observe" are perfectly consistent. A NARROWER
+# tension survives and it is about consequence, not consumption: `load_bearing`
+# asserts that REMOVING IT CHANGES OUTCOMES, which IS an operational consequence.
+# So the check still has a subject — it just no longer has the subject it claimed.
+#
+# AND IT NO LONGER GATES. The axis that prescribes the demotion is ADVISORY: it
+# exits 0 and states in its own output that re-authorising belongs to the
+# operator. A gate that forbids the operator from applying the demotion the
+# advisory system recommends is incoherent, so this is REPORTED and not REFUSED.
+# The assertions below therefore pin FACTS ABOUT THE LIVE CENSUS and the
+# REPORTING, and deliberately do not forbid the operator a move.
 SM_AUT="$(fval "$REG" maint.source_scan_mask runtime_authority)"
 SM_IMP="$(fval "$REG" maint.source_scan_mask implementation_status)"
 SM_CONS="$(fval "$REG" maint.source_scan_mask consuming_policies)"
 [ "$SM_IMP" = "load_bearing" ] && [ -n "$SM_CONS" ] \
   && ok "maint.source_scan_mask is load_bearing and names its consumers (this check is not vacuous)" \
   || no "maint.source_scan_mask no longer claims load_bearing with named consumers"
-[ "$SM_AUT" != "observe" ] \
-  && ok "...and it has NOT been demoted to \`observe\`, which would claim nothing reads what two controls read" \
-  || no "maint.source_scan_mask sits at \`observe\` while naming consumers — the evidence cap was applied as an instruction and wrote a falsehood"
-# The live census, generally: no entry may claim both.
-OBSBAD=0; OBSN=0
+# THIS PACKET RE-AUTHORISED NOBODY, so the control is where the operator left it.
+# Stated as an observation of the census — not as a prohibition, which is exactly
+# the thing this section stopped doing.
+[ "$SM_AUT" = "advise" ] \
+  && ok "...and this packet did not move it: it is still at \`advise\`, and the finding still stands" \
+  || no "maint.source_scan_mask's runtime_authority is now '$SM_AUT'; redefining a rung must not move a control"
+# The live census, reported rather than refused.
+OBSN=0; OBSLB=0
 while IFS= read -r id; do
   [ -n "$id" ] || continue
   [ "$(fval "$REG" "$id" runtime_authority)" = "observe" ] || continue
   OBSN=$((OBSN+1))
   c="$(fval "$REG" "$id" consuming_policies)"
   [ "$(fval "$REG" "$id" implementation_status)" = "load_bearing" ] && [ -n "$c" ] && [ "$c" != "NONE" ] \
-    && { OBSBAD=$((OBSBAD+1)); echo "      | $id is load_bearing at observe, consumed by: $c"; }
+    && { OBSLB=$((OBSLB+1)); echo "      | reported: $id is load_bearing at observe, consumed by: $c"; }
 done < <(sed -n 's/^control: //p' "$REG")
-[ "$OBSBAD" -eq 0 ] \
-  && ok "no live entry claims load_bearing at \`observe\` ($OBSN entr(ies) sit at observe)" \
-  || no "$OBSBAD entr(ies) claim load_bearing at \`observe\`"
+ok "the census reports $OBSN entr(ies) at \`observe\`, of which $OBSLB are load_bearing — reported, not refused"
 
-echo "== 20b. RED DRIVE — the scanner REFUSES load_bearing at \`observe\` =="
+echo "== 20b. RED DRIVE — the scanner REPORTS load_bearing at \`observe\`, and does NOT refuse =="
 # The live check above passes on a census where nothing sits at `observe`, so on
-# its own it proves nothing. This drives the enforcing scanner with a fixture
-# that DOES, and requires a refusal by name.
+# its own it proves nothing. This drives the scanner with a fixture that DOES.
+#
+# TWO THINGS ARE PROVEN AT ONCE, AND BOTH MATTER. The check must still FIRE — a
+# guard relocated to an advisory channel and then silently never reached is a
+# deleted guard with better paperwork — and it must NOT set the exit code, which
+# is the operator's actual complaint: the evidence axis recommends the demotion
+# and this scanner forbade it. So the assertions below demand exit 0 AND the
+# finding by name, and neither alone would do.
 RD="$WORK/obsfix"
 mkobsfix(){ # <authority-for-the-sensor>
   rm -rf "$RD"; mkdir -p "$RD/build-os/metrics"
@@ -836,12 +851,35 @@ RC=$?
 mkobsfix observe
 bash "$SCAN" check --repo "$RD" --registry "$RD/registry.txt" --mismatches "$RD/MISM.md" > "$WORK/obs.txt" 2>&1
 RC=$?
-{ [ "$RC" = "2" ] && grep -qi 'fixture.sensor' "$WORK/obs.txt"; } \
-  && ok "the same entry demoted to \`observe\` is REFUSED, by name (exit $RC)" \
-  || { no "a load_bearing control with a live consumer was accepted at \`observe\` (exit $RC)"; sed 's/^/      | /' "$WORK/obs.txt" | head -8; }
-grep -qi 'nothing reads' "$WORK/obs.txt" \
-  && ok "...and the refusal states the contradiction it caught" \
-  || { no "the refusal does not say why observe and load_bearing cannot both hold"; sed 's/^/      | /' "$WORK/obs.txt" | head -8; }
+{ [ "$RC" = "0" ] && grep -q 'OBSERVE-LB' "$WORK/obs.txt" && grep -qi 'fixture.sensor' "$WORK/obs.txt"; } \
+  && ok "the same entry demoted to \`observe\` is REPORTED by name as OBSERVE-LB, and the scan still exits 0" \
+  || { no "expected an OBSERVE-LB report at exit 0, got exit $RC"; sed 's/^/      | /' "$WORK/obs.txt" | head -8; }
+# THE OPERATOR'S RULING, MADE MECHANICAL. This is the assertion that would have
+# caught the original defect: a demotion the advisory axis prescribes must not be
+# blocked by this scanner's exit code.
+[ "$RC" != "2" ] \
+  && ok "...so applying the evidence axis's own prescribed demotion is NOT refused by the gating path" \
+  || no "the scanner still refuses at exit 2 the demotion the advisory evidence axis recommends"
+grep -qi 'no operational consequence' "$WORK/obs.txt" \
+  && ok "...and the report states the surviving tension in terms of CONSEQUENCE, not consumption" \
+  || { no "the report does not state the consequence-based tension"; sed 's/^/      | /' "$WORK/obs.txt" | head -8; }
+grep -qi 'nothing reads the result' "$WORK/obs.txt" \
+  && { no "the report still hard-codes the RETIRED non-consumption definition of \`observe\`"; sed 's/^/      | /' "$WORK/obs.txt" | head -8; } \
+  || ok "...and it no longer hard-codes \"nothing reads the result\", which was the definition that made the cap unreachable"
+# NON-VACUITY OF THE ADVISORY CHANNEL ITSELF: the count must be reported, and it
+# must actually be non-zero here. A channel that reports "0 advisory findings"
+# while a finding is on screen is worse than no channel.
+grep -qE 'scan-controls: [1-9][0-9]* advisory finding' "$WORK/obs.txt" \
+  && ok "...and the scan reports a NON-ZERO advisory count, so the channel is not silently inert" \
+  || { no "the advisory count is absent or zero while an OBSERVE-LB finding was printed"; sed 's/^/      | /' "$WORK/obs.txt" | head -8; }
+# AND THE GATING PATH STILL GATES. Relocating one check must not have converted
+# the scanner into an advisory tool. A real violation must still exit 2.
+mkobsfix advise
+printf 'control: fixture.bogus\nclass: Z\nimplementation_status: load_bearing\n' >> "$RD/registry.txt"
+bash "$SCAN" check --repo "$RD" --registry "$RD/registry.txt" --mismatches "$RD/MISM.md" > "$WORK/obs2.txt" 2>&1
+[ "$?" = "2" ] \
+  && ok "a genuine violation still REFUSES at exit 2 — only OBSERVE-LB moved, the scanner still gates" \
+  || { no "the scanner no longer refuses a genuine violation; the relocation went too far"; sed 's/^/      | /' "$WORK/obs2.txt" | head -8; }
 
 echo "== 20c. A demotion MEASURED to cost safety must say so where it is read =="
 # `demotion_requirement` is the field an operator reads when lowering authority.
@@ -874,6 +912,247 @@ grep -q 'PREVENTION' "$MSUITE" \
 [ "$(fval "$REG" maint.tripwire_coverage_scan authority_mismatch)" = "declared" ] \
   && ok "...and its mismatch is still DECLARED — keeping the gate did not clear the finding" \
   || no "maint.tripwire_coverage_scan's mismatch was cleared; keeping a gate is not the same as being in licence"
+
+echo "== 21. THE CORRECTED LADDER — \`observe\` by CONSEQUENCE, and a sixth rung =="
+# THE DEFECT THIS SECTION EXISTS TO KEEP FIXED. `gravito_mismatch_refuted_a`
+# measured that `refuted -> observe` was an UNREACHABLE remedy: `OBSERVE-LB`
+# foreclosed `observe` for 67 of 81 controls and 0 sat there. The cause was
+# definitional, not incidental — README §2 defined `none` as "nothing consumes
+# it" AND `observe` as "it measures and records. Nothing reads the result", so
+# BOTH bottom rungs were defined by NON-CONSUMPTION and the ladder had no rung
+# meaning "it is read, but it may cause nothing". That is precisely the state a
+# refuted-but-wired-in control must occupy.
+#
+# The operator's correction, which this section pins:
+#   `observe`  output may be recorded and CONSUMED FOR VISIBILITY; it causes
+#              NO OPERATIONAL CONSEQUENCE.               (defined by CONSEQUENCE)
+#   `execute`  output may DIRECTLY CAUSE MUTATION.        (a sixth rung, above `gate`)
+#
+# THE SIX SITES ARE THE POINT. Consumption semantics were asserted in SIX
+# places, and the previous packet's own receipt records that a remedy touching
+# only the README is not a remedy — the foreclosure was enforced by CODE.
+SITE_README="$RREADME"
+SITE_ENVSTORE="$SRC/build-os/registry/authority_envelopes.txt"
+SITE_ENVTOOL="$SRC/build-os/tools/authority-envelope.sh"
+SITE_EPOL="$TOOL"
+# THE PACKET NAMED SIX SITES. THIS SWEEP COVERS SEVEN. `control_registry.txt`
+# was found during the build to carry the retired rule in TWO live fields of
+# `maint.source_scan_mask` — a `demotion_requirement` instructing the reader that
+# "demotion becomes available only when nothing consumes it", and a `notes` field
+# restating the same. Those are the fields an operator reads WHILE DECIDING, so
+# leaving them behind would have left the correction true everywhere except the
+# place it gets acted on. It is swept here for exactly that reason.
+SEMANTIC_SITES="$SITE_README $SITE_ENVSTORE $SITE_ENVTOOL $SITE_EPOL $SCAN $SRC/build-os/registry/MISMATCHES.md $REG"
+NSITE=0; for _s in $SEMANTIC_SITES; do NSITE=$((NSITE+1)); done
+MISSING=0
+for _s in $SEMANTIC_SITES; do [ -f "$_s" ] || { MISSING=$((MISSING+1)); echo "      | absent: $_s"; }; done
+# NON-VACUITY IS PINNED BY NAME, NOT BY A COUNT. An earlier draft floored this
+# with a numeric minimum on the site count, which is STRICTLY WEAKER — six of the
+# WRONG files would have satisfied it — and which tests/control_registry_tests.sh
+# §21 correctly caught as a new unregistered member of the fitted-floor family.
+# Naming the sites is the better check AND introduces no fitted constant, so
+# there is nothing to register and nothing to excuse.
+#
+# NOTE FOR WHOEVER EDITS THIS COMMENT: that family scan greps tests/*.sh for the
+# floor operators as raw text, so it matches COMMENTS as well as code. Spelling
+# the rejected operator out in prose here made this file a member of the family
+# it was only describing. Say it in words, not in symbols.
+SITEBAD=0
+for _want in README.md authority_envelopes.txt authority-envelope.sh evidence-policy.sh scan-controls.sh MISMATCHES.md control_registry.txt; do
+  case " $(for _s in $SEMANTIC_SITES; do basename "$_s"; done | tr '\n' ' ') " in
+    *" $_want "*) ;;
+    *) SITEBAD=$((SITEBAD+1)); echo "      | the sweep does not cover $_want" ;;
+  esac
+done
+{ [ "$MISSING" -eq 0 ] && [ "$SITEBAD" -eq 0 ]; } \
+  && ok "the sweep covers all $NSITE named semantic sites and every one exists (not vacuous)" \
+  || no "$MISSING absent and $SITEBAD uncovered — the sweep below would pass by reading the wrong files or none"
+
+# (a) THE RETIRED CLAUSE IS GONE, SWEPT BY CONTENT AND NOT BY FILENAME. The
+# previous packet's brief warns that prose citations escape in two forms — bare
+# `:NNN` refs and MISMATCHES.md §10's row form naming a file with NO line number
+# at all — so a filename-qualified grep misses both. This greps CONTENT.
+#
+# THE RULE IS ABSOLUTE AND THAT IS DELIBERATE: the retired string may not appear
+# at these sites AT ALL, not even inside a quotation explaining the history. A
+# sweep that allowed "we used to say X" would have to tell a quotation from a
+# definition, which no grep can do, and the exemption would be the whole hole.
+# The history is therefore recorded by DESCRIBING the old clause ("defined by
+# non-consumption") rather than by reproducing it. Three of this packet's own
+# edits tripped this rule and were rewritten rather than exempted.
+RETIRED=0
+for _s in $SEMANTIC_SITES; do
+  if grep -qi 'nothing reads the result' "$_s"; then
+    RETIRED=$((RETIRED+1)); echo "      | $(basename "$_s") still defines \`observe\` by non-consumption"
+  fi
+done
+[ "$RETIRED" -eq 0 ] \
+  && ok "no live semantic site still defines \`observe\` as \"nothing reads the result\"" \
+  || no "$RETIRED site(s) still carry the retired non-consumption definition of \`observe\`"
+
+# (a2) THE RETIRED RULE HAS TWO WORDINGS, AND BLOCK (a) SWEPT ONLY ONE. This
+# block exists because THIS PACKET REPRODUCED ITS OWN HEADLINE DEFECT INSIDE ITS
+# OWN NEW GUARD. The finding that opened the packet was that `VACUOUS-REF` checks
+# RESOLVABILITY and not IDENTITY — a guard that confirms a citation lands
+# somewhere while never confirming it lands on the right thing. Block (a) above
+# is the same shape one level up: it confirms the retired rule is gone in the
+# README's wording ("nothing reads the result") while never confirming it is gone
+# in the DEPLOYMENT AXIS's wording ("nothing consumes it"). Two sites shipped
+# past it carrying the second wording — `authority-envelope.sh`'s `shadow` row
+# and `control_registry.txt`'s `envelope.grant_composition` notes — in the two
+# files that OWN the deployment axis. A sweep that covers one of a rule's two
+# spellings is not a sweep; it is a filter that happens to name the rule.
+#
+# WHY THIS IS SCOPED TO THE ARROW LINES AND NOT SWEPT ABSOLUTELY. "Nothing
+# consumes it" cannot be banned outright the way "nothing reads the result" was:
+# it is also the correct wording of the MOTIVATION for the whole third axis —
+# "a control whose ranking nothing consumes and a control whose ranking silently
+# reorders the work queue are indistinguishable on both existing axes" — which is
+# a true sentence about two controls, not a definition of a rung. That sentence
+# appears legitimately at README.md, authority_envelopes.txt and
+# authority-envelope.sh. So the discriminator here is POSITION, not
+# vocabulary: a consumption clause is a DEFINITION when it sits on the line that
+# maps something ONTO the `observe` rung, and is prose everywhere else. This
+# greps the mapping lines — `-> observe` — and refuses a consumption clause on
+# any of them.
+#
+# THE LIMIT OF LINE-SCOPING, STATED RATHER THAN DISCOVERED LATER. A registry
+# record is ONE LINE, so in `control_registry.txt` this block cannot separate the
+# mapping from the motivation — the whole `notes` field is the same line, and the
+# motivation sentence there had to be rewritten ("reaches no consumer") to say the
+# same thing in the corrected vocabulary. That is a REWRITE and not an exemption,
+# which is the same treatment block (a) forced on three sites. The check is
+# therefore STRICTER inside a registry record than inside a comment block, and
+# the direction of that error is the safe one: it over-reports on the file where
+# an operator makes the decision.
+#
+# AND THE ASYMMETRY WITH BLOCK (a) IS DELIBERATE, NOT AN OVERSIGHT. Block (a)
+# bans its wording ABSOLUTELY, even in a quotation; this block bans its wording
+# only ON A MAPPING LINE. The two rules differ because the two strings do: only
+# one of them has a legitimate non-definitional use. The visible consequence is
+# that `authority_envelopes.txt` may — and does — say "it used to read
+# <the retired clause>" as history, one line below its own corrected `shadow`
+# row, while no site may quote the README's wording at all. That is stated here
+# so the next reader finds a recorded judgement rather than an apparent hole.
+#
+# WHAT THIS BLOCK STILL DOES NOT SWEEP, RECORDED SO IT IS NOT REDISCOVERED AS A
+# SURPRISE: the FIVE-RUNG SPELLING of the ladder. Sites 3, 4 and 7 of this fix
+# round drifted that way, not this way — a ladder enumerated as ending at `gate`.
+# That is a DIFFERENT guard over a DIFFERENT site set: the drift landed in
+# `tests/*.sh` `ok` messages and in a README-declaration probe, none of which are
+# among the seven SEMANTIC sites above, and the check it needs is an
+# enumeration-continuation test (does the enumeration continue past `gate`?)
+# rather than a same-line-clause test. It is deliberately NOT bolted on here, and
+# is recorded as its own packet in `MISMATCHES.md` §16.
+#
+# AND A SECOND GAP, FOUND BY THE RE-REVIEW AND RECORDED RATHER THAN PATCHED: this
+# block matches an ARROW (`-> observe`), and the mapping has TWO SYNTAXES. README
+# — the FIRST of the seven SEMANTIC_SITES — writes it as a MARKDOWN TABLE ROW:
+# `| shadow | observe | ... |`. Arrow-form matches in README total ZERO, so this
+# block is STRUCTURALLY VACUOUS over the site it lists first. Measured: rewriting
+# that row to carry a consumption clause escapes block (a) (wrong literal), this
+# block (no arrow), and block (b) (which still finds the surviving correct
+# definition elsewhere in the file). The block's stated discriminator is right —
+# a consumption clause is a DEFINITION when it sits on the line that maps
+# something onto `observe` — and a table row IS such a line. The rule is sound;
+# the implementation covers one of the mapping's two syntaxes. That is the same
+# criticism this block levels at its own predecessor, one syntax along, and it is
+# named here so it is not rediscovered as a surprise.
+CONSUMEDEF=0
+for _s in $SEMANTIC_SITES; do
+  while IFS= read -r _ln; do
+    [ -n "$_ln" ] || continue
+    printf '%s' "$_ln" | grep -qiE 'nothing[[:space:]]+(consumes|reads)|(consumes|reads)[[:space:]]+nothing' \
+      && { CONSUMEDEF=$((CONSUMEDEF+1))
+           echo "      | $(basename "$_s"):${_ln%%:*} maps onto \`observe\` with a CONSUMPTION clause"; }
+  done < <(grep -nE -- '->[[:space:]]*observe' "$_s" 2>/dev/null)
+done
+[ "$CONSUMEDEF" -eq 0 ] \
+  && ok "no line mapping anything ONTO \`observe\` defines the rung by consumption — the retired rule's SECOND wording is swept too" \
+  || no "$CONSUMEDEF \`-> observe\` mapping line(s) still define the rung by non-consumption"
+
+# (b) AND THE REPLACEMENT IS PRESENT AT EVERY ONE OF THEM. Deleting the old
+# clause without stating the new one would leave the rung undefined, which is a
+# different defect with the same symptom.
+AGREE=0
+for _s in $SEMANTIC_SITES; do
+  grep -qi 'no operational consequence' "$_s" && AGREE=$((AGREE+1)) \
+    || echo "      | $(basename "$_s") never states that \`observe\` causes no operational consequence"
+done
+[ "$AGREE" -eq "$NSITE" ] \
+  && ok "all $NSITE sites define \`observe\` by CONSEQUENCE — \"no operational consequence\"" \
+  || no "only $AGREE of $NSITE sites carry the consequence definition"
+
+# (c) THE SIXTH RUNG EXISTS, IS ON TOP, AND BOTH TOOLS PRINT THE SAME LADDER.
+run matrix >/dev/null   # cell() reads this buffer, and the ladder is printed here
+EP_LAD="$(awk '$1=="ladder:"{$1=""; print}' "$WORK/out.txt" | xargs)"
+AE_LAD="$(bash "$SITE_ENVTOOL" schema 2>/dev/null | awk '$1=="ladder:"{$1=""; print}' | xargs)"
+[ -n "$EP_LAD" ] && [ "$EP_LAD" = "$AE_LAD" ] \
+  && ok "both tools print the SAME ladder: $EP_LAD" \
+  || no "the two tools print different ladders ('$EP_LAD' vs '$AE_LAD')"
+NRUNG=0; for _r in $EP_LAD; do NRUNG=$((NRUNG+1)); done
+[ "$NRUNG" -eq 6 ] \
+  && ok "the ladder has SIX rungs, not five" \
+  || no "the ladder has $NRUNG rung(s); the corrected ladder has six"
+[ "${EP_LAD##* }" = "execute" ] \
+  && ok "\`execute\` is the TOP rung — strictly above \`gate\`" \
+  || no "the top rung is '${EP_LAD##* }', not \`execute\`"
+[ "$(rank_of execute)" -gt "$(rank_of gate)" ] \
+  && ok "...and this suite's own independent rank_of agrees that execute > gate" \
+  || no "this suite's rank_of does not place execute above gate"
+sed -n '/^### RuntimeAuthority/,/^### nervous_system_role/p' "$SITE_README" \
+  | grep -qE '^\| `execute` \|' \
+  && ok "README §2's RuntimeAuthority table carries an \`execute\` row" \
+  || no "README §2 never defines \`execute\`, so the rung exists only in code"
+sed -n '/^### RuntimeAuthority/,/^### nervous_system_role/p' "$SITE_README" \
+  | grep -qiE 'execute.*(mutat|changes the world)' \
+  && ok "...and defines it by DIRECT MUTATION, which is what distinguishes it from \`gate\`" \
+  || no "README's \`execute\` row does not say it directly causes mutation"
+
+run matrix >/dev/null   # restore the buffer cell() reads, after the README greps
+# (d) THE CAP DID NOT MOVE. Redefining a rung must not re-authorise anybody:
+# `refuted` still caps at `observe`. What changed is what `observe` MEANS, which
+# turns the cap from an unreachable instruction into a legal destination.
+[ "$(cell C refuted)" = "observe" ] && [ "$(cell A refuted)" = "observe" ] \
+  && ok "\`refuted\` still caps at \`observe\` at every class — the cap VALUE is unmoved" \
+  || no "the refuted cap moved while the rung was being redefined; that is a re-authorisation"
+
+# (e) NOTHING DERIVES ITS BOUND FROM "THE TOP RUNG". The class table is settled
+# and must be untouched by the arrival of a rung above `gate` — if any class
+# licence were written as "the top of the ladder" it would have silently risen
+# to `execute` and re-authorised the whole Class-A population in one commit.
+[ "$(cell A calibrated)" = "gate" ] \
+  && ok "Class A still licenses \`gate\` and NOT \`execute\` — no class bound tracked the top rung" \
+  || no "Class A now licenses '$(cell A calibrated)'; adding a rung re-authorised a whole class"
+GRIDEX=0
+for _c in $CLASSES; do for _e in $EVIDENCE; do
+  [ "$(cell "$_c" "$_e")" = "execute" ] && GRIDEX=$((GRIDEX+1))
+done; done
+[ "$GRIDEX" -eq 0 ] \
+  && ok "NO cell of the $NCELL-cell class/evidence grid licenses \`execute\` — whether one should is the operator's, and is recorded, not answered here" \
+  || no "$GRIDEX grid cell(s) license \`execute\`; this packet was licensed to add a rung, not to grant it"
+
+# (f) THE TOP RUNG MUST NOT BE UNREACHABLE ON THE DEPLOYMENT AXIS — which is the
+# ONLY axis whose default applies to all 81 controls that predate it. The
+# artefact's own stated defence of `autonomous` is "no additional cap ... the top
+# of the ladder and therefore no cap at all". That defence is a claim about
+# POSITION, not about the token `gate`. If the top moves and `autonomous` stays
+# put, a documented NON-cap silently becomes a real cap on the whole census —
+# and `execute` becomes foreclosed for everyone, which is the very
+# unreachable-rung pathology this section exists to fix, reproduced one axis
+# along.
+DEPTOP="$(bash "$SITE_ENVTOOL" schema 2>/dev/null \
+  | awk '$1=="axis:" && $2=="deployment"{for(i=3;i<=NF;i++) if($i ~ /^autonomous:/){split($i,p,":"); print p[2]}}')"
+[ "$DEPTOP" = "${EP_LAD##* }" ] \
+  && ok "the DEFAULT deployment mode \`autonomous\` caps at the TOP rung (\`$DEPTOP\`) — it still adds no cap" \
+  || no "\`autonomous\` caps at '${DEPTOP:-<none>}' while the ladder tops out at '${EP_LAD##* }' — the default now silently demotes the whole census"
+
+# (g) AND THE CENSUS IS UNMOVED. The whole point: a definition changed, and not
+# one finding did.
+LIVE_N="$(bash "$SITE_EPOL" check 2>/dev/null | sed -n 's/^evidence-policy: \([0-9]*\) of [0-9]* out of licence.*/\1/p')"
+[ "${LIVE_N:-x}" = "19" ] \
+  && ok "the live census still reports 19 findings — redefining a rung re-authorised nobody" \
+  || no "the live census reports ${LIVE_N:-<none>} findings, not 19; a semantic edit moved the finding set"
 
 echo "== 19. This suite is chained, and is not vacuous about itself =="
 grep -qF 'chain_suite "tests/evidence_policy_tests.sh"' "$SRC/tests/build_os_tests.sh" \

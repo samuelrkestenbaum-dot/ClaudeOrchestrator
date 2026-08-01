@@ -122,9 +122,16 @@ file with exactly **2** `## ` headings — so the suite went red on live content
 not on code.
 
 Note the sharper hazard named in that assertion: **a count of 0 means the
-delimiter does not match the file's format at all, and such a file silently
-never rotates.** A prose-only rewrite of this file could disarm its own rotation
-without failing anything loudly.
+delimiter does not match the file's format at all, and nothing can ever rotate
+out of such a file.** A prose-only rewrite of this file could disarm its own
+rotation.
+
+**It would not do so *silently* — that word was wrong here and is corrected.**
+Measured: a zero-block file is byte-identical after `--apply`, exit is **0**, and
+**nothing fails** — but `rotate-memory.mjs` prints `WARNING: <path>: the block
+delimiter /^## / matched NOTHING … NOTHING CAN EVER ROTATE OUT OF IT` to stderr.
+That warning exists at base and `rotate-memory.mjs` was not touched. The failure
+mode is **an ignorable warning**, not silence.
 
 Fixed here by promoting this packet's own section headings from `###` to `##`,
 which is a change to **this packet's file only** — no guard was weakened,

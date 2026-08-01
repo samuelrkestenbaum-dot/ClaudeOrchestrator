@@ -74,7 +74,7 @@ trap 'rm -rf "$WORK"' EXIT
 # its expected set out of the tool it is checking cannot notice the tool quietly
 # dropping a mode or inventing one.
 MODES="shadow human_confirmed bounded_autonomous autonomous"
-LADDER="none observe advise rank gate"
+LADDER="none observe advise rank gate execute"
 DEFAULT_MODE="autonomous"
 # The fourteen fields the operator's ruling names. Duplicated for the same
 # reason.
@@ -83,7 +83,7 @@ NMODE=0; for _m in $MODES; do NMODE=$((NMODE+1)); done
 NFIELD=0; for _f in $SCHEMA_FIELDS; do NFIELD=$((NFIELD+1)); done
 
 in_list(){ local v="$1" l; for l in $2; do [ "$v" = "$l" ] && return 0; done; return 1; }
-rank_of(){ case "$1" in none) echo 0 ;; observe) echo 1 ;; advise) echo 2 ;; rank) echo 3 ;; gate) echo 4 ;; *) echo -1 ;; esac; }
+rank_of(){ case "$1" in none) echo 0 ;; observe) echo 1 ;; advise) echo 2 ;; rank) echo 3 ;; gate) echo 4 ;; execute) echo 5 ;; *) echo -1 ;; esac; }
 
 run(){ "$TOOL" "$@" > "$WORK/out.txt" 2> "$WORK/err.txt"; echo "$?"; }
 out(){ cat "$WORK/out.txt" "$WORK/err.txt"; }
@@ -198,7 +198,7 @@ NDECL="$(awk '$1=="axis:" && $2=="deployment"{print NF-2; exit}' "$WORK/out.txt"
 # The ladder is printed rather than assumed, and it is the registry's own.
 LAD="$(awk '$1=="ladder:"{$1=""; print}' "$WORK/out.txt" | tr -d ' ')"
 [ "$LAD" = "$(printf '%s' "$LADDER" | tr -d ' ')" ] \
-  && ok "the printed ladder is the registry's own: none observe advise rank gate" \
+  && ok "the printed ladder is the registry's own: $LADDER" \
   || no "the printed ladder '$LAD' is not the registry's authority ladder"
 # The same anti-pattern the evidence matrix refuses, refused one axis along.
 grep -qE '(score|index|blend|composite|weight)[a-z_]*[[:space:]]*[=:][[:space:]]*[0-9.]' "$WORK/out.txt" \
@@ -297,9 +297,16 @@ DEF="$(awk '$1=="default:" && $2=="deployment_mode"{print $3; exit}' "$WORK/out.
 [ "$DEF" = "$DEFAULT_MODE" ] \
   && ok "the declared default for a control with no envelope is \`$DEFAULT_MODE\`" \
   || { no "the declared default is \"${DEF:-<none>}\", not \`$DEFAULT_MODE\` — any other default silently demotes the whole census"; dump; }
-[ "$(rank_of "$(depcap "$DEFAULT_MODE")")" = "$(rank_of gate)" ] \
-  && ok "and the default mode caps at \`gate\` — i.e. it adds NO cap, which is what \"changes nothing\" means arithmetically" \
-  || no "the default mode caps below \`gate\`, so it demotes every control that never asked for a deployment mode"
+# ASSERTED AGAINST THE TOP OF THE LADDER, NOT AGAINST A TOKEN. This line used to
+# read `= "$(rank_of gate)"`, which was correct only for as long as `gate` HAPPENED
+# to be the top rung. When `execute` was added above it, that spelling would have
+# demanded the default cap BELOW the top — i.e. it would have required the default
+# to demote the whole census, which is the exact opposite of the property being
+# checked. The property is "adds NO cap"; the token that satisfies it is derived.
+LADDER_TOP="${LADDER##* }"
+[ "$(rank_of "$(depcap "$DEFAULT_MODE")")" = "$(rank_of "$LADDER_TOP")" ] \
+  && ok "and the default mode caps at the TOP rung (\`$LADDER_TOP\`) — i.e. it adds NO cap, which is what \"changes nothing\" means arithmetically" \
+  || no "the default mode caps below \`$LADDER_TOP\`, so it demotes every control that never asked for a deployment mode"
 grep -qiE 'default:.*(demot|re-?authoris|changes nothing|no additional cap)' "$WORK/out.txt" \
   && ok "the default line carries its DEFENCE, not just its value" \
   || { no "the default is stated without the reason it must be this one"; dump; }
