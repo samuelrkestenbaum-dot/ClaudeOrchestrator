@@ -10,7 +10,7 @@
   plan → build → prove → review → record system.
 - **Primary branch / base:** `claude/add-build-os` (current integration base; no
   `main` present in this environment). Active work branch:
-  `claude/project-handoff-merge-ramhds` (tip `d0eff10` before this close commit). Merge-base with
+  `claude/project-handoff-merge-ramhds` (tip `a75c25e` before this close commit). Merge-base with
   `origin/claude/add-build-os` = `7ef50e8`.
   **CORRECTED 2026-07-31 — this line previously claimed the branch was UNPUSHED, and it is not.**
   `refs/remotes/origin/claude/project-handoff-merge-ramhds` is at **`6b01173`**, and
@@ -19,7 +19,8 @@
   `105cb75`, `0555717`, `77a0040` (`gravito_evidence_policy_matrix_a` + its close) and
   `88052e7`, `a7ab841` (`gravito_authority_envelope_a`) and its close `c52915f`, and
   `b25f3f7`, `566443f` (`gravito_mismatch_refuted_a`) and its close `2df61ae`, and `576751a`,
-  `d0eff10` (`gravito_ladder_semantics_a`), plus this close commit.**
+  `d0eff10` (`gravito_ladder_semantics_a`) and its close `7daedee`, and `f27c570`, `a75c25e`
+  (`gravito_p1_mutators_ids_telemetry_a`), plus this close commit.**
   **NOTE, and it is the reason a whole finding exists: `2df61ae` WAS PUSHED AND IT SHIPS RED** —
   `./build-os/maintenance/run-tests.sh` is **143/144** at that commit, because the close that wrote
   it left `active_packet.md` with 2 `^## ` blocks and the rotation proof needs >=3. **`576751a`
@@ -37,9 +38,9 @@
   `no tags` because `tests/release_metadata_tests.sh:322` requires it, so the residue item is
   annotated rather than rewritten. Whether the tag was created with an explicit go is not
   determinable from here and no claim is made.
-- **Build/test command:** `bash tests/build_os_tests.sh` (1636 checks; no network; temp dirs)
-  — measured on a quiet tree at `d0eff10`, and reconciled against `CHANGELOG.md`, which
-  carries the matching literal `**1636 passed**` (present exactly once, unsplit) in the
+- **Build/test command:** `bash tests/build_os_tests.sh` (1689 checks; no network; temp dirs)
+  — measured on a quiet tree at `a75c25e`, and reconciled against `CHANGELOG.md`, which
+  carries the matching literal `**1689 passed**` (present exactly once, unsplit) in the
   release block `## [Unreleased]` -> `### In flight (not landed at the released commit)`.
   **CITED BY HEADING, NOT BY LINE NUMBER, from 2026-08-01 on** — the changelog grows from the
   top, so every line-citation into it decays on every packet, guaranteed rather than
@@ -60,13 +61,18 @@
   `566443f` green at **1617/0** while this line still claimed **1597**; and at `d0eff10` green at
   **1636/0** while this line and CHANGELOG **disagreed** (this line 1617, CHANGELOG already 1636,
   because the builder wrote the live total into the changelog entry) — a **seventh** demonstration
-  on the same token, and the first where the two halves were out of step in the *other* direction. The check
+  on the same token, and the first where the two halves were out of step in the *other* direction;
+  and at `a75c25e` green at **1689/0** while this line still claimed **1636** and CHANGELOG already
+  carried **1689** — an **EIGHTH** demonstration, out of step in the same *other* direction, and for
+  the same structural reason. The check
   that actually works is opt-in and **still NOT enabled by the chained suite** —
   `RELEASE_METADATA_LIVE_SUITE=1 bash tests/release_metadata_tests.sh` compares against a live
   run, and it is the ONLY check that compares memory against a live run. It correctly reported
   `live suite total (1617 passed) contradicts current_state.md's claim (1597)` at the previous
   close, and it is re-run **after** the archivist's writes at every close since. **At this close it
-  reports a MATCH at 1636.** Correcting the number does not fix the guard; see residue.
+  reports a MATCH at 1636.** **[UPDATED 2026-08-01 at the `gravito_p1_mutators_ids_telemetry_a`
+  close: this line now reads 1689, and `RELEASE_METADATA_LIVE_SUITE=1` re-run AFTER the archivist's
+  writes reports a MATCH at 1689.]** Correcting the number does not fix the guard; see residue.
   It **chains** 16 sibling suites in `tests/` through one `chain_suite` function and folds their
   counts into its own totals. A sibling suite present on disk but not chained is itself a failure,
   so a new suite cannot become discoverable-only. **The per-suite breakdown that used to sit here was
@@ -92,7 +98,114 @@
 
 ## Where we are
 
-- **Last closed packet:** `gravito_ladder_semantics_a` — **the ladder gained a rung, `observe`
+- **PHASE CHANGE — RECORD THIS BEFORE THE PACKET LOG. THE GOVERNANCE-ONLY PHASE IS OVER.** The
+  operator has ended it and issued **BUILD AUTHORITY** with an **ANTI-STALL RULE**: build around
+  the limitations and record what was built around, rather than pausing on them. The operator's
+  framing, verbatim, because it is the standard every packet from here is measured against:
+  *"the governance substrate is no longer the bottleneck. The bottleneck is now whether Gravito can
+  begin making better decisions than today's planning approaches."*
+  **THE SEQUENCE IS FIVE PHASES: P1 mutators/IDs/telemetry (DONE) -> P2 claim-scoped evidence ->
+  P3 `accept_and_constrain` -> P4 S1 shadow ranker -> P5 outcome/counterfactual telemetry.**
+  Read everything below as **substrate for P4**, not as governance for its own sake.
+- **Last closed packet:** `gravito_p1_mutators_ids_telemetry_a`
+  (`PACKET-0006-gravito-p1-mutators-ids-telemetry-a`) — **`execute` got its FIRST SIX OCCUPANTS,
+  identity stopped being a line number, and the packet recorded the feature vectors of the arms it
+  did NOT take** (receipt `build-os/receipts/gravito_p1_mutators_ids_telemetry_a.md`, commits
+  `f27c570` + `a75c25e`, base `7daedee`, re-verified `git merge-base a75c25e 7daedee` = `7daedee`).
+  **DELIVERED.** The **mutator census** (`build-os/registry/mutator_registry.txt`) — every
+  durable-write path in the repository, identified, scoped, and classified on **what it actually
+  guarantees** rather than on the check standing next to it, as `MUT-0001`..`MUT-0008`.
+  **SIX `execute` OCCUPANTS, THE RUNG'S FIRST EVER:** `maint.rotation_live_file_replacement`,
+  `swarm.merge_commit_execution`, `metrics.record.store_append`, `metrics.decision.store_append`,
+  `identity.stamp_write`, `tools.handoff_lock_lifecycle`. **Census 81 -> 90**; authority
+  **71 `gate` / 13 `advise` / 6 `execute` / 0 `rank` / 0 `observe` / 0 `none`.**
+  **STABLE IDS AT BIRTH** — `MUT-*`, `CTRL-*`, `DEFECT-*`, `FINDING-*`, `PACKET-*`, `DECISION-*`,
+  `EVIDENCE-*`, `OUTCOME-*`, `SIGNAL-SNAPSHOT-*`, `RANKING-*`. **LINE NUMBERS ARE NAVIGATION HINTS;
+  THEY ARE NO LONGER IDENTITY.** IDs are **DERIVED, not ledgered** — a central ledger would be a
+  second copy of every id with nothing reconciling the two, which is `DEFECT-0003` itself.
+  Plus **`defect_classes.txt`** (twelve recurrent classes, `DEFECT-0001`..`DEFECT-0012`,
+  mechanically queryable), **`record-decision.sh` + decision telemetry + frozen signal snapshots**,
+  **`governance_baseline.txt`** (pins class/authority/mismatch on all 81 pre-existing controls),
+  **`findings.txt`** (`FINDING-0001`/`-0002`/`-0003`, remedies **named and UNAPPLIED**), the new
+  suite `tests/mutator_registry_tests.sh` and the new scanner `scan-mutators.sh`.
+  **(1) P1 DELIVERS THE COUNTERFACTUAL SUBSTRATE, NOT IMITATION LEARNING — THE FINDING THAT DECIDES
+  WHETHER THE SEQUENCE CAN WORK.** `build-os/metrics/signal_snapshots.tsv` carries **12 rows across
+  ALL FOUR candidates of `DECISION-0007-p1-mutators-ids-telemetry` — INCLUDING THE THREE NOT
+  SELECTED** (`PACKET-0015-mutation-census` selected; `PACKET-0016-citation-identity-anchor`,
+  `PACKET-0017-chain-the-live-suite`, `PACKET-0018-ladder-spelling-sweep` rejected) — three signals
+  each, **digest-chained**, each naming its `repository_commit` and `derivation_version`. **§9 of
+  `tests/mutator_registry_tests.sh` PROVES THE FREEZE EMPIRICALLY:** it reads a historical
+  `signal_value`, **materially mutates the live registry the signal derives from**, re-reads, and
+  asserts **no movement**. **IMITATION LEARNING NEEDS ONLY THE SELECTED ARM; THIS RECORDS THE
+  FEATURE VECTOR FOR THE REJECTED ARMS TOO.** The store's header states the principle: *"A later
+  evaluation must never recompute a historical signal against the current tree: that scores a
+  decision nobody took, on information nobody had."* And the rows are recorded **unflatteringly to
+  the signals**: the selected candidate scored **0** on `dependency_unlock_count` while a candidate
+  that scored **1** was not selected. **THE RESIDUE THE REVIEWER ATTACHED, AND P2 MUST ACT ON IT:
+  today's training set is ONE decision with a non-degenerate candidate set.** `DECISION-0001` is a
+  fan-out where all three were selected; `DECISION-0002`..`-0006` are **|C| = 1**. **P2 AND P3 MUST
+  KEEP RECORDING REJECTED CANDIDATES OR P4 STARTS AT n = 1.**
+  **(2) THE PACKET COMMITTED THE TWO DEFECT CLASSES IT REGISTERED.** It registered
+  `DEFECT-0001-stale-line-reference` and `DEFECT-0008-incomplete-application` and shipped fresh
+  instances of both — ultimately in **TWENTY sites across two rounds**. The sharpest: `agency`'s
+  `claimed_max_authority` was changed to `execute` on one line while **the next line still read**
+  *"Five bindings… The fifth binding"* against a live **11 bindings / 8 instantiating**.
+  **Corrected and uncorrected, ONE LINE APART.**
+  **(3) THE SWEEP HIT THE DERIVED DOC AND MISSED THE SOURCE ARTEFACT.** Round 1 corrected five stale
+  counts in `CROSSWALK.md` and **never swept `neurocosmology_crosswalk.txt` — the artefact
+  `CROSSWALK.md` IS DERIVED FROM**, which this packet also edited. **Seven more sites were stale
+  there.** The reviewer named the cause **as its own**: *incomplete enumeration*, the same class as
+  its item-8 miss.
+  **(4) A FIFTH ESCAPE FORM: THE FILE HEADER.** Site seven was `neurocosmology_crosswalk.txt`'s
+  **header comment** — *"1 binding out of 22"* (live **23**), *"12 out of 25"* (live **14 of 27**).
+  **A HEADER COMMENT REACHES NO FIELD-SCOPED SWEEP.** The catalogue is now: bare `:NNN`; table rows
+  naming a file with no line number; line-wrapped enumerations; markdown table-row mappings;
+  **header comments**.
+  **(5) TWO NUMBERS WERE WRONG WHEN WRITTEN, NOT MERELY STALE — AND BOTH ERRED IN THE FLATTERING
+  DIRECTION.** The packet's self-hit tally said **7 shifted / 4 silently wrong**; qa's repo-wide
+  census gives **10 shifted / 3 flagged / 7 silently wrong** — **it under-reported its own defect**.
+  And `defect_classes.txt` recorded only the occurrences the packet **CAUGHT**, not those it
+  **ESCAPED** — in a store whose sole purpose is that `query()` returns a trustworthy count, and
+  whose own `OCCURRENCE-0008` states the principle it was violating: *"a caught instance is evidence
+  about the class exactly as an escaped one is."* **Both corrected.**
+  **(6) THE REVIEWER'S OWN FIGURE WAS WRONG AND THE BUILDER REFUSED IT.** The reviewer wrote
+  **"64 of 90"** for the `red_driven` counterfactual; the builder derived **77 of 90** and
+  **validated the METHOD rather than asserting it** — run against `7daedee`, the same composition
+  **regenerates the reviewer's ORIGINAL sentence verbatim** (*68 of 81, 49 newly, on top of 19*).
+  The orchestrator independently reproduced **25 / 77 / 52 / 25**. **A MODEL THAT REGENERATES THE
+  PRIOR SENTENCE FROM THE PRIOR ARTEFACT IS THE MODEL THAT PRODUCED IT.** The reviewer **confirmed
+  its own error on re-review**; `README.md` now keeps **64** (exactly `red_driven`) and **68**
+  (*contains* it) in the same passage, explicitly labelled as answers to different questions.
+  **VERDICT TRAIL: qa RED — documentation-only, ZERO TEST FAILURES; reviewer `fix-then-pass` TWICE**
+  (11 items, then 6). **Fix rounds: 13 reconciled items in ONE installment, then 7 artefact sites
+  closed by the orchestrator in the `tiny` lane.**
+  **qa PROVED THE SIX `execute` REGISTRATIONS BY EXECUTION, NOT BY READING:** `swarm-merge.sh
+  --commit` created commit `ff2c8ac` in a scratch repo; `record-packet.sh` grew its store **12 -> 13
+  rows**; `record-decision.sh` appended. **Stable ids survived a 25-line insertion** — `MUT-0002`
+  moved **104 -> 129** and `query` output was **BYTE-IDENTICAL**. **Duplicate ID injection exits 2.**
+  **`query(DEFECT-0001)` returns 3 occurrences.** **The baseline drove RED on a flipped authority.**
+  Telemetry wrote **20 fields `unknown` with ZERO literal 0s**; exactly **2 `@derived`** values,
+  both traced **verbatim** to `packet_metrics.tsv`; **117 unknown cells, NOTHING back-filled**.
+  **Appending a 91st control left `signal_snapshots.tsv`'s md5 UNCHANGED.** `build-os/memory/*`
+  **byte-identical start and finish**.
+  **FINAL STATE AT `a75c25e`: 2 commits (`f27c570` untouched and still an ancestor). Suite
+  1689 passed / 0 failed; `./build-os/maintenance/run-tests.sh` 144/144; `scan-controls.sh check`
+  exit 0; `scan-mutators.sh check` exit 0; `evidence-policy.sh check` 25 of 90, split 6/5/14;
+  90 controls, 20 declared mismatches, 71 gate / 13 advise / 6 execute / 0 rank / 0 observe / 0
+  none; class A67 / B3 / C20; implementation_status 76 load_bearing / 9 implemented /
+  5 decision_contributing; 8 mutator records; 12 defect classes; 3 findings; 7 decisions;
+  12 signal snapshots; 0 live authority envelopes; tree clean.** All re-derived by the archivist at
+  close directly from `control_registry.txt` and the live tools.
+  **THE 20 DECLARED MISMATCHES SPLIT INTO TWO KINDS AND THE SPLIT IS THE POINT: 14 exercise `gate`
+  on an `advise` licence (fitted heuristics, the pre-existing population); 6 exercise `execute` on a
+  Class A licence that reaches only `gate` (the durable writes) — OUT OF LICENCE BY CONSTRUCTION,
+  because NO CLASS LICENSES `execute`.** Their mismatch is not a defect in the registration; it is
+  the registry correctly reporting that **the operator has not decided whether anything may mutate
+  under licence**. **ZERO governance-field changes — nothing pre-existing was re-authorised.**
+  **Both verdicts single-model — NO CODEX IN ANY PASS, for the SIXTH packet running.**
+  `tool_router.md:368` routes to it and nothing is installed. It matters here specifically:
+  **finding 6 is a REVIEWER error that only the BUILDER caught.**
+- **Prior:** `gravito_ladder_semantics_a` — **the ladder gained a rung, `observe`
   changed meaning, and NOT ONE CONTROL MOVED** (receipt
   `build-os/receipts/gravito_ladder_semantics_a.md`, commits `576751a` + `d0eff10`, base `2df61ae`).
   On the operator's ruling: **`observe` is redefined by CONSEQUENCE** — *"output may be recorded and
@@ -645,9 +758,23 @@
   writes envelopes to fix mismatches.
   **AND DO NOT EXTRAPOLATE the two refuted closures to the remaining twelve:** 11 of the 19 findings
   are `unvalidated`, where the remedy is **improve the evidence** and that outcome is **wide open**.
-- **Next (candidates) — from this and the previous closes' residue. THE FIRST TWO ARE NOT ORDERED BY
-  COST; they are ordered by what the reviewer ruled and by what has already shipped red.**
-  -2. **THE MUTATION CENSUS COVERAGE GAP — THE REVIEWER RULED THIS THE NEXT PACKET.**
+- **Next — THE OPERATOR'S FIVE-PHASE SEQUENCE COMES FIRST AND IS NOT A CANDIDATE LIST.** P1 is
+  **DONE** (`gravito_p1_mutators_ids_telemetry_a`). The remaining four, in order:
+  **P2. CLAIM-SCOPED EVIDENCE.** **AND IT CARRIES A HARD OBLIGATION FROM P1:** it **must keep
+     recording REJECTED candidates** in `signal_snapshots.tsv`. Today only `DECISION-0007` has a
+     non-degenerate candidate set — `DECISION-0001` selected all three, `DECISION-0002`..`-0006` are
+     `|C| = 1` — so **if P2 and P3 record only the selected arm, P4 starts at n = 1.**
+  **P3. `accept_and_constrain`** — the reviewer's missing-fifth-outcome proposal, still untaken by
+     the operator (see the three decisions above).
+  **P4. S1 SHADOW RANKER** — the consumer everything above is substrate for. Its two open
+     decisions are still the operator's: the evidence token (`untested` as a sixth, or S1 arrives
+     carrying `unvalidated`) and the `runtimeAuthority: observe` recommendation (advice, NOT
+     adopted).
+  **P5. OUTCOME / COUNTERFACTUAL TELEMETRY.**
+- **Candidates (the standing backlog, subordinate to the five phases) — from this and the previous
+  closes' residue.**
+  -2. **[CLOSED 2026-08-01 by `gravito_p1_mutators_ids_telemetry_a` — kept for the record, DO NOT
+     SCHEDULE.] THE MUTATION CENSUS COVERAGE GAP — THE REVIEWER RULED THIS THE NEXT PACKET.**
      `MISMATCHES.md` §15. Five modules durably mutate and **not one of those write ACTIONS is a
      registered control at any authority**: `rotate-memory.mjs` (renames onto the LIVE memory file —
      the most consequential write in the system), `swarm-merge.sh`, `record-packet.sh`, the identity
@@ -655,6 +782,11 @@
      output that *copies files over a user's edits*, *"none that stops anything"* on failure, and
      **no rollback** — on the corrected ladder that is `execute`, **two rungs up**. **Registering
      any of it is a RE-AUTHORISATION and needs the operator.** Residue (nn).
+     **WHAT ACTUALLY HAPPENED: the write ACTIONS were registered as SIX new controls at `execute`
+     (census 81 -> 90), and `maint.managed_set_replacement` was examined exactly as asked and
+     DELIBERATELY NOT MOVED** — it is `FINDING-0001` with the remedy **named and unapplied**,
+     because moving a pre-existing control is the operator's act. `FINDING-0002` holds the same
+     shape for `hooks.once_dedup`. **Applying either remedy is STILL OPEN and STILL THE OPERATOR'S.**
   -1. **THE CITATION GUARD CHECKS RESOLVABILITY, NOT IDENTITY.** `scan-controls.sh:362-386` tests
      existence, numeric, in-bounds and not-blank, and **never compares content** — **20 of 27
      drifted refs passed every check while silently wrong**. **The durable fix is an anchor token or
@@ -663,7 +795,8 @@
      CROSS-COMMIT comparison tests identity** — several earlier *"zero drift, 287/287"* claims were
      the former reported as the latter. Residue (mm).
   0a. **THE CLOSE CHECKLIST OMITTED A LIVE SUITE AND A PUSHED COMMIT SHIPPED RED.**
-     `./build-os/maintenance/run-tests.sh` is **not chained into the 1636** and no close brief asked
+     `./build-os/maintenance/run-tests.sh` is **still not chained into the suite** (1689 at
+     `a75c25e`) and no close brief asked
      for it, so `2df61ae` was pushed at **143/144**. Remedy: chain it, or name every live suite in
      the close checklist. **Orchestrator defect.** Residue (oo).
   0b. **THE LADDER'S SPELLING SWEEP** — deferred with all three grounds upheld. It needs an
@@ -679,7 +812,11 @@
      **line-wrapped enumerations**, which no same-line grep can see and which hid a fifth stale
      ladder in a file the packet had already edited; and **markdown table-row mappings**, which made
      `evidence_policy_tests.sh` §21's new block **structurally vacuous over `README.md`, its own
-     first listed site**. Residue (pp).
+     first listed site**. Residue (pp). **UPDATED 2026-08-01 by
+     `gravito_p1_mutators_ids_telemetry_a`: there are now FIVE, not four — the fifth is the
+     FILE HEADER COMMENT, which reaches no field-scoped sweep** (`neurocosmology_crosswalk.txt`'s
+     header said *"1 binding out of 22"* against a live 23 and *"12 out of 25"* against a live
+     14 of 27). Residue (tt).
   1. **Stop creating `CHANGELOG.md` line-citations, and re-cite the two live ones by release-block
      heading** (`residue.md:280`, `receipts/gravito_evidence_policy_matrix_a.md:572-573`). The
      changelog grows from the top, so **every** line-citation into it decays on **every** packet —

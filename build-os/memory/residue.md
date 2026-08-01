@@ -733,6 +733,82 @@
   earlier "zero drift" results across several packets** (item mm), and a retroactive downgrade of
   prior evidence is exactly what an independent second model exists to check. **Either install
   Codex or stop declaring the row.**
+- **[PHASE CONTEXT 2026-08-01 — everything below this line is now subordinate to it.] THE
+  GOVERNANCE-ONLY PHASE IS OVER; the operator issued BUILD AUTHORITY with an ANTI-STALL RULE.**
+  *"the governance substrate is no longer the bottleneck. The bottleneck is now whether Gravito can
+  begin making better decisions than today's planning approaches."* Five phases:
+  **P1 mutators/IDs/telemetry (DONE) -> P2 claim-scoped evidence -> P3 `accept_and_constrain` ->
+  P4 S1 shadow ranker -> P5 outcome/counterfactual telemetry.** Residue items are still real; they
+  are **built around and recorded**, not paused on.
+- **(tt) FIVE ESCAPE FORMS NOW, AND THE NEWEST ONE REACHES NO FIELD-SCOPED SWEEP: THE FILE HEADER
+  COMMENT.** `gravito_p1_mutators_ids_telemetry_a`'s seventh missed site was
+  `build-os/registry/neurocosmology_crosswalk.txt`'s **header comment** — *"1 binding out of 22"*
+  against a live **23**, and *"12 out of 25"* against a live **14 of 27**. **A HEADER COMMENT IS NOT
+  A FIELD, so a field-scoped sweep cannot reach it.** The full catalogue, all one shape — *a guard
+  written against one surface form, blind to its siblings*: (i) bare `:NNN` citations with the
+  filename elsewhere in the sentence; (ii) table rows naming a file with **no line number at all**;
+  (iii) **line-wrapped enumerations**, which no same-line grep can see; (iv) **markdown table-row
+  mappings**; (v) **header comments**. Supersedes the "four escape forms" count at (pp).
+- **(uu) THE SWEEP HIT THE DERIVED DOC AND MISSED THE SOURCE ARTEFACT — SWEEP THE SOURCE FIRST.**
+  Round 1 corrected **five** stale counts in `build-os/registry/CROSSWALK.md` and **never swept
+  `build-os/registry/neurocosmology_crosswalk.txt`, the artefact `CROSSWALK.md` IS DERIVED FROM** —
+  a file the same packet had **already edited**. **Seven more stale sites were there.** Correcting
+  the OUTPUT and leaving the INPUT wrong means **the next regeneration reintroduces the defect**.
+  The reviewer named the cause as its own: `DEFECT-0007-incomplete-enumeration`, **the same class as
+  its own item-8 miss**. **Rule for every future sweep: sweep the SOURCE ARTEFACT, then the DERIVED
+  DOC, and say which is which.**
+- **(vv) n = 1 — THE WARNING P2 AND P3 MUST ACT ON, OR P4 HAS NOTHING TO TRAIN ON.**
+  `build-os/metrics/signal_snapshots.tsv` records **12 rows across ALL FOUR candidates of
+  `DECISION-0007-p1-mutators-ids-telemetry`, including the THREE NOT SELECTED** — which is what
+  makes P1 a **counterfactual** substrate rather than an imitation-learning one, because imitation
+  learning needs only the selected arm. **But `DECISION-0007` is the ONLY decision with a
+  non-degenerate candidate set.** `DECISION-0001-fanout-lanes-scaffold-release` is a fan-out where
+  **all three candidates were selected**; `DECISION-0002` through `DECISION-0006` are **|C| = 1**.
+  **P2 AND P3 MUST KEEP RECORDING REJECTED CANDIDATES OR P4 STARTS AT n = 1.**
+- **(ww) PRE-EXISTING, AND THE REVIEWER EXPLICITLY RULED IT NOT `gravito_p1_mutators_ids_telemetry_a`'s
+  DEBT: the `defects_escaped` row-count claim is wrong in TWO places and the two DISAGREE.**
+  `build-os/metrics/packet_metrics.tsv` holds **11 data rows** (**12** once this close appends its
+  own), while `build-os/registry/CROSSWALK.md:319-320` says *"all 6 of 6 rows"* and
+  `build-os/registry/neurocosmology_crosswalk.txt:169` says *"all 8 of 8 rows"*. **The derived doc
+  and its source artefact again** — see (uu). The *substance* of both claims is still true (the
+  column has never held anything but `-`); only the cardinality is wrong.
+- **(xx) PRE-EXISTING, ALSO RULED NOT THIS PACKET'S DEBT: a LIVE `DEFECT-0001-stale-line-reference`
+  INSTANCE THAT PREDATES IT.** `build-os/registry/MISMATCHES.md:484` and `:549-550` cite
+  `tests/control_registry_tests.sh` at **`:79 :184 :440 :772`**, where the live assertions are
+  **`:81 :186 :442 :774`** — verified at close by reading both sets of lines. **Off by two, in the
+  file that documents the class.**
+- **(yy) THE GOVERNANCE BASELINE HAS ONE ESCAPE HATCH, AND IT IS A COMPLETENESS HOLE, NOT A
+  CONFORMANCE HOLE.** §11 of `tests/mutator_registry_tests.sh` iterates the rows **PRESENT IN**
+  `build-os/registry/governance_baseline.txt` — **so deleting a row and then moving that control
+  PASSES.** The only cardinality guard is `NBASE > 0` (`tests/mutator_registry_tests.sh:571-573`),
+  which **certifies a store of one**. **The guard checks that what is listed conforms; it never
+  checks that the list is complete.** Same shape as the vacuity holes elsewhere in this file.
+- **(zz) SECOND-EYES DECLARED AND NOT DELIVERED — SIXTH PACKET RUNNING, AND THIS TIME A REVIEWER
+  ERROR WAS CAUGHT ONLY BY THE BUILDER.** In `gravito_p1_mutators_ids_telemetry_a` the reviewer
+  wrote **"64 of 90"** for the `red_driven` counterfactual; the builder derived **77 of 90** and
+  **validated the METHOD** — the same composition run against `7daedee` **regenerates the reviewer's
+  ORIGINAL sentence verbatim** (*68 of 81, 49 newly, on top of 19*), and the orchestrator
+  independently reproduced **25 / 77 / 52 / 25**. The reviewer confirmed its own error on re-review.
+  **A single-model review chain caught this only because the builder pushed back.** `codex` is still
+  absent and `build-os/memory/tool_router.md:368` still declares the row. **Either install Codex or
+  stop declaring the row.** Extends (ss).
+- **(aaa) THE CLOSE ITSELF BROKE TREE-QUIET, AND ONE SUITE RUN WENT RED BECAUSE OF IT.** At the
+  `gravito_p1_mutators_ids_telemetry_a` close the archivist launched
+  `bash tests/build_os_tests.sh` in the background and then started
+  `./build-os/maintenance/run-tests.sh` **and**
+  `RELEASE_METADATA_LIVE_SUITE=1 bash tests/release_metadata_tests.sh` — **which itself runs a full
+  live suite** — while it was still running. **Up to three suite runs were in flight at once**, and
+  the first reported **1688 passed / 1 failed**. **A single ISOLATED, SEQUENTIAL run is
+  `1689 passed / 0 failed`, exit 0**, and the four suites that touch `packet_metrics.tsv` are each
+  green standalone (`speed_benchmark` 169/0, `metrics_adoption` 70/0, `neurocosmology_crosswalk`
+  65/0, `pilot_kit` 154/0).
+  **TWO LESSONS, BOTH THE ARCHIVIST'S.** (i) `CLAUDE.md`'s **tree-quiet precondition applies to the
+  CLOSE, not only to stage 2** — these suites write into shared temp space, so concurrent runs
+  produce a number that belongs to no commit. **The close checklist must say: run the suites
+  SEQUENTIALLY.** (ii) **The failing assertion's identity was LOST** because the run's output was
+  piped through `tail -3`. **Never pipe a gate's output through `tail` before reading it.** The
+  honest claim on the record is *"a concurrent run went red once and every isolated run is green"* —
+  **NOT** *"the failure was proven harmless"*, which nobody can say from here.
 
 ## Known risks / debt
 
@@ -922,6 +998,24 @@
   adopts — §17 of `tests/authority_envelope_tests.sh` fails if reading 2 is adopted silently.
 - **Step 3 needs a class change or a different instrument**, and neither is designed. See residue
   item (w) — an envelope cannot promote, so step 3 cannot be executed by writing envelopes.
+
+- **[ADDED 2026-08-01 by `gravito_p1_mutators_ids_telemetry_a`] APPLYING ANY `FINDING-*` REMEDY IS A
+  RE-AUTHORISATION AND IS THE OPERATOR'S ACT; NONE HAS BEEN PERFORMED.**
+  `FINDING-0001-managed-set-replacement-understated` (move `maint.managed_set_replacement` from
+  `advise` to `execute`, declare the mismatch, add a `MISMATCHES.md` row, and update
+  `governance_baseline.txt` **in the same commit**) and
+  `FINDING-0002-hook-once-marker-understated` (either move `hooks.once_dedup` to `execute`, or —
+  the shape `findings.txt` itself recommends — register the marker write as its own control the way
+  `MUT-0001`..`MUT-0006` were) both have **remedies NAMED AND UNAPPLIED**.
+  `FINDING-0003-mutators-emit-no-receipt` **proposes no remedy, deliberately**: a receipt standard
+  for mutators is a design decision with real cost, and the census was built to make the question
+  **askable**, not to answer it.
+- **[ADDED 2026-08-01] WHETHER ANY CLASS SHOULD LICENSE `execute` IS OPEN, AND UNTIL IT IS ANSWERED
+  EVERY DURABLE WRITE IN THE REPOSITORY IS DECLARED OUT OF LICENCE.** The six new `execute` controls
+  are out of licence **BY CONSTRUCTION** — no class reaches that rung — which is **the registry
+  correctly reporting an undecided question**, not a defect in the registrations. Of the 20 declared
+  mismatches, **14 are fitted heuristics gating on an `advise` licence** and **6 are these durable
+  writes**; the two kinds must not be blended into one number.
 
 ---
 _Append-only working notes._
