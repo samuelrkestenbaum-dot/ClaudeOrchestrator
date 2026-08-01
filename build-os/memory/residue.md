@@ -1316,5 +1316,55 @@ not to be fixed outside that packet.**
   citation with no duplicate is unpoliced by everything currently in the suite**, which is the real
   residue here: §27d only catches drift that someone else already recorded correctly.
 
+- **(sss) A TOOL WHOSE LICENCE CAPS BELOW `gate` CANNOT OWN ITS OWN REFUSAL PATH — STRUCTURAL, FOUND
+  BY EXECUTION, AND IT MAKES A "<=1 NEW CONTROL" CEILING UNREACHABLE FOR ANY NEW REFUSING TOOL.**
+  `scan-controls.sh`'s anti-shelfware reconciliation requires every `.sh` under `build-os`, `tests`
+  and `.claude/hooks` that can terminate a run non-zero to own a registry entry **at authority
+  `gate`**. S1 is Class C and composes to `observe`, so registering it once was IMPOSSIBLE:
+  `scan-controls.sh check` refused at exit 2 with `UNREGISTERED build-os/metrics/rank-candidates.sh
+  can terminate a run non-zero and owns NO registry entry at authority gate`. The two available
+  moves were (a) register the ranker itself at `gate`, two rungs above a Class C licence, shipping a
+  twenty-first declared mismatch **to launder a refusal path**, or (b) split into two entries — the
+  ordering at `observe` and the input integrity at `gate`, which is the split
+  `envelope.grant_composition` / `envelope.derivation_nonvacuity` already makes one axis along.
+  **(b) was taken.** The residue is that the ceiling P4 was handed says `<=1 new census control` and
+  the tree's own guard makes that unachievable for any tool that refuses. **Not a defect in the
+  guard** — it is doing exactly what it exists to do — but the interaction was invisible until it
+  fired, and it will fire on the next tool too.
+
+- **(ttt) THE CROSSWALK RESTATED THE CENSUS CARDINALITY IN ELEVEN PLACES AND SEVEN WENT FALSE THE
+  MOMENT THE CENSUS GREW.** `CROSSWALK.md` and `neurocosmology_crosswalk.txt` carried `97` as a
+  denominator in prose seven times, plus `75 of 97`, `31 of 97`, `14 out of 31` and `all 8 of 8
+  rows`. All were correct at base and all are `DEFECT-0003-duplicate-semantic-truth`. This packet
+  **de-duplicated rather than refreshed** them — the literal is replaced by the derivation or by a
+  phrasing that carries no count — because refreshing guarantees the same work again on the next
+  packet. **`all 8 of 8 rows` (residue (ww)) is untouched and is now 15 of 15**, per the standing
+  ruling that it is not this packet's debt; it is staler than when that ruling was made.
+
+- **(uuu) `known_limitations` IS THE CROSSWALK'S LOAD-BEARING FIELD AND IT IS CHECKED ONLY FOR
+  LENGTH.** §12 requires each primitive's `known_limitations` to be longer than its own
+  `system_representation`, which catches a perfunctory field and nothing else. `goal_ecology`'s said
+  *"No control weighs two objectives against each other at runtime, and it could not"* — a claim
+  falsified by this packet's own build, which no guard could see, and which was corrected only
+  because a human read it. `mass`'s said `observe` is *"held by ZERO of 97 controls"*; that is now
+  false too. **A prose field the file itself calls load-bearing, with no reconciliation against the
+  artefact it describes, is the same shape as every other hole in this file.**
+
+- **(vvv) THE SUITE-TOTAL PAIR NEEDED THE BUILDER AGAIN, EXACTLY AS (ooo) PREDICTED.** Advancing
+  `current_state.md` from 1869 to 1898 requires the literal `**1898 passed**` to already exist in
+  `CHANGELOG.md`, which the archivist cannot write. This packet's builder wrote both halves in one
+  commit and the live check MATCHes at 1898. **(ooo)'s structural complaint is unaddressed and this
+  is the fourth packet to route around it by hand.**
+
+- **(www) S1's FIRST `rank_of_selected` IS 1, ON n = 1, AND THAT IS NOT EVIDENCE OF ANYTHING.** The
+  ordering agreed with the reviewer's endorsed re-cut on the only decision it has ever seen. The
+  three earlier decisions with non-degenerate candidate sets (`DECISION-0007`, `-0008`, `-0009`)
+  **cannot be replayed under guard 1**: none of their candidates carries a frozen
+  `candidate_write_surface`, so every one of them is refused as `guard1_unscreenable`. That is the
+  guard failing closed and is correct, but the consequence is that **the retrospective substrate
+  residue (vv) warned about is smaller than it looks** — S1 has one usable decision, not four, and
+  the missing signal is a screening input nobody knew to freeze. P5 should freeze
+  `candidate_write_surface` on every candidate from now on, whether or not S1 is consulted.
+
 ---
 _Append-only working notes._

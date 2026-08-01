@@ -14,6 +14,49 @@ deprecation cycle. Pin a commit if you need stability.
 
 ### In flight (not landed at the released commit)
 
+- **The first executive component: a shadow ranker that forms an explicit,
+  inspectable preference among several permissible good actions — and refuses to
+  rank anything that would promote it.** Everything in this system until now
+  prevented a bad action. `build-os/metrics/rank-candidates.sh` takes a real
+  recorded decision, reads the digest-chained signals frozen at the moment that
+  decision was taken, and emits an ordering with the DECOMPOSITION — what each
+  signal contributed to each candidate's position — rather than a total score
+  somebody is expected to trust.
+
+  **It writes nothing, anywhere.** No new store: the ordering is immutable *by
+  derivation* rather than by storage, a pure function of a chained input and a
+  versioned rule, so re-running reproduces the `ranking_digest` and an edited
+  historical signal refuses before anything ranks. Two live stores are
+  byte-identical before and after a run, and the suite measures that rather than
+  asserting it.
+
+  **Guard 1 — no learned policy may optimize the mechanism governing its own
+  promotion.** A candidate whose frozen write surface reaches S1's code, its
+  registry entry, its own tests or the licence machinery is REFUSED, with the
+  reason printed: an excluded candidate that silently disappeared would be
+  indistinguishable from one that ranked last. It fails closed — a candidate
+  with no frozen write surface is refused as unscreenable, never assumed
+  innocent — and it discriminates: on the real candidate set two of seven are
+  refused and five are ranked, including one whose write surface touches the
+  *same file* as a protected object but a different section of it.
+
+  **Every absence is named and none of them scores.** `MISSING` (declared but
+  not frozen for this decision), `UNINTERPRETED` (frozen here, but its direction
+  has never been established) and `NEVER-COLLECTED` (cost, energy, recurrence,
+  counterfactual regret, outcome quality, human attention). A defaulted signal
+  is the `untested`-missing-from-`EVIDENCE_AXIS` defect again.
+
+  **And it can be wrong.** `rank_of_selected` records where the human's actual
+  pick landed in S1's ordering; on the first real decision it is **1**, over
+  **n = 1**, and one agreement is not evidence of skill. Two census entries, no
+  new store, no new tool beyond the ranker itself, and no new suite file: 29
+  assertions in `tests/mutator_registry_tests.sh`. Suite **1898 passed**, 0
+  failed; `scan-controls.sh check` and `scan-mutators.sh check` both exit 0;
+  zero re-authorisations. `goal_ecology` — recorded in the crosswalk since it was
+  written as the primitive nothing could bind to, because *"no control weighs two
+  objectives against each other at runtime"* — is no longer empty, and the
+  binding only PROXIES: three objectives ordered, six named as never collected.
+
 - **A fifth mismatch disposition, and a lease term that is finally enforced
   against a clock.** `MISMATCHES.md` named four remedies —
   `demote_authority`, `correct_class`, `improve_evidence`, `retire_control` — and

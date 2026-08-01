@@ -651,6 +651,251 @@ grep -qF 'chain_suite "tests/mutator_registry_tests.sh"' "$SRC/tests/build_os_te
   && ok "this suite is chained into tests/build_os_tests.sh (not discoverable-only)" \
   || no "this suite is not chained — it would run only for whoever knew it existed"
 
+echo "== 13. S1 — an ordering comes out, it refuses to rank itself, and it dispatches nothing (4.7.13) =="
+# THE FIRST EXECUTIVE COMPONENT IN THE CENSUS. Everything above this section
+# prevents a bad action. This one forms an explicit, inspectable PREFERENCE among
+# several permissible good actions, and every assertion here exists because a
+# preference that cannot be inspected, cannot be reproduced, or can be pointed at
+# its own promotion is worse than no preference at all.
+#
+# WHAT IS ASSERTED AGAINST THE LIVE STORES, NOT A FIXTURE: the ordering over the
+# real recorded decision, the visibility of every candidate including the ones it
+# ranked last and the ones it refused, and `rank_of_selected` — the one number
+# that makes S1 falsifiable, because without it S1 can emit orderings forever and
+# never be wrong about anything.
+#
+# WHAT IS DRIVEN RED ON FIXTURES: the self-amendment guard in BOTH directions (a
+# candidate that would edit S1 is refused; its neighbour, which would not, is
+# ranked), the identity binding between a snapshot and the decision it claims,
+# and the refusal to rank against a broken chain. A guard observed only passing
+# is a guard nobody has tested, and a guard tested only against its author's own
+# positive case is fitted to it.
+S1="$SRC/build-os/metrics/rank-candidates.sh"
+S1DEC="DECISION-0010-p4-s1-shadow-ranker"
+[ -s "$S1" ] && ok "build-os/metrics/rank-candidates.sh exists and is non-empty" \
+             || no "S1 is absent — there is no ranker"
+[ -x "$S1" ] && ok "S1 is executable" || no "S1 is not executable"
+
+# --- it is a REGISTERED control, at the authority the composition produces ----
+S1CTRL="ranker.s1_shadow_ordering"
+grep -qxF "control: $S1CTRL" "$REG" \
+  && ok "S1 owns a census entry ($S1CTRL) — it is not an unregistered control surface" \
+  || no "S1 is not registered in control_registry.txt"
+S1DECL=""
+for pair in class:C empirical_status:untested runtime_authority:observe nervous_system_role:conscience; do
+  f="${pair%%:*}"; want="${pair##*:}"
+  got="$(fld control "$S1CTRL" "$f" "$REG")"
+  [ "$got" = "$want" ] || S1DECL="$S1DECL $f=$got(want $want)"
+done
+[ -z "$S1DECL" ] \
+  && ok "S1 is declared class C / untested / observe — MIN(advise, observe, execute) = observe, and it is registered at exactly that" \
+  || no "S1's declaration does not compose to observe:$S1DECL"
+grep -qxF "control: $S1CTRL" "$CROSS" \
+  && ok "S1's control owns a crosswalk binding — the first control bound to goal_ecology" \
+  || no "S1 is registered but unbound in the crosswalk"
+
+# --- IT PRODUCES AN ORDERING OVER THE REAL, LIVE, FROZEN CANDIDATE SET --------
+"$S1" rank --decision-id "$S1DEC" > "$WORK/s1.out" 2>&1
+S1EXIT=$?
+[ "$S1EXIT" -eq 0 ] \
+  && ok "S1 ranks the live decision $S1DEC at exit 0" \
+  || { no "S1 refused the live decision (exit $S1EXIT)"; head -12 "$WORK/s1.out" | sed 's/^/      | /'; }
+
+# EVERY CANDIDATE IS STILL VISIBLE — derived from the store, never from a literal
+# list in this file, so a candidate deleted from the decision row cannot make
+# this assertion pass by shrinking what it checks.
+S1CANDS="$("$RECDEC" get "$S1DEC" candidate_ids --store "$TEL" 2>/dev/null | tr ';' '\n' | grep -c . || true)"
+[ "${S1CANDS:-0}" -gt 0 ] \
+  && ok "$S1CANDS candidate(s) are recorded for $S1DEC — the visibility check below is not vacuous" \
+  || no "the decision names no candidates; every check below would pass vacuously"
+INVIS=""
+while IFS= read -r c; do
+  [ -n "$c" ] || continue
+  grep -qF "$c" "$WORK/s1.out" || INVIS="$INVIS $c"
+done < <("$RECDEC" get "$S1DEC" candidate_ids --store "$TEL" 2>/dev/null | tr ';' '\n')
+[ -z "$INVIS" ] \
+  && ok "every one of the $S1CANDS candidates appears in the output — including the last-ranked and the refused; nothing is filtered out of the record" \
+  || no "candidate(s) vanished from S1's output:$INVIS"
+
+# `rank_of_selected` — the falsifiability hook. Its VALUE is not asserted here
+# (that would fit the suite to today's answer); its PRESENCE and its AGREEMENT
+# with the ordering are.
+grep -q '^rank_of_selected: ' "$WORK/s1.out" \
+  && ok "S1 reports rank_of_selected — where the human's actual pick landed in its ordering" \
+  || no "S1 reports no rank_of_selected, so no ordering it ever emits can be wrong about anything"
+S1SEL="$("$RECDEC" get "$S1DEC" selected_candidate_id --store "$TEL" 2>/dev/null)"
+ROS="$(awk '/^rank_of_selected: /{print $2; exit}' "$WORK/s1.out")"
+SELRANK="$(awk -v c="$S1SEL" '$1=="rank" && $3==c {print $2; exit}' "$WORK/s1.out")"
+{ [ -n "$ROS" ] && [ "$ROS" = "$SELRANK" ]; } \
+  && ok "rank_of_selected ($ROS) is the position the ordering actually gives $S1SEL — the number is read off the ordering, not asserted beside it" \
+  || no "rank_of_selected is \"$ROS\" but the ordering places $S1SEL at \"$SELRANK\""
+
+# --- GUARD 1, ON THE LIVE SET, IN BOTH DIRECTIONS ----------------------------
+NEXCL="$(grep -c '^excluded ' "$WORK/s1.out" || true)"; NEXCL="${NEXCL:-0}"
+[ "$NEXCL" -gt 0 ] \
+  && ok "$NEXCL live candidate(s) are REFUSED by the self-amendment guard — the refusal is visible in the output, not a silent skip" \
+  || no "no live candidate is excluded, so the self-amendment guard has nothing to bite on here"
+NRANKED="$(grep -c '^rank ' "$WORK/s1.out" || true)"; NRANKED="${NRANKED:-0}"
+[ "$NRANKED" -gt 0 ] \
+  && ok "$NRANKED candidate(s) are ranked alongside them — the guard discriminates rather than refusing the whole set" \
+  || no "the guard excluded everything; a predicate that refuses every subject discriminates nothing"
+EXCLNOREASON=0
+while IFS= read -r l; do
+  case "$l" in *' reason='*) ;; *) EXCLNOREASON=$((EXCLNOREASON+1)) ;; esac
+done < <(grep '^excluded ' "$WORK/s1.out")
+[ "$EXCLNOREASON" -eq 0 ] \
+  && ok "every exclusion carries its reason — an exclusion nobody can audit is a silent one" \
+  || no "$EXCLNOREASON exclusion(s) name no reason"
+
+# --- GUARD 2 — THE DECOMPOSITION, NOT JUST THE TOTAL -------------------------
+# A total score is not transparency. For every ranked candidate the output must
+# say what each signal contributed to its position, or a reader cannot see why A
+# outranked B.
+NODECOMP=""
+while IFS= read -r c; do
+  [ -n "$c" ] || continue
+  awk -v c="$c" '$1=="contribution" && $2==c {f=1} END{exit !f}' "$WORK/s1.out" \
+    || NODECOMP="$NODECOMP $c"
+done < <(awk '$1=="rank"{print $3}' "$WORK/s1.out")
+[ -z "$NODECOMP" ] \
+  && ok "every ranked candidate publishes a per-signal contribution — the decomposition, not just the value" \
+  || no "candidate(s) carry a total with no decomposition:$NODECOMP"
+
+# --- MISSING SIGNALS STAY EXPLICITLY MISSING ---------------------------------
+grep -q '^signal .* MISSING' "$WORK/s1.out" \
+  && ok "at least one declared signal is reported MISSING for this decision rather than defaulted or dropped" \
+  || no "no signal is named as missing; a defaulted signal is the untested-missing-from-EVIDENCE_AXIS defect again"
+grep -q '^signal .* NEVER-COLLECTED' "$WORK/s1.out" \
+  && ok "the signals this repository has never collected at all are named as absent, not imputed" \
+  || no "S1 does not name the signals it lacks"
+grep -q '^signal .* UNINTERPRETED' "$WORK/s1.out" \
+  && ok "a frozen signal whose DIRECTION has never been established is named uninterpreted rather than guessed into an ordering" \
+  || no "S1 silently interprets every signal it finds"
+MISSCORED=0
+while IFS= read -r s; do
+  [ -n "$s" ] || continue
+  awk -v s="$s" '$1=="contribution" && $3==s {f=1} END{exit !f}' "$WORK/s1.out" && MISSCORED=$((MISSCORED+1))
+done < <(awk '$1=="signal" && ($3=="MISSING" || $3=="NEVER-COLLECTED" || $3=="UNINTERPRETED"){print $2}' "$WORK/s1.out")
+[ "$MISSCORED" -eq 0 ] \
+  && ok "no missing, never-collected or uninterpreted signal contributes to any candidate's position" \
+  || no "$MISSCORED signal(s) are declared absent and scored anyway"
+
+# --- ZERO DISPATCH AUTHORITY, MEASURED RATHER THAN ASSERTED ------------------
+hash_of(){ if command -v sha256sum >/dev/null 2>&1; then sha256sum; else shasum -a 256; fi; }
+BEFORE="$(cat "$TEL" "$SNAP" | hash_of)"
+"$S1" rank --decision-id "$S1DEC" >/dev/null 2>&1
+AFTER="$(cat "$TEL" "$SNAP" | hash_of)"
+[ "$BEFORE" = "$AFTER" ] \
+  && ok "ranking leaves both live stores byte-identical — S1 emits an ordering and acts on nothing" \
+  || no "a rank run MUTATED a store; S1 has dispatch authority it must not have"
+
+# --- REPRODUCIBILITY: THE ORDERING IS IMMUTABLE BECAUSE ITS INPUTS ARE --------
+"$S1" rank --decision-id "$S1DEC" > "$WORK/s1b.out" 2>&1
+cmp -s "$WORK/s1.out" "$WORK/s1b.out" \
+  && ok "two runs over the same frozen inputs produce byte-identical output — the ordering is a function of the chain, not of the tree" \
+  || no "S1's output is not reproducible"
+grep -q '^ranking_digest: ' "$WORK/s1.out" \
+  && ok "the ordering carries a digest over the rule, the inputs and the result, so a reader can bind a quoted ordering to the inputs it came from" \
+  || no "the ordering carries no digest"
+
+# --- RED DRIVES --------------------------------------------------------------
+# The fixtures are built with the REAL recorder, so a fixture that the live tool
+# would refuse cannot be smuggled in by hand-writing a row.
+mks1(){ # <dir> <surface-of-the-first-arm> [omit-surface] — a two-candidate decision
+  local d="$1"; mkdir -p "$d"
+  "$RECDEC" record --store "$d/tel.tsv" \
+    --decision-id DECISION-9101-s1-fixture --decision-time 2026-08-01T00:00:00Z \
+    --candidate-ids "PACKET-9101-touches-s1;PACKET-9101-touches-nothing" \
+    --selected-candidate-id PACKET-9101-touches-nothing --selector operator \
+    --selection-reason "a fixture for the self-amendment guard" \
+    --expected-outcome "one arm is refused and the other is ranked" \
+    --result unknown --durability-status unknown >/dev/null 2>&1
+  local i=1 c v
+  for c in PACKET-9101-touches-s1 PACKET-9101-touches-nothing; do
+    case "$c" in
+      *touches-s1) v="$2" ;;
+      *)           v="build-os/memory/residue.md" ;;
+    esac
+    # `omit-surface` builds the fixture WITHOUT the screening signal rather than
+    # deleting the row afterwards — a deletion would break the digest chain and
+    # the run would refuse for that reason instead, proving nothing about the
+    # guard.
+    if [ "${3:-}" != "omit-surface" ]; then
+      "$RECDEC" snapshot --snapshots "$d/snap.tsv" \
+        --snapshot-id "SIGNAL-SNAPSHOT-910$i-surface" --decision-id DECISION-9101-s1-fixture \
+        --captured-at 2026-08-01T00:00:00Z --repository-commit fixture \
+        --candidate-id "$c" --signal-name candidate_write_surface --signal-value "$v" \
+        --derivation-version fixture --source-object-versions fixture --evidence-refs fixture >/dev/null 2>&1
+    fi
+    i=$((i+1))
+    "$RECDEC" snapshot --snapshots "$d/snap.tsv" \
+      --snapshot-id "SIGNAL-SNAPSHOT-910$i-items" --decision-id DECISION-9101-s1-fixture \
+      --captured-at 2026-08-01T00:00:00Z --repository-commit fixture \
+      --candidate-id "$c" --signal-name residue_items_closed --signal-value 1 \
+      --derivation-version fixture --source-object-versions fixture --evidence-refs fixture >/dev/null 2>&1
+    i=$((i+1))
+  done
+}
+# R1: the candidate that would edit S1's own code is REFUSED.
+mks1 "$WORK/r1s1" "build-os/metrics/rank-candidates.sh"
+"$S1" rank --decision-id DECISION-9101-s1-fixture --store "$WORK/r1s1/tel.tsv" --snapshots "$WORK/r1s1/snap.tsv" \
+  > "$WORK/r1s1.out" 2>&1
+grep -qE '^excluded PACKET-9101-touches-s1 .*self_amendment' "$WORK/r1s1.out" \
+  && ok "RED: a candidate whose write surface names S1's own code is REFUSED, by name, with the reason self_amendment" \
+  || { no "RED FAILED: a candidate that would rewrite S1 was not excluded"; head -8 "$WORK/r1s1.out" | sed 's/^/      | /'; }
+awk '$1=="rank" && $3=="PACKET-9101-touches-nothing"{f=1} END{exit !f}' "$WORK/r1s1.out" \
+  && ok "...and its neighbour, which touches no protected object, is RANKED in the same run — the predicate discriminates" \
+  || no "the guard refused the whole fixture; it is not a predicate, it is a wall"
+grep -qF 'PACKET-9101-touches-s1' "$WORK/r1s1.out" \
+  && ok "the refused candidate is still PRESENT in the output — refused is recorded, never omitted" \
+  || no "the refused candidate was dropped from the record"
+# R2: the same shape pointed at the promotion machinery rather than at S1's code.
+mks1 "$WORK/r2s1" "build-os/tools/evidence-policy.sh"
+"$S1" rank --decision-id DECISION-9101-s1-fixture --store "$WORK/r2s1/tel.tsv" --snapshots "$WORK/r2s1/snap.tsv" \
+  > "$WORK/r2s1.out" 2>&1
+grep -qE '^excluded PACKET-9101-touches-s1 .*self_amendment' "$WORK/r2s1.out" \
+  && ok "RED: a candidate that would edit the MECHANISM GOVERNING S1'S PROMOTION is refused too — the guard is the general form, not a filename check" \
+  || no "RED FAILED: a candidate rewriting the licence composition was ranked"
+# R3: a candidate with NO frozen write surface cannot be screened, and an
+# unscreenable candidate is refused rather than assumed innocent.
+mks1 "$WORK/r3s1" "build-os/memory/residue.md" omit-surface
+"$S1" rank --decision-id DECISION-9101-s1-fixture --store "$WORK/r3s1/tel.tsv" --snapshots "$WORK/r3s1/snap.tsv" \
+  > "$WORK/r3s1.out" 2>&1
+grep -q 'guard1_unscreenable' "$WORK/r3s1.out" \
+  && ok "RED: a candidate carrying no frozen write surface is refused as UNSCREENABLE — the guard fails closed rather than assuming innocence" \
+  || { no "RED FAILED: an unscreenable candidate was ranked"; head -8 "$WORK/r3s1.out" | sed 's/^/      | /'; }
+# R4: RESOLVABILITY IS NOT IDENTITY. A snapshot that parses perfectly, and is
+# chained perfectly, but claims a candidate the decision never named.
+mks1 "$WORK/r4s1" "build-os/memory/residue.md"
+"$RECDEC" snapshot --snapshots "$WORK/r4s1/snap.tsv" \
+  --snapshot-id SIGNAL-SNAPSHOT-9109-orphan --decision-id DECISION-9101-s1-fixture \
+  --captured-at 2026-08-01T00:00:00Z --repository-commit fixture \
+  --candidate-id PACKET-9199-never-a-candidate --signal-name residue_items_closed --signal-value 99 \
+  --derivation-version fixture --source-object-versions fixture --evidence-refs fixture >/dev/null 2>&1
+if "$S1" rank --decision-id DECISION-9101-s1-fixture --store "$WORK/r4s1/tel.tsv" --snapshots "$WORK/r4s1/snap.tsv" \
+     > "$WORK/r4s1.out" 2>&1; then
+  no "RED FAILED: a snapshot claiming a candidate the decision never named was ranked — the snapshot parsed, so the instrument reported confidence"
+else
+  grep -q 'PACKET-9199-never-a-candidate' "$WORK/r4s1.out" \
+    && ok "RED: a well-formed, correctly-chained snapshot bound to a candidate the decision does not name is REFUSED and the orphan is named — parsing is not belonging" \
+    || no "RED FAILED: the orphan snapshot was refused without naming what was wrong"
+fi
+# R5: a tampered chain is not a ranking substrate.
+mks1 "$WORK/r5s1" "build-os/memory/residue.md"
+sed 's/\tresidue_items_closed\t1\t/\tresidue_items_closed\t9\t/' "$WORK/r5s1/snap.tsv" > "$WORK/r5s1/snap2.tsv"
+if "$S1" rank --decision-id DECISION-9101-s1-fixture --store "$WORK/r5s1/tel.tsv" --snapshots "$WORK/r5s1/snap2.tsv" \
+     > "$WORK/r5s1.out" 2>&1; then
+  no "RED FAILED: S1 ranked against a snapshot store whose chain does not verify"
+else
+  ok "RED: an edited historical signal breaks the chain and S1 REFUSES to rank on it — a value recomputed or rewritten after the fact is not evidence about the decision that was made"
+fi
+# R6: an unknown decision is refused rather than ranked over an empty set.
+if "$S1" rank --decision-id DECISION-9999-does-not-exist >"$WORK/r6s1.out" 2>&1; then
+  no "RED FAILED: S1 ranked a decision that does not exist"
+else
+  ok "RED: an unknown decision id is refused — a ranking over an empty candidate set is satisfiable by anything"
+fi
+
 echo
 echo "==== RESULT: $PASS passed, $FAIL failed ===="
 [ "$FAIL" -eq 0 ]
