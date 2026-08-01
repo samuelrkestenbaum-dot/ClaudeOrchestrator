@@ -4,94 +4,132 @@
 > the builder implements exactly this and nothing else; the archivist clears it
 > on close. One packet at a time.
 
-## Status: NO PACKET IN FLIGHT
+## Status: IN FLIGHT — `gravito_p3_accept_and_constrain_a`
 
-`gravito_p2_claim_scoped_evidence_a` is **CLOSED**.
+- **Packet id:** `PACKET-0023-gravito-p3-accept-and-constrain-a`
+- **Lane:** substantive — builder → qa → reviewer → archivist.
+- **Declared:** 2026-08-01.
+- **Decision id:** `DECISION-0009-p3-accept-and-constrain`, recorded with its
+  **rejected candidates and their frozen signal snapshots** — see *The n=1
+  obligation* below.
 
-- **Packet id:** `PACKET-0019-gravito-p2-claim-scoped-evidence-a`
-- **Closed:** 2026-08-01
-- **Receipt:** `build-os/receipts/gravito_p2_claim_scoped_evidence_a.md`
-- **Commits:** `9474cae` (declaration alone) + `c653508` (tests + implementation),
-  base `e6b825b` — re-verified at close, `git merge-base c653508 e6b825b` =
-  `e6b825b`. **At the 2-commit cap**, so the close is a separate third commit.
-- **Verdict:** **PASS** — reviewer **PASS** with no fix list and no fix round;
-  qa **RED, resolved**. **Depth: 2 serial stages**, the `substantive` median, and
-  the first packet in this sequence to hold it.
-- **Delivered:** one control may now carry **many claims with many verdicts** —
-  `evidence_assertions.txt`, `claim-evidence.sh`, `tests/claim_evidence_tests.sh`
-  (77 assertions), and `untested` on the evidence axis at `observe`. Census
-  **90 → 93**; suite **1689 → 1771**; findings numerator **unchanged at 25**;
-  **zero re-authorisations**.
-- **The finding that outlived the feature — F1:** a **live over-grant inside the
-  over-grant detector**. A second `EVIDENCE_AXIS` copy left at five tokens made a
-  `gate` grant read `WITHIN-LICENCE` against a correct cap of `observe` —
-  over-reaching by three rungs. **Fixed, and the fix covers the CLASS rather than
-  the pair** — the first such fix in this sequence.
-- **Nothing was pushed, merged, tagged or deployed.** The branch is local-only
-  past `6b01173`.
+## Branch base
 
-## Next up (staged, NOT declared — the orchestrator declares it)
+Branch `claude/project-handoff-merge-ramhds`, based at `f3c5353` (the close of
+`gravito_p2_claim_scoped_evidence_a`). **Verified before the first edit:**
+`git rev-parse HEAD` = `f3c5353`, so HEAD *is* the base, the base is an ancestor
+of HEAD trivially, and no rebase is implied.
 
-**P3 — `accept_and_constrain`.** The third of the operator's five phases, and the
-one the previous four packets have each pointed at:
+**≤2 commits.** Commit 1 is **this declaration alone** — trivially green in
+isolation, because it changes one markdown file and no code path reads it.
+Commit 2 carries the tests and the implementation together.
 
-- **Why it exists:** the operator's framework offers demote / correct class /
-  improve evidence / retire, and **demotion onto the rung the `refuted` cap
-  prescribes is unspellable for the large majority of the census**. `accept and
-  constrain` — leave the authority, keep the finding standing, require an
-  operator envelope — is the missing fifth outcome.
-- **`authority_envelopes.txt` exists with 0 live grants**, which is exactly what
-  it was built for.
-- **The known hard constraint, carried from `gravito_authority_envelope_a`:** an
-  envelope can **only lower** `L_effective`; **it cannot legitimise a grant**. So
-  P3 **cannot** be done by writing envelopes against the 20 declared mismatches —
-  every one of them exercises **more** authority than its class licenses. **P3
-  needs a class change or a different instrument, and neither is designed yet.**
-  This is the first thing P3 must settle, out loud, before it builds anything.
-- **P3 MUST own expiry enforcement** — residue **(eee)**. `valid_until` is stored
-  and enforced nowhere; it is inert today only because nothing consumes
-  assertions and composition is `MIN`, and **P3 is the first consumer**. Folding
-  in `authority_envelopes.txt`'s equally-unchecked `expires` at the same time is
-  the cheap version.
-- **P3 MUST keep recording rejected candidates with frozen signal snapshots.**
-  The n = 1 warning is now discharged to **n = 2** (`DECISION-0007` and
-  `DECISION-0008`); P4 trains on this and nothing else.
+## What this packet builds
 
-**Also available, and cheaper — two `tiny`-lane candidates that need no packet:**
+Two things, and the second is a standing ruling this packet owns rather than a
+discovery made inside it.
 
-1. **Residue (ccc)** — repoint `MISMATCHES.md:607/:608/:609` from
-   `scan-controls.sh` `:454`/`:126`/`:129` to **`:471`/`:141`/`:144`**. Exact
-   targets and their anchor content are in the residue entry. Already wrong at
-   base, so this is not a regression — but `MISMATCHES.md:611` documents the
-   *previous* generation of the same bug, making this **generation three**.
-2. **Install Codex, or delete the second-eyes row** — residue **(fff)** / **(zz)**.
-   **Seventh consecutive unbacked packet.** A one-line fix in either direction.
+### 1. `accept_and_constrain` — a fifth mismatch disposition
 
-## THIS FILE'S SHAPE IS LOAD-BEARING — it must carry ≥3 `^## ` blocks
+The vocabulary becomes `demote_authority | correct_class | improve_evidence |
+retire_control | accept_and_constrain`. `disposition` is a **wholly new concept**
+in this tree: `grep -rn -i disposition build-os/ tests/` returns zero, so there is
+nothing to retrofit and no existing convention to lean on. This packet builds the
+vocabulary, its store, its validator and its tests.
 
-**Do not reduce this file to two headings.** `rotate-memory.mjs`'s `FILE_SPECS`
-splits it on `blockDelimiter: /^## /`, and the maintenance layer's two-pass
-rotation proof (`tests/scaffold_seeding_tests.sh`, the two-pass rotation section)
-needs **≥3 blocks per rotating file**.
+`accept_and_constrain` is for a control whose authority is imperfectly licensed
+and whose **demotion or removal has been MEASURED to be more dangerous than the
+mismatch**. *Measured* is load-bearing. It is not an operator exception that makes
+a mismatch disappear:
 
-**This has already shipped red once.** The close of `gravito_mismatch_refuted_a`
-left this file with exactly **2** blocks, so `./build-os/maintenance/run-tests.sh`
-went **143/144** at `2df61ae` — **a commit that was pushed**. That suite is
-**still not chained into the main suite** and nothing else catches it, so **every
-close must run it AFTER its own writes.** This close did: **144/144**, and the
-block count was **verified after writing**, not before.
+- **It clears nothing.** The subject keeps `authority_mismatch: declared`, keeps
+  its row in `MISMATCHES.md`'s summary table, and keeps its `OUT-OF-LICENCE`
+  finding from `evidence-policy.sh check`. All three are asserted against the
+  **live** tree, not against a fixture.
+- **It raises nothing.** The standing ruling holds: **class correction and
+  authority demotion, not a general promotion instrument.**
 
-The sharper hazard: a count of **0** means the delimiter does not match the file's
-format at all and **nothing can ever rotate out of it**. That state is
-byte-identical after `--apply`, exits **0**, and fails nothing — but it is **not
-silent**: `rotate-memory.mjs` prints
-`WARNING: <path>: the block delimiter /^## / matched NOTHING … NOTHING CAN EVER
-ROTATE OUT OF IT` on stderr. **The failure mode is an ignorable warning, not
-silence.**
+**It is applied narrowly, and the narrowness is proved.** The fixture pair is
+already in the census and it comes with its own negative case:
 
-The underlying control gap is still open: `bandwidth.active_packet_singleton`
-refuses **two** declared packets but permits **zero**, so a packet that simply
-omits its declaration passes clean. Residue **(c)** / **(u)**. Note that this
-file currently sits in exactly that permitted-zero state **legitimately** — the
-packet is closed and the next is not yet declared — which is precisely why the
-control cannot tell the two situations apart.
+| control | `demotion_requirement` | expected |
+|---|---|---|
+| `maint.tripwire_coverage_scan` | **"MEASURED AND REFUSED, not open"** | **qualifies** |
+| `maint.source_scan_mask` | "REACHABLE SINCE THE LADDER WAS CORRECTED" | **REFUSED** |
+
+The second row is the discipline test. A disposition that swallows both is
+useless, so the refusal must fire **and say why**, quoting the census's own
+`demotion_requirement` rather than restating a reason in the tool. If the
+predicate cannot tell the two apart, the predicate is fixed — the fixture is not
+relaxed. **Disposing one control is the packet; disposing twenty is out of scope.**
+
+### 2. The lease term, enforced against a clock
+
+The residue ruling assigns expiry enforcement to P3. It is not a theoretical
+concern: three fixtures were executed against this tree on 2026-08-01 before a
+line was written.
+
+- An envelope `starts: 2025-01-01 / expires: 2026-01-01` — **seven months dead** —
+  reported `1 live grant(s)` and `WITHIN-LICENCE … l-deployment=execute
+  l-effective=gate binding-axis=none`, **EXIT 0**. The word *live* printed about a
+  dead grant, and the strongest deployment cap in the system computed from a
+  lease that had ended.
+- The **same** lease at `deployment_mode: shadow` dragged
+  `metrics.record.schema_invariant` — licensed `gate` on both live axes — down to
+  `licensed=observe axis=deployment` inside `evidence-policy.sh check`. The second
+  live site is **confirmed, not suspected**.
+- The same record moved to `starts: 2027-01-01 / expires: 2027-12-31` — five
+  months before it opens — bound **byte-identically**. The window was decorative
+  at **both** ends.
+
+Root cause: the tool format-checked the dates and ordered them, then never
+consulted the clock. `date` appeared in zero tools.
+
+**The defect is framed as: an expired grant keeps applying IN WHICHEVER DIRECTION
+IT POINTED.** The restrictive direction is visible; the permissive one is
+invisible, because an ungranted control already defaults to
+`autonomous`/`execute` — so a test written only against the permissive direction
+passes vacuously against a fixed tool and an unfixed one alike. The **restrictive**
+fixture is the one with discriminating power, and it is asserted both ways round.
+
+Required: an out-of-window envelope contributes **no grant**; `LAPSED` and
+`NOT-YET-LIVE` are reported as **distinct** states and neither is
+`WITHIN-LICENCE`; `mode_projection()` does not consume them; `N live` means live;
+"now" comes from an overridable source that **says so** when overridden. And
+`claim-evidence.sh`'s `valid_until` — which `control_registry.txt` says "is
+recorded so a later packet can enforce it" — is enforced here, at **both** ends of
+the term, because enforcing one end is the decorative-window defect one artefact
+along.
+
+## Out of scope
+
+- Any change to any control's `class`, `runtime_authority`, `empirical_status` or
+  `authority_mismatch`. **Zero re-authorisations.**
+- Disposing any control other than `maint.tripwire_coverage_scan`.
+- Writing a live authority envelope. The store still ships with zero grants.
+- Anything outside this repository. **No push, no merge, no PR, no tag, no
+  deploy, no secrets, no `git config`.** Six commits are deliberately unpushed and
+  stay that way.
+
+## The n=1 obligation
+
+P4's ranker starts at n=1 unless decisions keep recording **rejected** candidates
+with signals **frozen at decision time** and never recomputed. There are two
+counterfactual data points so far, `DECISION-0007` and `DECISION-0008`.
+`DECISION-0009` records four candidates and sixteen frozen snapshots, twelve of
+them for the three arms that were **not** selected — including the
+`maint.source_scan_mask` rejection, which is a genuinely discriminative example of
+the disposition **not** applying.
+
+## Baseline to hold
+
+Suite **1771 / 0** (verified solo, full capture, before the first edit).
+Maintenance **144 / 144**. `scan-controls` exit 0. `scan-mutators` exit 0.
+`evidence-policy` **25 of 93**, split **6 / 5 / 14** — the numerator and the split
+must not move; the denominator may grow as controls are added. Both
+`EVIDENCE_AXIS` copies byte-identical at six tokens. 0 stale pathed refs
+tree-wide.
+
+**Known trap, not this packet's to fix:** `MISMATCHES.md`'s citations of
+`scan-controls.sh` at three sites are stale **at base**. That is pre-existing debt
+— it is not fixed silently here and it does not fail this packet's gate.
