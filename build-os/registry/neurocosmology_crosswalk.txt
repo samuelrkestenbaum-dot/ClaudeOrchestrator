@@ -78,7 +78,7 @@ system_representation: product objective; acceptance criteria; task value; strat
 observable_proxies: none
 binding_quality: unbound
 claimed_max_authority: none
-known_limitations: EMPTY, and the near-miss is named precisely so nobody fills the slot by relabelling. Acceptance criteria DO exist here in quantity — each of the fifteen test suites is a set of them — but an acceptance criterion is a BINARY PREDICATE OVER AN ARTEFACT THAT ALREADY EXISTS, and a meaning metric is a MEASURE OVER FUTURES. This registry holds 78 controls that can say "this is wrong" and none that can say "this is worth more than that". Binding the suites here would be exactly the inflation this crosswalk exists to refuse.
+known_limitations: EMPTY, and the near-miss is named precisely so nobody fills the slot by relabelling. Acceptance criteria DO exist here in quantity — each of the fifteen test suites is a set of them — but an acceptance criterion is a BINARY PREDICATE OVER AN ARTEFACT THAT ALREADY EXISTS, and a meaning metric is a MEASURE OVER FUTURES. This registry holds 81 controls that can say "this is wrong" and none that can say "this is worth more than that". Binding the suites here would be exactly the inflation this crosswalk exists to refuse.
 
 primitive: mass
 universal_function: what pulls hardest on behaviour
@@ -86,7 +86,7 @@ system_representation: priority; severity; urgency; dependency-unlock value; att
 observable_proxies: the fixed ordering of the speed report's sections
 binding_quality: nominal
 claimed_max_authority: advise
-known_limitations: NOMINAL ONLY, and it should be read as empty by anyone applying a strict standard. `metrics.report.disclosure_ordering` is the sole ordering of anything in the census, it takes `inputs: none`, and its order was chosen once by a human — so the system orders exactly one thing, a page layout, by constant. No control assigns severity, priority or urgency; the registry has no severity field; and `runtime_authority: rank` — the authority tier that exists precisely to order work or select between options — is held by ZERO of 78 controls, as is `observe`. Nothing here computes what pulls hardest from state.
+known_limitations: NOMINAL ONLY, and it should be read as empty by anyone applying a strict standard. `metrics.report.disclosure_ordering` is the sole ordering of anything in the census, it takes `inputs: none`, and its order was chosen once by a human — so the system orders exactly one thing, a page layout, by constant. No control assigns severity, priority or urgency; the registry has no severity field; and `runtime_authority: rank` — the authority tier that exists precisely to order work or select between options — is held by ZERO of 81 controls, as is `observe`. Nothing here computes what pulls hardest from state.
 
 primitive: valence
 universal_function: which directions are attractive and which are harmful
@@ -102,7 +102,7 @@ system_representation: tools; permissions; authority leases; effective execution
 observable_proxies: PATH resolution of required binaries; the handoff lock's acquired or BUSY state and its pid liveness; the capability-profile subcommand
 binding_quality: instantiates
 claimed_max_authority: gate
-known_limitations: Four bindings, and all four are BINARY PRECONDITIONS — is the tool on PATH, is the lock free, is the subcommand valid. `tools.handoff_lock` is a genuine authority lease and the closest thing here to agency as a quantity, but it is one bit, and `tools.capability_profile_usage` is NOMINAL: it validates a subcommand's arguments, guarding the switch that sets effective capability without ever observing capability. Nothing represents degrees of capability and nothing models what an agent can actually accomplish. Decisively: the permission system that really constrains agent action is EXTERNAL to this repository, so the census is structurally blind to the largest determinant of agency in the running system.
+known_limitations: Five bindings. FOUR OF THEM ARE BINARY PRECONDITIONS — is the tool on PATH, is the lock free, is the subcommand valid. `tools.handoff_lock` is a genuine authority lease and the closest thing here to agency as a quantity, but it is one bit, and `tools.capability_profile_usage` is NOMINAL: it validates a subcommand's arguments, guarding the switch that sets effective capability without ever observing capability. Nothing represents degrees of capability and nothing models what an agent can actually accomplish. The fifth binding, `envelope.grant_composition`, is the only one that is not a binary precondition: it represents an authority lease as a STRUCTURE — issuer, actor, scope, granted authority, evidence basis, deployment mode, start, expiry, revocation, rollback — and its deployment mode is the only representation anywhere here of whether an output is consumed, confirmed by a person, acted on within bounds, or acted on freely. It is still a PROXY and the reason is the one below, which it does not escape: the lease it validates is DECLARED, nothing enforces it, and NO LIVE GRANT EXISTS — the store ships empty, so this binding is real machinery over an empty set. Decisively, and unchanged by it: the permission system that really constrains agent action is EXTERNAL to this repository, so the census is structurally blind to the largest determinant of agency in the running system.
 
 primitive: energy
 universal_function: the capacity to act and to integrate
@@ -115,10 +115,10 @@ known_limitations: THREE BINDINGS, NONE INSTANTIATING, and every constant inside
 primitive: homeostasis
 universal_function: staying stable while operating
 system_representation: runtime health; test state; repo cleanliness; dependency integrity; recovery
-observable_proxies: fifteen suite RESULT lines; merge preconditions over git status; post-merge verification; hook idempotence; static assertions over the maintenance layer's own source
+observable_proxies: seventeen suite RESULT lines; merge preconditions over git status; post-merge verification; hook idempotence; static assertions over the maintenance layer's own source
 binding_quality: instantiates
 claimed_max_authority: gate
-known_limitations: THE LARGEST COUNT IN THIS CROSSWALK AND THE ONE MOST AT RISK OF BEING MISREAD. Fifteen of its twenty bindings are test suites, and a suite's empirical status is `red_driven` — the registry README's concession applies here at full force: a check written against a fixture written by the same author in the same hour mostly proves the two agree. A green suite is evidence that PLANTED defects are caught. It is not a measurement of system health. There is no runtime health signal in this system at all, and nothing observes the system WHILE it operates: every binding here is a pre-condition or a post-condition around a run, never a state variable during one. `suite.build_os_maintenance` is the only binding that exercises recovery, and it does so against a cold install in a scratch repo rather than against a damaged live one.
+known_limitations: THE LARGEST COUNT IN THIS CROSSWALK AND THE ONE MOST AT RISK OF BEING MISREAD. Seventeen of its twenty-two bindings are test suites, and a suite's empirical status is `red_driven` — the registry README's concession applies here at full force: a check written against a fixture written by the same author in the same hour mostly proves the two agree. A green suite is evidence that PLANTED defects are caught. It is not a measurement of system health. There is no runtime health signal in this system at all, and nothing observes the system WHILE it operates: every binding here is a pre-condition or a post-condition around a run, never a state variable during one. `suite.build_os_maintenance` is the only binding that exercises recovery, and it does so against a cold install in a scratch repo rather than against a damaged live one.
 
 primitive: integration_bandwidth
 universal_function: how much change can be safely absorbed
@@ -150,7 +150,7 @@ system_representation: evidence coverage; receipts; calibration; claim-state rec
 observable_proxies: git numstat recomputation of claimed row values; vacuity refusals across seven surfaces; occupancy and length floors on evidence rows; the tree-derived discovery rule
 binding_quality: instantiates
 claimed_max_authority: gate
-known_limitations: TWENTY-FOUR BINDINGS, AND THE COUNT OVERSTATES THE CONTACT. 53 of the 78 controls in this registry are `red_driven` and only 3 are `field_observed`, so most of what binds here has been shown to fire on a defect its own author planted, and nothing more. The bindings divide sharply. A small group compares a claim against something the claimant did not write — `metrics.record.verify_git` against git numstat, `adoption.lane_size_check` against measured churn, `registry.discovery_rule` against the tree — and those genuinely instantiate the primitive. The larger group checks SHAPE, OCCUPANCY, LENGTH or VACUITY: `adoption.boundary_manifest` validates that a manifest is well-formed and not that the boundary it declares is true, which is why it sits with its siblings `adoption.schema_invariant` and `adoption.store_validate` rather than above them; `metrics.record.note_minimum` passes twelve repeated characters, `adoption.junk_row_thresholds` scores a row of plausible fabrications as full, and seven separate "the scan found nothing" refusals prove only that a check was not blind — a necessary condition for evidence and never a sufficient one. `maint.tripwire_coverage_scan` is registered `refuted`: measured, and found not to discriminate. Nothing here is `calibrated` except two threshold controls fitted to n=4 packets of this repository's own history. Reading "24 of 78" as dense epistemic coverage would be the overclaim the registry exists to prevent.
+known_limitations: TWENTY-FIVE BINDINGS, AND THE COUNT OVERSTATES THE CONTACT. 56 of the 81 controls in this registry are `red_driven` and only 3 are `field_observed`, so most of what binds here has been shown to fire on a defect its own author planted, and nothing more. The bindings divide sharply. A small group compares a claim against something the claimant did not write — `metrics.record.verify_git` against git numstat, `adoption.lane_size_check` against measured churn, `registry.discovery_rule` against the tree — and those genuinely instantiate the primitive. The larger group checks SHAPE, OCCUPANCY, LENGTH or VACUITY: `adoption.boundary_manifest` validates that a manifest is well-formed and not that the boundary it declares is true, which is why it sits with its siblings `adoption.schema_invariant` and `adoption.store_validate` rather than above them; `metrics.record.note_minimum` passes twelve repeated characters, `adoption.junk_row_thresholds` scores a row of plausible fabrications as full, and seven separate "the scan found nothing" refusals prove only that a check was not blind — a necessary condition for evidence and never a sufficient one. `maint.tripwire_coverage_scan` is registered `refuted`: measured, and found not to discriminate. Nothing here is `calibrated` except two threshold controls fitted to n=4 packets of this repository's own history. Reading "25 of 81" as dense epistemic coverage would be the overclaim the registry exists to prevent.
 
 primitive: latent_state
 universal_function: hidden state beneath the explicit claims
@@ -166,7 +166,7 @@ system_representation: D1, D7, D30 and D90 retention; rollback; rework; escaped 
 observable_proxies: byte conservation across a memory rotation
 binding_quality: proxies
 claimed_max_authority: gate
-known_limitations: ONE BINDING, AND IT INSTANTIATES NOTHING: it measures durability across a single TRANSFORMATION rather than across TIME, and it touches NONE of the five representations this record declares — not D1, D7, D30 or D90 retention, not rollback, not rework, not escaped regressions. `maint.rotation_conservation` proves no byte is lost when memory is rotated; it says nothing about whether anything survives a week. The temporal quantities the primitive names are not merely unmeasured — for one of them the INSTRUMENT EXISTS AND IS EMPTY: `packet_metrics.tsv` carries a `defects_escaped` column and it reads `-` in all 8 of 8 rows, so the system has built a place to record escaped regressions and has never recorded one. Nothing computes D1, D7, D30 or D90. Nothing measures rework. And `rollback_behavior` is a prose field on every one of the 78 registry entries that no control ever executes, tests or verifies.
+known_limitations: ONE BINDING, AND IT INSTANTIATES NOTHING: it measures durability across a single TRANSFORMATION rather than across TIME, and it touches NONE of the five representations this record declares — not D1, D7, D30 or D90 retention, not rollback, not rework, not escaped regressions. `maint.rotation_conservation` proves no byte is lost when memory is rotated; it says nothing about whether anything survives a week. The temporal quantities the primitive names are not merely unmeasured — for one of them the INSTRUMENT EXISTS AND IS EMPTY: `packet_metrics.tsv` carries a `defects_escaped` column and it reads `-` in all 8 of 8 rows, so the system has built a place to record escaped regressions and has never recorded one. Nothing computes D1, D7, D30 or D90. Nothing measures rework. And `rollback_behavior` is a prose field on every one of the 81 registry entries that no control ever executes, tests or verifies.
 
 primitive: gated_plasticity
 universal_function: changing the rules safely
@@ -750,3 +750,24 @@ class: A
 runtime_authority: gate
 binding_kind: proxies
 rationale: Test state over the evidence-policy tool: that the sharp rule holds at every class, that a comma-composite resolves to its minimum, that neither axis is invented, and that the matrix reports a violating registry and still exits 0. It binds here rather than to epistemic_quality for the same reason the other fourteen suites do: a suite's function is property preservation, and its own empirical status is red_driven.
+
+control: envelope.grant_composition
+binds_to: agency
+class: C
+runtime_authority: advise
+binding_kind: proxies
+rationale: THE FIRST BINDING TO REACH THIS PRIMITIVE'S THIRD REPRESENTATION AS A STRUCTURE. `authority leases` is named in system_representation and was held by one binding — `tools.handoff_lock`, a genuine lease and, as known_limitations says, ONE BIT. An envelope is a lease with issuer, actor, scope, granted authority, evidence basis, deployment mode, start, expiry, revocation and rollback, and the deployment mode is the part no other artefact here represents at all: whether the output is consumed, confirmed by a person, acted on within bounds, or acted on freely. It PROXIES and does not instantiate, for the reason this primitive's known_limitations already states decisively: the permission system that actually constrains agent action is EXTERNAL to this repository, so a validated envelope is a DECLARED lease standing in for a permission nothing here enforces. It grants nothing, revokes nothing, and no runtime consults it before acting.
+
+control: envelope.derivation_nonvacuity
+binds_to: epistemic_quality
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: A vacuity refusal over the envelope store's own derivation: an absent store, a line the schema has no slot for, a record missing a required field, a duplicate id, a malformed or backwards lease term, or an unknown deployment mode. It belongs with the other "the scan found nothing" refusals this primitive's known_limitations names and carries their limit exactly — proving a derivation was not blind is necessary for evidence and never sufficient. It says nothing about whether any grant is WISE, only that it can be read.
+
+control: suite.authority_envelope
+binds_to: homeostasis
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Test state over the authority envelope: that the store ships empty of live grants, that every refusal state really refuses, that the deployment modes are strictly ordered, that nothing is written during a run, and that both readings of the S1 collision are recorded while neither is adopted. It binds here rather than to epistemic_quality for the same reason the other sixteen suites do: a suite's function is property preservation, and its own empirical status is red_driven.

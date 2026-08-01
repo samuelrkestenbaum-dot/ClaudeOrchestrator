@@ -848,6 +848,7 @@ chain_suite "tests/control_registry_tests.sh"     "the control registry: class, 
 chain_suite "tests/neurocosmology_crosswalk_tests.sh" "the Neurocosmology crosswalk: control-to-primitive bindings"
 chain_suite "tests/bandwidth_tests.sh"            "work-in-flight capacity ceilings, per dimension"
 chain_suite "tests/evidence_policy_tests.sh"      "the evidence-policy matrix: class x empirical_status -> licensed authority"
+chain_suite "tests/authority_envelope_tests.sh"   "the authority envelope: who granted what, in which deployment mode, until when"
 
 # A chained suite that is added to the repo but never wired here would be
 # discoverable-only — the exact defect chaining exists to prevent. Assert the

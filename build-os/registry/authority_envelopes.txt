@@ -1,0 +1,186 @@
+# Build OS — the authority envelope store.
+#
+# WHAT THIS EXISTS AGAINST. MISMATCHES.md states — now fourteen times — that
+# re-authorising a control is a governance action belonging to the operator.
+# THE OPERATOR HAD NO MECHANISM TO PERFORM ONE. There was no artefact in this
+# repository in which a human could write "this control may exercise this
+# authority, on this basis, until this date, and here is what happens when the
+# lease ends". A rule that names an authority nobody can exercise is not a rule
+# with a gap in it; it is a rule that has never been available. This file is the
+# artefact. `build-os/tools/authority-envelope.sh` validates it.
+#
+# THIS FILE IS EMPTY OF GRANTS ON THE DAY IT LANDS, AND THAT IS THE POINT.
+# Creating the first grant is a governance act taken by the operator. A build
+# packet that shipped the mechanism AND used it would have re-authorised
+# something by writing the tool that permits re-authorisation — the exact
+# self-authorisation the envelope exists to prevent. So: zero live records here,
+# a schema documented below, and a worked example that lives ENTIRELY INSIDE
+# COMMENTS. An example a parser can see is a live grant wearing a label; every
+# tool that reads this file skips `#` at column 0, so the example below cannot
+# be counted, cannot be composed against, and cannot license anything.
+#
+# ZERO RECORDS IS THE CORRECT STATE, NOT THE SHELFWARE STATE. This is the one
+# place the census's vacuity rule is deliberately NOT copied. `scan-controls.sh`
+# refuses a registry that declares zero controls, because an empty census is an
+# unclassified system wearing a registry. An empty ENVELOPE store means
+# something different and better: nothing has been re-authorised. So the
+# validator reports zero and exits 0. An ABSENT store still refuses — absent is
+# not empty, and a consumer that read a missing file as "no grants" would give
+# the permissive answer for a question it could not ask.
+#
+# THE FORMAT is the registry's own: ONE FIELD PER LINE, ONE BLANK LINE BETWEEN
+# RECORDS, `#` at column 0 for comments. Greppable without a parser, diffable at
+# field granularity, readable by an agent with no tooling. It is the same shape
+# as control_registry.txt and neurocosmology_crosswalk.txt on purpose: a
+# governance artefact that needed its own file format would be one more thing to
+# get wrong at the moment it matters most.
+#
+# ---------------------------------------------------------------------------
+# THE SCHEMA — fourteen fields, every one required, in this order.
+#
+#   envelope            the grant's own id. Unique. It is what a revocation
+#                       names, so two records sharing one id is refused: a lease
+#                       nobody can name uniquely is a lease nobody can end.
+#   issuer              the human who granted it. Not an agent. The whole point
+#                       of the artefact is that a person took the decision.
+#   actor               which agent, role or caller may exercise the grant.
+#   control             the control id the grant applies to. A STABLE ID, never
+#                       a file:line — the operator's standing direction.
+#   scope               where the grant applies, and where it does not.
+#   granted_authority   a rung on the ladder none < observe < advise < rank <
+#                       gate. This is what the actor may DO.
+#   evidence_basis      the evidence relied on. Prose, and deliberately not a
+#                       token: the evidence AXIS already carries the token, and
+#                       this field is where a human says what they actually
+#                       looked at.
+#   deployment_mode     one of: shadow, human_confirmed, bounded_autonomous,
+#                       autonomous. See below — this is the field that makes the
+#                       artefact worth having.
+#   starts              YYYY-MM-DD. When the lease opens.
+#   expires             YYYY-MM-DD, strictly after `starts`. LEASES END. An
+#                       authority granted without an end date is not a lease; it
+#                       is a permanent re-authorisation with a date on it.
+#   revocation          how the grant is revoked, and by whom, before expiry.
+#   reason              why it was granted. The sentence a reviewer reads.
+#   human_confirmation  the confirmation a human must give before the actor
+#                       acts. `none` is a legitimate value under `autonomous`
+#                       and a contradiction under `human_confirmed`.
+#   rollback_behavior   what happens when the lease ends or is revoked — the
+#                       DEMOTION. Where the control lands, and what undoes
+#                       anything it did while the lease was open.
+#
+# ---------------------------------------------------------------------------
+# THE DEPLOYMENT AXIS, AND WHY IT IS THE CRITICAL FIELD.
+#
+# `class` asks what KIND of thing is being checked. `empirical_status` asks
+# whether the check WORKS. Neither asks the third question, and it is the one an
+# operator actually has to answer before switching something on: WHAT HAPPENS TO
+# THE OUTPUT? A control whose ranking nothing consumes and a control whose
+# ranking silently reorders the work queue are the same control on both existing
+# axes, and they are not the same risk. `deployment_mode` separates PERMISSION
+# TO RANK from PERMISSION TO CHOOSE from PERMISSION TO ACT.
+#
+#   shadow              -> observe   It produces output and NOTHING CONSUMES IT.
+#                                    `observe` is what "recorded, and nothing
+#                                    acts on it" means on the ladder.
+#   human_confirmed     -> advise    A person sits between the signal and the
+#                                    consequence. `advise` and not `rank`, by
+#                                    the ladder's OWN definition of `rank`: the
+#                                    rung that lets a control order work or
+#                                    select between options WITH NO HUMAN IN THE
+#                                    LOOP. A mode whose entire content is "a
+#                                    human confirms" cannot license the rung
+#                                    that means "no human confirms".
+#   bounded_autonomous  -> rank      It acts without a person, inside declared
+#                                    bounds. It may order and select. It may not
+#                                    `gate`, because `gate` is the UNBOUNDED
+#                                    stop and "bounded" is precisely the refusal
+#                                    of it.
+#   autonomous          -> gate      No additional cap.
+#
+# THE DEFAULT FOR A CONTROL WITH NO ENVELOPE IS `autonomous`, AND THE DEFENCE
+# MATTERS MORE THAN THE VALUE. Every control registered before this axis existed
+# carries no deployment mode. `autonomous` — no additional cap — is the ONLY
+# default that leaves the existing finding set exactly where it is. Any other
+# default would silently demote the entire census in a single commit, which is
+# the self-re-authorisation this artefact exists to prevent: the system deciding,
+# with no operator in the loop, that everything it had been permitted to do it
+# may no longer do. A permissive default is normally the wrong instinct; here it
+# is the conservative one, because the conservative direction is "change
+# nothing" and not "cap everything".
+#
+# THE COST OF THAT DEFAULT, STATED RATHER THAN IMPLIED AWAY: the axis is OPT-IN
+# and does nothing at all until an operator writes a record here. It cannot
+# discover that a control is deployed in shadow; it can only record that someone
+# said so. Nothing scans a running system to derive a deployment mode, and
+# nothing here could.
+#
+# COMPOSITION:  L_effective = MIN(L_class, L_evidence, L_deployment)
+#
+# over the ladder none < observe < advise < rank < gate. Three independent
+# NECESSARY conditions, so the minimum and not an average: being the right kind
+# of thing does not make a broken check work, a working check does not make a
+# chosen threshold an invariant, and neither of them makes it safe for the
+# output to act without a person. There is NO composite score and there will not
+# be one — the weights would be underivable and one number hides which term is
+# saturated, so all three are reported separately on every finding.
+#
+# ---------------------------------------------------------------------------
+# THE ONE PENDING EXTENSION, DECLARED HERE AND DECIDED ELSEWHERE.
+#
+# The operator ruled that `untested` and `unvalidated` are meaningfully
+# different: `untested` = has not yet produced live outputs against real tasks;
+# `unvalidated` = has operated, but lacks sufficient outcome evidence. THAT
+# DISTINCTION IS NOT IMPLEMENTED HERE. The evidence axis still carries exactly
+# five tokens, `untested` has no cap row, and a control declaring it is REFUSED
+# by `evidence.derivation_nonvacuity` at exit 2 rather than falling through to
+# permissive. Adding a token so that a planned control fits is the failure mode
+# the registry exists to prevent, so the sixth token is a governance decision and
+# it is the single decision the next packet must take.
+#
+# ---------------------------------------------------------------------------
+# THE OPEN QUESTION THIS FILE RECORDS AND DOES NOT ANSWER.
+#
+# The sanctioned S1 launch declaration is `controlClass: heuristic_policy` /
+# `empiricalStatus: untested` / `runtimeAuthority: rank` / `deploymentMode:
+# shadow`. As literally specified, MIN() CANNOT PRODUCE `rank` FOR IT:
+# `heuristic_policy` is Class C, README §3 licenses Class C at `advise`, and the
+# ladder puts `rank` strictly above `advise`, so the minimum can never exceed
+# `advise` whatever the other two terms say. Two readings, claiming different
+# things, both recorded, NEITHER adopted:
+#
+#   1. S1 ships carrying `authority_mismatch: declared` — the fifteenth. Honest,
+#      and exactly consistent with the fourteen already in MISMATCHES.md.
+#   2. `shadow` means the ranking has NO CONSEQUENCE, so `runtime_authority` is
+#      measuring the wrong property for a shadow-mode control, and the ladder
+#      conflates SIGNAL STRENGTH with WHETHER ANYTHING CONSUMES THE SIGNAL.
+#
+# Reading 2 is architecturally interesting and may well be right. Adopting it
+# would REDEFINE THE LADDER, which is a governance change and not a build
+# decision, so it has not been adopted: `shadow` still caps at `observe` here,
+# and S1 as declared would still be out of licence. The operator decides.
+#
+# ---------------------------------------------------------------------------
+# A WORKED EXAMPLE — ENTIRELY INSIDE COMMENTS, COUNTED BY NOTHING.
+#
+# Delete the leading `# ` from every line of a copy of this block to create a
+# real grant. Do not edit this block itself into a record: the example names a
+# control that exists, and turning it live would re-authorise it.
+#
+#   envelope: env.example.not_a_grant
+#   issuer: the operator (example only — this record is commented out)
+#   actor: the build-orchestrator, when routing a substantive packet
+#   control: evidence.policy_matrix
+#   scope: build-os/ only; never applies to a packet that touches secrets
+#   granted_authority: advise
+#   evidence_basis: red-driven refusal states, plus one live run over the census
+#   deployment_mode: human_confirmed
+#   starts: 2026-08-01
+#   expires: 2026-11-01
+#   revocation: the operator deletes this record; no agent may edit this file
+#   reason: to show the schema; this record grants nothing because it is a comment
+#   human_confirmation: the operator confirms each finding before it is acted on
+#   rollback_behavior: on expiry the control returns to its registered authority
+#
+# ---------------------------------------------------------------------------
+# LIVE GRANTS BELOW THIS LINE. There are none.

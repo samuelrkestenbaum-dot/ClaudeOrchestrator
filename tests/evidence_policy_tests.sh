@@ -146,16 +146,23 @@ RC="$(run matrix)"
 [ "$RC" = "0" ] && ok "\`matrix\` prints the two-axis licence and exits 0" \
                 || { no "\`matrix\` exited $RC"; dump; }
 
-echo "== 2. TWO AXES, REPORTED SEPARATELY — there is no composite evidence score =="
+echo "== 2. THREE AXES, REPORTED SEPARATELY — there is no composite evidence score =="
 # The anti-pattern this refuses: one blended number whose weights are
 # unjustifiable and which hides which axis is saturated.
+#
+# THE COUNT MOVED FROM 2 TO 3 DELIBERATELY, and the guard is not weakened by the
+# move: what it enforces is that every axis is declared BY NAME on its own line
+# and that none is blended into another. `deployment` is now one of them, sourced
+# from build-os/tools/authority-envelope.sh. The set below is spelled out so that
+# an axis quietly appearing or disappearing is still a failure.
 run matrix >/dev/null
 awk '$1=="axis:"{print $2}' "$WORK/out.txt" | sort > "$WORK/axes.txt"
 NAX="$(grep -c . "$WORK/axes.txt" || true)"; NAX="${NAX:-0}"
-[ "$NAX" = "2" ] && ok "the tool declares exactly 2 axes, one line each" \
-                 || { no "the tool declares $NAX axis line(s), expected 2"; dump; }
+[ "$NAX" = "3" ] && ok "the tool declares exactly 3 axes, one line each" \
+                 || { no "the tool declares $NAX axis line(s), expected 3"; dump; }
 grep -qxF class "$WORK/axes.txt"    && ok "the class axis is declared by name"    || no "no class axis is declared"
 grep -qxF evidence "$WORK/axes.txt" && ok "the evidence axis is declared by name" || no "no evidence axis is declared"
+grep -qxF deployment "$WORK/axes.txt" && ok "the deployment axis is declared by name" || no "no deployment axis is declared"
 grep -qE '(score|index|blend|composite|weight)[a-z_]*[[:space:]]*[=:][[:space:]]*[0-9.]' "$WORK/out.txt" \
   && { no "the model assigns a NUMBER to a blended quantity — the composite anti-pattern this design refuses"; dump; } \
   || ok "no line of the model assigns a number to a blended, weighted or composite quantity"
@@ -165,8 +172,21 @@ grep -qi 'never blended\|no composite' "$WORK/out.txt" \
 
 echo "== 3. COMPOSITION IS THE MINIMUM, and it says so =="
 grep -qiE 'composition:.*(MIN|minimum)' "$WORK/out.txt" \
-  && ok "the composition rule is stated explicitly: licensed = MIN over the two axes" \
-  || { no "the tool does not state how the two axes compose"; dump; }
+  && ok "the composition rule is stated explicitly: licensed = MIN over the axes" \
+  || { no "the tool does not state how the axes compose"; dump; }
+CTERM=0
+for _t in L_class L_evidence L_deployment; do
+  grep -qE "^composition:.*$_t" "$WORK/out.txt" || { CTERM=$((CTERM+1)); echo "      | composition rule never names $_t"; }
+done
+[ "$CTERM" -eq 0 ] \
+  && ok "and it names all three terms — MIN(L_class, L_evidence, L_deployment)" \
+  || no "$CTERM term(s) missing from the stated composition rule"
+grep -qE '^deployment-default: ' "$WORK/out.txt" \
+  && ok "the default deployment mode is declared where the operator reads the model" \
+  || { no "the tool never states the default for a control with no envelope"; dump; }
+grep -qF 'authority-envelope.sh' "$WORK/out.txt" \
+  && ok "and it names where the third term comes from, rather than parsing that schema a second time" \
+  || { no "the model does not say where L_deployment is sourced from"; dump; }
 grep -qiE 'composite-status:.*(MIN|minimum)' "$WORK/out.txt" \
   && ok "the comma-composite \`empirical_status\` resolution rule is stated (minimum over components)" \
   || { no "nothing states how a comma-composite empirical_status resolves"; dump; }
@@ -253,7 +273,15 @@ echo "== 5a. THE EVIDENCE AXIS'S CAPS ARE A COPY OF README §3a, not a second ta
 # cannot be mistaken for a second cap table. Requiring the cap to be a rung of the
 # ladder drops the header and separator rows; a cap edited to something that is
 # not a rung drops its row instead, which the row count below then catches.
-sed -n '/^### 3a\./,/^## 4/p' "$RREADME" \
+#
+# THE RANGE ENDS AT §3b, NOT AT §4, AND THAT IS A TIGHTENING RATHER THAN A
+# LOOSENING. §3b carries the DEPLOYMENT axis's cap table, which is also a
+# three-column table of `token | rung | why`. Read as part of §3a it would add
+# four rows to the evidence axis and the comparison would fail for the wrong
+# reason — a section boundary, not a drift. Each extractor now reads exactly its
+# own section, and §4a below reconciles the deployment table the same way, so
+# nothing has stopped being checked.
+sed -n '/^### 3a\./,/^### 3b\./p' "$RREADME" \
   | awk -F'|' -v lad=" $LADDER " 'NF==5 { e=$2; a=$3;
       gsub(/[`*[:space:]]/,"",e); gsub(/[`*[:space:]]/,"",a);
       if (e != "" && index(lad," " a " ") > 0) print e"="a }' \
@@ -273,6 +301,32 @@ if diff -q "$WORK/readme_ev.txt" "$WORK/tool_ev_caps.txt" >/dev/null 2>&1; then
 else
   no "the tool's evidence axis and README §3a's cap table disagree"
   diff "$WORK/readme_ev.txt" "$WORK/tool_ev_caps.txt" | sed 's/^/      | /' | head -8
+fi
+
+echo "== 5a. THE DEPLOYMENT AXIS IS A COPY OF README §3b, not a rewrite of it =="
+# The third axis gets the same treatment as the first two, for the same reason:
+# a cap restated in a second place that nothing compares is the drift surface
+# that put a stale out-of-licence count in three files at once. `shadow` could be
+# quietly raised to `rank` in one of the two and every other assertion here would
+# still pass — including, pointedly, the one that checks reading 2 of the S1
+# collision has not been silently adopted.
+sed -n '/^### 3b\./,/^## 4/p' "$RREADME" \
+  | awk -F'|' -v lad=" $LADDER " 'NF==5 { d=$2; a=$3;
+      gsub(/[`*[:space:]]/,"",d); gsub(/[`*[:space:]]/,"",a);
+      if (d != "" && index(lad," " a " ") > 0) print d"="a }' \
+  | sort -u > "$WORK/readme_dep.txt"
+awk '$1=="axis:" && $2=="deployment"{for(i=3;i<=NF;i++) if($i ~ /:/){split($i,p,":"); print p[1]"="p[2]}}' \
+  "$WORK/out.txt" | sort -u > "$WORK/tool_dep.txt"
+NRD="$(grep -c . "$WORK/readme_dep.txt" || true)"; NRD="${NRD:-0}"
+NTD="$(grep -c . "$WORK/tool_dep.txt" || true)"; NTD="${NTD:-0}"
+[ "${NRD}" = "${NTD}" ] && [ "${NRD}" != "0" ] \
+  && ok "README §3b's deployment table yields $NRD cap row(s), the same number the tool prints (this comparison is not vacuous)" \
+  || { no "README §3b parsed to $NRD cap row(s) against the tool's $NTD"; sed 's/^/      | /' "$WORK/readme_dep.txt"; }
+if diff -q "$WORK/readme_dep.txt" "$WORK/tool_dep.txt" >/dev/null 2>&1; then
+  ok "the tool's deployment axis equals README §3b's cap table exactly, row for row"
+else
+  no "the tool's deployment axis and README §3b's cap table disagree"
+  diff "$WORK/readme_dep.txt" "$WORK/tool_dep.txt" | sed 's/^/      | /' | head -8
 fi
 
 echo "== 6. Every cell of the class x evidence grid is stated, once =="
@@ -553,7 +607,125 @@ awk -v i="$MATRIXID" '/^control: /{c=$2} c==i && /^authority_mismatch: /{print $
   && ok "$MATRIXID declares NO authority mismatch — Class C at advise is exactly its licence" \
   || no "$MATRIXID declares an authority mismatch, which a Class-C control at advise must not"
 
-echo "== 18. This suite is chained, and is not vacuous about itself =="
+echo "== 18. THE THIRD MIN TERM CHANGES NOTHING ON THE LIVE CENSUS =="
+# THE PACKET'S CENTRAL REGRESSION. Every control in the census predates the
+# deployment axis and declares no deployment mode. Adding a third MIN term MUST
+# NOT move a single finding — anything else is the system demoting controls with
+# no operator in the loop, which is the exact act the envelope exists to make
+# impossible without a human.
+#
+# HOW THIS IS ASSERTED, AND WHY NOT AS A STORED GOLDEN FILE. A frozen copy of
+# yesterday's output would decay the moment a control is added — and THIS PACKET
+# ADDS THREE, so a pinned `19 of 78` would be stale before it was committed. The
+# standing direction is stable ids and derived tables over remembered counts, so
+# the comparison is a DIFFERENTIAL run instead: the same tool, the same registry,
+# with the third term sourced from an EMPTY store and from the LIVE store. The
+# live store has zero grants, so the two runs must agree exactly — and the
+# per-axis totals are additionally reconciled against the census's own count of
+# `authority_mismatch: declared`, which is a cross-artefact fact rather than a
+# number anybody typed.
+printf '# a store with no grants at all\n' > "$WORK/nogrants.txt"
+run check --repo "$SRC" --envelopes "$WORK/nogrants.txt" >/dev/null
+grep '^evidence: ' "$WORK/out.txt" > "$WORK/live_empty.txt"
+LSUM_A="$(grep '^evidence-policy: [0-9]* of ' "$WORK/out.txt")"
+run check --repo "$SRC" >/dev/null
+grep '^evidence: ' "$WORK/out.txt" > "$WORK/live_real.txt"
+LSUM_B="$(grep '^evidence-policy: [0-9]* of ' "$WORK/out.txt")"
+NFIND="$(grep -c 'OUT-OF-LICENCE' "$WORK/live_real.txt" || true)"; NFIND="${NFIND:-0}"
+[ "${NFIND}" != "0" ] \
+  && ok "the live census produces $NFIND finding(s), so the identity below compares something" \
+  || no "the live census produced no findings — the invariance check would hold vacuously"
+if diff -q "$WORK/live_empty.txt" "$WORK/live_real.txt" >/dev/null 2>&1; then
+  ok "every finding line is BYTE-IDENTICAL with the live envelope store and with an empty one — the third term is inert on this census"
+else
+  no "the live envelope store changes the finding set: a grant has been created, and this packet must create none"
+  diff "$WORK/live_empty.txt" "$WORK/live_real.txt" | head -6 | sed 's/^/      | /'
+fi
+[ "$LSUM_A" = "$LSUM_B" ] \
+  && ok "and the per-axis totals are identical too: $LSUM_B" \
+  || no "the summary totals moved: [$LSUM_A] vs [$LSUM_B]"
+# THE SPLIT, RECONCILED RATHER THAN REMEMBERED. The findings the class axis
+# already saw are exactly the entries carrying `authority_mismatch: declared` —
+# scan-controls.sh §5 enforces that equivalence from the other side — so the
+# split is checked against the census instead of against a typed constant.
+SNOUT="$(printf '%s' "$LSUM_B"  | awk '{print $2}')"
+SNTOT="$(printf '%s' "$LSUM_B"  | awk '{print $4}')"
+SNCLS="$(printf '%s' "$LSUM_B"  | sed 's/.*class axis binds \([0-9]*\).*/\1/')"
+SNEVI="$(printf '%s' "$LSUM_B"  | sed 's/.*evidence axis binds \([0-9]*\).*/\1/')"
+SNBOTH="$(printf '%s' "$LSUM_B" | sed 's/.*both axes bind \([0-9]*\).*/\1/')"
+NDECL="$(grep -c '^authority_mismatch: declared$' "$REG" || true)"; NDECL="${NDECL:-0}"
+NSTANZA="$(grep -c '^control: ' "$REG" || true)"; NSTANZA="${NSTANZA:-0}"
+[ "$SNTOT" = "$NSTANZA" ] \
+  && ok "the denominator is the census itself ($NSTANZA stanzas), not a number anybody typed" \
+  || no "the tool read $SNTOT controls but the registry declares $NSTANZA stanzas"
+[ "$((SNCLS + SNBOTH))" = "$NDECL" ] \
+  && ok "the findings the CLASS axis binds ($SNCLS + $SNBOTH) equal the census's $NDECL \`authority_mismatch: declared\` entries — the new axes reproduce the old finding rather than replacing it" \
+  || no "class-axis findings ($((SNCLS + SNBOTH))) do not equal the $NDECL declared mismatches"
+[ "$((SNCLS + SNEVI + SNBOTH))" = "$SNOUT" ] \
+  && ok "and the three attributions partition the $SNOUT findings exactly — none is unattributed, none is double-counted" \
+  || no "the per-axis totals do not sum to the out-of-licence total"
+DEPBIND="$(grep -c 'axis=[a-z+]*deployment' "$WORK/live_real.txt" || true)"
+[ "${DEPBIND:-0}" = "0" ] \
+  && ok "NO live finding is bound by the deployment axis, because no live control has an envelope — which is what \"re-authorises nothing\" means arithmetically" \
+  || no "${DEPBIND} live finding(s) are bound by the deployment axis: a grant exists that this packet must not have created"
+
+echo "== 18a. ...AND THE AXIS IS NOT INERT — a fixture under \`shadow\` is capped, driven red =="
+# The other half. An axis that could never bind would be decoration, and a
+# regression test that only proved "nothing changed" would pass just as well
+# against a term that was never wired in.
+mkreg "$WORK/dep_reg.txt" <<EOF
+d.shadowed|A|red_driven|gate
+d.control|A|red_driven|gate
+EOF
+{
+  printf 'envelope: e.shadow\n'
+  printf 'issuer: the fixture\nactor: the fixture\ncontrol: d.shadowed\n'
+  printf 'scope: this fixture\ngranted_authority: gate\nevidence_basis: a fixture\n'
+  printf 'deployment_mode: shadow\nstarts: 2026-01-01\nexpires: 2026-12-31\n'
+  printf 'revocation: delete it\nreason: to drive the third term red\n'
+  printf 'human_confirmation: none\nrollback_behavior: none\n\n'
+} > "$WORK/dep_env.txt"
+RC="$(run check --registry "$WORK/dep_reg.txt" --envelopes "$WORK/dep_env.txt")"
+[ "$(verdict d.shadowed)" = "OUT-OF-LICENCE" ] \
+  && ok "RED: a class-A red_driven control gating under \`shadow\` is named OUT-OF-LICENCE — class and evidence both license \`gate\`, and the DEPLOYMENT term does not" \
+  || { no "RED FAILED: the shadow-capped control was not flagged"; dump; }
+[ "$(field d.shadowed axis)" = "deployment" ] \
+  && ok "RED: and the finding names \`deployment\` as the binding axis" \
+  || { no "RED FAILED: binding axis was '$(field d.shadowed axis)'"; dump; }
+[ "$(field d.shadowed licensed)" = "observe" ] \
+  && ok "RED: the composed minimum drops to \`observe\` — the third term really is a MIN term" \
+  || { no "RED FAILED: licensed was '$(field d.shadowed licensed)', expected observe"; dump; }
+[ "$(verdict d.control)" != "OUT-OF-LICENCE" ] \
+  && ok "and the control WITHOUT an envelope in the same run is untouched — the cap follows the grant, not the run" \
+  || { no "a control with no envelope was capped: the default is not \`autonomous\`"; dump; }
+[ "$RC" = "0" ] \
+  && ok "the matrix still ADVISES with a third axis in play: it exits 0" \
+  || { no "the matrix exited $RC once the deployment axis bound something"; dump; }
+
+echo "== 18b. AN UNREADABLE ENVELOPE STORE REFUSES — it never defaults to permissive =="
+# The third term is a MIN term, so an unknown value for it must not be silently
+# read as "no cap". That is the same rule the evidence axis already enforces for
+# an unrecognised `empirical_status`, one axis along.
+RC="$(run check --registry "$WORK/dep_reg.txt" --envelopes "$WORK/nosuchstore.txt")"
+[ "$RC" = "2" ] \
+  && ok "an ABSENT envelope store is REFUSED (exit 2) — absent is not empty, and an unknown MIN term must never be defaulted to permissive" \
+  || { no "an absent envelope store exited $RC"; dump; }
+{
+  printf 'envelope: e.badmode\n'
+  printf 'issuer: x\nactor: x\ncontrol: d.shadowed\nscope: x\n'
+  printf 'granted_authority: gate\nevidence_basis: x\ndeployment_mode: vibes\n'
+  printf 'starts: 2026-01-01\nexpires: 2026-12-31\n'
+  printf 'revocation: x\nreason: x\nhuman_confirmation: x\nrollback_behavior: x\n\n'
+} > "$WORK/badmode.txt"
+RC="$(run check --registry "$WORK/dep_reg.txt" --envelopes "$WORK/badmode.txt")"
+[ "$RC" = "2" ] \
+  && ok "an UNKNOWN deployment mode is REFUSED (exit 2) rather than treated as licensing everything" \
+  || { no "an unknown deployment mode exited $RC — the permissive fall-through this design refuses"; dump; }
+out | grep -qi 'envelope' \
+  && ok "and the refusal says the envelope store is what it could not trust" \
+  || { no "the refusal does not name the envelope store"; dump; }
+
+echo "== 19. This suite is chained, and is not vacuous about itself =="
 grep -qF 'chain_suite "tests/evidence_policy_tests.sh"' "$SRC/tests/build_os_tests.sh" \
   && ok "this suite is chained from tests/build_os_tests.sh (not discoverable-only)" \
   || no "this suite is present but never chained from tests/build_os_tests.sh"

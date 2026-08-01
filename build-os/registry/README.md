@@ -41,7 +41,7 @@ That buys the same four properties the TSV was chosen for, at this shape:
 - **Greppable without a parser.** `grep '^class: C' control_registry.txt` counts
   the heuristics. `grep -B4 '^runtime_authority: gate'` finds what gates.
   `grep -c '^control: '` is the census size. The number worth reading first is
-  **`gate` on `unvalidated` evidence — 11 of 78**: eleven controls can stop the
+  **`gate` on `unvalidated` evidence — 11 of 81**: eleven controls can stop the
   build and nothing has established that any of them discriminates. The one-line
   `awk` that derives it is in `control_registry.txt`'s header.
 - **Diffable at field granularity.** Changing one control's authority is a
@@ -162,7 +162,7 @@ its mismatch at exit 0, silently, while the report went on naming it.
 **An entry is not a line.** Entries are cut at different granularities:
 `metrics.record.note_minimum` classifies one comparison, and
 `tests.nonvacuity_minimums` classifies a family of 34 fitted constants across 12
-test files. So "14 of 78 declare a mismatch" is a fact about this file's
+test files. So "14 of 81 declare a mismatch" is a fact about this file's
 granularity, not a count of the heuristics that can stop a build — that number is
 **56**, in `MISMATCHES.md`'s summary table. The family's membership is not
 trusted: `tests/control_registry_tests.sh` §21 rescans the tree for the shape and
@@ -266,10 +266,10 @@ Three of those rows carry the argument:
   `empirical_status` at the author's word.
 
   **The consequentialist half, derived rather than remembered.** Capping
-  `red_driven` at `advise` would put **66 of 78 controls out of licence in a
-  single edit — 47 of them newly**, on top of the 19 already named below. A
+  `red_driven` at `advise` would put **68 of 81 controls out of licence in a
+  single edit — 49 of them newly**, on top of the 19 already named below. A
   matrix that flags nearly everything discriminates nothing. (For scale, and not
-  to be confused with it: **53** is the number of controls whose
+  to be confused with it: **56** is the number of controls whose
   `empirical_status` is exactly `red_driven`, which is the figure CROSSWALK.md
   uses for a different question.)
 
@@ -311,7 +311,7 @@ build-os/tools/evidence-policy.sh matrix   # the two axes and the composed grid
 build-os/tools/evidence-policy.sh check    # the out-of-licence list; always exit 0
 ```
 
-- **19 of 78 controls are out of licence** under the composed matrix.
+- **19 of 81 controls are out of licence** under the composed matrix.
 - **14** of those the class axis already saw — they are exactly the 14 carrying
   `authority_mismatch: declared`, so the new axis reproduces the old finding
   rather than replacing it.
@@ -361,6 +361,152 @@ already means here* — differ in what they claim about the ontology, and choosi
 between them is a governance action for the operator. Adding a token to make a
 planned control fit would be fitting the rule to the case; that is exactly the
 move this axis exists to make visible, so it is named and left open.
+
+### 3b. The third axis: deployment, and the artefact that grants it
+
+Everything above states, repeatedly, that **re-authorising a control is a
+governance action belonging to the operator**. Until now *the operator had no
+mechanism to perform one*. There was no artefact anywhere in this repository in
+which a human could write "this control may exercise this authority, on this
+basis, until this date, and here is where it lands when the lease ends". A rule
+that names an act nobody can carry out is not a rule with a gap in it; it is a
+rule that has never been available. `build-os/registry/authority_envelopes.txt`
+is that artefact, and `build-os/tools/authority-envelope.sh` validates it.
+
+**The store ships empty of grants**, and that is the point rather than an
+omission: creating the first grant is a governance act, and a packet that shipped
+the mechanism *and used it* would have re-authorised something by writing the
+tool that permits re-authorisation. It carries a worked example, entirely inside
+comments, because an example a parser can see is a live grant wearing a label.
+
+**An envelope record carries fourteen fields:** `envelope` (the id a revocation
+names), `issuer` (a human), `actor`, `control`, `scope`, `granted_authority`,
+`evidence_basis`, `deployment_mode`, `starts`, `expires`, `revocation`, `reason`,
+`human_confirmation`, `rollback_behavior`. Two of them do the work the other
+twelve support. **Leases end** — an authority granted with no `expires` is a
+permanent re-authorisation with a date on it. And `deployment_mode` is the axis.
+
+#### Why a third axis at all
+
+`class` asks what **kind** of thing is being checked. `empirical_status` asks
+whether the check **works**. Neither asks the question an operator must actually
+answer before switching something on: **what happens to the output?** A control
+whose ranking nothing consumes and a control whose ranking silently reorders the
+work queue are *indistinguishable on both existing axes*, and they are not the
+same risk. `deployment_mode` separates **permission to rank** from **permission
+to choose** from **permission to act**.
+
+| `deployment_mode` | licensed authority | why that level |
+|---|---|---|
+| `shadow` | `observe` | it produces output and **nothing consumes it**. |
+| `human_confirmed` | `advise` | a person sits between the signal and the consequence. |
+| `bounded_autonomous` | `rank` | it acts unattended, inside declared bounds. |
+| `autonomous` | `gate` | no additional cap. **The default.** |
+
+> **`L_effective = MIN(L_class, L_evidence, L_deployment)`** over the same ladder
+> `none < observe < advise < rank < gate`. A control may do what **all three**
+> allow, and no more.
+
+Two of those rows carry an argument that is not merely a preference:
+
+- **`human_confirmed` caps below `rank` by the ladder's own definition of
+  `rank`** — §3a already fixes `rank` as the rung that lets a control order work
+  or select between options *with no human in the loop*. A mode whose entire
+  content is "a human confirms" cannot license the rung that means "no human
+  confirms". This is a consistency requirement, not a judgement call.
+- **`bounded_autonomous` caps below `gate`** because `gate` is the *unbounded*
+  stop, and "bounded" is precisely the refusal of it.
+
+#### The default is `autonomous`, and the defence matters more than the value
+
+Every control in the census predates this axis and declares no deployment mode.
+**`autonomous` — no additional cap — is the only default that leaves the finding
+set exactly where the operator put it.** Any other default would demote the
+entire census in a single commit with no operator in the loop, which is precisely
+the self-re-authorisation this artefact exists to prevent. A permissive default is
+normally the wrong instinct; here the conservative direction is *change nothing*,
+not *cap everything*.
+
+That is **proved, not asserted**. `tests/evidence_policy_tests.sh` §18 runs the
+matrix against the live envelope store and against an empty one and requires
+every finding line to be **byte-identical**, reconciles the per-axis split
+against the census's own count of `authority_mismatch: declared`, and requires
+that **no live finding is bound by the deployment axis**. §18a drives the other
+half red — a fixture control under `shadow` *is* capped, and the control beside
+it with no envelope is not — because a regression test that only proved "nothing
+changed" would pass equally well against a term that was never wired in.
+
+**The cost of that default, stated rather than implied away:** the axis is
+**opt-in** and does nothing at all until an operator writes a record. Nothing
+here can *discover* that a control is deployed in shadow; it can only record that
+a human declared so.
+
+#### What the envelope machinery is allowed to do
+
+It is registered as `envelope.grant_composition`, **Class C,
+`runtime_authority: advise`, `authority_mismatch: none`.** It reports; it does
+not gate, and it **grants nothing**. Beyond the two reasons §3a already gives for
+the matrix, one is specific to this artefact: **a validator that gated would be
+enforcing a governance scheme over zero live grants** — vacuous authority over an
+empty set, able to fire only on the operator's own first attempt to use the
+mechanism, which is the worst possible moment to refuse.
+
+The one exception mirrors `evidence.derivation_nonvacuity` exactly.
+`envelope.derivation_nonvacuity` (Class A, `gate`) refuses a derivation it cannot
+trust: an **absent** store, an unparseable one, a record missing a required
+field, a duplicate id, a `granted_authority` off the ladder, a malformed or
+backwards lease term, a field the schema has no slot for, or **an unknown
+`deployment_mode`**. The last is the sharpest, because the deployment term is a
+`MIN` term: reading an unknown value as "no cap" would silently license
+everything the store exists to bound.
+
+**Zero grants is the correct state, not the shelfware state** — and this is the
+one place §4's vacuity reasoning is deliberately *not* copied. `scan-controls.sh`
+refuses a registry declaring zero controls because an empty census is an
+unclassified system wearing a registry. An empty *envelope* store means the
+opposite and better thing: **nothing has been re-authorised.** So zero records
+reports and exits 0, while an **absent** store still refuses — absent is not
+empty, and reading a missing file as "no grants" gives the permissive answer to a
+question that was never asked.
+
+#### The open question this section records and does not answer
+
+The sanctioned S1 launch declaration is `controlClass: heuristic_policy` /
+`empiricalStatus: untested` / `runtimeAuthority: rank` / `deploymentMode:
+shadow`. **As literally specified, `min()` cannot produce `rank` for it.**
+`heuristic_policy` is Class C, §3 licenses Class C at `advise`, and `rank` is
+strictly above `advise` on the ladder, so the minimum can never exceed `advise`
+whatever the other two terms say. Two readings, and they claim different things:
+
+1. **S1 ships carrying `authority_mismatch: declared`** — the fifteenth. Honest,
+   mechanical, and exactly consistent with the fourteen already reported in
+   `MISMATCHES.md`. Nothing new is required of the ladder.
+2. **`shadow` means the ranking has no consequence**, so `runtime_authority` is
+   measuring the wrong property for a shadow-mode control, and the ladder
+   **conflates signal strength with whether anything consumes the signal**. A
+   control that ranks into a void is not exercising `rank` in the sense the
+   ladder means.
+
+**Both are recorded. Neither is adopted.** Reading 2 is architecturally
+interesting and may well be right — but adopting it would **redefine the
+ladder**, which is a governance change and not a build decision, so `shadow`
+still caps at `observe` here and S1 as declared would still be out of licence.
+This is the same treatment §3a gave the collision it found: record it, do not
+quietly fix it. **The operator decides.**
+
+**And `untested` remains pending.** The operator has ruled that `untested` (has
+not yet produced live outputs against real tasks) and `unvalidated` (has
+operated, but lacks sufficient outcome evidence) are meaningfully different.
+**That distinction is not implemented.** The evidence axis in §3a still carries
+exactly five tokens, `untested` has no cap row, and a control declaring it is
+still refused at exit 2 rather than falling through to permissive — proved, not
+asserted, by `tests/authority_envelope_tests.sh` §18. Adding a token so that a
+planned control fits is the failure this registry exists to prevent, so the sixth
+token is the single decision the next packet must take.
+
+**This section re-authorises nothing.** No `class`, `runtime_authority`,
+`authority_mismatch` or `empirical_status` changes, and **no grant exists for any
+control.**
 
 ---
 
@@ -445,7 +591,7 @@ in `scan-controls.sh`, with its reason beside it, where `grep` finds it;
 `scan-controls.sh patterns` prints the list and its size, so an allowance
 quietly growing is visible without reading the file. **It is empty today.**
 
-The registry carries **274** `evidence_refs`. That number is not remembered: the
+The registry carries **287** `evidence_refs`. That number is not remembered: the
 same total was previously written down in three artefacts as 218, 184 and 184
 against a live 224, because each was a hand count frozen at a different moment.
 `tests/control_registry_tests.sh` §25 recomputes it from the registry and fails
