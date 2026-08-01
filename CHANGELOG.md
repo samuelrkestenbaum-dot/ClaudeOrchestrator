@@ -14,6 +14,55 @@ deprecation cycle. Pin a commit if you need stability.
 
 ### In flight (not landed at the released commit)
 
+- **The two `refuted` controls were taken to the four outcomes, and both came
+  back "no change" — one of them because demoting it was MEASURED to destroy
+  live memory.** `refuted` is the only evidence state where the question looks
+  settled: measured, and found not to discriminate. It caps at `observe` at any
+  class, so the two controls carrying it read as the census's most obvious
+  demotions. Both readings were wrong, for different reasons, and the packet
+  changed **no class, no authority and no `empirical_status`**. Suite
+  **1617 passed**, 0 failed (+14 in the evidence-policy suite, +6 in the
+  maintenance suite). `evidence-policy.sh` still reports **19 of 81** out of
+  licence, split **6/5/8** — unmoved, which is the correct result for a packet
+  that re-authorised nothing.
+  - **`maint.tripwire_coverage_scan`: the demotion was applied and measured, and
+    it cost the layer its only prevention.** `COVERAGE-GATE-PREVENTION-DIFFERENTIAL`
+    (`tests/build_os_maintenance_tests.sh` §6a) runs two arms against an uncovered
+    suite file that rewrites real memory, differing only in that `throw`: gated →
+    **exit 1, tree untouched**; demoted to a print → **exit 1, tree destroyed**.
+    **The exit code is 1 in both arms**, so nothing watching exit codes can see
+    the difference at all — only the tree can. The entry's own
+    `demotion_requirement` had *prescribed* that demotion; it now records what it
+    was measured to cost. The gate stands and **the mismatch stands with it**:
+    keeping a gate is not a claim to be in licence.
+  - **Evadability is not non-discrimination.** The refutation is *path-scoped* and
+    one unqualified token cannot say so: `refuted` records that the **detection**
+    claim failed under a bare `node --test`; under the sanctioned command the same
+    scan is measured **prevention**. The defect it exists against was an accident
+    — a suite file with no tripwire, destroying live memory at exit 0 — and
+    against that it discriminates exactly.
+  - **`maint.source_scan_mask`: the finding is real and its remedy is
+    unreachable.** It is one of the five findings only the evidence axis can see
+    (Class C licenses `advise`, so it carries no declared mismatch). But `observe`
+    is defined as *"it measures and records. Nothing reads the result"* — and two
+    controls read its result, which is why it is `load_bearing`. Demoting it would
+    not lower its authority, it would write a falsehood; retiring it breaks both
+    consumers; its own `promotion_requirement` forbids improving the evidence; and
+    a defeatable lexer really is a heuristic. All four outcomes closed.
+  - **New guard: `OBSERVE-LB`.** `scan-controls.sh` now refuses any entry claiming
+    `load_bearing` at `observe` while naming a consuming policy, because those
+    cannot both be true. It exists so an evidence cap cannot be applied as an
+    instruction — the cap is a finding about a control, not a spelling for it.
+    Red-driven in `tests/evidence_policy_tests.sh` §20b, clean arm first.
+    **Its radius is the whole census, not one control:** it forecloses `observe`
+    for **67 of 81** controls — every `load_bearing` entry naming a consumer —
+    and **0 of 81 sit at `observe` today**, so the evidence axis's
+    `refuted → observe` cap has **no legal spelling for any wired-in control**.
+    README §2 compounds this by defining **both** bottom rungs by
+    non-consumption (`none` = "nothing consumes it", `observe` = "nothing reads
+    the result"), leaving no rung for *"it is read, but may cause nothing."*
+    Whether the guard is correctly placed is the operator's design call; it is
+    recorded here, not moved.
 - **The operator finally has an artefact to grant authority in — and the licence
   table gets a third `MIN` term.** `MISMATCHES.md` has said, fourteen times, that
   re-authorising a control is a governance action belonging to the operator.

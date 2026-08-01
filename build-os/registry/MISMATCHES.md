@@ -265,6 +265,16 @@ separates them. What the tree says is that this gate is the layer's **only
 prevention**. `maint.real_memory_tripwire` and `maint.shell_fingerprint` are
 detection after the fact and both declare `rollback_behavior: NONE`.
 
+**Which demotion was measured, stated exactly.** The DEMOTED arm replaces a
+`throw` with a `console.error`. On README §2's ladder that is **`gate` →
+`advise`** — the output is still produced and still presented — whereas the
+evidence cap demands **`observe`**. So the arm measured is not the arm the cap
+prescribes. The conclusion survives *a fortiori*: `observe` is strictly weaker
+than `advise`, so if advising already lets the tree be destroyed, observing does
+too. The distinction is recorded because "the demotion" was otherwise doing
+quiet work in that sentence — and because, per §2 of this entry's companion
+above, `observe` is not a rung this control could be written onto at all.
+
 Two things follow, and they are separate.
 
 1. **The refutation is path-scoped and the token cannot say so.** `refuted`
@@ -296,6 +306,16 @@ resolutions are closed to it:
   its authority; it would write a falsehood. `scan-controls.sh` now refuses that
   combination as `OBSERVE-LB`, and `tests/evidence_policy_tests.sh` §20b drives it
   red.
+  **The radius is not specific to this control.** `OBSERVE-LB` forecloses
+  `observe` for **67 of the 81** registered controls — every entry that is
+  `load_bearing` and names a consumer — and **0 of 81 sit at `observe` today**.
+  So the evidence axis's `refuted → observe` cap has **no legal spelling for any
+  wired-in control**: it can be stated as a finding and never written as a row.
+  Compounding it, README §2 defines `none` as *"nothing consumes it"* and
+  `observe` as *"it measures and records. Nothing reads the result."* — **both
+  bottom rungs are defined by non-consumption**, so the ladder has no rung
+  meaning *"it is read, but may cause nothing."* That is a gap in the ladder,
+  not a fact about this entry.
 - **Retire it?** That breaks both consumers.
 - **Improve the evidence?** Its own `promotion_requirement` forbids it: three
   defeats, and the maintainers stopped writing mask heuristics deliberately.
@@ -304,9 +324,53 @@ resolutions are closed to it:
 
 So the finding is real and its prescribed remedy is unreachable. The blocker is
 that `runtime_authority` currently means both *what consequence may this output
-have* and *does anything read it*, and those come apart exactly here. That split
-is the reviewer's S1 recommendation, and it is **not adopted**. Nothing about this
-control has been changed.
+have* and *does anything read it*, and those come apart exactly here.
+
+**This is not a second demonstration of the `runtime_authority` /
+`deployment_mode` split, and it must not be counted as one.** The decisive test:
+splitting output semantics out of `runtime_authority` would **not** fix this
+control. Even with an `outputSemantics` concept in hand, `observe` still means
+*nothing reads the result*, two controls still read this one's result, and the
+mask still cannot sit on that rung. The collision here is between
+`runtime_authority`'s **consumption clause** and **`implementation_status`** — a
+redundancy between two fields that **both already exist** — not a missing third
+concept. **The remedy is NOT small, and an earlier draft of this paragraph said
+it was — wrongly, in the direction that flatters the fix.** Consumption is
+asserted in **six** places, not one: README §2's *two* bottom rungs (`none`,
+"nothing consumes it", and `observe`, "Nothing reads the result" — both are
+consumption clauses), README §3b's `shadow` row, `authority_envelopes.txt`'s
+header, and both tools' headers. And the decisive one: **the foreclosure is
+enforced by code, not by prose.** `scan-controls.sh`'s `OBSERVE-LB` keys on
+`[ "$aut" = "observe" ]` and hard-codes the semantics in its own refusal message,
+so deleting every line of README prose leaves it refusing at exit 2 and the
+demotion still unwritable for all 67. A remedy its own guard survives is not a
+remedy. That edit is **not made here** — it is named, with its true radius, and
+belongs to its own packet. Nothing about this control has been changed.
+
+### A fifth outcome is missing from the framework — recorded, not built
+
+The operator's step-3 ruling offers four outcomes: **demote**, **correct the
+class**, **improve the evidence**, **retire**. Both controls in this packet
+worked all four and closed all four, which is a legitimate result — but the
+pattern behind it is worth naming. **For 67 of 81 controls (83% of the census),
+demotion ONTO THE RUNG THE `refuted` CAP PRESCRIBES is unspellable**, because
+`OBSERVE-LB` and the ladder's two non-consumption bottom rungs leave no `observe`
+row a wired-in control can be lowered onto. The qualifier matters and an earlier
+draft dropped it: `gate` -> `advise` remains perfectly spellable — 13 of 81 sit
+at `advise` today — and it is the demotion this packet actually measured.
+`maint.tripwire_coverage_scan` closed "demote" because demoting it was measured
+to destroy the tree, not because the row was unwritable. A framework whose first outcome is unavailable for five-sixths of its
+subjects will keep producing "all four closed" for reasons that have nothing to
+do with the control in front of it.
+
+The missing outcome is **accept and constrain**: leave the authority where it
+is, keep the finding standing and un-retired, and require an operator envelope
+to bound it — an explicit, dated, revocable grant rather than either a silent
+pass or an unwritable demotion. **The machinery already exists and is empty:**
+`build-os/registry/authority_envelopes.txt` holds 0 live envelopes, and the
+deployment axis binds 0 findings as a result. This is recorded as a finding for
+the operator. **Nothing here builds it**, and no envelope is written by this
+packet.
 
 ## 9. `tests.stdin_scan_nonvacuity`
 
@@ -470,7 +534,7 @@ than curated.
 ## 13. `registry.discovery_rule` — this packet's own guard
 
 **Gates at** `build-os/registry/scan-controls.sh:387` (an unregistered surface is
-a violation) and `:452` (`exit 2`).
+a violation) and `:454` (`exit 2`).
 **The heuristic** is three directories (`:126`) and five refusal patterns
 (`:129`).
 
