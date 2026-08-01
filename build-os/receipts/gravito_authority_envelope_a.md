@@ -153,7 +153,7 @@ The diagnosis is exact and is the transferable part: `§5b` of
 axis. **Nothing pinned the axis's declared OWNER.** A tool can be a faithful
 copy of a document and still be the wrong document.
 
-**Closed by new §2a** of `tests/authority_envelope_tests.sh:208` —
+**Closed by new §2a** of `tests/authority_envelope_tests.sh:242` —
 *"THE AXIS THIS TOOL OWNS IS A COPY OF README §3b, not a rewrite of it"* —
 which reconciles `DEPLOYMENT_AXIS` against README §3b's cap table in **both
 directions**, with a non-vacuity floor on **both sides** (`NRD==NMODE &&
@@ -220,7 +220,7 @@ That declaration **cannot be produced by `min()`**.
   **conflates signal strength with whether anything consumes the signal**.
 
 **Both recorded, neither adopted**, and the non-adoption is **enforced**:
-`tests/authority_envelope_tests.sh:625` (§17) fails with
+`tests/authority_envelope_tests.sh:659` (§17) fails with
 
 ```
 reading 2 has been silently adopted — shadow now licenses rank, which redefines the ladder

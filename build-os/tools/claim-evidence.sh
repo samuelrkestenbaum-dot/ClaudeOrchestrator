@@ -96,6 +96,45 @@
 # `supported` is the ONE cap this file owns, because it is the one status with
 # no legacy row to source from.
 #
+# ---------------------------------------------------------------------------
+# THE TERM IS NOW ENFORCED, AND THE TWO HALVES OF ENFORCEMENT POINT OPPOSITE WAYS
+# ---------------------------------------------------------------------------
+# `build-os/registry/evidence_assertions.txt` said, in its own words, that
+# nothing "notices an assertion going stale against the `valid_until` it
+# declares", and `control_registry.txt` said the field "is recorded so that a
+# later packet can enforce it". This is that packet. Enforcement is split,
+# because the two directions are not the same act and getting them the same way
+# round would turn this store into a laundering channel:
+#
+#   `validate` REFUSES a term that is not in force. A dated `valid_until` that
+#   has passed, or a `valid_from` that has not arrived, is an assertion its own
+#   author dated out of the present. The remedy is a HUMAN one — re-date it, or
+#   supersede it — and a store that quietly carried it would be asserting
+#   evidence nobody re-measured.
+#
+#   `project` REPORTS it (`LAPSED` / `NOT-YET-LIVE`) and KEEPS IT IN THE
+#   MINIMUM. This is the half that matters. Assertion evidence can only LOWER a
+#   licence, so DROPPING an out-of-term assertion would RAISE one: a lapsed
+#   REFUTATION would silently stop binding and the control it refutes would read
+#   better than it did the day before. That is the flattering-direction error
+#   the whole store exists to catch, so an out-of-term assertion is NAMED and
+#   NEVER DROPPED.
+#
+# THE TERM HAS TWO ENDS AND BOTH ARE CHECKED. `valid_from` is as much a term as
+# `valid_until`; enforcing one end and not the other is the decorative-window
+# defect that `authority-envelope.sh` was found to have at BOTH ends.
+#
+# THE COST IS STATED RATHER THAN HIDDEN: a dated term becomes a commitment that
+# comes due, and the day it does this gate goes red with no code change. That is
+# the field meaning something. Every live assertion today carries an `open` term
+# — prose, not a date — so the gate is INERT on the live store BY CONSTRUCTION,
+# the same property the deployment axis has and for the same stated reason.
+#
+# THE CLOCK IS NOT COMPUTED HERE. It is sourced from `authority-envelope.sh now`,
+# which owns the only clock in the repository, exactly as the caps above are
+# sourced from `evidence-policy.sh matrix`. A second private `date` call is how
+# an override is honoured in one tool and silently ignored in another.
+#
 # TWO EXIT PATHS, GOVERNING DIFFERENT OBJECTS, as evidence-policy.sh already
 # does. `validate` is a Class-A gate over WHETHER A STANZA CAN BE READ AT ALL
 # (evidence.assertion_schema) and exits 2. `project` ADVISES: it exits 0
@@ -157,7 +196,7 @@ CMD="${1:-}"
 [ $# -gt 0 ] && shift
 case "$CMD" in
   schema|list|validate|project) ;;
-  -h|--help|help) sed -n '2,114p' "${BASH_SOURCE[0]}"; exit 0 ;;
+  -h|--help|help) sed -n '2,153p' "${BASH_SOURCE[0]}"; exit 0 ;;
   "") refuse "no command — expected one of: schema, list, validate, project" ;;
   *)  refuse "unknown command \"$CMD\" — expected one of: schema, list, validate, project" ;;
 esac
@@ -169,7 +208,7 @@ while [ $# -gt 0 ]; do
     --mutators)  [ $# -ge 2 ] || refuse "--mutators needs a value";  MUTATORS="$2"; shift 2 ;;
     --subject)   [ $# -ge 2 ] || refuse "--subject needs a value";   SUBJECT="$2"; shift 2 ;;
     --repo)      [ $# -ge 2 ] || refuse "--repo needs a value";      REPO="$2"; shift 2 ;;
-    -h|--help)   sed -n '2,114p' "${BASH_SOURCE[0]}"; exit 0 ;;
+    -h|--help)   sed -n '2,153p' "${BASH_SOURCE[0]}"; exit 0 ;;
     *) refuse "unknown option \"$1\"" ;;
   esac
 done
@@ -202,6 +241,47 @@ scope_cap(){
 }
 legacy_cap(){ map_of "$EVIDENCE_AXIS" "$1"; }
 class_cap(){  map_of "$CLASS_AXIS" "$1"; }
+
+# --- the clock, SOURCED and never computed ------------------------------------
+# One clock, one owner. `authority-envelope.sh now` is the only place in this
+# repository that asks what day it is; a second private `date` call here is how
+# BUILD_OS_NOW gets honoured in one tool and silently ignored in another. If the
+# clock cannot be read, this REFUSES: a term evaluated against an unknown date is
+# a term nobody evaluated.
+ENVTOOL="$SELF_DIR/authority-envelope.sh"
+NOW=""; NOW_SOURCE=""
+load_clock(){
+  local o
+  [ -n "$NOW" ] && return 0
+  [ -x "$ENVTOOL" ] || refuse "no clock at $ENVTOOL. The assertion terms below are evaluated against a date, and deriving that date here would be a second private clock — the way an override is honoured in one tool and ignored in another."
+  o="$("$ENVTOOL" now 2>&1)" || refuse "\`authority-envelope.sh now\` failed; the date every \`valid_from\`/\`valid_until\` is judged against is unknown, and an unknown clock must never fall back to \"today\"."
+  NOW="$(printf '%s\n' "$o" | awk '$1=="now:"{print $2; exit}')"
+  NOW_SOURCE="$(printf '%s\n' "$o" | sed -n 's/^source: //p' | head -1)"
+  case "$NOW" in
+    [0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]) ;;
+    *) refuse "the clock printed \"$NOW\", which is not YYYY-MM-DD." ;;
+  esac
+}
+# THE TERM STATES. Three, and the two out-of-term ones are DISTINCT for the same
+# reason the envelope's are: a term that has not begun and a term that ended are
+# different facts. A term value may be PROSE (`open — …`), which is not a date
+# and never comes due; only a leading YYYY-MM-DD is a dated commitment.
+TERM_STATES="in_force lapsed not_yet_live"
+dateish(){ # <field value> -> the leading YYYY-MM-DD, or nothing
+  local d="${1%% *}"
+  case "$d" in [0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]) printf '%s' "$d" ;; esac
+}
+term_state(){ # <valid_from> <valid_until> -> in_force | lapsed | not_yet_live
+  local f u
+  f="$(dateish "$1")"; u="$(dateish "$2")"
+  if [ -n "$f" ] && [ "$NOW" \< "$f" ]; then printf 'not_yet_live'; return 0; fi
+  # HALF-OPEN, exactly as the envelope window is: `valid_until` is the moment the
+  # term ENDS rather than the last day it covers, so the two artefacts cannot
+  # disagree about what a date on a term means.
+  if [ -n "$u" ] && { [ "$u" \< "$NOW" ] || [ "$u" = "$NOW" ]; }; then printf 'lapsed'; return 0; fi
+  printf 'in_force'
+}
+term_verdict(){ case "$1" in lapsed) printf 'LAPSED' ;; not_yet_live) printf 'NOT-YET-LIVE' ;; *) printf 'IN-FORCE' ;; esac; }
 
 # --------------------------------------------------------------- schema ------
 if [ "$CMD" = "schema" ]; then
@@ -289,6 +369,7 @@ has(){ awk -F'\t' -v i="$1" -v f="$2" '$1=="FIELD" && $2==i && $3==f {n=1} END{e
 # --------------------------------------------------------------- validate ----
 if [ "$CMD" = "validate" ]; then
   load_axes
+  load_clock
   parse_store
   : > "$PROBLEMS"
   awk -F'\t' '$1=="PROBLEM"{printf "%s: %s %s\n", $2, $3, $4}' "$FLAT" >> "$PROBLEMS"
@@ -340,6 +421,21 @@ if [ "$CMD" = "validate" ]; then
       grep -qxF "control: $sub" "$REGISTRY" || { [ -f "$MUTATORS" ] && grep -qxF "control_id: $sub" "$MUTATORS"; } \
         || printf '%s: subject `%s` is in neither the control census nor the mutator census. An assertion about nothing is evidence about nothing.\n' "$id" "$sub" >> "$PROBLEMS"
     fi
+
+    # THE TERM, ENFORCED. An assertion its own author dated out of the present is
+    # not a live assertion, and the remedy is a HUMAN one: re-date it, or
+    # supersede it. Both ends are checked — enforcing `valid_until` alone would
+    # leave the window decorative at its opening end, which is the defect this
+    # packet found in the envelope store.
+    vf="$(gv "$id" valid_from)"; vu="$(gv "$id" valid_until)"
+    case "$(term_state "$vf" "$vu")" in
+      lapsed)
+        printf '%s: `valid_until` is %s and today is %s — the term LAPSED. An assertion whose own author dated it out of the present is evidence nobody re-measured; re-date it, or supersede it with a fresh measurement. It is NOT dropped from the projection: dropping a lapsed refutation would RAISE a licence.\n' \
+          "$id" "$(dateish "$vu")" "$NOW" >> "$PROBLEMS" ;;
+      not_yet_live)
+        printf '%s: `valid_from` is %s and today is %s — the term has NOT BEGUN. A claim that starts in the future asserts nothing about now, and a store carrying it reads as though it did.\n' \
+          "$id" "$(dateish "$vf")" "$NOW" >> "$PROBLEMS" ;;
+    esac
 
     sup="$(gv "$id" supersedes)"
     if [ -n "$sup" ] && [ "$sup" != "none" ]; then
@@ -393,6 +489,7 @@ fi
 # THIS ADVISES. It exits 0 whatever it finds, and refuses only a derivation it
 # cannot trust. It re-authorises nothing and writes nothing.
 load_axes
+load_clock
 parse_store
 [ -f "$REGISTRY" ] || refuse "no control registry at $REGISTRY. The class and registry-evidence terms of MIN(L_class, L_registry_evidence, L_assertion_evidence) would be unknown, and an unknown term must never be defaulted to permissive."
 NID="$(ids | grep -c . || true)"; NID="${NID:-0}"
@@ -428,6 +525,22 @@ while IFS= read -r s; do
   ST="$(printf '%s' "$STATS"  | grep -v '^$' | sort -u | paste -sd, -)"
   TK="$(printf '%s' "$TOKENS" | grep -v '^$' | sort -u | paste -sd, -)"
   printf 'projection: %s legacy-empirical-status=%s assertions=%s claims=%s statuses=%s\n' "$s" "$TK" "$NA" "$CL" "$ST"
+
+  # THE TERM, REPORTED AND NEVER APPLIED AS A FILTER. Every out-of-term
+  # assertion is NAMED here and stays in the composite above. Dropping one would
+  # RAISE a licence — a lapsed REFUTATION would silently stop binding — and that
+  # is the one direction this store may never move. The envelope store drops an
+  # out-of-window record because a GRANT that has ended is not in force; an
+  # assertion is a MEASUREMENT, and a measurement whose term ran out has not
+  # become false, it has become unrefreshed.
+  while IFS= read -r id; do
+    [ -n "$id" ] || continue
+    [ "$(gv "$id" subject_id)" = "$s" ] || continue
+    tsv="$(term_state "$(gv "$id" valid_from)" "$(gv "$id" valid_until)")"
+    [ "$tsv" = "in_force" ] && continue
+    printf 'term: %s %s status=%s valid_from=%s valid_until=%s now=%s — RETAINED in the composite above. It is out of term and it is not dropped: assertion evidence can only LOWER a licence, so dropping a stale one would RAISE one.\n' \
+      "$(term_verdict "$tsv")" "$id" "$(gv "$id" status)" "$(dateish "$(gv "$id" valid_from)")" "$(dateish "$(gv "$id" valid_until)")" "$NOW"
+  done < <(ids)
 
   # The composite resolves by MINIMUM, which is what makes a refutation
   # impossible to outvote.

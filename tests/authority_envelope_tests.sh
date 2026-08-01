@@ -67,6 +67,15 @@ STORE="$SRC/build-os/registry/authority_envelopes.txt"
 REG="$SRC/build-os/registry/control_registry.txt"
 RREADME="$SRC/build-os/registry/README.md"
 
+# THE CLOCK IS PINNED, AND THAT IS NOT A CONVENIENCE. Every lease fixture below
+# carries a window, and a window is only meaningful against a date. A suite that
+# read the wall clock would change meaning on 2027-01-01 — the in-window fixture
+# would lapse and the not-yet-live fixture would open — and the failure would
+# look exactly like a regression in the tool. The tool takes `now` from this
+# variable and SAYS SO in its output when it is set; §23a asserts both halves.
+export BUILD_OS_NOW="2026-08-01"
+PINNED_NOW="$BUILD_OS_NOW"
+
 PASS=0; FAIL=0
 ok(){ PASS=$((PASS+1)); echo "  PASS: $1"; }
 no(){ FAIL=$((FAIL+1)); echo "  FAIL: $1"; }
@@ -122,6 +131,31 @@ mkenv(){
       printf '\n'
     } >> "$f"
   done
+}
+
+# mkenvw <file> <id> <control> <authority> <mode> <starts> <expires> — the same
+# record with the LEASE TERM under the caller's control. It exists because the
+# window is now load-bearing: `mkenv` writes one fixed window, and a suite that
+# could only ever build one window could not tell an enforced window from a
+# decorative one.
+mkenvw(){
+  local f="$1"
+  { printf '# synthetic envelope fixture with an explicit lease term\n\n'
+    printf 'envelope: %s\n' "$2"
+    printf 'issuer: the operator (fixture)\n'
+    printf 'actor: any agent (fixture)\n'
+    printf 'control: %s\n' "$3"
+    printf 'scope: this fixture only\n'
+    printf 'granted_authority: %s\n' "$4"
+    printf 'evidence_basis: a fixture, and nothing else\n'
+    printf 'deployment_mode: %s\n' "$5"
+    printf 'starts: %s\n' "$6"
+    printf 'expires: %s\n' "$7"
+    printf 'revocation: delete this record\n'
+    printf 'reason: to exercise the lease term\n'
+    printf 'human_confirmation: none — it is a fixture\n'
+    printf 'rollback_behavior: the control returns to its registered authority\n'
+  } > "$f"
 }
 
 # mkreg <file> — a well-formed control registry, same shape as
@@ -817,6 +851,165 @@ awk -v i="$ENVID" '/^control: /{c=$2} c==i && /^class: /{print $2; exit}' "$REG"
 awk -v i="$ENVID" '/^control: /{c=$2} c==i && /^authority_mismatch: /{print $2; exit}' "$REG" | grep -qx none \
   && ok "$ENVID declares NO authority mismatch — Class C at advise is exactly its licence" \
   || no "$ENVID declares an authority mismatch, which a Class-C control at advise must not"
+
+echo "== 23. THE WINDOW IS NOT DECORATIVE — an out-of-window envelope contributes NO GRANT =="
+# THE DEFECT THIS PINS, AND IT WAS EXECUTED RATHER THAN INFERRED. Before this
+# section the tool format-checked `starts` and `expires` and ordered them, and
+# then NEVER CONSULTED THE CLOCK. An envelope seven months dead reported
+#
+#   authority-envelope: 1 live grant(s) …
+#   envelope: WITHIN-LICENCE … l-deployment=execute l-effective=gate binding-axis=none
+#
+# The word "live" was printed about a dead grant, and `l-deployment=execute` —
+# the strongest deployment cap in the system — was computed from a lease that had
+# ended. THE SYMMETRIC BUG WAS CONFIRMED THE SAME WAY: the same envelope moved to
+# a window five months in the FUTURE produced byte-identical output. The window
+# was decorative at BOTH ends, so both ends are driven here.
+#
+# THE DEFECT IS NOT "EXPIRED GRANTS OVER-PERMIT". It is "expired grants keep
+# applying, IN WHICHEVER DIRECTION THEY POINTED", and only one direction is
+# visible: a permissive stale grant is byte-identical in the matrix's output to
+# no grant at all, because an ungranted control already defaults to
+# `autonomous`/`execute`. So §23b drives the RESTRICTIVE direction, which is the
+# one with discriminating power.
+DEAD_START="2025-01-01"; DEAD_END="2026-01-01"      # ended before the pinned now
+FUT_START="2027-01-01";  FUT_END="2027-12-31"       # opens after the pinned now
+LIVE_START="2026-01-01"; LIVE_END="2026-12-31"      # the window mkenv writes
+
+mkenvw "$WORK/lapsed.txt"  e.lapsed  f.classa_red gate autonomous "$DEAD_START" "$DEAD_END"
+mkenvw "$WORK/future.txt"  e.future  f.classa_red gate autonomous "$FUT_START"  "$FUT_END"
+mkenvw "$WORK/inwin.txt"   e.inwin   f.classa_red gate autonomous "$LIVE_START" "$LIVE_END"
+
+RC="$(run check --store "$WORK/lapsed.txt" --registry "$WORK/reg.txt")"
+[ "$RC" = "0" ] && ok "a lapsed envelope is REPORTED, not refused — an ended lease is a fact about the store, not a malformed store" \
+                || { no "a lapsed envelope exited $RC"; dump; }
+[ "$(verdict e.lapsed)" = "LAPSED" ] \
+  && ok "RED: an envelope whose \`expires\` has passed is named LAPSED" \
+  || { no "RED FAILED: a lease dead since $DEAD_END reported '$(verdict e.lapsed)'"; dump; }
+[ "$(verdict e.lapsed)" != "WITHIN-LICENCE" ] \
+  && ok "...and is NOT reported WITHIN-LICENCE — the word 'live' is no longer printed about a dead grant" \
+  || { no "a dead lease still reports WITHIN-LICENCE"; dump; }
+LIVEN="$(awk '$1=="authority-envelope:" && $3=="live" && $4=="grant(s)"{print $2; exit}' "$WORK/out.txt")"
+[ "${LIVEN:-x}" = "0" ] \
+  && ok "and the COUNT agrees with the partition: \"$LIVEN live grant(s)\" — \`N live\` now means live" \
+  || { no "the tool reported ${LIVEN:-<unparsed>} live grant(s) for a store whose only lease has ended"; dump; }
+
+RC="$(run check --store "$WORK/future.txt" --registry "$WORK/reg.txt")"
+[ "$(verdict e.future)" = "NOT-YET-LIVE" ] \
+  && ok "RED: an envelope whose \`starts\` has not arrived is named NOT-YET-LIVE" \
+  || { no "RED FAILED: a lease that opens on $FUT_START reported '$(verdict e.future)'"; dump; }
+[ "$(verdict e.future)" != "$(printf 'LAPSED')" ] \
+  && ok "...and the two out-of-window states are DISTINCT — a lease that has not opened is not a lease that ended" \
+  || { no "NOT-YET-LIVE and LAPSED collapsed into one state"; dump; }
+
+RC="$(run check --store "$WORK/inwin.txt" --registry "$WORK/reg.txt")"
+[ "$(verdict e.inwin)" = "WITHIN-LICENCE" ] \
+  && ok "and an envelope INSIDE its window still composes normally — the window check discriminates rather than refusing everything" \
+  || { no "an in-window envelope reported '$(verdict e.inwin)'"; dump; }
+LIVEN="$(awk '$1=="authority-envelope:" && $3=="live" && $4=="grant(s)"{print $2; exit}' "$WORK/out.txt")"
+[ "${LIVEN:-x}" = "1" ] \
+  && ok "...and it IS counted: 1 live grant, so the count is a partition and not a suppression" \
+  || { no "an in-window lease was counted as ${LIVEN:-<unparsed>} live grant(s)"; dump; }
+
+# `mode_projection()` is the second live site, and it is the one that reaches the
+# evidence matrix. A stale mode that never appears in `check` but still leaves
+# through `modes` would be the same defect with the report cleaned up.
+RC="$(run modes --store "$WORK/lapsed.txt")"
+{ [ "$RC" = "0" ] && [ ! -s "$WORK/out.txt" ]; } \
+  && ok "RED: \`modes\` emits NOTHING for a lapsed envelope — the projection the matrix consumes carries the window too" \
+  || { no "RED FAILED: \`modes\` projected a dead lease into the matrix's MIN term"; dump; }
+RC="$(run modes --store "$WORK/future.txt")"
+{ [ "$RC" = "0" ] && [ ! -s "$WORK/out.txt" ]; } \
+  && ok "...and nothing for a NOT-YET-LIVE envelope either" \
+  || { no "\`modes\` projected a lease that has not opened"; dump; }
+RC="$(run modes --store "$WORK/inwin.txt")"
+[ -s "$WORK/out.txt" ] \
+  && ok "...while an in-window envelope IS projected, so the filter is a window and not a mute button" \
+  || { no "\`modes\` emitted nothing for an in-window envelope"; dump; }
+
+echo "== 23a. THE CLOCK is overridable, ANNOUNCED, and refused when malformed =="
+# Determinism, and the cost of it stated. A suite that reads the wall clock rots;
+# an override that could silently un-expire a grant is worse than no override, so
+# the tool must SAY the clock is not the machine's.
+RC="$(run now)"
+[ "$RC" = "0" ] && ok "\`now\` exits 0 and is a command in its own right — one tool owns the clock" || { no "\`now\` exited $RC"; dump; }
+grep -qE "^now: $PINNED_NOW$" "$WORK/out.txt" \
+  && ok "\`now\` reports the pinned date, so every date comparison in this suite is reproducible in 2027" \
+  || { no "\`now\` did not report the pinned date $PINNED_NOW"; dump; }
+grep -E '^source: ' "$WORK/out.txt" | grep -qi 'overrid' \
+  && ok "and it SAYS the clock is OVERRIDDEN rather than reporting a date with no provenance" \
+  || { no "\`now\` does not disclose that BUILD_OS_NOW is in force"; dump; }
+RC="$(BUILD_OS_NOW=not-a-date "$TOOL" now >"$WORK/out.txt" 2>"$WORK/err.txt"; echo "$?")"
+[ "$RC" = "2" ] \
+  && ok "REFUSED (exit 2): a malformed BUILD_OS_NOW — an unreadable clock must never fall through to \"today\"" \
+  || { no "a malformed clock override exited $RC"; dump; }
+RC="$(unset BUILD_OS_NOW; "$TOOL" now >"$WORK/out.txt" 2>"$WORK/err.txt"; echo "$?")"
+{ [ "$RC" = "0" ] && grep -qE '^now: [0-9]{4}-[0-9]{2}-[0-9]{2}$' "$WORK/out.txt"; } \
+  && ok "with no override it falls back to the system clock and still prints a well-formed date" \
+  || { no "the unoverridden clock exited $RC or printed no date"; dump; }
+grep -qE '^source: ' "$WORK/out.txt" && grep -E '^source: ' "$WORK/out.txt" | grep -qvi 'overrid' \
+  && ok "...and reports the system clock as its source, so the two provenances are distinguishable" \
+  || { no "the unoverridden clock does not distinguish its source"; dump; }
+# One clock, one owner. A second private `date` call is how one tool honours the
+# override and another quietly does not.
+CBAD=0; CSEEN=0
+for CF in "$SRC"/build-os/tools/*.sh; do
+  [ "$CF" = "$TOOL" ] && continue
+  CSEEN=$((CSEEN+1))
+  grep -qE 'date[[:space:]]+\+%' "$CF" && { CBAD=$((CBAD+1)); echo "      | ${CF#"$SRC"/} computes its own wall-clock date"; }
+done
+[ "$CBAD" -eq 0 ] \
+  && ok "none of the other $CSEEN tool(s) under build-os/tools computes its own date — the clock has ONE owner and the rest source it" \
+  || no "$CBAD tool(s) carry a second private clock, which is how an override is honoured in one place and ignored in another"
+
+echo "== 23b. THE RESTRICTIVE DIRECTION — the fixture with discriminating power =="
+# A test that only checked the PERMISSIVE direction would pass vacuously against
+# both a fixed and an unfixed tool: on a census with no grants, a permissive
+# expired grant is byte-identical in the matrix's output to no grant at all,
+# because an ungranted control already defaults to `autonomous`/`execute`. The
+# restrictive fixture is the one that can tell the two apart, so it is asserted
+# BOTH ways round: a live `shadow` lease must BIND, and the same lease moved into
+# the past must STOP binding.
+mkenvw "$WORK/shadow_live.txt" e.sl f.classa_red gate shadow "$LIVE_START" "$LIVE_END"
+mkenvw "$WORK/shadow_dead.txt" e.sd f.classa_red gate shadow "$DEAD_START" "$DEAD_END"
+"$EPOL" check --registry "$WORK/reg.txt" --envelopes "$WORK/shadow_live.txt" > "$WORK/ep_live.txt" 2>&1
+"$EPOL" check --registry "$WORK/reg.txt" --envelopes "$WORK/shadow_dead.txt" > "$WORK/ep_dead.txt" 2>&1
+grep -q 'OUT-OF-LICENCE f.classa_red .*axis=deployment' "$WORK/ep_live.txt" \
+  && ok "a LIVE \`shadow\` lease drags a fully licensed control to \`observe\` and NAMES the deployment axis as binding" \
+  || { no "the live restrictive fixture does not bind, so the assertion below proves nothing"; sed 's/^/      | /' "$WORK/ep_live.txt" | head -4; }
+grep -q 'axis=deployment' "$WORK/ep_dead.txt" \
+  && { no "RED FAILED: a lease dead since $DEAD_END still binds the deployment axis inside the evidence matrix"; sed 's/^/      | /' "$WORK/ep_dead.txt" | head -4; } \
+  || ok "RED: moving that same lease into the PAST stops it binding — the finding CHANGES, which is what proves the clock reached the matrix"
+DL="$(sed -n 's/.*deployment axis binds \([0-9][0-9]*\) .*/\1/p' "$WORK/ep_live.txt" | head -1)"
+DD="$(sed -n 's/.*deployment axis binds \([0-9][0-9]*\) .*/\1/p' "$WORK/ep_dead.txt" | head -1)"
+{ [ "${DL:-x}" = "1" ] && [ "${DD:-x}" = "0" ]; } \
+  && ok "and the matrix's own count moves with it: $DL finding(s) bound live, $DD once the lease has ended" \
+  || { no "the deployment-axis count did not move ('${DL:-<unparsed>}' live vs '${DD:-<unparsed>}' dead)"; }
+GL="$(awk '/live authority envelope/{for(i=1;i<=NF;i++) if($i=="from"){print $(i+1); exit}}' "$WORK/ep_dead.txt")"
+[ "${GL:-x}" = "0" ] \
+  && ok "...and the matrix reports 0 live envelopes for that store, so its summary line cannot call a dead lease live either" \
+  || { no "the matrix reported ${GL:-<unparsed>} live envelope(s) for a store whose only lease ended"; sed 's/^/      | /' "$WORK/ep_dead.txt" | head -4; }
+
+echo "== 23c. THE WINDOW VOCABULARY IS SWEPT AS A CLASS, not as a pair =="
+# The F1 defect class: a vocabulary spelled in a tool, a store comment, a census
+# entry and a suite gets updated in one copy and left short in another. LAPSED
+# and NOT-YET-LIVE are two halves of ONE distinction, so a file that names either
+# must name both — checked over the live surfaces (tools, registry, tests) and
+# not over receipts or memory, which are records of past runs and must not be
+# rewritten.
+WBAD=0; WSEEN=0; WFILES=""
+while IFS= read -r wf; do
+  [ -n "$wf" ] || continue
+  WSEEN=$((WSEEN+1)); WFILES="$WFILES
+${wf#"$SRC"/}"
+  { grep -qF 'LAPSED' "$wf" && grep -qF 'NOT-YET-LIVE' "$wf"; } \
+    || { WBAD=$((WBAD+1)); echo "      | ${wf#"$SRC"/} names one out-of-window state and not the other"; }
+done < <(grep -rl -e 'LAPSED' -e 'NOT-YET-LIVE' "$SRC/build-os/tools" "$SRC/build-os/registry" "$SRC/tests" 2>/dev/null | sort)
+{ printf '%s\n' "$WFILES" | grep -qxF 'build-os/tools/authority-envelope.sh' \
+  && printf '%s\n' "$WFILES" | grep -qxF 'tests/authority_envelope_tests.sh' \
+  && [ "$WBAD" -eq 0 ]; } \
+  && ok "all $WSEEN file(s) naming an out-of-window state name BOTH — the tool and this suite among them" \
+  || no "$WBAD of $WSEEN restatement(s) name one state and omit the other, or the sweep never reached the tool and its suite"
 
 echo "== 21. This packet re-authorises nothing =="
 # The hardest rule in the packet, checked mechanically: the store may name no

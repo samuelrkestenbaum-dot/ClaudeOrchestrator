@@ -41,7 +41,7 @@ That buys the same four properties the TSV was chosen for, at this shape:
 - **Greppable without a parser.** `grep '^class: C' control_registry.txt` counts
   the heuristics. `grep -B4 '^runtime_authority: gate'` finds what gates.
   `grep -c '^control: '` is the census size. The number worth reading first is
-  **`gate` on `unvalidated` evidence — 11 of 93**: eleven controls can stop the
+  **`gate` on `unvalidated` evidence — 11 of 97**: eleven controls can stop the
   build and nothing has established that any of them discriminates. The one-line
   `awk` that derives it is in `control_registry.txt`'s header.
 - **Diffable at field granularity.** Changing one control's authority is a
@@ -203,7 +203,7 @@ its mismatch at exit 0, silently, while the report went on naming it.
 **An entry is not a line.** Entries are cut at different granularities:
 `metrics.record.note_minimum` classifies one comparison, and
 `tests.nonvacuity_minimums` classifies a family of 34 fitted constants across 12
-test files. So "20 of 93 declare a mismatch" is a fact about this file's
+test files. So "20 of 97 declare a mismatch" is a fact about this file's
 granularity, not a count of the heuristics that can stop a build — that number is
 **56**, in `MISMATCHES.md`'s summary table. The family's membership is not
 trusted: `tests/control_registry_tests.sh` §21 rescans the tree for the shape and
@@ -321,11 +321,11 @@ Four of those rows carry the argument:
   `empirical_status` at the author's word.
 
   **The consequentialist half, derived rather than remembered.** Capping
-  `red_driven` at `advise` would put **79 of 93 controls out of licence in a
-  single edit — 54 of them newly**, on top of the 25 already named below. A
+  `red_driven` at `advise` would put **81 of 97 controls out of licence in a
+  single edit — 56 of them newly**, on top of the 25 already named below. A
   matrix that flags nearly everything discriminates nothing. (For scale, and not
-  to be confused with it: **67** is the number of controls whose
-  `empirical_status` is exactly `red_driven`, and **71** the number whose status
+  to be confused with it: **71** is the number of controls whose
+  `empirical_status` is exactly `red_driven`, and **75** the number whose status
   *contains* it — the second is the figure CROSSWALK.md uses, for a different
   question.)
 
@@ -367,7 +367,7 @@ build-os/tools/evidence-policy.sh matrix   # the two axes and the composed grid
 build-os/tools/evidence-policy.sh check    # the out-of-licence list; always exit 0
 ```
 
-- **25 of 93 controls are out of licence** under the composed matrix.
+- **25 of 97 controls are out of licence** under the composed matrix.
 - **20** of those the class axis already saw — they are exactly the 20 carrying
   `authority_mismatch: declared`, so the new axis reproduces the old finding
   rather than replacing it.
@@ -450,6 +450,42 @@ names), `issuer` (a human), `actor`, `control`, `scope`, `granted_authority`,
 `human_confirmation`, `rollback_behavior`. Two of them do the work the other
 twelve support. **Leases end** — an authority granted with no `expires` is a
 permanent re-authorisation with a date on it. And `deployment_mode` is the axis.
+
+**The lease term is enforced against a clock, and for two packets it was not.**
+The tool format-checked `starts` and `expires` and ordered them, then never asked
+what day it was — `date` appeared in no tool in this repository. An envelope seven
+months dead reported `1 live grant(s)` and `WITHIN-LICENCE … l-deployment=execute`,
+computing the strongest deployment cap in the system from a lease that had ended;
+the same record moved five months into the *future* produced **byte-identical**
+output. The window was decorative at both ends.
+
+**The defect was not "expired grants over-permit".** It is that **an expired grant
+keeps applying in whichever direction it pointed**, and only one direction is
+visible: a dead `shadow` lease drags a control licensed `gate` on both live axes
+down to `observe`, while a dead *permissive* lease is byte-identical in the
+matrix's output to no grant at all — because an ungranted control already takes
+the default `autonomous`/`execute`. A test written only against the permissive
+direction passes against a fixed tool and an unfixed one alike.
+
+A record is **live** iff `starts <= now < expires`. The interval is half-open, so
+`expires` is the moment the lease *ends* rather than the last day it covers.
+Outside it, a record **contributes no grant** — it is not counted live, not
+composed, and not projected into the licence matrix — and it is reported in one
+of **two distinct states**, because a lease that ended and a lease that has not
+opened are different facts about a grant:
+
+| state | when | what it contributes |
+|---|---|---|
+| `LAPSED` | `expires` has passed | nothing. The lease ended. |
+| `NOT-YET-LIVE` | `starts` has not arrived | nothing. The lease has never opened. |
+
+**One clock, one owner.** `authority-envelope.sh now` is the only place in this
+repository that asks what day it is; every other tool that needs a date sources
+it, exactly as `claim-evidence.sh` sources its caps from `evidence-policy.sh
+matrix`. `BUILD_OS_NOW` pins it so fixtures do not rot, a malformed override
+**refuses** rather than falling back to today, and whenever the override is in
+force **the output says so** — an override that could silently un-expire a grant
+would be worse than no override at all.
 
 #### Why a third axis at all
 
@@ -650,6 +686,53 @@ token is the single decision the next packet must take.
 `authority_mismatch` or `empirical_status` changes, and **no grant exists for any
 control.**
 
+### 3c. The five dispositions: what may be DONE about a mismatch
+
+The licence table says when a control is out of licence. It has never said what
+an operator may do about it, and `MISMATCHES.md` named four remedies in prose:
+`demote_authority`, `correct_class`, `improve_evidence`, `retire_control`.
+`maint.source_scan_mask`'s own registry entry records that **all four were closed
+to it**, each for a separate reason — so a control whose every prescribed remedy
+is unreachable had nowhere to be recorded except as a mismatch nobody was doing
+anything about, which reads exactly like a mismatch nobody had got to yet.
+
+There is now a fifth, recorded in `build-os/registry/mismatch_dispositions.txt`
+and validated by `build-os/tools/mismatch-disposition.sh`:
+
+| disposition | what it means |
+|---|---|
+| `demote_authority` | lower `runtime_authority` to what the class licenses. The default remedy. |
+| `correct_class` | the classification was wrong, not the authority. |
+| `improve_evidence` | measure, then re-derive. |
+| `retire_control` | the control should not exist. |
+| `accept_and_constrain` | the mismatch is **carried**, because demotion or removal has been **measured** to be more dangerous than the mismatch. |
+
+**`accept_and_constrain` clears nothing and raises nothing.** A disposed control
+keeps `authority_mismatch: declared`, keeps its row in the summary table, and
+keeps its `OUT-OF-LICENCE` finding. The standing rule is unchanged: **this
+machinery is class correction and authority demotion, and it is not a promotion
+instrument.** A disposition makes a finding *legible*; an exception would make it
+*go away*.
+
+**It applies to exactly one control, and its neighbour is refused by name.** The
+predicate carries four conditions, all required and each independently falsifiable:
+(a) the census records `authority_mismatch: declared` for the subject; (b) the
+subject holds a row in the machine-read summary table; (c) the named
+`demotion_measurement` appears verbatim in the subject's own
+`demotion_requirement`; (d) that token exists as an artefact elsewhere in the
+tree — without (d), (c) is two documents agreeing with each other.
+`maint.tripwire_coverage_scan` passes all four.
+`maint.source_scan_mask` fails (a) and (c), and the refusal quotes the census's
+own words back: its demotion is **REACHABLE**.
+
+Every disposition carries a `review_by`. Past it the record is reported
+`REVIEW-DUE` and is **not** dropped — unlike an authority envelope, where an
+ended lease must stop granting. The asymmetry is the same rule read twice: an
+expired thing keeps applying in whichever direction it pointed, so each artefact
+is corrected in the direction that costs. Dropping a lapsed *grant* removes
+authority nobody renewed; dropping a lapsed *disposition* would hide a mismatch
+that is still being carried.
+
 ---
 
 ## 4. Reconciliation, and what it does not cover
@@ -733,7 +816,7 @@ in `scan-controls.sh`, with its reason beside it, where `grep` finds it;
 `scan-controls.sh patterns` prints the list and its size, so an allowance
 quietly growing is visible without reading the file. **It is empty today.**
 
-The registry carries **316** `evidence_refs`. That number is not remembered: the
+The registry carries **329** `evidence_refs`. That number is not remembered: the
 same total was previously written down in three artefacts as 218, 184 and 184
 against a live 224, because each was a hand count frozen at a different moment.
 `tests/control_registry_tests.sh` §25 recomputes it from the registry and fails

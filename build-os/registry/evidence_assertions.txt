@@ -28,7 +28,7 @@
 #
 # WHY NOT WIDEN control_registry.txt. Its field list is CLOSED: scan-controls.sh
 # refuses the whole file on an unknown field name, and its "every field present"
-# check would fail all 93 existing entries the moment a field were added. More
+# check would fail all 97 existing entries the moment a field were added. More
 # importantly the shape is wrong — one control has ONE stanza there and MANY
 # assertions here, so this is a different cardinality, not a longer record. This
 # store is keyed by its own stable id and joined to the census by `subject_id`,
@@ -52,10 +52,27 @@
 # WHAT THIS STORE DOES NOT CLAIM, named rather than implied away. It takes every
 # field AT THE AUTHOR'S WORD, exactly as evidence-policy.sh takes
 # `empirical_status`. Nothing re-runs a `fixture`, checks that an
-# `observed_result` was ever observed, or notices an assertion going stale
-# against the `valid_until` it declares. A `valid_until` that has passed is not
-# enforced anywhere today; it is recorded so that a later packet can enforce it,
-# and saying otherwise would be the overclaim this file exists to prevent.
+# `observed_result` was ever observed.
+#
+# THE TERM IS ENFORCED, AND THE TWO HALVES POINT OPPOSITE WAYS. This file used to
+# say that a `valid_until` which had passed was "recorded so that a later packet
+# can enforce it". `gravito_p3_accept_and_constrain_a` is that packet.
+# `claim-evidence.sh validate` REFUSES a dated `valid_from` that has not arrived
+# or a dated `valid_until` that has passed — an assertion its own author dated
+# out of the present is evidence nobody re-measured, and the remedy is a HUMAN
+# one: re-date it, or supersede it. `claim-evidence.sh project` REPORTS it
+# (`LAPSED` / `NOT-YET-LIVE`) and KEEPS IT IN THE MINIMUM. That second half is
+# the one that matters: evidence here can only LOWER a licence, so DROPPING an
+# out-of-term assertion would RAISE one — a lapsed REFUTATION would silently stop
+# binding and the control it refutes would read better than it did the day
+# before, which is the flattering-direction error this whole file exists to catch.
+#
+# A TERM MAY BE PROSE. `open — …` is not a date and never comes due; only a
+# leading YYYY-MM-DD is a dated commitment. Every assertion below carries an
+# `open` term, so the refusal is INERT on this store by construction — and the
+# cost of that gate is stated rather than hidden: the day somebody writes a date
+# here, it becomes a commitment that comes due, and the suite goes red with no
+# code change when it does. That is the field meaning something.
 #
 # IT RE-AUTHORISES NOTHING. It is read by `claim-evidence.sh project`, which
 # ADVISES: it composes `MIN(L_class, L_registry_evidence, L_assertion_evidence)`

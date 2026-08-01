@@ -57,13 +57,14 @@
 # cells reach the rung. The rung was populated because six actions met its stated
 # test, and a candidate that only PROPOSES a mutation would not be here.
 #
-# THE SCAN'S TWO EXCLUSIONS, stated here because an exclusion nobody can audit is
-# how a census shrinks quietly. tests/mutator_registry_tests.sh section 1 scans
-# the tree for durable-write syntax and requires every hit to be censused. TWO
-# MODULES MATCH THE PATTERN AND ARE EXCLUDED, FOR THE SAME REASON AND NOT FOR TWO:
-# `build-os/tools/authority-envelope.sh` and `build-os/tools/claim-evidence.sh`
-# each append only to paths obtained from `mktemp`, which their own `trap`
-# removes on exit, so neither changes any durable state.
+# THE SCAN'S THREE EXCLUSIONS, stated here because an exclusion nobody can audit
+# is how a census shrinks quietly. tests/mutator_registry_tests.sh section 1 scans
+# the tree for durable-write syntax and requires every hit to be censused. THREE
+# MODULES MATCH THE PATTERN AND ARE EXCLUDED, FOR THE SAME REASON AND NOT FOR
+# THREE: `build-os/tools/authority-envelope.sh`, `build-os/tools/claim-evidence.sh`
+# and `build-os/tools/mismatch-disposition.sh` each append only to paths obtained
+# from `mktemp`, which their own `trap` removes on exit, so none of them changes
+# any durable state.
 # `build-os/registry/scan-controls.sh` has the same shape and is not scanned at
 # all. The pattern is syntactic and cannot tell those apart from a real store;
 # the exclusion is the honest handling, and the test fails if this reason is ever

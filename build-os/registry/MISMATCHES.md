@@ -14,7 +14,7 @@ control is a governance action and belongs to the operator.
 
 ## Three numbers, each with its derivation
 
-1. **11 of 93 classified controls gate on `unvalidated` evidence.** Eleven
+1. **11 of 97 classified controls gate on `unvalidated` evidence.** Eleven
    controls can stop the build and nothing has established that any of them
    discriminates — no measurement, no red drive, no field observation. This is
    the sharpest number in the census and the one to read first.
@@ -72,7 +72,7 @@ the control as `UNREPORTED`.
 | `swarm.disjointness` | C | gate | advise | `build-os/tools/swarm-merge.sh:381` | 1 |
 | `swarm.hot_file_reservation` | C | gate | advise | `build-os/tools/swarm-merge.sh:311` | 3 |
 | `maint.tripwire_coverage_scan` | C | gate | advise | `build-os/maintenance/real-memory-tripwire.mjs:447` | 1 |
-| `tests.stdin_scan_nonvacuity` | C | gate | advise | `tests/build_os_tests.sh:963` | 1 |
+| `tests.stdin_scan_nonvacuity` | C | gate | advise | `tests/build_os_tests.sh:964` | 1 |
 | `tests.nonvacuity_minimums` | C | gate | advise | `tests/entitlement_tests.sh:126` (+33 more, §10) | 34 |
 | `tools.handoff_timeouts` | C | gate | advise | `build-os/tools/specialist-handoff.sh:151` | 3 |
 | `tools.supervise_timeout` | C | gate | advise | `build-os/tools/supervise.sh:49` | 2 |
@@ -115,6 +115,38 @@ There is no Class D and no Class R anywhere in this system, so the second half o
 the safety claim — that a learned model may not outrank an invariant — is
 currently vacuous here. It is asserted by the suite anyway, so that it stops
 being vacuous the day something learned arrives.
+
+## The five dispositions — what may be DONE about a row above
+
+This file has always named four remedies. There are now **five**, and the fifth
+is recorded in `build-os/registry/mismatch_dispositions.txt` and validated by
+`build-os/tools/mismatch-disposition.sh`:
+
+| disposition | what it does |
+|---|---|
+| `demote_authority` | lower `runtime_authority` to what the class licenses. The default remedy, and the one every other row is measured against. |
+| `correct_class` | the classification was wrong, not the authority. Re-classify — and be ready to say why the thresholds are not a heuristic. |
+| `improve_evidence` | the authority is defensible once the evidence supports it. Measure, then re-derive. |
+| `retire_control` | the control should not exist. Remove it, and whatever consumes it. |
+| `accept_and_constrain` | the mismatch is **CARRIED**, because demotion or removal has been **MEASURED** to be more dangerous than the mismatch. |
+
+**`accept_and_constrain` CLEARS NOTHING.** A disposed control keeps
+`authority_mismatch: declared`, keeps its row in the table above, and keeps its
+`OUT-OF-LICENCE` finding from `evidence-policy.sh check`. The record states that
+a mismatch is being carried, names the constraint that bounds it, and gives it a
+review date. It raises no authority: the standing rule is unchanged — **this
+machinery is class correction and authority demotion, and it is not a promotion
+instrument.**
+
+**It is applied to exactly ONE row, and its neighbour is REFUSED by name.**
+`maint.tripwire_coverage_scan` qualifies: its demotion was applied literally and
+measured, and the measurement (`COVERAGE-GATE-PREVENTION-DIFFERENTIAL`) found
+that the gated arm leaves the tree untouched while the demoted arm **destroys
+live memory** — *at the same exit code*, so nothing watching exit codes could
+have seen it. `maint.source_scan_mask` does **not** qualify: its
+`demotion_requirement` records the demotion as **REACHABLE**, and it carries
+`authority_mismatch: none`, so there is no declared mismatch to carry. The
+validator refuses it and quotes the census's own words back.
 
 ---
 
@@ -426,7 +458,7 @@ consumed for visibility and sit there — but the fifth-outcome point survives t
 fix and is why it is kept: the framework offered four outcomes and one of them
 was unavailable to five-sixths of the census for definitional reasons nobody had
 noticed. The qualifier matters and an earlier
-draft dropped it: `gate` -> `advise` remains perfectly spellable — 14 of 93 sit
+draft dropped it: `gate` -> `advise` remains perfectly spellable — 14 of 97 sit
 at `advise` today — and it is the demotion this packet actually measured.
 `maint.tripwire_coverage_scan` closed "demote" because demoting it was measured
 to destroy the tree, not because the row was unwritable. A framework whose first outcome is unavailable for five-sixths of its
@@ -444,7 +476,7 @@ packet.
 
 ## 9. `tests.stdin_scan_nonvacuity`
 
-**Gates at** `tests/build_os_tests.sh:963`. **Threshold** `PIN_MIN_SITES=10`
+**Gates at** `tests/build_os_tests.sh:964`. **Threshold** `PIN_MIN_SITES=10`
 (`:941`, tested at `:963`).
 
 "The scanner must not be blind" is Class A. `10` is the number of hook-invocation
@@ -712,7 +744,7 @@ one mutating file without any of them being the mutation.
 **The registry already names the world-changing role.** `nervous_system_role:
 motor` — *"it changes the world"* — was carried by exactly **2 of 81** entries
 when this section was written. The mutation census (§17) added six more, so it is
-now **8 of 93** (against 42 `immune`, 29 `reflex`, 7 `conscience`, 6 `sensor`, 1
+now **8 of 97** (against 43 `immune`, 32 `reflex`, 7 `conscience`, 6 `sensor`, 1
 `memory`). The two originals are the table below; that this role was almost
 unused is the observation the section was making, and the census is what changed
 it:

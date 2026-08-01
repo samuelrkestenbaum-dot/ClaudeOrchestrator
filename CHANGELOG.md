@@ -14,6 +14,44 @@ deprecation cycle. Pin a commit if you need stability.
 
 ### In flight (not landed at the released commit)
 
+- **A fifth mismatch disposition, and a lease term that is finally enforced
+  against a clock.** `MISMATCHES.md` named four remedies —
+  `demote_authority`, `correct_class`, `improve_evidence`, `retire_control` — and
+  `maint.source_scan_mask`'s own registry entry records that **all four were
+  closed to it**. `accept_and_constrain` is the fifth: the mismatch is **carried**
+  because demotion or removal has been **MEASURED** to be more dangerous than the
+  mismatch. New store `build-os/registry/mismatch_dispositions.txt` keyed by
+  `DISP-NNNN` stable ids, new tool `build-os/tools/mismatch-disposition.sh`, new
+  suite `tests/mismatch_disposition_tests.sh`.
+
+  **It clears nothing and raises nothing.** The disposed control keeps
+  `authority_mismatch: declared`, keeps its row in the summary table, and keeps
+  its `OUT-OF-LICENCE` finding — all three asserted against the **live** tree.
+  **It is applied to exactly one control and refuses its neighbour by name:**
+  `maint.tripwire_coverage_scan` qualifies on all four conditions;
+  `maint.source_scan_mask` is refused, and the refusal quotes the census's own
+  `demotion_requirement`, which records that demotion as **REACHABLE**.
+
+  **The lease term was decorative at BOTH ends, and that was executed rather than
+  inferred.** An envelope seven months dead reported `1 live grant(s)` and
+  `WITHIN-LICENCE … l-deployment=execute`; the same lease under `shadow` dragged
+  a control licensed `gate` on both live axes down to `observe` inside
+  `evidence-policy.sh check`, naming `axis=deployment`; and the same record moved
+  five months into the future bound **byte-identically**. `date` appeared in no
+  tool in the repository. **The defect is not "expired grants over-permit"** — it
+  is that an expired grant keeps applying **in whichever direction it pointed**,
+  and only the restrictive direction is visible, because an ungranted control
+  already defaults to `autonomous`/`execute`. Out-of-window records now report
+  `LAPSED` or `NOT-YET-LIVE`, contribute no grant, and never reach
+  `mode_projection()`. `claim-evidence.sh` enforces `valid_from`/`valid_until` the
+  same way — refusing an out-of-term store while **retaining** the assertion in
+  the minimum, because dropping a lapsed refutation would RAISE a licence.
+
+  One clock, one owner: `authority-envelope.sh now`, overridable through
+  `BUILD_OS_NOW`, refused when malformed, and **announced in the output** whenever
+  it is in force. Census **93 → 97**; suite **1771 → 1852**; findings numerator
+  **unchanged at 25**, split **6/5/14**; **zero re-authorisations**.
+
 - **Evidence stopped being a property of a control and became an assertion about
   a named claim in a named scope — because one control was measured both refuted
   and supported, and one token could not say both.**

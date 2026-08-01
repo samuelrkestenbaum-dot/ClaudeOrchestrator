@@ -779,14 +779,14 @@
   and its source artefact again** — see (uu). The *substance* of both claims is still true (the
   column has never held anything but `-`); only the cardinality is wrong.
 - **(xx) PRE-EXISTING, ALSO RULED NOT THIS PACKET'S DEBT: a LIVE `DEFECT-0001-stale-line-reference`
-  INSTANCE THAT PREDATES IT.** `build-os/registry/MISMATCHES.md:484` and `:549-550` cite
+  INSTANCE THAT PREDATES IT.** `build-os/registry/MISMATCHES.md:516` and `:549-550` cite
   `tests/control_registry_tests.sh` at **`:79 :184 :440 :772`**, where the live assertions are
   **`:81 :186 :442 :774`** — verified at close by reading both sets of lines. **Off by two, in the
   file that documents the class.**
 - **(yy) THE GOVERNANCE BASELINE HAS ONE ESCAPE HATCH, AND IT IS A COMPLETENESS HOLE, NOT A
   CONFORMANCE HOLE.** §11 of `tests/mutator_registry_tests.sh` iterates the rows **PRESENT IN**
   `build-os/registry/governance_baseline.txt` — **so deleting a row and then moving that control
-  PASSES.** The only cardinality guard is `NBASE > 0` (`tests/mutator_registry_tests.sh:572-574`,
+  PASSES.** The only cardinality guard is `NBASE > 0` (`tests/mutator_registry_tests.sh:573-574`,
   **repointed 2026-08-01 from `:571-573` BY CONTENT against base `e6b825b`; anchor line is
   `NBASE="$(grep -vc '^#' "$BASELINE" ...`**),
   which **certifies a store of one**. **The guard checks that what is listed conforms; it never

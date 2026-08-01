@@ -415,7 +415,7 @@ against `governance_baseline.txt`, which pins class / authority / mismatch on al
 **Stale-reference sweep — the method matters more than the number.** 42
 `evidence_refs` went stale when four tool headers grew. **Every one was repointed
 by locating its base-commit line CONTENT in the current file, never by shifting a
-number.** One was still missed by hand (`tests/mutator_registry_tests.sh:642 →
+number.** One was still missed by hand (`tests/mutator_registry_tests.sh:643 →
 :643`, which a `while` statement let past the §23 vacuity guard), so the
 repointing is now **verified mechanically**: every `file:line` reference in the
 tree is **paired positionally against its base-commit counterpart and compared by

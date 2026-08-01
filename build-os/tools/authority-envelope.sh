@@ -186,14 +186,73 @@
 # opposite and better thing: nothing has been re-authorised. So zero records is
 # reported and exits 0. An ABSENT store still refuses — absent is not empty.
 #
+# ---------------------------------------------------------------------------
+# THE LEASE TERM IS ENFORCED. IT USED NOT TO BE, AND THAT WAS NOT A SMALL GAP.
+# ---------------------------------------------------------------------------
+# This file format-checked `starts` and `expires` as YYYY-MM-DD and ordered them,
+# and then NEVER CONSULTED THE CLOCK. `date` appeared in no tool in this
+# repository. An envelope SEVEN MONTHS DEAD reported:
+#
+#   authority-envelope: 1 live grant(s) …
+#   envelope: WITHIN-LICENCE … l-deployment=execute l-effective=gate binding-axis=none
+#
+# The word "live" printed about a dead grant, and `l-deployment=execute` — the
+# strongest deployment cap in the system — computed from a lease that had ended.
+# THE SYMMETRIC CASE WAS CONFIRMED BY EXECUTION, NOT INFERRED: the same record
+# moved to a window five months in the FUTURE produced BYTE-IDENTICAL output. The
+# window was decorative at BOTH ends. Time was missing from the minimum in
+# precisely the way `untested` was missing from `EVIDENCE_AXIS` one packet ago —
+# the same defect class, one axis over.
+#
+# THE DEFECT IS NOT "EXPIRED GRANTS OVER-PERMIT", and framing it that way builds
+# the wrong test. It is: AN EXPIRED GRANT KEEPS APPLYING, IN WHICHEVER DIRECTION
+# IT POINTED. Both directions are wrong and only one is visible:
+#
+#   RESTRICTIVE stale mode — VISIBLE. A dead `shadow` lease dragged a control
+#     licensed `gate` on both live axes down to `observe`, and
+#     `evidence-policy.sh check` named `axis=deployment`: the binding term was a
+#     lease that ended seven months earlier.
+#   PERMISSIVE stale mode — INVISIBLE. An ungranted control already defaults to
+#     `autonomous`/`execute`, so a permissive expired grant is byte-identical in
+#     the matrix's output to no grant at all. A test written only against this
+#     direction passes vacuously against a fixed tool AND an unfixed one.
+#
+# THE RULE. An envelope is LIVE when `starts <= now < expires`, and contributes
+# NO GRANT otherwise. THE INTERVAL IS HALF-OPEN, and that is a choice with a
+# reason: `expires` is the moment the lease ENDS rather than the last day it
+# covers, so `[starts, expires)` has positive length exactly when `expires >
+# starts` — the ordering rule the schema already enforces — and no lease is
+# accidentally extended by a day at its most sensitive boundary. Out-of-window
+# records are reported in TWO states, because they are two different facts about
+# a grant and a reader must not have to guess which:
+#
+#   LAPSED         `expires` has passed. The lease ended. It is over.
+#   NOT-YET-LIVE   `starts` has not arrived. The lease exists and has not opened.
+#
+# Neither is `WITHIN-LICENCE`, neither is counted in the live total, and neither
+# reaches `mode_projection()` — which is the site that matters, because
+# `evidence-policy.sh` consumes that projection as a MIN term and a stale mode
+# leaving through it reaches the matrix whatever this file's report says.
+#
+# THE CLOCK IS OWNED HERE, EXACTLY ONCE, AND IS OVERRIDABLE. `authority-envelope.sh
+# now` is the one place in this repository that asks what day it is; every other
+# tool that needs a date SOURCES it from here, the same way `claim-evidence.sh`
+# sources its caps from `evidence-policy.sh matrix`. A second private `date` call
+# is how one tool honours an override and another quietly does not. `BUILD_OS_NOW`
+# overrides it so fixtures can pin a date and the suites do not rot in 2027, and
+# A MALFORMED OVERRIDE REFUSES rather than falling back to today — an unreadable
+# clock must never default to the permissive answer. WHEN THE OVERRIDE IS IN
+# FORCE THE OUTPUT SAYS SO, on every command that reasons from a date: an
+# override that could silently un-expire a grant would be worse than no override
+# at all.
+#
 # WHAT IT DOES NOT DO. It grants nothing, it writes nothing anywhere, and it
 # takes every field AT THE ISSUER'S WORD. It observes DECLARED deployment, not
 # deployment: a record saying `shadow` is believed. Nothing here inspects a
 # running system, verifies that a consumer exists, checks that a human really
-# confirms, or notices a lease whose stated rollback was never implemented. It
-# does not enforce expiry against the wall clock either — an expired envelope is
-# reported, and no control's registered authority changes because of it. That
-# gap is real and is named in the registry entry rather than implied away.
+# confirms, or notices a lease whose stated rollback was never implemented. What
+# it now DOES do is refuse to compose a lease that is not in force; what it still
+# cannot do is tell whether the lease was ever honoured while it was.
 #
 # THE DIRECTION OF THE INSTRUMENT: AN ENVELOPE CAN ONLY LOWER `L_effective`.
 # Stated here because it is the single easiest thing to assume backwards. The
@@ -227,8 +286,12 @@
 #
 # Usage:
 #   authority-envelope.sh schema
+#   authority-envelope.sh now
 #   authority-envelope.sh check [--repo DIR] [--store FILE] [--registry FILE]
 #   authority-envelope.sh modes [--repo DIR] [--store FILE]
+# Env:
+#   BUILD_OS_NOW=YYYY-MM-DD  pin the clock. Announced in the output whenever it
+#                            is set; refused, never ignored, when malformed.
 # Exit: 0 the derivation ran (WHATEVER it found — this advises);
 #       2 the invocation is malformed, or the store could not be trusted.
 set -uo pipefail
@@ -265,13 +328,63 @@ axis_cap(){ # <axis-string> <key> -> licensed authority, or the empty string
 }
 in_list(){ local v="$1" l; for l in $2; do [ "$v" = "$l" ] && return 0; done; return 1; }
 
+# --- THE CLOCK, owned here and sourced by everything else ---------------------
+# The one place in this repository that asks what day it is. Every other tool
+# that needs a date runs `authority-envelope.sh now` rather than calling `date`,
+# for the same reason `claim-evidence.sh` sources its caps from
+# `evidence-policy.sh matrix`: a second private clock is how an override is
+# honoured in one place and silently ignored in another.
+CLOCK_VAR="BUILD_OS_NOW"
+DATE_RE='^[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]$'
+NOW=""; NOW_SOURCE=""
+clock(){
+  [ -n "$NOW" ] && return 0
+  if [ -n "${BUILD_OS_NOW:-}" ]; then
+    NOW="$BUILD_OS_NOW"
+    NOW_SOURCE="$CLOCK_VAR — OVERRIDDEN, not this machine's clock"
+    # A MALFORMED OVERRIDE REFUSES. Falling back to today would make an
+    # unreadable clock resolve to the permissive answer, which is the one thing
+    # every derivation in this file is written against.
+    case "$NOW" in
+      [0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]) ;;
+      *) refuse "$CLOCK_VAR is \"$NOW\", which is not YYYY-MM-DD. An unreadable clock must never fall back to today: every lease term in the store would then be judged against a date nobody chose." ;;
+    esac
+  else
+    NOW="$(date +%Y-%m-%d 2>/dev/null)"
+    NOW_SOURCE="system clock"
+    case "$NOW" in
+      [0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]) ;;
+      *) refuse "the system clock produced \"$NOW\", which is not YYYY-MM-DD. Without a date no lease term can be evaluated, and evaluating none would mean composing every expired grant as if it were live." ;;
+    esac
+  fi
+}
+# THE WINDOW STATES. Three, and the two out-of-window ones are DISTINCT: a lease
+# that has ended and a lease that has not opened are different facts about a
+# grant, and collapsing them makes a reader guess which. The interval is
+# HALF-OPEN — live iff `starts <= now < expires` — so `expires` is the moment the
+# lease ends rather than the last day it covers.
+WINDOW_STATES="live lapsed not_yet_live"
+window_state(){ # <starts> <expires> -> live | lapsed | not_yet_live
+  clock
+  if [ "$NOW" \< "$1" ]; then printf 'not_yet_live'
+  elif [ "$2" \< "$NOW" ] || [ "$2" = "$NOW" ]; then printf 'lapsed'
+  else printf 'live'
+  fi
+}
+window_verdict(){ # <window-state> -> the word printed on a report line
+  case "$1" in lapsed) printf 'LAPSED' ;; not_yet_live) printf 'NOT-YET-LIVE' ;; *) printf 'LIVE' ;; esac
+}
+# Printed by every command that reasons from a date. An override that could
+# silently un-expire a grant would be worse than having no override at all.
+clock_line(){ clock; printf 'clock: now=%s source=%s\n' "$NOW" "$NOW_SOURCE"; }
+
 CMD="${1:-}"
 [ $# -gt 0 ] && shift
 case "$CMD" in
-  schema|check|modes) ;;
-  -h|--help|help) sed -n '2,196p' "${BASH_SOURCE[0]}"; exit 0 ;;
-  "") refuse "no command — expected one of: schema, check, modes" ;;
-  *)  refuse "unknown command \"$CMD\" — expected one of: schema, check, modes" ;;
+  schema|check|modes|now) ;;
+  -h|--help|help) sed -n '2,296p' "${BASH_SOURCE[0]}"; exit 0 ;;
+  "") refuse "no command — expected one of: schema, now, check, modes" ;;
+  *)  refuse "unknown command \"$CMD\" — expected one of: schema, now, check, modes" ;;
 esac
 
 while [ $# -gt 0 ]; do
@@ -279,10 +392,23 @@ while [ $# -gt 0 ]; do
     --repo)     [ $# -ge 2 ] || refuse "--repo needs a value";     REPO="$2"; shift 2 ;;
     --store)    [ $# -ge 2 ] || refuse "--store needs a value";    STORE="$2"; shift 2 ;;
     --registry) [ $# -ge 2 ] || refuse "--registry needs a value"; REGISTRY="$2"; shift 2 ;;
-    -h|--help)  sed -n '2,196p' "${BASH_SOURCE[0]}"; exit 0 ;;
+    -h|--help)  sed -n '2,296p' "${BASH_SOURCE[0]}"; exit 0 ;;
     *) refuse "unknown option \"$1\"" ;;
   esac
 done
+
+# ------------------------------------------------------------------ now ------
+# The clock as a first-class command, so that every other tool can source a date
+# instead of computing one. It prints the date AND its provenance, because a date
+# with no provenance is a date a reader cannot audit.
+if [ "$CMD" = "now" ]; then
+  clock
+  printf 'now: %s\n' "$NOW"
+  printf 'source: %s\n' "$NOW_SOURCE"
+  printf 'override: set %s=YYYY-MM-DD to pin the clock. It is ANNOUNCED wherever it is used and REFUSED when malformed — an override that could silently un-expire a grant would be worse than no override at all.\n' "$CLOCK_VAR"
+  printf 'owner: this is the ONLY clock in the repository. Every other tool that needs a date runs this command rather than calling `date`, because a second private clock is how an override is honoured in one place and ignored in another.\n'
+  exit 0
+fi
 
 # --------------------------------------------------------------- schema ------
 if [ "$CMD" = "schema" ]; then
@@ -304,8 +430,8 @@ if [ "$CMD" = "schema" ]; then
   printf 'field: granted_authority — what the actor may DO: a rung on the ladder above.\n'
   printf 'field: evidence_basis — the evidence relied on, in prose. The token lives on the evidence axis; this is where a human says what they actually looked at.\n'
   printf 'field: deployment_mode — one of the four modes above. The field that makes this artefact worth having.\n'
-  printf 'field: starts — YYYY-MM-DD. When the lease opens.\n'
-  printf 'field: expires — YYYY-MM-DD, strictly after starts. LEASES END: an authority granted with no end date is a permanent re-authorisation with a date on it.\n'
+  printf 'field: starts — YYYY-MM-DD. When the lease opens. ENFORCED against the clock: before it, the record is NOT-YET-LIVE and contributes no grant.\n'
+  printf 'field: expires — YYYY-MM-DD, strictly after starts. LEASES END: an authority granted with no end date is a permanent re-authorisation with a date on it. ENFORCED against the clock: on or after it, the record is LAPSED and contributes no grant.\n'
   printf 'field: revocation — how the grant is revoked before expiry, and by whom.\n'
   printf 'field: reason — why it was granted. The sentence a reviewer reads.\n'
   printf 'field: human_confirmation — the confirmation a human must give before the actor acts.\n'
@@ -313,6 +439,12 @@ if [ "$CMD" = "schema" ]; then
   for m in shadow human_confirmed bounded_autonomous autonomous; do
     printf 'mode: %-19s caps at %-8s\n' "$m" "$(axis_cap "$DEPLOYMENT_AXIS" "$m")"
   done
+  printf 'window: %s — a record is LIVE iff `starts <= now < expires`. The interval is HALF-OPEN so that `expires` is the moment the lease ENDS rather than the last day it covers, which is also what makes the schema'"'"'s `expires > starts` rule equivalent to "the window has positive length".\n' "$WINDOW_STATES"
+  printf 'window-state: live         WITHIN-LICENCE or OVER-GRANTED — the lease is in force, and only these records are composed, counted or projected\n'
+  printf 'window-state: lapsed       LAPSED — `expires` has passed. It CONTRIBUTES NO GRANT: it is not counted live, and `modes` does not project it.\n'
+  printf 'window-state: not_yet_live NOT-YET-LIVE — `starts` has not arrived. A distinct state from LAPSED, because a lease that has not opened and a lease that ended are different facts about a grant.\n'
+  printf 'window-direction: an out-of-window grant is dropped in BOTH directions, not only the permissive one. A stale RESTRICTIVE mode drags a fully licensed control down through the MIN term and is VISIBLE; a stale PERMISSIVE one is INVISIBLE, because an ungranted control already takes the default `%s`. Only the restrictive case can be told apart from no grant at all, which is why it is the fixture with discriminating power.\n' "$DEPLOYMENT_DEFAULT"
+  clock_line
   exit 0
 fi
 
@@ -385,18 +517,44 @@ while IFS= read -r id; do
 done < <(printf '%s\n' "$IDS")
 [ -n "$BAD" ] && refuse "$STORE carries $(printf '%s' "$BAD" | tr ';' '\n' | grep -c .) malformed grant(s), named here rather than skipped:${BAD%;}"
 
+# --- the lease term, evaluated exactly once, at the top level -----------------
+# THE PARTITION EVERYTHING BELOW READS. `clock` is resolved HERE rather than
+# inside the loops, because a refusal raised inside a command substitution would
+# exit the subshell and leave the caller composing against a clock that failed.
+# LIVE_IDS is what the report counts and what `modes` projects; the other two are
+# reported and contribute nothing.
+clock
+LIVE_IDS=""; LAPSED_IDS=""; NOTYET_IDS=""
+while IFS= read -r id; do
+  [ -n "$id" ] || continue
+  case "$(window_state "$(get "$id" starts)" "$(get "$id" expires)")" in
+    lapsed)       LAPSED_IDS="$LAPSED_IDS$id"$'\n' ;;
+    not_yet_live) NOTYET_IDS="$NOTYET_IDS$id"$'\n' ;;
+    *)            LIVE_IDS="$LIVE_IDS$id"$'\n' ;;
+  esac
+done < <(printf '%s\n' "$IDS")
+NLIVE="$(printf   '%s' "$LIVE_IDS"   | grep -c . || true)"; NLIVE="${NLIVE:-0}"
+NLAPSED="$(printf '%s' "$LAPSED_IDS" | grep -c . || true)"; NLAPSED="${NLAPSED:-0}"
+NNOTYET="$(printf '%s' "$NOTYET_IDS" | grep -c . || true)"; NNOTYET="${NNOTYET:-0}"
+
 # ------------------------------------------------------------------ modes ----
 # The machine projection the evidence matrix consumes, so that ONE parser owns
 # this schema. Where two envelopes name one control, the MINIMUM mode governs —
 # the same "weakest component wins" rule the comma-composite `empirical_status`
 # already uses, and for the same reason: the conservative reading is the one an
 # operator can defend.
+#
+# IT PROJECTS LIVE_IDS AND NOT IDS, AND THAT IS THE SITE THAT MATTERS. This
+# projection is what `evidence-policy.sh` consumes as a MIN term, so an
+# out-of-window mode that leaked through here would reach the licence matrix
+# whatever the report above said about it — a defect with the report cleaned up
+# and the composition still wrong.
 mode_projection(){
   local id c m best bestr r
   while IFS= read -r id; do
     [ -n "$id" ] || continue
     printf '%s\t%s\n' "$(get "$id" control)" "$(get "$id" deployment_mode)"
-  done < <(printf '%s\n' "$IDS") | sort -u > "$FLAT.pairs"
+  done < <(printf '%s\n' "$LIVE_IDS") | sort -u > "$FLAT.pairs"
   cut -f1 "$FLAT.pairs" | sort -u | while IFS= read -r c; do
     [ -n "$c" ] || continue
     best=""; bestr=99
@@ -409,7 +567,7 @@ mode_projection(){
 }
 
 if [ "$CMD" = "modes" ]; then
-  [ "$NENV" -eq 0 ] && exit 0
+  [ "$NLIVE" -eq 0 ] && exit 0
   mode_projection
   exit 0
 fi
@@ -418,9 +576,32 @@ fi
 [ -n "$REGISTRY" ] || REGISTRY="$REPO/build-os/registry/control_registry.txt"
 [ -f "$REGISTRY" ] || refuse "no control registry at $REGISTRY. A grant's licence is composed against the census's class and empirical_status, and an absent census is not a permissive one."
 
-printf 'authority-envelope: %s live grant(s) in %s\n' "$NENV" "$STORE"
-if [ "$NENV" -eq 0 ]; then
-  printf 'authority-envelope: ZERO live grants is the CORRECT state, not the shelfware state — an empty envelope store means nothing has been re-authorised. (An ABSENT store would refuse: absent is not empty.)\n'
+clock_line
+printf 'authority-envelope: %s live grant(s) in %s\n' "$NLIVE" "$STORE"
+if [ "$NLAPSED" -gt 0 ] || [ "$NNOTYET" -gt 0 ]; then
+  printf 'authority-envelope: and %s record(s) OUT OF WINDOW — %s LAPSED, %s NOT-YET-LIVE — of %s total. An out-of-window record CONTRIBUTES NO GRANT: it is not counted live, it is not composed, and `modes` does not project it into the licence matrix.\n' \
+    "$((NLAPSED + NNOTYET))" "$NLAPSED" "$NNOTYET" "$NENV"
+fi
+# Reported before the live findings, so a reader meets the records that are NOT
+# in force before the ones that are. Each names the term that put it out of the
+# window, because "this lease is not in force" is unactionable without the date
+# that decided it.
+while IFS= read -r id; do
+  [ -n "$id" ] || continue
+  printf 'envelope: LAPSED %s control=%s granted=%s expires=%s now=%s — the lease ENDED. It contributes no grant: not counted live, not composed, not projected. Nothing about the control changed when it lapsed; it returned to its registered authority, which is what `rollback_behavior` describes.\n' \
+    "$id" "$(get "$id" control)" "$(get "$id" granted_authority)" "$(get "$id" expires)" "$NOW"
+done < <(printf '%s' "$LAPSED_IDS")
+while IFS= read -r id; do
+  [ -n "$id" ] || continue
+  printf 'envelope: NOT-YET-LIVE %s control=%s granted=%s starts=%s now=%s — the lease has NOT OPENED. A distinct state from LAPSED: this grant is scheduled and has never been in force, and it contributes no grant until it opens.\n' \
+    "$id" "$(get "$id" control)" "$(get "$id" granted_authority)" "$(get "$id" starts)" "$NOW"
+done < <(printf '%s' "$NOTYET_IDS")
+if [ "$NLIVE" -eq 0 ]; then
+  if [ "$NENV" -eq 0 ]; then
+    printf 'authority-envelope: ZERO live grants is the CORRECT state, not the shelfware state — an empty envelope store means nothing has been re-authorised. (An ABSENT store would refuse: absent is not empty.)\n'
+  else
+    printf 'authority-envelope: ZERO live grants — every one of the %s record(s) in this store is outside its lease term. A record that is not in force is not a grant, and the correct reading is that nothing is re-authorised right now, not that the store is empty.\n' "$NENV"
+  fi
   printf 'authority-envelope: the deployment axis is therefore INERT on this census — every control takes the default `%s`, which adds no cap, so L_effective = MIN(L_class, L_evidence) exactly as before.\n' "$DEPLOYMENT_DEFAULT"
   printf 'authority-envelope: this validator GRANTS NOTHING. Writing a grant is a governance act taken by the operator in %s, never by a tool.\n' "$STORE"
   exit 0
@@ -465,9 +646,13 @@ while IFS= read -r id; do
     printf 'envelope: WITHIN-LICENCE %s control=%s granted=%s l-class=%s l-evidence=%s l-deployment=%s l-effective=%s deployment-mode=%s binding-axis=none\n' \
       "$id" "$ctl" "$ga" "$(name_of "$cr")" "$(name_of "$er")" "$(name_of "$dr")" "$(name_of "$lr")" "$dm"
   fi
-done < <(printf '%s\n' "$IDS")
+done < <(printf '%s' "$LIVE_IDS")
 
-printf 'authority-envelope: %s of %s grant(s) reach beyond L_effective = MIN(L_class, L_evidence, L_deployment) — the three terms are reported separately on every line and never blended\n' \
-  "$NOVER" "$NENV"
+# THE DENOMINATOR IS THE LIVE SET, not the record count. "0 of 1 grant(s) reach
+# beyond L_effective" was printed about a store whose only lease had ended seven
+# months earlier; a summary whose denominator counts dead leases is a summary
+# that cannot be read.
+printf 'authority-envelope: %s of %s LIVE grant(s) reach beyond L_effective = MIN(L_class, L_evidence, L_deployment) — the three terms are reported separately on every line and never blended\n' \
+  "$NOVER" "$NLIVE"
 printf 'authority-envelope: ADVISORY. This is a chosen policy, not a definition: it reports and exits 0. It GRANTS NOTHING and revokes nothing; both are governance acts for the operator.\n'
 exit 0

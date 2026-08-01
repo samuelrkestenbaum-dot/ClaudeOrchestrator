@@ -1,0 +1,91 @@
+# Build OS — mismatch dispositions.
+#
+# One record per DECISION about one declared authority mismatch. One field per
+# line; a blank line separates records; `#` at column 0 is a comment. The format
+# is control_registry.txt's on purpose — the same parser habits read it, the same
+# greps work on it.
+#
+# WHY THIS FILE HAD TO EXIST. MISMATCHES.md has always named four remedies for a
+# control that exercises more authority than its class licenses:
+#
+#   demote_authority      lower the authority to what the class licenses
+#   correct_class         the classification was wrong, not the authority
+#   improve_evidence      measure, then re-derive
+#   retire_control        the control should not exist
+#
+# `maint.source_scan_mask`'s own registry entry records that ALL FOUR were closed
+# to it, each for a separate reason. A control whose every prescribed remedy is
+# unreachable had nowhere to be recorded except as a mismatch nobody was doing
+# anything about — which reads, in the report, exactly like a mismatch nobody had
+# got to yet. The two are not the same and the report could not tell them apart.
+#
+# THE FIFTH DISPOSITION, AND THE WORD THAT DOES THE WORK.
+#
+#   accept_and_constrain  the mismatch is CARRIED, because demotion or removal
+#                         has been MEASURED to be more dangerous than the
+#                         mismatch itself
+#
+# MEASURED. Not judged, not argued, not asserted here. The measurement must be
+# recorded in the SUBJECT'S OWN census entry and must exist as an artefact in the
+# tree; `build-os/tools/mismatch-disposition.sh validate` refuses a record whose
+# subject fails either, along with two further conditions — see below.
+#
+# WHAT A RECORD HERE DOES NOT DO, stated first because every misreading of this
+# file is a reading of it as something stronger:
+#
+#   IT CLEARS NO MISMATCH. The subject keeps `authority_mismatch: declared`, keeps
+#   its row in MISMATCHES.md's summary table, and keeps its OUT-OF-LICENCE finding
+#   from `evidence-policy.sh check`. Nothing in this file edits the census, the
+#   report or any licence. A disposition makes a finding LEGIBLE; an exception
+#   would make it GO AWAY, and that difference is asserted mechanically by
+#   tests/mismatch_disposition_tests.sh §5 against the live tree.
+#
+#   IT RAISES NO AUTHORITY. The standing ruling is unchanged: this machinery is
+#   for class correction and authority demotion, and it is not a promotion
+#   instrument. There is no ladder in this file and nothing here composes one.
+#
+#   IT DOES NOT EXPIRE INTO SILENCE. Every record carries a `review_by`. Past it,
+#   the record is reported REVIEW-DUE and is NOT dropped — dropping it would make
+#   the carried mismatch LESS visible, which is the opposite of what it is for.
+#   (An authority envelope behaves the other way round, and deliberately: an
+#   ended LEASE must stop granting, because a permission nobody renewed is not a
+#   permission. A decision to carry is not a permission.)
+#
+# THE FOUR CONDITIONS for `accept_and_constrain`, all required:
+#
+#   (a) the census records `authority_mismatch: declared` for the subject
+#   (b) the subject holds a row in MISMATCHES.md's machine-read summary table
+#   (c) `demotion_measurement` appears VERBATIM in the subject's own
+#       `demotion_requirement` field
+#   (d) that same token occurs as an ARTEFACT elsewhere under the repository
+#
+# Condition (d) exists because without it (c) is two documents agreeing with each
+# other, which is how "measured" becomes a word rather than a fixture.
+#
+#   grep -c '^disposition: '                    how many decisions are recorded
+#   grep -B1 '^kind: accept_and_constrain'      what is being CARRIED
+#   awk -F': ' '/^review_by: /{print $2}'       when each comes up for review
+
+# =============================================================================
+# THE ONE CONTROL THAT QUALIFIES. Its neighbour in the census,
+# `maint.source_scan_mask`, DOES NOT — its demotion is REACHABLE and it carries
+# `authority_mismatch: none` — and the validator REFUSES it by name. That
+# refusal is the discipline test: a disposition that swallowed both would be
+# useless, and disposing twenty mismatches was never what the fifth kind is for.
+# =============================================================================
+
+disposition: DISP-0001-tripwire-coverage-carry
+subject_id: maint.tripwire_coverage_scan
+kind: accept_and_constrain
+mismatch_summary: Class C licenses `advise`; this control exercises `gate`. It throws during module load on the verdict of a mask its own header calls "a heuristic and defeatable", and it prints the one-line source shape that beats it. The mismatch is real, it is DECLARED, and this record does not clear it.
+alternatives_considered: demote_authority — MEASURED AND REFUSED, see below. correct_class — refused: a defeatable lexer is a heuristic and Class C is the honest classification; relabelling it Class A to make `gate` legal is the single failure the registry exists to prevent. improve_evidence — refused by the subject's own promotion_requirement: the mask has been defeated three times and the maintainers stopped writing mask heuristics deliberately. retire_control — refused: it is the maintenance layer's only PREVENTION, and both controls that could supply prevention elsewhere (maint.real_memory_tripwire, maint.shell_fingerprint) declare `rollback_behavior: NONE`.
+demotion_measurement: COVERAGE-GATE-PREVENTION-DIFFERENTIAL
+measured_harm: The obvious demotion — collect the coverage findings and print them instead of throwing, which is what the file's own header claims it does — was applied literally and run as a two-arm differential against an uncovered suite file that rewrites real memory. GATED ARM: exit 1, tree UNTOUCHED. DEMOTED ARM: exit 1, live memory DESTROYED. THE EXIT CODE IS 1 IN BOTH ARMS, so no exit-code check, no CI status and no reviewer reading a summary line could have seen this demotion at all. The remedy the report prescribes is the one the measurement refuses.
+constraint: The carry is bounded to the SANCTIONED MAINTENANCE INVOCATION and to the PREVENTION claim. EV-0002 supports prevention under `run-tests.sh` with the tripwire preloaded, and licenses nothing else; EV-0001 leaves the DETECTION claim refuted under bare `node --test`, and this record does not touch it. The control stays Class C, stays `red_driven,refuted`, and stays out of licence on both the class and evidence axes. The carry ends the day prevention is supplied elsewhere and the subject's `demotion_requirement` becomes satisfiable — which is a governance act, not an edit.
+constraint_enforced_by: tests/build_os_maintenance_tests.sh section 6a, which re-runs both arms of the differential on every maintenance run, so the measurement this record rests on is re-established rather than remembered; build-os/registry/evidence_assertions.txt EV-0001 and EV-0002, which keep the two claims scoped and opposed; and build-os/tools/mismatch-disposition.sh validate, which refuses this record the moment condition (a), (b), (c) or (d) stops holding.
+visibility: MISMATCHES.md's machine-read summary table, where the subject keeps its row; `evidence-policy.sh check`, which still reports it OUT-OF-LICENCE; `scan-controls.sh check`, which still counts it among the declared mismatches. All three are asserted against the live tree by tests/mismatch_disposition_tests.sh §5, so this record cannot outlive the finding it describes.
+recorded_at: 2026-08-01
+recorded_by: gravito_p3_accept_and_constrain_a
+reviewed_by: operator, in the ruling that named accept_and_constrain and required it to be applied narrowly
+review_by: 2027-02-01
+supersedes: none

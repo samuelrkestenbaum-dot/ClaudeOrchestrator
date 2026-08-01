@@ -525,6 +525,82 @@ RC="$(run wibble)";          [ "$RC" = "2" ] && ok "an unknown command is REFUSE
 RC="$(run validate --store)";[ "$RC" = "2" ] && ok "an option missing its value is REFUSED" || { no "a valueless --store exited $RC"; dump; }
 RC="$(run validate --nope x)";[ "$RC" = "2" ] && ok "an unknown option is REFUSED"        || { no "an unknown option exited $RC"; dump; }
 
+echo "== 13. \`valid_until\` IS ENFORCED, AND IN THE ONE DIRECTION THAT CANNOT FLATTER =="
+# THE GAP THIS CLOSES, IN THE FILE'S OWN WORDS. evidence_assertions.txt said
+# "nothing … notices an assertion going stale against the `valid_until` it
+# declares"; control_registry.txt said the field "is recorded so that a later
+# packet can enforce it". This is that packet, and enforcement is split because
+# the two directions are not the same act:
+#
+#   VALIDATE REFUSES a dated `valid_until` that has passed. A store asserting
+#   evidence its own author dated out is a store nobody re-measured, and the
+#   remedy is a human one — re-date it, or supersede it.
+#
+#   PROJECT REPORTS it LAPSED and KEEPS IT IN THE MINIMUM. This is the half that
+#   matters. Assertion evidence can only LOWER a licence, so DROPPING a lapsed
+#   assertion would RAISE one — a lapsed refutation silently stops binding and
+#   the control reads better than it did. That is the flattering-direction error
+#   this whole store exists to catch, so a lapsed assertion is named and never
+#   dropped.
+#
+# THE COST IS STATED, NOT HIDDEN: a dated `valid_until` becomes a commitment
+# that comes due, and the day it does the suite goes red with no code change.
+# That is the field meaning something. Today every live assertion carries an
+# `open` term, so the gate is inert on the live store BY CONSTRUCTION.
+export BUILD_OS_NOW="2026-08-01"
+LIVE_OPEN="$(awk '/^valid_until: /{ if ($2 ~ /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/) n++ } END{print n+0}' "$STORE")"
+[ "$LIVE_OPEN" = "0" ] \
+  && ok "every assertion in the live store carries an OPEN term, so this gate is inert on today's store by construction rather than by luck" \
+  || no "$LIVE_OPEN live assertion(s) carry a dated valid_until; the gate below is no longer inert and the store must be re-dated"
+# A dated term still in the future must pass — otherwise the refusal below would
+# prove only that dates are refused.
+sed 's|^valid_until: open.*|valid_until: 2099-01-01 — a fixture term that has not come due|' "$STORE" > "$WORK/vu_future.txt"
+RC="$(run validate --store "$WORK/vu_future.txt" --registry "$REG")"
+[ "$RC" = "0" ] \
+  && ok "a DATED \`valid_until\` still in the future validates — the check is a clock comparison, not a ban on dates" \
+  || { no "a future-dated valid_until exited $RC"; dump; }
+sed 's|^valid_until: open.*|valid_until: 2026-01-01 — a fixture term that came due seven months ago|' "$STORE" > "$WORK/vu_past.txt"
+RC="$(run validate --store "$WORK/vu_past.txt" --registry "$REG")"
+[ "$RC" = "2" ] \
+  && ok "RED: a \`valid_until\` that has PASSED is REFUSED — the field the registry said a later packet would enforce is enforced" \
+  || { no "RED FAILED: a lapsed valid_until exited $RC; the field is still recorded and unenforced"; dump; }
+grep -qi 'valid_until' "$WORK/out.txt" \
+  && ok "and the refusal names the field, so the fix is readable from it" \
+  || { no "the refusal does not name valid_until"; dump; }
+# THE DIRECTION. `project` must NAME the lapse and must NOT drop the assertion:
+# EV-0001 is a REFUTATION, and a refutation that stopped binding when its term
+# came due would raise the licence of the control it refutes.
+RC="$(run project --store "$WORK/vu_past.txt" --registry "$REG" --subject "$SUBJECT")"
+[ "$RC" = "0" ] \
+  && ok "\`project\` still ADVISES over a lapsed store — it reports and exits 0" \
+  || { no "project exited $RC on a lapsed store"; dump; }
+grep -q 'LAPSED' "$WORK/out.txt" \
+  && ok "...and NAMES the lapse where the projection is read" \
+  || { no "project does not report a lapsed assertion"; dump; }
+LAPSED_TOK="$(awk '$1=="projection:" && $2=="'"$SUBJECT"'"{for(i=1;i<=NF;i++) if(index($i,"legacy-empirical-status=")==1){sub(/^legacy-empirical-status=/,"",$i); print $i; exit}}' "$WORK/out.txt")"
+case ",$LAPSED_TOK," in
+  *,refuted,*) ok "...and the lapsed REFUTATION is STILL in the composite ($LAPSED_TOK) — dropping it would have RAISED a licence, which is the one direction this store may never move" ;;
+  *) no "the lapsed refutation was dropped from the composite (got '$LAPSED_TOK'); enforcement became a laundering channel"; dump ;;
+esac
+# THE WINDOW HAS TWO ENDS, AND THE SECOND ONE IS THE SAME DEFECT. `valid_from` is
+# as much a term as `valid_until`: an assertion whose term has not begun has not
+# begun, and a store that enforced one end and not the other would be the
+# decorative-window defect one artefact along from where it was found.
+sed 's|^valid_from: .*|valid_from: 2099-01-01|' "$STORE" > "$WORK/vf_future.txt"
+RC="$(run validate --store "$WORK/vf_future.txt" --registry "$REG")"
+[ "$RC" = "2" ] \
+  && ok "RED: a \`valid_from\` that has NOT ARRIVED is REFUSED too — the term is enforced at BOTH ends, not just the one that was asked about" \
+  || { no "RED FAILED: a not-yet-live assertion exited $RC; the window is decorative at its opening end"; dump; }
+RC="$(run project --store "$WORK/vf_future.txt" --registry "$REG" --subject "$SUBJECT")"
+grep -q 'NOT-YET-LIVE' "$WORK/out.txt" \
+  && ok "...and \`project\` names it NOT-YET-LIVE — a distinct state from LAPSED, because a term that has not opened and a term that ended are different facts" \
+  || { no "project does not distinguish a not-yet-live assertion from a lapsed one"; dump; }
+# And the clock is the SAME clock. A second private date in this tool is how one
+# tool honours an override and another quietly does not.
+grep -qE 'date[[:space:]]+\+%' "$TOOL" \
+  && no "claim-evidence.sh computes its own wall-clock date instead of sourcing the one the envelope tool owns" \
+  || ok "claim-evidence.sh computes no date of its own — one clock, one owner, sourced like the caps are"
+
 echo "== 11. The tool and its store are registered control surfaces =="
 grep -qF "owning_module: build-os/tools/claim-evidence.sh" "$REG" \
   && ok "the tool owns at least one registry entry" \

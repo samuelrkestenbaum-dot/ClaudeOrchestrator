@@ -217,7 +217,7 @@
   **THE STALE-REFERENCE SWEEP — THE METHOD MATTERS MORE THAN THE NUMBER.** 42 `evidence_refs` went
   stale when four tool headers grew; **every one was repointed by locating its base-commit line
   CONTENT in the current file, NEVER by shifting a number.** One was still missed by hand
-  (`tests/mutator_registry_tests.sh:642 -> :643`, which a `while` statement let past the §23
+  (`tests/mutator_registry_tests.sh:643 -> :643`, which a `while` statement let past the §23
   vacuity guard), so the repointing is now **verified MECHANICALLY**: every `file:line` reference in
   the tree is **paired positionally against its base-commit counterpart and compared by CONTENT**.
   **0 stale pathed refs tree-wide over 338 refs** — and that sweep **caught the reference the
@@ -576,7 +576,7 @@
   `shadow:observe` to `shadow:none`, left README §3b saying `observe`, and **both suites stayed
   green at 86/0 and 88/0**; the orchestrator reproduced it independently. Only the axis's **copy**
   was pinned (by §5b of the evidence suite); the **declared OWNER** was pinned by nothing. Closed by
-  new **§2a** of `tests/authority_envelope_tests.sh:213`, reconciling `DEPLOYMENT_AXIS` against
+  new **§2a** of `tests/authority_envelope_tests.sh:247`, reconciling `DEPLOYMENT_AXIS` against
   README §3b in both directions with a non-vacuity floor on both sides; the orchestrator re-drove
   the identical mutation against it: **89 passed / 2 failed**. **The fix used the device already in
   the tree — §5a's parse-prose / recompute-table / diff-both-ways pattern — not a new invention.**

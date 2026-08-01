@@ -131,6 +131,7 @@ MUT_EXCL="$WORK/mut_excluded.txt"
 cat > "$MUT_EXCL" <<'EOF'
 build-os/tools/authority-envelope.sh
 build-os/tools/claim-evidence.sh
+build-os/tools/mismatch-disposition.sh
 EOF
 ( cd "$SRC" && grep -rlnE 'renameSync|writeFileSync\(|copyFileSync|appendFileSync|git -C "\$[A-Za-z_]+" commit|>>[[:space:]]*"\$[A-Za-z_]+"|mkdir[[:space:]]+"\$[A-Za-z_]+"' \
     build-os/maintenance build-os/tools build-os/metrics .claude/hooks 2>/dev/null \
