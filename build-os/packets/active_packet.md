@@ -4,66 +4,76 @@
 > the builder implements exactly this and nothing else; the archivist clears it
 > on close. One packet at a time.
 
-## Status: IN FLIGHT — `gravito_p4_s1_shadow_ranker_a`
+## Status: NONE IN FLIGHT
+
+`gravito_p4_s1_shadow_ranker_a` is **CLOSED**. Nothing is in flight. The packet
+staged below is **staged, not started**, and awaits an explicit go like any
+other.
+
+## Just closed — `gravito_p4_s1_shadow_ranker_a`
 
 - **Packet id:** `PACKET-0034-gravito-p4-s1-shadow-ranker-a`
-- **Lane:** `substantive` · **Depth budget:** 2 (builder, then qa ‖ reviewer)
-- **P4 of the operator's five-phase sequence.** The first phase whose output is a
-  **decision** rather than a record of one.
+  — derived from this file's own declaration at `9742a10` and **collision-checked
+  against every `PACKET-*` in the tree before it was written down**.
+  `decision_telemetry.tsv` allocates `PACKET-0007`..`PACKET-0033` and nothing
+  else. The P3 close is why this check exists.
+- **Receipt:** `build-os/receipts/gravito_p4_s1_shadow_ranker_a.md`
+- **Commits:** `9742a10` (declaration) + `af4ce0c` (build) + `b9896e0` (fix
+  round), base `ce71122`, re-verified with `git merge-base`. **None pushed.**
+- **Verdict:** PASS-AS-FIXED. qa GREEN; reviewer fix-then-pass, all items fixed
+  and orchestrator-verified. **Depth: 3 serial stages, no stage 4.**
+- **Success condition MET:** a real candidate set went in and an immutable
+  explained ordering came out —
+  `ranking_digest: 2fa876c632bf81088793968a5d76501556fe283dc27ff97aad40459218df81c8`,
+  reproduced byte-identically before and after the fix round and again at close.
+- **And the honest half:** the first ordering is **degenerate** — the rank-1
+  candidate Pareto-dominates every rival under all 125 weight combinations — so
+  **the executive exists as a MECHANISM before it exists as a DEMONSTRATED
+  CAPABILITY.** Residue `(www)`–`(zzz)`.
+- Suite **1869 → 1909**; census **97 → 99**; `observe` gains its **first
+  occupant ever**; snapshots **44 → 72**; **zero re-authorisations**.
 
-## Branch base
+## Staged next — `gravito_p3b_count_derivation_a` (NOT STARTED)
 
-Built on `claude/project-handoff-merge-ramhds` at `ce71122`, re-verified with
-`git merge-base`. Everything through that commit is pushed; nothing in this
-packet is authorised to be.
+**This is `PACKET-0027-p3b-count-derivation`, the candidate S1 independently
+placed at rank 1 in `DECISION-0010`, and it was selected — by the reviewer, at
+the P3 close — BEFORE S1 EXISTED. That ordering is what makes
+`rank_of_selected: 1` non-circular; it is not a reason to start the packet.**
 
-## The success condition
+Its contents are the five open items `(hhh)`–`(lll)`: the false coverage claim in
+the arrow-pair test; the corrected-headline/uncorrected-body count in
+`control_registry.txt`; the `homeostasis` binding count in the crosswalk; the
+governance store that misdescribes its own validator; and the false
+"matches-by-accident" claim with its reproduction.
 
-**A real candidate set goes in, and an immutable explained ordering comes out.**
-Nothing else in this packet counts as success.
+**The P4 close adds a sixth, live instance of exactly this defect class** — the
+signal-snapshot count reported as the store's line count at two consecutive
+closes, residue `(aaaa)`. **The durable fix both it and `(ooo)` name is the same
+one: a guard that DERIVES a store's cardinality rather than comparing two
+remembered copies of it.** Nothing has built it.
 
-## What is being built
+## Explicitly NOT staged
 
-`build-os/metrics/rank-candidates.sh` — **S1**, a shadow ranker.
-`controlClass: heuristic_policy` · class C · `empiricalStatus: untested` ·
-`runtimeAuthority: observe` · `deploymentMode: shadow` ·
-`outputSemantics: ordered_candidates`. The composition is
-`MIN(advise, observe, observe) = observe`, and it is registered at exactly that.
+- **`s1-v2`.** The signal set's four recorded defects — degeneracy, the
+  lettering-granularity margin, the non-independence of two signals, and the
+  label leakage in `residue_ruling_satisfied` — are **not** to be fixed in a fix
+  round or folded into another packet. The operator's ceiling reasoning applies
+  to S1's own shortcomings exactly as it applies to governance defects.
+- **Widening guard 1's `PROTECTED_SURFACE`** to the evidence substrate, or
+  closing the directory-prefix alias. Both are deliberately open: widening turns
+  the predicate into a wall, and treating a directory as covering its contents
+  would **move the live `DECISION-0010` ordering the non-circularity proof is
+  anchored to**. Residue `(zzz)`.
+- **P5 (outcome / counterfactual telemetry).** It is the next phase, not the next
+  packet, and it is `PACKET-0032` — a candidate S1 **excluded from its own
+  ordering** as `self_amendment`. That exclusion is correct and stands.
 
-Nine required outputs: stable candidate ids · frozen signal snapshots, never
-recomputed · every candidate still visible including the last-ranked and the
-refused · per-candidate signal values · the **decomposition**, not just a total ·
-self-amendment exclusions, printed with reasons · the actual selection ·
-`rank_of_selected` · **zero dispatch authority**.
+## Open boundaries carried forward
 
-Two guards: **(1)** no learned policy may optimize the mechanism governing its
-own promotion — refuse, visibly, and fail closed; **(2)** publish the
-decomposition.
-
-## The governance ceiling
-
-**No new store. No new validator tool. No new suite file. No new governance
-primitive.** An exception requires a concrete FAILING FIXTURE, executed with
-output. One was executed: `scan-controls.sh check` refuses at exit 2 with
-`UNREGISTERED build-os/metrics/rank-candidates.sh can terminate a run non-zero
-and owns NO registry entry at authority gate`, which forces a **second** census
-entry (`ranker.s1_input_integrity`, class A, `gate`). Registering the ranker
-itself at `gate` was the alternative and is worse: it would put a Class C control
-two rungs above its licence and ship a declared mismatch to launder a refusal
-path.
-
-Governance defects found while building are recorded as residue and **not fixed
-here**. Stores added: 0. Validator tools added: 0. Suite files added: 0.
-Governance primitives added: 0.
-
-## Candidate set
-
-Real, not synthetic: open work drawn from `build-os/memory/residue.md` and the
-packet staged at the `gravito_p3_accept_and_constrain_a` close. Recorded as
-`DECISION-0010-p4-s1-shadow-ranker` with 28 frozen snapshots.
-
-## Not in this packet
-
-The five items of `gravito_p3b_count_derivation_a` — which is the **selected
-candidate** of `DECISION-0010`, still not started, and which S1 independently
-placed at rank 1.
+- **Nothing is pushed, merged, tagged, PR'd or deployed.** Everything through
+  `ce71122` is on the remote; this packet's three commits and its close commit
+  are not, and stay that way pending explicit go.
+- **Nothing consumes S1's ordering**, and wiring anything to it is an operator
+  act. S1 holds `runtime_authority: observe` and its own `promotion_requirement`
+  turns on `rank_of_selected` history that does not yet exist at any useful n.
+- **Second eyes: still NONE**, ten packets running. Residue `(zz)`.

@@ -46,7 +46,9 @@
   annotated rather than rewritten. Whether the tag was created with an explicit go is not
   determinable from here and no claim is made.
 - **Build/test command:** `bash tests/build_os_tests.sh` (1909 checks; no network; temp dirs)
-  — measured on a quiet tree at `ce71122` plus this packet's build, and reconciled against
+  — measured on a quiet tree at `ce71122` plus this packet's build, **RE-MEASURED BY THE ARCHIVIST
+  AFTER ITS OWN WRITES at the `gravito_p4_s1_shadow_ranker_a` close and UNCHANGED at 1909**, and
+  reconciled against
   `CHANGELOG.md`, which carries the matching literal `**1909 passed**` (unsplit) in the
   release block `## [Unreleased]` -> `### In flight (not landed at the released commit)`.
   **CITED BY HEADING, NOT BY LINE NUMBER, from 2026-08-01 on** — the changelog grows from the
@@ -145,8 +147,8 @@
   *"the governance substrate is no longer the bottleneck. The bottleneck is now whether Gravito can
   begin making better decisions than today's planning approaches."*
   **THE SEQUENCE IS FIVE PHASES: P1 mutators/IDs/telemetry (DONE) -> P2 claim-scoped evidence
-  (DONE) -> P3 `accept_and_constrain` (DONE) -> P4 S1 shadow ranker (NEXT) -> P5
-  outcome/counterfactual telemetry.**
+  (DONE) -> P3 `accept_and_constrain` (DONE) -> P4 S1 shadow ranker (**DONE**) -> P5
+  outcome/counterfactual telemetry (**NEXT**).**
   **P4 CARRIES A DECLARED GOVERNANCE CEILING, AND IT IS THERE BECAUSE OF P3's DENSITY:**
   **`<=1 new census control, no new registry store, no new validator tool, no new suite file`.**
   Ledger at the end of P3: **97 controls, ~20 tools, ~1869 assertions, ZERO executive components.**
@@ -154,7 +156,159 @@
   before it ranks anything** — and P4 is the first phase whose output is supposed to be a
   **decision**, not a **record of a decision**.
   Read everything below as **substrate for P4**, not as governance for its own sake.
-- **Last closed packet:** `gravito_p3_accept_and_constrain_a`
+  **[P4 CLOSED 2026-08-01. THE CEILING WAS HELD, WITH ONE PAID-FOR EXCEPTION.** 0 new stores, 0 new
+  validator tools, 0 new suite files, 0 new governance primitives; **exactly ONE new file in the
+  whole range** — `build-os/metrics/rank-candidates.sh`, which IS the deliverable. The exception is
+  **2 census entries where the ceiling said <=1**, forced by a fixture qa reproduced verbatim at
+  base: `scan-controls` REFUSES at exit 2 because a refusal-capable `.sh` must own a registry entry
+  **at `gate`**, and S1 is Class C composing to `observe`, so it CANNOT own one. Split into
+  `ranker.s1_shadow_ordering` (C/untested/`observe`) + `ranker.s1_input_integrity` (A/red_driven/
+  `gate`) — the split `envelope.grant_composition`/`envelope.derivation_nonvacuity` already makes.
+  **No 21st mismatch: the declared count is still 20.** Residue (sss) records the general shape: the
+  anti-shelfware guard makes a `<=1 new control` ceiling **UNREACHABLE FOR ANY NEW REFUSING TOOL**,
+  and it will fire again on the next one. **The ledger the ceiling was written against has now
+  changed: 99 controls, ~20 tools, 1909 assertions, and ONE executive component.]**
+- **Last closed packet:** `gravito_p4_s1_shadow_ranker_a`
+  (`PACKET-0034-gravito-p4-s1-shadow-ranker-a`) — **THE FIRST EXECUTIVE COMPONENT: A REAL CANDIDATE
+  SET IN, AN IMMUTABLE EXPLAINED ORDERING OUT — AND THE FIRST ORDERING IT PRODUCED IS DEGENERATE**
+  (receipt `build-os/receipts/gravito_p4_s1_shadow_ranker_a.md`, commits `9742a10` + `af4ce0c` +
+  `b9896e0`, base `ce71122`, re-verified `git merge-base b9896e0 ce71122` = `ce71122`).
+  **P4 OF THE OPERATOR'S FIVE — THE MILESTONE.** Everything before P4 made Gravito better at
+  **preventing a bad action**; P4 is the first component that forms **an explicit, inspectable
+  preference among several permissible good actions.** The operator's success condition — *"a real
+  candidate set goes in, and an immutable explained ordering comes out"* — is **MET**.
+  **THE ID WAS DERIVED AND COLLISION-CHECKED, NOT ACCEPTED FROM A BRIEF.** `PACKET-0034` was taken
+  from `active_packet.md` (declared at `9742a10`, before the first implementation edit) and checked
+  against every `PACKET-*` in the tree: `decision_telemetry.tsv` allocates `PACKET-0007`..`-0033`
+  and nothing else. The P3 close is why this check exists — that brief supplied `PACKET-0020`, an id
+  already held by a **rejected** `DECISION-0008` candidate, which would have collided two candidates
+  under one key **inside the store S1 now reads**.
+  **DELIVERED.** `build-os/metrics/rank-candidates.sh` — **S1**, `heuristic_policy`, class C,
+  `untested`, `deployment_mode: shadow`, `output_semantics: ordered_candidates`, composition
+  `MIN(advise, observe, observe) = observe` and **registered at exactly that**. Nine required
+  outputs: stable candidate ids; frozen snapshots never recomputed; every candidate visible
+  including the last-ranked and the refused; per-candidate values; **the DECOMPOSITION, not just a
+  total**; self-amendment exclusions printed WITH reasons; the actual selection; `rank_of_selected`;
+  **zero dispatch authority**.
+  **THE ARTIFACT.** `DECISION-0010-p4-s1-shadow-ranker`, rule `s1-v1`: `PACKET-0032` and
+  `PACKET-0033` **excluded** `reason=self_amendment`; rank 1 `PACKET-0027` total 10 (Pareto
+  frontier), rank 2 `PACKET-0029` total 4, **rank 3 TIE** `PACKET-0030` and `PACKET-0031` total 3
+  each, rank 5 `PACKET-0028` total 1; `selected: PACKET-0027`, `rank_of_selected: 1`;
+  `ranking_digest: 2fa876c632bf81088793968a5d76501556fe283dc27ff97aad40459218df81c8`. **The digest
+  is byte-identical before and after the fix round**, and the archivist re-ran the tool at close:
+  exit 0, same digest, and `decision_telemetry.tsv`, `signal_snapshots.tsv` AND `residue.md` all
+  **byte-identical by md5 across the run** — the dispatch guarantee MEASURED, not asserted.
+  **Ties are reported, not broken. Excluded candidates stay on the record with reasons. Every absent
+  signal is NAMED absent** (5 MISSING, 2 UNINTERPRETED, 6 NEVER-COLLECTED; nothing imputed).
+  **Census 97 -> 99; suite 1869 -> 1909 (+40, ALL of it in `tests/mutator_registry_tests.sh`);
+  snapshots 44 -> 72 (+28, all bound to this one decision); decisions 9 -> 10; ZERO
+  RE-AUTHORISATIONS**, field-anchored across all 99 controls. **`observe` HAS ITS FIRST OCCUPANT
+  EVER** — `ranker.s1_shadow_ordering` — not by re-authorising anything but by being the first
+  control born there; the rung has been empty since `gravito_ladder_semantics_a` redefined it.
+  **THE CANDIDATE SET IS GENUINELY REAL, PROVEN BY CONTENT.** All 12 lettered anchors resolve in
+  `residue.md` by CONTENT: `(mm)` literally reads *"an ANCHOR TOKEN or a CONTENT HASH instead of a
+  line number"* -> `PACKET-0029`; `(nn)` names `maint.managed_set_replacement`, verbatim
+  `PACKET-0030`'s write surface; `(yy)` locates the hole at `tests/mutator_registry_tests.sh` **11**,
+  verbatim `PACKET-0031`'s; `(hhh)`-`(lll)` map **1:1** onto `PACKET-0027`'s six write-surface
+  tokens. A ranker fed a synthetic set proves nothing; this one was fed the repo's own open work.
+  **THE STRONGEST QA RESULT — THE NAMED DEFECT CLASS IS CAUGHT IN CODE.** qa appended a
+  **legitimately chained** orphan snapshot naming an undeclared candidate. `snapshot-verify` **PASSES
+  it at exit 0** — it really does parse and chain — and the ranker still refuses at exit 2:
+  *"snapshot(s) claim decision ... but name candidate(s) the decision does not ... **RESOLVABILITY
+  IS NOT IDENTITY**."* That is residue `(mm)`'s doctrine made mechanical inside the executive.
+  **FREEZING HOLDS BOTH DIRECTIONS:** gutting `residue.md` leaves the digest identical; editing a
+  frozen value in place trips `TAMPERED`, exit 2.
+  **`rank_of_selected: 1` IS NON-CIRCULAR, PROVEN BY TIMESTAMPS:** selection anchor at `5c8d19e`
+  **21:05:58**; ranker ABSENT at base `ce71122` **21:41:30**; created `af4ce0c` **22:28:34** — **82
+  minutes later**. The telemetry row is co-committed with the tool; **the referent is prior and
+  independently verifiable.**
+  **THE REVIEW'S REAL VALUE IS NEGATIVE AND IT IS RECORDED UNSOFTENED.**
+  **(1) THE FIRST ORDERING IS DEGENERATE.** `PACKET-0027` scores the MAXIMUM on all three frozen
+  signals and **Pareto-dominates every rival**; the reviewer swept **125 of 125 weight combinations**
+  and **every single-signal drop** and all return the same sole winner. **No monotone weighting can
+  dethrone it**, so the ordering carries **no information beyond "one candidate dominates"** and the
+  10-vs-4 margin is decorative. The reviewer's words: ***a result that survives every perturbation is
+  not robust — it is uninformative.***
+  **(2) THE MARGIN MEASURES RESIDUE LETTERING GRANULARITY, NOT VALUE.** `(hhh)`-`(lll)` are FIVE
+  letters for ONE defect class; re-letter as one item and the margin collapses **10-4 -> 6-5**, and
+  dropping the ruling signal as well makes **`PACKET-0029` WIN**.
+  **(3) TWO OF THE THREE SIGNALS ARE NOT INDEPENDENT** — a **single sentence** in `residue.md`
+  supplies both `residue_items_closed=5` and `residue_ruling_satisfied=1`, two projections of one
+  editorial act, weighted 1 and 1.
+  **(4) `residue_ruling_satisfied` IS LABEL LEAKAGE** — the recorded `selection_reason` is verbatim
+  *"the only candidate a standing ruling names as NEXT rather than as queued"*, so the signal is a
+  restatement of the answer. **Agreement obtained that way is not agreement.**
+  **(5) BUT `residue_items_closed` IS DERIVED, NOT ASSERTED, AND THE ASYMMETRY PROVES IT:**
+  `PACKET-0028` scores **1, not 2**, despite citing two letters, because `(nnn)` says *"AND `(ddd)`
+  STAYS QUEUED... do not mark it consumed."* **Fitting would not produce that.**
+  **(6) THE OUT-OF-SAMPLE REPLAY, OBTAINED BY THE REVIEWER AND NOT CLAIMED BY THE PACKET.** `s1-v1`
+  hand-evaluated on frozen v1 data authored **before S1 existed**, on the two decisions where the
+  human went AGAINST the cheap signal, with the scorer validated by first reproducing
+  `DECISION-0010` exactly: `DECISION-0008` selected `P0019` -> **rank 1 (tied)**; `DECISION-0009`
+  selected `P0023` -> **rank 1 (tied)**; with plausible guard-1 exclusions both become **sole rank
+  1**. **TWO CAVEATS, NEITHER OPTIONAL:** those write surfaces are **RECONSTRUCTED, NOT FROZEN** and
+  **must NEVER be entered as snapshots** (that is exactly the "recomputed against the current tree"
+  defect S1's own `demotion_requirement` names); and **a TIE out-of-sample against a LANDSLIDE
+  in-sample is an OVERFITTING SIGNATURE**, recorded BESIDE the positive result rather than under it.
+  **(7) GUARD 1 FAILED OPEN ON SPELLING, AND IT TOOK TWO AGENTS TO SEE IT.** qa built four aliases of
+  the protected path; **all four reached rank 1** while only the exact literal was excluded — against
+  a header claiming the guard *"fails CLOSED"* and is *"deliberately OVER-BROAD in the safe
+  direction"*. Fixed: `touches()` now NORMALISES (`./`, `//`, `..`, trailing `/`), wildcards are
+  **REFUSED not interpreted** (`guard1_uninterpretable_surface` — expanding one would screen frozen
+  evidence against the CURRENT tree), and **`set -f` was added; its absence is why qa saw `EVADE-D`
+  RANKED and the builder saw it EXCLUDED — the same tool, different working directory.** All five
+  fixtures now excluded; innocent neighbours still rank.
+  **(8) GUARD 1's REMAINING BLIND SPOT, DISCLOSED NOT WIDENED.** It screens reachability to the
+  PROMOTION MACHINERY but not to the EVIDENCE SUBSTRATE — `record-decision.sh`,
+  `signal_snapshots.tsv`, `decision_telemetry.tsv`, `residue.md`. **LIVE, NOT HYPOTHETICAL:
+  `PACKET-0029` is ranked 2 in this very ordering and writes `residue.md`, the file
+  `residue_items_closed` is DERIVED FROM.** Not widened on purpose: nearly every packet writes
+  `residue.md`, so protecting it turns the predicate into a wall. Residue `(zzz)`.
+  **(9) THE EXIT CONTRACT WAS FALSIFIED AND IS NOW TRUE.** When guard 1 excluded every candidate the
+  tool printed an EMPTY ordering and **exited 0**, against its own header. Now: `ordering: NONE —
+  every candidate was refused`, `rank_of_selected: excluded`, **exit 2**, all exclusions still
+  printed. Orchestrator-verified live.
+  **(10) THE BUILDER FOUND A BUG IN ITS OWN FIRST DRAFT** — `local t="$1" p="${t%%#*}"` expands the
+  OUTER `t`, making `touches()` true for everything. Split across two `local` lines with the reason
+  in a comment.
+  **THE VERDICT ON THE MILESTONE, IN THE REVIEWER'S OWN WORDS:** *"Yes, narrowly and honestly. It
+  forms a preference, publishes the decomposition, and refuses to rank its own promotion. It is not
+  governance wearing a label. **But the first ordering it produced is degenerate, so the executive
+  exists as a MECHANISM before it exists as a DEMONSTRATED CAPABILITY** — and the packet's own
+  residue says so."* `rank_of_selected: 1` is **uninformative at n=1** and the tool's own `note:`
+  output says so. **No overclaim anywhere in the diff.**
+  **DO NOT FIX THE SIGNAL SET. `s1-v2` IS A LATER PACKET** — the operator's ceiling reasoning applies
+  to S1's own shortcomings exactly as it applies to governance defects.
+  **DEPTH: 3 SERIAL STAGES — builder, then qa ‖ reviewer CONCURRENTLY, then the fix round. NO STAGE
+  4.** P3 hit stage 4 and the contract calls that a defect; here **the orchestrator verified the fix
+  round itself rather than opening another gate stage.**
+  **3 COMMITS — ONE OVER THE <=2 CAP**, same deviation and same reason as P3: the fix round landed as
+  its own commit rather than amending a commit the gates had already measured. Recorded, not
+  normalised. **The manifest is NOT fully disjoint and says so:** `9742a10` owns
+  `active_packet.md` ALONE (intersection with both others EMPTY, `comm -12` verified), while
+  `af4ce0c` and `b9896e0` **overlap on all 6 files the fix round touched** — separable by ORDER, not
+  by path. Guard convention **12 files / +1281 / -152**; net diff **12 / +1265 / -136**; the row
+  records the GUARD's numbers, per residue `(ggg)`: **fix by RECORDING, never by widening.**
+  **AN ARCHIVIST FINDING AT THIS CLOSE — THE SNAPSHOT COUNT HAS BEEN THE FILE'S LINE COUNT FOR TWO
+  CLOSES.** P1's close recorded **12** and was CORRECT; P2's recorded **71** against an actual **28**;
+  P3's recorded **87** against an actual **44** — **an overstatement of very nearly 2x**, in the store
+  whose entire purpose is that a later evaluation can trust it. The store carries 43 comment lines
+  plus a column header, and both wrong figures are `(total lines - 1)`. **The derivation changed
+  between P1 and P2 and nothing noticed.** This is `DEFECT-0003-duplicate-semantic-truth` in its
+  COUNTING form — the exact half P3 mechanised for citations and left to hand for counts, which is
+  why `PACKET-0027-p3b-count-derivation` exists and why S1 ranked it first. **The sealed receipts are
+  NOT rewritten**; both figures are corrected IN PLACE above with the correction visible.
+  **FINAL STATE AT `b9896e0`: 99 controls; 77 gate / 15 advise / 6 execute / 0 rank / 1 observe /
+  0 none; class A74 / B3 / C22; 20 declared mismatches; `evidence-policy.sh check` 25 of 99 split
+  6/5/14; 10 decisions; 72 signal snapshots; 1 mismatch disposition; 3 claim-scoped assertions;
+  8 mutator records; 0 live authority envelopes; suite 1909/0; maintenance 144/144;
+  `scan-controls`/`scan-mutators` exit 0; exactly ONE file added in the whole range; tree clean.**
+  All re-derived by the archivist at close from the registry files and the live tools.
+  **SECOND EYES: NONE — TENTH CONSECUTIVE PACKET.** `tool_router.md` was corrected at `ce71122` to
+  state plainly that this runtime has never had the capability and to REQUIRE the reviewer to say
+  *"second eyes: NONE, single-model"* rather than silently omit it. **The reviewer complied.** Every
+  verdict in this entire sequence is single-model.
+- **Prior:** `gravito_p3_accept_and_constrain_a`
   (`PACKET-0023-gravito-p3-accept-and-constrain-a`) — **A FIFTH DISPOSITION THAT CLEARS NOTHING,
   AND A LEASE WINDOW THAT WAS DECORATIVE AT BOTH ENDS AND WAS REACHING THE LICENCE MATRIX**
   (receipt `build-os/receipts/gravito_p3_accept_and_constrain_a.md`, commits `3bd2ab4` + `e68d931`
@@ -224,7 +378,11 @@
   own commit rather than amending a reviewed one; the right call and still a deviation, and it is
   downstream of the depth defect). 97 controls; 76 gate / 15 advise / 6 execute / 0 rank / 0 observe
   / 0 none; 20 declared mismatches; `evidence-policy.sh check` 25 of 97 split 6/5/14;
-  1 mismatch disposition; 3 claim-scoped assertions; 9 decisions; 87 signal snapshots; 0 live
+  1 mismatch disposition; 3 claim-scoped assertions; 9 decisions; **44** signal snapshots
+  (**CORRECTED 2026-08-01 at the P4 close — this line said 87, which was the FILE'S LINE COUNT minus
+  one, counting the store's 43 header comment lines as data. `grep -c '^SIGNAL-SNAPSHOT-'` at
+  `ead24bc` returns 44. See finding A of `build-os/receipts/gravito_p4_s1_shadow_ranker_a.md`**);
+  0 live
   authority envelopes; `./build-os/maintenance/run-tests.sh` 144/144; tree clean.** All re-derived
   by the archivist at close from the registry files and the live tools.
   **THE SUITE WAS RED AT HEAD UNTIL THIS CLOSE RECORDED ITS OWN METRICS ROW — 1865/4, NOT 1869/0.**
@@ -352,7 +510,9 @@
   25 of 93, split 6/5/14; `claim-evidence.sh validate` exit 0 (3 assertions);
   93 controls, 20 declared mismatches, 73 gate / 14 advise / 6 execute / 0 rank / 0 observe /
   0 none; 3 claim-scoped assertions (1 refuted / 1 supported / 1 untested, two of them on the SAME
-  subject); 8 decisions; 71 signal snapshots; 0 live authority envelopes; both `EVIDENCE_AXIS`
+  subject); 8 decisions; **28** signal snapshots (**CORRECTED 2026-08-01 at the P4 close — this
+  line said 71, the same line-count-not-row-count error; `grep -c '^SIGNAL-SNAPSHOT-'` at `c653508`
+  returns 28**); 0 live authority envelopes; both `EVIDENCE_AXIS`
   copies byte-identical at six tokens; 0 stale pathed refs tree-wide; tree clean.** All re-derived
   by the archivist at close directly from `control_registry.txt` and the live tools.
   **Both verdicts single-model — NO CODEX IN ANY PASS, for the SEVENTH packet running.**

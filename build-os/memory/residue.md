@@ -815,6 +815,14 @@
   receipt** and left two files naming different spans for the same three lines — **reinstating
   DEFECT-0003**. A single-model chain caught it only because the builder pushed back, for the fifth
   time in this sequence.]**
+  **[2026-08-01, P4: TENTH CONSECUTIVE PACKET — AND THE ROW IS NO LONGER MERELY UNBACKED, IT IS
+  CORRECTLY DECLARED.** `build-os/memory/tool_router.md` was corrected at `ce71122` to state plainly
+  that this runtime has never had a second-eyes capability, and to REQUIRE the reviewer to say
+  *"second eyes: NONE, single-model"* rather than silently omit it. **The reviewer complied at this
+  packet.** That closes the *"stop declaring the row"* half of this item and leaves the *"install
+  Codex"* half open. **The streak counter is advanced NINE -> TEN here rather than being left to go
+  stale a second time** — the failure this item is about. Every verdict in the entire five-phase
+  sequence is single-model, INCLUDING the verdict on the first executive component.]**
 - **(aaa) THE CLOSE ITSELF BROKE TREE-QUIET, AND ONE SUITE RUN WENT RED BECAUSE OF IT.** At the
   `gravito_p1_mutators_ids_telemetry_a` close the archivist launched
   `bash tests/build_os_tests.sh` in the background and then started
@@ -1430,6 +1438,37 @@ not to be fixed outside that packet.**
   the fix round on purpose**: treating a directory as covering its contents would also make
   `build-os` cover everything, which changes the live `DECISION-0010` ordering the packet's
   non-circularity proof is anchored to. It belongs with `s1-v2`.
+
+- **(aaaa) THE SIGNAL-SNAPSHOT COUNT HAS BEEN REPORTED AS THE FILE'S LINE COUNT FOR TWO CONSECUTIVE
+  CLOSES, AND AT P3 THAT NEARLY DOUBLED IT. FOUND BY THE ARCHIVIST AT THE P4 CLOSE, BY MEASUREMENT.**
+  `grep -c '^SIGNAL-SNAPSHOT-'` against each close's own commit gives: `a75c25e` (P1) **12**, and P1's
+  close recorded **12** — CORRECT; `c653508` (P2) **28**, and P2's close recorded **71**; `ead24bc`
+  (P3) **44**, and P3's close recorded **87**. The store carries **43 comment lines plus one column
+  header**, and both wrong figures are exactly `(total lines - 1)` — they counted the store's own
+  explanatory header as snapshot data. **THE DERIVATION CHANGED BETWEEN P1 AND P2 AND NOTHING
+  NOTICED**, which is the entire shape of the defect: a count restated by hand from a different
+  derivation each time, with no check that any two of them agree. **This is
+  `DEFECT-0003-duplicate-semantic-truth` in its COUNTING form** — the half P3 mechanised for
+  citations (via section 27) and left ENTIRELY TO HAND for counts, which is why
+  `PACKET-0027-p3b-count-derivation` exists and why S1 placed it at rank 1. **The sealed receipts are
+  NOT rewritten — receipts are append-only history.** `current_state.md` is corrected in place at the
+  P4 close with the correction visible, and the true count at `b9896e0` is **72**. **Note the
+  direction this points:** it is a fresh, independent instance of the defect class the rank-1
+  candidate exists to close, found by an agent that was not ranking anything. It does NOT rescue
+  `(xxx)` — the ordering is still degenerate for the reasons given there — but it is evidence about
+  the CANDIDATE rather than about the RANKER. **The durable fix is a guard that DERIVES a store's
+  cardinality instead of comparing two remembered copies of it**, which is the same remedy `(ooo)`
+  named for the suite total and which nothing has yet built.
+- **(bbbb) THE CLOSE BRIEF'S ONE CITATION WAS OFF BY 115 LINES, AND IT IS RECORDED RATHER THAN
+  COPIED.** The P4 close brief attributed the *"`rank_of_selected` is uninformative at n=1"* sentence
+  to line **412** of `build-os/metrics/rank-candidates.sh`. At `b9896e0` that line sits inside the
+  **Pareto domination loop**; the sentence is emitted by the tool's `note:` line at **527** of a
+  544-line file. **The quotation is true and the pointer is not** — which is precisely `(mm)`'s
+  ruling (a citation checked for RESOLVABILITY is not checked for IDENTITY) and precisely why
+  `PACKET-0029-citation-anchor-tokens` — anchor tokens or content hashes instead of line numbers — is
+  ranked 2 in the ordering S1 produced. It is recorded here **by content, never by number**. **This is
+  the SIXTH time in this sequence a figure relayed by an orchestrator or a reviewer has been corrected
+  downstream, and the SECOND caught by the archivist** (see `(fff)`, which enumerated the first four).
 
 ---
 _Append-only working notes._
