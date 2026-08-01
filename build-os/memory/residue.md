@@ -511,6 +511,8 @@
 
 ### From `gravito_mismatch_refuted_a` (2026-08-01, receipt `build-os/receipts/gravito_mismatch_refuted_a.md`)
 
+- **[SUPERSEDED 2026-08-01 BY ITEM (pp) — THE COUNT IS FOUR, NOT TWO. Left in place because the
+  sweep-as-a-throwaway half is still true and unbuilt.]**
 - **(aa) PROSE CITATIONS HAVE **TWO** KNOWN ESCAPE FORMS, AND THE ONLY WORKING SWEEP IS A
   THROWAWAY.** The known form is a **bare `:NNN` reference**. The second is **`MISMATCHES.md` §10's
   nonvacuity-table row form, which names a file with NO LINE NUMBER AT ALL** — a citation shape that
@@ -541,6 +543,13 @@
   advisory axis was designed so that **nothing gets demoted automatically with no operator in the
   loop**; this guard **removes the operator's ability to apply the demotion BY HAND as well.** The
   **reviewer declined to demand a move** — it is a design call, recorded as open.
+- **[RESOLVED 2026-08-01 BY DEMONSTRATION — NO THIRD COMMIT AND NO HOOK WERE NEEDED.]**
+  `gravito_ladder_semantics_a` spent **Commit 1 on the declaration ALONE** (`576751a`): trivially
+  green in isolation, the `<=2-commit` cap intact, and **git now corroborates the ordering**.
+  Nothing ever required the docs to be the SECOND commit. **This is the standing pattern from
+  here on.** The item below is left intact as the record of the tension it answers. **The
+  underlying control gap is NOT closed** — `bandwidth.active_packet_singleton` still refuses two
+  declared packets and permits zero, so pure omission passes clean; see (c)/(u).
 - **(ee) "DECLARE BEFORE BUILDING" AND THE `<=2-COMMIT` RULE ARE IN GENUINE TENSION — OPERATOR
   DECISION, DELIBERATELY UNRESOLVED.** `gravito_mismatch_refuted_a` **DID declare itself before
   building**, which is the fix for item (u). **But the reviewer observed that the declaration landed
@@ -613,6 +622,117 @@
   withdrew its own prior ruling** (item hh) and **a false remedy survived a full review round** (item
   ii) — both are exactly what an independent second model is for, and the declared second model is
   the one that never ran. **Either install Codex or stop declaring the row.**
+
+- **(mm) THE CITATION GUARD CHECKS RESOLVABILITY, NOT IDENTITY — QUANTIFIED, AND IT RETROACTIVELY
+  DISCOUNTS EARLIER CLAIMS.** qa located the cause at **`build-os/registry/scan-controls.sh:362-386`**:
+  the `evidence_refs` loop tests **existence** (`[ ! -f "$REPO/$rf" ]`), **numeric**
+  (`case "$rl" in ''|*[!0-9]*)`), **in-bounds** (`[ "$rl" -le "$tot" ]`) and **not-blank**
+  (`vacuous_why`). **IT NEVER COMPARES CONTENT.** Measured across the three tools whose refs drifted:
+  **27 of 27 would have cited a DIFFERENT LINE**; `VACUOUS-REF` caught **7**; **20 PASSED EVERY
+  CHECK WHILE SILENTLY WRONG.**
+  **THE REVIEWER'S COROLLARY, WHICH MUST BE KEPT VERBATIM BECAUSE IT DOWNGRADES PRIOR RESULTS:
+  a content match at a SINGLE COMMIT tests RESOLVABILITY; only a CROSS-COMMIT comparison tests
+  IDENTITY.** Several *"zero drift, 287/287 verified"* results earlier in this sequence were **the
+  former and were reported as the latter** — true statements of a **weaker property** than the one
+  claimed. **Discounted, not retracted.** **The durable fix is an ANCHOR TOKEN or a CONTENT HASH
+  instead of a line number**, which also subsumes item (aa)'s sweep-as-a-script. Not built.
+- **(nn) THE MUTATION-CENSUS COVERAGE GAP — THE REVIEWER CALLED IT THE PACKET'S MOST VALUABLE OUTPUT
+  AND RULED IT THE NEXT PACKET.** `build-os/registry/MISMATCHES.md` §15 surveys all 81 controls
+  against the new `execute` rung.
+  **The sharp case is NOT at `gate`.** `maint.managed_set_replacement` sits at **`advise`** while its
+  declared `output` is *"files copied into an installed repo, replacing prior managed copies"*, its
+  `failure_behavior` is *"none that stops anything"* and its `rollback_behavior` is *"none; a managed
+  file's local edits are lost on install"*. `advise` means *the output may influence a human or a
+  higher-authority control*. **Copying files over a user's edits is not influence.** On the corrected
+  ladder that is `execute` — **two rungs up** — and it is `unvalidated`, so nobody has watched it.
+  **FIVE MODULES DURABLY MUTATE AND NOT ONE OF THOSE WRITE ACTIONS IS A REGISTERED CONTROL AT ANY
+  AUTHORITY:** `build-os/maintenance/rotate-memory.mjs` (`renameSync` **onto the live memory file** —
+  the most consequential write in the system), `build-os/tools/swarm-merge.sh` (creates a commit
+  behind `--commit`), `build-os/metrics/record-packet.sh` (appends to the live store),
+  `.claude/hooks/build-os-identity.sh` (writes the identity stamp into the repo),
+  `build-os/tools/specialist-handoff.sh` (takes a lock under `$HOME`).
+  **THE REVIEWER'S RULING ON THE PACKET'S OWN DEFENCE, KEEP IT VERBATIM:** *"the controls are checks
+  and the mutations belong to the modules they live in"* is **sound as a description of what the
+  registry covers, and convenient as a reason not to extend it** — and **the most consequential
+  write in the system has no entry.**
+  **Registering those actions is a RE-AUTHORISATION and is therefore the OPERATOR'S ACT.** Nothing
+  in the closing packet performed one; `evidence-policy.sh check` is **19 of 81, 6/5/8 — unmoved**.
+- **(oo) A PUSHED COMMIT SHIPPED RED, AND THE CLOSE CHECKLIST IS THE CAUSE — ORCHESTRATOR DEFECT.**
+  qa confirmed that **`2df61ae` — which is PUSHED —** ships `./build-os/maintenance/run-tests.sh` at
+  **143 passed / 1 failed**. Cause: the archivist close that wrote it cleared
+  `build-os/packets/active_packet.md` to **2** `^## ` blocks, while `rotate-memory.mjs`'s two-pass
+  rotation proof needs **>=3 blocks per rotating file** (`tests/scaffold_seeding_tests.sh:242`).
+  **NOTHING CAUGHT IT BECAUSE THAT SUITE IS NOT CHAINED INTO THE 1636 AND THE ORCHESTRATOR'S CLOSE
+  BRIEF DID NOT ASK FOR IT.** **Record it as an orchestrator defect, not an archivist one**: a close
+  checklist that omits a live suite is how a red commit reaches a remote. **`576751a` alone repairs
+  it** (2 blocks -> 10). **Remedy: chain that suite, or name every live suite in the close checklist.**
+  **THE SHARPER HAZARD WAS PARTLY REFUTED, AND THE CORRECTION IS THE POINT.** The record said a
+  zero-block file *"silently never rotates"*. Measured: a zero-block file **genuinely never rotates
+  and fails nothing** — byte-identical after `--apply`, exit **0** — **but it is NOT SILENT**;
+  `rotate-memory.mjs` prints `WARNING: <path>: the block delimiter /^## / matched NOTHING … NOTHING
+  CAN EVER ROTATE OUT OF IT` to stderr, and that warning exists at base with the module untouched.
+  **The failure mode is AN IGNORABLE WARNING, NOT SILENCE.** Corrected in the closing packet's own
+  prose and **annotated in place** in `current_state.md` — annotated rather than rewritten because
+  the surrounding entry is a historical packet log with a commit pin. **The receipt and the released
+  `CHANGELOG.md` block are frozen records and were deliberately left carrying the wrong word.**
+- **(pp) FOUR ESCAPE FORMS FOR THE SAME CLASS OF GUARD, ALL THE SAME SHAPE — supersedes item (aa)'s
+  count of two.** Every one is **a guard written against ONE surface form and blind to its
+  siblings**:
+  1. **Bare `:NNN` citations**, with the filename elsewhere in the sentence.
+  2. **`MISMATCHES.md` §10's table rows**, which name a file with **no line number at all**.
+  3. **LINE-WRAPPED ENUMERATIONS** — `none < observe < advise` on one line, `< rank < gate)` on the
+     next. **No same-line grep can see it; a multiline scan finds it at once.** This is how a
+     **FIFTH** stale five-rung ladder survived in `tests/neurocosmology_crosswalk_tests.sh` — **a
+     file the packet had already edited** — past the orchestrator's sweep AND the reviewer's first
+     pass.
+  4. **MARKDOWN TABLE-ROW MAPPINGS** — `| shadow | observe | … |`, where the new guard expects
+     `-> observe`. **`tests/evidence_policy_tests.sh` §21's successor block is therefore
+     STRUCTURALLY VACUOUS OVER `README.md`, THE FIRST OF ITS SEVEN LISTED SITES.** Proven, not
+     argued: that row was rewritten to carry a consumption clause and **all three blocks missed it**.
+     **The rule is sound; the implementation covers one syntax of two.** Recorded rather than
+     patched, because patching it inside a stage-3 round is how fix lists arrive in installments.
+  **AND THE PACKET REPRODUCED ITS OWN HEADLINE DEFECT TWICE.** It found a guard checking the wrong
+  property, then built §21 in the same shape one level up: **§21 greps only ONE of the retired rule's
+  TWO wordings** — README's *"nothing reads the result"* but not the deployment axis's *"nothing
+  consumes it"* — **which is exactly why the stale definition survived in the file that OWNS the
+  axis** — and its successor block covers **one of the mapping's two syntaxes**. Both found by
+  review, fixed or recorded, and named in the artefact.
+- **(qq) THE `observe`/`advise` BOUNDARY IS NOW INTENT-BASED AND NO LONGER MECHANICALLY CHECKABLE —
+  RECORDED AS A COST, NOT AS A WIN.** `gate` has a test (*exits non-zero*), `execute` has one
+  (*performs a durable write*), `none` has one (*names no consuming policy*). **`observe` USED TO
+  have one** — non-consumption is greppable — **and defining the rung by CONSEQUENCE removes it.**
+  **Three of six rungs are now separated by the author's assertion alone.** **This was the right
+  trade** — the checkable boundary is precisely what made the rung **unreachable for 67 of 81
+  controls** — **and the loss is real.** Stated in `build-os/registry/README.md` §2 and in the
+  receipt. **Anything that later claims the ladder is machine-verifiable end to end is wrong.**
+  Related, and worth keeping separate: **`execute` is EARNED, not another empty rung.** The
+  reviewer's distinction — **`rank` is 0-occupancy because nothing in the system ranks, so the
+  concept has NO REFERENT; `execute` is 0-occupancy because FIVE REAL, NAMED, DURABLE MUTATORS EXIST
+  AND ARE UNREGISTERED.** Occupants demonstrated by survey, not asserted.
+- **(rr) THE LADDER'S SPELLING SWEEP STAYS DEFERRED — ALL THREE GROUNDS UPHELD, THE EVIDENCE FOR IT
+  WAS NOT.** `MISMATCHES.md` §16. The reviewer upheld: (i) it lands in **a different site set** from
+  the semantics sweep; (ii) **the five-rung string is a PREFIX of the six-rung one**, so it needs an
+  enumeration-**CONTINUATION** test — **a containment test passes on the correct string**; (iii)
+  bolting a second guard onto a stage-3 round is how fix lists arrive in installments.
+  **WHAT WAS UNSOUND WAS THE DEFERRAL'S EVIDENCE, NOT THE DEFERRAL.** §16 claimed *"four live places
+  … listed so the packet can prove it found them all."* **It was five** — the fifth being the
+  line-wrapped one at (pp)(3). **The wrong number is LEFT VISIBLE IN THE RECORD ON PURPOSE**, on the
+  orchestrator's call: **a completeness claim that turned out false is the strongest available
+  argument for the guard §16 was deferring**, and it is **the same enumeration-plus-assertion defect
+  the packet had just fixed at item 10.**
+  The sharpest of the found sites is kept here too: **a PASSING TEST WHOSE TRANSCRIPT PRINTED A
+  FALSE LADDER.** Both suites compared against the six-rung `$LADDER` — **the assertion was right** —
+  and then reported success with a **hard-coded five-rung string**. **The proof was right and the
+  evidence it emitted was wrong**, which is the worst kind, because it is the one a reader trusts.
+  All five were repaired by hand and the `ok` messages now derive from `$LADDER`.
+- **(ss) SECOND-EYES DECLARED AND NOT DELIVERED — FIFTH PACKET RUNNING, AND THIS TIME IT GATES A
+  RETROACTIVE CLAIM.** `build-os/memory/tool_router.md:368` routes reviewer second-eyes to Codex;
+  `codex` is not on PATH and no Codex plugin is installed. **Every verdict in
+  `gravito_ladder_semantics_a` — the review and both re-reviews — is single-model.** It matters
+  here specifically: **the reviewer's resolvability-vs-identity corollary retroactively discounts
+  earlier "zero drift" results across several packets** (item mm), and a retroactive downgrade of
+  prior evidence is exactly what an independent second model exists to check. **Either install
+  Codex or stop declaring the row.**
 
 ## Known risks / debt
 
@@ -757,9 +877,13 @@
   `gravito_evidence_policy_matrix_a`, are genuinely local-only**, and they remain so pending
   explicit go. **[EXTENDED 2026-08-01]** Local-only now also includes `77a0040` (that packet's
   close), `88052e7` + `a7ab841` (`gravito_authority_envelope_a`) and its close `c52915f`, and
-  `b25f3f7` + `566443f` (`gravito_mismatch_refuted_a`) and its close commit. No claim is made about whether those earlier pushes carried a go; the record is
+  `b25f3f7` + `566443f` (`gravito_mismatch_refuted_a`) and its close `2df61ae`, and `576751a` +
+  `d0eff10` (`gravito_ladder_semantics_a`) and its close commit. No claim is made about whether those earlier pushes carried a go; the record is
   corrected to match git and the discrepancy is flagged for the operator. **Nothing was pushed,
   merged, tagged, PR'd or deployed by the archivist.**
+  **AND A PUSHED COMMIT IS RED.** `2df61ae` — on the local side of that boundary but written by the
+  same close chain — ships `./build-os/maintenance/run-tests.sh` at **143/144**. See item (oo).
+  **Do not treat pushed history as green just because the 1636 was green.**
 - **[RESOLVED 2026-08-01 — "NO CHANGE", ON MEASUREMENT. NOT AN OPEN BOUNDARY ANY MORE.]**
   Re-authorising `maint.tripwire_coverage_scan` **was authorised** by the operator's step-3 ruling
   and `gravito_mismatch_refuted_a` **exercised that authorisation and declined to use it**: the
@@ -767,11 +891,25 @@
   gated arm**, and refused; retirement is strictly worse. **The control stays at `gate` with its
   mismatch declared.** See residue item (p). **No envelope was written and the store still holds 0
   live grants.**
-- **THE THREE OPERATOR DECISIONS FROM `gravito_mismatch_refuted_a` ARE OPEN AND NONE IS TAKEN:**
-  the missing **fifth outcome** (accept-and-constrain, needing an operator envelope — item bb); the
-  **ladder's definitional bug** and its true radius of six prose sites plus `OBSERVE-LB` (item cc);
-  and **`OBSERVE-LB`'s placement** on the gating path while the axis it defends only advises
-  (item dd).
+- **[UPDATED 2026-08-01] OF THE THREE OPERATOR DECISIONS FROM `gravito_mismatch_refuted_a`, ONE IS
+  CLOSED AND ONE IS ADDRESSED.** **Decision 2 — the ladder's definitional bug (item cc) — is FIXED**
+  by `gravito_ladder_semantics_a`, at **seven** semantic sites (not six) plus `scan-controls.sh`.
+  **Decision 3 — `OBSERVE-LB`'s placement (item dd) — is ADDRESSED**: the check was re-keyed to
+  consequence and **moved off the gating path** onto an advisory channel that prints and counts but
+  never sets the exit code, while a genuine violation still refuses at exit 2. **Decision 1 — the
+  missing fifth outcome (item bb) — is now SPELLABLE and still UNTAKEN**: `observe` is finally a
+  legal destination, and moving any control onto it remains a governance act nobody has performed.
+- **THE MUTATION CENSUS IS THE NEW BLOCKING OPERATOR DECISION, AND THE REVIEWER RULED IT THE NEXT
+  PACKET.** Five modules durably mutate and **not one of those write actions is a registered control
+  at any authority**; `maint.managed_set_replacement` sits at `advise` while copying files over a
+  user's edits with **no rollback**. **Registering any of it is a RE-AUTHORISATION and is the
+  operator's act; nothing has performed one.** Item (nn).
+- **Two further questions are OPEN BY DESIGN:** **should Class A license `execute`?** — today **no
+  class does**, deliberately, so adding the rung granted nobody anything. And **should a fifth
+  DEPLOYMENT mode for mutation exist?** — the discarded reading of `autonomous -> execute` (*"an
+  operator authorising autonomy did not thereby authorise mutation"*) is real but misplaced, since
+  the axis states a **cap** and `L_effective` is a **minimum**; the question survives in
+  `build-os/registry/README.md` §3b.
 - **Whether "declare before building" gets a third commit or a pre-commit hook** is an operator
   decision and is **deliberately unresolved** — the `<=2-commit` rule is in genuine tension with it
   (item ee).

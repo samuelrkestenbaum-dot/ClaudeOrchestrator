@@ -4,141 +4,73 @@
 > the builder implements exactly this and nothing else; the archivist clears it
 > on close. One packet at a time.
 
-## Status: IN FLIGHT — `gravito_ladder_semantics_a`
+## Status: NO PACKET IN FLIGHT
 
-- **Lane:** substantive (builder → qa → reviewer → archivist)
-- **Branch:** `claude/project-handoff-merge-ramhds`
-- **Base:** `2df61ae` (verified by `git merge-base`)
-- **Commit budget:** ≤2, Commit-1 green in isolation
-- **Declared:** before the builder's first edit to any other file
+`gravito_ladder_semantics_a` **closed 2026-08-01** — receipt at
+`build-os/receipts/gravito_ladder_semantics_a.md`, commits `576751a` + `d0eff10`,
+base `2df61ae`, plus this close commit. Verdict **pass as fixed** (qa GREEN with 5
+non-functional findings; reviewer `fix-then-pass` twice). All fix rounds landed and
+were re-verified.
 
-## Why this packet exists
+**What it did:** corrected the authority ladder on the operator's ruling. `observe`
+is redefined by **consequence** — *"may be recorded and consumed for visibility;
+causes no operational consequence"* — instead of by non-consumption, and **`execute`**
+is added as a sixth rung above `gate`. The ladder is now
+`none < observe < advise < rank < gate < execute`.
 
-`gravito_mismatch_refuted_a` proved the authority ladder is **definitionally
-broken at the bottom**: `refuted → observe` is an **unreachable remedy**.
-`README.md` §2 defines `none` as *"nothing consumes it"* **and** `observe` as
-*"it measures and records. Nothing reads the result."* Both bottom rungs are
-defined by **non-consumption**, so the ladder has **no rung meaning "it is read,
-but it causes nothing"** — exactly the state a refuted-but-wired-in control must
-occupy. `observe` is foreclosed for 67 of 81 controls and 0 sit there.
+**What it changed about any control's licence: NOTHING.** `evidence-policy.sh check`
+is **19 of 81, split 6/5/8 — UNMOVED**. Zero governance-field diff lines. No class
+licenses `execute`; **0 of 25 grid cells reach it**. The packet changed what `observe`
+*means*, not what anything is licensed to do — which is exactly the predicted result,
+because the previous packet had proved `refuted → observe` was an **unreachable
+remedy** (foreclosed for 67 of 81, 0 sitting there) purely for definitional reasons.
 
-## The operator's ruling — the corrected ladder
+## THIS FILE'S SHAPE IS LOAD-BEARING — it must carry ≥3 `^## ` blocks
 
-| authority | corrected meaning |
-|---|---|
-| `none` | no runtime output or consumer |
-| `observe` | output may be recorded and **consumed for visibility**; it causes **no operational consequence** |
-| `advise` | output may influence a human or a higher-authority control |
-| `rank` | output may order already-permitted alternatives |
-| `gate` | output may allow or prohibit |
-| `execute` | output may **directly cause mutation** |
+**Do not clear this file to two headings.** `rotate-memory.mjs`'s `FILE_SPECS` splits
+it on `blockDelimiter: /^## /`, and the maintenance layer's two-pass rotation proof
+(`tests/scaffold_seeding_tests.sh:242`) needs **≥3 blocks per rotating file**.
 
-Two changes: **`observe` is redefined by CONSEQUENCE rather than by
-CONSUMPTION**, and **`execute` is added as a sixth rung above `gate`**.
+**This is not theoretical. It has already shipped red once.** The close of
+`gravito_mismatch_refuted_a` left this file with exactly **2** blocks, so
+`./build-os/maintenance/run-tests.sh` went **143/144** at `2df61ae` — **a commit that
+was pushed.** That suite is **not chained into the 1636** and the orchestrator's close
+brief did not ask for it, so nothing caught it. `576751a` repaired it (2 blocks → 10).
 
-## Scope — in
+**The sharper hazard, with its wording corrected.** A count of **0** means the
+delimiter does not match the file's format at all and **nothing can ever rotate out of
+it**. That state is byte-identical after `--apply`, exit **0**, and **nothing fails** —
+but it is **NOT silent**: `rotate-memory.mjs` prints
+`WARNING: <path>: the block delimiter /^## / matched NOTHING … NOTHING CAN EVER ROTATE
+OUT OF IT` on stderr. **The failure mode is an IGNORABLE WARNING, not silence.**
 
-1. Redefine `observe` at **all six semantic sites**, by content:
-   `README.md` (`none` row, `observe` row, §3b `shadow` row),
-   `build-os/registry/authority_envelopes.txt` header,
-   `build-os/tools/authority-envelope.sh` header,
-   `build-os/tools/evidence-policy.sh` header.
-2. Add `execute` as the sixth rung: every `LADDER` string and `rank_of()`-style
-   mapping in `evidence-policy.sh`, `authority-envelope.sh`, `scan-controls.sh`
-   and the suites.
-3. Reassess `OBSERVE-LB` in `scan-controls.sh`: under the corrected `observe`,
-   "load_bearing AND observe" is **no longer contradictory**. Decide and argue
-   whether the guard dissolves, narrows, or merely moves off the gating path.
-   It **must not** remain a `gate` that blocks the operator from applying a
-   remedy the advisory axis recommends.
-4. Decide and **state** whether `DEPLOYMENT_AXIS`'s `autonomous` maps to
-   `execute` or stays at `gate`.
-5. Tests first, at every changed site.
-6. `CHANGELOG.md` (cite by release-block heading, never by line number).
+The underlying control gap is still open: `bandwidth.active_packet_singleton` refuses
+**two** declared packets but permits **zero**, so a packet that simply omits its
+declaration passes clean. Residue **(c)** / **(u)**.
 
-## Scope — out (record, do not act)
+## Next packet — staged, NOT declared
 
-- **Whether Class A should license `execute`** — a governance question. Record.
-- **The mutation census**: which of the 81 controls actually perform a write and
-  are registered at `gate` (`rotate-memory.mjs` writes; `swarm-merge.sh`
-  merges). **Report as a finding. Re-authorise nothing.**
-- Any change to a control's `class`, `runtime_authority`, `authority_mismatch`
-  or `empirical_status`.
+**The reviewer ruled the next packet should be the MUTATION CENSUS coverage gap**
+(`build-os/registry/MISMATCHES.md` §15). Five modules durably mutate and **not one of
+those write actions is a registered control at any authority** —
+`rotate-memory.mjs` (renames onto the live memory file — the most consequential write
+in the system), `swarm-merge.sh`, `record-packet.sh`, `.claude/hooks/build-os-identity.sh`,
+`specialist-handoff.sh`. The sharp case is **not** at `gate`:
+`maint.managed_set_replacement` sits at **`advise`** while its declared output is
+*"files copied into an installed repo, replacing prior managed copies"*, its failure
+behaviour is *"none that stops anything"* and its rollback is *"none; a managed file's
+local edits are lost on install"*.
 
-## Expected result — verify, do not force
+**Registering those actions is a RE-AUTHORISATION and therefore the operator's act.**
+Nothing here declares it. See `build-os/memory/current_state.md` → *Next (candidates)*
+for the full ordered list, including the citation guard's **resolvability-vs-identity**
+fix (anchor token or content hash, not a line number) and the ladder-**spelling** sweep
+deferred to §16.
 
-Redefining `observe` changes **no cap value** (`refuted` still caps at
-`observe`); it changes what `observe` **means**, making it a **legal
-destination**. So `evidence-policy.sh check` should stay at **19 of 81, split
-6/5/8**. **If the count moves, explain it control by control — do not adjust
-anything to make it match.**
+## Declaring the next packet
 
-## Verification gates
-
-- `bash tests/build_os_tests.sh` — report exact new total (was 1617 / 0)
-- `./build-os/maintenance/run-tests.sh` — 144/144
-- `bash build-os/registry/scan-controls.sh check` — exit 0
-- `bash build-os/tools/evidence-policy.sh check` — count + split, with any delta
-  from 19 / 6-5-8 explained
-- `RELEASE_METADATA_LIVE_SUITE=1 bash tests/release_metadata_tests.sh`
-- All six semantic sites agree **by content**
-- Commit-1 green in isolation in a clean clone
-- `git status --porcelain` empty
-
-## Hard gates
-
-Local commits only. **NO push, merge, tag, PR, deploy, secrets, `git config`.**
-Do not touch `/home/user/empathiq-website`. Do not touch `build-os/memory/*`.
-**Do not weaken, delete or exempt any guard to make the suite green** — if a
-guard and a value conflict, the value is wrong until proven otherwise.
-
----
-
-## On the declaration-ordering tension (residue item **ee**)
-
-`gravito_authority_envelope_a` was built and closed while this file read **NO
-PACKET IN FLIGHT**. `gravito_mismatch_refuted_a` declared itself first, but the
-declaration **landed in the same commit as the build**, so git could not attest
-the ordering; the reviewer noted the `≤2-commit` rule and "declare before
-building" appeared to be in genuine tension, needing a third commit or a hook.
-
-**This packet resolves that tension without a third commit and without a hook:**
-it spends **Commit 1 on this declaration alone** — trivially green in isolation —
-and lands the entire build in **Commit 2**. Nothing says the docs must be the
-second commit. Ordering is now attested by git.
-
-## This file's SHAPE is load-bearing — it must carry ≥3 `^## ` blocks
-
-Found while declaring this packet, and it was **already red at base `2df61ae`**:
-`./build-os/maintenance/run-tests.sh` was **143 passed / 1 failed**, not the
-144/144 the packet brief expected.
-
-`rotate-memory.mjs`'s `FILE_SPECS` splits this file on `blockDelimiter: /^## /`,
-and the maintenance proof *"real content: all 8 reported byte counts recomputed
-from disk, first rotation AND re-rotation"* needs a **two-pass** rotation, so
-every rotating file must carry **≥3 blocks**. `current_state.md` and
-`residue.md` carry 3. When `gravito_mismatch_refuted_a` closed, it left this
-file with exactly **2** `## ` headings — so the suite went red on live content,
-not on code.
-
-Note the sharper hazard named in that assertion: **a count of 0 means the
-delimiter does not match the file's format at all, and nothing can ever rotate
-out of such a file.** A prose-only rewrite of this file could disarm its own
-rotation.
-
-**It would not do so *silently* — that word was wrong here and is corrected.**
-Measured: a zero-block file is byte-identical after `--apply`, exit is **0**, and
-**nothing fails** — but `rotate-memory.mjs` prints `WARNING: <path>: the block
-delimiter /^## / matched NOTHING … NOTHING CAN EVER ROTATE OUT OF IT` to stderr.
-That warning exists at base and `rotate-memory.mjs` was not touched. The failure
-mode is **an ignorable warning**, not silence.
-
-Fixed here by promoting this packet's own section headings from `###` to `##`,
-which is a change to **this packet's file only** — no guard was weakened,
-deleted or exempted, and `rotate-memory.mjs` was not touched.
-
-The underlying control gap is still open:
-`bandwidth.active_packet_singleton` refuses **two** declared packets but permits
-**zero**, so a packet that simply omits its declaration passes clean. The floor —
-*assert a declared packet EXISTS while a packet is in flight* — remains unbuilt
-(`residue.md` items **c** / **u**).
+Write the declaration **into this file, as its own commit, BEFORE the builder's first
+edit to any other file.** `gravito_ladder_semantics_a` proved that works: Commit 1 was
+the declaration **alone** — trivially green in isolation, keeps the ≤2-commit cap, and
+**lets git attest the ordering** without a third commit and without a pre-commit hook.
+Nothing requires the docs to be the second commit.

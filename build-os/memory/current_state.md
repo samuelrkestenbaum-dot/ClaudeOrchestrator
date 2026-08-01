@@ -10,7 +10,7 @@
   plan → build → prove → review → record system.
 - **Primary branch / base:** `claude/add-build-os` (current integration base; no
   `main` present in this environment). Active work branch:
-  `claude/project-handoff-merge-ramhds` (tip `566443f`). Merge-base with
+  `claude/project-handoff-merge-ramhds` (tip `d0eff10` before this close commit). Merge-base with
   `origin/claude/add-build-os` = `7ef50e8`.
   **CORRECTED 2026-07-31 — this line previously claimed the branch was UNPUSHED, and it is not.**
   `refs/remotes/origin/claude/project-handoff-merge-ramhds` is at **`6b01173`**, and
@@ -18,7 +18,12 @@
   (`6b01173`, `321dced`, `e8f34ed`, `785a851`, `d30aeab`). **Local-only as of 2026-08-01:
   `105cb75`, `0555717`, `77a0040` (`gravito_evidence_policy_matrix_a` + its close) and
   `88052e7`, `a7ab841` (`gravito_authority_envelope_a`) and its close `c52915f`, and
-  `b25f3f7`, `566443f` (`gravito_mismatch_refuted_a`), plus this close commit.**
+  `b25f3f7`, `566443f` (`gravito_mismatch_refuted_a`) and its close `2df61ae`, and `576751a`,
+  `d0eff10` (`gravito_ladder_semantics_a`), plus this close commit.**
+  **NOTE, and it is the reason a whole finding exists: `2df61ae` WAS PUSHED AND IT SHIPS RED** —
+  `./build-os/maintenance/run-tests.sh` is **143/144** at that commit, because the close that wrote
+  it left `active_packet.md` with 2 `^## ` blocks and the rotation proof needs >=3. **`576751a`
+  repairs it.** Do not treat the pushed history as green.
   No claim is made here about whether those pushes carried an explicit go; the record is
   corrected to match git and the discrepancy is flagged for the operator.
 - **Version:** `0.1.0` (`VERSION`), pre-1.0 — **installable, not yet API-stable**.
@@ -32,10 +37,13 @@
   `no tags` because `tests/release_metadata_tests.sh:322` requires it, so the residue item is
   annotated rather than rewritten. Whether the tag was created with an explicit go is not
   determinable from here and no claim is made.
-- **Build/test command:** `bash tests/build_os_tests.sh` (1617 checks; no network; temp dirs)
-  — measured on a quiet tree at `566443f`, and reconciled against `CHANGELOG.md`, which
-  carries the matching literal `**1617 passed**` at `CHANGELOG.md:24` (present exactly once,
-  unsplit). **This pair had gone stale in four consecutive packets** (657 → 1418 → 1485 → 1597),
+- **Build/test command:** `bash tests/build_os_tests.sh` (1636 checks; no network; temp dirs)
+  — measured on a quiet tree at `d0eff10`, and reconciled against `CHANGELOG.md`, which
+  carries the matching literal `**1636 passed**` (present exactly once, unsplit) in the
+  release block `## [Unreleased]` -> `### In flight (not landed at the released commit)`.
+  **CITED BY HEADING, NOT BY LINE NUMBER, from 2026-08-01 on** — the changelog grows from the
+  top, so every line-citation into it decays on every packet, guaranteed rather than
+  occasionally. The old `CHANGELOG.md:24` citation had already moved to `:28`. Residue (r). **This pair had gone stale in four consecutive packets** (657 → 1418 → 1485 → 1597),
   each time because the archivist can write this token but **`CHANGELOG.md` is outside its
   write gate**, so the two halves of the check are owned by different lanes and only one of
   them can close the loop. **It has now closed TWICE RUNNING for the same reason and only that
@@ -49,13 +57,16 @@
   three times on this same token: at `2a3c9b3` the suite was green at 1418/0 while this line
   claimed 657; at `0555717` green at 1485/0 while this line and CHANGELOG agreed on 1418; at
   `a7ab841` green at **1597/0** while this line and CHANGELOG agreed on **1485**; and at
-  `566443f` green at **1617/0** while this line still claimed **1597** — a **sixth** demonstration
-  on the same token. The check
+  `566443f` green at **1617/0** while this line still claimed **1597**; and at `d0eff10` green at
+  **1636/0** while this line and CHANGELOG **disagreed** (this line 1617, CHANGELOG already 1636,
+  because the builder wrote the live total into the changelog entry) — a **seventh** demonstration
+  on the same token, and the first where the two halves were out of step in the *other* direction. The check
   that actually works is opt-in and **still NOT enabled by the chained suite** —
   `RELEASE_METADATA_LIVE_SUITE=1 bash tests/release_metadata_tests.sh` compares against a live
   run, and it is the ONLY check that compares memory against a live run. It correctly reported
-  `live suite total (1617 passed) contradicts current_state.md's claim (1597)` at this close,
-  while the chained suite was green. Correcting the number does not fix the guard; see residue.
+  `live suite total (1617 passed) contradicts current_state.md's claim (1597)` at the previous
+  close, and it is re-run **after** the archivist's writes at every close since. **At this close it
+  reports a MATCH at 1636.** Correcting the number does not fix the guard; see residue.
   It **chains** 16 sibling suites in `tests/` through one `chain_suite` function and folds their
   counts into its own totals. A sibling suite present on disk but not chained is itself a failure,
   so a new suite cannot become discoverable-only. **The per-suite breakdown that used to sit here was
@@ -81,7 +92,109 @@
 
 ## Where we are
 
-- **Last closed packet:** `gravito_mismatch_refuted_a` — **it was AUTHORISED to re-authorise two
+- **Last closed packet:** `gravito_ladder_semantics_a` — **the ladder gained a rung, `observe`
+  changed meaning, and NOT ONE CONTROL MOVED** (receipt
+  `build-os/receipts/gravito_ladder_semantics_a.md`, commits `576751a` + `d0eff10`, base `2df61ae`).
+  On the operator's ruling: **`observe` is redefined by CONSEQUENCE** — *"output may be recorded and
+  consumed for visibility; it causes no operational consequence"* — instead of by non-consumption,
+  and **`execute` is added as a sixth rung above `gate`** (*"output may directly cause mutation"*).
+  **The ladder is now `none < observe < advise < rank < gate < execute`.**
+  **THE RESULT HELD EXACTLY AS PREDICTED: 19 of 81, split 6/5/8, UNMOVED.** The packet changed what
+  `observe` **means**, not what any control is **licensed to do**. **ZERO governance-field diff
+  lines.** **No class licenses `execute`; a test pins that 0 of the 25 grid cells reach it.**
+  **SEVEN SEMANTIC SITES, NOT SIX** — the seventh was found while building: `control_registry.txt`
+  carried the retired rule in **two live fields** of `maint.source_scan_mask`, including the
+  `demotion_requirement` an operator reads **WHILE DECIDING**.
+  **`OBSERVE-LB` MOVED OFF THE GATING PATH** — re-keyed to consequence and moved to a new advisory
+  channel that prints and counts but never sets the exit code; a genuine violation still refuses at
+  exit 2, so only that one check moved. **`autonomous` NOW CAPS AT `execute`** (the axis states a
+  CEILING, not a grant, and `L_effective` is a MINIMUM, so it grants nobody anything).
+  **THE FINDINGS MATTER MORE THAN THE FEATURE — five of them.**
+  **(1) THE CITATION GUARD CHECKS RESOLVABILITY, NOT IDENTITY, and it is quantified.** qa located the
+  cause at `scan-controls.sh:362-386`: it tests **existence, numeric, in-bounds, not-blank** and
+  **NEVER COMPARES CONTENT**. Of the 27 refs that drifted in the three tools, **27 of 27 would have
+  cited a different line**; `VACUOUS-REF` caught **7**; **20 PASSED EVERY CHECK WHILE SILENTLY
+  WRONG**. **THE REVIEWER'S COROLLARY, RECORDED BECAUSE IT DISCOUNTS EARLIER CLAIMS: a content match
+  at a SINGLE COMMIT tests RESOLVABILITY; only a CROSS-COMMIT comparison tests IDENTITY.** Several
+  *"zero drift, 287/287 verified"* results earlier in this sequence were **the former, reported as
+  the latter** — true statements of a weaker property than the one claimed. The durable fix is an
+  **anchor token or content hash**, not a line number.
+  **(2) A PUSHED COMMIT SHIPPED RED, AND THE CLOSE CHECKLIST IS WHY.** qa confirmed `2df61ae` —
+  **pushed** — ships `./build-os/maintenance/run-tests.sh` at **143/144**. Cause: the previous
+  archivist close cleared `active_packet.md` to **2** `^## ` blocks while the rotation proof needs
+  **>=3** (`tests/scaffold_seeding_tests.sh:242`). **That suite is NOT chained into the 1636 and the
+  orchestrator's close brief did not ask for it — an ORCHESTRATOR DEFECT, recorded as such.**
+  Commit 1 of this packet alone repairs it (2 blocks -> 10). **qa PARTLY REFUTED the sharper
+  hazard:** a zero-block file genuinely never rotates and fails nothing (byte-identical after
+  `--apply`, exit 0) — **but it is NOT silent**; `rotate-memory.mjs` emits an explicit
+  `WARNING: … the block delimiter /^## / matched NOTHING`. **The failure mode is AN IGNORABLE
+  WARNING, NOT SILENCE.**
+  **(3) THE MUTATION CENSUS — surveyed, reported, ACTED ON IN NO WAY, and the reviewer called it the
+  packet's most valuable output.** The sharp case is **NOT at `gate`**:
+  `maint.managed_set_replacement` sits at **`advise`** while its declared output is *"files copied
+  into an installed repo, replacing prior managed copies"*, failure behaviour *"none that stops
+  anything"*, rollback *"none; a managed file's local edits are lost on install"*. **FIVE MODULES
+  DURABLY MUTATE — `rotate-memory.mjs` (renames onto the LIVE memory file), `swarm-merge.sh`,
+  `record-packet.sh`, the identity hook, `specialist-handoff.sh` — AND NOT ONE OF THOSE WRITE
+  ACTIONS IS A REGISTERED CONTROL AT ANY AUTHORITY.** The reviewer's ruling on the packet's own
+  defence: *"the controls are checks and the mutations belong to the modules they live in"* is
+  **sound as a description of what the registry covers and convenient as a reason not to extend
+  it**, and **the most consequential write in the system has no entry**. **IT RULED THIS SHOULD BE
+  THE NEXT PACKET.**
+  **(4) FOUR ESCAPE FORMS, ALL THE SAME SHAPE** — a guard written against one surface form, blind to
+  its siblings: (i) bare `:NNN` citations with the filename elsewhere in the sentence; (ii)
+  `MISMATCHES.md` §10's table rows, naming a file with **no line number**; (iii) **line-wrapped
+  enumerations** — `none < observe < advise` on one line, `< rank < gate)` on the next, which is how
+  a **FIFTH** stale ladder survived in a file this packet had **already edited**, past the
+  orchestrator's sweep and the reviewer's first pass; (iv) **markdown table-row mappings** —
+  `| shadow | observe | … |` where the new guard expects `-> observe`, so **the new block is
+  STRUCTURALLY VACUOUS over `README.md`, the FIRST of its seven listed sites**, proven by rewriting
+  that row to carry a consumption clause and watching all three blocks miss it.
+  **(5) THE PACKET REPRODUCED ITS OWN HEADLINE DEFECT TWICE.** It found a guard checking the wrong
+  property, built §21 to sweep seven semantic sites — and **§21 greps only ONE of the retired rule's
+  TWO wordings** (which is why the stale definition survived in the file that OWNS the axis), and
+  **its successor block covers one of the mapping's TWO syntaxes**. Both were found by review, fixed
+  or recorded, and named in the artefact.
+  **§16's COMPLETENESS CLAIM WAS WRONG AND THE WRONG NUMBER IS LEFT VISIBLE ON PURPOSE.** It said
+  *"four live places … listed so the packet can prove it found them all."* **It was five.** The
+  undercount stays in the record rather than being silently corrected: **a completeness claim that
+  turned out false is the strongest available argument for the guard §16 was deferring**, and it is
+  the same enumeration-plus-assertion defect the packet had just fixed at item 10.
+  **RULINGS TO CARRY.** **The ladder-SPELLING sweep stays DEFERRED** to §16's own packet; the
+  reviewer upheld all three grounds (a different site set; the five-rung string is a **PREFIX** of
+  the six-rung one, so it needs an enumeration-**CONTINUATION** test, not a containment test;
+  bolting a second guard onto a stage-3 round is how fix lists arrive in installments). **What was
+  unsound was the deferral's EVIDENCE, not the deferral.**
+  **THE `observe`/`advise` BOUNDARY IS NOW INTENT-BASED, NOT MECHANICALLY CHECKABLE.** `gate` has a
+  test (*exits non-zero*), `execute` has one (*performs a durable write*), `none` has one (*no
+  consuming policies*). **`observe` USED TO have one and no longer does.** **Three of six rungs are
+  now separated by the author's assertion alone.** **This was the right trade** — the checkable
+  boundary is exactly what made the rung unreachable — **and it is recorded as a COST.**
+  **`execute` IS EARNED, NOT ANOTHER EMPTY RUNG.** The reviewer's distinction: **`rank` is
+  0-occupancy because nothing in the system ranks — the concept has NO REFERENT. `execute` is
+  0-occupancy because FIVE REAL, NAMED, DURABLE MUTATORS EXIST AND ARE UNREGISTERED.** Occupants
+  demonstrated by survey.
+  **`autonomous -> execute`, with the discarded reading recorded AND answered:** *"an operator
+  authorising AUTONOMY did not thereby authorise MUTATION"* — **real but misplaced**, because the
+  deployment axis states a **CAP, not a grant**, and MIN means the class axis still withholds
+  `execute`. Whether a fifth deployment mode should exist survives as a live question.
+  **Census UNMOVED — the correct result for a packet that re-authorised nothing: 81 controls,
+  14 declared mismatches, 68 `gate` / 13 `advise` and 0 at `none`, `observe`, `rank` or `execute`;
+  class A58 / B3 / C20; `implementation_status` 67 `load_bearing` / 9 `implemented` /
+  5 `decision_contributing`; `evidence_refs` 287, all resolving; 0 live authority envelopes.**
+  Suite **1636 passed / 0 failed** (was 1617); `./build-os/maintenance/run-tests.sh` **144/144**
+  (base was **143/144**); `scan-controls.sh check` **exit 0**; `evidence-policy.sh check`
+  **19 of 81, split 6/5/8 — UNMOVED**; tree clean. All re-derived by the archivist at close directly
+  from the registry files.
+  **Verdict pass as fixed: qa GREEN with 5 findings, NONE FUNCTIONAL; reviewer `fix-then-pass`
+  TWICE** (11 items, then 2 findings). **Fix rounds: 13 items in ONE INSTALLMENT** — the builder's
+  by-number sweep found 2 beyond the reviewer's 11 — **then 3 prose sites closed by the orchestrator
+  in the `tiny` lane.**
+  **Both verdicts single-model — NO CODEX IN ANY PASS**, for the **fifth** packet running.
+  `tool_router.md:368` routes to it and nothing is installed. **The row is unbacked**, and it matters
+  here specifically: the reviewer's resolvability-vs-identity corollary **retroactively discounts
+  earlier claims**, which is exactly what an independent second model is for.
+- **Prior:** `gravito_mismatch_refuted_a` — **it was AUTHORISED to re-authorise two
   controls and it changed NOTHING, because the prescribed demotion was MEASURED to destroy live
   memory** (receipt `build-os/receipts/gravito_mismatch_refuted_a.md`, commits `b25f3f7` +
   `566443f`, base `c52915f`).
@@ -384,7 +497,16 @@
   cold-install suite chained into the documented command** rather than left discoverable-only.
   Load-bearing adaptation: all three `FILE_SPECS` delimiters are now `^## ` (the reference
   delimiter found **zero** blocks in a scaffolded file, and a delimiter matching nothing does not
-  error — it reported a no-op at exit 0, i.e. a file that silently never rotates), and a
+  error — it reported a no-op at exit 0, i.e. a file that silently never rotates
+  **[ANNOTATED 2026-08-01 by `gravito_ladder_semantics_a`: the word "silently" IS WRONG and this
+  entry is left otherwise intact because it is a historical packet log pinned to a commit. qa
+  MEASURED it: a zero-block file is byte-identical after `--apply`, exit is 0, and nothing fails —
+  but `rotate-memory.mjs` prints `WARNING: <path>: the block delimiter /^## / matched NOTHING …
+  NOTHING CAN EVER ROTATE OUT OF IT` to stderr. The failure mode is AN IGNORABLE WARNING, NOT
+  SILENCE. Corrected HERE and only here, on the reviewer's ruling: this file is what agents read to
+  FORM beliefs, so an uncorrected known-falsehood here gets re-propagated — which is this packet's
+  entire thesis. The receipt and the released `CHANGELOG.md` block are frozen records and are left
+  alone.]**), and a
   zero-block parse of a file that HAS content now warns on stderr instead of printing the same
   `already rotated (no-op)` line it printed for two benign states. Reviewer verdict **pass**,
   after one **fix-then-pass** round (5 items). Suites at `641527f`: **281 / 144 / 61**, all 0 fail (the 281 is now 488).
@@ -485,16 +607,31 @@
   `tests/build_os_tests.sh` — 189/189 green (RED 148/38 → GREEN 186/0; +3 list-schema checks → 189/0).
 - **Prior:** P-015 — global install ships the specialist handoff tools (installed hook resolves
   + runs the handoff end-to-end). P-014 — zero-touch specialist orchestration.
-- **Now:** none active. `gravito_mismatch_refuted_a` is **closed** (2026-08-01); its two commits
-  `b25f3f7` + `566443f` and this close commit are **local-only** and stay that way pending explicit
-  go. `build-os/packets/active_packet.md` is cleared and reads NO PACKET IN FLIGHT.
-  **This packet DID declare itself before building**, unlike the previous one — but **the reviewer
-  observed the declaration landed in the SAME COMMIT as the build** (`b25f3f7` touches
-  `active_packet.md` alongside the guard and the tests), **so git cannot attest the ordering.** The
-  **`<=2-commit` rule and "declare before building" are in genuine tension**, and attesting the
-  ordering needs **a third commit or a pre-commit hook**. **That is an OPERATOR DECISION and this
-  close does not resolve it.**
-- **THE OPERATOR DECISIONS THAT NOW BLOCK THE MOST — three, all from `gravito_mismatch_refuted_a`:**
+- **Now:** none active. `gravito_ladder_semantics_a` is **closed** (2026-08-01); its two commits
+  `576751a` + `d0eff10` and this close commit are **local-only** and stay that way pending explicit
+  go. `build-os/packets/active_packet.md` is cleared, reads NO PACKET IN FLIGHT, **and carries 4
+  `^## ` blocks** — clearing it to 2 is exactly what made `2df61ae` ship red at 143/144.
+  **THE DECLARATION-ORDERING TENSION IS RESOLVED, AND IT NEEDED NEITHER A THIRD COMMIT NOR A HOOK.**
+  The previous packet's reviewer noted that a declaration landing in the SAME COMMIT as the build
+  leaves git unable to attest the ordering, and that attesting it appeared to need a third commit or
+  a pre-commit hook against a hard cap of two. **`gravito_ladder_semantics_a` spent Commit 1 on the
+  DECLARATION ALONE** (`576751a`): trivially green in isolation, cap still 2, **and git now
+  corroborates the ordering.** Nothing requires the docs to be the second commit. **This is the
+  standing pattern from here on.** Residue (ee) is closed by demonstration.
+  **The underlying control gap is NOT closed:** `bandwidth.active_packet_singleton` still refuses
+  **two** declared packets and permits **zero**, so pure omission passes clean. Residue (c)/(u).
+- **DECISION 2 IS CLOSED — the ladder's definitional bug is FIXED**, by
+  `gravito_ladder_semantics_a`, at seven semantic sites plus `scan-controls.sh`. **Decision 3 is
+  addressed**: `OBSERVE-LB` is off the gating path. **Decision 1 — the missing fifth outcome — is
+  now SPELLABLE but still UNTAKEN**: `observe` is a legal destination at last, and whether to move
+  any control onto it remains a governance act nobody has performed.
+  **THE NEW BLOCKING DECISION IS THE MUTATION CENSUS**, and the reviewer named it the next packet:
+  five modules durably mutate and **not one of those write actions is a registered control at any
+  authority**; `maint.managed_set_replacement` sits at `advise` while copying files over a user's
+  edits with **no rollback**. **Registering them is a RE-AUTHORISATION and therefore the operator's.**
+  Also open: **should Class A license `execute`** (today no class does, deliberately), and **should a
+  fifth deployment mode for mutation exist** (`README.md` §3b).
+- **THE THREE ORIGINAL DECISIONS, kept for the record — all from `gravito_mismatch_refuted_a`:**
   (1) **the missing FIFTH OUTCOME** — demotion onto the rung the `refuted` cap prescribes is
   unspellable for **67 of 81 controls**, so the framework's four outcomes cannot cover the census;
   the reviewer's **accept-and-constrain** proposal needs an operator envelope and is **not adopted**.
@@ -508,13 +645,41 @@
   writes envelopes to fix mismatches.
   **AND DO NOT EXTRAPOLATE the two refuted closures to the remaining twelve:** 11 of the 19 findings
   are `unvalidated`, where the remedy is **improve the evidence** and that outcome is **wide open**.
-- **Next (candidates), cheapest first — from this and the previous close's residue:**
+- **Next (candidates) — from this and the previous closes' residue. THE FIRST TWO ARE NOT ORDERED BY
+  COST; they are ordered by what the reviewer ruled and by what has already shipped red.**
+  -2. **THE MUTATION CENSUS COVERAGE GAP — THE REVIEWER RULED THIS THE NEXT PACKET.**
+     `MISMATCHES.md` §15. Five modules durably mutate and **not one of those write ACTIONS is a
+     registered control at any authority**: `rotate-memory.mjs` (renames onto the LIVE memory file —
+     the most consequential write in the system), `swarm-merge.sh`, `record-packet.sh`, the identity
+     hook, `specialist-handoff.sh`. And `maint.managed_set_replacement` sits at **`advise`** with an
+     output that *copies files over a user's edits*, *"none that stops anything"* on failure, and
+     **no rollback** — on the corrected ladder that is `execute`, **two rungs up**. **Registering
+     any of it is a RE-AUTHORISATION and needs the operator.** Residue (nn).
+  -1. **THE CITATION GUARD CHECKS RESOLVABILITY, NOT IDENTITY.** `scan-controls.sh:362-386` tests
+     existence, numeric, in-bounds and not-blank, and **never compares content** — **20 of 27
+     drifted refs passed every check while silently wrong**. **The durable fix is an anchor token or
+     a content hash instead of a line number**, and it also subsumes candidate 0 below. **And note
+     the retroactive discount: a content match at a SINGLE COMMIT tests resolvability; only a
+     CROSS-COMMIT comparison tests identity** — several earlier *"zero drift, 287/287"* claims were
+     the former reported as the latter. Residue (mm).
+  0a. **THE CLOSE CHECKLIST OMITTED A LIVE SUITE AND A PUSHED COMMIT SHIPPED RED.**
+     `./build-os/maintenance/run-tests.sh` is **not chained into the 1636** and no close brief asked
+     for it, so `2df61ae` was pushed at **143/144**. Remedy: chain it, or name every live suite in
+     the close checklist. **Orchestrator defect.** Residue (oo).
+  0b. **THE LADDER'S SPELLING SWEEP** — deferred with all three grounds upheld. It needs an
+     enumeration-**CONTINUATION** test, because the five-rung string is a **PREFIX** of the six-rung
+     one and a containment test passes on the correct string. `MISMATCHES.md` §16. Residue (rr).
   0. **Land the prose-citation sweep as a real script.** A working sweep exists **only as a
      throwaway** from this packet and nothing re-runs it. Prose citations have **TWO known escape
      forms**: bare `:NNN` refs, and **`MISMATCHES.md` §10's nonvacuity-table row form, which names a
      file with NO line number at all** — the builder's own first sweep pass mis-resolved that table
      and had to be redone. Residue (aa). Cheapest of the citation-class items and it is the only one
-     with a proven implementation already written.
+     with a proven implementation already written. **UPDATED 2026-08-01: there are now FOUR known
+     escape forms, not two** — bare `:NNN`; §10's table rows with no line number at all;
+     **line-wrapped enumerations**, which no same-line grep can see and which hid a fifth stale
+     ladder in a file the packet had already edited; and **markdown table-row mappings**, which made
+     `evidence_policy_tests.sh` §21's new block **structurally vacuous over `README.md`, its own
+     first listed site**. Residue (pp).
   1. **Stop creating `CHANGELOG.md` line-citations, and re-cite the two live ones by release-block
      heading** (`residue.md:280`, `receipts/gravito_evidence_policy_matrix_a.md:572-573`). The
      changelog grows from the top, so **every** line-citation into it decays on **every** packet —
