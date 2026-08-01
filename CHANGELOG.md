@@ -24,7 +24,8 @@ deprecation cycle. Pin a commit if you need stability.
   entries, `evidence_refs` **257 → 274**, authorities **64 → 66 `gate`** and
   **11 → 12 `advise`**. `CROSSWALK.md`'s six machine-reconciled columns were
   recomputed, not edited: **78 bindings**, `epistemic_quality` **22 → 24** and
-  `homeostasis` **20 → 21**.
+  `homeostasis` **20 → 21**. Suite 1418 → **1485 passed**, 0 failed
+  (+67 `tests/evidence_policy_tests.sh`).
   - **The sharp rule: `refuted` may not `gate`, at any class**, and caps at
     `observe`. It is the one rule here that resolves a real defect
     *mechanically* rather than by judgement. **Class cannot rescue it** — class

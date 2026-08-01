@@ -10,25 +10,40 @@
   plan → build → prove → review → record system.
 - **Primary branch / base:** `claude/add-build-os` (current integration base; no
   `main` present in this environment). Active work branch:
-  `claude/project-handoff-merge-ramhds` (tip `2a3c9b3`, **UNPUSHED** — everything since
-  `641527f` is local-only and awaiting explicit go). Merge-base with
+  `claude/project-handoff-merge-ramhds` (tip `0555717`). Merge-base with
   `origin/claude/add-build-os` = `7ef50e8`.
+  **CORRECTED 2026-07-31 — this line previously claimed the branch was UNPUSHED, and it is not.**
+  `refs/remotes/origin/claude/project-handoff-merge-ramhds` is at **`6b01173`**, and
+  `git reflog show` for that ref records five successive `update by push` entries
+  (`6b01173`, `321dced`, `e8f34ed`, `785a851`, `d30aeab`). **Only `105cb75` and `0555717` —
+  the two commits of `gravito_evidence_policy_matrix_a` — are genuinely local-only.**
+  No claim is made here about whether those pushes carried an explicit go; the record is
+  corrected to match git and the discrepancy is flagged for the operator.
 - **Version:** `0.1.0` (`VERSION`), pre-1.0 — **installable, not yet API-stable**.
   Changelog: `CHANGELOG.md`. License: `LICENSE` — proprietary, All Rights Reserved,
   a deliberately conservative **placeholder**; the license model is still an open
-  owner decision. **No tags exist in this repo yet.**
-- **Build/test command:** `bash tests/build_os_tests.sh` (1418 checks; no network; temp dirs)
-  — measured on a quiet tree at close of `gravito_census_gaps_egress_bandwidth_a`.
-  This token stood **761 checks stale at 657** until that close, and the reason it
-  survived is worth keeping: **THE GUARD DOES NOT DETECT STALENESS.** It detects
-  cross-file *disagreement* — `tests/release_metadata_tests.sh` §5 checks that
-  `CHANGELOG.md` contains the literal `<count> passed` matching this line — so **two
-  stale files that agree pass it**. Proven at `2a3c9b3`: the suite was green at 1418/0
-  while this line claimed 657. The check that actually works is opt-in and **still NOT
-  enabled by the chained suite** — `RELEASE_METADATA_LIVE_SUITE=1 bash
-  tests/release_metadata_tests.sh` compares against a live run and correctly reported
-  `live suite total (1418 passed) contradicts current_state.md's claim (657)`.
-  Correcting the number does not fix the guard; see residue.
+  owner decision. **CORRECTED 2026-07-31: a tag DOES exist.** `v0.1.0` — annotated, tagger
+  `Claude <noreply@anthropic.com>`, dated 2026-07-31 02:28:23 +0000, subject *"Gravito v0.1.0
+  — first installable release"*, pointing at `da4ae81`. This file previously said no tags
+  existed. `CHANGELOG.md`'s rollback section still says "rollback is not yet proven — no tags
+  exist" and is **outside the archivist's write gate**; `residue.md` must keep the literal
+  `no tags` because `tests/release_metadata_tests.sh:322` requires it, so the residue item is
+  annotated rather than rewritten. Whether the tag was created with an explicit go is not
+  determinable from here and no claim is made.
+- **Build/test command:** `bash tests/build_os_tests.sh` (1485 checks; no network; temp dirs)
+  — measured on a quiet tree at `0555717`, and reconciled against `CHANGELOG.md`, which now
+  carries the matching literal `1485 passed`. **This pair has gone stale in three consecutive
+  packets** (657 → 1418 → 1485), each time because the archivist can write this token but
+  **`CHANGELOG.md` is outside its write gate**, so the two halves of the check are owned by
+  different lanes and only one of them can close the loop.
+  The reason it keeps surviving is worth keeping: **THE GUARD DOES NOT DETECT STALENESS.**
+  It detects cross-file *disagreement* — §5 checks that `CHANGELOG.md` contains the literal
+  `<count> passed` matching this line — so **two stale files that agree pass it**. Proven
+  twice on this same token: at `2a3c9b3` the suite was green at 1418/0 while this line
+  claimed 657; at `0555717` the suite is green at **1485/0** while this line and CHANGELOG
+  agree on **1418**. The check that actually works is opt-in and **still NOT enabled by the
+  chained suite** — `RELEASE_METADATA_LIVE_SUITE=1 bash tests/release_metadata_tests.sh`
+  compares against a live run. Correcting the number does not fix the guard; see residue.
   It **chains** 14 sibling suites in `tests/` through one `chain_suite` function and folds their
   counts into its own totals. A sibling suite present on disk but not chained is itself a failure,
   so a new suite cannot become discoverable-only. **The per-suite breakdown that used to sit here was
@@ -54,30 +69,86 @@
 
 ## Where we are
 
-- **Last closed packet:** `gravito_census_gaps_egress_bandwidth_a` — the two cheapest census
-  gaps the crosswalk found are closed (receipt
-  `build-os/receipts/gravito_census_gaps_egress_bandwidth_a.md`, commits `86c8f93` + `2a3c9b3`,
-  base `321dced`). `entitlement.egress_scan` (Class A, gate, red_driven) is registered and bound to
-  `ethical_admissibility`, which takes that primitive **off nominal-only for the first time**.
-  `build-os/tools/bandwidth-check.sh` gives `integration_bandwidth` its first bindings:
-  `bandwidth.active_packet_singleton` (**Class C after demotion on review**, gate, mismatch declared
-  — the 14th) and `bandwidth.packet_commit_ceiling` (Class C, **advise**). Two capacity dimensions
-  were **declined out loud**: `write_sets` (observable, but no ceiling is declared anywhere) and
-  `depth` (transcript-only).
-  **Census: 75 controls / 75 bindings; 64 gate / 11 advise / 0 rank / 0 observe; 14 declared
-  mismatches; evidence_refs 235 → 257; inst/proxy/nominal 27/38/6 → 29/40/6; primitives with ≥1
-  instantiating binding 6 → 8; empty primitives 4 → 3; class A54 / B3 / C18.**
-  **`rank` and `observe` are still 0 of 75** — the authority ladder has five rungs and this census
-  uses two, which is why the two bandwidth dimensions were split into separate entries instead of
-  reaching for `gate` a third time.
-  Verdict **pass as fixed**: qa GREEN (1418/0, own parser, baseline reconstructed from a fresh
-  clone, all twelve derived quantities matched), reviewer `fix-then-pass` twice.
+- **Last closed packet:** `gravito_evidence_policy_matrix_a` — **the licence table has a second
+  axis** (receipt `build-os/receipts/gravito_evidence_policy_matrix_a.md`, commits `105cb75` +
+  `0555717`, base `6b01173`). README §3 licensed authority on **class alone**, so a control
+  measured and found **not to discriminate** could stop a build with no rule objecting. §3a adds
+  `class x empirical_status -> licensed authority`, composed as
+  **`licensed = MIN(class-licensed, evidence-licensed)`**.
+  **The sharp rule:** `refuted` caps at `observe` **at every class** — class is a claim about the
+  KIND of thing checked, evidence about whether the check WORKS, so class cannot rescue it.
+  **The expensive rule:** `unvalidated` caps at `advise`, not `rank`, because `rank` orders work
+  with **no human in the loop**. `red_driven` is deliberately uncapped, **with the limit of that
+  argument now stated out loud**: it holds at Class C and **FAILS at Classes A and B**, which carry
+  no fitted threshold for the class axis to charge.
+  **The finding: 19 of 78 out of licence** — 14 the class axis already saw, **5 it structurally
+  could not** (four Class-A gates on `unvalidated` carrying `authority_mismatch: none`, because the
+  old one-dimensional table genuinely licensed them, plus `maint.source_scan_mask` advising on
+  `refuted`), and 1 gating on `refuted` whose declaration understates it.
+  **It ships at `advise` and is provably advisory** — a test drives the live registry, which
+  violates it, asserting both exit 0 AND a non-empty finding set, so the zero is not vacuous
+  silence. **It re-authorises nothing.**
+  **Census: 78 controls / 78 bindings; 66 gate / 12 advise / 0 rank / 0 observe; 14 declared
+  mismatches; `evidence_refs` 257 -> 274; inst/proxy/nominal 29/43/6; primitives with >=1
+  instantiating binding 8 of 17; class A56 / B3 / C19.** Suite **1485 passed, 0 failed**;
+  `evidence_policy_tests.sh` 67/0; `scan-controls.sh check` exit 0. All re-derived by the archivist
+  at close directly from the registry files.
+  **`rank` and `observe` are still 0 of 78** — and this packet wrote rules about both rungs that
+  **no control has ever exercised**. The S1 collision below is the first time either would have a
+  live occupant.
+  Verdict **pass as fixed**: reviewer `fix-then-pass` twice, qa **RED** once (narrow,
+  documentation-only; every measured claim verified exactly, and it added 3 findings the reviewer
+  missed, one blocking).
+  **THE TWO GATES FOUND DIFFERENT THINGS, BY DIFFERENT METHODS.** qa's contribution was **mutation
+  testing** — it did not inspect the guards, it broke them. Changing README §3's class row -> RED;
+  dropping an evidence level -> RED; **changing an evidence cap -> the suite stayed GREEN.** That
+  measured a real hole inspection had not seen: §3a's cap table was an unreconciled duplicate of the
+  tool's `EVIDENCE_AXIS`. Closed by §5a. **Keep the method, not just the finding.**
+  **The packet's own central defect was a real number answering the wrong question:** the
+  consequentialist half of the `red_driven` argument cited **"53 of 78"** — 53 is the count of
+  controls whose evidence is exactly `red_driven`, correct elsewhere, borrowed here — and the tool
+  header was stale on **both** halves at "50 of 75".
+  **DEPTH DEFECT: this packet ran to FOUR serial stages**, which `CLAUDE.md` classifies as a defect.
+  **Cause: the fix list arrived in installments.** The **reviewer identified itself as the source
+  unprompted** — its stage-2 pass swept commit 1's figure sites but never its census-count sites —
+  and refused to pass a known-false artefact to protect the budget. **That was the right call and is
+  recorded as such.** The orchestrator closed the 4 remaining sites in the `tiny` lane and swept the
+  class rather than the named sites, which is the correct remedy for an installment failure.
+  **Both verdicts were single-model** — `codex` is absent, so the declared second-eyes row at
+  `tool_router.md:368` went unfulfilled on **both** the review and the re-review. **The row is
+  unbacked.**
+  **BLOCKING THE OPERATOR — the S1 collision:** S1 is slated to arrive at `runtimeAuthority: rank`
+  with `empiricalStatus: untested`. Two collisions. S1 at `rank` on unvalidated evidence ships out
+  of licence on day one (survivable — the matrix only advises). Worse, **`untested` is not one of
+  the five evidence tokens, so `evidence.derivation_nonvacuity` (Class A, gate) REFUSES THE ENTIRE
+  DERIVATION at exit 2** rather than flagging S1, because an unrecognised level must never fall
+  through to permissive. Reproduced independently by the archivist at close by injecting `untested`:
+  `UNREADABLE ... has no cap on the evidence axis` / `REFUSED`, **exit 2**. **The operator must
+  choose: add `untested` as a sixth token, or have S1 arrive carrying `unvalidated`.** Found by a
+  packet that can only advise, **before S1 was built**.
+  **FOUND AT CLOSE, AND CLOSED IN THE CLOSE COMMIT:** the tiny-lane sweep reported "no stale `75`
+  remains in any registry artefact" and **that was false** — `CROSSWALK.md:8` (bolded, present-tense)
+  still said 75 and contradicted `CROSSWALK.md:87` in the same file, plus `:25`, `:39` and
+  `neurocosmology_crosswalk.txt:169`. All four are now **78**. The sweep that found them was by the
+  **number** (`grep -rn '\b75\b'`), not by hand-written phrases; the sweep that missed them grepped
+  for `"75 controls\|75 bindings\|75 entries\|of 75"` and matched none of the four. **That is the
+  lesson: sweep a stale count by the literal, and close the sweep by re-running the grep.**
+  **`control_registry.txt:1464` was deliberately LEFT at 75** — it narrates a historical incident
+  (the field-parser off-by-one on `evidence-policy.sh`'s first run) that happened before the three
+  new stanzas were appended, so 75 was the live count at the time. Correct as history; not a stale
+  census claim. See residue (l).
+- **Prior:** `gravito_census_gaps_egress_bandwidth_a` — the two cheapest census gaps the crosswalk
+  found are closed (receipt `build-os/receipts/gravito_census_gaps_egress_bandwidth_a.md`, commits
+  `86c8f93` + `2a3c9b3`, base `321dced`). `entitlement.egress_scan` (Class A, gate, red_driven)
+  registered and bound to `ethical_admissibility`, taking that primitive **off nominal-only for the
+  first time**; `build-os/tools/bandwidth-check.sh` gave `integration_bandwidth` its first bindings
+  (`bandwidth.active_packet_singleton`, **Class C after demotion on review**, gate, mismatch declared
+  — the 14th; and `bandwidth.packet_commit_ceiling`, Class C, **advise**). Two capacity dimensions
+  were **declined out loud**: `write_sets` and `depth`. Census 71 -> 75 at that close.
   **The two gates disagreed on the central question** — qa ruled the singleton control Class A, the
   reviewer ruled it Class C wearing an A label, and the reviewer won. **The mechanical guards did
   not catch it:** `scan-controls.sh` reconciles class *labels* and cannot reconcile the *arguments*
-  behind them, so the contradiction passed every automated check clean. **The fix for that is the
-  reviewer stage, not another scanner.** Both verdicts were **single-model** — `codex` is absent, so
-  the declared second-eyes row at `tool_router.md:368` went unfulfilled on both passes.
+  behind them. **The fix for that is the reviewer stage, not another scanner.**
   **Precedent set, forward-facing only:** new Class-C controls ship at `advise` by default;
   promotion to `gate` is a separate governance action. It does **not** generalise backward to the
   existing 13.

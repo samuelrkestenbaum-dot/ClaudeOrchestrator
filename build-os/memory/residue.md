@@ -60,6 +60,17 @@
   dual, or open) without clawing back a right already given — loosening is easy, retracting a
   grant is not. **This is not a settled licensing decision.** No pricing, entitlement scheme, or
   terms of service are defined anywhere, and none should be invented without the owner.
+- **[CORRECTED 2026-07-31 — THE PREMISE OF THIS ITEM IS NOW FALSE. A TAG EXISTS.]** `v0.1.0` —
+  annotated, tagger `Claude <noreply@anthropic.com>`, dated 2026-07-31 02:28:23 +0000, subject
+  *"Gravito v0.1.0 — first installable release"*, pointing at `da4ae81`. Found by the archivist at
+  close of `gravito_evidence_policy_matrix_a` by reading git rather than this file. **The item below
+  is deliberately NOT rewritten**, for two reasons: `tests/release_metadata_tests.sh:322` requires
+  the literal `no tags` to appear in this file, so deleting the sentence turns the suite red; and
+  `CHANGELOG.md`'s rollback section states the same now-false thing and is **outside the archivist's
+  write gate**. So the guard and the CHANGELOG both still encode a false premise, and correcting
+  them needs a lane that may write outside `build-os/`. **Whether the tag was created with an
+  explicit go is not determinable from here and no claim is made either way.** The *substantive*
+  point still stands: **no rollback has been executed end-to-end and measured**, tag or no tag.
 - **No tags exist → rollback is UNPROVEN (`gravito_release_metadata_a`):** `VERSION` is `0.1.0`
   and `CHANGELOG.md` documents update = re-run the installer at a newer checkout, rollback =
   check out an earlier tag/commit and re-run. The **update** half is covered (the cold-install
@@ -194,8 +205,12 @@
   and missed in the table, and `:668` had drifted onto a comment line — so the file contradicted
   itself about the same assertion while every automated check stayed green. Highest value per line
   of the follow-ons here.
-- **(f) `current_state.md`'s suite count is PINNED STALE and only half fixable.** The live total is
-  **1418**; the guard-bound token still reads **657**. Measured, both directions:
+- **(f) `current_state.md`'s suite count is PINNED STALE and only half fixable.**
+  **[PARTLY SUPERSEDED 2026-07-31 — AND IT RECURRED IMMEDIATELY. See item (m).]** The 657 -> 1418
+  half was closed by `gravito_evidence_policy_matrix_a`'s commit 2, which could write `CHANGELOG.md`;
+  the token then went stale again at 1418 against a live 1485 within the same packet. Original entry
+  preserved below. The live total was **1418**; the guard-bound token still read **657**. Measured,
+  both directions:
   writing `1418 checks` turns the suite **RED** (`41 passed, 1 failed`) because
   `tests/release_metadata_tests.sh` §5 requires `CHANGELOG.md` to contain the literal
   `<count> passed` and CHANGELOG line 96 reads `Suite **1338 → 1418** passed` (bolded, so `grep -qF`
@@ -224,9 +239,12 @@
   first control under it. **This does NOT generalise backward to the existing 13 declared
   mismatches** — the reviewer ruled they are **not one population** and must not be swept by a
   single rule. Do not let a future cleanup packet apply this retroactively.
-- **(j) `rank` and `observe` remain 0 of 75.** The authority ladder has five rungs and the census
-  uses two (64 gate / 11 advise). A 64/11/0/0 distribution carries almost no information. Not a
-  defect with a fix attached — a standing observation about whether the ladder is real.
+- **(j) `rank` and `observe` remain 0 of 78** (was 0 of 75 at that close). The authority ladder has
+  five rungs and the census uses two (**66 gate / 12 advise**). A 66/12/0/0 distribution carries
+  almost no information. Not a defect with a fix attached — a standing observation about whether the
+  ladder is real. **Sharper since `gravito_evidence_policy_matrix_a`:** that packet wrote rules
+  about `rank` and `observe` that **no control has ever exercised**. See item (S1) below — the first
+  live occupant either rung would have had.
 - **(k) Second-eyes was declared and NOT delivered, on both passes.**
   `build-os/memory/tool_router.md:368` routes reviewer second-eyes to Codex (`codex` CLI /
   Codex-for-Claude-Code plugin). **`codex` is not on PATH and no Codex plugin is installed**, so the
@@ -234,6 +252,115 @@
   capability, not a pass.** It matters more than usual here: the defect that mattered most was a
   judgement call about the strength of an argument — precisely what a second model is for. Either
   install Codex or stop declaring the row.
+
+### From `gravito_evidence_policy_matrix_a` (2026-07-31, receipt `build-os/receipts/gravito_evidence_policy_matrix_a.md`)
+
+- **(l) THE `75` SWEEP WAS INCOMPLETE — "no stale `75` remains in any registry artefact" was FALSE.**
+  **[CLOSED IN THE CLOSE COMMIT. Kept in full, because the finding is about the gates, not the
+  counts.]** All four stale sites below now read **78**; `control_registry.txt:1464` was judged
+  historical and deliberately left at 75 (resolution at the end of this item).
+  The tiny-lane sweep that closed the re-review's 4 sites reported that it had swept the whole class.
+  The archivist re-ran the grep at close and it did not hold. `grep -rn '\b75\b' build-os/registry/`
+  at `0555717` returned:
+  **`CROSSWALK.md:8`** — *"binds each of the **75** registered controls to exactly one of **17**
+  primitives"*. **Bolded, present-tense, and it contradicts `CROSSWALK.md:87` in the same file**,
+  which the re-review corrected to 78. The file disagrees with itself about the census, 79 lines
+  apart, and `:8` is the file's *opening description of what it is*.
+  **`CROSSWALK.md:25`** (*"an eighteenth field on each of the 75 registry records"*) and
+  **`CROSSWALK.md:39`** (*"costs 75 record edits"*) — both present-tense, both stale.
+  **`neurocosmology_crosswalk.txt:169`** (*"a prose field on every one of the 75 registry entries"*)
+  — present-tense, stale.
+  **`control_registry.txt:1464`** (*"made every one of the 75 live stanzas unclassifiable"*) —
+  flagged **AMBIGUOUS** by the archivist, **DO NOT SWEEP MECHANICALLY**. **RESOLVED: LEFT AT 75, and
+  it is correct.** It narrates a historical incident — the field-parser off-by-one on
+  `evidence-policy.sh`'s *first run*, which necessarily preceded the registration of the three new
+  stanzas (the tool had to exist before `evidence.derivation_nonvacuity` could be registered for it),
+  so **75 was the live count at the moment narrated**. qa's `78/78` reproduction is a re-drive on the
+  *final* tree, not the original incident, and does not date it. The matching sentence in
+  `CHANGELOG.md:106` narrates the same incident and is likewise **correct and left**.
+  **The archivist deliberately did not fix any of this**, on three grounds: the packet was at its
+  2-commit cap, registry artefacts are the packet's *deliverable* rather than archivist memory, and
+  an archivist quietly closing a reviewer-class defect inside its own close is the papering-over the
+  adoption-guard episode warned about. **That judgement is upheld** — the fixes landed in a
+  **separate close commit** on top of the capped pair, not folded into either.
+  **THE LESSON, AND IT IS THE VALUABLE PART:** the tiny-lane sweep swept *counts of controls* and
+  missed *counts of records* — the same class-boundary error, one level down, as the installment
+  failure it was fixing — **because it grepped for hand-written phrases**
+  (`"75 controls\|75 bindings\|75 entries\|of 75"`), which matched **none** of the four live sites.
+  **Sweep a stale count by the LITERAL NUMBER (`grep -rn '\b75\b'`), classify every hit by hand, and
+  close the sweep by re-running the grep — never by asserting it.** These four got past **both review
+  gates AND the sweep that claimed the class closed**; they were caught only because the archivist
+  re-ran the check at close. They are **not** an escape (nothing reached a reader, and
+  `packet_metrics.tsv`'s `defects_escaped` correctly reads `-`), but they are a measured statement
+  about what the gates do not see.
+- **(m) NOTHING MACHINE-CHECKS PROSE THAT RESTATES A MACHINE-COMPUTED TABLE — three packets running,
+  and the highest-value follow-on in this file.** Instances: `MISMATCHES.md` §10's file/lines table
+  **twice**; `CROSSWALK.md:87` once (fixed at re-review); `CROSSWALK.md:8`, `:25`, `:39` and
+  `neurocosmology_crosswalk.txt:169` (fixed in the close commit — item l). **Every instance so far
+  has been fixed by a human read after a gate missed it. The class is still unguarded**; only the
+  instances are closed.
+  **§5a of `tests/evidence_policy_tests.sh` is the pattern a checker would follow** — it reconciles
+  README §3a's cap table against the tool's `EVIDENCE_AXIS` in **both directions** and is red-driven
+  both ways (a cap changed to another rung fails the diff; a cap changed to a non-rung fails the row
+  count). Same shape closes this class: parse the prose restatement, recompute the table, diff them.
+  **The asymmetry is the argument:** qa's mutation test proved the cap table unguarded in seconds,
+  while the `CROSSWALK.md` instances consumed a re-review, a tiny-lane sweep, a close **and a
+  resumed close** before the last of them landed.
+- **(n) THE SUITE COUNT WAS PINNED STALE AGAIN, AND WRITING THE TRUE NUMBER TURNED THE SUITE RED.**
+  **[BOTH HALVES CLOSED IN THE CLOSE COMMIT — but the diagnosis below is the point and is kept.]**
+  `CHANGELOG.md` now carries the literal `**1485 passed**` and `current_state.md` now reads 1485; the
+  close commit could write both because it is not bound by the archivist's `build-os/`-only gate.
+  **The structural cause is untouched: the two halves of this check are owned by different lanes.**
+  Live total **1485**; the guard-bound token in `current_state.md` read **1418**, left there on
+  purpose. Proven at `0555717` in a throwaway clone: setting the line to `1485 checks` yielded
+  `FAIL: CHANGELOG does not report '1485 passed'` -> **`41 passed, 1 failed`**.
+  `tests/release_metadata_tests.sh:288` runs `grep -qF "<count> passed"` against `CHANGELOG.md`, and
+  **the string `1485` did not occur anywhere in the repository** — this packet's CHANGELOG entry
+  reported "67 assertions" for the new suite but **never stated the new chained total**, so the
+  literal was never created. **`CHANGELOG.md` is outside the archivist's write gate**, which is why
+  the archivist could not close it and correctly refused to write a token that would turn the tree
+  red. Fix was one literal string in `CHANGELOG.md` plus the token — **now applied**.
+  **Third consecutive packet for this pair** (657 -> 1418 -> 1485), and the reason it recurs is
+  structural, not sloppiness: **the archivist owns one half of the check and cannot write the other.**
+  **And the guard still does not detect staleness:** `current_state.md` at 1418 and CHANGELOG at
+  `**1418 passed**` *agreed*, so §5 passed while the truth was 1485. **Two stale files that agree
+  pass** — now demonstrated twice on the same token. The check that works,
+  `RELEASE_METADATA_LIVE_SUITE=1`, is **still opt-in and still not enabled by the chained suite** —
+  and it is the only reason this was caught at all. **Chaining it, or giving the archivist's lane the
+  CHANGELOG literal, is the standing follow-on. Neither is done.**
+- **(o) AN UNREPRODUCED FLAKE — flagged, NOT diagnosed.** qa's **base clone's first run** reported
+  **1398 + 20 = 1418 with no `FAIL:` line captured**. **Five subsequent runs, three of them under
+  load, were all 1418 / 0.** **Pre-existing at `6b01173`**; not introduced by this packet.
+  Deliberately not chased — one anomaly in six runs is not enough signal to spend a packet on. But a
+  suite whose count can move **without a captured failure line** is cheap to dismiss and expensive to
+  have dismissed. **If it recurs, the missing `FAIL:` capture is the thread to pull, not the count.**
+- **(S1) THE S1 EVIDENCE-TOKEN DECISION — OPERATOR DECISION, AND IT BLOCKS STEP 2.** S1 is slated to
+  arrive at `runtimeAuthority: rank` with `empiricalStatus: untested`. **Two collisions.** (1) S1 at
+  `rank` on unvalidated evidence **ships out of licence on day one** — survivable, the matrix only
+  advises. (2) Worse: **`untested` is not one of the five evidence tokens**, so
+  `evidence.derivation_nonvacuity` (**Class A, gate**) **REFUSES THE ENTIRE DERIVATION at exit 2**
+  rather than flagging S1 — because an unrecognised level must never fall through to permissive,
+  which is exactly how a matrix stops discriminating while still printing green. Confirmed
+  empirically by the reviewer, and **reproduced independently by the archivist at close** by
+  injecting `untested` into a throwaway clone of `0555717`:
+  `evidence: UNREADABLE ... empirical_status token "untested" has no cap on the evidence axis` /
+  `evidence-policy: REFUSED`, **exit 2**. **The operator must choose: add `untested` as a sixth
+  token with its own cap, or have S1 arrive carrying `unvalidated`.** Adding a token *purely to make
+  a planned control fit* is the failure mode the registry exists to prevent, so this is a governance
+  decision, not a mechanical one. **Neither move is taken.** Found by a packet that can only advise,
+  **before S1 was built**.
+- **(p) `maint.tripwire_coverage_scan` is now flagged TWICE and still gates.** Registered `refuted`,
+  holding `gate`. The class axis called it a declared mismatch; the evidence axis's **sharp rule**
+  independently caps it at `observe`. **Still BLOCKED on the authority envelope — re-authorising is
+  the operator's decision, not a builder's.** Carried deliberately, not overlooked.
+- **(q) SECOND-EYES WAS DECLARED AND NOT DELIVERED — on BOTH passes, again.**
+  `build-os/memory/tool_router.md:368` routes reviewer second-eyes to Codex; `codex` is not on PATH
+  and no Codex plugin is installed. **Both verdicts in this packet are single-model, and the row is
+  now UNBACKED** — declared and undelivered on every packet that has invoked it. It matters
+  specifically here: **the two gates found different things by using different methods** (inspection
+  vs mutation), which is direct local evidence that an independent third perspective pays. The
+  declared third perspective is the one that never ran. **Either install Codex or stop declaring the
+  row.**
 
 ## Known risks / debt
 
@@ -369,9 +496,16 @@
 - Production boundaries default-OFF: secrets, OAuth, DDL, remote-DB writes,
   payments, flags, canaries, telemetry, deploys, merges, external sends — each a
   separate explicit approval.
-- **`claude/project-handoff-merge-ramhds` is UNPUSHED at `2a3c9b3`.** Everything since `641527f`
-  — including both commits of `gravito_census_gaps_egress_bandwidth_a` — is **local-only**. No push,
-  no merge, no tag, no PR, no deploy. Awaiting explicit go.
+- **[CORRECTED 2026-07-31] `claude/project-handoff-merge-ramhds` is NOT fully unpushed.** This entry
+  previously claimed everything since `641527f` was local-only. Git says otherwise:
+  `refs/remotes/origin/claude/project-handoff-merge-ramhds` is at **`6b01173`**, and
+  `git reflog show` for that ref records five successive **`update by push`** entries (`6b01173`,
+  `321dced`, `e8f34ed`, `785a851`, `d30aeab`) — so `gravito_census_gaps_egress_bandwidth_a`'s two
+  commits are already on `origin`. **Only `105cb75` and `0555717`, the two commits of
+  `gravito_evidence_policy_matrix_a`, are genuinely local-only**, and they remain so pending
+  explicit go. No claim is made about whether those earlier pushes carried a go; the record is
+  corrected to match git and the discrepancy is flagged for the operator. **Nothing was pushed,
+  merged, tagged, PR'd or deployed by the archivist.**
 - **Re-authorising `maint.tripwire_coverage_scan`** (registered `refuted`, still gating) is an
   **operator decision**, not a builder's. Deliberately not taken.
 

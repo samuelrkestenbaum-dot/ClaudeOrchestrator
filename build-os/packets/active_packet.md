@@ -4,62 +4,69 @@
 > the builder implements exactly this and nothing else; the archivist clears it
 > on close. One packet at a time.
 
-- **Packet id:** `gravito_evidence_policy_matrix_a`
-- **Status:** **built; qa and reviewer returned; fix round applied — awaiting
-  re-review.**
-- **Lane:** substantive.
+## Status: NO PACKET IN FLIGHT
 
-## Branch base
+`gravito_evidence_policy_matrix_a` closed **2026-07-31** — receipt at
+`build-os/receipts/gravito_evidence_policy_matrix_a.md`, commits `105cb75` +
+`0555717`, base `6b01173`, verdict **pass as fixed**. Suite **1485 passed / 0
+failed**; census **78 controls**; `19 of 78 out of licence`, reported at
+`advise`, re-authorising nothing.
 
-- `claude/project-handoff-merge-ramhds` at `6b01173`; verified before building
-  (`git merge-base HEAD 6b01173` = `6b01173`, tree clean).
+Zero declared packet ids is a **legitimate idle state** —
+`bandwidth.active_packet_singleton` enforces *at most one*, not *exactly one*.
+No `**Packet id:**` line appears below on purpose.
 
-## What it built
+## No next packet is staged
 
-The **second axis of the licence table**: `class x empirical_status -> licensed
-authority`. README §3 licensed on `class` alone, so a control's
-`empirical_status` licensed nothing and forbade nothing, and a control measured
-and found not to discriminate could stop a build with no rule objecting.
+Nothing is staged, because **the next move is an operator decision, not a build**.
+Staging a packet here would imply the decision had been taken.
 
-- `build-os/registry/README.md` **§3a** — the evidence axis, the composed grid,
-  and the composition rule stated explicitly: `licensed = MIN(class-licensed,
-  evidence-licensed)`. Extends §3; does not replace it.
-- `build-os/tools/evidence-policy.sh` (new) — `matrix` prints the model, `check`
-  **derives** the out-of-licence set from the registry. **No control id appears
-  in its source.**
-- `tests/evidence_policy_tests.sh` (new, 67 assertions), chained from
-  `tests/build_os_tests.sh`. §5a — added in the fix round — reconciles README
-  §3a's evidence **cap** table against the tool's `EVIDENCE_AXIS` in both
-  directions; without it the README's copy of the caps was guarded by nothing.
-- Three entries registered: `evidence.policy_matrix` (C, `advise`, mismatch
-  **none**), `evidence.derivation_nonvacuity` (A, `gate`),
-  `suite.evidence_policy` (A, `gate`). Census **75 → 78**.
+### The decision that blocks step 2 — S1's evidence token
 
-## The finding — derived, not remembered
+S1 is slated to arrive at `runtimeAuthority: rank` with
+`empiricalStatus: untested`. Two collisions with what just shipped:
 
-**19 of 78 out of licence.** 14 are the class axis's existing declared
-mismatches, reproduced exactly. **5 are visible only to the evidence axis**:
-four class-A gates on `unvalidated` evidence carrying `authority_mismatch:
-none`, plus `maint.source_scan_mask` advising on `refuted` evidence. **1**
-control gates on `refuted` evidence (`maint.tripwire_coverage_scan`) — already
-declared, but the declaration understates it.
+1. **S1 at `rank` on unvalidated evidence ships out of licence on day one.**
+   Survivable — the matrix only advises. It would appear as a 20th finding.
+2. **`untested` is not one of the five evidence tokens**, so
+   `evidence.derivation_nonvacuity` (**Class A, gate**) **refuses the entire
+   derivation at exit 2** rather than flagging S1 — an unrecognised level must
+   never fall through to permissive. Reproduced independently at close by
+   injecting the token: `UNREADABLE … has no cap on the evidence axis` /
+   `REFUSED`, **exit 2**.
 
-## The authority decision
+**The operator chooses one:** add `untested` as a sixth token with its own cap,
+**or** have S1 arrive carrying `unvalidated`. Adding a token *purely to make a
+planned control fit* is the failure mode the registry exists to prevent, so this
+is governance, not mechanics. **Neither move has been taken.**
 
-**The matrix ships at `advise` and does not gate.** It is chosen policy, not a
-definition; a matrix that gated on "chosen thresholds may not gate" would be
-self-refuting. Gating would demote 19 controls automatically with no operator in
-the loop, and the authority envelope that would make that legitimate is **step 2
-and does not exist yet**.
+## Candidates the orchestrator may cut from, once that is answered
 
-**Nothing was re-authorised.** No existing control's `class`,
-`runtime_authority`, `authority_mismatch` or `empirical_status` changed.
+Ranked by value per line, from `build-os/memory/residue.md`:
 
-## Out of scope, and deliberately not done
+1. **A checker for prose that restates a machine-computed table** — §5a of
+   `tests/evidence_policy_tests.sh` is the pattern to follow. Highest value per
+   line of the open follow-ons, and the **only** one of these that closes a
+   *class* rather than an instance. Every instance so far has been caught by a
+   human read after a gate missed it.
+2. **Enable the staleness check that actually works** —
+   `RELEASE_METADATA_LIVE_SUITE=1` is still opt-in and still not chained. It is
+   the check that caught the 1485 token; the chained suite still cannot.
+3. **`swarm-merge.sh` disjointness false negatives**; **`entitlement_tests.sh`'s
+   decaying 12-file `PACKET_FILES` list**.
 
-Any change to an existing control's authority (steps 2 and 3),
-`build-os/memory/*` (archivist territory), `/home/user/empathiq-website`.
-**Nothing pushed, merged, tagged or deployed. Local commits only.**
+**Closed in the close commit, not carried:** the four stale `75` sites
+(`CROSSWALK.md:8`, `:25`, `:39`, `neurocosmology_crosswalk.txt:169` — all now
+**78**; `control_registry.txt:1464` judged historical and left) and the
+`1485 passed` literal in `CHANGELOG.md` plus the `current_state.md` token.
+
+**Blocked on the operator, not schedulable:** re-authorising or demoting any of
+the 19 out-of-licence controls, including `maint.tripwire_coverage_scan` (now
+flagged by both axes). The matrix reports and exits 0; nothing performs a
+governance action.
 
 ---
-_Written by the builder on handback. The archivist clears this file on close._
+_Cleared by the archivist at close of `gravito_evidence_policy_matrix_a`. The
+archivist's close was interrupted by a container restart before it verified
+anything; the close was resumed and verified in a separate commit — see the
+addendum in `build-os/receipts/gravito_evidence_policy_matrix_a.md`._

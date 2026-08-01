@@ -5,7 +5,7 @@ much authority does it exercise?* This crosswalk answers the second question
 every control should be able to answer: **what universal function does it
 instantiate?**
 
-`neurocosmology_crosswalk.txt` binds each of the **75** registered controls to
+`neurocosmology_crosswalk.txt` binds each of the **78** registered controls to
 exactly one of **17** primitives, and records for each primitive what the
 bindings *miss*. `tests/neurocosmology_crosswalk_tests.sh` reconciles it against
 the census in both directions and refuses drift.
@@ -22,7 +22,7 @@ registry is right.
 
 ## 1. Why a second file, and not a field on each control record
 
-The obvious alternative was an eighteenth field on each of the 75 registry
+The obvious alternative was an eighteenth field on each of the 78 registry
 records. It was rejected on four grounds, three of which the registry's own
 `README.md` §1 already argues.
 
@@ -36,7 +36,7 @@ records. It was rejected on four grounds, three of which the registry's own
    `known_limitations`, is **per primitive** — 17 of them — not per control.
    It has no home in a control record, so a second store was needed regardless;
    the only real question was whether to *also* denormalise a `primitive:` field
-   into the census, which buys nothing and costs 75 record edits.
+   into the census, which buys nothing and costs 78 record edits.
 3. **The census schema is pinned.** `tests/control_registry_tests.sh` fixes the
    17 field names exactly. An eighteenth would mean loosening that guard for a
    non-census reason.
