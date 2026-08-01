@@ -239,11 +239,14 @@
   first control under it. **This does NOT generalise backward to the existing 13 declared
   mismatches** — the reviewer ruled they are **not one population** and must not be swept by a
   single rule. Do not let a future cleanup packet apply this retroactively.
-- **(j) `rank` and `observe` remain 0 of 78** (was 0 of 75 at that close). The authority ladder has
+- **(j) `rank` and `observe` remain 0 of 81** (0 of 78 after `gravito_evidence_policy_matrix_a`; 0 of 75 at that close). The authority ladder has
   five rungs and the census uses two (**66 gate / 12 advise**). A 66/12/0/0 distribution carries
   almost no information. Not a defect with a fix attached — a standing observation about whether the
   ladder is real. **Sharper since `gravito_evidence_policy_matrix_a`:** that packet wrote rules
-  about `rank` and `observe` that **no control has ever exercised**. See item (S1) below — the first
+  about `rank` and `observe` that **no control has ever exercised**. **Sharper again since
+  `gravito_authority_envelope_a`:** `DEPLOYMENT_AXIS`'s `shadow:observe` and
+  `bounded_autonomous:rank` are two MORE caps onto empty rungs. The distribution is now
+  **68 gate / 13 advise / 0 rank / 0 observe**. See item (S1) below — the first
   live occupant either rung would have had.
 - **(k) Second-eyes was declared and NOT delivered, on both passes.**
   `build-os/memory/tool_router.md:368` routes reviewer second-eyes to Codex (`codex` CLI /
@@ -334,6 +337,22 @@
   Deliberately not chased — one anomaly in six runs is not enough signal to spend a packet on. But a
   suite whose count can move **without a captured failure line** is cheap to dismiss and expensive to
   have dismissed. **If it recurs, the missing `FAIL:` capture is the thread to pull, not the count.**
+  **[IT RECURRED, 2026-08-01, at the `gravito_authority_envelope_a` close.]** The archivist's
+  `RELEASE_METADATA_LIVE_SUITE=1` run reported `live run of tests/build_os_tests.sh is not green
+  (exit 1, 1 failed)` / `live suite total (1596 passed)`, while a **direct** run of the same suite
+  on the same quiet tree, seconds apart, reported **1597 passed / 0 failed, exit 0** — and two
+  immediately following `RELEASE_METADATA_LIVE_SUITE=1` runs both reported **1597, MATCH, 44/0**.
+  **Same shape as the original, one packet later: the count moved by exactly 1 and no `FAIL:`
+  line reached the observer.** The reason it did not reach the observer is now KNOWN and is the
+  thread to pull: `tests/release_metadata_tests.sh:329-330` writes the nested suite's output to
+  `"$WORK/live.log"` inside an `mktemp -d` that is cleaned on exit, and the guard reports only the
+  parsed COUNTS (`ACTUAL`, `ACTUAL_FAIL`) — **it never surfaces the failing assertion, so a live
+  cross-check failure is structurally undiagnosable from its own output.** That is a cheap fix
+  (echo the `FAIL:` lines from `$LIVE_LOG` on the failure branch) and it is the prerequisite for
+  ever diagnosing this. **Still not chased** — **1 anomaly in 8 clean-tree runs at this close** (3 further
+  nested runs with logs preserved were all 1597/0 with zero `FAIL` lines), 1 in 6 at the last, so
+  **2 in 14 across two packets** — but it is now TWO packets running and the diagnosis-blocker is
+  identified.
 - **(S1) THE S1 EVIDENCE-TOKEN DECISION — OPERATOR DECISION, AND IT BLOCKS STEP 2.** S1 is slated to
   arrive at `runtimeAuthority: rank` with `empiricalStatus: untested`. **Two collisions.** (1) S1 at
   `rank` on unvalidated evidence **ships out of licence on day one** — survivable, the matrix only
@@ -351,8 +370,11 @@
   **before S1 was built**.
 - **(p) `maint.tripwire_coverage_scan` is now flagged TWICE and still gates.** Registered `refuted`,
   holding `gate`. The class axis called it a declared mismatch; the evidence axis's **sharp rule**
-  independently caps it at `observe`. **Still BLOCKED on the authority envelope — re-authorising is
-  the operator's decision, not a builder's.** Carried deliberately, not overlooked.
+  independently caps it at `observe`. **NO LONGER BLOCKED ON THE INSTRUMENT.**
+  `gravito_authority_envelope_a` shipped the authority envelope, and a demotion is exactly what
+  an envelope CAN express (it lowers `L_effective`). **What is missing is the AUTHORISATION, not
+  the instrument** — re-authorising is the operator's decision, not a builder's. Carried
+  deliberately, not overlooked.
 - **(q) SECOND-EYES WAS DECLARED AND NOT DELIVERED — on BOTH passes, again.**
   `build-os/memory/tool_router.md:368` routes reviewer second-eyes to Codex; `codex` is not on PATH
   and no Codex plugin is installed. **Both verdicts in this packet are single-model, and the row is
@@ -361,6 +383,98 @@
   vs mutation), which is direct local evidence that an independent third perspective pays. The
   declared third perspective is the one that never ran. **Either install Codex or stop declaring the
   row.**
+
+### From `gravito_authority_envelope_a` (2026-08-01, receipt `build-os/receipts/gravito_authority_envelope_a.md`)
+
+- **(r) A STRUCTURAL CITATION DEFECT — AND IT IS GUARANTEED, NOT OCCASIONAL.** `residue.md:280` (in
+  item (l), above) and `build-os/receipts/gravito_evidence_policy_matrix_a.md:572-573` cite
+  `CHANGELOG.md:106` and `CHANGELOG.md:131`. **Both were correct when written.**
+  `gravito_authority_envelope_a`'s **145-line prepend invalidated them**, verified at close:
+  `CHANGELOG.md:106` now sits inside that packet's zero-grants argument and `:131` inside the S1
+  tension — neither narrates what its citation claims. **This will happen to EVERY `CHANGELOG.md`
+  line-citation on EVERY future packet**, because the changelog grows **from the top**: every landed
+  citation into it decays by the size of the next release block. **The decay is structural and
+  guaranteed, not occasional drift**, which makes it different in kind from the `MISMATCHES.md`
+  class below — that one decays when a file is edited near the cited line; this one decays on every
+  packet unconditionally. **Remedy: cite by RELEASE-BLOCK HEADING, and stop creating new
+  line-citations into `CHANGELOG.md` at all.** The two live citations above are left as-is here so
+  the next packet can fix them by heading in one pass; nothing outside `build-os/` was written by
+  the close that found this.
+- **(s) `MISMATCHES.md` HAS CARRIED A STALE LINE REFERENCE IN SIX CONSECUTIVE PACKETS.** §10's table
+  **names its own decay mode in prose** and nothing checks it. Six packets is no longer a recurring
+  incident — it is a permanent property of the file. Same class as item (m). Most recent instance:
+  `MISMATCHES.md:248`'s `:938`, which the builder found only by sweeping the class by number, and
+  which sat in the **same sentence** as the `:960` the reviewer had flagged; neither the reviewer
+  nor the orchestrator saw it.
+- **(t) A SECOND INSTANCE OF THE SAME SPECIES, AND THIS ONE DEGRADES SILENTLY.**
+  `build-os/tools/authority-envelope.sh`'s `--help` uses a **hand-maintained `sed` range**,
+  `sed -n '2,196p'`, **duplicated across TWO handlers** (`:235` and `:245`). **It was live and
+  broken until the fix round caught it.** The property that makes it worse than (s): when the range
+  goes stale it **silently truncates the help text rather than failing**. A hand-maintained line
+  number that *errors* when stale is a nuisance; one that *quietly returns less* can persist
+  indefinitely. **Nothing tests it** — not its length, not its start, not that the two handlers
+  agree.
+- **(u) AN ENTIRE PACKET WAS BUILT WITH NO DECLARED PACKET, AND THE CONTROL PASSED CLEAN.**
+  `gravito_authority_envelope_a` — two commits, +2142 lines, three new registered controls — was
+  built with `build-os/packets/active_packet.md` reading **"NO PACKET IN FLIGHT"**. The orchestrator
+  dispatched without setting it. **The reviewer ruled: DO NOT back-write the file**, because that
+  would manufacture an artefact stating a packet was declared when it was not — precisely the
+  falsehood the envelope store avoids by keeping its worked example inside `#` comments. **The file
+  was not back-written; the record stands as the true one.**
+  **The gap:** `bandwidth.active_packet_singleton` refuses **TWO** declared packets but permits
+  **ZERO**. **This is item (c)'s disclosed "delete the file evades it" hole in a STRICTLY WORSE
+  FORM:** the delete branch requires an **affirmative destructive act**; this one **fires on pure
+  omission** — nobody has to do anything wrong, somebody merely has to not do something.
+  Omission-triggered evasions are the ones that happen by accident, repeatedly. **This is the first
+  recorded instance, and it happened on the very next packet after (c) was written down.**
+  The fix is a floor, not a ceiling: assert a declared packet EXISTS while a packet is in flight.
+- **(v) NON-BLOCKING — REVIEWER FLAGGED AND EXPLICITLY PASSED. DO NOT TREAT AS OPEN.**
+  `tests/evidence_policy_tests.sh:322` — §5b's non-vacuity floor is `NRD == NTD && NRD != 0`, which
+  is **weaker** than §2a's `NRD == NMODE && NTD == NMODE`: §5b's form would pass if both sides
+  yielded 2 of 4 rows. **It is not a live hole** — §2a of `tests/authority_envelope_tests.sh` covers
+  the same axis in both directions with the mode count as the floor on both sides. **Align §5b
+  whenever that file is next open for another reason.** Recorded so a future reader does not
+  mistake a passed-with-comment item for an open defect.
+- **(w) THE CENTRAL RESULT, RECORDED HERE BECAUSE IT RE-SCOPES FUTURE WORK: AN ENVELOPE CAN ONLY
+  LOWER `L_effective`; IT CANNOT LEGITIMISE A GRANT.** The reviewer wrote a well-formed operator
+  grant of `gate` to `adoption.lane_size_check` and got `OVER-GRANTED ... granted=gate
+  l-class=advise l-effective=advise binding-axis=class`, with `evidence-policy.sh`'s 19 finding
+  lines **byte-identical** against an empty store. The behaviour is **correct** — the tool refuses
+  to launder a Class-C gate even when the operator signs off. **Consequence: step 3 (applying
+  promotion/demotion rules to the fourteen declared mismatches) CANNOT be done by writing
+  envelopes.** All fourteen exercise MORE authority than their class licenses, and an envelope only
+  subtracts. **Step 3 needs a class change or a different instrument, and neither is designed.**
+  **Do not cut a packet that writes envelopes to fix mismatches.**
+- **(x) THE SUITE-COUNT PAIR IS CLOSED — 1485 -> 1597 — BUT THE STRUCTURE THAT BREAKS IT IS
+  UNTOUCHED.** See items (f), (g), (n). It closed at this packet's close only because the
+  **builder** happened to write the live total into the CHANGELOG entry (`CHANGELOG.md:32`,
+  `**1597 passed**`, present exactly once and unsplit), giving the archivist a literal to match. The
+  archivist still cannot write `CHANGELOG.md`. **§5 still cannot detect staleness** — it checks
+  cross-file agreement, and `current_state.md` at 1485 agreed with a landed `1485 passed` at
+  `CHANGELOG.md:175` while the live total was 1597, which is a **fifth** demonstration on this same
+  token. Verified at close in both directions: before the memory write,
+  `RELEASE_METADATA_LIVE_SUITE=1` reported `live suite total (1597 passed) contradicts
+  current_state.md's claim (1485) — the memory is stale` **while the chained suite was green at
+  1597/0**; after, it reports a match. **`RELEASE_METADATA_LIVE_SUITE=1` is the ONLY check in this
+  repo that compares memory against a live run, and it is still opt-in and still not chained.**
+- **(y) DEPTH DEFECT — FOUR SERIAL STAGES, AND THE CAUSE IS A DIFFERENT ONE FROM LAST PACKET'S.**
+  `gravito_evidence_policy_matrix_a`: **incomplete ENUMERATION** (the fix list arrived in
+  installments). `gravito_authority_envelope_a`: **incomplete APPLICATION** — the reviewer swept the
+  whole class first and enumerated correctly in **one** installment, and stage 4 still happened
+  because **two of its nine items did not fully land**: item 7 renamed a section header **without
+  the two prose references pointing at it**, and item 6 **over-corrected a false claim into a
+  different false claim**. **The two failure modes need different remedies.** Sweep-the-class fixes
+  enumeration and was correctly applied here. What is missing from the process is that **a fix round
+  must verify each item LANDED, not that each item was addressed** — a rename is not done when the
+  definition changes, it is done when nothing still points at the old name. **The reviewer
+  self-identified this without being asked, for the second packet running.**
+- **(z) SECOND-EYES DECLARED AND NOT DELIVERED — on BOTH passes, for the third packet running.**
+  `build-os/memory/tool_router.md:368` routes reviewer second-eyes to Codex; `codex` is not on PATH
+  and no Codex plugin is installed. **Both verdicts in `gravito_authority_envelope_a` are
+  single-model.** It matters here for a specific reason: the two findings that mattered most were
+  both produced by **mutation** — changing one token and watching a green suite stay green — and
+  both were produced by the reviewer alone, with qa green. **Either install Codex or stop declaring
+  the row.**
 
 ## Known risks / debt
 
@@ -503,11 +617,23 @@
   `321dced`, `e8f34ed`, `785a851`, `d30aeab`) — so `gravito_census_gaps_egress_bandwidth_a`'s two
   commits are already on `origin`. **Only `105cb75` and `0555717`, the two commits of
   `gravito_evidence_policy_matrix_a`, are genuinely local-only**, and they remain so pending
-  explicit go. No claim is made about whether those earlier pushes carried a go; the record is
+  explicit go. **[EXTENDED 2026-08-01]** Local-only now also includes `77a0040` (that packet's
+  close), `88052e7` + `a7ab841` (`gravito_authority_envelope_a`) and its close commit. No claim is made about whether those earlier pushes carried a go; the record is
   corrected to match git and the discrepancy is flagged for the operator. **Nothing was pushed,
   merged, tagged, PR'd or deployed by the archivist.**
 - **Re-authorising `maint.tripwire_coverage_scan`** (registered `refuted`, still gating) is an
-  **operator decision**, not a builder's. Deliberately not taken.
+  **operator decision**, not a builder's. Deliberately not taken. **The instrument now exists** —
+  `build-os/registry/authority_envelopes.txt` + `build-os/tools/authority-envelope.sh` — and a
+  demotion is exactly what an envelope can express. **What is missing is the authorisation.**
+- **Writing the FIRST authority envelope is an operator act.** The store ships with **0 live
+  grants** and nothing in `gravito_authority_envelope_a` writes to it.
+- **The S1 decisions are OPERATOR decisions and none is taken:** (i) add `untested` as a sixth
+  evidence token, or have S1 arrive carrying `unvalidated`; (ii) the reviewer's recommendation that
+  S1 declare `runtimeAuthority: observe` with a note that its SIGNAL is rank-shaped — **recorded as
+  ADVICE and explicitly NOT ADOPTED**; (iii) which of the two S1 readings, if either, the ladder
+  adopts — §17 of `tests/authority_envelope_tests.sh` fails if reading 2 is adopted silently.
+- **Step 3 needs a class change or a different instrument**, and neither is designed. See residue
+  item (w) — an envelope cannot promote, so step 3 cannot be executed by writing envelopes.
 
 ---
 _Append-only working notes._
