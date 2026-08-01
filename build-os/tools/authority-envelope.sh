@@ -158,6 +158,34 @@
 # reported, and no control's registered authority changes because of it. That
 # gap is real and is named in the registry entry rather than implied away.
 #
+# THE DIRECTION OF THE INSTRUMENT: AN ENVELOPE CAN ONLY LOWER `L_effective`.
+# Stated here because it is the single easiest thing to assume backwards. The
+# composition is a MINIMUM, so the deployment term can only pull the result DOWN.
+# AN ENVELOPE CAN NEVER RAISE A CONTROL ABOVE `L_class` OR `L_evidence`. The
+# default `autonomous` caps at `gate`, the top of the ladder and therefore no cap
+# at all, and every other mode is strictly below it — so the only effect an
+# operator can have on `L_effective` by writing a record is to REDUCE it.
+#
+# That is deliberate, and it is the property most worth keeping: this validator
+# refuses to launder a Class-C control into a `gate` even when the operator signs
+# the grant. Granting `gate` to `adoption.lane_size_check` (Class C,
+# `calibrated,red_driven`, exercising `gate`) reports
+#   OVER-GRANTED … granted=gate l-class=advise l-evidence=gate
+#                  l-deployment=gate l-effective=advise binding-axis=class
+# and evidence-policy.sh still reports that control OUT-OF-LICENCE, its finding
+# byte-identical to the run with no store at all.
+#
+# THE CONSEQUENCE FOR THE NEXT STEP, so nobody plans around a mechanism that does
+# not do this. "The operator had no mechanism to re-authorise a control, and this
+# is it" invites the reading that the fourteen `authority_mismatch: declared`
+# controls can be cleared by writing fourteen envelopes. THEY CANNOT. This tool
+# RECORDS a grant and COMPOSES it; it does not LEGITIMISE one. Applying the
+# registry's promotion and demotion rules to those fourteen needs a class change,
+# a change in `empirical_status`, a change to the licence table itself, or an
+# instrument that does not exist yet — a governance act on the FIRST TWO axes. An
+# envelope is where such an act is recorded and bounded, not the authority that
+# performs it.
+#
 # Local only. Reads files and prints. Writes nothing, anywhere.
 #
 # Usage:
@@ -204,7 +232,7 @@ CMD="${1:-}"
 [ $# -gt 0 ] && shift
 case "$CMD" in
   schema|check|modes) ;;
-  -h|--help|help) sed -n '2,168p' "${BASH_SOURCE[0]}"; exit 0 ;;
+  -h|--help|help) sed -n '2,196p' "${BASH_SOURCE[0]}"; exit 0 ;;
   "") refuse "no command — expected one of: schema, check, modes" ;;
   *)  refuse "unknown command \"$CMD\" — expected one of: schema, check, modes" ;;
 esac
@@ -214,7 +242,7 @@ while [ $# -gt 0 ]; do
     --repo)     [ $# -ge 2 ] || refuse "--repo needs a value";     REPO="$2"; shift 2 ;;
     --store)    [ $# -ge 2 ] || refuse "--store needs a value";    STORE="$2"; shift 2 ;;
     --registry) [ $# -ge 2 ] || refuse "--registry needs a value"; REGISTRY="$2"; shift 2 ;;
-    -h|--help)  sed -n '2,168p' "${BASH_SOURCE[0]}"; exit 0 ;;
+    -h|--help)  sed -n '2,196p' "${BASH_SOURCE[0]}"; exit 0 ;;
     *) refuse "unknown option \"$1\"" ;;
   esac
 done

@@ -66,7 +66,7 @@ the control as `UNREPORTED`.
 | `swarm.disjointness` | C | gate | advise | `build-os/tools/swarm-merge.sh:381` | 1 |
 | `swarm.hot_file_reservation` | C | gate | advise | `build-os/tools/swarm-merge.sh:311` | 3 |
 | `maint.tripwire_coverage_scan` | C | gate | advise | `build-os/maintenance/real-memory-tripwire.mjs:447` | 1 |
-| `tests.stdin_scan_nonvacuity` | C | gate | advise | `tests/build_os_tests.sh:960` | 1 |
+| `tests.stdin_scan_nonvacuity` | C | gate | advise | `tests/build_os_tests.sh:961` | 1 |
 | `tests.nonvacuity_minimums` | C | gate | advise | `tests/entitlement_tests.sh:126` (+33 more, §10) | 34 |
 | `tools.handoff_timeouts` | C | gate | advise | `build-os/tools/specialist-handoff.sh:151` | 3 |
 | `tools.supervise_timeout` | C | gate | advise | `build-os/tools/supervise.sh:49` | 2 |
@@ -244,8 +244,8 @@ being the easiest thing to write inside a module body.
 
 ## 9. `tests.stdin_scan_nonvacuity`
 
-**Gates at** `tests/build_os_tests.sh:960`. **Threshold** `PIN_MIN_SITES=10`
-(`:938`, tested at `:960`).
+**Gates at** `tests/build_os_tests.sh:961`. **Threshold** `PIN_MIN_SITES=10`
+(`:939`, tested at `:961`).
 
 "The scanner must not be blind" is Class A. `10` is the number of hook-invocation
 sites that existed the day it was written. Legitimately deleting two of them

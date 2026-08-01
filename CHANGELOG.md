@@ -14,6 +14,154 @@ deprecation cycle. Pin a commit if you need stability.
 
 ### In flight (not landed at the released commit)
 
+- **The operator finally has an artefact to grant authority in — and the licence
+  table gets a third `MIN` term.** `MISMATCHES.md` has said, fourteen times, that
+  re-authorising a control is a governance action belonging to the operator.
+  **The operator had no mechanism to perform one.** No artefact in this
+  repository let a human write *"this control may exercise this authority, on
+  this basis, until this date, and here is where it lands when the lease ends"*.
+  A rule naming an act nobody can carry out is not a rule with a gap in it; it is
+  a rule that has never been available.
+  `build-os/registry/authority_envelopes.txt` is that artefact — fourteen
+  required fields, one per line, blank line between records, the census's own
+  shape. **Leases end:** an authority granted with no `expires` is a permanent
+  re-authorisation with a date on it. Census **78 → 81** entries, `evidence_refs`
+  **274 → 287**, authorities **66 → 68 `gate`** and **12 → 13 `advise`**.
+  `CROSSWALK.md`'s six machine-reconciled columns were recomputed, not edited:
+  **81 bindings**, `agency` **4 → 5**, `epistemic_quality` **24 → 25**,
+  `homeostasis` **21 → 22**. Suite **1597 passed**, 0 failed
+  (+91 `tests/authority_envelope_tests.sh`, +21 in the evidence-policy suite).
+  - **It ships empty of grants, and that is the point.** Creating the first grant
+    is a governance act; a packet that shipped the mechanism *and used it* would
+    have re-authorised something by writing the tool that permits
+    re-authorisation. The worked example lives **entirely inside comments**,
+    because an example a parser can see is a live grant wearing a label. Zero
+    uncommented records, checked.
+  - **The third axis, and why two were not enough.** `class` asks what *kind* of
+    thing is checked; `empirical_status` asks whether the check *works*. Neither
+    asks the question an operator must answer before switching anything on:
+    **what happens to the output?** A control whose ranking nothing consumes and
+    one that silently reorders the work queue are *indistinguishable on both
+    existing axes*, and they are not the same risk. `deployment_mode` separates
+    permission to **rank** from permission to **choose** from permission to
+    **act**:
+    `shadow → observe` (produces output, nothing consumes it);
+    `human_confirmed → advise`; `bounded_autonomous → rank`;
+    `autonomous → gate`. Composition becomes
+    **`L_effective = MIN(L_class, L_evidence, L_deployment)`**.
+  - **An envelope can only *lower* `L_effective` — and that is the best property
+    here.** Because the composition is a minimum, **an envelope can never raise a
+    control above `L_class` or `L_evidence`**; `autonomous` caps at `gate`, the
+    top of the ladder, and every other mode is strictly below it. The validator
+    refuses to launder a Class-C control into a `gate` *even when the operator
+    signs the grant*: granting `gate` to `adoption.lane_size_check` reports
+    `OVER-GRANTED … binding-axis=class`, and the matrix still calls that control
+    out of licence, byte-identically. **So the fourteen
+    `authority_mismatch: declared` controls cannot be cleared by writing fourteen
+    envelopes** — the store *records and composes* a grant, it does not
+    *legitimise* one. Clearing them needs a class change, a change in
+    `empirical_status`, a change to the licence table, or an instrument that does
+    not exist yet. Stated at all three sites that describe the axis, because §3b
+    opens by saying the operator had no mechanism and this is it — which reads,
+    wrongly, as a licence to promote.
+  - **The axis's *owner* is pinned, not just its copy.** `evidence-policy.sh`'s
+    restatement of `DEPLOYMENT_AXIS` was reconciled against README §3b (§5b of
+    the evidence-policy suite), but `authority-envelope.sh` — the file that
+    *defines* the axis — was pinned by nothing: changing `shadow:observe` to
+    `shadow:none` there, leaving README saying `observe`, left both suites fully
+    green. §2a of the authority-envelope suite now reconciles the owner against
+    README §3b and against the consuming copy, and is **driven red** by exactly
+    that mutation (**89 passed / 2 failed**, restored to **91 / 0**). Same
+    unchecked-duplicate defect as §3a's cap column, one file along.
+  - **Two of those caps are consistency requirements, not preferences.**
+    `human_confirmed` may not reach `rank` **by the ladder's own definition of
+    `rank`** — the rung that orders work or selects between options *with no
+    human in the loop* — so a mode whose entire content is "a human confirms"
+    cannot license the rung that means "no human confirms". And
+    `bounded_autonomous` may not reach `gate`, because `gate` is the *unbounded*
+    stop and "bounded" is the refusal of exactly that.
+  - **The default is `autonomous`, and the defence matters more than the value.**
+    Every control in the census predates this axis. **No additional cap is the
+    only default that leaves the finding set where the operator put it**; any
+    other demotes the entire census in a single commit with no operator in the
+    loop — precisely the self-re-authorisation this machinery exists to prevent.
+    A permissive default is normally the wrong instinct; here the conservative
+    direction is *change nothing*, not *cap everything*. The cost, stated: the
+    axis is **opt-in** and inert until an operator writes a record, and nothing
+    here can *discover* a deployment mode.
+  - **The safety property is proved, not asserted.** §18 of the evidence-policy
+    suite runs the matrix against the live envelope store and against an empty
+    one and requires every finding line to be **byte-identical**; reconciles the
+    split against the census's own count of `authority_mismatch: declared`
+    rather than a typed constant; and requires that **no live finding is bound by
+    the deployment axis**. **19 out of licence, 14 + 5, the same control ids,
+    unchanged.** §18a drives the other half red — a fixture under `shadow` *is*
+    capped and the control beside it with no envelope is not — because a test
+    that only proved "nothing changed" would pass equally well against a term
+    that was never wired in.
+  - **The authority decision: `envelope.grant_composition` ships Class C at
+    `advise`, `authority_mismatch: none`.** A validator that *gated* would be
+    enforcing a governance scheme over **zero live grants** — vacuous authority
+    over an empty set, able to fire only on the operator's own first attempt to
+    use the mechanism, which is the worst possible moment to refuse. And new
+    Class-C controls ship at `advise`, with promotion a separate governance
+    action — the precedent this packet is literally about.
+  - **The one exception mirrors `evidence.derivation_nonvacuity`.**
+    `envelope.derivation_nonvacuity` (Class A, `gate`) refuses an absent or
+    unparseable store, a missing required field, a duplicate id, a backwards
+    lease term, a field the schema has no slot for, or **an unknown
+    `deployment_mode`** — the sharpest, because the deployment term is a `MIN`
+    term and reading an unknown value as "no cap" would silently license
+    everything the store exists to bound. Ten refusal states driven red, plus
+    five unknown modes including the operator's own prose spellings
+    `human-confirmed` and `bounded autonomous`, each refusing with the accepted
+    spellings named so the fix is readable from the refusal. **The refusal
+    propagates**: `evidence-policy.sh` quotes it and refuses in turn rather than
+    composing a term it could not read.
+  - **Zero grants is the correct state, not the shelfware state** — the one place
+    the census's vacuity rule is deliberately *not* copied. An empty control
+    registry is an unclassified system wearing a registry; an empty *envelope*
+    store means **nothing has been re-authorised**. So zero reports and exits 0,
+    while an **absent** store still refuses: absent is not empty, and reading a
+    missing file as "no grants" gives the permissive answer to a question that
+    was never asked.
+  - **Recorded, and deliberately not resolved: the S1 collision.** The sanctioned
+    launch declaration `heuristic_policy` / `untested` / `rank` / `shadow`
+    **cannot be produced by `min()`** — Class C licenses `advise` and `rank` is
+    strictly above it. *Reading 1:* S1 ships carrying `authority_mismatch:
+    declared`, the fifteenth, consistent with the fourteen already reported.
+    *Reading 2:* `shadow` means the ranking has no consequence, so
+    `runtime_authority` is measuring the wrong property and the ladder
+    **conflates signal strength with whether anything consumes the signal**.
+    **Both recorded, neither adopted** — adopting reading 2 would *redefine the
+    ladder*, which is a governance change and not a build decision. The suite
+    enforces the non-adoption: `shadow` must still cap below `rank`, so a silent
+    adoption fails rather than passing as a refactor.
+  - **`untested` is declared pending and is not implemented.** The operator ruled
+    `untested` (has not yet produced live outputs) and `unvalidated` (has
+    operated, lacks outcome evidence) meaningfully different. That distinction is
+    **not built**: `untested` is absent from the evidence axis, has no cap row,
+    and a control carrying it is still **refused at exit 2** — driven red, not
+    claimed. Adding a token so a planned control fits is the failure the registry
+    exists to prevent, so the sixth token is the single decision the next packet
+    must take.
+  - **Nothing is re-authorised.** No existing control's `class`,
+    `runtime_authority`, `authority_mismatch` or `empirical_status` changes, and
+    **no grant exists for any control**. Pre-existing stale numbers were found
+    and corrected on the way — the registry's stated `274` `evidence_refs`, and
+    `homeostasis`'s binding counts, which were restated in prose in four separate
+    places (`CROSSWALK.md`'s ranked list, twice; the crosswalk's `binding_quality`
+    note; and `meaning_metric`'s `known_limitations`) and were stale in all four.
+    **The two are not alike, and the difference is the whole lesson.** The
+    `evidence_refs` total **is** machine-pinned — `tests/control_registry_tests.sh`
+    §25 derives every stated ref total from the live count and red-drives itself —
+    which is why that one could not stay wrong. The `homeostasis` counts are
+    hand-written prose that no test reconciles against the table it restates,
+    which is exactly why they went stale in four places at once. `CROSSWALK.md`'s own
+    bound/inst table *is* recomputed and did not drift; the §4 prose beside it
+    did. A checker for prose that restates a machine-computed table is the
+    highest-value open follow-on, and it is not built here.
+
 - **The licence table gets a second axis: `class x empirical_status -> licensed
   authority`.** README §3's table licensed on **class alone**, so a control's
   `empirical_status` — whether anybody ever established that the check *works* —

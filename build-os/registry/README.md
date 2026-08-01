@@ -407,6 +407,41 @@ to choose** from **permission to act**.
 > `none < observe < advise < rank < gate`. A control may do what **all three**
 > allow, and no more.
 
+#### An envelope can only LOWER `L_effective` — read this before planning with it
+
+Because the composition is a **minimum**, the deployment term can only pull
+`L_effective` **down**. **An envelope can never raise a control above `L_class`
+or `L_evidence`.** The default `autonomous` caps at `gate`, which is the top of
+the ladder and therefore no cap at all; every other mode is strictly below it. So
+the *only* thing an operator can do to `L_effective` by writing a record is
+**reduce** it.
+
+**This is deliberate and it is the best property the artefact has** — the
+validator refuses to launder a Class-C control into a `gate` even when the
+operator signs the grant. Written out, a grant of `gate` to
+`adoption.lane_size_check` (Class C, `calibrated,red_driven`, exercising `gate`)
+reports:
+
+```
+envelope: OVER-GRANTED … granted=gate l-class=advise l-evidence=gate
+          l-deployment=gate l-effective=advise binding-axis=class
+```
+
+and `evidence-policy.sh` still reports that control **out of licence**, its
+finding byte-identical to the run with no store at all.
+
+**What this means for the step this section opens with.** The paragraph above
+says the operator *had no mechanism* to re-authorise a control and that this
+artefact is that mechanism. Read carelessly, that invites the conclusion that the
+fourteen `authority_mismatch: declared` controls can now be cleared by writing
+fourteen envelopes. **They cannot.** The store **records** a grant and
+**composes** it; it does not **legitimise** one. Applying the registry's
+promotion and demotion rules to those fourteen needs a **class change**, a change
+in `empirical_status`, a change to the licence table itself, or an instrument
+that does not exist yet — a governance act on the *first two* axes. An envelope
+is the artefact in which such an act is **recorded and bounded**, not the
+authority that performs it.
+
 Two of those rows carry an argument that is not merely a preference:
 
 - **`human_confirmed` caps below `rank` by the ladder's own definition of

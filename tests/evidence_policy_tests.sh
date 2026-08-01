@@ -279,7 +279,7 @@ echo "== 5a. THE EVIDENCE AXIS'S CAPS ARE A COPY OF README §3a, not a second ta
 # three-column table of `token | rung | why`. Read as part of §3a it would add
 # four rows to the evidence axis and the comparison would fail for the wrong
 # reason — a section boundary, not a drift. Each extractor now reads exactly its
-# own section, and §4a below reconciles the deployment table the same way, so
+# own section, and §5b below reconciles the deployment table the same way, so
 # nothing has stopped being checked.
 sed -n '/^### 3a\./,/^### 3b\./p' "$RREADME" \
   | awk -F'|' -v lad=" $LADDER " 'NF==5 { e=$2; a=$3;
@@ -303,7 +303,7 @@ else
   diff "$WORK/readme_ev.txt" "$WORK/tool_ev_caps.txt" | sed 's/^/      | /' | head -8
 fi
 
-echo "== 5a. THE DEPLOYMENT AXIS IS A COPY OF README §3b, not a rewrite of it =="
+echo "== 5b. THE DEPLOYMENT AXIS IS A COPY OF README §3b, not a rewrite of it =="
 # The third axis gets the same treatment as the first two, for the same reason:
 # a cap restated in a second place that nothing compares is the drift surface
 # that put a stale out-of-licence count in three files at once. `shadow` could be

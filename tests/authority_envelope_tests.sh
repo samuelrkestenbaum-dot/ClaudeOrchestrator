@@ -60,6 +60,7 @@ TOOL="$SRC/build-os/tools/authority-envelope.sh"
 EPOL="$SRC/build-os/tools/evidence-policy.sh"
 STORE="$SRC/build-os/registry/authority_envelopes.txt"
 REG="$SRC/build-os/registry/control_registry.txt"
+RREADME="$SRC/build-os/registry/README.md"
 
 PASS=0; FAIL=0
 ok(){ PASS=$((PASS+1)); echo "  PASS: $1"; }
@@ -203,6 +204,68 @@ LAD="$(awk '$1=="ladder:"{$1=""; print}' "$WORK/out.txt" | tr -d ' ')"
 grep -qE '(score|index|blend|composite|weight)[a-z_]*[[:space:]]*[=:][[:space:]]*[0-9.]' "$WORK/out.txt" \
   && { no "the model assigns a NUMBER to a blended quantity — the composite anti-pattern this design refuses"; dump; } \
   || ok "no line of the model assigns a number to a blended, weighted or composite quantity"
+
+echo "== 2a. THE AXIS THIS TOOL OWNS IS A COPY OF README §3b, not a rewrite of it =="
+# WHY THIS EXISTS, AND WHY IT WAS MISSING. This file is the DECLARED OWNER of the
+# deployment axis: `evidence-policy.sh` copies `DEPLOYMENT_AXIS` from here the way
+# it copies the class axis from README §3, and README §3b states the same four
+# caps in prose for a human. Section 2 above proves the tool declares four modes
+# and that each cap is a rung of the ladder — it does NOT prove the caps are the
+# ones the README publishes. Until this block, NOTHING pinned the owner: with
+# `shadow` changed to `none` HERE and left at `observe` in README §3b, this suite
+# and the evidence-policy suite both stayed fully green (86/0 and 88/0, driven and
+# observed). Only the evidence matrix's COPY was pinned, by §5b of
+# tests/evidence_policy_tests.sh — so the copy was checked and the ORIGINAL was
+# not, which is the unchecked-duplicate defect §5a's own comment names, one file
+# along. The fix is that same device pointed at the owner, so a cap edited on
+# either side is caught on either side.
+#
+# THE RANGE ENDS AT `## 4`, matching the extractor in evidence_policy_tests.sh
+# §5b, so this reads exactly §3b and cannot absorb a neighbouring section's
+# table. `NF==5` restricts it to THREE-column tables, and requiring the cap to be
+# a rung of the ladder drops the header and separator rows; a cap edited to
+# something that is not a rung drops its row instead, which the row count then
+# catches.
+sed -n '/^### 3b\./,/^## 4/p' "$RREADME" \
+  | awk -F'|' -v lad=" $LADDER " 'NF==5 { d=$2; a=$3;
+      gsub(/[`*[:space:]]/,"",d); gsub(/[`*[:space:]]/,"",a);
+      if (d != "" && index(lad," " a " ") > 0) print d"="a }' \
+  | sort -u > "$WORK/readme_dep.txt"
+awk '$1=="axis:" && $2=="deployment"{for(i=3;i<=NF;i++) if($i ~ /:/){split($i,p,":"); print p[1]"="p[2]}}' \
+  "$WORK/schema.txt" | sort -u > "$WORK/tool_dep.txt"
+NRD="$(grep -c . "$WORK/readme_dep.txt" || true)"; NRD="${NRD:-0}"
+NTD="$(grep -c . "$WORK/tool_dep.txt" || true)"; NTD="${NTD:-0}"
+# Both sides must yield exactly the modes this suite knows independently, so the
+# diff below cannot pass by comparing two empty files or two short ones.
+[ "$NRD" = "$NMODE" ] \
+  && ok "README §3b's deployment table yields all $NMODE cap rows (this comparison is not vacuous)" \
+  || { no "README §3b parsed to $NRD cap row(s), not $NMODE — the axis's owner cannot be reconciled"; sed 's/^/      | /' "$WORK/readme_dep.txt"; }
+[ "$NTD" = "$NMODE" ] \
+  && ok "the tool printed all $NMODE deployment caps to compare against (this comparison is not vacuous)" \
+  || { no "the tool printed $NTD deployment cap(s), not $NMODE"; dump; }
+if diff -q "$WORK/readme_dep.txt" "$WORK/tool_dep.txt" >/dev/null 2>&1; then
+  ok "the tool's deployment axis equals README §3b's cap table exactly, row for row — the axis's OWNER is pinned, not just its copy"
+else
+  no "the tool's deployment axis and README §3b's cap table disagree — the owner of the axis has drifted from the document that publishes it"
+  diff "$WORK/readme_dep.txt" "$WORK/tool_dep.txt" | sed 's/^/      | /' | head -8
+fi
+# And the owner must agree with the copy that consumes it. evidence-policy.sh
+# restates DEPLOYMENT_AXIS; §5b of tests/evidence_policy_tests.sh pins that copy
+# to the README and the block above pins this file to the README, so the two are
+# already transitively equal — this asserts it directly rather than by argument,
+# because a transitive proof breaks silently the moment either extractor changes.
+awk '$1=="axis:" && $2=="deployment"{for(i=3;i<=NF;i++) if($i ~ /:/){split($i,p,":"); print p[1]"="p[2]}}' \
+  <("$EPOL" matrix 2>/dev/null) | sort -u > "$WORK/epol_dep.txt"
+NED="$(grep -c . "$WORK/epol_dep.txt" || true)"; NED="${NED:-0}"
+[ "$NED" = "$NMODE" ] \
+  && ok "evidence-policy.sh prints all $NMODE deployment caps (its copy is readable, so the comparison below is not vacuous)" \
+  || { no "evidence-policy.sh printed $NED deployment cap(s), not $NMODE"; sed 's/^/      | /' "$WORK/epol_dep.txt"; }
+if diff -q "$WORK/tool_dep.txt" "$WORK/epol_dep.txt" >/dev/null 2>&1; then
+  ok "the consuming copy in evidence-policy.sh equals this tool's axis exactly — owner and copy cannot restate the third axis differently"
+else
+  no "evidence-policy.sh's copy of the deployment axis differs from the owner's"
+  diff "$WORK/tool_dep.txt" "$WORK/epol_dep.txt" | sed 's/^/      | /' | head -8
+fi
 
 echo "== 3. THE ORDERING OF THE MODES IS THE POINT: rank < choose < act =="
 # The axis is worth having only if the four modes are strictly ordered. If

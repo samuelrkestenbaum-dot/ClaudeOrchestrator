@@ -197,8 +197,8 @@ The distinction that decides whether this crosswalk earns its place. Note that
 the concept and *is not coverage* — so it is never used below as loose English
 for "in name only". Ranked by how badly the `bound` column overstates `inst`:
 
-1. **`homeostasis` — 20 bound, 1 instantiating.** The worst overstatement in the
-   table. Fifteen of the twenty are *test suites*, and a suite's empirical
+1. **`homeostasis` — 22 bound, 1 instantiating.** The worst overstatement in the
+   table. Seventeen of the twenty-two are *test suites*, and a suite's empirical
    status is `red_driven`: a check written against a fixture written by the same
    author in the same hour mostly proves the two agree. A green suite is evidence
    that **planted** defects are caught, not that the system is healthy. There is
