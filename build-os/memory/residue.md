@@ -248,6 +248,12 @@
   `bounded_autonomous:rank` are two MORE caps onto empty rungs. The distribution is now
   **68 gate / 13 advise / 0 rank / 0 observe**. See item (S1) below — the first
   live occupant either rung would have had.
+  **SHARPER AGAIN SINCE `gravito_mismatch_refuted_a`, and now with a mechanism:** that packet added a
+  **GUARD ON** the `observe` rung (`OBSERVE-LB`) without adding an **occupant** to it — and the guard
+  is precisely what makes the rung unreachable for the 67 `load_bearing` controls. **No `observe`,
+  `none` or `rank` rows exist at all in the census of 81.** The ladder is not merely unused at three
+  rungs; for the largest population it is now **provably unenterable at the bottom two**. See items
+  (bb) and (cc).
 - **(k) Second-eyes was declared and NOT delivered, on both passes.**
   `build-os/memory/tool_router.md:368` routes reviewer second-eyes to Codex (`codex` CLI /
   Codex-for-Claude-Code plugin). **`codex` is not on PATH and no Codex plugin is installed**, so the
@@ -353,6 +359,12 @@
   nested runs with logs preserved were all 1597/0 with zero `FAIL` lines), 1 in 6 at the last, so
   **2 in 14 across two packets** — but it is now TWO packets running and the diagnosis-blocker is
   identified.
+  **[STILL OPEN AND STILL UNDIAGNOSABLE, 2026-08-01, `gravito_mismatch_refuted_a` close.]** Nothing
+  about the blocker changed: `tests/release_metadata_tests.sh` still writes the live log into an
+  `mktemp -d` that is **cleaned on exit** and still reports **only the parsed counts**, so **a live
+  cross-check failure destroys its own evidence.** The cheap fix — echo the `FAIL:` lines from
+  `$LIVE_LOG` on the failure branch — is **still not made**, and it remains the prerequisite for
+  ever diagnosing this. It is now **three packets** since the flake was first seen.
 - **(S1) THE S1 EVIDENCE-TOKEN DECISION — OPERATOR DECISION, AND IT BLOCKS STEP 2.** S1 is slated to
   arrive at `runtimeAuthority: rank` with `empiricalStatus: untested`. **Two collisions.** (1) S1 at
   `rank` on unvalidated evidence **ships out of licence on day one** — survivable, the matrix only
@@ -368,13 +380,23 @@
   a planned control fit* is the failure mode the registry exists to prevent, so this is a governance
   decision, not a mechanical one. **Neither move is taken.** Found by a packet that can only advise,
   **before S1 was built**.
-- **(p) `maint.tripwire_coverage_scan` is now flagged TWICE and still gates.** Registered `refuted`,
-  holding `gate`. The class axis called it a declared mismatch; the evidence axis's **sharp rule**
-  independently caps it at `observe`. **NO LONGER BLOCKED ON THE INSTRUMENT.**
-  `gravito_authority_envelope_a` shipped the authority envelope, and a demotion is exactly what
-  an envelope CAN express (it lowers `L_effective`). **What is missing is the AUTHORISATION, not
-  the instrument** — re-authorising is the operator's decision, not a builder's. Carried
-  deliberately, not overlooked.
+- **(p) `maint.tripwire_coverage_scan` — RESOLVED 2026-08-01 BY MEASUREMENT, AND THE RESOLUTION IS
+  "NO CHANGE". DO NOT RE-OPEN THIS AS SCHEDULED WORK.** It was flagged twice (class axis: declared
+  mismatch; evidence axis's sharp rule: capped at `observe`), the reviewer had called it **the
+  strongest demotion candidate in the census**, and its own `demotion_requirement` **literally
+  prescribed its own demotion**. `gravito_mismatch_refuted_a` was **authorised** by the operator's
+  step-3 ruling to perform it, **applied it**, and **measured both arms** against an uncovered suite
+  file that rewrites real memory: **GATED — throws, exit 1, real tree sha256-IDENTICAL; DEMOTED —
+  prints, exit 1, `residue.md` TRUNCATED 1621 B -> 8 B and replaced with `DAMAGED`.**
+  **THE EXIT CODE IS 1 IN BOTH ARMS**, so nothing watching exit codes can see this demotion at all;
+  only inspecting the tree reveals it. That gate is the maintenance layer's **only PREVENTION** —
+  `maint.real_memory_tripwire` and `maint.shell_fingerprint` are detection and both declare
+  `rollback_behavior: NONE` — so **retirement is strictly worse than demotion**. **Both outcomes are
+  CLOSED with the measurement attached** (`COVERAGE-GATE-PREVENTION-DIFFERENTIAL`,
+  `tests/build_os_maintenance_tests.sh` §6a). It stays at `gate`, its mismatch stays **declared**,
+  and **keeping the gate is not a claim to be in licence**. The refutation is also **PATH-SCOPED** —
+  the DETECTION claim failed on the bare `node --test` path; on the sanctioned path the same scan is
+  measured PREVENTION — which one unqualified `refuted` token cannot say.
 - **(q) SECOND-EYES WAS DECLARED AND NOT DELIVERED — on BOTH passes, again.**
   `build-os/memory/tool_router.md:368` routes reviewer second-eyes to Codex; `codex` is not on PATH
   and no Codex plugin is installed. **Both verdicts in this packet are single-model, and the row is
@@ -400,7 +422,12 @@
   line-citations into `CHANGELOG.md` at all.** The two live citations above are left as-is here so
   the next packet can fix them by heading in one pass; nothing outside `build-os/` was written by
   the close that found this.
-- **(s) `MISMATCHES.md` HAS CARRIED A STALE LINE REFERENCE IN SIX CONSECUTIVE PACKETS.** §10's table
+- **(s) [STREAK ENDED 2026-08-01 — THE INSTANCE IS CLOSED, THE CLASS IS NOT.]** qa confirmed at
+  `gravito_mismatch_refuted_a` that the `:960` reference **was corrected in `a7ab841`**, and that
+  packet **inherits a correct citation**. The six-packet streak is over. **The class (item m) is
+  still unguarded** and a working sweep exists only as a throwaway — see item (aa). Original entry
+  preserved below.
+  **(s) `MISMATCHES.md` HAD CARRIED A STALE LINE REFERENCE IN SIX CONSECUTIVE PACKETS.** §10's table
   **names its own decay mode in prose** and nothing checks it. Six packets is no longer a recurring
   incident — it is a permanent property of the file. Same class as item (m). Most recent instance:
   `MISMATCHES.md:248`'s `:938`, which the builder found only by sweeping the class by number, and
@@ -445,8 +472,14 @@
   envelopes.** All fourteen exercise MORE authority than their class licenses, and an envelope only
   subtracts. **Step 3 needs a class change or a different instrument, and neither is designed.**
   **Do not cut a packet that writes envelopes to fix mismatches.**
-- **(x) THE SUITE-COUNT PAIR IS CLOSED — 1485 -> 1597 — BUT THE STRUCTURE THAT BREAKS IT IS
-  UNTOUCHED.** See items (f), (g), (n). It closed at this packet's close only because the
+- **(x) THE SUITE-COUNT PAIR IS CLOSED — 1485 -> 1597, AND AGAIN 1597 -> 1617 — BUT THE STRUCTURE
+  THAT BREAKS IT IS UNTOUCHED, AND IT HAS NOW CLOSED TWICE FOR THE SAME LUCKY REASON.**
+  **[UPDATED 2026-08-01 at the `gravito_mismatch_refuted_a` close.]** Live total is **1617**; this
+  file's and `current_state.md`'s prior claim of **1597** was a **sixth** demonstration that §5
+  checks cross-file AGREEMENT and not liveness. It closed again only because **the builder** wrote
+  the live total into the CHANGELOG entry (`**1617 passed**`, present exactly once and unsplit),
+  giving the archivist a literal to match. **Twice running, the loop has closed by luck of the
+  builder's phrasing rather than by design.** Original entry follows. See items (f), (g), (n). It closed at this packet's close only because the
   **builder** happened to write the live total into the CHANGELOG entry (`CHANGELOG.md:32`,
   `**1597 passed**`, present exactly once and unsplit), giving the archivist a literal to match. The
   archivist still cannot write `CHANGELOG.md`. **§5 still cannot detect staleness** — it checks
@@ -475,6 +508,111 @@
   both produced by **mutation** — changing one token and watching a green suite stay green — and
   both were produced by the reviewer alone, with qa green. **Either install Codex or stop declaring
   the row.**
+
+### From `gravito_mismatch_refuted_a` (2026-08-01, receipt `build-os/receipts/gravito_mismatch_refuted_a.md`)
+
+- **(aa) PROSE CITATIONS HAVE **TWO** KNOWN ESCAPE FORMS, AND THE ONLY WORKING SWEEP IS A
+  THROWAWAY.** The known form is a **bare `:NNN` reference**. The second is **`MISMATCHES.md` §10's
+  nonvacuity-table row form, which names a file with NO LINE NUMBER AT ALL** — a citation shape that
+  every `:NNN`-shaped sweep is structurally blind to. **The builder's own first sweep pass
+  mis-resolved that table and had to be redone.** A sweep that handles both forms **was written and
+  works**, and it **exists only as a throwaway script** — it is not in the tree, nothing chains it,
+  and nothing re-runs it. This is the cheapest item in the citation class (items m, r, s) because,
+  uniquely among them, **the implementation already exists and only needs landing**.
+- **(bb) OPERATOR DECISION 1 — A FIFTH OUTCOME IS MISSING FROM THE FRAMEWORK.** The operator's
+  step-3 framework offers **demote / correct class / improve evidence / retire**. But **demotion
+  onto the rung the `refuted` cap prescribes is UNSPELLABLE for 67 of 81 controls (83%)** — every
+  `load_bearing` one — and **0 controls sit at `observe` today**. The reviewer's proposal:
+  **ACCEPT AND CONSTRAIN** — leave the authority where it is, **keep the finding standing**, and
+  require an **operator envelope**. `build-os/registry/authority_envelopes.txt` exists with **0 live
+  grants**, which is exactly what it was built for. **Not adopted. Operator's call.**
+- **(cc) OPERATOR DECISION 2 — THE LADDER HAS A DEFINITIONAL BUG, AND FIXING IT IS NOT ONE LINE.**
+  `none` = *"nothing consumes it"* and `observe` = *"it measures and records. Nothing reads the
+  result"* — **both bottom rungs are defined by non-consumption**, so **no rung means "it is read,
+  but may cause nothing"**, which is precisely the state a refuted-but-wired-in control should
+  occupy. **The fix touches SIX prose sites AND `scan-controls.sh`'s `OBSERVE-LB`, which is the part
+  that actually binds.** The six: README §2's **two** bottom rungs, README §3b's `shadow` row,
+  `authority_envelopes.txt`'s header, and both tools' headers. **Deleting every line of README prose
+  leaves `OBSERVE-LB` refusing at exit 2 and the demotion still unwritable for all 67.**
+  **A remedy its own guard survives is not a remedy.** Do not cut a one-line packet for this.
+- **(dd) OPERATOR DECISION 3 — `OBSERVE-LB` MAY BE CORRECTLY REASONED BUT MIS-PLACED IN AUTHORITY.**
+  It sits on the **gating** path (`build-os/registry/scan-controls.sh`, **exit 2**) while the axis it
+  defends deliberately only **advises** (`build-os/tools/evidence-policy.sh`, **exit 0**). The
+  advisory axis was designed so that **nothing gets demoted automatically with no operator in the
+  loop**; this guard **removes the operator's ability to apply the demotion BY HAND as well.** The
+  **reviewer declined to demand a move** — it is a design call, recorded as open.
+- **(ee) "DECLARE BEFORE BUILDING" AND THE `<=2-COMMIT` RULE ARE IN GENUINE TENSION — OPERATOR
+  DECISION, DELIBERATELY UNRESOLVED.** `gravito_mismatch_refuted_a` **DID declare itself before
+  building**, which is the fix for item (u). **But the reviewer observed that the declaration landed
+  in the SAME COMMIT as the build** (`b25f3f7` touches `build-os/packets/active_packet.md` alongside
+  the guard and the tests), **so git cannot attest the ordering.** The claim is true; git simply
+  cannot corroborate it. **Attesting it needs a third commit or a pre-commit hook**, and the packet
+  is capped at two commits. **This close does not resolve it.** Item (u)'s floor — *assert a declared
+  packet EXISTS while a packet is in flight* — is still unbuilt.
+- **(ff) `maint.source_scan_mask`: ALL FOUR OUTCOMES CLOSED, EACH FOR A DIFFERENT REASON — AND IT IS
+  **NOT** A SECOND DATA POINT FOR `outputSemantics`.** Demotion **writes a falsehood** (README §2
+  defines `observe` as "nothing reads the result"; **two controls read this one's result** — verified
+  at **import AND call sites**), and `OBSERVE-LB` now refuses it mechanically. Retirement **breaks
+  both consumers** (`maint.tripwire_coverage_scan` and `rotate-memory.rootscan.test.mjs`). Improving
+  the evidence is **forbidden by its own `promotion_requirement`** (defeated three times; the
+  maintainers stopped writing mask heuristics deliberately). Its **class is not wrong** — a
+  defeatable lexer really is a heuristic. **So the finding is REAL and its prescribed remedy is
+  UNREACHABLE.**
+  **THE CORRECTION THAT MATTERS COMMERCIALLY:** the packet first recorded this as a **second
+  demonstration of the `outputSemantics` split**, and **the reviewer refused it** with a decisive
+  test — **`outputSemantics` would not fix it**, because `observe` would still mean "nothing reads
+  the result". The collision is between **`runtime_authority`'s consumption clause** and
+  **`implementation_status`**: a redundancy between **two fields that BOTH ALREADY EXIST**, not a
+  missing third concept. **The operator committed to `outputSemantics` for S1 on a DIFFERENT case;
+  counting this as a second data point would inflate confidence behind that design using a case that
+  does not test it.**
+- **(gg) DO NOT EXTRAPOLATE THE TWO REFUTED CLOSURES TO THE REMAINING TWELVE MISMATCHES.** These two
+  controls were selected **precisely because `refuted` made action look settled**, which makes them
+  **the least representative pair in the census**. **Of the 19 findings, 11 are `unvalidated`** —
+  *nobody measured* — and for those the remedy is **outcome 3, improve the evidence**, which is
+  **WIDE OPEN**. It was closed here **only** because `source_scan_mask`'s own
+  `promotion_requirement` explicitly forbade it, which is a property of one control, not of a class.
+- **(hh) A REVIEWER WITHDREW ITS OWN PRIOR RULING, ON THE RECORD — KEEP THIS VERBATIM.**
+  *"I reasoned from the token `refuted` rather than the evidence the token points at… Reasoning from
+  a label instead of its referent is precisely the failure this registry exists to catch."*
+  **A reviewer correcting itself on the record is the behaviour the system is supposed to produce**,
+  and it is filed as such rather than as a defect. Related, and equally worth keeping:
+  **EVADABILITY IS NOT NON-DISCRIMINATION** — the defect `maint.tripwire_coverage_scan` exists
+  against was an **ACCIDENT** (a suite file carrying no tripwire, destroying live memory at exit 0),
+  and against that it discriminates exactly.
+- **(ii) A FALSE REMEDY SURVIVED A REVIEW ROUND, AND THE FAILURE MODE HAS A NAME.** The packet
+  wrote, in **two** places, that the `observe`-rung foreclosure is fixed by *"deleting the
+  consumption clause from README §2's ladder definitions, a one-line edit"*. **Both halves were
+  false** (see item cc). **A future packet could have executed that prescription faithfully and
+  achieved nothing.** The reviewer's framing is the transferable part and is exactly what
+  `MISMATCHES.md` says about itself: *"a wrong exclusion gets caught by re-running the rule, and a
+  wrong reason is what the rule is re-run against."* **NOTHING RE-RUNS A REASON.** This is the same
+  class as item (m) — prose that restates something machine-enforced — but one level worse: here the
+  prose restated a **remedy** rather than a **table**, and no diff-both-ways checker of the (m) shape
+  would have caught it.
+- **(jj) DEPTH DEFECT — FOUR SERIAL STAGES, AND THE REVIEWER'S OWN ACCOUNTING IS MORE PRECISE THAN
+  THE RULE.** **It was NOT a withheld installment:** both second-round items concerned text that
+  **did not exist at stage-2 review** — item A was **the item-2 replacement itself**, and item B was
+  a collision **the ALSO-RECORD note created by landing**. A reviewer cannot enumerate text a later
+  stage will write. **But the reviewer named the honest reading anyway:** item 2 was cut as *"replace
+  a false claim"* when it was really *"replace a false claim AND state the correct radius"* — the
+  **same INCOMPLETE-APPLICATION shape as `gravito_authority_envelope_a`** (item y), **two packets
+  running**. The remedy is unchanged and still not in the process: **a fix round must verify each
+  item LANDED, not that each item was addressed** — and, new here, **an item that replaces a false
+  claim must state the replacement's radius, or it will be applied at the wrong one.**
+- **(kk) qa CAUGHT A TRAP IN ITS OWN WORK, AND THE DISCARDED NUMBER IS RECORDED SO IT DOES NOT LEAK.**
+  A **first** Commit-1 isolation run reported **1592**; qa traced it to a **stale clone directory
+  that made `git checkout` fail silently**, so the run measured the wrong tree. **qa discarded and
+  redid it.** **1592 IS NOT A NUMBER FROM THIS PACKET** — it is the count of a tree that was never
+  checked out. Filed because a loose count in a transcript is exactly the kind of thing a later
+  reader reconciles against and cannot resolve.
+- **(ll) SECOND-EYES DECLARED AND NOT DELIVERED — on the review AND both re-reviews, for the FOURTH
+  packet running.** `build-os/memory/tool_router.md:368` routes reviewer second-eyes to Codex;
+  `codex` is not on PATH and no Codex plugin is installed. **Both verdicts in
+  `gravito_mismatch_refuted_a` are single-model.** It matters specifically here: **the reviewer
+  withdrew its own prior ruling** (item hh) and **a false remedy survived a full review round** (item
+  ii) — both are exactly what an independent second model is for, and the declared second model is
+  the one that never ran. **Either install Codex or stop declaring the row.**
 
 ## Known risks / debt
 
@@ -618,13 +756,25 @@
   commits are already on `origin`. **Only `105cb75` and `0555717`, the two commits of
   `gravito_evidence_policy_matrix_a`, are genuinely local-only**, and they remain so pending
   explicit go. **[EXTENDED 2026-08-01]** Local-only now also includes `77a0040` (that packet's
-  close), `88052e7` + `a7ab841` (`gravito_authority_envelope_a`) and its close commit. No claim is made about whether those earlier pushes carried a go; the record is
+  close), `88052e7` + `a7ab841` (`gravito_authority_envelope_a`) and its close `c52915f`, and
+  `b25f3f7` + `566443f` (`gravito_mismatch_refuted_a`) and its close commit. No claim is made about whether those earlier pushes carried a go; the record is
   corrected to match git and the discrepancy is flagged for the operator. **Nothing was pushed,
   merged, tagged, PR'd or deployed by the archivist.**
-- **Re-authorising `maint.tripwire_coverage_scan`** (registered `refuted`, still gating) is an
-  **operator decision**, not a builder's. Deliberately not taken. **The instrument now exists** —
-  `build-os/registry/authority_envelopes.txt` + `build-os/tools/authority-envelope.sh` — and a
-  demotion is exactly what an envelope can express. **What is missing is the authorisation.**
+- **[RESOLVED 2026-08-01 — "NO CHANGE", ON MEASUREMENT. NOT AN OPEN BOUNDARY ANY MORE.]**
+  Re-authorising `maint.tripwire_coverage_scan` **was authorised** by the operator's step-3 ruling
+  and `gravito_mismatch_refuted_a` **exercised that authorisation and declined to use it**: the
+  prescribed demotion was applied, measured **destroying live memory at the same exit code as the
+  gated arm**, and refused; retirement is strictly worse. **The control stays at `gate` with its
+  mismatch declared.** See residue item (p). **No envelope was written and the store still holds 0
+  live grants.**
+- **THE THREE OPERATOR DECISIONS FROM `gravito_mismatch_refuted_a` ARE OPEN AND NONE IS TAKEN:**
+  the missing **fifth outcome** (accept-and-constrain, needing an operator envelope — item bb); the
+  **ladder's definitional bug** and its true radius of six prose sites plus `OBSERVE-LB` (item cc);
+  and **`OBSERVE-LB`'s placement** on the gating path while the axis it defends only advises
+  (item dd).
+- **Whether "declare before building" gets a third commit or a pre-commit hook** is an operator
+  decision and is **deliberately unresolved** — the `<=2-commit` rule is in genuine tension with it
+  (item ee).
 - **Writing the FIRST authority envelope is an operator act.** The store ships with **0 live
   grants** and nothing in `gravito_authority_envelope_a` writes to it.
 - **The S1 decisions are OPERATOR decisions and none is taken:** (i) add `untested` as a sixth

@@ -10,14 +10,15 @@
   plan → build → prove → review → record system.
 - **Primary branch / base:** `claude/add-build-os` (current integration base; no
   `main` present in this environment). Active work branch:
-  `claude/project-handoff-merge-ramhds` (tip `a7ab841`). Merge-base with
+  `claude/project-handoff-merge-ramhds` (tip `566443f`). Merge-base with
   `origin/claude/add-build-os` = `7ef50e8`.
   **CORRECTED 2026-07-31 — this line previously claimed the branch was UNPUSHED, and it is not.**
   `refs/remotes/origin/claude/project-handoff-merge-ramhds` is at **`6b01173`**, and
   `git reflog show` for that ref records five successive `update by push` entries
   (`6b01173`, `321dced`, `e8f34ed`, `785a851`, `d30aeab`). **Local-only as of 2026-08-01:
   `105cb75`, `0555717`, `77a0040` (`gravito_evidence_policy_matrix_a` + its close) and
-  `88052e7`, `a7ab841` (`gravito_authority_envelope_a`), plus this close commit.**
+  `88052e7`, `a7ab841` (`gravito_authority_envelope_a`) and its close `c52915f`, and
+  `b25f3f7`, `566443f` (`gravito_mismatch_refuted_a`), plus this close commit.**
   No claim is made here about whether those pushes carried an explicit go; the record is
   corrected to match git and the discrepancy is flagged for the operator.
 - **Version:** `0.1.0` (`VERSION`), pre-1.0 — **installable, not yet API-stable**.
@@ -31,26 +32,30 @@
   `no tags` because `tests/release_metadata_tests.sh:322` requires it, so the residue item is
   annotated rather than rewritten. Whether the tag was created with an explicit go is not
   determinable from here and no claim is made.
-- **Build/test command:** `bash tests/build_os_tests.sh` (1597 checks; no network; temp dirs)
-  — measured on a quiet tree at `a7ab841`, and reconciled against `CHANGELOG.md`, which
-  carries the matching literal `**1597 passed**` at `CHANGELOG.md:32` (present exactly once,
+- **Build/test command:** `bash tests/build_os_tests.sh` (1617 checks; no network; temp dirs)
+  — measured on a quiet tree at `566443f`, and reconciled against `CHANGELOG.md`, which
+  carries the matching literal `**1617 passed**` at `CHANGELOG.md:24` (present exactly once,
   unsplit). **This pair had gone stale in four consecutive packets** (657 → 1418 → 1485 → 1597),
   each time because the archivist can write this token but **`CHANGELOG.md` is outside its
   write gate**, so the two halves of the check are owned by different lanes and only one of
-  them can close the loop. **It closed at the `gravito_authority_envelope_a` close only
-  because that packet's builder happened to write the live total into the CHANGELOG entry** —
-  the structural cause is untouched.
+  them can close the loop. **It has now closed TWICE RUNNING for the same reason and only that
+  reason** — at the `gravito_authority_envelope_a` close and again here, both times because the
+  **builder** happened to write the live total into the CHANGELOG entry, giving the archivist a
+  literal to match. **The structural cause is untouched:** the archivist still cannot write
+  `CHANGELOG.md`, so the loop closes by luck of the builder's phrasing, not by design.
   The reason it keeps surviving is worth keeping: **THE GUARD DOES NOT DETECT STALENESS.**
   It detects cross-file *disagreement* — §5 checks that `CHANGELOG.md` contains the literal
   `<count> passed` matching this line — so **two stale files that agree pass it**. Proven
   three times on this same token: at `2a3c9b3` the suite was green at 1418/0 while this line
   claimed 657; at `0555717` green at 1485/0 while this line and CHANGELOG agreed on 1418; at
-  `a7ab841` green at **1597/0** while this line and CHANGELOG agreed on **1485**. The check
+  `a7ab841` green at **1597/0** while this line and CHANGELOG agreed on **1485**; and at
+  `566443f` green at **1617/0** while this line still claimed **1597** — a **sixth** demonstration
+  on the same token. The check
   that actually works is opt-in and **still NOT enabled by the chained suite** —
   `RELEASE_METADATA_LIVE_SUITE=1 bash tests/release_metadata_tests.sh` compares against a live
   run, and it is the ONLY check that compares memory against a live run. It correctly reported
-  `live suite total (1597 passed) contradicts current_state.md's claim (1485)` at close, while
-  the chained suite was green. Correcting the number does not fix the guard; see residue.
+  `live suite total (1617 passed) contradicts current_state.md's claim (1597)` at this close,
+  while the chained suite was green. Correcting the number does not fix the guard; see residue.
   It **chains** 16 sibling suites in `tests/` through one `chain_suite` function and folds their
   counts into its own totals. A sibling suite present on disk but not chained is itself a failure,
   so a new suite cannot become discoverable-only. **The per-suite breakdown that used to sit here was
@@ -76,7 +81,114 @@
 
 ## Where we are
 
-- **Last closed packet:** `gravito_authority_envelope_a` — **the operator has an artefact to grant
+- **Last closed packet:** `gravito_mismatch_refuted_a` — **it was AUTHORISED to re-authorise two
+  controls and it changed NOTHING, because the prescribed demotion was MEASURED to destroy live
+  memory** (receipt `build-os/receipts/gravito_mismatch_refuted_a.md`, commits `b25f3f7` +
+  `566443f`, base `c52915f`).
+  `maint.tripwire_coverage_scan` carried a `demotion_requirement` that **literally prescribed its
+  own demotion**; the reviewer had called it *"the strongest demotion candidate in the census"* and
+  the operator's step-3 ruling named it first. The builder **applied the demotion and measured both
+  arms** against an uncovered suite file that rewrites real memory:
+  **GATED (shipped) — scan throws, exit 1, real tree UNTOUCHED (sha256-identical). DEMOTED — scan
+  prints, exit 1, `residue.md` TRUNCATED 1621 B -> 8 B, contents replaced with `DAMAGED`.**
+  **THE EXIT CODE IS 1 IN BOTH ARMS**, so every automated check watching exit codes would have
+  reported the demotion harmless; only inspecting the tree reveals it. That gate is the maintenance
+  layer's **only PREVENTION** — `maint.real_memory_tripwire` and `maint.shell_fingerprint` are
+  detection and both declare `rollback_behavior: NONE` — so **retirement is worse than demotion and
+  both outcomes are CLOSED**, not deferred.
+  **Built:** `COVERAGE-GATE-PREVENTION-DIFFERENTIAL` (`tests/build_os_maintenance_tests.sh` §6a) and
+  the **`OBSERVE-LB`** guard in `scan-controls.sh`, which refuses `load_bearing` at `observe` with a
+  named consumer. Red-driven, clean arm first.
+  **`maint.source_scan_mask`: ALL FOUR OUTCOMES CLOSED, each for a different reason.** Demotion
+  writes a **falsehood** (README §2 defines `observe` as "nothing reads the result"; **two controls
+  read this one's** — verified at import AND call sites); retirement breaks both consumers;
+  improving the evidence is **forbidden by its own `promotion_requirement`**; and its class is not
+  wrong, because a defeatable lexer really is a heuristic.
+  **THE REVIEWER'S CORRECTION THE BUILDER ACCEPTED:** `source_scan_mask` is **NOT** a second
+  demonstration of the `outputSemantics` split. Decisive test: **`outputSemantics` would not fix
+  it** — `observe` would still mean "nothing reads the result". The collision is between
+  `runtime_authority`'s **consumption clause** and `implementation_status`, a redundancy between two
+  fields that **BOTH ALREADY EXIST**. **This matters because the operator committed to
+  `outputSemantics` for S1 on a different case; counting this as a second data point would inflate
+  confidence behind that design using a case that does not test it.**
+  **THE SECOND-ROUND FINDING — the sharpest self-catch in the sequence.** The packet had written,
+  in TWO places, that the `observe`-rung foreclosure is fixed by *"deleting the consumption clause
+  from README §2's ladder definitions, a one-line edit"*. **Both halves were false.** Consumption is
+  asserted in **SIX** places (README §2's **two** bottom rungs — `none` "nothing consumes it" and
+  `observe` "Nothing reads the result" are **both** consumption clauses — README §3b's `shadow` row,
+  `authority_envelopes.txt`'s header, and both tools' headers). And decisively: **the foreclosure is
+  enforced by CODE, not prose** — `scan-controls.sh`'s `OBSERVE-LB` keys on `[ "$aut" = "observe" ]`
+  and hard-codes the semantics in its own refusal message, so deleting every line of README prose
+  leaves it refusing at exit 2 and the demotion still unwritable for all 67. **A future packet could
+  have executed that prescription faithfully and achieved nothing.** The reviewer's framing: this is
+  the failure `MISMATCHES.md` names about itself — *"a wrong exclusion gets caught by re-running the
+  rule, and a wrong reason is what the rule is re-run against."* **Nothing re-runs a reason.**
+  **THE REVIEWER WITHDREW ITS OWN PRIOR RULING**, naming the error precisely and on the record:
+  *"I reasoned from the token `refuted` rather than the evidence the token points at… Reasoning from
+  a label instead of its referent is precisely the failure this registry exists to catch."*
+  **A reviewer correcting itself on the record is the behaviour the system is supposed to produce.**
+  Two corrections landed with it: the refutation is **PATH-SCOPED** (the DETECTION claim failed on
+  the bare `node --test` path; on the sanctioned path the same scan is measured PREVENTION), and
+  **EVADABILITY IS NOT NON-DISCRIMINATION** (the defect it exists against was an ACCIDENT, and
+  against that it discriminates exactly). **Keeping the gate is not a claim to be in licence:** it
+  stays at `gate`, its mismatch stays **declared**, and no exception was written.
+  **qa GREEN, and it REPRODUCED THE CENTRAL FINDING FROM SCRATCH rather than running the builder's
+  test:** three independent fresh repos, its own `node:test` fixture with **static imports and a
+  real `test()` block** — a **stronger** shape than the shipped fixture's top-level
+  `await import()` — arms verified by `diff -r` to differ by **exactly one line**
+  (`throw new Error(` -> `console.error(`), plus a **negative control** with no fixture (exit 0,
+  tree untouched). So the refusal is caused by the fixture, not a pre-existing failure, and the
+  finding is **not an artefact of fixture shape**. Also: **287/287 `evidence_refs` content-verified
+  with ZERO drift**; the census **re-derived independently from README §3** giving the same 19 of 81
+  at 6/5/8; **`OBSERVE-LB` driven red by name with 0 of 81 live entries able to trip it**; both
+  `source_scan_mask` consumers verified at **import AND call sites**; **Commit-1 green in
+  isolation**; a safety grep with **22 patterns all firing on planted controls**; and destruction
+  confinement **audited and empirically proven** (real `build-os/memory/*` byte-identical after
+  three full-suite runs). **qa also caught a trap in its own work** — a first isolation run reported
+  **1592** because a stale clone directory made `git checkout` fail silently; it discarded and redid
+  it. **1592 is NOT a number from this packet.**
+  **Verdict pass as fixed: reviewer `fix-then-pass` TWICE** — 3 items / 5 sites, then 2 items /
+  3 sites closed by the orchestrator in the `tiny` lane.
+  **DEPTH: FOUR SERIAL STAGES.** Reviewer's own accounting: **not a withheld installment** — both
+  second-round items concerned text that **did not exist at stage-2 review** (item A was the item-2
+  replacement itself; item B was a collision the ALSO-RECORD note created by landing). But it named
+  the honest reading: **item 2 was cut as "replace a false claim" when it was really "replace a
+  false claim AND state the correct radius"** — the same **incomplete-application** shape as the
+  previous packet, two packets running.
+  **Census UNMOVED, which is the correct result for a packet that re-authorised nothing:**
+  **81 controls, 67 `load_bearing`, 14 declared mismatches, 0 at `observe`, distribution
+  68 `gate` / 13 `advise` — no `observe`, `none` or `rank` rows exist at all; class A58 / B3 / C20;
+  `evidence_refs` 287, all resolving.** Suite **1617 passed / 0 failed** (independently verified by
+  the orchestrator); `./build-os/maintenance/run-tests.sh` **144/144**;
+  `tests/evidence_policy_tests.sh` **102/0** (was 88); `tests/build_os_maintenance_tests.sh`
+  **67/0** (was 61); `scan-controls.sh check` **exit 0**;
+  `evidence-policy.sh check` **19 of 81, split 6/5/8 — UNMOVED**; **ZERO governance-field diff
+  lines** vs `c52915f`; tree clean.
+  **THREE OPERATOR DECISIONS — the packet's real output.** (1) **A FIFTH OUTCOME IS MISSING from the
+  operator's framework**: it offers demote / correct class / improve evidence / retire, but demotion
+  **onto the rung the `refuted` cap prescribes is unspellable for 67 of 81 controls (83%)**, and 0
+  sit at `observe` today. Reviewer's proposal: **accept and constrain** — leave the authority, keep
+  the finding standing, require an operator envelope; `authority_envelopes.txt` exists with 0 live
+  grants, which is exactly what it was built for. (2) **THE LADDER HAS A DEFINITIONAL BUG, and
+  fixing it is NOT one line**: `none` = "nothing consumes it" and `observe` = "it measures and
+  records. Nothing reads the result" — **both bottom rungs defined by non-consumption**, leaving no
+  rung meaning *"it is read, but may cause nothing"*, which is precisely the state a
+  refuted-but-wired-in control should occupy. The fix touches **six prose sites AND
+  `scan-controls.sh`'s `OBSERVE-LB`**, which is the part that actually binds. (3) **`OBSERVE-LB` MAY
+  BE CORRECTLY REASONED BUT MIS-PLACED IN AUTHORITY**: it sits on the **gating** path
+  (`scan-controls.sh`, exit 2) while the axis it defends deliberately only **advises**
+  (`evidence-policy.sh`, exit 0). The advisory axis was designed so nothing gets demoted
+  automatically with no operator in the loop — **this guard removes the operator's ability to apply
+  the demotion by hand as well.** The reviewer **declined to demand a move**; it is a design call.
+  **DO NOT EXTRAPOLATE from this packet to the remaining twelve mismatches.** These two were
+  selected **because** `refuted` made action look settled, which makes them **the least
+  representative pair in the census**. **Of the 19 findings, 11 are `unvalidated`** — nobody
+  measured — and for those the remedy is **outcome 3, improve the evidence**, which is **wide open**.
+  It was closed here only because `source_scan_mask`'s own `promotion_requirement` explicitly
+  forbade it.
+  **Both verdicts single-model** — **no Codex in either review or either re-review**;
+  `tool_router.md:368` routes to it and nothing is installed. **The row is unbacked.**
+- **Prior:** `gravito_authority_envelope_a` — **the operator has an artefact to grant
   authority in, and the licence model has a third MIN term** (receipt
   `build-os/receipts/gravito_authority_envelope_a.md`, commits `88052e7` + `a7ab841`, base
   `77a0040`). A **store** (`build-os/registry/authority_envelopes.txt`, **0 live grants**, worked
@@ -373,16 +485,36 @@
   `tests/build_os_tests.sh` — 189/189 green (RED 148/38 → GREEN 186/0; +3 list-schema checks → 189/0).
 - **Prior:** P-015 — global install ships the specialist handoff tools (installed hook resolves
   + runs the handoff end-to-end). P-014 — zero-touch specialist orchestration.
-- **Now:** none active. `gravito_authority_envelope_a` is **closed** (2026-08-01); its two commits
-  `88052e7` + `a7ab841` and this close commit are **local-only** and stay that way pending explicit
-  go. `build-os/packets/active_packet.md` reads NO PACKET IN FLIGHT and was **deliberately not
-  back-written** for the closed packet — see the process defect above.
-- **THE OPERATOR DECISION THAT NOW BLOCKS THE MOST:** step 3 was the plan and **step 3 cannot be
-  done with the instrument just built.** An envelope only lowers `L_effective`; it cannot promote.
-  The fourteen mismatches need **a class change or a different instrument**, and neither is
-  designed. Do not cut a packet that writes envelopes to fix mismatches — it will not work, and the
-  reviewer already proved it will not work.
-- **Next (candidates), cheapest first — all from this close's residue:**
+- **Now:** none active. `gravito_mismatch_refuted_a` is **closed** (2026-08-01); its two commits
+  `b25f3f7` + `566443f` and this close commit are **local-only** and stay that way pending explicit
+  go. `build-os/packets/active_packet.md` is cleared and reads NO PACKET IN FLIGHT.
+  **This packet DID declare itself before building**, unlike the previous one — but **the reviewer
+  observed the declaration landed in the SAME COMMIT as the build** (`b25f3f7` touches
+  `active_packet.md` alongside the guard and the tests), **so git cannot attest the ordering.** The
+  **`<=2-commit` rule and "declare before building" are in genuine tension**, and attesting the
+  ordering needs **a third commit or a pre-commit hook**. **That is an OPERATOR DECISION and this
+  close does not resolve it.**
+- **THE OPERATOR DECISIONS THAT NOW BLOCK THE MOST — three, all from `gravito_mismatch_refuted_a`:**
+  (1) **the missing FIFTH OUTCOME** — demotion onto the rung the `refuted` cap prescribes is
+  unspellable for **67 of 81 controls**, so the framework's four outcomes cannot cover the census;
+  the reviewer's **accept-and-constrain** proposal needs an operator envelope and is **not adopted**.
+  (2) **the ladder's definitional bug** — both bottom rungs are defined by non-consumption, so no
+  rung means *"it is read, but may cause nothing"*; the fix is **six prose sites plus `OBSERVE-LB`**,
+  **not one line**. (3) **`OBSERVE-LB`'s placement** — correctly reasoned, but it gates (exit 2) on
+  behalf of an axis that deliberately only advises (exit 0), which removes the operator's ability to
+  apply the demotion **by hand**. **None is taken.**
+  **Still standing from `gravito_authority_envelope_a`:** step 3 **cannot be done by writing
+  envelopes** — an envelope only lowers `L_effective` and cannot promote. Do not cut a packet that
+  writes envelopes to fix mismatches.
+  **AND DO NOT EXTRAPOLATE the two refuted closures to the remaining twelve:** 11 of the 19 findings
+  are `unvalidated`, where the remedy is **improve the evidence** and that outcome is **wide open**.
+- **Next (candidates), cheapest first — from this and the previous close's residue:**
+  0. **Land the prose-citation sweep as a real script.** A working sweep exists **only as a
+     throwaway** from this packet and nothing re-runs it. Prose citations have **TWO known escape
+     forms**: bare `:NNN` refs, and **`MISMATCHES.md` §10's nonvacuity-table row form, which names a
+     file with NO line number at all** — the builder's own first sweep pass mis-resolved that table
+     and had to be redone. Residue (aa). Cheapest of the citation-class items and it is the only one
+     with a proven implementation already written.
   1. **Stop creating `CHANGELOG.md` line-citations, and re-cite the two live ones by release-block
      heading** (`residue.md:280`, `receipts/gravito_evidence_policy_matrix_a.md:572-573`). The
      changelog grows from the top, so **every** line-citation into it decays on **every** packet —
@@ -408,11 +540,17 @@
      **NON-BLOCKING — reviewer flagged and explicitly passed; do not treat as open.** §2a covers the
      same axis with the stronger form, so it is not a live hole. Do it when that file is next open.
      Residue (v).
-  **Blocked on the operator, not schedulable:** the S1 evidence-token decision (add `untested` as a
-  sixth token, or have S1 carry `unvalidated`); the S1 `runtimeAuthority: observe` recommendation
-  (reviewer's advice, **not adopted**); demoting `maint.tripwire_coverage_scan` (the envelope now
-  EXISTS and CAN express this demotion — what is missing is the authorisation, not the instrument);
-  writing the first authority envelope at all.
+  **Blocked on the operator, not schedulable:** the **three decisions above** (the missing fifth
+  outcome; the ladder's definitional bug and its six-site-plus-`OBSERVE-LB` radius; `OBSERVE-LB`'s
+  placement on the gating path); **whether "declare before building" gets a third commit or a
+  pre-commit hook**, since the `<=2-commit` rule is in genuine tension with it; the S1
+  evidence-token decision (add `untested` as a sixth token, or have S1 carry `unvalidated`); the S1
+  `runtimeAuthority: observe` recommendation (reviewer's advice, **not adopted**); writing the first
+  authority envelope at all.
+  **NO LONGER OPEN — closed on measurement, do not re-open as scheduled work:** demoting
+  `maint.tripwire_coverage_scan`. `gravito_mismatch_refuted_a` was **authorised** to do it, **did
+  it**, **measured it destroying live memory at the same exit code**, and **refused**. Retirement is
+  worse. Both outcomes are closed with the measurement attached.
   Carried, unrelated: decide Context Mode routing enablement (stays non-secret pilot); name a target
   repo + approve a secret for the GH Actions; authorize/enable the deferred connectors.
 
