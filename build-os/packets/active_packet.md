@@ -4,132 +4,96 @@
 > the builder implements exactly this and nothing else; the archivist clears it
 > on close. One packet at a time.
 
-## Status: IN FLIGHT — `gravito_p3_accept_and_constrain_a`
+## Status: NO PACKET IN FLIGHT
+
+`gravito_p3_accept_and_constrain_a` was **CLOSED 2026-08-01**. Nothing is in
+flight. The next packet is **staged, not started** — it needs an explicit go like
+any other.
+
+## Closed — `gravito_p3_accept_and_constrain_a`
 
 - **Packet id:** `PACKET-0023-gravito-p3-accept-and-constrain-a`
-- **Lane:** substantive — builder → qa → reviewer → archivist.
-- **Declared:** 2026-08-01.
-- **Decision id:** `DECISION-0009-p3-accept-and-constrain`, recorded with its
-  **rejected candidates and their frozen signal snapshots** — see *The n=1
-  obligation* below.
+- **Receipt:** `build-os/receipts/gravito_p3_accept_and_constrain_a.md`
+- **Commits:** `3bd2ab4` (declaration) + `e68d931` (build) + `ead24bc` (fix
+  round). Base `f3c5353`, re-verified at close.
+- **Verdict:** **PASS-AS-FIXED** — qa GREEN, reviewer fix-then-pass **twice**.
+- **Delivered:** a fifth mismatch disposition (`accept_and_constrain`) that
+  **clears nothing and raises nothing**, plus **lease-window enforcement** —
+  `LAPSED` / `NOT-YET-LIVE`, `valid_from`/`valid_until`, calendar-valid dates.
+- **Census 93 → 97; suite 1771 → 1869; findings numerator and finding SET
+  byte-identical to base at 25 (6/5/14); ZERO re-authorisations.**
+- **Depth: 4 serial stages — a DEFECT under the contract**, recorded as one. It
+  was a **mis-cut in mechanism**: P3 mechanised the *citation* half of
+  `DEFECT-0003-duplicate-semantic-truth` and left the *counts-in-two-places*
+  half to hand. **Stage 5 was not opened**; the remainder is re-cut below.
+- **Note the id:** the close brief said `PACKET-0020-…`, which is **already
+  taken** by `PACKET-0020-widen-control-registry-with-claim-fields`. The
+  canonical id is `PACKET-0023-…`.
 
-## Branch base
+## Staged next — `gravito_p3b_count_derivation_a` (NOT STARTED)
 
-Branch `claude/project-handoff-merge-ramhds`, based at `f3c5353` (the close of
-`gravito_p2_claim_scoped_evidence_a`). **Verified before the first edit:**
-`git rev-parse HEAD` = `f3c5353`, so HEAD *is* the base, the base is an ancestor
-of HEAD trivially, and no rebase is implied.
+**The re-cut the reviewer endorsed. It is the contract's own remedy for a fourth
+serial stage — not a deferral of convenience.**
 
-**≤2 commits.** Commit 1 is **this declaration alone** — trivially green in
-isolation, because it changes one markdown file and no code path reads it.
-Commit 2 carries the tests and the implementation together.
+Five items, each with an exact address, all recorded in `build-os/memory/residue.md`
+as **(hhh)–(lll)**:
 
-## What this packet builds
+1. **(hhh)** `tests/control_registry_tests.sh:867` — arrow-pair file-selection is
+   line-based while extraction is fold-based, so the wrapped pair is dropped
+   before folding. `AP_SEEN` reads **2**; the tree has **3**. The assertion at
+   `:870` makes a **false coverage claim**. Raising the floor makes it a **fitted
+   floor** needing registration to `tests.nonvacuity_minimums` — so this is not a
+   one-line fix.
+2. **(iii)** `build-os/registry/control_registry.txt:1060` — headline says
+   "FAMILY OF 35"; the same field still says 37 / 34 / 34. Re-derive with §21's
+   own scan, **not a grep**.
+3. **(jjj)** `build-os/registry/neurocosmology_crosswalk.txt:121` — "Seventeen of
+   its twenty-two bindings" against a live **20 suites of 25 bindings**.
+4. **(kkk)** `build-os/registry/mismatch_dispositions.txt:54` and `:85` — says
+   "THE FOUR CONDITIONS" while the tool enforces **five**. **A governance store
+   misdescribing its own validator is the failure this registry exists to
+   prevent.**
+5. **(lll)** `build-os/tools/mismatch-disposition.sh:167` and `:238` — the claim
+   that condition (0) removes accidental corpus matches is **false, with a
+   reproduction** (`MEASURED`, `PREVENTI`, `UNTOUCHE`, `COVERAGE` all certify at
+   exit 0). **Bounded:** it cannot smuggle a non-qualifying control through.
 
-Two things, and the second is a standing ruling this packet owns rather than a
-discovery made inside it.
+**Declared governance ceiling for this packet:** it is a *correction* packet.
+**No new census control, no new registry store, no new validator tool, no new
+suite file.**
 
-### 1. `accept_and_constrain` — a fifth mismatch disposition
+## Also queued, and NOT consumed
 
-The vocabulary becomes `demote_authority | correct_class | improve_evidence |
-retire_control | accept_and_constrain`. `disposition` is a **wholly new concept**
-in this tree: `grep -rn -i disposition build-os/ tests/` returns zero, so there is
-nothing to retrofit and no existing convention to lean on. This packet builds the
-vocabulary, its store, its validator and its tests.
+- **(ooo) — BLOCKING, ONE LINE, OUTSIDE THE ARCHIVIST'S GATE.** The live suite
+  total is **1869**; `current_state.md` still claims **1771** because advancing it
+  ships the tree **red** (`CHANGELOG.md` carries no `1869 passed` literal, and
+  `tests/release_metadata_tests.sh` is chained). **Remedy: add `**1869 passed**`
+  to the `## [Unreleased]` block of `CHANGELOG.md`, then set the Build/test line
+  to 1869.**
+- **(ddd) the positional content-pairing guard — STILL QUEUED.** The builder
+  verified all 330 refs inline (22 repointed, 0 drifts), but what is queued is a
+  **durable guard**, and §27 covers **two-position** citations only. **An inline
+  verification performed once is not a guard.**
+- **(mmm) make the arrow-pair convention a MECHANISM.** Writing a superseded span
+  without its path is a **convention**, and it was violated **twice during this
+  packet's own close** by the agent that had just written it down.
+- **(nnn)** *"a single-position citation with no duplicate is unpoliced by
+  everything currently in the suite."*
 
-`accept_and_constrain` is for a control whose authority is imperfectly licensed
-and whose **demotion or removal has been MEASURED to be more dangerous than the
-mismatch**. *Measured* is load-bearing. It is not an operator exception that makes
-a mismatch disappear:
+## Next phase — P4 S1 shadow ranker, with a ceiling
 
-- **It clears nothing.** The subject keeps `authority_mismatch: declared`, keeps
-  its row in `MISMATCHES.md`'s summary table, and keeps its `OUT-OF-LICENCE`
-  finding from `evidence-policy.sh check`. All three are asserted against the
-  **live** tree, not against a fixture.
-- **It raises nothing.** The standing ruling holds: **class correction and
-  authority demotion, not a general promotion instrument.**
+**P4 is the first phase whose output is a DECISION, not a RECORD of a decision.**
 
-**It is applied narrowly, and the narrowness is proved.** The fixture pair is
-already in the census and it comes with its own negative case:
+Ledger at the end of P3: **97 controls, ~20 tools, ~1869 assertions, ZERO
+executive components.** On P3's density a ranker built to the same standard would
+spend **5 controls and 200 assertions before it ranks anything**.
 
-| control | `demotion_requirement` | expected |
-|---|---|---|
-| `maint.tripwire_coverage_scan` | **"MEASURED AND REFUSED, not open"** | **qualifies** |
-| `maint.source_scan_mask` | "REACHABLE SINCE THE LADDER WAS CORRECTED" | **REFUSED** |
+**Carry a declared governance ceiling into the P4 packet:**
+**`≤1 new census control, no new registry store, no new validator tool, no new
+suite file`.**
 
-The second row is the discipline test. A disposition that swallows both is
-useless, so the refusal must fire **and say why**, quoting the census's own
-`demotion_requirement` rather than restating a reason in the tool. If the
-predicate cannot tell the two apart, the predicate is fixed — the fixture is not
-relaxed. **Disposing one control is the packet; disposing twenty is out of scope.**
-
-### 2. The lease term, enforced against a clock
-
-The residue ruling assigns expiry enforcement to P3. It is not a theoretical
-concern: three fixtures were executed against this tree on 2026-08-01 before a
-line was written.
-
-- An envelope `starts: 2025-01-01 / expires: 2026-01-01` — **seven months dead** —
-  reported `1 live grant(s)` and `WITHIN-LICENCE … l-deployment=execute
-  l-effective=gate binding-axis=none`, **EXIT 0**. The word *live* printed about a
-  dead grant, and the strongest deployment cap in the system computed from a
-  lease that had ended.
-- The **same** lease at `deployment_mode: shadow` dragged
-  `metrics.record.schema_invariant` — licensed `gate` on both live axes — down to
-  `licensed=observe axis=deployment` inside `evidence-policy.sh check`. The second
-  live site is **confirmed, not suspected**.
-- The same record moved to `starts: 2027-01-01 / expires: 2027-12-31` — five
-  months before it opens — bound **byte-identically**. The window was decorative
-  at **both** ends.
-
-Root cause: the tool format-checked the dates and ordered them, then never
-consulted the clock. `date` appeared in zero tools.
-
-**The defect is framed as: an expired grant keeps applying IN WHICHEVER DIRECTION
-IT POINTED.** The restrictive direction is visible; the permissive one is
-invisible, because an ungranted control already defaults to
-`autonomous`/`execute` — so a test written only against the permissive direction
-passes vacuously against a fixed tool and an unfixed one alike. The **restrictive**
-fixture is the one with discriminating power, and it is asserted both ways round.
-
-Required: an out-of-window envelope contributes **no grant**; `LAPSED` and
-`NOT-YET-LIVE` are reported as **distinct** states and neither is
-`WITHIN-LICENCE`; `mode_projection()` does not consume them; `N live` means live;
-"now" comes from an overridable source that **says so** when overridden. And
-`claim-evidence.sh`'s `valid_until` — which `control_registry.txt` says "is
-recorded so a later packet can enforce it" — is enforced here, at **both** ends of
-the term, because enforcing one end is the decorative-window defect one artefact
-along.
-
-## Out of scope
-
-- Any change to any control's `class`, `runtime_authority`, `empirical_status` or
-  `authority_mismatch`. **Zero re-authorisations.**
-- Disposing any control other than `maint.tripwire_coverage_scan`.
-- Writing a live authority envelope. The store still ships with zero grants.
-- Anything outside this repository. **No push, no merge, no PR, no tag, no
-  deploy, no secrets, no `git config`.** Six commits are deliberately unpushed and
-  stay that way.
-
-## The n=1 obligation
-
-P4's ranker starts at n=1 unless decisions keep recording **rejected** candidates
-with signals **frozen at decision time** and never recomputed. There are two
-counterfactual data points so far, `DECISION-0007` and `DECISION-0008`.
-`DECISION-0009` records four candidates and sixteen frozen snapshots, twelve of
-them for the three arms that were **not** selected — including the
-`maint.source_scan_mask` rejection, which is a genuinely discriminative example of
-the disposition **not** applying.
-
-## Baseline to hold
-
-Suite **1771 / 0** (verified solo, full capture, before the first edit).
-Maintenance **144 / 144**. `scan-controls` exit 0. `scan-mutators` exit 0.
-`evidence-policy` **25 of 93**, split **6 / 5 / 14** — the numerator and the split
-must not move; the denominator may grow as controls are added. Both
-`EVIDENCE_AXIS` copies byte-identical at six tokens. 0 stale pathed refs
-tree-wide.
-
-**Known trap, not this packet's to fix:** `MISMATCHES.md`'s citations of
-`scan-controls.sh` at three sites are stale **at base**. That is pre-existing debt
-— it is not fixed silently here and it does not fail this packet's gate.
+**Substrate is ready:** `DECISION-0009` recorded 4 candidates and 16 frozen
+snapshots (12 for non-selected arms), and it is the **second consecutive**
+decision where selection went **against** the cheap signal. **n=3** non-degenerate
+decisions, **two of them human overrides of the cheapest arm with a stated
+reason** — that is counterfactual substrate, not imitation data.

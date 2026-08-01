@@ -793,7 +793,9 @@
   moved only the first renamed a three-line guard as a two-line one**),
   which **certifies a store of one**. **The guard checks that what is listed conforms; it never
   checks that the list is complete.** Same shape as the vacuity holes elsewhere in this file.
-- **(zz) SECOND-EYES DECLARED AND NOT DELIVERED — SIXTH PACKET RUNNING, AND THIS TIME A REVIEWER
+- **(zz) SECOND-EYES DECLARED AND NOT DELIVERED — SIXTH PACKET RUNNING WHEN WRITTEN, **NOW NINE**
+  (CORRECTED 2026-08-01 at the `gravito_p3_accept_and_constrain_a` close — THIS COUNTER WAS ITSELF
+  STALE, WHICH IS THIS FILE'S OWN DEFECT CLASS APPEARING IN AN ITEM ABOUT UNVERIFIED CLAIMS) — AND A REVIEWER
   ERROR WAS CAUGHT ONLY BY THE BUILDER.** In `gravito_p1_mutators_ids_telemetry_a` the reviewer
   wrote **"64 of 90"** for the `red_driven` counterfactual; the builder derived **77 of 90** and
   **validated the METHOD** — the same composition run against `7daedee` **regenerates the reviewer's
@@ -802,6 +804,17 @@
   **A single-model review chain caught this only because the builder pushed back.** `codex` is still
   absent and `build-os/memory/tool_router.md:368` still declares the row. **Either install Codex or
   stop declaring the row.** Extends (ss).
+  **[2026-08-01, P3: STILL UNBACKED, NINTH CONSECUTIVE PACKET. `codex` is not on PATH and there is
+  no plugin directory. EVERY VERDICT IN THE ENTIRE FIVE-PHASE SEQUENCE IS SINGLE-MODEL.** It bit
+  again here in the same shape: the reviewer prescribed `:643 -> :644` and `:572-574`, **the BUILDER
+  overrode both on evidence, in writing, in the commit message, and was right both times.** The
+  reviewer's content check was **not false but OFF-TARGET** — it read merge-base `f3c5353` where the
+  orchestrator read `e6b825b`. Its own statement of the error is the durable part: *"a content match
+  across base->HEAD does not establish that the arrow-pair denotes base->HEAD."* Applying the
+  prescriptions would have **relocated a P2-era event into P3's coordinates inside P2's sealed
+  receipt** and left two files naming different spans for the same three lines — **reinstating
+  DEFECT-0003**. A single-model chain caught it only because the builder pushed back, for the fifth
+  time in this sequence.]**
 - **(aaa) THE CLOSE ITSELF BROKE TREE-QUIET, AND ONE SUITE RUN WENT RED BECAUSE OF IT.** At the
   `gravito_p1_mutators_ids_telemetry_a` close the archivist launched
   `bash tests/build_os_tests.sh` in the background and then started
@@ -888,6 +901,16 @@ as this packet's items (a)–(e), in the same order.*
   **THE CHEAP VERSION, AND IT SHOULD BE TAKEN:** fold in `authority_envelopes.txt`'s
   **equally-unchecked `expires`** at the same time. **Two unenforced expiry fields, one enforcement
   path, one packet.**
+  **[DISCHARGED 2026-08-01 by `gravito_p3_accept_and_constrain_a`, AND THE CHEAP VERSION WAS TAKEN.**
+  Both fields are now enforced on one path: `authority-envelope.sh` reports `LAPSED` /
+  `NOT-YET-LIVE` as **distinct** states, neither of which is `WITHIN-LICENCE`, and out-of-window
+  records **contribute no grant and never reach `mode_projection()`**; `claim-evidence.sh` enforces
+  `valid_from`/`valid_until` at **both** ends. **THE FORECAST IN THIS ITEM WAS CORRECT AND
+  UNDERSTATED** — the over-grant was not merely latent-pending-P3, it was **already live at base and
+  already reaching `evidence-policy.sh`**: a dead `shadow` lease dragged a doubly-licensed Class A
+  control to `licensed=observe`. **A lapsed refutation is deliberately RETAINED in the minimum**,
+  because dropping it would RAISE a licence. The clock is overridable via `BUILD_OS_NOW` and
+  **announced in the output** whenever it is in force.]**
 
 - **(fff) SECOND-EYES DECLARED AND NOT DELIVERED — SEVENTH CONSECUTIVE PACKET.** `codex` is not on
   PATH and no Codex plugin is installed; `tool_router.md` routes reviewer second-eyes to it. Both
@@ -918,6 +941,138 @@ as this packet's items (a)–(e), in the same order.*
   measures **the archivist's own output** rather than the packet's.
   **It was caught only because the gates were re-run AFTER the writes.** Had the close run them
   before writing, this would have shipped red exactly as `2df61ae` did.
+
+### From `gravito_p3_accept_and_constrain_a` (2026-08-01, receipt `build-os/receipts/gravito_p3_accept_and_constrain_a.md`)
+
+*Labelled (hhh)-(nnn) to continue the file's sequence.* **(hhh)-(lll) are the five items RE-CUT
+into `gravito_p3b_count_derivation_a`** — the reviewer explicitly endorsed the re-cut, and it is
+**the contract's own remedy for a fourth serial stage**, not a deferral of convenience. **They are
+not to be fixed outside that packet.**
+
+- **(hhh) A FALSE COVERAGE CLAIM IN THE ARROW-PAIR TEST — `tests/control_registry_tests.sh:867`.**
+  The **file-selection is line-based while the extraction is fold-based**, so the P2 receipt's
+  **wrapped** pair (`...:642 ->` / `:643`) is **dropped before folding and never extracted**.
+  `AP_SEEN` reads **2**; the tree has **3**. The comment at `:858` names that wrapped pair as **the
+  reason folding exists**, and the assertion at `:870` prints *"found tree-wide — memory, receipts
+  and metrics included"* — **a false coverage claim**. The floor `AP_SEEN -ge 1` is **too low to
+  notice**. **This is not a one-line fix:** raising the floor makes it a **fitted floor**, which
+  requires registration to `tests.nonvacuity_minimums` — a re-authorisation.
+
+- **(iii) `build-os/registry/control_registry.txt:1060` — HEADLINE CORRECTED, BODY NOT.** The
+  headline now says **"FAMILY OF 35"** while the same field still says *"the scan finds 37 such
+  lines"*, *"34 remain and all 34 are this control"*, *"all 34 constants"*. **Re-derive with §21's
+  own scan, not a grep.**
+
+- **(jjj) `build-os/registry/neurocosmology_crosswalk.txt:121` — `homeostasis`
+  `known_limitations`** says *"Seventeen of its twenty-two bindings are test suites"*; the tree says
+  **20 suites of 25 bindings**. **`ead24bc` corrected that same file's header from 23 to 25 in the
+  same commit** — the corrected-and-uncorrected-one-line-apart shape, again.
+
+- **(kkk) A GOVERNANCE STORE MISDESCRIBING ITS OWN VALIDATOR —
+  `build-os/registry/mismatch_dispositions.txt:54` and `:85`.** Both say *"THE FOUR CONDITIONS ...
+  all required"* and list (a)-(d), while the tool now enforces **FIVE** — condition **(0)** was added
+  in `ead24bc`. **Record it in exactly these terms: a governance store misdescribing its own
+  validator is the failure this registry exists to prevent.**
+
+- **(lll) A FALSE CLAIM WITH A REPRODUCTION — `build-os/tools/mismatch-disposition.sh:167` and
+  `:238`.** The claim that (0) *"removes the class of token that matches the corpus BY ACCIDENT"* is
+  **false**. Against `maint.tripwire_coverage_scan`, the tokens **`MEASURED`, `PREVENTI`,
+  `UNTOUCHE`, `COVERAGE`** all certify at **exit 0** and print the full *"MEASURED and refused
+  demotion"* line: they pass **(0)** by shape, **(c)** as substrings of that control's own
+  `demotion_requirement`, and **(d)** as substrings of half the tree. **`PREVENTI` and `UNTOUCHE`
+  are not even whole words.** **BOUNDED, and the bound is why this is residue and not a blocker:**
+  it **cannot smuggle a non-qualifying control through** — (a) and (b) hold — it **degrades the
+  fidelity of the named measurement on a record that already qualifies**. Tightening the shape is a
+  **design question for a separate packet**.
+
+- **(mmm) THE ARROW-PAIR RULE IS THE PACKET'S MOST TRANSFERABLE OUTPUT — AND ITS HANDLING IS A
+  CONVENTION, NOT A MECHANISM.** The doctrine: a **range** `path:N-M` is **two positions in the
+  current tree** and is **repointed at BOTH ends**; an **arrow-pair** `path:N -> :M` is **the same
+  content at two commits** and is **NEVER repointed — it is a historical record**. The proof is
+  structural, not empirical: an arrow-pair's two numbers necessarily denote **identical content**, so
+  they **cannot** be two positions in one commit. Stress-tested by the reviewer against **all 16**
+  two-position citations in the tree: **no mis-classification**.
+  **THE BLIND SPOT:** a **historical RANGE in prose** (*"was at `:362-386`, now `:368-392`"*) is
+  **textually indistinguishable from a live pointer**, so §27a would sweep it. The builder's handling
+  is a **convention** — write the superseded span **without its path** — applied at one site in this
+  file. **One edit from silent violation, and THE VIOLATION HAPPENED AT THE VERY NEXT EDIT.**
+  **PROVEN, NOT PREDICTED:** the archivist's own receipt for this packet wrote a historical range
+  **with** its path and §27d correctly refused — **2 contradicting range citation pairs**, isolated
+  by measurement with one variable (**with the receipt 98/1, without it 99/0**), and the archivist
+  then **reproduced the same violation a second time** while writing the finding into
+  `current_state.md`. **Twice in one close, by the agent that had just written the doctrine down.**
+  **NEXT MECHANICAL STEP, and it is now evidenced rather than argued:** make the convention a guard.
+
+- **(nnn) A SINGLE-POSITION CITATION WITH NO DUPLICATE IS UNPOLICED BY EVERYTHING CURRENTLY IN THE
+  SUITE — AND THE QUEUED POSITIONAL-CONTENT-PAIRING PACKET IS NOT CONSUMED.** `(ccc)` **stays open
+  and it is correct that it does**: `gravito_mismatch_refuted_a.md:56` cites `OBSERVE-LB` at a span
+  of `build-os/registry/scan-controls.sh` that is now a blank line plus a section comment (the guard
+  moved to `:337`). **Both ends are equally stale**, which makes it ordinary
+  **resolvability-not-identity drift** (the `(mm)` class) and **not** the two-position class — **§27
+  structurally cannot see it.** Its generalization is the strongest sentence of the fix round and is
+  recorded verbatim: *"a single-position citation with no duplicate is unpoliced by everything
+  currently in the suite."*
+  **AND `(ddd)` STAYS QUEUED.** The builder verified all **330** refs identity-preserving **inline**
+  (22 repointed, **0** drifts), but what `(ddd)` queues is a **DURABLE GUARD**, and §27 covers
+  **two-position citations only**. **An inline verification performed once is not a guard — do not
+  mark it consumed.**
+  **CLOSED, NOT RESIDUE, recorded so the count is not re-litigated:** five further stale ranges over
+  the same citation guard were found by the re-audit — `current_state.md` (**2**),
+  `gravito_ladder_semantics_a.md` (**2**), `packet_metrics.tsv` (**1**) — **stale since P2, NOT
+  introduced by P3**: `residue.md` was repointed then and these five were not, so **the tree stated
+  one finding with two different spans.** All now repointed.
+
+- **(ooo) THE `current_state.md` <-> `CHANGELOG.md` SUITE-TOTAL LOOP IS NOW A HARD DEADLOCK, AND THE
+  ARCHIVIST COULD NOT CLOSE IT. BLOCKING — ONE LINE, OUTSIDE THE ARCHIVIST'S WRITE GATE.**
+  **The live suite total is 1869. `current_state.md` still claims 1771, KNOWINGLY, because
+  advancing it SHIPS THE TREE RED.** Measured at this close, one variable: with `1869 checks`,
+  `tests/release_metadata_tests.sh` goes **42/0 -> 41/1** on *"CHANGELOG does not report
+  '1869 passed'"*, and that suite is **CHAINED**, so the repo suite goes **1869/0 -> 1868/1**.
+  **THE LUCK FINALLY RAN OUT, EXACTLY WHERE THIS FILE SAID IT WOULD.** The loop closed three times
+  running only because the **BUILDER** happened to write the live total into `CHANGELOG.md` as the
+  literal `**N passed**`. **THIS packet's builder wrote it as an ARROW** — `suite **1771 -> 1852**` —
+  which the guard's `grep -qF "$CLAIMED passed"` **cannot see**; and the fix round then moved the
+  total **1852 -> 1869**, so **even the builder's number is stale**. **The archivist cannot write
+  `CHANGELOG.md`**, so it recorded the falsehood loudly rather than either shipping red or pretending
+  the memory was current. **REMEDY, one builder-lite line: add the literal `**1869 passed**` to the
+  `## [Unreleased]` block of `CHANGELOG.md`, THEN set the `Build/test command` line to 1869.**
+  **The structural fix is the one this file has asked for nine times: the two halves of the check are
+  owned by different lanes, and only one of them can close the loop.**
+
+- **(ppp) THE CLOSE BROKE THE BUILD AGAIN — THIRD PACKET RUNNING — AND THE GATES CAUGHT IT ONLY
+  BECAUSE THEY RAN AFTER THE WRITES.** At HEAD `ead24bc`, before this close wrote anything, the
+  suite was **1865 passed / 4 failed**, NOT the `1869/0` the close brief reported. **Three of the
+  four were `check-adoption.sh` refusing at exit 2** (`metrics_adoption` 2, `lane_declaration` 1)
+  because **this packet had no `packet_metrics.tsv` row yet** — i.e. the tree is red **in the window
+  between the last build commit and the archivist's row**, which is precisely the window in which
+  `2df61ae` was pushed at 143/144. **The fourth was the archivist's own receipt** — see (mmm). All
+  four are closed by this close. **Two standing lessons re-confirmed:** run the gates **AFTER** the
+  writes, and **`check-adoption.sh` belongs on the close checklist by name** (residue (ggg)).
+  **Also re-confirmed: the suite is NOT concurrency-safe** — overlapping runs return **N-1 / 1**
+  rather than refusing (**1688/1**, **1770/1** on record). Every gate at this close was run alone,
+  behind an anchored `pgrep -fa '^bash tests/'`, redirected to a file, and read in full. **Never
+  through `tail`.**
+
+- **(qqq) NON-BLOCKING NITS, AND ONE ACCEPTED EDGE CASE.**
+  (i) `tests/mismatch_disposition_tests.sh` labels four RED cases (a)(b)(c)(d) in an order that does
+  **not** match the tool's own — **coverage is complete, only the letters cross**.
+  (ii) `tests/claim_evidence_tests.sh` inserts `== 13.` **immediately before** `== 11.`, and sets
+  `export BUILD_OS_NOW` **inside §13** rather than at file top, so **§§1-12 invoke clock-reading
+  paths against an unpinned clock** — they pass today and are not pinned against tomorrow.
+  (iii) **`0000-01-01` is accepted** by the new `valid_date()`. Proleptic, sorts before everything,
+  **conservative direction**. Recorded; not worth an item.
+
+- **(rrr) THE TRAJECTORY QUESTION THE OPERATOR ASKED, AND THE ANSWER, UNSOFTENED.** *"Is governance
+  now deeper than execution?"* **The two halves of P3 are not the same kind of thing and averaging
+  them hides the answer.** The **expiry half was a live bug fix and would have been worth building
+  alone**. The **disposition half is governance depth in its purest form: ~945 new lines and 4 new
+  census controls to record ONE decision about ONE control.** **Ledger: 97 controls, ~20 tools,
+  ~1869 assertions, ZERO executive components.** **RECOMMENDATION CARRIED INTO P4: cut it smaller,
+  with a DECLARED GOVERNANCE CEILING written into the packet — `<=1 new census control, no new
+  registry store, no new validator tool, no new suite file`.** On this packet's density **a ranker
+  built to P3's standard would spend 5 controls and 200 assertions before it ranks anything**, and
+  **P4 is the first phase whose output is supposed to be a DECISION, not a RECORD of a decision.**
+
 
 ## Known risks / debt
 

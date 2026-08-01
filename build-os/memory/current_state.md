@@ -92,6 +92,21 @@
   into the CHANGELOG entry — the archivist still cannot write `CHANGELOG.md`, so the loop STILL
   closes by luck of the builder's phrasing, not by design.]** Correcting the number does not fix the
   guard; see residue.
+  **[NOT UPDATED 2026-08-01 at the `gravito_p3_accept_and_constrain_a` close — AND THE REASON IS
+  THE STRUCTURAL DEFECT THIS BULLET HAS BEEN DESCRIBING FOR NINE PACKETS. THE LIVE SUITE TOTAL IS
+  1869; THE `1771 checks` ABOVE IS KNOWN-FALSE AND IS LEFT IN PLACE DELIBERATELY, BECAUSE ADVANCING
+  IT SHIPS THE TREE RED.** Measured at this close, not predicted: with `1869 checks` on that line,
+  `tests/release_metadata_tests.sh` goes **42/0 -> 41/1** on *"CHANGELOG does not report
+  '1869 passed' — it disagrees with current_state.md's claim"*, and that suite is **CHAINED**, so
+  the repo suite goes **1869/0 -> 1868/1**. **THE LUCK FINALLY RAN OUT.** The loop closed three
+  times running only because the BUILDER happened to write the live total into `CHANGELOG.md` as
+  the literal `**N passed**`. **THIS packet's builder wrote it as an ARROW** — `suite **1771 →
+  1852**` — which the guard's `grep -qF "$CLAIMED passed"` **cannot see**, and the fix round then
+  moved the total **1852 -> 1869**, so even the builder's number is stale. `CHANGELOG.md` is
+  **OUTSIDE THE ARCHIVIST'S WRITE GATE**, so the archivist **cannot** close this and **did not
+  pretend to**. **REMEDY, one line, builder-lite: add the literal `**1869 passed**` to the
+  `## [Unreleased]` block of `CHANGELOG.md`, THEN set this line to 1869.** Until then the honest
+  claim is *"this line is stale by 98 and says so"*, not *"the memory is current"*. Residue (ooo).]**
   It **chains** 16 sibling suites in `tests/` through one `chain_suite` function and folds their
   counts into its own totals. A sibling suite present on disk but not chained is itself a failure,
   so a new suite cannot become discoverable-only. **The per-suite breakdown that used to sit here was
@@ -124,10 +139,105 @@
   *"the governance substrate is no longer the bottleneck. The bottleneck is now whether Gravito can
   begin making better decisions than today's planning approaches."*
   **THE SEQUENCE IS FIVE PHASES: P1 mutators/IDs/telemetry (DONE) -> P2 claim-scoped evidence
-  (DONE) -> P3 `accept_and_constrain` (NEXT) -> P4 S1 shadow ranker -> P5 outcome/counterfactual
-  telemetry.**
+  (DONE) -> P3 `accept_and_constrain` (DONE) -> P4 S1 shadow ranker (NEXT) -> P5
+  outcome/counterfactual telemetry.**
+  **P4 CARRIES A DECLARED GOVERNANCE CEILING, AND IT IS THERE BECAUSE OF P3's DENSITY:**
+  **`<=1 new census control, no new registry store, no new validator tool, no new suite file`.**
+  Ledger at the end of P3: **97 controls, ~20 tools, ~1869 assertions, ZERO executive components.**
+  On P3's density a ranker built to the same standard would spend **5 controls and 200 assertions
+  before it ranks anything** — and P4 is the first phase whose output is supposed to be a
+  **decision**, not a **record of a decision**.
   Read everything below as **substrate for P4**, not as governance for its own sake.
-- **Last closed packet:** `gravito_p2_claim_scoped_evidence_a`
+- **Last closed packet:** `gravito_p3_accept_and_constrain_a`
+  (`PACKET-0023-gravito-p3-accept-and-constrain-a`) — **A FIFTH DISPOSITION THAT CLEARS NOTHING,
+  AND A LEASE WINDOW THAT WAS DECORATIVE AT BOTH ENDS AND WAS REACHING THE LICENCE MATRIX**
+  (receipt `build-os/receipts/gravito_p3_accept_and_constrain_a.md`, commits `3bd2ab4` + `e68d931`
+  + `ead24bc`, base `f3c5353`, re-verified `git merge-base ead24bc f3c5353` = `f3c5353`).
+  **P3 of the operator's five.**
+  **NOTE THE ID.** The close brief said `PACKET-0020-…`; that id is **already taken** by
+  `PACKET-0020-widen-control-registry-with-claim-fields`, a rejected `DECISION-0008` candidate live
+  in `decision_telemetry.tsv`. The canonical id is **`PACKET-0023-…`**, which `active_packet.md`
+  declared and which `DECISION-0009` already records as its selected candidate. Using the brief's id
+  would have **collided two different candidates under one key inside the store P4 trains on.**
+  **FIFTH orchestrator/reviewer figure corrected downstream in this sequence; first one caught by
+  the archivist.**
+  **DELIVERED.** (1) A fifth mismatch disposition —
+  `demote_authority | correct_class | improve_evidence | retire_control | accept_and_constrain` —
+  via `build-os/tools/mismatch-disposition.sh`, `build-os/registry/mismatch_dispositions.txt`
+  (`DISP-NNNN` stable ids, fourteen required fields) and `tests/mismatch_disposition_tests.sh`
+  (chained, not discoverable-only). (2) **A lease window that is finally enforced**: `LAPSED` /
+  `NOT-YET-LIVE` in `authority-envelope.sh`, `valid_from`/`valid_until` in `claim-evidence.sh`, plus
+  **calendar-valid** date checking.
+  **Census 93 -> 97; suite 1771 -> 1869 (+98); FINDINGS NUMERATOR AND FINDING SET BYTE-IDENTICAL TO
+  BASE at 25, split 6/5/14 — only the denominator moved (25 of 97); ZERO RE-AUTHORISATIONS**,
+  confirmed **twice independently and field-anchored** over **different row sets** (qa 485 rows,
+  reviewer 388 rows, same conclusion).
+  **THE HEADLINE — THE EXPIRY HALF WAS A LIVE BUG, NOT GOVERNANCE.** At base, an envelope **seven
+  months dead** printed **`1 live grant(s)`** and `WITHIN-LICENCE … binding-axis=none`, **exit 0**;
+  the **same** dead lease at `deployment_mode: shadow` **dragged a doubly-licensed Class A control
+  to `licensed=observe`** via `mode_projection()` **into `evidence-policy.sh`**; and the same record
+  **five months before it opened** bound **byte-identically**. **The window was decorative at BOTH
+  ends and it REACHED THE LICENCE MATRIX** — not confined to the tool's own report. Root cause: the
+  tool format-checked and ordered the dates and **never consulted the clock**; `date` appeared in
+  **zero** tools. **qa proved the discriminating direction NUMERICALLY: dead window -> the
+  deployment axis binds 0; live window -> it binds 1.** That matters because the **permissive**
+  direction is untestable — an ungranted control already defaults to `autonomous`/`execute`, so a
+  test written only that way **passes against a fixed tool and an unfixed one alike**.
+  **`accept_and_constrain` IS INERT BY CONSTRUCTION.** **Nothing in the tree reads
+  `mismatch_dispositions.txt` except its own tool and its own suite** — `scan-controls.sh` §8 and
+  `evidence-policy.sh check` **never open it**. `maint.tripwire_coverage_scan` still carries its
+  mismatch, its table row, and its place among the **25** findings. **NOT BULK-APPLIED: 1
+  disposition against 20 declared mismatches.** `maint.source_scan_mask` is correctly **REFUSED at
+  exit 2** on **three independently-failing conditions**, and the reviewer proved the predicate
+  **discriminative against a SECOND unqualifying subject the builder did not choose**
+  (`swarm.disjointness`) — a predicate tested only against its author's own negative case is fitted
+  to it; this one is not.
+  **DEPTH DEFECT: 4 SERIAL STAGES, RECORDED AS A DEFECT.** builder -> qa ‖ reviewer -> fix round ->
+  targeted re-review. **NOT "the fix list arrived in installments"** — the second round's items did
+  not exist or were unreachable before `ead24bc` edited those records, and one is a hole in a guard
+  that did not exist at `e68d931`. **It WAS a mis-cut, in MECHANISM rather than scope:** P3
+  mechanised **one half** of `DEFECT-0003-duplicate-semantic-truth` — the **citation** half, via
+  §27 — and left the other half, **counts stated in two places**, **entirely to hand**. The commit
+  message correctly diagnoses *"the denominator was re-derived at 97 and the numerator was not"* and
+  **then reproduces that exact shape three more times in the records it touched.** **Stage 5 was NOT
+  opened**; the remainder is **re-cut as `gravito_p3b_count_derivation_a`**, which the reviewer
+  explicitly endorsed — **the contract's own remedy, not a deferral of convenience.**
+  **DECISION-0009 recorded 4 candidates and 16 frozen snapshots (12 for non-selected arms), and it
+  is the SECOND CONSECUTIVE decision where selection went AGAINST the cheap signal** — the chosen
+  arm is the **most expensive** on `census_growth_controls` (**4** vs **0** for the rejected
+  registry-field arm). **That is precisely the counterfactual substrate P4 needs:** a ranker trained
+  only on decisions where the cheap arm won learns to be a cost function. **n=3** non-degenerate
+  decisions now, **two of them human overrides of the cheapest arm with a stated reason.**
+  **P2's SEALED RECEIPT IS BYTE-IDENTICAL TO BASE, AND GIT ATTESTS IT.**
+  `gravito_p2_claim_scoped_evidence_a.md` appears in **both** `e68d931` and `ead24bc`, yet the net
+  diff against `f3c5353` is **EMPTY**. `e68d931`'s repoint sweep reached into a sealed receipt and
+  corrupted the arrow-pair `:642 -> :643` into `:643 -> :643` — **a repoint asserting nothing had
+  moved, which destroys the record of the defect the pair exists to document** — and `ead24bc`
+  restored it exactly.
+  **FINAL STATE AT `ead24bc`: 3 commits (ONE OVER THE <=2 CAP — the stage-3 fix round landed as its
+  own commit rather than amending a reviewed one; the right call and still a deviation, and it is
+  downstream of the depth defect). 97 controls; 76 gate / 15 advise / 6 execute / 0 rank / 0 observe
+  / 0 none; 20 declared mismatches; `evidence-policy.sh check` 25 of 97 split 6/5/14;
+  1 mismatch disposition; 3 claim-scoped assertions; 9 decisions; 87 signal snapshots; 0 live
+  authority envelopes; `./build-os/maintenance/run-tests.sh` 144/144; tree clean.** All re-derived
+  by the archivist at close from the registry files and the live tools.
+  **THE SUITE WAS RED AT HEAD UNTIL THIS CLOSE RECORDED ITS OWN METRICS ROW — 1865/4, NOT 1869/0.**
+  Three of the four failures were `check-adoption.sh` refusing at exit 2 (`metrics_adoption` 2,
+  `lane_declaration` 1) because **this packet had no `packet_metrics.tsv` row yet**; the fourth was
+  **the archivist's own receipt** violating the arrow-pair convention (see below). **All four are
+  closed by this close.** **The close writes into the tree, so the close can break the build — third
+  packet running.**
+  **THE ARCHIVIST COMMITTED THE EXACT DEFECT THE PACKET'S OWN DOCTRINE PREDICTED, ONE EDIT LATER.**
+  The receipt wrote a **historical** range **with its path** (the superseded span `:362-386` written WITH its path, alongside
+  the live `:368-392`), which §27d correctly read as **2 contradicting range citation pairs**.
+  Isolated by measurement, one variable: **with the receipt 98/1, without it 99/0.** Fixed by the
+  packet's own convention — **write the superseded span WITHOUT its path**. Residue (mmm) is exactly
+  this: **the convention is not a mechanism, and it is one edit from silent violation.**
+  **Both verdicts single-model — NO CODEX IN ANY PASS, for the NINTH packet running**, and the
+  reviewer's own two prescriptions (`:643 -> :644`, `:572-574`) were **overridden by the builder on
+  evidence, in writing, and the builder was right both times.** Residue (zz)'s streak counter said
+  **six** and was **itself stale**; corrected to **nine**.
+- **Prior:** `gravito_p2_claim_scoped_evidence_a`
   (`PACKET-0019-gravito-p2-claim-scoped-evidence-a`) — **ONE CONTROL MAY NOW CARRY MANY CLAIMS
   WITH MANY VERDICTS, and the packet found a LIVE OVER-GRANT INSIDE THE OVER-GRANT DETECTOR**
   (receipt `build-os/receipts/gravito_p2_claim_scoped_evidence_a.md`, commits `9474cae` +
