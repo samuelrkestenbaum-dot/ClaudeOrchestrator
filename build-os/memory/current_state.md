@@ -45,9 +45,9 @@
   `no tags` because `tests/release_metadata_tests.sh:322` requires it, so the residue item is
   annotated rather than rewritten. Whether the tag was created with an explicit go is not
   determinable from here and no claim is made.
-- **Build/test command:** `bash tests/build_os_tests.sh` (1771 checks; no network; temp dirs)
-  — measured on a quiet tree at `c653508`, and reconciled against `CHANGELOG.md`, which
-  carries the matching literal `**1771 passed**` (present exactly once, unsplit) in the
+- **Build/test command:** `bash tests/build_os_tests.sh` (1869 checks; no network; temp dirs)
+  — measured on a quiet tree at `5c8d19e`, and reconciled against `CHANGELOG.md`, which
+  carries the matching literal `**1869 passed**` (present exactly once, unsplit) in the
   release block `## [Unreleased]` -> `### In flight (not landed at the released commit)`.
   **CITED BY HEADING, NOT BY LINE NUMBER, from 2026-08-01 on** — the changelog grows from the
   top, so every line-citation into it decays on every packet, guaranteed rather than
@@ -92,21 +92,27 @@
   into the CHANGELOG entry — the archivist still cannot write `CHANGELOG.md`, so the loop STILL
   closes by luck of the builder's phrasing, not by design.]** Correcting the number does not fix the
   guard; see residue.
-  **[NOT UPDATED 2026-08-01 at the `gravito_p3_accept_and_constrain_a` close — AND THE REASON IS
-  THE STRUCTURAL DEFECT THIS BULLET HAS BEEN DESCRIBING FOR NINE PACKETS. THE LIVE SUITE TOTAL IS
-  1869; THE `1771 checks` ABOVE IS KNOWN-FALSE AND IS LEFT IN PLACE DELIBERATELY, BECAUSE ADVANCING
-  IT SHIPS THE TREE RED.** Measured at this close, not predicted: with `1869 checks` on that line,
-  `tests/release_metadata_tests.sh` goes **42/0 -> 41/1** on *"CHANGELOG does not report
-  '1869 passed' — it disagrees with current_state.md's claim"*, and that suite is **CHAINED**, so
-  the repo suite goes **1869/0 -> 1868/1**. **THE LUCK FINALLY RAN OUT.** The loop closed three
-  times running only because the BUILDER happened to write the live total into `CHANGELOG.md` as
-  the literal `**N passed**`. **THIS packet's builder wrote it as an ARROW** — `suite **1771 →
-  1852**` — which the guard's `grep -qF "$CLAIMED passed"` **cannot see**, and the fix round then
-  moved the total **1852 -> 1869**, so even the builder's number is stale. `CHANGELOG.md` is
-  **OUTSIDE THE ARCHIVIST'S WRITE GATE**, so the archivist **cannot** close this and **did not
-  pretend to**. **REMEDY, one line, builder-lite: add the literal `**1869 passed**` to the
-  `## [Unreleased]` block of `CHANGELOG.md`, THEN set this line to 1869.** Until then the honest
-  claim is *"this line is stale by 98 and says so"*, not *"the memory is current"*. Residue (ooo).]**
+  **[DISCHARGED 2026-08-01, after the `gravito_p3_accept_and_constrain_a` close, by the
+  orchestrator in the `tiny` lane — the remedy residue (ooo) prescribed, applied exactly.
+  THE HISTORY IS KEPT BECAUSE THE FAILURE MODE IS THE POINT.** At the close this line read
+  `1771 checks` and was **KNOWN-FALSE**, left in place deliberately because advancing it shipped
+  the tree red: `tests/release_metadata_tests.sh` went **42/0 -> 41/1** on *"CHANGELOG does not
+  report '1869 passed'"*, and that suite is **CHAINED**, so the repo suite went **1869/0 ->
+  1868/1**. The loop had closed three times running only because the BUILDER happened to write the
+  live total into `CHANGELOG.md` as the literal `**N passed**`. **THIS packet's builder wrote it as
+  an ARROW** — `suite **1771 → 1852**` — which the guard's `grep -qF "$CLAIMED passed"` **cannot
+  see**, and the fix round then moved the total **1852 -> 1869**, so even the builder's number was
+  stale. `CHANGELOG.md` is **OUTSIDE THE ARCHIVIST'S WRITE GATE**, so the archivist could not close
+  this and **did not pretend to** — it annotated instead, which is why the defect survived to be
+  fixed rather than being silently carried. **THE SHAPE WORTH REMEMBERING: the false number was
+  what kept the normal path GREEN.** `CHANGELOG.md` and `current_state.md` agreed with each other
+  and both disagreed with the tree, so the chained cross-check passed; only
+  `RELEASE_METADATA_LIVE_SUITE=1`, which actually runs the suite, could see it (**43/1**). Two
+  documents agreeing with each other is not evidence — the same defect this repo has now named in
+  its citations, its counts, and its evidence axis. Both literals now read **1869**, measured on a
+  quiet tree at `5c8d19e`. Residue (ooo) is closed; the DURABLE fix — a guard that derives the
+  number instead of comparing two remembered copies — belongs to
+  `gravito_p3b_count_derivation_a`.]**
   It **chains** 16 sibling suites in `tests/` through one `chain_suite` function and folds their
   counts into its own totals. A sibling suite present on disk but not chained is itself a failure,
   so a new suite cannot become discoverable-only. **The per-suite breakdown that used to sit here was

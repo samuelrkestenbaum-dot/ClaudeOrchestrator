@@ -49,7 +49,8 @@ deprecation cycle. Pin a commit if you need stability.
 
   One clock, one owner: `authority-envelope.sh now`, overridable through
   `BUILD_OS_NOW`, refused when malformed, and **announced in the output** whenever
-  it is in force. Census **93 → 97**; suite **1771 → 1852**; findings numerator
+  it is in force. Census **93 → 97**; suite **1869 passed**, 0 failed (+98 from
+  1771: +81 in the build, +17 in the fix round); findings numerator
   **unchanged at 25**, split **6/5/14**; **zero re-authorisations**.
 
 - **Evidence stopped being a property of a control and became an assertion about
