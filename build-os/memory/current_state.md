@@ -10,17 +10,24 @@
   plan → build → prove → review → record system.
 - **Primary branch / base:** `claude/add-build-os` (current integration base; no
   `main` present in this environment). Active work branch:
-  `claude/project-handoff-merge-ramhds` (tip `a75c25e` before this close commit). Merge-base with
+  `claude/project-handoff-merge-ramhds` (tip `c653508` before this close commit). Merge-base with
   `origin/claude/add-build-os` = `7ef50e8`.
   **CORRECTED 2026-07-31 — this line previously claimed the branch was UNPUSHED, and it is not.**
-  `refs/remotes/origin/claude/project-handoff-merge-ramhds` is at **`6b01173`**, and
-  `git reflog show` for that ref records five successive `update by push` entries
-  (`6b01173`, `321dced`, `e8f34ed`, `785a851`, `d30aeab`). **Local-only as of 2026-08-01:
-  `105cb75`, `0555717`, `77a0040` (`gravito_evidence_policy_matrix_a` + its close) and
-  `88052e7`, `a7ab841` (`gravito_authority_envelope_a`) and its close `c52915f`, and
-  `b25f3f7`, `566443f` (`gravito_mismatch_refuted_a`) and its close `2df61ae`, and `576751a`,
-  `d0eff10` (`gravito_ladder_semantics_a`) and its close `7daedee`, and `f27c570`, `a75c25e`
-  (`gravito_p1_mutators_ids_telemetry_a`), plus this close commit.**
+  **CORRECTED AGAIN 2026-08-01 at the `gravito_p2_claim_scoped_evidence_a` close — THE LOCAL-ONLY
+  LIST BELOW WAS WRONG, AND IT WAS WRONG IN THE DIRECTION THAT UNDERSTATES WHAT HAS BEEN PUSHED.**
+  It named `c52915f`, `2df61ae` and `7daedee` as local-only. **All three were pushed.**
+  `refs/remotes/origin/claude/project-handoff-merge-ramhds` is at **`7daedee`**, not `6b01173`, and
+  `git reflog show` for that ref records **twelve or more** successive `update by push` entries, the
+  four most recent being **`7daedee`, `2df61ae`, `c52915f`, `6b01173`**. Re-derived directly from
+  the reflog at this close; no claim is made here about whether any of those pushes carried an
+  explicit go.
+  **LOCAL-ONLY AS OF 2026-08-01, re-derived at this close with `git branch -r --contains` (no remote
+  branch contains any of them): `f27c570`, `a75c25e` (`gravito_p1_mutators_ids_telemetry_a`) and its
+  close `e6b825b`; `9474cae`, `c653508` (`gravito_p2_claim_scoped_evidence_a`); plus this close
+  commit.** Everything at or below `7daedee` is on the remote.
+  **THE PREVIOUSLY-LISTED COMMITS `105cb75`, `0555717`, `77a0040`, `88052e7`, `a7ab841`, `c52915f`,
+  `b25f3f7`, `566443f`, `2df61ae`, `576751a`, `d0eff10`, `7daedee` ARE ALL PUSHED**, which makes the
+  `2df61ae` ships-red note below **more** important, not less.
   **NOTE, and it is the reason a whole finding exists: `2df61ae` WAS PUSHED AND IT SHIPS RED** —
   `./build-os/maintenance/run-tests.sh` is **143/144** at that commit, because the close that wrote
   it left `active_packet.md` with 2 `^## ` blocks and the rotation proof needs >=3. **`576751a`
@@ -38,13 +45,18 @@
   `no tags` because `tests/release_metadata_tests.sh:322` requires it, so the residue item is
   annotated rather than rewritten. Whether the tag was created with an explicit go is not
   determinable from here and no claim is made.
-- **Build/test command:** `bash tests/build_os_tests.sh` (1689 checks; no network; temp dirs)
-  — measured on a quiet tree at `a75c25e`, and reconciled against `CHANGELOG.md`, which
-  carries the matching literal `**1689 passed**` (present exactly once, unsplit) in the
+- **Build/test command:** `bash tests/build_os_tests.sh` (1771 checks; no network; temp dirs)
+  — measured on a quiet tree at `c653508`, and reconciled against `CHANGELOG.md`, which
+  carries the matching literal `**1771 passed**` (present exactly once, unsplit) in the
   release block `## [Unreleased]` -> `### In flight (not landed at the released commit)`.
   **CITED BY HEADING, NOT BY LINE NUMBER, from 2026-08-01 on** — the changelog grows from the
   top, so every line-citation into it decays on every packet, guaranteed rather than
-  occasionally. The old `CHANGELOG.md:24` citation had already moved to `:28`. Residue (r). **This pair had gone stale in four consecutive packets** (657 → 1418 → 1485 → 1597),
+  occasionally. **AND IT DECAYED AGAIN AT THIS CLOSE, EXACTLY AS PREDICTED:** the citation
+  was `CHANGELOG.md:24`, then `:28`; `gravito_p2_claim_scoped_evidence_a` prepended 92 lines,
+  so the **1689** literal that line pointed at now sits at `:117` and the live **1771**
+  literal sits at `:28`. **Both are under the SAME heading**, which is why the heading
+  citation above survived the packet and the line citation did not. No line number is
+  restated here on purpose. Residue (r). **This pair had gone stale in four consecutive packets** (657 → 1418 → 1485 → 1597),
   each time because the archivist can write this token but **`CHANGELOG.md` is outside its
   write gate**, so the two halves of the check are owned by different lanes and only one of
   them can close the loop. **It has now closed TWICE RUNNING for the same reason and only that
@@ -72,7 +84,14 @@
   close, and it is re-run **after** the archivist's writes at every close since. **At this close it
   reports a MATCH at 1636.** **[UPDATED 2026-08-01 at the `gravito_p1_mutators_ids_telemetry_a`
   close: this line now reads 1689, and `RELEASE_METADATA_LIVE_SUITE=1` re-run AFTER the archivist's
-  writes reports a MATCH at 1689.]** Correcting the number does not fix the guard; see residue.
+  writes reports a MATCH at 1689.]** **[UPDATED AGAIN 2026-08-01 at the
+  `gravito_p2_claim_scoped_evidence_a` close: this line now reads 1771, `CHANGELOG.md` carries the
+  matching unsplit literal `**1771 passed**`, and `RELEASE_METADATA_LIVE_SUITE=1` re-run AFTER the
+  archivist's writes reports a MATCH at 1771. This is the THIRD consecutive close where the pair is
+  live rather than stale, and for the THIRD time the reason is that the BUILDER wrote the live total
+  into the CHANGELOG entry — the archivist still cannot write `CHANGELOG.md`, so the loop STILL
+  closes by luck of the builder's phrasing, not by design.]** Correcting the number does not fix the
+  guard; see residue.
   It **chains** 16 sibling suites in `tests/` through one `chain_suite` function and folds their
   counts into its own totals. A sibling suite present on disk but not chained is itself a failure,
   so a new suite cannot become discoverable-only. **The per-suite breakdown that used to sit here was
@@ -104,10 +123,127 @@
   framing, verbatim, because it is the standard every packet from here is measured against:
   *"the governance substrate is no longer the bottleneck. The bottleneck is now whether Gravito can
   begin making better decisions than today's planning approaches."*
-  **THE SEQUENCE IS FIVE PHASES: P1 mutators/IDs/telemetry (DONE) -> P2 claim-scoped evidence ->
-  P3 `accept_and_constrain` -> P4 S1 shadow ranker -> P5 outcome/counterfactual telemetry.**
+  **THE SEQUENCE IS FIVE PHASES: P1 mutators/IDs/telemetry (DONE) -> P2 claim-scoped evidence
+  (DONE) -> P3 `accept_and_constrain` (NEXT) -> P4 S1 shadow ranker -> P5 outcome/counterfactual
+  telemetry.**
   Read everything below as **substrate for P4**, not as governance for its own sake.
-- **Last closed packet:** `gravito_p1_mutators_ids_telemetry_a`
+- **Last closed packet:** `gravito_p2_claim_scoped_evidence_a`
+  (`PACKET-0019-gravito-p2-claim-scoped-evidence-a`) — **ONE CONTROL MAY NOW CARRY MANY CLAIMS
+  WITH MANY VERDICTS, and the packet found a LIVE OVER-GRANT INSIDE THE OVER-GRANT DETECTOR**
+  (receipt `build-os/receipts/gravito_p2_claim_scoped_evidence_a.md`, commits `9474cae` +
+  `c653508`, base `e6b825b`, re-verified `git merge-base c653508 e6b825b` = `e6b825b`).
+  **P2 of the operator's five.**
+  **DELIVERED.** A **claim-scoped evidence store** (`build-os/registry/evidence_assertions.txt`,
+  one stanza per assertion, stable `EV-NNNN-<slug>` ids, nineteen required fields, **a subject may
+  carry many concurrent assertions**), a validator (`build-os/tools/claim-evidence.sh` —
+  `schema`/`validate`/`list`/`project`), and a new suite `tests/claim_evidence_tests.sh`
+  (**77 assertions**, chained — not discoverable-only). **`untested` ADDED to the evidence axis at
+  `observe`** (*has never operated against a live or representative task*, strictly weaker than
+  `unvalidated`) **WITHOUT WEAKENING THE GUARD** — every OTHER unrecognised token still takes
+  `evidence.derivation_nonvacuity` to **exit 2**, and both halves are driven in the SAME run so
+  "recognising one token" cannot be read as "opening a fall-through".
+  **Census 90 -> 93; suite 1689 -> 1771 (+82); FINDINGS NUMERATOR UNCHANGED AT 25 — only the
+  denominator moved (25 of 93, split 6/5/14, identical to 25 of 90 at base); ZERO
+  RE-AUTHORISATIONS.** Grid 25 cells -> 30; **0 of 30 license `execute`, unchanged.**
+  **THE CANONICAL FIXTURE WORKS AND IT IS FAITHFUL, NOT PLAUSIBLE-LOOKING.**
+  `maint.tripwire_coverage_scan` now carries `refuted` (claim A: detects uncovered behaviour under
+  bare `node --test`) AND `supported` (claim B: prevents destructive mutation under the sanctioned
+  invocation) **SIMULTANEOUSLY**. qa **independently verified the underlying measurement** rather
+  than trusting the stanza: `residue.md` is **1621 B**, `DAMAGED\n` is **8 B**, and the gated arm
+  uses **`cmp -s` byte identity — STRONGER than the sha256 the earlier packet claimed**. This is
+  the case that nearly caused a demotion **measured to destroy live memory**, now **representable**
+  instead of collapsed into one misleading token. **And the registry entry did not move:**
+  `class: C`, `empirical_status: red_driven,refuted`, `runtime_authority: gate`,
+  `authority_mismatch: declared` — unchanged. The store is **additive and advisory: read by
+  nothing that grants authority.**
+  **(1) F1 — A LIVE OVER-GRANT INSIDE THE OVER-GRANT DETECTOR.** The packet updated ONE copy of
+  `EVIDENCE_AXIS` and the prose describing it, and left a SECOND copy at five tokens in
+  `authority-envelope.sh` — **while that file's own header said six**. **AT BASE BOTH AGREED; THE
+  PACKET CREATED THE DIVERGENCE.** Demonstrated against the shipped tool, not argued: `axis_cap`
+  returns **empty** for `untested`, `rank_of("")` = **-1**, and the `[ "$tr" -ge 0 ]` guard
+  **silently drops the strictest token out of the minimum**, so a `gate` grant reads
+  **`WITHIN-LICENCE`** when the correct cap is **`observe`** — **OVER-REACHING BY THREE RUNGS,
+  INSIDE THE TOOL THAT EXISTS TO CATCH OVER-GRANTS.** Latent only because 0 envelopes are live and
+  0 controls carry `untested`. Section 18 was blind because **every assertion in it grepped
+  `evidence-policy.sh` and none grepped the tool under test.** The reviewer: *"the strongest thing
+  in the diff... found by pointing an assertion at the tool under test instead of at the tool it
+  cites."* **Both literal copies verified byte-identical at six tokens at close.**
+  **(2) THE FIX COVERS THE CLASS, NOT THE PAIR — A FIRST.** This was the **THIRD** instance of the
+  unchecked-duplicate defect (evidence cap table vs README; deployment axis owner vs copy; now the
+  evidence axis in the envelope tool), and **the first fix that is not pair-shaped**: every literal
+  `<NAME>_AXIS="..."` restatement under `build-os/tools/` must now agree **token-for-token** with
+  `evidence-policy.sh matrix`. It sweeps **3** restatements; **a fourth added later is covered with
+  nobody remembering.** Red-driven by reverting the one-token fix: **94 passed / 2 failed**,
+  restored to **96 / 0**. **THE REVIEWER FOUND TWO COVERAGE LIMITS AND RULED THEM RESIDUE, NOT
+  DEFECTS** (no failing fixture exists): a **same-line second assignment**
+  (`FOO=1; EVIDENCE_AXIS="bogus"` — the anchored enumerator never sees the second name) and the
+  **append form** (`EVIDENCE_AXIS+=" bogus"` — the sweep passes green while the tool composes with
+  the appended token). Neither exists in the tree today, so the CHANGELOG's wording is true of it.
+  Residue (bbb).
+  **(3) A GUARD CAUGHT THE BUILDER'S OWN WORK AND WAS OBEYED, NOT SILENCED.** Section 18's first
+  non-vacuity check was `[ "$AXSEEN" -ge 3 ]`; **§21 flagged it as an unregistered fitted floor**,
+  pushing the family **37 -> 38**. Registering a floor is a **re-authorisation and out of scope**,
+  so it replaced the count with a **NAMED ANCHOR**. The reviewer confirmed the replacement is
+  genuinely **stronger**, not merely compliant: *"`-ge 3` is satisfiable by three copies of
+  anything, while the named anchor cannot be satisfied by arithmetic and fails closed if the glob
+  breaks."* **Family verified back at 37; §10's 34 undisturbed; NO FLOOR REGISTERED.**
+  **(4) THE ORCHESTRATOR'S COUNT WAS WRONG AGAIN — FOURTH TIME THIS SEQUENCE.** It reported the
+  fitted-floor family at **38**; the repo's rule **excludes `N <= 1` deliberately** (*"the scan
+  found at least one thing" is a Class A invariant*), and §21 reports **34 of 37 scanned, 3
+  excluded**. **THE BUILDER WAS RIGHT.** Re-derived by the archivist at close: 37 / 34 / 3.
+  **RECORD THIS AS A PATTERN, NOT AN INCIDENT: four times in this sequence a BUILDER (or qa)
+  derived and corrected a figure the ORCHESTRATOR relayed** — the reviewer's `64 of 90` vs the
+  builder's `77 of 90`; the self-tally `7/4` vs qa's `10/3/7`; "first counterfactual" vs qa's
+  **second**; and `38` vs `37` here.
+  **(5) TWO COUNTERFACTUAL DATA POINTS, NOT ONE.** qa corrected the orchestrator: `DECISION-0008`
+  is the **SECOND** recorded decision where a signal disagreed with the human choice, **not the
+  first**. `DECISION-0007` already records one — the selected candidate scored **0** on
+  `dependency_unlock_count` while `PACKET-0016` scored **1** (snapshots 0001 vs 0004). For
+  `DECISION-0008`, `census_growth_controls` is **3** for the selected arm and **0** for all three
+  rejected arms — **uniquely worst on the only cost-ranking signal** — and `selection_reason` says
+  so **verbatim**, **re-derivable from the recorded signals alone**. **16 frozen snapshots, TWELVE
+  of them for arms NOT selected.** Store now at **8 decisions / 71 snapshot rows**. **THE n = 1
+  OBLIGATION INHERITED FROM P1 IS DISCHARGED — there are now TWO decisions with a non-degenerate
+  candidate set.** **NO ARTEFACT CLAIMS "first"** — verified **absent tree-wide** at close.
+  **(6) THE ANTI-LAUNDERING PROPERTY SURVIVED SEVEN ATTACKS.** qa **could not defeat it**. Sharpest
+  case: `refuted` in the registry + a `red_driven` assertion -> `effective = observe`; **A
+  REFUTATION CANNOT BE OUTVOTED.** It is **STRUCTURALLY UNRAISABLE**, not merely untested —
+  composition uses only `-lt`, so `L_effective = MIN(L_class, L_registry_evidence,
+  L_assertion_evidence)` can only lower. §8 fabricates a Class-A control the census records
+  `refuted`, hands it a `red_driven` assertion licensing `gate` alone, and requires `observe` —
+  **checked as an INEQUALITY over the ladder, not a matched string.** **Freeze verified BY
+  MUTATION:** adding a control to the source `census_growth_controls` derives from left **all 12
+  non-selected snapshot values unmoved**.
+  **THE STALE-REFERENCE SWEEP — THE METHOD MATTERS MORE THAN THE NUMBER.** 42 `evidence_refs` went
+  stale when four tool headers grew; **every one was repointed by locating its base-commit line
+  CONTENT in the current file, NEVER by shifting a number.** One was still missed by hand
+  (`tests/mutator_registry_tests.sh:642 -> :643`, which a `while` statement let past the §23
+  vacuity guard), so the repointing is now **verified MECHANICALLY**: every `file:line` reference in
+  the tree is **paired positionally against its base-commit counterpart and compared by CONTENT**.
+  **0 stale pathed refs tree-wide over 338 refs** — and that sweep **caught the reference the
+  packet's own new assertions had displaced**. Residue (ddd) proposes it as its own governance
+  control.
+  **DEFECT-0009, SELF-CAUGHT IN A FILE THIS PACKET AUTHORED:** `claim-evidence.sh --help` printed
+  six lines of shell as documentation (`sed -n '2,120p'` over a 114-line header). Bounded to
+  `'2,114p'`.
+  **VERDICT TRAIL: reviewer PASS — NO FIX LIST, NO FIX ROUND. qa RED, RESOLVED.**
+  **DEPTH: 2 SERIAL STAGES — builder, then qa and reviewer CONCURRENTLY. NO STAGE 3.** This is the
+  **first packet in this sequence to hold the `substantive` median**; the previous four each ran to
+  **four** serial stages.
+  **FINAL STATE AT `c653508`: 2 commits (`9474cae` untouched and still an ancestor; `20df098` still
+  a live object). Suite 1771 passed / 0 failed; `./build-os/maintenance/run-tests.sh` 144/144;
+  `scan-controls.sh check` exit 0; `scan-mutators.sh check` exit 0; `evidence-policy.sh check`
+  25 of 93, split 6/5/14; `claim-evidence.sh validate` exit 0 (3 assertions);
+  93 controls, 20 declared mismatches, 73 gate / 14 advise / 6 execute / 0 rank / 0 observe /
+  0 none; 3 claim-scoped assertions (1 refuted / 1 supported / 1 untested, two of them on the SAME
+  subject); 8 decisions; 71 signal snapshots; 0 live authority envelopes; both `EVIDENCE_AXIS`
+  copies byte-identical at six tokens; 0 stale pathed refs tree-wide; tree clean.** All re-derived
+  by the archivist at close directly from `control_registry.txt` and the live tools.
+  **Both verdicts single-model — NO CODEX IN ANY PASS, for the SEVENTH packet running.**
+  `tool_router.md` routes reviewer second-eyes to it and nothing is installed. Residue (zz) already
+  says *"Either install Codex or stop declaring the row."* **It is still declared and still
+  unbacked.**
+- **Prior:** `gravito_p1_mutators_ids_telemetry_a`
   (`PACKET-0006-gravito-p1-mutators-ids-telemetry-a`) — **`execute` got its FIRST SIX OCCUPANTS,
   identity stopped being a line number, and the packet recorded the feature vectors of the arms it
   did NOT take** (receipt `build-os/receipts/gravito_p1_mutators_ids_telemetry_a.md`, commits
@@ -440,7 +576,7 @@
   `shadow:observe` to `shadow:none`, left README §3b saying `observe`, and **both suites stayed
   green at 86/0 and 88/0**; the orchestrator reproduced it independently. Only the axis's **copy**
   was pinned (by §5b of the evidence suite); the **declared OWNER** was pinned by nothing. Closed by
-  new **§2a** of `tests/authority_envelope_tests.sh:208`, reconciling `DEPLOYMENT_AXIS` against
+  new **§2a** of `tests/authority_envelope_tests.sh:213`, reconciling `DEPLOYMENT_AXIS` against
   README §3b in both directions with a non-vacuity floor on both sides; the orchestrator re-drove
   the identical mutation against it: **89 passed / 2 failed**. **The fix used the device already in
   the tree — §5a's parse-prose / recompute-table / diff-both-ways pattern — not a new invention.**
@@ -795,8 +931,8 @@
      CROSS-COMMIT comparison tests identity** — several earlier *"zero drift, 287/287"* claims were
      the former reported as the latter. Residue (mm).
   0a. **THE CLOSE CHECKLIST OMITTED A LIVE SUITE AND A PUSHED COMMIT SHIPPED RED.**
-     `./build-os/maintenance/run-tests.sh` is **still not chained into the suite** (1689 at
-     `a75c25e`) and no close brief asked
+     `./build-os/maintenance/run-tests.sh` is **still not chained into the suite** (1771 at
+     `c653508`; 1689 at `a75c25e`) and no close brief asked
      for it, so `2df61ae` was pushed at **143/144**. Remedy: chain it, or name every live suite in
      the close checklist. **Orchestrator defect.** Residue (oo).
   0b. **THE LADDER'S SPELLING SWEEP** — deferred with all three grounds upheld. It needs an

@@ -286,7 +286,10 @@
   stanzas (the tool had to exist before `evidence.derivation_nonvacuity` could be registered for it),
   so **75 was the live count at the moment narrated**. qa's `78/78` reproduction is a re-drive on the
   *final* tree, not the original incident, and does not date it. The matching sentence in
-  `CHANGELOG.md:106` narrates the same incident and is likewise **correct and left**.
+  `CHANGELOG.md:198` narrates the same incident and is likewise **correct and left**.
+  **[REPOINTED 2026-08-01 at the `gravito_p2_claim_scoped_evidence_a` close: was `:106`. Repointed
+  BY CONTENT against base `e6b825b`, not by shifting a number — the anchor line is
+  `refuted-but-wired-in control belongs. The ladder is now`. Cite the ANCHOR, not the number.]**
   **The archivist deliberately did not fix any of this**, on three grounds: the packet was at its
   2-commit cap, registry artefacts are the packet's *deliverable* rather than archivist memory, and
   an archivist quietly closing a reviewer-class defect inside its own close is the papering-over the
@@ -410,9 +413,9 @@
 
 - **(r) A STRUCTURAL CITATION DEFECT — AND IT IS GUARANTEED, NOT OCCASIONAL.** `residue.md:280` (in
   item (l), above) and `build-os/receipts/gravito_evidence_policy_matrix_a.md:572-573` cite
-  `CHANGELOG.md:106` and `CHANGELOG.md:131`. **Both were correct when written.**
+  `CHANGELOG.md:198` and `CHANGELOG.md:223`. **Both were correct when written.**
   `gravito_authority_envelope_a`'s **145-line prepend invalidated them**, verified at close:
-  `CHANGELOG.md:106` now sits inside that packet's zero-grants argument and `:131` inside the S1
+  `CHANGELOG.md:198` now sits inside that packet's zero-grants argument and `:223` inside the S1
   tension — neither narrates what its citation claims. **This will happen to EVERY `CHANGELOG.md`
   line-citation on EVERY future packet**, because the changelog grows **from the top**: every landed
   citation into it decays by the size of the next release block. **The decay is structural and
@@ -480,11 +483,11 @@
   the live total into the CHANGELOG entry (`**1617 passed**`, present exactly once and unsplit),
   giving the archivist a literal to match. **Twice running, the loop has closed by luck of the
   builder's phrasing rather than by design.** Original entry follows. See items (f), (g), (n). It closed at this packet's close only because the
-  **builder** happened to write the live total into the CHANGELOG entry (`CHANGELOG.md:32`,
+  **builder** happened to write the live total into the CHANGELOG entry (`CHANGELOG.md:124`,
   `**1597 passed**`, present exactly once and unsplit), giving the archivist a literal to match. The
   archivist still cannot write `CHANGELOG.md`. **§5 still cannot detect staleness** — it checks
   cross-file agreement, and `current_state.md` at 1485 agreed with a landed `1485 passed` at
-  `CHANGELOG.md:175` while the live total was 1597, which is a **fifth** demonstration on this same
+  `CHANGELOG.md:267` while the live total was 1597, which is a **fifth** demonstration on this same
   token. Verified at close in both directions: before the memory write,
   `RELEASE_METADATA_LIVE_SUITE=1` reported `live suite total (1597 passed) contradicts
   current_state.md's claim (1485) — the memory is stale` **while the chained suite was green at
@@ -624,7 +627,10 @@
   the one that never ran. **Either install Codex or stop declaring the row.**
 
 - **(mm) THE CITATION GUARD CHECKS RESOLVABILITY, NOT IDENTITY — QUANTIFIED, AND IT RETROACTIVELY
-  DISCOUNTS EARLIER CLAIMS.** qa located the cause at **`build-os/registry/scan-controls.sh:362-386`**:
+  DISCOUNTS EARLIER CLAIMS.** qa located the cause at **`build-os/registry/scan-controls.sh:368-392`**
+  (**repointed 2026-08-01 from `:362-386` BY CONTENT against base `e6b825b`** — both endpoints
+  content-pair at +6: `# --- 6. evidence must resolve ---` and
+  `[ "$nref" -ge 1 ] || viol "NO-EVIDENCE ..."`):
   the `evidence_refs` loop tests **existence** (`[ ! -f "$REPO/$rf" ]`), **numeric**
   (`case "$rl" in ''|*[!0-9]*)`), **in-bounds** (`[ "$rl" -le "$tot" ]`) and **not-blank**
   (`vacuous_why`). **IT NEVER COMPARES CONTENT.** Measured across the three tools whose refs drifted:
@@ -780,7 +786,9 @@
 - **(yy) THE GOVERNANCE BASELINE HAS ONE ESCAPE HATCH, AND IT IS A COMPLETENESS HOLE, NOT A
   CONFORMANCE HOLE.** §11 of `tests/mutator_registry_tests.sh` iterates the rows **PRESENT IN**
   `build-os/registry/governance_baseline.txt` — **so deleting a row and then moving that control
-  PASSES.** The only cardinality guard is `NBASE > 0` (`tests/mutator_registry_tests.sh:571-573`),
+  PASSES.** The only cardinality guard is `NBASE > 0` (`tests/mutator_registry_tests.sh:572-574`,
+  **repointed 2026-08-01 from `:571-573` BY CONTENT against base `e6b825b`; anchor line is
+  `NBASE="$(grep -vc '^#' "$BASELINE" ...`**),
   which **certifies a store of one**. **The guard checks that what is listed conforms; it never
   checks that the list is complete.** Same shape as the vacuity holes elsewhere in this file.
 - **(zz) SECOND-EYES DECLARED AND NOT DELIVERED — SIXTH PACKET RUNNING, AND THIS TIME A REVIEWER
@@ -809,6 +817,105 @@
   piped through `tail -3`. **Never pipe a gate's output through `tail` before reading it.** The
   honest claim on the record is *"a concurrent run went red once and every isolated run is green"* —
   **NOT** *"the failure was proven harmless"*, which nobody can say from here.
+
+### From `gravito_p2_claim_scoped_evidence_a` (2026-08-01, receipt `build-os/receipts/gravito_p2_claim_scoped_evidence_a.md`)
+
+*Labelled (bbb)–(fff) to continue the file's sequence. The receipt refers to these
+as this packet's items (a)–(e), in the same order.*
+
+- **(bbb) THE AXIS SWEEP HAS TWO COVERAGE LIMITS — RECORDED, NO FIXTURE, AND THE REVIEWER RULED THEM
+  RESIDUE RATHER THAN DEFECTS.** Section 18 now requires every literal `<NAME>_AXIS="..."`
+  restatement under `build-os/tools/` to agree token-for-token with `evidence-policy.sh matrix` —
+  **the first fix in this sequence that covers the CLASS rather than the PAIR**, sweeping 3
+  restatements today with a fourth covered automatically. Two shapes escape it:
+  **(i) a SAME-LINE SECOND ASSIGNMENT** — `FOO=1; EVIDENCE_AXIS="bogus"` — because the anchored
+  enumerator never sees the second name on a line; **(ii) the APPEND FORM** —
+  `EVIDENCE_AXIS+=" bogus"` — where the sweep passes green while the tool composes with the
+  appended token. **The ruling turned on there being NO FAILING FIXTURE**: neither form exists in
+  the tree today, so the CHANGELOG's wording is **true of the tree it describes**.
+  **SHARPENED BY THE ARCHIVIST AT CLOSE, because it strengthens the item rather than softening it:**
+  the same-line *shape* **is already present in the tree**, at `build-os/tools/claim-evidence.sh` —
+  `CLASS_AXIS=""; EVIDENCE_AXIS=""`. **This is NOT a counter-example to the ruling**: it is an
+  *empty initialiser*, immediately overwritten by a value **derived from `evidence-policy.sh
+  matrix`**, so no divergent literal exists and nothing is over-granted. But it means the
+  enumerator's blind spot is **reachable by a shape the tree already contains**, not merely by a
+  hypothetical one. **Whoever closes this should write the fixture from that line.**
+
+- **(ccc) `MISMATCHES.md` §13 CITES THREE WRONG LINES — AND THEY WERE ALREADY WRONG AT BASE, SO THIS
+  IS NOT A REGRESSION THE DIFF INTRODUCED.** `MISMATCHES.md:607` / `:608` / `:609` cite
+  `build-os/registry/scan-controls.sh` at **`:454`** (claimed: the `exit 2`), **`:126`** (claimed:
+  three directories) and **`:129`** (claimed: five refusal patterns). **All three land on prose
+  comments.** True targets, verified by content at close:
+
+  | cited | true target | anchor content |
+  |---|---|---|
+  | `:454` | **`:471`** | `  exit 2` |
+  | `:126` | **`:141`** | `SCAN_DIRS="build-os tests .claude/hooks"` |
+  | `:129` | **`:144`** | `REFUSAL_PATTERNS=(` |
+
+  **ALREADY WRONG AT BASE BY NINE LINES:** at `e6b825b`, `SCAN_DIRS` sat at `:135` and
+  `REFUSAL_PATTERNS` at `:138` against citations of `:126` and `:129`. **The packet moved the true
+  targets by six** (135 → 141, 138 → 144, 465 → 471) **UNDER REFERENCES THAT WERE ALREADY STALE**,
+  so **no correctness property changed state**. **The reviewer RECORDED rather than DEMANDED**,
+  explicitly to avoid a **sixth stage-4 in seven packets** — a deliberate depth-budget trade, not an
+  oversight.
+  **THE BITTER DETAIL, PRESERVED BECAUSE IT IS THE WHOLE ARGUMENT FOR ANCHORS OVER LINE NUMBERS:**
+  `MISMATCHES.md:611` is a **parenthetical documenting the PREVIOUS generation of this exact bug at
+  `:347`**. So **`:454` is GENERATION THREE of a defect the file narrates about itself.**
+  **Right home:** a `tiny` edit or the next packet, using the exact targets in the table above.
+
+- **(ddd) THE POSITIONAL CONTENT-PAIRING CHECK IS A REAL DISCRIMINATOR AND BELONGS IN ITS OWN
+  PACKET.** It would close the class **§23's vacuity guard cannot see**: F2 walked straight past §23
+  because `while IFS= read -r id; do` **is non-vacuous** — the guard checks that the loop has a
+  body, not that the body compares anything. The check pairs **every `file:line` reference in the
+  tree positionally against its base-commit counterpart and compares by CONTENT**; run at this
+  close it was **clean over 338 refs** and **caught the one reference the packet's own new
+  assertions had displaced**, which a hand sweep had missed.
+  **The reviewer agreed it is a NEW GOVERNANCE CONTROL belonging in its own packet — and recorded,
+  honestly, that it could produce NO FIXTURE showing P3 blocked without it.** That is the reason it
+  is deferred rather than pulled forward: **the case for it is strong and the urgency is
+  unevidenced.**
+
+- **(eee) `valid_until` IS STORED AND ENFORCED NOWHERE — AND P3 MUST OWN ITS OWN EXPIRY
+  ENFORCEMENT.** Every stanza in `build-os/registry/evidence_assertions.txt` carries `valid_until`
+  and **nothing reads it**. **Inert HERE for two specific reasons, and NEITHER SURVIVES P3:**
+  (i) nothing consumes assertions yet, and (ii) composition is `MIN`, so a stale assertion cannot
+  raise anything. **P3 (`accept_and_constrain`) is the first consumer**, and the moment an assertion
+  can license a constrained acceptance, an **expired** assertion silently licensing it is a live
+  over-grant of exactly the F1 shape.
+  **THE CHEAP VERSION, AND IT SHOULD BE TAKEN:** fold in `authority_envelopes.txt`'s
+  **equally-unchecked `expires`** at the same time. **Two unenforced expiry fields, one enforcement
+  path, one packet.**
+
+- **(fff) SECOND-EYES DECLARED AND NOT DELIVERED — SEVENTH CONSECUTIVE PACKET.** `codex` is not on
+  PATH and no Codex plugin is installed; `tool_router.md` routes reviewer second-eyes to it. Both
+  verdicts on this packet were **single-model**. Item **(zz) already says it plainly — *"Either
+  install Codex or stop declaring the row"* — and the row is STILL declared and STILL unbacked.**
+  **This is now the longest-running unremedied item in the file, and it is a ONE-LINE FIX in either
+  direction.** It bites specifically here: **four times in this sequence a builder or qa has
+  corrected a figure the orchestrator or the reviewer relayed** (`64 of 90` → `77 of 90`; `7/4` →
+  `10/3/7`; "first counterfactual" → **second**; fitted-floor `38` → **37**). **Cross-checking is
+  exactly what the unbacked row was for.**
+
+- **(ggg) AN ARCHIVIST DEFECT, CAUGHT BY A LIVE GUARD DURING THE CLOSE — AND THE CLOSE CHECKLIST
+  SHOULD NAME `check-adoption.sh`.** At this close the archivist appended a `packet_metrics.tsv`
+  row naming **two commits** while the receipt carried **no file-ownership manifest**.
+  `build-os/metrics/check-adoption.sh` refused at **exit 2** with `UNATTRIBUTED`, which took
+  **`tests/metrics_adoption_tests.sh`** and **`tests/lane_declaration_tests.sh`** red and dropped
+  the live suite to **1769 passed / 2 failed**. **Closed by RECORDING THE MANIFEST the guard asks
+  for — NOT by widening a boundary**, which the guard's own refusal text explicitly forecloses:
+  *"the boundary is dated, pinned by `tests/metrics_adoption_tests.sh`, and emptying the scope makes
+  this guard refuse rather than pass."* The two commit sets are genuinely disjoint (1 file + 21
+  files, `comm -12` intersection **empty**), so the manifest is a true statement and not a phrase
+  added to satisfy a grep.
+  **THE LESSON, AND IT IS THE SAME SHAPE AS (aaa):** the close writes into the tree, so **the close
+  can break the build**, and it did. **A metrics row naming ≥2 commits obliges a manifest in the
+  receipt**, and nothing tells the archivist that until a guard refuses. **The close checklist
+  should name `bash build-os/metrics/check-adoption.sh` explicitly**, alongside the full suite,
+  `run-tests.sh` and the `RELEASE_METADATA_LIVE_SUITE=1` cross-check — it is the one live guard that
+  measures **the archivist's own output** rather than the packet's.
+  **It was caught only because the gates were re-run AFTER the writes.** Had the close run them
+  before writing, this would have shipped red exactly as `2df61ae` did.
 
 ## Known risks / debt
 
