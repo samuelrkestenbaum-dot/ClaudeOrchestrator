@@ -4,96 +4,66 @@
 > the builder implements exactly this and nothing else; the archivist clears it
 > on close. One packet at a time.
 
-## Status: NO PACKET IN FLIGHT
+## Status: IN FLIGHT — `gravito_p4_s1_shadow_ranker_a`
 
-`gravito_p3_accept_and_constrain_a` was **CLOSED 2026-08-01**. Nothing is in
-flight. The next packet is **staged, not started** — it needs an explicit go like
-any other.
+- **Packet id:** `PACKET-0034-gravito-p4-s1-shadow-ranker-a`
+- **Lane:** `substantive` · **Depth budget:** 2 (builder, then qa ‖ reviewer)
+- **P4 of the operator's five-phase sequence.** The first phase whose output is a
+  **decision** rather than a record of one.
 
-## Closed — `gravito_p3_accept_and_constrain_a`
+## Branch base
 
-- **Packet id:** `PACKET-0023-gravito-p3-accept-and-constrain-a`
-- **Receipt:** `build-os/receipts/gravito_p3_accept_and_constrain_a.md`
-- **Commits:** `3bd2ab4` (declaration) + `e68d931` (build) + `ead24bc` (fix
-  round). Base `f3c5353`, re-verified at close.
-- **Verdict:** **PASS-AS-FIXED** — qa GREEN, reviewer fix-then-pass **twice**.
-- **Delivered:** a fifth mismatch disposition (`accept_and_constrain`) that
-  **clears nothing and raises nothing**, plus **lease-window enforcement** —
-  `LAPSED` / `NOT-YET-LIVE`, `valid_from`/`valid_until`, calendar-valid dates.
-- **Census 93 → 97; suite 1771 → 1869; findings numerator and finding SET
-  byte-identical to base at 25 (6/5/14); ZERO re-authorisations.**
-- **Depth: 4 serial stages — a DEFECT under the contract**, recorded as one. It
-  was a **mis-cut in mechanism**: P3 mechanised the *citation* half of
-  `DEFECT-0003-duplicate-semantic-truth` and left the *counts-in-two-places*
-  half to hand. **Stage 5 was not opened**; the remainder is re-cut below.
-- **Note the id:** the close brief said `PACKET-0020-…`, which is **already
-  taken** by `PACKET-0020-widen-control-registry-with-claim-fields`. The
-  canonical id is `PACKET-0023-…`.
+Built on `claude/project-handoff-merge-ramhds` at `ce71122`, re-verified with
+`git merge-base`. Everything through that commit is pushed; nothing in this
+packet is authorised to be.
 
-## Staged next — `gravito_p3b_count_derivation_a` (NOT STARTED)
+## The success condition
 
-**The re-cut the reviewer endorsed. It is the contract's own remedy for a fourth
-serial stage — not a deferral of convenience.**
+**A real candidate set goes in, and an immutable explained ordering comes out.**
+Nothing else in this packet counts as success.
 
-Five items, each with an exact address, all recorded in `build-os/memory/residue.md`
-as **(hhh)–(lll)**:
+## What is being built
 
-1. **(hhh)** `tests/control_registry_tests.sh:867` — arrow-pair file-selection is
-   line-based while extraction is fold-based, so the wrapped pair is dropped
-   before folding. `AP_SEEN` reads **2**; the tree has **3**. The assertion at
-   `:870` makes a **false coverage claim**. Raising the floor makes it a **fitted
-   floor** needing registration to `tests.nonvacuity_minimums` — so this is not a
-   one-line fix.
-2. **(iii)** `build-os/registry/control_registry.txt:1060` — headline says
-   "FAMILY OF 35"; the same field still says 37 / 34 / 34. Re-derive with §21's
-   own scan, **not a grep**.
-3. **(jjj)** `build-os/registry/neurocosmology_crosswalk.txt:121` — "Seventeen of
-   its twenty-two bindings" against a live **20 suites of 25 bindings**.
-4. **(kkk)** `build-os/registry/mismatch_dispositions.txt:54` and `:85` — says
-   "THE FOUR CONDITIONS" while the tool enforces **five**. **A governance store
-   misdescribing its own validator is the failure this registry exists to
-   prevent.**
-5. **(lll)** `build-os/tools/mismatch-disposition.sh:167` and `:238` — the claim
-   that condition (0) removes accidental corpus matches is **false, with a
-   reproduction** (`MEASURED`, `PREVENTI`, `UNTOUCHE`, `COVERAGE` all certify at
-   exit 0). **Bounded:** it cannot smuggle a non-qualifying control through.
+`build-os/metrics/rank-candidates.sh` — **S1**, a shadow ranker.
+`controlClass: heuristic_policy` · class C · `empiricalStatus: untested` ·
+`runtimeAuthority: observe` · `deploymentMode: shadow` ·
+`outputSemantics: ordered_candidates`. The composition is
+`MIN(advise, observe, observe) = observe`, and it is registered at exactly that.
 
-**Declared governance ceiling for this packet:** it is a *correction* packet.
-**No new census control, no new registry store, no new validator tool, no new
-suite file.**
+Nine required outputs: stable candidate ids · frozen signal snapshots, never
+recomputed · every candidate still visible including the last-ranked and the
+refused · per-candidate signal values · the **decomposition**, not just a total ·
+self-amendment exclusions, printed with reasons · the actual selection ·
+`rank_of_selected` · **zero dispatch authority**.
 
-## Also queued, and NOT consumed
+Two guards: **(1)** no learned policy may optimize the mechanism governing its
+own promotion — refuse, visibly, and fail closed; **(2)** publish the
+decomposition.
 
-- **(ooo) — BLOCKING, ONE LINE, OUTSIDE THE ARCHIVIST'S GATE.** The live suite
-  total is **1869**; `current_state.md` still claims **1771** because advancing it
-  ships the tree **red** (`CHANGELOG.md` carries no `1869 passed` literal, and
-  `tests/release_metadata_tests.sh` is chained). **Remedy: add `**1869 passed**`
-  to the `## [Unreleased]` block of `CHANGELOG.md`, then set the Build/test line
-  to 1869.**
-- **(ddd) the positional content-pairing guard — STILL QUEUED.** The builder
-  verified all 330 refs inline (22 repointed, 0 drifts), but what is queued is a
-  **durable guard**, and §27 covers **two-position** citations only. **An inline
-  verification performed once is not a guard.**
-- **(mmm) make the arrow-pair convention a MECHANISM.** Writing a superseded span
-  without its path is a **convention**, and it was violated **twice during this
-  packet's own close** by the agent that had just written it down.
-- **(nnn)** *"a single-position citation with no duplicate is unpoliced by
-  everything currently in the suite."*
+## The governance ceiling
 
-## Next phase — P4 S1 shadow ranker, with a ceiling
+**No new store. No new validator tool. No new suite file. No new governance
+primitive.** An exception requires a concrete FAILING FIXTURE, executed with
+output. One was executed: `scan-controls.sh check` refuses at exit 2 with
+`UNREGISTERED build-os/metrics/rank-candidates.sh can terminate a run non-zero
+and owns NO registry entry at authority gate`, which forces a **second** census
+entry (`ranker.s1_input_integrity`, class A, `gate`). Registering the ranker
+itself at `gate` was the alternative and is worse: it would put a Class C control
+two rungs above its licence and ship a declared mismatch to launder a refusal
+path.
 
-**P4 is the first phase whose output is a DECISION, not a RECORD of a decision.**
+Governance defects found while building are recorded as residue and **not fixed
+here**. Stores added: 0. Validator tools added: 0. Suite files added: 0.
+Governance primitives added: 0.
 
-Ledger at the end of P3: **97 controls, ~20 tools, ~1869 assertions, ZERO
-executive components.** On P3's density a ranker built to the same standard would
-spend **5 controls and 200 assertions before it ranks anything**.
+## Candidate set
 
-**Carry a declared governance ceiling into the P4 packet:**
-**`≤1 new census control, no new registry store, no new validator tool, no new
-suite file`.**
+Real, not synthetic: open work drawn from `build-os/memory/residue.md` and the
+packet staged at the `gravito_p3_accept_and_constrain_a` close. Recorded as
+`DECISION-0010-p4-s1-shadow-ranker` with 28 frozen snapshots.
 
-**Substrate is ready:** `DECISION-0009` recorded 4 candidates and 16 frozen
-snapshots (12 for non-selected arms), and it is the **second consecutive**
-decision where selection went **against** the cheap signal. **n=3** non-degenerate
-decisions, **two of them human overrides of the cheapest arm with a stated
-reason** — that is counterfactual substrate, not imitation data.
+## Not in this packet
+
+The five items of `gravito_p3b_count_derivation_a` — which is the **selected
+candidate** of `DECISION-0010`, still not started, and which S1 independently
+placed at rank 1.
