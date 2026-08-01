@@ -38,6 +38,34 @@
 # refuses all of them rather than trying to decide which edits to the promotion
 # machinery would happen to benefit it.
 #
+# IT ONCE FAILED CLOSED ON ABSENCE AND *OPEN* ON SPELLING, AND THAT IS FIXED
+# HERE. The comparison was exact string equality, so four aliases of the very
+# file this guard protects — `./build-os/metrics/rank-candidates.sh`,
+# `build-os/metrics/../metrics/rank-candidates.sh`,
+# `build-os//metrics/rank-candidates.sh` and `build-os/metrics/*` — all reached
+# rank 1 while the plain spelling was excluded. A guard that a rename of the
+# same path defeats is not a guard. Both sides are now NORMALISED before they are
+# compared: `.` segments dropped, repeated slashes collapsed, `..` resolved
+# lexically, trailing slashes removed, and the `#object` suffix carried through
+# untouched. A WILDCARD IS NOT NORMALISED, IT IS REFUSED: a token carrying a glob
+# metacharacter names a set this tool cannot enumerate without consulting the
+# working tree — which would make the screening a function of the tree rather
+# than of the frozen snapshot — so it is excluded as
+# `guard1_uninterpretable_surface`. Pathname expansion is disabled tree-wide in
+# this script (`set -f`) so that such a token cannot silently mean different
+# things from different working directories.
+#
+# THE BLIND SPOT THIS GUARD GENUINELY HAS, STATED RATHER THAN LEFT TO BE FOUND.
+# Guard 1 screens reachability to the PROMOTION MACHINERY. It does NOT screen
+# reachability to the EVIDENCE SUBSTRATE — `record-decision.sh`,
+# `signal_snapshots.tsv`, `decision_telemetry.tsv` and `build-os/memory/residue.md`
+# are all unprotected — even though this control's own `promotion_requirement`
+# turns on `rank_of_selected` history, which lives in exactly those files. This is
+# LIVE, not hypothetical: `PACKET-0029` sits at rank 2 in the one real ordering S1
+# has produced, and its frozen write surface includes `build-os/memory/residue.md`,
+# the file `residue_items_closed` is derived from. See `PROTECTED_SURFACE` below
+# for why the surface is NOT widened to cover it.
+#
 # ---------------------------------------------------------------------------
 # GUARD 2 — PUBLISH THE DECOMPOSITION, NOT JUST THE VALUES
 # ---------------------------------------------------------------------------
@@ -96,8 +124,22 @@
 # Usage:
 #   rank-candidates.sh rank --decision-id ID [--store F] [--snapshots F]
 #   rank-candidates.sh rule
-# Exit: 0 an ordering was produced, 2 refused.
+# Exit: 0 an ordering over AT LEAST ONE rankable candidate was produced.
+#       2 refused — and "every candidate was refused by guard 1" IS a refusal.
+#       An empty ordering section is not an ordering: a ranking over an empty
+#       candidate set is satisfiable by anything, which is the exact principle
+#       this tool refuses an unknown decision id on. When guard 1 excludes the
+#       whole set the full record is still printed — the exclusions, their
+#       reasons, and every candidate's frozen values, because a refusal that is
+#       not visible is not a refusal — the ordering section carries the single
+#       line `ordering: NONE — every candidate was refused`, and the exit is 2.
 set -uo pipefail
+# NO PATHNAME EXPANSION, ANYWHERE. Write-surface tokens are read from a frozen
+# snapshot and split unquoted; without this a token like `build-os/metrics/*`
+# would be expanded against whatever directory the tool happens to be run from,
+# so the same frozen evidence would screen differently from two shells. Nothing
+# in this file globs on purpose.
+set -f
 
 SELF_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 STORE="$SELF_DIR/decision_telemetry.tsv"
@@ -130,6 +172,23 @@ SURFACE_SIGNAL="candidate_write_surface"
 # --- guard 1's protected surface ---------------------------------------------
 # A bare path means the whole file. `path#object` means one named object inside
 # a file S1 does not own outright.
+#
+# WHAT IS DELIBERATELY *NOT* HERE, AND WHY. The evidence substrate is absent:
+# `build-os/metrics/record-decision.sh`, `signal_snapshots.tsv`,
+# `decision_telemetry.tsv` and `build-os/memory/residue.md`. S1's
+# `promotion_requirement` turns on `rank_of_selected` history, and that history
+# lives in those files, so an edit to them can move S1's promotion just as surely
+# as an edit to `evidence-policy.sh` can. THE OMISSION IS A CHOICE, NOT AN
+# OVERSIGHT: nearly every packet in this repository writes `residue.md`, so
+# adding it would make guard 1 refuse nearly every candidate — and a predicate
+# that refuses every subject discriminates nothing. It would stop being a guard
+# and become a wall, and S1 would emit no orderings rather than safe ones. The
+# real remedy is to make the evidence substrate append-only and digest-chained
+# against tampering — which `record-decision.sh` already is for snapshots and
+# `residue.md` is not — rather than to forbid writing to it. Until that exists
+# this is a KNOWN, DISCLOSED HOLE in guard 1, recorded as residue and stated in
+# `ranker.s1_shadow_ordering`'s registry notes. It is not closed by this comment;
+# it is made impossible to discover by accident.
 PROTECTED_SURFACE="
 build-os/metrics/rank-candidates.sh
 build-os/registry/control_registry.txt#ranker.s1_shadow_ordering
@@ -151,10 +210,56 @@ digest_of(){
 direction_of(){ printf '%s\n' "$SIGNAL_DIRECTION" | awk -F: -v s="$1" '$1==s{print $2; exit}'; }
 in_words(){ local v="$1" w; for w in $2; do [ "$v" = "$w" ] && return 0; done; return 1; }
 
-# Two surface tokens touch iff they are equal, or one names a whole file and the
-# other names an object inside it.
+# A surface token S1 cannot interpret WITHOUT CONSULTING THE WORKING TREE is not
+# interpreted. A glob names a set whose members depend on what exists right now,
+# and screening a frozen snapshot against the current tree is the same defect
+# this control's `demotion_requirement` names. Refused, not expanded.
+surface_interpretable(){
+  case "$1" in *'*'*|*'?'*|*'['*|*'{'*) return 1 ;; esac
+  return 0
+}
+
+# Normalise one surface token so that two spellings of one path compare equal:
+# `.` segments dropped, repeated slashes collapsed, `..` resolved lexically, a
+# trailing slash removed. The `#object` suffix is split off first and re-attached
+# untouched — it names an object inside a file, not a path component. Purely
+# lexical: it never touches the filesystem, so it cannot make a frozen snapshot's
+# meaning depend on the current tree. Result in NORM_OUT (no subshell: this runs
+# once per token per protected object).
+NORM_OUT=""
+normalize_surface(){
+  local t="$1"                                  # NOT one `local` with the next
+  local p="${t%%#*}" obj="" seg lead="" n       # line: `local a=$1 b=${a}` reads
+  case "$t" in *'#'*) obj="#${t#*#}" ;; esac    # the OUTER a, not the new one.
+  case "$p" in /*) lead="/" ;; esac
+  local IFS=/
+  local -a parts=() out=()
+  parts=($p)
+  for seg in ${parts[@]+"${parts[@]}"}; do
+    case "$seg" in
+      ''|.) ;;
+      ..)
+        n=${#out[@]}
+        if [ "$n" -gt 0 ] && [ "${out[n-1]}" != ".." ]; then
+          out=("${out[@]:0:n-1}")
+        elif [ -z "$lead" ]; then
+          out+=("..")
+        fi ;;
+      *) out+=("$seg") ;;
+    esac
+  done
+  local joined=""
+  [ ${#out[@]} -gt 0 ] && joined="${out[*]}"   # IFS is `/` here, so this joins
+  NORM_OUT="${lead}${joined}${obj}"
+}
+
+# Two surface tokens touch iff their NORMALISED forms are equal, or one names a
+# whole file and the other names an object inside it. Comparing the raw strings
+# let four aliases of a protected file through; see the guard 1 header.
 touches(){
-  local a="$1" b="$2"
+  local a b
+  normalize_surface "$1"; a="$NORM_OUT"
+  normalize_surface "$2"; b="$NORM_OUT"
   [ "$a" = "$b" ] && return 0
   case "$b" in "$a"'#'*) return 0 ;; esac
   case "$a" in "$b"'#'*) return 0 ;; esac
@@ -170,7 +275,9 @@ while [ $# -gt 0 ]; do
     --decision-id) [ $# -ge 2 ] || die "--decision-id needs a value"; DEC="$2"; shift 2 ;;
     --store)       [ $# -ge 2 ] || die "--store needs a value";       STORE="$2"; shift 2 ;;
     --snapshots)   [ $# -ge 2 ] || die "--snapshots needs a value";   SNAPS="$2"; shift 2 ;;
-    -h|--help)     sed -n '2,100p' "${BASH_SOURCE[0]}"; exit 0 ;;
+    # Through the `Exit:` block rather than to a line number: the header grows,
+    # and a numeric bound silently starts truncating it when it does.
+    -h|--help)     sed -n '2,/^set -uo/p' "${BASH_SOURCE[0]}" | sed '$d'; exit 0 ;;
     *) die "unexpected argument \"$1\"" ;;
   esac
 done
@@ -241,18 +348,22 @@ for c in $CAND_LIST; do
     EXCLUDED_LINES="${EXCLUDED_LINES}excluded $c reason=guard1_unscreenable detail=no frozen \`$SURFACE_SIGNAL\` for this candidate, so S1 cannot establish that ranking it would not be ranking its own promotion. It fails closed: unscreenable is refused, not assumed innocent."$'\n'
     continue
   fi
-  hit=""
+  hit=""; uninterp=""
   for tok in $(printf '%s' "$surf" | tr ';' ' '); do
+    surface_interpretable "$tok" || { uninterp="$tok"; break; }
     for p in $PROTECTED_SURFACE; do
       touches "$tok" "$p" && { hit="$tok -> $p"; break 2; }
     done
   done
-  if [ -n "$hit" ]; then
+  if [ -n "$uninterp" ]; then
+    EXCLUDED_LINES="${EXCLUDED_LINES}excluded $c reason=guard1_uninterpretable_surface detail=its write surface carries the wildcard token \`$uninterp\`, which names a SET whose members depend on what the working tree happens to contain. Expanding it would screen a frozen snapshot against the current tree; guessing its extent would invent one. It is refused, on the same fail-closed rule as an unscreenable candidate."$'\n'
+  elif [ -n "$hit" ]; then
     EXCLUDED_LINES="${EXCLUDED_LINES}excluded $c reason=self_amendment detail=its write surface reaches a protected object ($hit). No learned policy may optimize the mechanism governing its own promotion."$'\n'
   else
     RANKABLE="$RANKABLE $c"
   fi
 done
+NRANKABLE="$(printf '%s\n' $RANKABLE | grep -c . || true)"; NRANKABLE="${NRANKABLE:-0}"
 
 # --- which signals are ranked, and which absences are named ------------------
 SIG_RANKED=""
@@ -381,6 +492,10 @@ for c in $CAND_LIST; do
 done
 add ""
 add "== THE ORDERING, WITH ITS DECOMPOSITION =="
+if [ "$NRANKABLE" -eq 0 ]; then
+  add "ordering: NONE — every candidate was refused"
+  add "detail: guard 1 excluded all $CANDS declared candidate(s), so no candidate is rankable and NO ORDERING EXISTS. An empty ordering section is not an ordering: a ranking over an empty candidate set is satisfiable by anything, which is the same reason an unknown decision id is refused. The exclusions above are the whole result, and this run exits 2."
+fi
 while IFS="$TAB" read -r t c; do
   [ -n "$c" ] || continue
   tied=no
@@ -416,4 +531,14 @@ DIGEST="$(printf '%s' "$BODY" | digest_of)"
 printf '%s' "$BODY"
 printf 'ranking_digest: %s\n' "$DIGEST"
 printf 'reproduce: build-os/metrics/rank-candidates.sh rank --decision-id %s\n' "$DEC"
+
+# THE EXIT CODE STATES WHETHER AN ORDERING EXISTS, AND NOTHING ELSE. The record
+# above is printed either way — a refusal nobody can read is not a refusal, and
+# guard 1's whole contract is that an excluded candidate stays visible WITH its
+# reason. But `exit 0` claims an ordering was produced, and when guard 1 has
+# refused the entire set there is none to produce.
+if [ "$NRANKABLE" -eq 0 ]; then
+  printf 's1: REFUSED — every one of the %s candidate(s) in %s was refused by guard 1, so no ordering exists. The exclusions and their reasons are printed above; the ordering section says so explicitly. A ranking over an empty candidate set is satisfiable by anything.\n' "$CANDS" "$DEC" >&2
+  exit 2
+fi
 exit 0

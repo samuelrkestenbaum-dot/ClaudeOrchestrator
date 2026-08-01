@@ -45,9 +45,9 @@
   `no tags` because `tests/release_metadata_tests.sh:322` requires it, so the residue item is
   annotated rather than rewritten. Whether the tag was created with an explicit go is not
   determinable from here and no claim is made.
-- **Build/test command:** `bash tests/build_os_tests.sh` (1898 checks; no network; temp dirs)
+- **Build/test command:** `bash tests/build_os_tests.sh` (1909 checks; no network; temp dirs)
   — measured on a quiet tree at `ce71122` plus this packet's build, and reconciled against
-  `CHANGELOG.md`, which carries the matching literal `**1898 passed**` (unsplit) in the
+  `CHANGELOG.md`, which carries the matching literal `**1909 passed**` (unsplit) in the
   release block `## [Unreleased]` -> `### In flight (not landed at the released commit)`.
   **CITED BY HEADING, NOT BY LINE NUMBER, from 2026-08-01 on** — the changelog grows from the
   top, so every line-citation into it decays on every packet, guaranteed rather than

@@ -50,7 +50,9 @@ deprecation cycle. Pin a commit if you need stability.
   pick landed in S1's ordering; on the first real decision it is **1**, over
   **n = 1**, and one agreement is not evidence of skill. Two census entries, no
   new store, no new tool beyond the ranker itself, and no new suite file: 29
-  assertions in `tests/mutator_registry_tests.sh`. Suite **1898 passed**, 0
+  assertions in `tests/mutator_registry_tests.sh`, plus **11 more from the fix
+  round** that drive the whole-set refusal and the four path aliases guard 1 used
+  to fail open on. Suite **1909 passed**, 0
   failed; `scan-controls.sh check` and `scan-mutators.sh check` both exit 0;
   zero re-authorisations. `goal_ecology` — recorded in the crosswalk since it was
   written as the primitive nothing could bind to, because *"no control weighs two

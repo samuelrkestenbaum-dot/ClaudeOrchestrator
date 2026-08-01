@@ -801,7 +801,7 @@ grep -q '^ranking_digest: ' "$WORK/s1.out" \
 # --- RED DRIVES --------------------------------------------------------------
 # The fixtures are built with the REAL recorder, so a fixture that the live tool
 # would refuse cannot be smuggled in by hand-writing a row.
-mks1(){ # <dir> <surface-of-the-first-arm> [omit-surface] — a two-candidate decision
+mks1(){ # <dir> <surface-arm-1> [omit-surface] [surface-arm-2] — a two-candidate decision
   local d="$1"; mkdir -p "$d"
   "$RECDEC" record --store "$d/tel.tsv" \
     --decision-id DECISION-9101-s1-fixture --decision-time 2026-08-01T00:00:00Z \
@@ -814,7 +814,7 @@ mks1(){ # <dir> <surface-of-the-first-arm> [omit-surface] — a two-candidate de
   for c in PACKET-9101-touches-s1 PACKET-9101-touches-nothing; do
     case "$c" in
       *touches-s1) v="$2" ;;
-      *)           v="build-os/memory/residue.md" ;;
+      *)           v="${4:-build-os/memory/residue.md}" ;;
     esac
     # `omit-surface` builds the fixture WITHOUT the screening signal rather than
     # deleting the row afterwards — a deletion would break the digest chain and
@@ -895,6 +895,71 @@ if "$S1" rank --decision-id DECISION-9999-does-not-exist >"$WORK/r6s1.out" 2>&1;
 else
   ok "RED: an unknown decision id is refused — a ranking over an empty candidate set is satisfiable by anything"
 fi
+# R7: THE SAME PRINCIPLE, ONE STEP LATER — AND THE TOOL USED TO VIOLATE IT.
+# R6 refuses an empty candidate set at the door. Guard 1 can produce one AFTER
+# the door, by excluding every candidate, and S1 then printed an EMPTY ordering
+# section and exited 0 — its own header claiming "0 an ordering was produced".
+# Reproducible on live data at the time this was found:
+#   rank --decision-id DECISION-0009-p3-accept-and-constrain
+# An empty section is not an ordering, and an exit code that says otherwise is a
+# falsified contract. The refusal must still PRINT the exclusions, because guard
+# 1's whole promise is that a refused candidate stays visible with its reason.
+mks1 "$WORK/r7s1" "build-os/metrics/rank-candidates.sh" "" "build-os/tools/authority-envelope.sh"
+if "$S1" rank --decision-id DECISION-9101-s1-fixture --store "$WORK/r7s1/tel.tsv" --snapshots "$WORK/r7s1/snap.tsv" \
+     > "$WORK/r7s1.out" 2>"$WORK/r7s1.err"; then
+  no "RED FAILED: guard 1 refused EVERY candidate and S1 still exited 0, reporting an empty ordering section as an ordering produced"
+else
+  ok "RED: when guard 1 refuses every candidate S1 exits 2 — exit 0 asserts an ordering was produced, and there is none"
+fi
+grep -qF 'ordering: NONE' "$WORK/r7s1.out" \
+  && ok "...and the ordering section says NONE in words, so an empty section cannot be misread as an ordering nobody printed" \
+  || { no "RED FAILED: the ordering section is silently empty rather than stating that no ordering exists"; head -4 "$WORK/r7s1.out" | sed 's/^/      | /'; }
+R7RANKS="$(grep -c '^rank ' "$WORK/r7s1.out" || true)"
+[ "${R7RANKS:-1}" -eq 0 ] \
+  && ok "...and it emits no rank line at all — nothing was ordered, and nothing pretends to have been" \
+  || no "RED FAILED: $R7RANKS rank line(s) survive a run in which every candidate was excluded"
+R7EXCL="$(grep -c '^excluded ' "$WORK/r7s1.out" || true)"
+[ "${R7EXCL:-0}" -eq 2 ] \
+  && ok "...and BOTH refusals are still printed with their reasons — a refusal nobody can read is not a refusal, so exit 2 does not suppress the record" \
+  || no "the whole-set refusal printed ${R7EXCL:-0} of 2 exclusions; the record does not survive the refusal"
+# R8: GUARD 1 FAILED CLOSED ON ABSENCE AND *OPEN* ON SPELLING.
+# `touches()` compared raw strings, so four aliases of the one file guard 1 exists
+# to protect all reached rank 1 while the plain spelling was excluded. A guard a
+# rename of the same path defeats is not a guard. The fourth is not a spelling at
+# all — it is a WILDCARD, which names a set whose members depend on the working
+# tree, and expanding it would screen frozen evidence against the current tree.
+S1SELF="build-os/metrics/rank-candidates.sh"
+R8I=0
+for r8alias in "./$S1SELF" "build-os/metrics/../metrics/rank-candidates.sh" \
+               "build-os//metrics/rank-candidates.sh" "build-os/metrics/*"; do
+  R8I=$((R8I+1))
+  mks1 "$WORK/r8s1$R8I" "$r8alias"
+  "$S1" rank --decision-id DECISION-9101-s1-fixture --store "$WORK/r8s1$R8I/tel.tsv" \
+        --snapshots "$WORK/r8s1$R8I/snap.tsv" > "$WORK/r8s1$R8I.out" 2>&1
+  if grep -q '^excluded PACKET-9101-touches-s1 ' "$WORK/r8s1$R8I.out"; then
+    ok "RED: the alias \"$r8alias\" of S1's own file is EXCLUDED — guard 1 no longer fails open on spelling"
+  else
+    no "RED FAILED: \"$r8alias\" names S1's own code and was RANKED; guard 1 compares raw strings and any alias walks past it"
+  fi
+done
+grep -q '^excluded PACKET-9101-touches-s1 reason=guard1_uninterpretable_surface' "$WORK/r8s1$R8I.out" \
+  && ok "RED: the WILDCARD surface is refused as uninterpretable rather than expanded — S1 will not decide what a candidate writes by looking at the working tree, because that would make frozen evidence mean different things from different directories" \
+  || { no "RED FAILED: a wildcard write surface is not refused as uninterpretable"; grep '^excluded' "$WORK/r8s1$R8I.out" | head -2 | sed 's/^/      | /'; }
+R8WALL=0
+for R8J in 1 2 3 4; do
+  awk '$1=="rank" && $3=="PACKET-9101-touches-nothing"{f=1} END{exit !f}' "$WORK/r8s1$R8J.out" || R8WALL=$((R8WALL+1))
+done
+[ "$R8WALL" -eq 0 ] \
+  && ok "...and in all four runs the innocent neighbour is STILL RANKED — normalising the comparison tightened the guard without turning it into a wall" \
+  || no "$R8WALL of 4 alias runs refused the whole fixture; the guard became a wall rather than a predicate"
+# The other direction, which is the one a conservative normalisation gets wrong:
+# an alias of a path that is NOT protected must still rank.
+mks1 "$WORK/r8neg" "./build-os/memory/residue.md"
+"$S1" rank --decision-id DECISION-9101-s1-fixture --store "$WORK/r8neg/tel.tsv" \
+      --snapshots "$WORK/r8neg/snap.tsv" > "$WORK/r8neg.out" 2>&1
+awk '$1=="rank" && $3=="PACKET-9101-touches-s1"{f=1} END{exit !f}' "$WORK/r8neg.out" \
+  && ok "RED (other direction): a NON-protected path written in the same aliased form is still RANKED — the normaliser resolves spellings, it does not excuse itself by excluding everything" \
+  || no "RED FAILED: normalisation excluded a candidate that touches nothing protected; over-broad in the unsafe direction is still broken"
 
 echo
 echo "==== RESULT: $PASS passed, $FAIL failed ===="

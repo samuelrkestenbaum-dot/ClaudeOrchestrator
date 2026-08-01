@@ -1365,6 +1365,71 @@ not to be fixed outside that packet.**
   residue (vv) warned about is smaller than it looks** — S1 has one usable decision, not four, and
   the missing signal is a screening input nobody knew to freeze. P5 should freeze
   `candidate_write_surface` on every candidate from now on, whether or not S1 is consulted.
+  **[CORRECTED 2026-08-01 by the fix round of `gravito_p4_s1_shadow_ranker_a`] "CANNOT BE REPLAYED"
+  IS TRUE OF THE TOOL AND FALSE OF THE RULE, AND THE ORIGINAL WORDING OVERSTATED THE CLOSURE.** No
+  v1 snapshot carries `candidate_write_surface`, so the TOOL fails closed on all three uniformly —
+  a real limitation, and not an excuse. But **`s1-v1` is hand-evaluable on frozen v1 data authored
+  before S1 existed**, and the reviewer ran it, validating the scorer by first reproducing
+  `DECISION-0010` exactly (`P0027=10, P0029=4, P0030=3, P0031=3, P0028=1`):
+  `DECISION-0008` — `P0019=4 P0021=4 P0022=3 P0020=2`, selected `P0019`, **rank 1 (tied)**;
+  `DECISION-0009` — `P0023=5 P0025=5 P0026=4 P0024=3`, selected `P0023`, **rank 1 (tied)**. With
+  plausible guard-1 exclusions applied (`P0021` reaches `evidence-policy.sh`; `P0025` reaches
+  `authority-envelope.sh`): `DECISION-0008` — `P0019=3 P0022=2 P0020=1`, **rank 1 (sole)**;
+  `DECISION-0009` — `P0023=4 P0026=3 P0024=2`, **rank 1 (sole)**.
+  **TWO CAVEATS, NEITHER OPTIONAL.** (1) Those write surfaces are **RECONSTRUCTED, NOT FROZEN**, so
+  this **must never be entered as snapshots** — doing so would recompute a signal against the
+  current tree, which is the exact defect S1's own `demotion_requirement` names and would evaluate
+  decisions nobody took on information nobody had. It is a hand-check recorded as prose, and that is
+  all it is. (2) **THE ASYMMETRY IS AN OVERFITTING SIGNATURE AND BELONGS BESIDE THE POSITIVE RESULT,
+  NOT UNDER IT: a TIE out-of-sample, a LANDSLIDE in-sample.** On the decision S1 was built against
+  the winner scores 10 to the runner-up's 4; on the two it was not, the selected candidate merely
+  ties for first. Three agreements out of three is the encouraging reading and it is not the honest
+  one.
+
+- **(xxx) THE ONE REAL ORDERING IS DEGENERATE, AND THE MARGIN THAT LOOKS LIKE SIGNAL IS AN ARTEFACT
+  OF RESIDUE LETTERING GRANULARITY. THIS IS THE MOST IMPORTANT THING THE REVIEW OF P4 PRODUCED.**
+  `PACKET-0027` scores **the maximum on all three ranked signals that were frozen**, so it
+  **Pareto-dominates every rival** and no monotone weighting can dethrone it: the reviewer swept
+  **125 of 125 weight combinations** and **every single-signal drop**, and all of them return the
+  same sole winner. The consequence is that **the ordering carries no information beyond "one
+  candidate dominates"** — agreement with the operator on `DECISION-0010` is therefore *very* weak
+  evidence about `s1-v1`, because a rule that ranked at random would agree here too. Worse, the
+  **10-vs-4 margin is a unit artefact, not a measure of value**: `residue_items_closed` counts
+  residue LETTERS, and re-lettering `(hhh)`-`(lll)` as the one re-cut item it actually is collapses
+  the margin from **10-4 to 6-5**; drop the ruling signal as well and **`PACKET-0029` wins**. A
+  signal whose scale is set by how finely somebody happened to letter a markdown list is not a
+  measurement. **Not fixed here — `s1-v2` is a later packet** and re-cutting the signal set inside a
+  bounded fix round is exactly the adjacent tidying that turns three serial stages into four.
+- **(yyy) TWO OF THE THREE RANKED SIGNALS ARE NOT INDEPENDENT OF EACH OTHER, AND ONE OF THEM IS
+  LABEL LEAKAGE.** `residue.md:947-951` is a **single sentence** — it supplies **both**
+  `residue_items_closed=5` (the five re-cut items) **and** `residue_ruling_satisfied=1` (the
+  reviewer's standing ruling naming them). Two signals read off one sentence are one signal counted
+  twice, and `s1-v1` weights them 1 and 1, so the sentence carries **two thirds of the ruling
+  candidate's ranked evidence**. And `residue_ruling_satisfied` is **LABEL LEAKAGE**: the recorded
+  `selection_reason` for `DECISION-0010` is verbatim *"the only candidate a standing ruling names as
+  NEXT rather than as queued"* — the signal is a restatement of the answer, so S1 was partly scoring
+  candidates on the operator's own stated reason for picking one. Agreement obtained that way is not
+  agreement. **Not fixed here, deliberately: the signal set belongs to `s1-v2`.**
+- **(zzz) GUARD 1 SCREENS THE PROMOTION MACHINERY AND NOT THE EVIDENCE SUBSTRATE, AND THE HOLE IS
+  OCCUPIED RIGHT NOW.** `build-os/metrics/record-decision.sh`, `signal_snapshots.tsv`,
+  `decision_telemetry.tsv` and **`build-os/memory/residue.md`** are outside `PROTECTED_SURFACE`,
+  while S1's `promotion_requirement` turns on `rank_of_selected` history, which lives in exactly
+  those files. **Live, not hypothetical: `PACKET-0029` is ranked 2 in the only real ordering S1 has
+  produced, and its frozen write surface includes `build-os/memory/residue.md` — the file
+  `residue_items_closed` is derived from.** **THE SURFACE IS DELIBERATELY NOT WIDENED**: nearly
+  every packet here writes `residue.md`, so protecting it turns guard 1 from a predicate into a
+  wall that refuses almost every candidate, and S1 would then emit no orderings rather than safe
+  ones. The real remedy is to make the evidence substrate **append-only and tamper-evident** — which
+  `record-decision.sh` already is for snapshots and `residue.md` is not — and that is a later
+  packet. Disclosed in the guard 1 header, beside `PROTECTED_SURFACE`, and in
+  `ranker.s1_shadow_ordering`'s registry notes; **not closed**.
+  **A SECOND, SMALLER ALIAS REMAINS OPEN IN THE SAME PREDICATE.** The fix round normalised path
+  spelling (`./`, `//`, `..`) and refuses wildcard surfaces as uninterpretable, but a token naming a
+  **DIRECTORY that CONTAINS a protected file** — `build-os/metrics`, say — still does not touch it,
+  because `touches()` compares whole tokens and `path#object` suffixes only. It was **not fixed in
+  the fix round on purpose**: treating a directory as covering its contents would also make
+  `build-os` cover everything, which changes the live `DECISION-0010` ordering the packet's
+  non-circularity proof is anchored to. It belongs with `s1-v2`.
 
 ---
 _Append-only working notes._
