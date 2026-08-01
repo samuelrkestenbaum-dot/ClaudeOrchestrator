@@ -103,7 +103,10 @@ MUTATION_TYPES="create replace append delete commit lock"
 DEPLOY_MODES="shadow human_confirmed bounded_autonomous autonomous"
 AUTHORITIES="none observe advise rank gate execute"
 IMPL_STATUSES="specified implemented runtime_observed decision_contributing load_bearing"
-EMP_STATUSES="unvalidated red_driven field_observed calibrated refuted"
+# `untested` — added with scan-controls.sh's copy, and for the same reason: the
+# two enums are the same ontology and a mutator whose evidence level this scan
+# refused while the control scan accepted it would be a split vocabulary.
+EMP_STATUSES="untested unvalidated red_driven field_observed calibrated refuted"
 MUT_FIELDS="control_id actor_or_tool trigger read_scope write_scope mutation_type rollback_behavior required_authority runtime_authority deployment_mode implementation_status empirical_status evidence_refs receipt_behavior"
 MUT_OPTIONAL="notes"
 DC_FIELDS="title root_cause_class description detection_signature migration_status"

@@ -44,12 +44,17 @@
 #      `advise`. Two readings exist, they claim different things, and choosing
 #      between them is a governance change rather than a build decision. BOTH
 #      must appear in the tool's own header; NEITHER may be adopted.
-#   8. `untested` IS DECLARED PENDING AND IS NOT IMPLEMENTED. The operator ruled
-#      that `untested` (has not yet produced live output) and `unvalidated` (has
-#      operated, lacks outcome evidence) are meaningfully different. That is the
-#      NEXT packet's decision. Here it is recorded as pending, and it must NOT
-#      appear on the evidence axis, must NOT have a cap row, and must still be
-#      REFUSED by `evidence.derivation_nonvacuity` — proven, not asserted.
+#   8. `untested` IS IMPLEMENTED, AND THE GUARD IT TOUCHED IS INTACT. The
+#      operator ruled that `untested` (has not yet produced live output) and
+#      `unvalidated` (has operated, lacks outcome evidence) are meaningfully
+#      different; `gravito_p2_claim_scoped_evidence_a` put it on the evidence
+#      axis at `observe`. What §18 now pins is the pair of properties that make
+#      that a schema change rather than a loosening: `untested` RESOLVES, and a
+#      token that is still unrecognised is STILL REFUSED by
+#      `evidence.derivation_nonvacuity` at exit 2 — proven, not asserted. It also
+#      pins the cap in the direction that costs: `untested` must not sit above
+#      `unvalidated`, because a token added to make a planned control fit would
+#      have been capped generously and this one was not.
 #
 # No network. Deterministic. Every fixture lives under $WORK; nothing outside it
 # is written. Exits non-zero if any assertion fails.
@@ -651,23 +656,33 @@ grep -qiE 'shadow.*no consequence|conflat|measuring the wrong property' "$HDR" |
   && ok "and NEITHER reading has been adopted in the code: \`shadow\` still caps below \`rank\`, so S1 as declared would still be out of licence" \
   || no "reading 2 has been silently adopted — shadow now licenses rank, which redefines the ladder"
 
-echo "== 18. \`untested\` IS PENDING, DECLARED, AND NOT IMPLEMENTED =="
+echo "== 18. \`untested\` IS IMPLEMENTED, AND THE REFUSAL IT USED TO TRIGGER IS INTACT =="
 # The operator ruled `untested` and `unvalidated` meaningfully different, and
-# ruled that difference to be the NEXT packet's decision. Recording it is in
-# scope; implementing it is not, because adding a token purely to make a planned
-# control fit is the failure the registry exists to prevent.
+# gravito_p2_claim_scoped_evidence_a implemented that ruling. The two properties
+# that make this a schema change rather than a loosening are pinned together,
+# because either one alone is cheap: the token RESOLVES, and an unrecognised
+# token is STILL REFUSED.
 run schema >/dev/null
-grep -qE '^pending: untested ' "$WORK/out.txt" \
-  && ok "\`untested\` is declared as the ONE pending extension, on its own \`pending:\` line" \
-  || { no "the pending extension is not declared where the operator reads it"; dump; }
-grep -qiE '^pending: untested .*(has not yet produced|no live output)' "$WORK/out.txt" \
-  && ok "and the declaration states what \`untested\` would MEAN, so the next packet decides a defined thing" \
-  || { no "the pending line does not define untested against unvalidated"; dump; }
-grep -qE '^EVIDENCE_AXIS=.*untested' "$EPOL" \
-  && no "\`untested\` has been added to EVIDENCE_AXIS — this packet must declare it, not implement it" \
-  || ok "\`untested\` is NOT on the evidence axis: declared, not implemented"
-# ...and the existing Class-A gate must still refuse it, which is the proof that
-# "not implemented" means "refused" and not "silently permitted".
+grep -qE '^resolved: untested ' "$WORK/out.txt" \
+  && ok "\`untested\` is declared RESOLVED, on its own line, where the operator reads the model" \
+  || { no "the resolution is not declared where the operator reads it"; dump; }
+grep -qiE '^resolved: untested .*(has not yet produced|no live output)' "$WORK/out.txt" \
+  && ok "and the line still states what \`untested\` MEANS against \`unvalidated\`, so the distinction survives its implementation" \
+  || { no "the resolved line does not define untested against unvalidated"; dump; }
+grep -qE '^EVIDENCE_AXIS=.*untested:' "$EPOL" \
+  && ok "\`untested\` is ON the evidence axis, with a cap row" \
+  || no "\`untested\` is declared resolved but carries no cap row on EVIDENCE_AXIS"
+# THE CAP IS PINNED IN THE DIRECTION THAT COSTS. A token added to make a planned
+# control fit would have been capped generously. `untested` must not sit above
+# `unvalidated`: "there is no result" is weaker than "nobody checked the result".
+axcap(){ grep -oE '^EVIDENCE_AXIS="[^"]*"' "$EPOL" | sed 's/^EVIDENCE_AXIS="//; s/"$//' | tr ' ' '\n' \
+           | awk -F: -v k="$1" '$1==k{print $2; exit}'; }
+UCAP="$(axcap untested)"
+VCAP="$(axcap unvalidated)"
+{ [ -n "$UCAP" ] && [ "$(rank_of "$UCAP")" -lt "$(rank_of "$VCAP")" ]; } \
+  && ok "\`untested\` caps at \`$UCAP\`, strictly below \`unvalidated\`'s \`$VCAP\` — the ruling was implemented in the direction that costs" \
+  || no "\`untested\` caps at '$UCAP' against \`unvalidated\`'s '$VCAP'; a token capped at or above the level it is weaker than was fitted to a case"
+# ...and it must now RESOLVE rather than take the derivation down.
 {
   printf 'control: pending.untested\n'
   printf 'class: C\n'
@@ -676,12 +691,93 @@ grep -qE '^EVIDENCE_AXIS=.*untested' "$EPOL" \
 } > "$WORK/untested_reg.txt"
 "$EPOL" check --registry "$WORK/untested_reg.txt" --envelopes "$WORK/empty.txt" > "$WORK/u.txt" 2>&1
 RCU="$?"
-[ "$RCU" = "2" ] \
-  && ok "RED: a control declaring \`untested\` is still REFUSED by evidence.derivation_nonvacuity (exit 2), not quietly permitted" \
-  || { no "an \`untested\` token exited $RCU — an unrecognised evidence level fell through"; sed 's/^/      | /' "$WORK/u.txt" | head -6; }
-grep -qF 'untested' "$WORK/u.txt" \
+[ "$RCU" = "0" ] \
+  && ok "a control declaring \`untested\` is now CLASSIFIED rather than refused — the derivation runs" \
+  || { no "an \`untested\` token exited $RCU — it was declared resolved but never capped"; sed 's/^/      | /' "$WORK/u.txt" | head -6; }
+grep -qE 'OUT-OF-LICENCE pending\.untested .*evidence-licensed=observe' "$WORK/u.txt" \
+  && ok "and the S1-shaped declaration (Class C / untested / rank) is named OUT OF LICENCE with the evidence axis capping it at \`observe\`" \
+  || { no "the untested control is not reported out of licence at observe"; sed 's/^/      | /' "$WORK/u.txt" | head -6; }
+# THE GUARD IS INTACT. A token that is STILL unrecognised must still take the
+# whole derivation down, or "recognising one token" was "opening a fall-through".
+{
+  printf 'control: pending.bogus\n'
+  printf 'class: C\n'
+  printf 'empirical_status: probably_fine\n'
+  printf 'runtime_authority: rank\n\n'
+} > "$WORK/bogus_reg.txt"
+"$EPOL" check --registry "$WORK/bogus_reg.txt" --envelopes "$WORK/empty.txt" > "$WORK/b.txt" 2>&1
+RCB="$?"
+[ "$RCB" = "2" ] \
+  && ok "RED: an evidence token nothing has capped is STILL REFUSED at exit 2 — adding \`untested\` opened no fall-through" \
+  || { no "an unrecognised evidence level exited $RCB and fell through"; sed 's/^/      | /' "$WORK/b.txt" | head -6; }
+grep -qF 'probably_fine' "$WORK/b.txt" \
   && ok "and the refusal names the token it has no cap for" \
-  || no "the refusal does not name untested"
+  || no "the refusal does not name the unrecognised token"
+
+# --- THE AXIS THIS TOOL ACTUALLY DERIVES WITH, not just the one it cites ------
+# Everything above this point greps $EPOL. That made §18 structurally blind to
+# its own file: the axis `authority-envelope.sh` composes with is a SECOND,
+# literal copy, and one of the two can be updated alone. It was. The consequence
+# is not theoretical — an evidence token missing from THIS copy makes `axis_cap`
+# return the empty string, `rank_of ""` return -1, and the `[ "$tr" -ge 0 ]`
+# guard drop the strictest token straight out of the minimum, so an over-granted
+# envelope reports WITHIN-LICENCE from inside the tool whose entire job is
+# catching over-grants.
+#
+# THIS IS THE THIRD INSTANCE OF ONE DEFECT CLASS (evidence cap table vs README;
+# deployment axis owner vs its copy; now the evidence axis in this tool), and
+# each earlier fix reconciled one PAIR, after which a new unreconciled pair
+# appeared. So this is written for the CLASS: every literal `<NAME>_AXIS="..."`
+# restatement anywhere under build-os/tools/ must agree token-for-token with
+# `evidence-policy.sh matrix`, the surface every non-restating reader already
+# sources. A tool added tomorrow that restates a fourth axis is covered without
+# anyone remembering to come back here.
+axis_from_matrix(){ "$EPOL" matrix 2>/dev/null \
+  | awk -v n="$1" '$1=="axis:" && $2==n{for(i=3;i<=NF;i++) print $i}' | LC_ALL=C sort; }
+axis_literal(){ grep -hoE "^$2=\"[^\"]*\"" "$1" | sed "s/^$2=\"//; s/\"\$//" \
+  | tr ' ' '\n' | grep -v '^$' | LC_ALL=C sort; }
+
+AE_EV="$(axis_literal "$TOOL" EVIDENCE_AXIS)"
+MX_EV="$(axis_from_matrix evidence)"
+{ [ -n "$AE_EV" ] && [ "$AE_EV" = "$MX_EV" ]; } \
+  && ok "authority-envelope.sh's OWN \`EVIDENCE_AXIS\` matches \`evidence-policy.sh matrix\` token-for-token — the reconciliation this file's header claims exists is now asserted against the tool under test, not only against \$EPOL" \
+  || { no "authority-envelope.sh's EVIDENCE_AXIS has diverged from the matrix; the tool composes envelopes against a copy nobody checks"; \
+       diff <(printf '%s\n' "$AE_EV") <(printf '%s\n' "$MX_EV") | sed 's/^/      | /' | head -12; }
+
+# The same check, swept over the class rather than this instance.
+#
+# THE NON-VACUITY ANCHOR IS A NAME, NOT A COUNT, and deliberately so. A numeric
+# floor here would be a fitted floor — a new member of the `-ge N` family that
+# tests/control_registry_tests.sh §21 requires to be censused, so it would cost a
+# registry entry — and it would be the WEAKER guard anyway: "the sweep found at
+# least three restatements" stays satisfied when the sweep finds three copies of
+# the wrong thing. Requiring the sweep to have examined the one pair we know must
+# exist cannot be satisfied by an accident of arithmetic.
+AXBAD=0; AXSEEN=0; AXPAIRS=""
+for AXF in "$SRC"/build-os/tools/*.sh; do
+  [ "$AXF" = "$EPOL" ] && continue
+  for AXN in $(grep -oE '^[A-Z][A-Z_]*_AXIS="' "$AXF" | sed 's/="$//'); do
+    AXL="$(axis_literal "$AXF" "$AXN")"
+    if [ -z "$AXL" ]; then
+      # An EMPTY assignment is an initialiser, not a restatement — but only if
+      # the file really does source the matrix. Skipping it unconditionally
+      # would be the exemption this whole section exists to refuse.
+      grep -qF 'matrix' "$AXF" || { AXBAD=$((AXBAD+1)); \
+        echo "      | ${AXF#"$SRC"/}: $AXN is empty and the file never reads \`matrix\` — neither a restatement nor a reader"; }
+      continue
+    fi
+    AXSEEN=$((AXSEEN+1)); AXPAIRS="$AXPAIRS
+${AXF#"$SRC"/}:$AXN"
+    AXM="$(axis_from_matrix "$(printf '%s' "${AXN%_AXIS}" | tr 'A-Z' 'a-z')")"
+    [ "$AXL" = "$AXM" ] || { AXBAD=$((AXBAD+1)); \
+      echo "      | ${AXF#"$SRC"/}: $AXN differs from \`evidence-policy.sh matrix\`'s $(printf '%s' "${AXN%_AXIS}" | tr 'A-Z' 'a-z') axis"; \
+      diff <(printf '%s\n' "$AXL") <(printf '%s\n' "$AXM") | sed 's/^/      |   /' | head -8; }
+  done
+done
+{ printf '%s\n' "$AXPAIRS" | grep -qxF 'build-os/tools/authority-envelope.sh:EVIDENCE_AXIS' \
+  && [ "$AXBAD" -eq 0 ]; } \
+  && ok "and the CLASS is covered, not just the instance: all $AXSEEN literal \`*_AXIS\` restatements under build-os/tools/ reconcile against the matrix, the diverged pair among them" \
+  || no "$AXBAD of $AXSEEN literal \`*_AXIS\` restatements disagree with the matrix, or the sweep never reached authority-envelope.sh:EVIDENCE_AXIS — the pair that actually diverged"
 
 echo "== 19. Usage errors refuse rather than guessing =="
 RC="$(run)";              [ "$RC" = "2" ] && ok "no command is REFUSED (exit 2)"        || { no "no command exited $RC"; dump; }

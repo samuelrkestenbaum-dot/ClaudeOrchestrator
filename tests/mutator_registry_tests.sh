@@ -130,6 +130,7 @@ done
 MUT_EXCL="$WORK/mut_excluded.txt"
 cat > "$MUT_EXCL" <<'EOF'
 build-os/tools/authority-envelope.sh
+build-os/tools/claim-evidence.sh
 EOF
 ( cd "$SRC" && grep -rlnE 'renameSync|writeFileSync\(|copyFileSync|appendFileSync|git -C "\$[A-Za-z_]+" commit|>>[[:space:]]*"\$[A-Za-z_]+"|mkdir[[:space:]]+"\$[A-Za-z_]+"' \
     build-os/maintenance build-os/tools build-os/metrics .claude/hooks 2>/dev/null \
@@ -155,7 +156,7 @@ while IFS= read -r ex; do
   grep -qF "$ex" "$MUTREG" || { MEXBAD=$((MEXBAD+1)); echo "      | exclusion is not justified in the census: $ex"; }
 done < "$MUT_EXCL"
 [ "$MEXBAD" -eq 0 ] \
-  && ok "the scan's one exclusion matches a real module AND states its reason in the census" \
+  && ok "every scan exclusion matches a real module AND states its reason in the census" \
   || no "$MEXBAD exclusion problem(s)"
 
 echo "== 2. Every registered mutator has a stable id, and every id is well-formed (4.7.2) =="

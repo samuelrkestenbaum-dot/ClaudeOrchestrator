@@ -45,6 +45,36 @@
 #
 # THE EVIDENCE AXIS, EACH LEVEL WITH ITS REASON:
 #
+#   untested        -> observe  IT HAS NEVER OPERATED against a live or
+#                               representative task. THE LOWEST CAP THAT IS
+#                               STILL A LEGAL DESTINATION: the output may be
+#                               recorded for visibility and may cause NO
+#                               operational consequence. `none` would be wrong
+#                               — `none` means nothing consumes it at all, and a
+#                               check that runs and is read but may act on
+#                               nothing is exactly `observe`. It sits BELOW
+#                               `unvalidated` because the two are genuinely
+#                               different and the operator ruled them so:
+#                               `unvalidated` has OPERATED and the outcome
+#                               evidence is inadequate, while `untested` has not
+#                               run. "Nobody checked the result" and "there is
+#                               no result" are not the same claim, and the
+#                               second is weaker.
+#                               ADDING THIS TOKEN DID NOT WEAKEN THE GUARD BELOW,
+#                               AND THAT IS THE WHOLE POINT OF HOW IT WAS ADDED.
+#                               `evidence.derivation_nonvacuity` still exits 2 on
+#                               an evidence token nothing has capped; what
+#                               changed is that `untested` stopped being one of
+#                               those tokens, and it arrived WITH the most
+#                               conservative cap available rather than with a
+#                               convenient one. A token added so a planned
+#                               control fits at the authority it wanted would
+#                               have been the failure the registry exists to
+#                               prevent — so note what this cap does to the
+#                               sanctioned S1 declaration (`heuristic_policy` /
+#                               `untested` / `rank` / `shadow`): it makes S1
+#                               MORE out of licence, not less. That is the test
+#                               of whether the token was fitted to the case.
 #   calibrated      -> gate     thresholds derived from a measured distribution.
 #   field_observed  -> gate     it has fired on a real defect nobody planted.
 #   red_driven      -> gate     it has been shown to fire on a synthetic defect.
@@ -225,11 +255,21 @@
 # licence. The full statement lives in authority-envelope.sh's header and in
 # README §3b. The operator decides.
 #
-# `untested` IS DECLARED PENDING AND IS NOT IMPLEMENTED. It is deliberately NOT
-# on EVIDENCE_AXIS below, has no cap row, and a control carrying it is REFUSED at
-# exit 2 by `evidence.derivation_nonvacuity` — an unrecognised evidence level
-# must never fall through to permissive, and adding a token so that a planned
-# control fits is the failure the registry exists to prevent.
+# `untested` IS IMPLEMENTED, AT `observe`, AND THE GUARD IT TOUCHES IS INTACT.
+# It was declared pending here for two packets and is now on EVIDENCE_AXIS with
+# a cap row (see the axis above for why `observe` and why below `unvalidated`).
+# WHAT DID NOT CHANGE: `evidence.derivation_nonvacuity` still REFUSES at exit 2
+# any `empirical_status` token this matrix has no cap for. Recognising one token
+# is the opposite of opening a fall-through — the refusal path is untouched and
+# tests/claim_evidence_tests.sh section 4 drives it with a token that is still
+# unrecognised, in the same run that proves `untested` now resolves.
+# THE CLAIM-SCOPED STORE IS WHERE THE INTERESTING CASE LIVES. A control can be
+# refuted for one claim and supported for another; one token cannot say both.
+# build-os/registry/evidence_assertions.txt records the claims, and
+# build-os/tools/claim-evidence.sh projects them back onto this field as a
+# COMPOSITE that never drops a contradiction. That projection SOURCES its caps
+# from this file's `matrix` output rather than restating them — one schema, one
+# parser — and it composes by MINIMUM, so nothing it reports can raise a licence.
 #
 # THE OUT-OF-LICENCE SET IS DERIVED ON EVERY RUN, from the registry, and is
 # stored nowhere. No control id appears in this file. A hand-maintained list
@@ -270,7 +310,7 @@ CLASS_AXIS="A:gate B:rank C:advise D:observe R:observe"
 # the suite reconciles them against scan-controls.sh's EMP_STATUSES and against
 # the tokens occurring in the registry, so a level fitted to a hypothetical
 # census cannot be added here quietly.
-EVIDENCE_AXIS="unvalidated:advise red_driven:gate field_observed:gate calibrated:gate refuted:observe"
+EVIDENCE_AXIS="untested:observe unvalidated:advise red_driven:gate field_observed:gate calibrated:gate refuted:observe"
 # THE DEPLOYMENT AXIS is owned by build-os/tools/authority-envelope.sh and copied
 # here the way the class axis is copied from README §3. The suites reconcile the
 # two, so this cannot quietly restate the third axis differently. A control with
@@ -294,7 +334,7 @@ CMD="${1:-}"
 [ $# -gt 0 ] && shift
 case "$CMD" in
   matrix|check) ;;
-  -h|--help|help) sed -n '2,230p' "${BASH_SOURCE[0]}"; exit 0 ;;
+  -h|--help|help) sed -n '2,292p' "${BASH_SOURCE[0]}"; exit 0 ;;
   "") refuse "no command — expected one of: matrix, check" ;;
   *)  refuse "unknown command \"$CMD\" — expected one of: matrix, check" ;;
 esac
@@ -304,7 +344,7 @@ while [ $# -gt 0 ]; do
     --repo)     [ $# -ge 2 ] || refuse "--repo needs a value";     REPO="$2"; shift 2 ;;
     --registry) [ $# -ge 2 ] || refuse "--registry needs a value"; REGISTRY="$2"; shift 2 ;;
     --envelopes) [ $# -ge 2 ] || refuse "--envelopes needs a value"; ENVELOPES="$2"; shift 2 ;;
-    -h|--help)  sed -n '2,230p' "${BASH_SOURCE[0]}"; exit 0 ;;
+    -h|--help)  sed -n '2,292p' "${BASH_SOURCE[0]}"; exit 0 ;;
     *) refuse "unknown option \"$1\"" ;;
   esac
 done
@@ -325,7 +365,7 @@ if [ "$CMD" = "matrix" ]; then
   printf 'authority: this matrix ADVISES. check exits 0 whatever it finds. Demoting a control is a governance action for the operator, not something this performs.\n'
   for c in A B C D R; do
     ccap="$(axis_cap "$CLASS_AXIS" "$c")"
-    for e in unvalidated red_driven field_observed calibrated refuted; do
+    for e in untested unvalidated red_driven field_observed calibrated refuted; do
       ecap="$(axis_cap "$EVIDENCE_AXIS" "$e")"
       cr="$(rank_of "$ccap")"; er="$(rank_of "$ecap")"
       lr="$cr"; [ "$er" -lt "$cr" ] && lr="$er"

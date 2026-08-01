@@ -14,7 +14,7 @@ control is a governance action and belongs to the operator.
 
 ## Three numbers, each with its derivation
 
-1. **11 of 90 classified controls gate on `unvalidated` evidence.** Eleven
+1. **11 of 93 classified controls gate on `unvalidated` evidence.** Eleven
    controls can stop the build and nothing has established that any of them
    discriminates — no measurement, no red drive, no field observation. This is
    the sharpest number in the census and the one to read first.
@@ -72,11 +72,11 @@ the control as `UNREPORTED`.
 | `swarm.disjointness` | C | gate | advise | `build-os/tools/swarm-merge.sh:381` | 1 |
 | `swarm.hot_file_reservation` | C | gate | advise | `build-os/tools/swarm-merge.sh:311` | 3 |
 | `maint.tripwire_coverage_scan` | C | gate | advise | `build-os/maintenance/real-memory-tripwire.mjs:447` | 1 |
-| `tests.stdin_scan_nonvacuity` | C | gate | advise | `tests/build_os_tests.sh:962` | 1 |
+| `tests.stdin_scan_nonvacuity` | C | gate | advise | `tests/build_os_tests.sh:963` | 1 |
 | `tests.nonvacuity_minimums` | C | gate | advise | `tests/entitlement_tests.sh:126` (+33 more, §10) | 34 |
 | `tools.handoff_timeouts` | C | gate | advise | `build-os/tools/specialist-handoff.sh:151` | 3 |
 | `tools.supervise_timeout` | C | gate | advise | `build-os/tools/supervise.sh:49` | 2 |
-| `registry.discovery_rule` | C | gate | advise | `build-os/registry/scan-controls.sh:397` | 2 |
+| `registry.discovery_rule` | C | gate | advise | `build-os/registry/scan-controls.sh:403` | 2 |
 | `bandwidth.active_packet_singleton` | C | gate | advise | `build-os/tools/bandwidth-check.sh:136` | 1 |
 | `maint.rotation_live_file_replacement` | A | execute | gate | `build-os/maintenance/rotate-memory.mjs:1006` | 1 |
 | `swarm.merge_commit_execution` | A | execute | gate | `build-os/tools/swarm-merge.sh:586` | 1 |
@@ -426,7 +426,7 @@ consumed for visibility and sit there — but the fifth-outcome point survives t
 fix and is why it is kept: the framework offered four outcomes and one of them
 was unavailable to five-sixths of the census for definitional reasons nobody had
 noticed. The qualifier matters and an earlier
-draft dropped it: `gate` -> `advise` remains perfectly spellable — 13 of 90 sit
+draft dropped it: `gate` -> `advise` remains perfectly spellable — 14 of 93 sit
 at `advise` today — and it is the demotion this packet actually measured.
 `maint.tripwire_coverage_scan` closed "demote" because demoting it was measured
 to destroy the tree, not because the row was unwritable. A framework whose first outcome is unavailable for five-sixths of its
@@ -444,8 +444,8 @@ packet.
 
 ## 9. `tests.stdin_scan_nonvacuity`
 
-**Gates at** `tests/build_os_tests.sh:962`. **Threshold** `PIN_MIN_SITES=10`
-(`:940`, tested at `:962`).
+**Gates at** `tests/build_os_tests.sh:963`. **Threshold** `PIN_MIN_SITES=10`
+(`:941`, tested at `:963`).
 
 "The scanner must not be blind" is Class A. `10` is the number of hook-invocation
 sites that existed the day it was written. Legitimately deleting two of them
@@ -603,7 +603,7 @@ than curated.
 
 ## 13. `registry.discovery_rule` — this packet's own guard
 
-**Gates at** `build-os/registry/scan-controls.sh:397` (an unregistered surface is
+**Gates at** `build-os/registry/scan-controls.sh:403` (an unregistered surface is
 a violation) and `:454` (`exit 2`).
 **The heuristic** is three directories (`:126`) and five refusal patterns
 (`:129`).
@@ -712,7 +712,7 @@ one mutating file without any of them being the mutation.
 **The registry already names the world-changing role.** `nervous_system_role:
 motor` — *"it changes the world"* — was carried by exactly **2 of 81** entries
 when this section was written. The mutation census (§17) added six more, so it is
-now **8 of 90** (against 41 `immune`, 28 `reflex`, 6 `conscience`, 6 `sensor`, 1
+now **8 of 93** (against 42 `immune`, 29 `reflex`, 7 `conscience`, 6 `sensor`, 1
 `memory`). The two originals are the table below; that this role was almost
 unused is the observation the section was making, and the census is what changed
 it:
@@ -832,7 +832,7 @@ and each one classifies a refusal that runs **before** the append.
 that applies it.
 
 **Why they are in this file at all.** `execute` is a rung, not a licence. **No
-class licenses it** — README §3's table is untouched and **0 of its 25 cells**
+class licenses it** — README §3's table is untouched and **0 of its 30 cells**
 reach the rung — so a control that performs a durable write exceeds its licence
 *by construction*. That is what these six rows record. **It is not a grant.**
 Nothing was re-authorised to make them legal, and nothing here proposes that

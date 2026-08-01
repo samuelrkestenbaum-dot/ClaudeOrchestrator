@@ -77,7 +77,7 @@ trap 'rm -rf "$WORK"' EXIT
 # the README (class) and against the live registry (evidence), so this
 # duplication is a third opinion and not the only one.
 CLASSES="A B C D R"
-EVIDENCE="unvalidated red_driven field_observed calibrated refuted"
+EVIDENCE="untested unvalidated red_driven field_observed calibrated refuted"
 LADDER="none observe advise rank gate execute"
 NCELL=0
 for _c in $CLASSES; do for _e in $EVIDENCE; do NCELL=$((NCELL+1)); done; done

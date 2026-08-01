@@ -1,0 +1,149 @@
+# Build OS — claim-scoped evidence assertions.
+#
+# One record per EVIDENCE ASSERTION: one subject, one claim, one scope, one
+# verdict. One field per line; a blank line separates records; `#` at column 0
+# is a comment. The format is control_registry.txt's on purpose — the same
+# parser habits read it, the same greps work on it.
+#
+# WHY THIS FILE HAD TO EXIST, AND IT IS NOT A REFACTOR.
+# control_registry.txt carries ONE `empirical_status` token per control, and
+# that token was read as a statement ABOUT THE CONTROL. The
+# `gravito_mismatch_refuted_a` experiment measured the case where that reading
+# is false:
+#
+#   maint.tripwire_coverage_scan
+#     claim A  detects uncovered behaviour under bare `node --test`
+#              -> REFUTED
+#     claim B  prevents destructive maintenance mutation under the sanctioned
+#              maintenance invocation
+#              -> SUPPORTED
+#
+# Both are true. They are claims about different behaviours in different
+# invocation paths, and ONE TOKEN CANNOT SAY BOTH. Reasoning from the bare token
+# — "it is refuted, so demote it" — nearly produced a demotion that the
+# COVERAGE-GATE-PREVENTION-DIFFERENTIAL measured to DESTROY LIVE MEMORY. So
+# evidence stops being a property of a control and becomes an ASSERTION about a
+# NAMED CLAIM IN A NAMED SCOPE, and a subject may carry as many concurrent
+# assertions as it has claims.
+#
+# WHY NOT WIDEN control_registry.txt. Its field list is CLOSED: scan-controls.sh
+# refuses the whole file on an unknown field name, and its "every field present"
+# check would fail all 93 existing entries the moment a field were added. More
+# importantly the shape is wrong — one control has ONE stanza there and MANY
+# assertions here, so this is a different cardinality, not a longer record. This
+# store is keyed by its own stable id and joined to the census by `subject_id`,
+# and the control registry is not widened by one byte.
+#
+# THE RECORD KEY IS THE STABLE ID. `evidence: EV-0001-…` — the key IS the
+# `evidence_id`, and there is deliberately no second field repeating it. Storing
+# the same truth twice is itself a registered defect class
+# (DEFECT-0003-duplicate-semantic-truth), and a store that commits the defect it
+# records is not worth reading.
+#
+# `scope` IS REQUIRED AND HAS NO DEFAULT. A scopeless claim is precisely the
+# unscoped token this file replaces, so `scope: n/a`, `scope: none`,
+# `scope: unknown`, `scope: any` and `scope: all` are REFUSED alongside an empty
+# one. A default here would reintroduce the defect under a new field name.
+#
+# `artifact_refs` ARE NAVIGATION HINTS, NOT IDENTITY. They may be `path:line`
+# and they may go stale; nothing anywhere is identified by them. Identity is the
+# `EV-NNNN` key, and `supersedes` is the only reference between records.
+#
+# WHAT THIS STORE DOES NOT CLAIM, named rather than implied away. It takes every
+# field AT THE AUTHOR'S WORD, exactly as evidence-policy.sh takes
+# `empirical_status`. Nothing re-runs a `fixture`, checks that an
+# `observed_result` was ever observed, or notices an assertion going stale
+# against the `valid_until` it declares. A `valid_until` that has passed is not
+# enforced anywhere today; it is recorded so that a later packet can enforce it,
+# and saying otherwise would be the overclaim this file exists to prevent.
+#
+# IT RE-AUTHORISES NOTHING. It is read by `claim-evidence.sh project`, which
+# ADVISES: it composes `MIN(L_class, L_registry_evidence, L_assertion_evidence)`
+# and therefore can only LOWER a licence, never raise one. No control's `class`,
+# `runtime_authority`, `authority_mismatch` or `empirical_status` is changed by
+# anything here.
+#
+#   grep -c '^evidence: '                        how many assertions exist
+#   grep -B3 '^status: refuted'                  what has been contradicted
+#   awk -F': ' '/^subject_id: /{print $2}' … | sort | uniq -d
+#                                                which subjects carry several
+
+# =============================================================================
+# THE CANONICAL FIXTURE — the pair that forced this file into existence. TWO
+# ASSERTIONS, ONE SUBJECT, OPPOSED VERDICTS, AND NEITHER COLLAPSES THE OTHER.
+# The control's own registry entry still reads `empirical_status:
+# red_driven,refuted` and is UNTOUCHED; these records say what that token cannot.
+# =============================================================================
+
+evidence: EV-0001-tripwire-coverage-detection-bare-node
+subject_id: maint.tripwire_coverage_scan
+claim_id: CLAIM-0001-coverage-detection
+claim_text: the coverage scan DETECTS a suite file that does not request the real-memory tripwire before it runs
+status: refuted
+scope: the bare `node --test` invocation path — a test file run directly, with no preload and no wrapper, which is how a developer runs one file
+substrate: node ESM module load, build-os/maintenance/real-memory-tripwire.mjs
+invocation_path: node --test <file>, with no --import of the tripwire and no run-tests.sh wrapper
+method: source inspection of the documented defeat, confirmed by the module's own header, which prints the one-line source shape that beats the mask
+fixture: two regexes in division position, blanking the span that holds a real import — the exact shape maint.source_scan_mask names as its own defeat
+observed_result: the scan reports NO finding for a file that does carry a real, hidden import; under bare `node --test` nothing preloads the tripwire, so the scan that would have found it never runs at all
+interpretation: the DETECTION claim is contradicted in this scope. The mask is a defeatable heuristic and the module's own header says so, calling itself "a convenience check, not a boundary"
+limitations: EVADABILITY IS NOT NON-DISCRIMINATION. The defect this control exists against was an ACCIDENT — a suite file that carried no tripwire and destroyed live memory at exit 0 — and against that accident it discriminates exactly. This assertion refutes the claim against a HOSTILE author, not against the accident.
+created_at: 2026-08-01
+created_by: gravito_mismatch_refuted_a
+reviewed_by: operator, in the step-3 ruling that named this control the first candidate
+valid_from: 2026-08-01
+valid_until: open — this claim is refuted until the mask stops being defeatable, and its own promotion_requirement forbids writing another mask heuristic
+artifact_refs: build-os/maintenance/real-memory-tripwire.mjs; build-os/registry/MISMATCHES.md; build-os/registry/control_registry.txt
+supersedes: none
+
+evidence: EV-0002-tripwire-coverage-prevention-sanctioned
+subject_id: maint.tripwire_coverage_scan
+claim_id: CLAIM-0002-destructive-mutation-prevention
+claim_text: the coverage scan PREVENTS a destructive maintenance mutation by throwing at module load, before any suite file in the directory runs
+status: supported
+scope: the sanctioned maintenance invocation ONLY — run-tests.sh under the tripwire preload, where the throw aborts every suite file in the directory by name. It licenses NOTHING about any other path and NOTHING about the detection claim.
+substrate: node ESM module load under the maintenance preload, build-os/maintenance/real-memory-tripwire.mjs
+invocation_path: ./build-os/maintenance/run-tests.sh, which preloads the tripwire so the coverage throw aborts the run before a suite file executes
+method: a two-arm differential, the arms differing ONLY in whether the coverage finding throws or is printed
+fixture: COVERAGE-GATE-PREVENTION-DIFFERENTIAL, in tests/build_os_maintenance_tests.sh section 6a — an uncovered suite file that rewrites real memory, run once gated and once demoted
+observed_result: GATED ARM — exit 1, tree UNTOUCHED. DEMOTED ARM — exit 1, tree DESTROYED: the live memory file is rewritten. THE EXIT CODE IS 1 IN BOTH ARMS, so nothing watching exit codes can tell the two apart.
+interpretation: in this scope the control's consequence is PREVENTION and not detection-after-the-fact, and the obvious demotion — collect the findings and print them — converts the maintenance layer's only prevention into a report filed after the damage. That is why the demotion was measured and REFUSED rather than left open.
+limitations: SCOPE-BOUND AND NOT A CLEAN BILL OF HEALTH. It supports the PREVENTION claim on the SANCTIONED path and says nothing about the detection claim, which EV-0001 refutes, and nothing about any other invocation path. Prevention here is a property of the THROW, not of the scan's accuracy: the same throw would prevent the same mutation on a scan that found the file by accident. n=1 fixture, authored by the same layer it measures.
+created_at: 2026-08-01
+created_by: gravito_mismatch_refuted_a
+reviewed_by: operator, in the step-3 ruling that closed the demotion
+valid_from: 2026-08-01
+valid_until: open — it lapses the day prevention is supplied elsewhere and the demotion_requirement is satisfiable
+artifact_refs: tests/build_os_maintenance_tests.sh; build-os/maintenance/real-memory-tripwire.mjs; build-os/maintenance/run-tests.sh
+supersedes: none
+
+# =============================================================================
+# THE FIRST `untested` ASSERTION. `untested` means the claim has NEVER OPERATED
+# against a live or representative task — which is strictly weaker than
+# `unvalidated`, where it has operated and the outcome evidence is inadequate.
+# Recorded here so the token has a live occupant rather than only a cap row.
+# THE SUBJECT'S REGISTRY ENTRY IS NOT TOUCHED: it still reads
+# `empirical_status: unvalidated`, which is a claim about the control, while
+# this is a claim about ONE behaviour of it that nothing has ever exercised.
+# =============================================================================
+
+evidence: EV-0003-handoff-lock-stale-reclaim-untested
+subject_id: tools.handoff_lock_lifecycle
+claim_id: CLAIM-0003-stale-lock-reclaim
+claim_text: the staleness rule reclaims a lock left behind by a crashed holder, so a crash does not wedge every later handoff
+status: untested
+scope: concurrent contention on the global handoff lock at $HANDOFF_LOCK, with a holder that died without releasing — the only situation the staleness rule exists for
+substrate: bash, build-os/tools/specialist-handoff.sh, a lock directory and pid file OUTSIDE this repository
+invocation_path: two or more specialist-handoff.sh detect/handoff routes racing for the same lock while a prior holder's pid is gone
+method: none has been applied
+fixture: none exists
+observed_result: NOTHING HAS BEEN OBSERVED. No test in this repository races two handoffs, kills a holder, or advances a clock past HANDOFF_LOCK_STALE, and the durable trace this path would leave is an appended line in $HANDOFF_LOG, outside the repository, where no reviewer of this repository will ever see it.
+interpretation: the claim has never operated against a live or representative task. That is `untested` and NOT `unvalidated`: nothing ran and produced inadequate evidence — nothing ran.
+limitations: this assertion is the ABSENCE of a measurement and must not be read as a negative result. It does not say the staleness rule is broken; it says nobody has exercised it, which is a different and cheaper thing to fix.
+created_at: 2026-08-01
+created_by: gravito_p2_claim_scoped_evidence_a
+reviewed_by: none — this is a declaration of absence and there is no result to review
+valid_from: 2026-08-01
+valid_until: open — it lapses the first time anything exercises the reclaim path
+artifact_refs: build-os/tools/specialist-handoff.sh; build-os/registry/mutator_registry.txt
+supersedes: none

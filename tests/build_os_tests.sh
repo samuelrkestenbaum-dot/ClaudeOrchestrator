@@ -850,6 +850,7 @@ chain_suite "tests/bandwidth_tests.sh"            "work-in-flight capacity ceili
 chain_suite "tests/evidence_policy_tests.sh"      "the evidence-policy matrix: class x empirical_status -> licensed authority"
 chain_suite "tests/authority_envelope_tests.sh"   "the authority envelope: who granted what, in which deployment mode, until when"
 chain_suite "tests/mutator_registry_tests.sh"     "the mutator census, stable ids, defect recurrence, decision telemetry and frozen signal snapshots"
+chain_suite "tests/claim_evidence_tests.sh"       "claim-scoped evidence: many claims per control, and the legacy projection that cannot flatter"
 
 # A chained suite that is added to the repo but never wired here would be
 # discoverable-only — the exact defect chaining exists to prevent. Assert the

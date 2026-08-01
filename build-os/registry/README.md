@@ -41,7 +41,7 @@ That buys the same four properties the TSV was chosen for, at this shape:
 - **Greppable without a parser.** `grep '^class: C' control_registry.txt` counts
   the heuristics. `grep -B4 '^runtime_authority: gate'` finds what gates.
   `grep -c '^control: '` is the census size. The number worth reading first is
-  **`gate` on `unvalidated` evidence — 11 of 90**: eleven controls can stop the
+  **`gate` on `unvalidated` evidence — 11 of 93**: eleven controls can stop the
   build and nothing has established that any of them discriminates. The one-line
   `awk` that derives it is in `control_registry.txt`'s header.
 - **Diffable at field granularity.** Changing one control's authority is a
@@ -203,7 +203,7 @@ its mismatch at exit 0, silently, while the report went on naming it.
 **An entry is not a line.** Entries are cut at different granularities:
 `metrics.record.note_minimum` classifies one comparison, and
 `tests.nonvacuity_minimums` classifies a family of 34 fitted constants across 12
-test files. So "20 of 90 declare a mismatch" is a fact about this file's
+test files. So "20 of 93 declare a mismatch" is a fact about this file's
 granularity, not a count of the heuristics that can stop a build — that number is
 **56**, in `MISMATCHES.md`'s summary table. The family's membership is not
 trusted: `tests/control_registry_tests.sh` §21 rescans the tree for the shape and
@@ -233,6 +233,7 @@ and call the difference policy.
 | `red_driven` | `gate` | it has been shown to fire on a synthetic defect. |
 | `unvalidated` | `advise` | nothing has established that it discriminates. |
 | `refuted` | `observe` | it was measured and found **not** to discriminate. |
+| `untested` | `observe` | it has **never operated** against a live or representative task. |
 
 **The composition rule, stated explicitly:**
 
@@ -246,13 +247,13 @@ broken check work, and a working check does not make a chosen threshold an
 invariant. Either failing is disqualifying on its own, and the minimum is what
 that looks like arithmetically. The composed table:
 
-| class \ evidence | `calibrated` | `field_observed` | `red_driven` | `unvalidated` | `refuted` |
-|---|---|---|---|---|---|
-| `A` hard invariant | `gate` | `gate` | `gate` | `advise` | `observe` |
-| `B` deterministic metric | `rank` | `rank` | `rank` | `advise` | `observe` |
-| `C` heuristic policy | `advise` | `advise` | `advise` | `advise` | `observe` |
-| `D` learned model | `observe` | `observe` | `observe` | `observe` | `observe` |
-| `R` research functional | `observe` | `observe` | `observe` | `observe` | `observe` |
+| class \ evidence | `calibrated` | `field_observed` | `red_driven` | `unvalidated` | `refuted` | `untested` |
+|---|---|---|---|---|---|---|
+| `A` hard invariant | `gate` | `gate` | `gate` | `advise` | `observe` | `observe` |
+| `B` deterministic metric | `rank` | `rank` | `rank` | `advise` | `observe` | `observe` |
+| `C` heuristic policy | `advise` | `advise` | `advise` | `advise` | `observe` | `observe` |
+| `D` learned model | `observe` | `observe` | `observe` | `observe` | `observe` | `observe` |
+| `R` research functional | `observe` | `observe` | `observe` | `observe` | `observe` | `observe` |
 
 **A comma-composite `empirical_status` resolves by MINIMUM** — the weakest
 component governs. That is conservative in general, and in the one case that
@@ -263,8 +264,21 @@ red-drove once, so it is fine" — is how a measurement that found nothing gets
 outvoted by the measurement that corrected it. So `red_driven,refuted` licenses
 exactly what bare `refuted` licenses.
 
-Three of those rows carry the argument:
+Four of those rows carry the argument:
 
+- **`untested` caps at `observe`, below `unvalidated`.** The two are genuinely
+  different and the difference is not a nuance: `unvalidated` has **operated**
+  and its outcome evidence is inadequate, while `untested` **has never run**.
+  "Nobody checked the result" and "there is no result" are separate claims, and
+  the second is weaker, so it caps lower. `observe` and not `none`, because
+  `none` means nothing consumes the output at all, whereas a check that runs and
+  is read while being allowed to cause nothing is exactly what `observe` was
+  redefined to mean. **Adding this token widened the axis and granted nobody
+  anything** — no control in the census carries it, the composed table above
+  gains a column of `observe`, and the unknown-token refusal is untouched. The
+  test of whether it was fitted to a case rather than to the ontology is what it
+  does to **S1**, which is slated to arrive carrying it: it makes S1 **more** out
+  of licence, not less.
 - **`refuted` may not `gate`, regardless of class.** This is the sharp rule, and
   the only one here that resolves a real defect *mechanically* rather than by
   judgement. A control empirically shown not to discriminate cannot license a
@@ -307,11 +321,11 @@ Three of those rows carry the argument:
   `empirical_status` at the author's word.
 
   **The consequentialist half, derived rather than remembered.** Capping
-  `red_driven` at `advise` would put **77 of 90 controls out of licence in a
-  single edit — 52 of them newly**, on top of the 25 already named below. A
+  `red_driven` at `advise` would put **79 of 93 controls out of licence in a
+  single edit — 54 of them newly**, on top of the 25 already named below. A
   matrix that flags nearly everything discriminates nothing. (For scale, and not
-  to be confused with it: **64** is the number of controls whose
-  `empirical_status` is exactly `red_driven`, and **68** the number whose status
+  to be confused with it: **67** is the number of controls whose
+  `empirical_status` is exactly `red_driven`, and **71** the number whose status
   *contains* it — the second is the figure CROSSWALK.md uses, for a different
   question.)
 
@@ -353,7 +367,7 @@ build-os/tools/evidence-policy.sh matrix   # the two axes and the composed grid
 build-os/tools/evidence-policy.sh check    # the out-of-licence list; always exit 0
 ```
 
-- **25 of 90 controls are out of licence** under the composed matrix.
+- **25 of 93 controls are out of licence** under the composed matrix.
 - **20** of those the class axis already saw — they are exactly the 20 carrying
   `authority_mismatch: declared`, so the new axis reproduces the old finding
   rather than replacing it.
@@ -386,23 +400,32 @@ around and expensive to retrofit.
    loop. A control arriving at `rank` with no evidence is precisely the case the
    rule was written to catch, so the matrix will name S1 the first time it runs
    against it. That is the rule working, not the rule mis-firing.
-2. **Worse: `untested` is not one of the five evidence tokens.** The ontology
-   carries `unvalidated`, `red_driven`, `field_observed`, `calibrated`,
-   `refuted`, and nothing else. A stanza carrying `untested` is **unclassifiable**
-   — so `evidence.derivation_nonvacuity` (Class A, `gate`) would **refuse the
-   entire derivation at exit 2** rather than flag S1, and the matrix would report
-   nothing at all about *any* control until the token was reconciled. That is
-   deliberate and it is not a bug: an unrecognised evidence level must never fall
-   through to permissive. But it means a single unrecognised token takes the whole
-   report down, which is worth knowing *before* it happens rather than after.
+2. **`untested` was not one of the evidence tokens — and now it is.**
+   **RESOLVED by `gravito_p2_claim_scoped_evidence_a`, and resolved in the
+   direction that costs.** Before that packet the ontology carried
+   `unvalidated`, `red_driven`, `field_observed`, `calibrated` and `refuted` and
+   nothing else, so a stanza carrying `untested` was **unclassifiable** and
+   `evidence.derivation_nonvacuity` (Class A, `gate`) refused **the entire
+   derivation at exit 2** rather than flagging S1 — deliberately, because an
+   unrecognised evidence level must never fall through to permissive.
 
-**This is not resolved here, and resolving it is not this section's call.** The
-two available moves — *add `untested` as a sixth token with its own cap*, or
-*have S1 arrive carrying `unvalidated`, which is what "nobody has checked it yet"
-already means here* — differ in what they claim about the ontology, and choosing
-between them is a governance action for the operator. Adding a token to make a
-planned control fit would be fitting the rule to the case; that is exactly the
-move this axis exists to make visible, so it is named and left open.
+   The two available moves were *add `untested` as a sixth token with its own
+   cap* or *have S1 arrive carrying `unvalidated`*. **The first was taken**,
+   because the operator had already ruled the two meaningfully different and
+   because the claim-scoped evidence store needed a way to record a claim that
+   has never operated — `EV-0003-handoff-lock-stale-reclaim-untested` is one, and
+   it is an assertion about a real control that no test in this repository
+   exercises. **The token arrived at `observe`, the most conservative cap
+   available**, which is what distinguishes adding a level from fitting the rule
+   to the case: it makes the sanctioned S1 declaration **more** out of licence,
+   not less. S1 at `rank` on `untested` is now out of licence on the evidence
+   axis by two rungs rather than one, in addition to collision 1 above.
+
+   **The refusal path is unchanged.** Any *other* unrecognised token still takes
+   the whole derivation down at exit 2, and
+   `tests/claim_evidence_tests.sh` §4 drives that with a token that is still
+   unrecognised in the same run that proves `untested` now resolves — so
+   "recognising one token" cannot be confused with "opening a fall-through".
 
 ### 3b. The third axis: deployment, and the artefact that grants it
 
@@ -710,7 +733,7 @@ in `scan-controls.sh`, with its reason beside it, where `grep` finds it;
 `scan-controls.sh patterns` prints the list and its size, so an allowance
 quietly growing is visible without reading the file. **It is empty today.**
 
-The registry carries **307** `evidence_refs`. That number is not remembered: the
+The registry carries **316** `evidence_refs`. That number is not remembered: the
 same total was previously written down in three artefacts as 218, 184 and 184
 against a live 224, because each was a hand count frozen at a different moment.
 `tests/control_registry_tests.sh` §25 recomputes it from the registry and fails

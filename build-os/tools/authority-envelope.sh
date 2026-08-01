@@ -120,14 +120,17 @@
 # `execute`, and which currently-`gate` controls actually perform writes, are
 # recorded for the operator and NOT answered here.
 #
-# THE ONE PENDING EXTENSION. The operator ruled that `untested` (has not yet
-# produced live outputs against real tasks) and `unvalidated` (has operated, but
-# lacks sufficient outcome evidence) are meaningfully different. THAT IS NOT
-# IMPLEMENTED HERE. The evidence axis still carries exactly five tokens,
-# `untested` has no cap row, and a control declaring it is REFUSED at exit 2 by
-# `evidence.derivation_nonvacuity` rather than falling through to permissive.
-# Adding a token so a planned control fits is the failure the registry exists to
-# prevent, so the sixth token is the single decision the next packet must take.
+# THE ONE PENDING EXTENSION, NOW RESOLVED. The operator ruled that `untested`
+# (has not yet produced live outputs against real tasks) and `unvalidated` (has
+# operated, but lacks sufficient outcome evidence) are meaningfully different.
+# `gravito_p2_claim_scoped_evidence_a` IMPLEMENTED IT: the evidence axis carries
+# six tokens and `untested` caps at `observe`, the lowest rung that is still a
+# legal destination. The refusal it used to trigger is UNCHANGED — any token
+# this matrix has no cap for still takes `evidence.derivation_nonvacuity` to
+# exit 2 — so recognising one token did not open a fall-through. And the cap was
+# chosen in the direction that costs: it makes the S1 declaration below MORE out
+# of licence, not less, which is the test of whether a token was added to the
+# ontology or fitted to a case.
 #
 # ---------------------------------------------------------------------------
 # WHY THIS IS A NEW FILE AND NOT AN EXTENSION OF evidence-policy.sh. Judged, not
@@ -251,7 +254,7 @@ DEPLOYMENT_DEFAULT="autonomous"
 SCHEMA_FIELDS="envelope issuer actor control scope granted_authority evidence_basis deployment_mode starts expires revocation reason human_confirmation rollback_behavior"
 # The class axis, copied from README §3 exactly as evidence-policy.sh copies it.
 CLASS_AXIS="A:gate B:rank C:advise D:observe R:observe"
-EVIDENCE_AXIS="unvalidated:advise red_driven:gate field_observed:gate calibrated:gate refuted:observe"
+EVIDENCE_AXIS="untested:observe unvalidated:advise red_driven:gate field_observed:gate calibrated:gate refuted:observe"
 
 rank_of(){ case "$1" in none) echo 0 ;; observe) echo 1 ;; advise) echo 2 ;; rank) echo 3 ;; gate) echo 4 ;; execute) echo 5 ;; *) echo -1 ;; esac; }
 name_of(){ case "$1" in 0) echo none ;; 1) echo observe ;; 2) echo advise ;; 3) echo rank ;; 4) echo gate ;; 5) echo execute ;; *) echo '?' ;; esac; }
@@ -291,7 +294,7 @@ if [ "$CMD" = "schema" ]; then
   printf 'ordering: the four modes are strictly increasing — shadow < human_confirmed < bounded_autonomous < autonomous — which is what separates permission to RANK from permission to CHOOSE from permission to ACT\n'
   printf 'authority: this validator ADVISES. check exits 0 whatever it finds. It GRANTS NOTHING: writing a grant is a governance act taken by the operator in the store, never by a tool.\n'
   printf 'empty-store: ZERO live grants is the CORRECT state and exits 0 — an empty envelope store means nothing has been re-authorised. An ABSENT store REFUSES, because absent is not empty.\n'
-  printf 'pending: untested — DECLARED, NOT IMPLEMENTED. The operator ruled `untested` (has not yet produced live outputs against real tasks) and `unvalidated` (has operated, but lacks sufficient outcome evidence) meaningfully different. It is NOT on the evidence axis, has NO cap row, and a control declaring it is refused at exit 2. Adding a token so a planned control fits is the failure the registry exists to prevent, so this is the one decision the next packet must take.\n'
+  printf 'resolved: untested — IMPLEMENTED at `observe` by gravito_p2_claim_scoped_evidence_a. The operator ruled `untested` (has not yet produced live outputs against real tasks) and `unvalidated` (has operated, but lacks sufficient outcome evidence) meaningfully different; `untested` is now ON the evidence axis with a cap row at `observe`, the lowest rung that is still a legal destination. The refusal is UNCHANGED: any token the matrix has no cap for still exits 2, so recognising one token opened no fall-through. It caps in the direction that costs — the S1 declaration below is now MORE out of licence, not less.\n'
   printf 'open-question: the sanctioned S1 declaration (heuristic_policy / untested / rank / shadow) cannot be produced by MIN() — Class C licenses `advise` and `rank` is strictly above it. Reading 1: S1 ships with authority_mismatch: declared, the fifteenth. Reading 2: `shadow` means the ranking has no consequence, so runtime_authority measures the wrong property and the ladder conflates signal strength with whether anything consumes the signal. BOTH RECORDED, NEITHER ADOPTED — choosing would redefine the ladder, which is the operator’s decision.\n'
   printf 'field: envelope — the grant id. Unique: a lease nobody can name uniquely is a lease nobody can revoke.\n'
   printf 'field: issuer — the HUMAN who granted it. Not an agent; the point of the artefact is that a person decided.\n'

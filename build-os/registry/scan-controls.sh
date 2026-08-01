@@ -110,7 +110,13 @@ done
 # --- the ontology, as this scanner enforces it -------------------------------
 CLASSES="R A B C D"
 IMPL_STATUSES="specified implemented runtime_observed decision_contributing load_bearing"
-EMP_STATUSES="unvalidated red_driven field_observed calibrated refuted"
+# `untested` was added by gravito_p2_claim_scoped_evidence_a: the claim HAS NEVER
+# OPERATED against a live or representative task, which is strictly weaker than
+# `unvalidated` (it operated; the outcome evidence is inadequate). It caps at
+# `observe` on build-os/tools/evidence-policy.sh's evidence axis. Widening this
+# enum re-authorises nothing — no control in the census carries it — and the
+# unknown-token refusal below is unchanged.
+EMP_STATUSES="untested unvalidated red_driven field_observed calibrated refuted"
 AUTHORITIES="none observe advise rank gate execute"
 ROLES="sensor reflex immune memory conscience motor"
 MISMATCH_VALUES="none declared"

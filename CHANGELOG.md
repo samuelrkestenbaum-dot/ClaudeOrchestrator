@@ -14,6 +14,98 @@ deprecation cycle. Pin a commit if you need stability.
 
 ### In flight (not landed at the released commit)
 
+- **Evidence stopped being a property of a control and became an assertion about
+  a named claim in a named scope — because one control was measured both refuted
+  and supported, and one token could not say both.**
+  `maint.tripwire_coverage_scan` is **refuted** for its detection claim under
+  bare `node --test` and **supported** for its prevention claim under the
+  sanctioned maintenance invocation. Reasoning from the bare token — *"it is
+  refuted, so demote it"* — nearly produced the demotion the
+  COVERAGE-GATE-PREVENTION-DIFFERENTIAL measured to **destroy live memory**. New
+  store `build-os/registry/evidence_assertions.txt`, keyed by `EV-NNNN` stable
+  ids, carrying nineteen required fields per assertion; new tool
+  `build-os/tools/claim-evidence.sh`; new suite `tests/claim_evidence_tests.sh`.
+  Suite **1771 passed**, 0 failed (+82: 77 in the new suite, 5 in the
+  authority-envelope suite where §18 was retargeted); maintenance suite
+  **144/144**; `scan-controls.sh check` and `scan-mutators.sh check` both exit 0.
+  - **The evidence axis had a second, diverged copy, and §18 could not see it.**
+    `authority-envelope.sh` restates `EVIDENCE_AXIS` literally instead of
+    sourcing it, and this change updated `evidence-policy.sh` and the prose but
+    not that copy. The consequence was live, not theoretical: `axis_cap` returns
+    the empty string for a missing token, `rank_of ""` is -1, and the
+    `[ "$tr" -ge 0 ]` guard drops the strictest token straight out of the
+    minimum — so a `gate` grant on a control carrying `untested,red_driven`
+    reported **WITHIN-LICENCE** when `l-evidence` is `observe`, over-reaching by
+    three rungs inside the tool whose job is catching over-grants. Latent only
+    because 0 envelopes are live and 0 controls carry `untested`. §18's two new
+    assertions grep the **tool under test**, and are written for the **class**:
+    every literal `<NAME>_AXIS="…"` restatement under `build-os/tools/` must
+    agree token-for-token with `evidence-policy.sh matrix`. Red-driven by
+    reverting the one-token fix — **94 passed / 2 failed**, restored to
+    **96 / 0**. This was the third instance of one unchecked-duplicate defect,
+    and the first fix for it that is not pair-shaped.
+  - **`untested` was added to the evidence vocabulary, at `observe`, and the
+    guard it interacts with was not weakened.** It means the claim **has never
+    operated** against a live or representative task — strictly weaker than
+    `unvalidated`, which has operated and lacks adequate outcome evidence. It
+    caps at `observe`, the lowest rung that is still a legal destination.
+    `evidence.derivation_nonvacuity` still exits 2 on any token nothing has
+    capped; what changed is that `untested` stopped being one of them. **Both
+    halves are proven in the same run** — §4 of the new suite drives a
+    still-unrecognised token to exit 2 in the same pass that shows `untested`
+    resolving — so "recognising one token" cannot be read as "opening a
+    fall-through". The cap was chosen in the direction that **costs**: the
+    sanctioned S1 declaration (`heuristic_policy` / `untested` / `rank` /
+    `shadow`) is now **more** out of licence, not less. The class × evidence grid
+    goes **25 cells → 30**, and **0 of the 30** license `execute`, unchanged.
+  - **The legacy projection exposes the composite and never selects.** Where a
+    subject carries several claim statuses, `claim-evidence.sh project` emits
+    **all** of them, sorted and deduplicated, so the output cannot depend on
+    stanza order and **a refutation cannot be dropped**. Selecting whichever
+    status permits greater authority is the flattering-direction error this
+    repository exists to catch, and in this case it is the demotion that was
+    measured to destroy live memory.
+  - **`supported` projects globally to `unvalidated`, and the loss is the
+    point.** A support claim is scope-bound; the legacy `empirical_status` field
+    carries **no scope**, so writing `field_observed` would assert globally what
+    was measured locally. **The cost is stated rather than hidden:** a genuinely
+    well-evidenced control reads no better through the projection than an
+    unmeasured one. The projection is a compatibility shim, lossy in the one
+    direction that cannot flatter, and the scoped claim is legible only in the
+    assertion store.
+  - **Evidence may lower authority and may not raise it, and that is driven red
+    rather than asserted.** `L_effective = MIN(L_class, L_registry_evidence,
+    L_assertion_evidence)`. §8 of the new suite fabricates a Class-A control the
+    census records `refuted` and hands it a `red_driven` assertion that licenses
+    `gate` on its own — and requires the effective licence to come out
+    `observe`, checked as an inequality over the ladder rather than as a matched
+    string. Without that, an assertion store is a laundering channel for
+    authority.
+  - **Census 90 → 93; the out-of-licence numerator did not move.**
+    `evidence-policy.sh check` reports **25 of 93**, split **6/5/14** — the same
+    25 findings against a larger denominator. The three new controls
+    (`evidence.assertion_schema` A/`gate`, `evidence.claim_projection`
+    C/`advise`, `suite.claim_evidence` A/`gate`) are each **in licence**, so the
+    entire delta is the denominator. **Nothing pre-existing was re-authorised:**
+    `maint.tripwire_coverage_scan` keeps `class: C`,
+    `empirical_status: red_driven,refuted`, `runtime_authority: gate` and
+    `authority_mismatch: declared`, and the new suite asserts all four.
+  - **Every stale citation was repointed by recomputing content against the
+    base, never by shifting numbers.** Growing four tool headers moved 41
+    `evidence_refs` across six files; each was resolved by locating its base-commit
+    line content in the current file and failing loudly on ambiguity, because
+    `scan-controls.sh` checks that a ref *resolves* and never that it names the
+    **same line**. The prose sweep hit the **source artefact**
+    (`neurocosmology_crosswalk.txt`) as well as the doc derived from it
+    (`CROSSWALK.md`), and every count written was re-derived from the artefact
+    rather than copied from the brief.
+  - **The known limitation, recorded rather than implied away.** Every field of
+    an assertion is taken **at the author's word**, exactly as
+    `empirical_status` already is. Nothing re-runs a `fixture`, checks that an
+    `observed_result` was ever observed, or enforces a `valid_until` that has
+    passed — that field is recorded so a later packet can enforce it, and calling
+    it enforced today would be the overclaim the store exists to prevent.
+
 - **Every known repository mutator is now visible to the authority model, and
   `execute` has its first six occupants — earned against the rung's own test, not
   created to populate it.** Until now every control sitting on a mutating module

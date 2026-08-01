@@ -48,7 +48,7 @@ trap 'rm -rf "$WORK"' EXIT
 # its own enum. These are pinned against the README's table in section 2.
 CLASSES="R A B C D"
 IMPL_STATUSES="specified implemented runtime_observed decision_contributing load_bearing"
-EMP_STATUSES="unvalidated red_driven field_observed calibrated refuted"
+EMP_STATUSES="untested unvalidated red_driven field_observed calibrated refuted"
 AUTHORITIES="none observe advise rank gate execute"
 ROLES="sensor reflex immune memory conscience motor"
 MISMATCH_VALUES="none declared"
