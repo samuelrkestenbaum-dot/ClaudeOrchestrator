@@ -725,6 +725,156 @@ out | grep -qi 'envelope' \
   && ok "and the refusal says the envelope store is what it could not trust" \
   || { no "the refusal does not name the envelope store"; dump; }
 
+# Field value for a control id, or empty. Defined HERE rather than beside the
+# other helpers on purpose: every `file:line` the registry cites into this suite
+# resolves at or below §15, and inserting a helper up there would silently
+# repoint all of them.
+fval(){ # <registry> <control-id> <field>
+  awk -v id="$2" -v f="$3" '
+    $0 ~ "^control: " { cur = substr($0, 10) }
+    cur == id && index($0, f ": ") == 1 { print substr($0, length(f) + 3); exit }
+  ' "$1"
+}
+
+echo "== 20. THE TWO REFUTED CONTROLS — the cap is a FINDING, not an instruction =="
+# §7 above proves the sharp rule: `refuted` caps at `observe` at any class. This
+# section is about what happens when someone ACTS on that cap for the two
+# controls that carry it, and the answer measured for both is: not what the cap
+# suggests. The cap correctly says "this is out of licence". It does not say
+# "demote it", and for these two the demotion has been checked and refused.
+[ "$(fval "$REG" maint.tripwire_coverage_scan empirical_status)" = "red_driven,refuted" ] \
+  && ok "maint.tripwire_coverage_scan still declares its refutation (red_driven,refuted)" \
+  || no "maint.tripwire_coverage_scan's empirical_status has moved — a refutation cleared by relabelling is the one move the registry forbids"
+[ "$(fval "$REG" maint.source_scan_mask empirical_status)" = "refuted" ] \
+  && ok "maint.source_scan_mask still declares its refutation (refuted)" \
+  || no "maint.source_scan_mask's empirical_status has moved — the mask's three measured defeats are not retractable"
+
+echo "== 20a. \`observe\` IS NOT REACHABLE FOR A load_bearing CONTROL WITH A CONSUMER =="
+# README §2 defines `observe` as "it measures and records. NOTHING READS THE
+# RESULT." scan-controls.sh defines `load_bearing` as "a live policy consumes it,
+# its result changes behaviour, and removing it changes outcomes." An entry
+# claiming both asserts that nothing reads a result something reads.
+#
+# This is the packet's finding about `maint.source_scan_mask`, made mechanical.
+# That control is `refuted` (so the evidence axis caps it at `observe`),
+# `load_bearing`, and consumed by two controls. Every one of the four resolutions
+# is therefore closed to it: demotion writes the falsehood this check now
+# refuses, retirement breaks both consumers, its own promotion_requirement
+# forbids improving the evidence, and its class is not wrong. The finding is
+# real and its prescribed remedy is unreachable — so the remedy must not be
+# applied by hand while nothing is watching.
+SM_AUT="$(fval "$REG" maint.source_scan_mask runtime_authority)"
+SM_IMP="$(fval "$REG" maint.source_scan_mask implementation_status)"
+SM_CONS="$(fval "$REG" maint.source_scan_mask consuming_policies)"
+[ "$SM_IMP" = "load_bearing" ] && [ -n "$SM_CONS" ] \
+  && ok "maint.source_scan_mask is load_bearing and names its consumers (this check is not vacuous)" \
+  || no "maint.source_scan_mask no longer claims load_bearing with named consumers"
+[ "$SM_AUT" != "observe" ] \
+  && ok "...and it has NOT been demoted to \`observe\`, which would claim nothing reads what two controls read" \
+  || no "maint.source_scan_mask sits at \`observe\` while naming consumers — the evidence cap was applied as an instruction and wrote a falsehood"
+# The live census, generally: no entry may claim both.
+OBSBAD=0; OBSN=0
+while IFS= read -r id; do
+  [ -n "$id" ] || continue
+  [ "$(fval "$REG" "$id" runtime_authority)" = "observe" ] || continue
+  OBSN=$((OBSN+1))
+  c="$(fval "$REG" "$id" consuming_policies)"
+  [ "$(fval "$REG" "$id" implementation_status)" = "load_bearing" ] && [ -n "$c" ] && [ "$c" != "NONE" ] \
+    && { OBSBAD=$((OBSBAD+1)); echo "      | $id is load_bearing at observe, consumed by: $c"; }
+done < <(sed -n 's/^control: //p' "$REG")
+[ "$OBSBAD" -eq 0 ] \
+  && ok "no live entry claims load_bearing at \`observe\` ($OBSN entr(ies) sit at observe)" \
+  || no "$OBSBAD entr(ies) claim load_bearing at \`observe\`"
+
+echo "== 20b. RED DRIVE — the scanner REFUSES load_bearing at \`observe\` =="
+# The live check above passes on a census where nothing sits at `observe`, so on
+# its own it proves nothing. This drives the enforcing scanner with a fixture
+# that DOES, and requires a refusal by name.
+RD="$WORK/obsfix"
+mkobsfix(){ # <authority-for-the-sensor>
+  rm -rf "$RD"; mkdir -p "$RD/build-os/metrics"
+  # a real refusal-capable surface, so the scanner is not blinded and refuses for
+  # that reason instead of the one under test
+  printf '#!/usr/bin/env bash\nrefuse(){ echo "$*" >&2; exit 2; }\n[ -f x ] || refuse "no x"\n' \
+    > "$RD/build-os/metrics/guard.sh"
+  # the control actually under test: a sensor that reports and never refuses
+  printf '#!/usr/bin/env bash\n# a sensor: it reports, it never refuses\necho "sensor: ok"\n' \
+    > "$RD/build-os/metrics/sensor.sh"
+  {
+    printf 'control: fixture.guard\nclass: A\nimplementation_status: load_bearing\n'
+    printf 'empirical_status: red_driven\nruntime_authority: gate\nnervous_system_role: reflex\n'
+    printf 'inputs: the presence of x\noutput: a refusal\n'
+    printf 'owning_module: build-os/metrics/guard.sh\n'
+    printf 'consuming_policies: the guard'"'"'s own exit code\n'
+    printf 'evidence_refs: build-os/metrics/guard.sh:3\n'
+    printf 'failure_behavior: exits 2\nrollback_behavior: none\n'
+    printf 'promotion_requirement: n/a\ndemotion_requirement: n/a\n'
+    printf 'authority_mismatch: none\nnotes: fixture\n\n'
+    printf 'control: fixture.sensor\nclass: C\nimplementation_status: load_bearing\n'
+    printf 'empirical_status: refuted\nruntime_authority: %s\nnervous_system_role: sensor\n' "$1"
+    printf 'inputs: source text\noutput: a list of specifiers\n'
+    printf 'owning_module: build-os/metrics/sensor.sh\n'
+    printf 'consuming_policies: fixture.guard, which reads its output\n'
+    printf 'evidence_refs: build-os/metrics/sensor.sh:3\n'
+    printf 'failure_behavior: none of its own\n'
+    printf 'rollback_behavior: pure\npromotion_requirement: it must not be promoted\n'
+    printf 'demotion_requirement: n/a\nauthority_mismatch: none\nnotes: fixture\n\n'
+  } > "$RD/registry.txt"
+  {
+    printf '# fixture mismatch report\n\n<!-- MISMATCH-TABLE:START -->\n\n'
+    printf '| control | class | exercises | licensed | the line that gates |\n|---|---|---|---|---|\n'
+    printf '\n<!-- MISMATCH-TABLE:END -->\n'
+  } > "$RD/MISM.md"
+}
+# the CLEAN arm first, so the red arm cannot pass for the wrong reason
+mkobsfix advise
+bash "$SCAN" check --repo "$RD" --registry "$RD/registry.txt" --mismatches "$RD/MISM.md" > "$WORK/obs.txt" 2>&1
+RC=$?
+[ "$RC" = "0" ] \
+  && ok "a load_bearing sensor at \`advise\` with a named consumer is ACCEPTED (exit $RC)" \
+  || { no "the clean arm already fails (exit $RC); the red drive below would pass for the wrong reason"; sed 's/^/      | /' "$WORK/obs.txt" | head -8; }
+mkobsfix observe
+bash "$SCAN" check --repo "$RD" --registry "$RD/registry.txt" --mismatches "$RD/MISM.md" > "$WORK/obs.txt" 2>&1
+RC=$?
+{ [ "$RC" = "2" ] && grep -qi 'fixture.sensor' "$WORK/obs.txt"; } \
+  && ok "the same entry demoted to \`observe\` is REFUSED, by name (exit $RC)" \
+  || { no "a load_bearing control with a live consumer was accepted at \`observe\` (exit $RC)"; sed 's/^/      | /' "$WORK/obs.txt" | head -8; }
+grep -qi 'nothing reads' "$WORK/obs.txt" \
+  && ok "...and the refusal states the contradiction it caught" \
+  || { no "the refusal does not say why observe and load_bearing cannot both hold"; sed 's/^/      | /' "$WORK/obs.txt" | head -8; }
+
+echo "== 20c. A demotion MEASURED to cost safety must say so where it is read =="
+# `demotion_requirement` is the field an operator reads when lowering authority.
+# For maint.tripwire_coverage_scan that decision has been measured and it went
+# AGAINST the obvious reading of the cap: demoting the throw to a print converts
+# the maintenance layer's only PREVENTION into detection after the fact. Both
+# arms exit 1 — only the tree tells them apart — so a reviewer watching exit
+# codes sees no difference at all. That is exactly why it has to be written here.
+#
+# TWO-SIDED, both sides floored: the registry field must cite the measurement by
+# a stable marker, and the marker must name arms that actually run.
+MARKER="COVERAGE-GATE-PREVENTION-DIFFERENTIAL"
+CS_DEM="$(fval "$REG" maint.tripwire_coverage_scan demotion_requirement)"
+printf '%s' "$CS_DEM" | grep -qF "$MARKER" \
+  && ok "maint.tripwire_coverage_scan's demotion_requirement cites the measurement ($MARKER)" \
+  || no "the demotion_requirement instructs a demotion without naming what the demotion was measured to cost"
+MSUITE="$SRC/tests/build_os_maintenance_tests.sh"
+grep -qF "${MARKER}-ARM-GATED" "$MSUITE" \
+  && ok "...and the GATED arm of that differential exists and runs" \
+  || no "no ${MARKER}-ARM-GATED arm exists — the registry's citation is decoration"
+grep -qF "${MARKER}-ARM-DEMOTED" "$MSUITE" \
+  && ok "...and the DEMOTED arm exists, so a differential is actually being taken" \
+  || no "no ${MARKER}-ARM-DEMOTED arm exists — one arm is not a differential"
+grep -q 'PREVENTION' "$MSUITE" \
+  && ok "...and the measurement separates prevention from detection by name" \
+  || no "the measurement never mentions prevention, so it does not measure the property cited"
+[ "$(fval "$REG" maint.tripwire_coverage_scan runtime_authority)" = "gate" ] \
+  && ok "maint.tripwire_coverage_scan is still at \`gate\` — which is what the differential licenses, not the cap" \
+  || no "maint.tripwire_coverage_scan has been demoted; the differential says that costs prevention, so re-measure before accepting it"
+[ "$(fval "$REG" maint.tripwire_coverage_scan authority_mismatch)" = "declared" ] \
+  && ok "...and its mismatch is still DECLARED — keeping the gate did not clear the finding" \
+  || no "maint.tripwire_coverage_scan's mismatch was cleared; keeping a gate is not the same as being in licence"
+
 echo "== 19. This suite is chained, and is not vacuous about itself =="
 grep -qF 'chain_suite "tests/evidence_policy_tests.sh"' "$SRC/tests/build_os_tests.sh" \
   && ok "this suite is chained from tests/build_os_tests.sh (not discoverable-only)" \

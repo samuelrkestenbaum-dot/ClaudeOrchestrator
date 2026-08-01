@@ -70,7 +70,7 @@ the control as `UNREPORTED`.
 | `tests.nonvacuity_minimums` | C | gate | advise | `tests/entitlement_tests.sh:126` (+33 more, §10) | 34 |
 | `tools.handoff_timeouts` | C | gate | advise | `build-os/tools/specialist-handoff.sh:151` | 3 |
 | `tools.supervise_timeout` | C | gate | advise | `build-os/tools/supervise.sh:49` | 2 |
-| `registry.discovery_rule` | C | gate | advise | `build-os/registry/scan-controls.sh:385` | 2 |
+| `registry.discovery_rule` | C | gate | advise | `build-os/registry/scan-controls.sh:387` | 2 |
 | `bandwidth.active_packet_singleton` | C | gate | advise | `build-os/tools/bandwidth-check.sh:136` | 1 |
 
 <!-- MISMATCH-TABLE:END -->
@@ -242,6 +242,72 @@ decision to let a self-described convenience check stop a run should be an
 operator's, taken once and on the record, rather than a side effect of `throw`
 being the easiest thing to write inside a module body.
 
+### The demotion was taken to the operator, and MEASURED. It was refused.
+
+This entry was read — here and on review — as the strongest demotion candidate in
+the census: `refuted` caps at `observe` at any class, and a control shown not to
+discriminate should not be able to stop a build. The demotion its own
+`demotion_requirement` used to prescribe was applied literally and measured, and
+the measurement went the other way.
+
+`COVERAGE-GATE-PREVENTION-DIFFERENTIAL`, in
+`tests/build_os_maintenance_tests.sh` §6a — two arms, differing only in that
+`throw`, against an uncovered suite file that rewrites real memory:
+
+| arm | the scan | exit | the real tree |
+|---|---|---|---|
+| GATED | throws, as shipped | 1 | **untouched** |
+| DEMOTED | prints instead | 1 | **destroyed** |
+
+**The exit code is 1 in both arms.** Nothing watching exit codes — a caller, a CI
+job, a reviewer reading a transcript — can see this demotion at all; only the tree
+separates them. What the tree says is that this gate is the layer's **only
+prevention**. `maint.real_memory_tripwire` and `maint.shell_fingerprint` are
+detection after the fact and both declare `rollback_behavior: NONE`.
+
+Two things follow, and they are separate.
+
+1. **The refutation is path-scoped and the token cannot say so.** `refuted`
+   records that the *detection* claim failed under a bare `node --test`. Under
+   the sanctioned command the same scan is measured *prevention*. **Evadability
+   is not non-discrimination:** the defect this control exists against was an
+   accident — a suite file carrying no tripwire, which destroyed live memory at
+   exit 0 — and against that it discriminates exactly. A determined evader beats
+   it; a forgetful author does not.
+2. **The mismatch stands anyway.** Keeping the gate is not a claim to be in
+   licence, and nothing here has been re-authorised, relabelled or excepted. The
+   class is still `C`, the evidence is still `red_driven,refuted`, the authority
+   is still `gate`, and this row still counts toward the 14. **The finding was
+   correct; the remedy it suggested was not.** That distinction is the whole
+   point of the census advising rather than gating.
+
+### The same measurement closes the entry the class axis cannot see
+
+`maint.source_scan_mask` — the mask this scan is built on — is `refuted` at
+`advise`. It carries **no** declared mismatch and is **not** in the table above,
+because Class C licenses `advise` and the class axis is structurally blind to it.
+It is one of the five findings only the evidence axis reaches, and all four
+resolutions are closed to it:
+
+- **Demote to `observe`?** `observe` is defined in `README.md` §2 as *"it measures
+  and records. Nothing reads the result."* Two controls read its result — this
+  section's scan gates on it, and `rotate-memory.rootscan.test.mjs` counts on it —
+  and it is `load_bearing` precisely because they do. Demoting it would not lower
+  its authority; it would write a falsehood. `scan-controls.sh` now refuses that
+  combination as `OBSERVE-LB`, and `tests/evidence_policy_tests.sh` §20b drives it
+  red.
+- **Retire it?** That breaks both consumers.
+- **Improve the evidence?** Its own `promotion_requirement` forbids it: three
+  defeats, and the maintainers stopped writing mask heuristics deliberately.
+- **Correct the class?** A defeatable lexer is a heuristic. `C` is right, and the
+  evidence cap binds at `observe` whatever the class.
+
+So the finding is real and its prescribed remedy is unreachable. The blocker is
+that `runtime_authority` currently means both *what consequence may this output
+have* and *does anything read it*, and those come apart exactly here. That split
+is the reviewer's S1 recommendation, and it is **not adopted**. Nothing about this
+control has been changed.
+
 ## 9. `tests.stdin_scan_nonvacuity`
 
 **Gates at** `tests/build_os_tests.sh:961`. **Threshold** `PIN_MIN_SITES=10`
@@ -403,7 +469,7 @@ than curated.
 
 ## 13. `registry.discovery_rule` — this packet's own guard
 
-**Gates at** `build-os/registry/scan-controls.sh:385` (an unregistered surface is
+**Gates at** `build-os/registry/scan-controls.sh:387` (an unregistered surface is
 a violation) and `:452` (`exit 2`).
 **The heuristic** is three directories (`:126`) and five refusal patterns
 (`:129`).

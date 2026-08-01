@@ -335,6 +335,66 @@ BAD="$(grep -rEn '^[ \t]*(\*|#|//)?[ \t]*(Run:[ \t]*)?node[ \t]+--test\b' \
 [ "$BAD" = "0" ] && ok "no installed file advertises a bare \`node --test\` as an instruction" \
                  || no "$BAD installed line(s) advertise the unguarded command"
 
+echo "== 6a. COVERAGE-GATE-PREVENTION-DIFFERENTIAL — what demoting the coverage scan actually costs =="
+# maint.tripwire_coverage_scan is `refuted`, so the evidence axis caps it at
+# `observe` and the census reads it as the most obvious demotion candidate in the
+# repository. Its own registry entry used to INSTRUCT that demotion: "collect the
+# findings and print them instead of throwing".
+#
+# This is the measurement that was taken before accepting that, and it went the
+# other way. Two arms, identical in every respect but the throw:
+#
+#   ARM GATED   — as shipped: the scan throws.        exit 1, tree UNTOUCHED.
+#   ARM DEMOTED — the throw replaced by a print.      exit 1, tree DESTROYED.
+#
+# THE EXIT CODE IS 1 IN BOTH ARMS. Anything watching exit codes — a caller, a CI
+# job, a reviewer reading a transcript — sees a demotion that changed nothing.
+# Only the tree tells them apart, and what it says is that this gate is the only
+# PREVENTION in the layer: the tripwire hashes and the shell fingerprints are
+# both detection after the fact and both declare rollback_behavior: NONE.
+RD6="$(blank_repo repo6a)"
+( cd "$RD6" && "$SRC/init-build-os.sh" ) > "$WORK/install6a.log" 2>&1
+VD="$RD6/build-os/memory/residue.md"
+cp "$VD" "$WORK/residue6a.before"
+cat > "$RD6/build-os/maintenance/zz-uncovered.test.mjs" <<'EOF'
+const fs = await import("node:fs");
+const path = await import("node:path");
+const url = await import("node:url");
+const here = path.dirname(url.fileURLToPath(import.meta.url));
+fs.writeFileSync(path.join(here, "..", "..", "build-os/memory/residue.md"), "DAMAGED\n");
+EOF
+
+# --- COVERAGE-GATE-PREVENTION-DIFFERENTIAL-ARM-GATED ------------------------
+( cd "$RD6" && ./build-os/maintenance/run-tests.sh ) > "$WORK/armgated.log" 2>&1
+AG=$?
+[ $AG -ne 0 ] && ok "ARM GATED: the wrapper refuses (exit $AG)" \
+              || no "ARM GATED: the wrapper accepted an uncovered file"
+cmp -s "$WORK/residue6a.before" "$VD" \
+  && ok "ARM GATED: the tree is UNTOUCHED — this is PREVENTION, not detection" \
+  || no "ARM GATED: the tree was damaged, so the gate prevents nothing"
+cp "$WORK/residue6a.before" "$VD"
+
+# --- COVERAGE-GATE-PREVENTION-DIFFERENTIAL-ARM-DEMOTED ----------------------
+# The demotion the registry entry used to prescribe, applied literally: the
+# throw becomes a print and nothing else changes.
+TRIPD="$RD6/build-os/maintenance/real-memory-tripwire.mjs"
+perl -0pi -e 's/if \(COVERAGE_FINDINGS\.length > 0\) \{\n  throw new Error\(/if (COVERAGE_FINDINGS.length > 0) {\n  console.error(/' "$TRIPD"
+grep -q 'console.error(' "$TRIPD" \
+  && ok "ARM DEMOTED: the throw was replaced by a print (the demotion, applied)" \
+  || no "ARM DEMOTED: the demotion could not be applied — this differential is vacuous"
+( cd "$RD6" && ./build-os/maintenance/run-tests.sh ) > "$WORK/armdemoted.log" 2>&1
+AD=$?
+[ $AD -ne 0 ] && ok "ARM DEMOTED: the run still exits non-zero ($AD) — the exit code hides the whole difference" \
+              || no "ARM DEMOTED: the run exited 0"
+cmp -s "$WORK/residue6a.before" "$VD" \
+  && no "ARM DEMOTED: the tree survived, so the gate was not what prevented the write — re-derive this finding" \
+  || ok "ARM DEMOTED: the tree is DESTROYED — demotion converts prevention into detection"
+# The finding, stated as the comparison it rests on: same exit code, different tree.
+{ [ $AG -ne 0 ] && [ $AD -ne 0 ] && ! cmp -s "$WORK/residue6a.before" "$VD"; } \
+  && ok "DIFFERENTIAL: both arms exit non-zero and only the TREE differs — a demotion no exit-code check can see" \
+  || no "DIFFERENTIAL: the two arms did not separate on the tree alone"
+rm -f "$RD6/build-os/maintenance/zz-uncovered.test.mjs"
+
 echo "== 7. The uninstall boundary is exact =="
 R7="$(blank_repo repo7)"
 ( cd "$R7" && "$SRC/init-build-os.sh" ) > "$WORK/install7.log" 2>&1

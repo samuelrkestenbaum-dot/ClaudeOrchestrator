@@ -317,6 +317,8 @@ while IFS= read -r id; do
     LOADBEARING=$((LOADBEARING+1))
     if [ -z "$cons" ] || [ "$cons" = "NONE" ] || [ "$cons" = "-" ]; then
       viol "LOAD-BEARING $id claims load_bearing and names no consuming policy. A control is not load_bearing because it is implemented; it is load_bearing when a live policy consumes it, its result changes behaviour, and removing it changes outcomes. Name the policy or demote the status."
+    elif [ "$aut" = "observe" ]; then
+      viol "OBSERVE-LB  $id claims load_bearing at authority \"observe\" while naming a consuming policy: $cons. Those cannot both be true. \"observe\" means it measures and records and NOTHING READS THE RESULT; load_bearing means a live policy consumes it and removing it changes outcomes. This fires where an evidence cap is applied as an instruction: a \"refuted\" control is capped at observe, but a capped control that still has consumers cannot be lowered onto that rung by editing its row — the cap is a finding about the control, not a spelling for it. Either remove the consumers first, and say what replaces the signal they read, or leave the authority where it is and leave the finding standing."
     fi
   fi
 

@@ -548,9 +548,9 @@ evidence_refs: build-os/maintenance/real-memory-tripwire.mjs:394; build-os/maint
 failure_behavior: throws an Error during module load, aborting every suite file in the directory by name
 rollback_behavior: n/a — it throws before anything runs
 promotion_requirement: n/a
-demotion_requirement: collect the findings and print them instead of throwing, which would match the authority the file's own header says it has
+demotion_requirement: MEASURED AND REFUSED, not open. The obvious demotion — collect the findings and print them instead of throwing, which would match the authority the file's own header claims — was applied literally and measured, and it converts the maintenance layer's only PREVENTION into detection after the fact. The measurement is COVERAGE-GATE-PREVENTION-DIFFERENTIAL, in tests/build_os_maintenance_tests.sh section 6a: two arms differing only in that throw, against an uncovered suite file that rewrites real memory. Gated, the run exits 1 and the tree is UNTOUCHED; demoted, the run exits 1 and the tree is DESTROYED. THE EXIT CODE IS 1 IN BOTH ARMS, so nothing watching exit codes can see this demotion at all. A demotion therefore requires supplying prevention elsewhere FIRST and saying what supplies it; maint.real_memory_tripwire and maint.shell_fingerprint do not, and both declare rollback_behavior: NONE.
 authority_mismatch: declared
-notes: THE MOST UNCOMFORTABLE ENTRY HERE, because the file itself already says it. Its own header calls this "a convenience check, not a boundary", says the mask "is a heuristic and is defeatable", and prints the exact one-line source shape that beats it (two regexes in division position, blanking the span that holds a real import). `refuted` is recorded honestly: the detection claim was measured FALSE for the bare `node --test` path. And it throws. A control that documents its own defeat and then aborts the run on its verdict is exercising gate on a heuristic — which is defensible as fail-closed, and is exactly the decision that should be the operator's rather than implied by an exception.
+notes: THE MOST UNCOMFORTABLE ENTRY HERE, because the file itself already says it. Its own header calls this "a convenience check, not a boundary", says the mask "is a heuristic and is defeatable", and prints the exact one-line source shape that beats it (two regexes in division position, blanking the span that holds a real import). `refuted` is recorded honestly: the detection claim was measured FALSE for the bare `node --test` path. And it throws. A control that documents its own defeat and then aborts the run on its verdict is exercising gate on a heuristic — which is defensible as fail-closed, and is exactly the decision that should be the operator's rather than implied by an exception. AND THE REFUTATION IS PATH-SCOPED, which one unqualified token cannot say. `refuted` records that the DETECTION claim failed on the bare `node --test` path; on the sanctioned path the same scan is measured PREVENTION (COVERAGE-GATE-PREVENTION-DIFFERENTIAL). Read unscoped, `refuted` caps this at `observe` and makes it the census's most obvious demotion candidate — a reading the measurement refuses. EVADABILITY IS NOT NON-DISCRIMINATION: the defect this control exists against was an ACCIDENT, a suite file that carried no tripwire and destroyed live memory at exit 0, and against that it discriminates exactly. It stays at `gate` and its mismatch stays DECLARED: keeping the gate is not a claim to be in licence, and no exception has been written to pretend otherwise.
 
 control: maint.source_scan_failclosed
 class: A
@@ -584,9 +584,9 @@ evidence_refs: build-os/maintenance/source-scan.mjs:210; build-os/maintenance/so
 failure_behavior: none of its own — it returns what it can see; the consumer decides
 rollback_behavior: pure
 promotion_requirement: it must not be promoted; it has been defeated three times and the maintainers stopped writing new mask heuristics deliberately
-demotion_requirement: n/a
+demotion_requirement: NOT REACHABLE while it keeps its consumers, which is a fact about the ladder rather than a licence to ignore the cap. The evidence axis caps `refuted` at `observe`, and README section 2 defines `observe` as "it measures and records. Nothing reads the result." Two controls read this one's result. Demoting it to `observe` would therefore not lower its authority — it would write something false about consumption, which scan-controls.sh now refuses as OBSERVE-LB. Demotion becomes available only when nothing consumes it, and removing the consumers is retirement, not demotion.
 authority_mismatch: none
-notes: EXACTLY THE DISTINCTION §15.6 IS ABOUT. This is load_bearing — removing it changes outcomes, because two other controls consume it — while exercising only `advise`. Its `refuted` status is real and documented: a real import can be hidden from it. The gate is its consumer's, not its own, and that is why the consumer is the entry that carries the mismatch.
+notes: EXACTLY THE DISTINCTION §15.6 IS ABOUT. This is load_bearing — removing it changes outcomes, because two other controls consume it — while exercising only `advise`. Its `refuted` status is real and documented: a real import can be hidden from it. The gate is its consumer's, not its own, and that is why the consumer is the entry that carries the mismatch. IT IS ALSO ONE OF THE FIVE FINDINGS ONLY THE EVIDENCE AXIS CAN SEE: Class C licenses `advise`, so the class axis is structurally blind to it, and it carries no declared mismatch for that reason. All four resolutions are closed to it, and the reasons are separate. Demotion writes a falsehood (above). Retirement breaks maint.tripwire_coverage_scan and rotate-memory.rootscan.test.mjs. Improving the evidence is forbidden by its own promotion_requirement — three defeats, and the maintainers stopped writing mask heuristics deliberately. Its class is not wrong: a defeatable lexer is a heuristic. So the finding is REAL and its prescribed remedy is UNREACHABLE, and the blocker is that `runtime_authority` currently means both "what consequence may this control's output have" and "does anything read it". Those come apart precisely here. That split is the reviewer's S1 recommendation and is NOT ADOPTED; this is the second control to demonstrate it, and the first to demonstrate it from the evidence axis. Nothing here re-authorises it: it stays at `advise`, and it stays out of licence on the evidence axis.
 
 control: maint.shell_fingerprint
 class: A
@@ -1159,7 +1159,7 @@ inputs: a cold install of the maintenance layer into a scratch repo, plus execut
 output: a RESULT line
 owning_module: tests/build_os_maintenance_tests.sh
 consuming_policies: chained from tests/build_os_tests.sh
-evidence_refs: tests/build_os_maintenance_tests.sh:295; tests/build_os_maintenance_tests.sh:371; tests/build_os_maintenance_tests.sh:372
+evidence_refs: tests/build_os_maintenance_tests.sh:295; tests/build_os_maintenance_tests.sh:431; tests/build_os_maintenance_tests.sh:432
 failure_behavior: exits non-zero when FAIL is non-zero
 rollback_behavior: read-only with respect to the real tree
 promotion_requirement: n/a
@@ -1361,7 +1361,7 @@ inputs: control_registry.txt, MISMATCHES.md, and the independent scan of the tre
 output: a per-violation report, or a two-line summary
 owning_module: build-os/registry/scan-controls.sh
 consuming_policies: tests/control_registry_tests.sh, chained into tests/build_os_tests.sh
-evidence_refs: build-os/registry/scan-controls.sh:265; build-os/registry/scan-controls.sh:319; build-os/registry/scan-controls.sh:327; build-os/registry/scan-controls.sh:336; build-os/registry/scan-controls.sh:432; build-os/registry/scan-controls.sh:442
+evidence_refs: build-os/registry/scan-controls.sh:265; build-os/registry/scan-controls.sh:319; build-os/registry/scan-controls.sh:329; build-os/registry/scan-controls.sh:338; build-os/registry/scan-controls.sh:434; build-os/registry/scan-controls.sh:444
 failure_behavior: exit 2 listing every violation, with an explicit instruction not to clear a LAUNDERED violation by changing the class
 rollback_behavior: read-only; writes nothing anywhere
 promotion_requirement: n/a
@@ -1379,7 +1379,7 @@ inputs: every .sh and .mjs file under build-os/, tests/ and .claude/hooks/, matc
 output: the set of refusal-capable control surfaces
 owning_module: build-os/registry/scan-controls.sh
 consuming_policies: registry.reconciliation, which refuses on any unregistered surface or phantom entry
-evidence_refs: build-os/registry/scan-controls.sh:126; build-os/registry/scan-controls.sh:129; build-os/registry/scan-controls.sh:274; build-os/registry/scan-controls.sh:385
+evidence_refs: build-os/registry/scan-controls.sh:126; build-os/registry/scan-controls.sh:129; build-os/registry/scan-controls.sh:274; build-os/registry/scan-controls.sh:387
 failure_behavior: an unregistered surface is a violation and the run exits 2; a scan finding zero surfaces refuses outright
 rollback_behavior: read-only
 promotion_requirement: n/a
