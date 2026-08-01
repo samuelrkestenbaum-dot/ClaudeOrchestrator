@@ -1147,12 +1147,37 @@ DEPTOP="$(bash "$SITE_ENVTOOL" schema 2>/dev/null \
   && ok "the DEFAULT deployment mode \`autonomous\` caps at the TOP rung (\`$DEPTOP\`) — it still adds no cap" \
   || no "\`autonomous\` caps at '${DEPTOP:-<none>}' while the ladder tops out at '${EP_LAD##* }' — the default now silently demotes the whole census"
 
-# (g) AND THE CENSUS IS UNMOVED. The whole point: a definition changed, and not
-# one finding did.
+# (g) AND THE PRE-EXISTING CENSUS IS UNMOVED. The whole point: a definition
+# changed, and not one finding did.
+#
+# THIS CHECK USED TO PIN THE RAW TOTAL AT 19, AND THAT WAS THE WRONG QUANTITY.
+# The claim it exists to defend is "no control's licence moved because somebody
+# edited a definition". A raw total also moves when a control is REGISTERED,
+# which is authorised build work — so the pin conflated a governance violation
+# with ordinary census growth, and the only way to add a control was to re-fit
+# the constant, which would have quietly retired the guarantee.
+#
+# So it now counts the findings against controls that EXISTED AT THE BASELINE,
+# using build-os/registry/governance_baseline.txt as the anchor. That is strictly
+# STRONGER, not weaker: a pre-existing control moving into or out of licence
+# still fails, exactly as before, while a newly registered control changes this
+# number by construction never. 19 is the count at 7daedee and it is a fact about
+# a fixed, enumerated set of controls rather than about the census's size.
+SITE_BASELINE="$SRC/build-os/registry/governance_baseline.txt"
 LIVE_N="$(bash "$SITE_EPOL" check 2>/dev/null | sed -n 's/^evidence-policy: \([0-9]*\) of [0-9]* out of licence.*/\1/p')"
-[ "${LIVE_N:-x}" = "19" ] \
-  && ok "the live census still reports 19 findings — redefining a rung re-authorised nobody" \
-  || no "the live census reports ${LIVE_N:-<none>} findings, not 19; a semantic edit moved the finding set"
+if [ ! -f "$SITE_BASELINE" ]; then
+  no "no governance baseline at $SITE_BASELINE — without it this check cannot tell a re-authorisation from a registration, and a check that cannot tell them apart is the one that was just replaced"
+else
+  BASE_N="$(bash "$SITE_EPOL" check 2>/dev/null \
+    | sed -n 's/^evidence: OUT-OF-LICENCE \([^ ]*\) .*/\1/p' \
+    | while IFS= read -r _id; do
+        [ -n "$_id" ] || continue
+        awk -F'\t' -v i="$_id" '!/^#/ && $1==i {f=1} END{exit !f}' "$SITE_BASELINE" && printf 'x\n'
+      done | grep -c . || true)"
+  [ "${BASE_N:-x}" = "19" ] \
+    && ok "all 19 findings against BASELINED controls are unmoved (live total is ${LIVE_N:-?}; the difference is newly registered controls, which is authorised and is not a re-authorisation)" \
+    || no "${BASE_N:-<none>} findings now stand against baselined controls, not 19 — a pre-existing control's licence moved"
+fi
 
 echo "== 19. This suite is chained, and is not vacuous about itself =="
 grep -qF 'chain_suite "tests/evidence_policy_tests.sh"' "$SRC/tests/build_os_tests.sh" \

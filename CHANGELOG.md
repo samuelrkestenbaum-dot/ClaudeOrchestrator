@@ -14,6 +14,88 @@ deprecation cycle. Pin a commit if you need stability.
 
 ### In flight (not landed at the released commit)
 
+- **Every known repository mutator is now visible to the authority model, and
+  `execute` has its first six occupants — earned against the rung's own test, not
+  created to populate it.** Until now every control sitting on a mutating module
+  classified the *check* and not the *write*: six controls guard
+  `record-packet.sh` and each one refuses **before** the append;
+  `tools.handoff_lock` classifies a fail-closed acquisition, not the lock;
+  `maint.rotation_conservation` classifies a property of a *plan*, not the rename
+  that applies it. The write actions themselves were registered at **no authority
+  at all**. Suite **1689 passed**, 0 failed (+53, all in the new
+  `tests/mutator_registry_tests.sh`); maintenance suite **144/144**;
+  `scan-controls.sh check` and the new `scan-mutators.sh check` both exit 0.
+  - **The brief named five mutators and said not to trust the list. The survey
+    found seven, and rejected four candidates.** Added: `hook-once.sh`'s marker
+    `mkdir` and `install-maintenance.sh`'s `cp` into a customer tree. Rejected
+    after inspection: `scan-controls.sh` and `authority-envelope.sh` (append only
+    to an `mktemp` path their own `trap` removes), `check-adoption.sh` and
+    `bandwidth-check.sh` (`git cat-file -e` / `rev-parse`, which read). The
+    negative result is recorded because a census that lists only what it found
+    cannot be audited for what it missed.
+  - **The evidence-policy denominator moved, and the numerator did not move for
+    anybody who was already there.** `evidence-policy.sh check` now reports
+    **25 of 90** out of licence, split **6/5/14**, against 19 of 81 split 6/5/8.
+    The class axis binds the same 6 and the evidence axis the same 5; the entire
+    delta is **+6 in "both axes bind"**, which is the six new `execute` entries.
+    **No class licenses `execute`** — 0 of the 25 grid cells reach it — so a
+    control that performs a durable write is out of licence *by construction*
+    rather than by anybody stretching a heuristic, and each declares
+    `authority_mismatch: declared` with a row in `MISMATCHES.md` §17.
+  - **`maint.managed_set_replacement` was examined, as asked, and deliberately
+    NOT moved.** It sits at `advise` while declaring its output as *"files copied
+    into an installed repo, replacing prior managed copies"*, its failure as
+    *"none that stops anything"* and its rollback as *"none"*. On the corrected
+    ladder that is `execute`. **It is a pre-existing control, and moving one is a
+    re-authorisation that belongs to the operator** — so it is recorded as
+    `FINDING-0001` with the remedy named and unapplied, and `hooks.once_dedup` as
+    `FINDING-0002`.
+  - **The restraint is mechanical, not promised.**
+    `build-os/registry/governance_baseline.txt` pins the class, runtime authority
+    and mismatch flag of all **81** controls that existed at the base commit;
+    `scan-mutators.sh` and the suite fail if any of them moves without that file
+    being edited in the same diff. Each finding is also checked against its own
+    subject, so applying a remedy without updating the finding — or deleting the
+    finding to retire the accusation — fails too.
+  - **Stable identity at birth, and line numbers demoted to navigation hints.**
+    32 ids across four namespaces (`MUT`, `DEFECT`, `OCCURRENCE`, `FINDING`),
+    derived rather than ledgered — a central ledger would be a second copy of
+    every id with nothing reconciling the two, which is `DEFECT-0003` itself.
+    Tests pin that the id set is byte-identical after every record moves, that a
+    duplicate is refused, and that `project` **refuses** a store keyed on a
+    `path:line` rather than rendering it as a tidy table.
+  - **Defect recurrence is out of prose and countable.** Twelve classes seeded,
+    nine occurrences migrated, and `query(DEFECT-0001-stale-line-reference)`
+    returns **three**. Every count is a **lower bound** — migration is partial by
+    design, so this store can prove a defect recurs and can never prove one did
+    not. `residue.md` (aa)–(ss) stays prose; the migration path is written down.
+  - **Decision telemetry that keeps unknowns unknown.** Every quantitative field
+    is `unknown` or `<value>@measured|derived|reported`; a bare number is
+    **refused**, and omission yields `unknown` — never 0. `0@measured` remains
+    legal and distinct. Seven decisions recorded, and **nothing was back-filled by
+    inference**: the only derived values are one packet's wall and serial minutes,
+    copied from `packet_metrics.tsv`, which is the only historical row carrying
+    them. The report withholds a sum entirely for a column with nothing known.
+  - **Signals frozen at decision time.** Twelve snapshots over four candidates and
+    the three currently derivable signals, digest-chained so a retroactive edit
+    breaks the chain — **tamper-evident, not tamper-proof**, and the difference is
+    stated in the tool rather than implied. The record is deliberately unflattering
+    to the signals: the selected candidate scored **0** on `dependency_unlock_count`
+    while an unselected one scored 1, because the operator's ruling outranked the
+    only ordering signal that existed.
+  - **The packet hit `DEFECT-0001` on itself, and the guard did not catch it.**
+    Adding one `chain_suite` line shifted **ten** citations into
+    `tests/build_os_tests.sh` — eight in `control_registry.txt` and two in
+    `MISMATCHES.md`; `scan-controls.sh` flagged only the three that
+    landed on a lone closer or a comment, because **it checks that a ref resolves,
+    never that it names the same content**. The other **seven** were silently
+    wrong, including one markdown table row and one prose citation in
+    `MISMATCHES.md`. All ten were repointed
+    by recomputing content against the base commit — never by shifting numbers —
+    and re-verified by content afterwards. **The first count published here was
+    itself wrong**, and wrong in the direction that under-reported the packet's
+    own self-inflicted defect: it said seven shifted and four silently wrong.
+
 - **The authority ladder was measuring the wrong property, and it has been
   corrected: `observe` is now defined by CONSEQUENCE rather than by consumption,
   and a sixth rung `execute` sits above `gate`.** The previous packet proved

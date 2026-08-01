@@ -1,0 +1,233 @@
+# Build OS — mutator census.
+#
+# One record per action in this repository that CHANGES DURABLE STATE. One field
+# per line; a blank line separates records; `#` at column 0 is a comment. The
+# format is control_registry.txt's on purpose — the same parser reads it, the
+# same grep habits work on it.
+#
+# WHY THIS FILE HAD TO EXIST SEPARATELY, AND IT IS NOT A STYLE CHOICE.
+# control_registry.txt's field list is CLOSED: scan-controls.sh refuses the whole
+# file on an unknown field name, and its "every field present" check would fail
+# all 81 pre-existing entries the moment a new field was added to the enum. So
+# the mutator's extra fields cannot live there. This store is keyed by
+# `control_id` instead, and the control registry is not widened by one byte.
+#
+# WHAT THE CENSUS FOUND, AND IT IS THE POINT OF THE FILE. Every control whose
+# owning_module is one of these mutating modules classified THE CHECK AND NOT THE
+# WRITE. `swarm.disjointness` classifies a refusal. `tools.handoff_lock`
+# classifies a fail-closed acquisition. `metrics.record.schema_invariant`
+# classifies a validation that runs BEFORE the append. `maint.rotation_conservation`
+# classifies a conservation property of a plan. The write actions themselves —
+# the rename onto the live memory file, the commit, the append, the stamp, the
+# lock — were registered at NO AUTHORITY AT ALL. That is what this census fixes.
+#
+# THE RECORD KEY IS THE STABLE ID. `mutator: MUT-0001-…` — the key IS the
+# `stable_mutator_id`, and there is deliberately no second field repeating it.
+# Storing the same truth twice is itself one of the registered defect classes
+# (DEFECT-0003-duplicate-semantic-truth), and a census that commits the defect it
+# records is not worth reading.
+#
+# IDS ARE NOT POSITIONS. `MUT-0001-…` survives every edit to every file. The
+# `evidence_refs` are `path:line` and are NAVIGATION HINTS ONLY: they are checked
+# to resolve and to support the declared mutation_type, and nothing anywhere is
+# identified by them. Seven consecutive packets shipped a stale `:NNN`; an
+# identifier that moves when somebody adds a comment is not an identifier.
+#
+# `runtime_authority` IS A COPY of the live control_registry.txt entry, kept
+# deliberately redundant so the two files can be checked against each other — the
+# same device neurocosmology_crosswalk.txt uses. WHERE THEY DISAGREE THE REGISTRY
+# IS RIGHT AND THIS FILE IS STALE, and tests/mutator_registry_tests.sh section 2
+# fails on the disagreement rather than picking a winner.
+#
+# `required_authority` IS NOT A COPY, AND IT IS THE LOAD-BEARING FIELD. It is what
+# the ACTUAL BEHAVIOUR requires under the corrected ladder, derived from README §2's
+# own mechanical test for the top rung — "performs a durable write" — and NOT from
+# what the control is currently granted. Where the two differ, the gap is a
+# FINDING in findings.txt, addressed to the operator, and NOTHING HERE APPLIES IT.
+# Two records carry that gap today (MUT-0007, MUT-0008) and both are left where
+# they are: re-authorising an existing control is a governance act, and this file
+# performs none.
+#
+# WHY `execute` AND NOT `gate`, FOR THE SIX THAT REACH IT. `gate` is "may allow or
+# prohibit"; `execute` is "may directly cause mutation". These six do not decide
+# whether a change is permitted — they ARE the change. NO CLASS LICENSES
+# `execute`, so every one of them declares `authority_mismatch: declared` in the
+# control registry and takes a row in MISMATCHES.md. THAT IS A RECORD OF AN
+# OVER-AUTHORISATION, NOT A GRANT: the licence table is untouched and 0 of its 25
+# cells reach the rung. The rung was populated because six actions met its stated
+# test, and a candidate that only PROPOSES a mutation would not be here.
+#
+# THE SCAN'S ONE EXCLUSION, stated here because an exclusion nobody can audit is
+# how a census shrinks quietly. tests/mutator_registry_tests.sh section 1 scans
+# the tree for durable-write syntax and requires every hit to be censused.
+# `build-os/tools/authority-envelope.sh` matches the pattern and is EXCLUDED: its
+# only append is to a path from `mktemp` which its own `trap` removes on exit, so
+# it changes no durable state. `build-os/registry/scan-controls.sh` has the same
+# shape and is not scanned at all. The pattern is syntactic and cannot tell those
+# apart from a real store; the exclusion is the honest handling, and the test
+# fails if this reason is ever deleted.
+#
+# WHAT THIS CENSUS DOES NOT CLAIM. `write_scope` is the author's word. Section 3
+# of the suite derives from the tree that a declared mutation_type is SUPPORTED by
+# a line the record cites; it does NOT prove the write scope is COMPLETE. A
+# mutator that writes somewhere nobody wrote down is not caught here, and the
+# independent scan is the only thing pushing back on that.
+#
+#   grep -c '^mutator: '                          how many actions are censused
+#   grep -B2 '^required_authority: execute'       what directly changes state
+#   awk -F': ' '/^mutator: /{m=$2} /^required_authority: /{r=$2} \
+#     /^runtime_authority: /{if($2!=r) print m}'  where authority lags behaviour
+
+# =============================================================================
+# THE FIVE NAMED BY THE PACKET BRIEF — confirmed by survey, not trusted from the
+# list. Each is registered as a NEW control at `execute`; none of the five write
+# actions was registered at any authority before this census existed.
+# =============================================================================
+
+mutator: MUT-0001-rotation-live-file-replacement
+control_id: maint.rotation_live_file_replacement
+actor_or_tool: build-os/maintenance/rotate-memory.mjs
+trigger: an operator or a maintenance job running rotate-memory.sh --apply; the default path is a dry run and writes nothing
+read_scope: the three rotating memory files, their `## ` block structure, and the existing archive directory
+write_scope: build-os/memory/current_state.md, build-os/memory/residue.md, build-os/packets/active_packet.md, and new files under build-os/memory/archive/
+mutation_type: replace
+rollback_behavior: partial and asymmetric — the rotated-out blocks are preserved in the archive and can be pasted back by hand, but the live file is REPLACED and its prior bytes exist only in git. There is no --undo.
+required_authority: execute
+runtime_authority: execute
+deployment_mode: human_confirmed
+implementation_status: load_bearing
+empirical_status: red_driven
+evidence_refs: build-os/maintenance/rotate-memory.mjs:982; build-os/maintenance/rotate-memory.mjs:1006
+receipt_behavior: none of its own — it prints a plan and an applied summary to stdout, and the only durable proof it ran is the archive file it created plus git. THE MOST CONSEQUENTIAL WRITE IN THIS SYSTEM EMITS NO RECEIPT.
+notes: The rename at :1006 is the whole reason this census exists. A staging file is written at :982, read back, verified byte-for-byte and checked against an append-only precondition, and only then renamed ONTO the live memory file — so the write is as careful as it could be while still being a replacement. `maint.rotation_conservation` already classified the PLAN's conservation property; nothing classified the rename. Note the asymmetry that makes this the sharpest entry here: the tool that rewrites Build OS memory is the tool whose own execution leaves the least evidence.
+
+mutator: MUT-0002-swarm-merge-commit
+control_id: swarm.merge_commit_execution
+actor_or_tool: build-os/tools/swarm-merge.sh
+trigger: `swarm-merge.sh merge --manifest FILE --commit MSG`. WITHOUT `--commit` the tool stages and verifies and does NOT commit, which is the default.
+read_scope: the fan-out manifest, the working tree, the git index, and the verification command's exit status
+write_scope: the git index and one new commit on the current branch of the target repository
+mutation_type: commit
+rollback_behavior: reversible — `git reset --hard HEAD^` restores the prior tip, and the tool has its own `rollback` path that runs if the commit itself fails. The commit is LOCAL; this tool never pushes, by construction.
+required_authority: execute
+runtime_authority: execute
+deployment_mode: human_confirmed
+implementation_status: load_bearing
+empirical_status: red_driven
+evidence_refs: build-os/tools/swarm-merge.sh:101; build-os/tools/swarm-merge.sh:586
+receipt_behavior: prints the short SHA and the message on stdout; the commit itself is the durable receipt, and it is the only mutator here whose receipt is a first-class git object
+notes: CITED AT :101 AND :586 RATHER THAN AT THE `git commit` LINE, AND THE REASON IS RECORDED SO IT DOES NOT LOOK LIKE EVASION. `build-os/tools/swarm-merge.sh:587` — the invocation itself — is ALREADY CLAIMED by `swarm.post_merge_verification`, and control_registry_tests.sh section 22 forbids one line carrying two classifications. The two lines cited instead are the flag that enables the commit (:101) and the branch that decides it happens (:586), which are the lines that make the mutation reachable. Repointing the other entry to free :587 would have been the technique scan-controls.sh's own header names as hole 5 — shedding authority by narrowing evidence_refs — so it was not done.
+
+mutator: MUT-0003-metrics-store-append
+control_id: metrics.record.store_append
+actor_or_tool: build-os/metrics/record-packet.sh
+trigger: `record-packet.sh` invoked with a full valid row, after every validation has passed
+read_scope: the 16 proposed field values, the existing store's header and its packet_id column
+write_scope: build-os/metrics/packet_metrics.tsv — one appended line, never an edit to an existing one
+mutation_type: append
+rollback_behavior: trivially reversible by deleting the appended line; the store is append-only and no prior row is touched
+required_authority: execute
+runtime_authority: execute
+deployment_mode: human_confirmed
+implementation_status: load_bearing
+empirical_status: red_driven
+evidence_refs: build-os/metrics/record-packet.sh:272; build-os/metrics/record-packet.sh:276
+receipt_behavior: prints `recorded: <packet> (<lane> lane) -> <store>`; the appended row IS the receipt, and it names the commit it claims, which `--verify-git` later reconciles against git
+notes: This is the best-guarded write in the repository and it is still an unregistered one. Six controls sit on this module — schema, note minimum, one-row-per-packet, store validation, git verification and its vacuity guard — and every one of them classifies a REFUSAL that happens before the append. The append at :276 was classified by none of them. `ensure_store` at :272 is cited alongside it because it will CREATE the store with a header if it is absent, which is a second, quieter mutation of the same file.
+
+mutator: MUT-0004-identity-stamp-write
+control_id: identity.stamp_write
+actor_or_tool: .claude/hooks/build-os-identity.sh
+trigger: the installer or an explicit `build-os-identity.sh stamp ROOT`
+read_scope: VERSION, the git commit, the managed file set and each file's digest
+write_scope: the `build-os-identity` stamp file at the installed root, plus the licence copy beside it
+mutation_type: replace
+rollback_behavior: none in the tool — the stamp is overwritten wholesale on every run. A prior stamp is recoverable only from git, and in a customer tree that is not this repository there may be no git at all.
+required_authority: execute
+runtime_authority: execute
+deployment_mode: human_confirmed
+implementation_status: load_bearing
+empirical_status: red_driven
+evidence_refs: .claude/hooks/build-os-identity.sh:156; .claude/hooks/build-os-identity.sh:160
+receipt_behavior: the stamp file IS the receipt, and it is self-verifying — it carries a digest over its own body which `build-os-identity.sh verify` recomputes. It is the only mutator here whose output proves its own integrity.
+notes: `identity.stamp_and_verify` classified the VERIFY half — the digest comparison that detects tampering — at `gate`. The WRITE half was unclassified. The distinction matters more here than elsewhere because this mutator writes into a CUSTOMER tree rather than into this repository, so the blast radius is somebody else's working directory.
+
+mutator: MUT-0005-handoff-lock-lifecycle
+control_id: tools.handoff_lock_lifecycle
+actor_or_tool: build-os/tools/specialist-handoff.sh
+trigger: any `detect`/`handoff` route that resolves to a disabled profile and must relaunch under a global lock
+read_scope: the prompt classification, the lock directory's mtime and pid file, and HANDOFF_LOCK_WAIT/HANDOFF_LOCK_STALE
+write_scope: OUTSIDE THIS REPOSITORY — the lock directory and its pid file at $HANDOFF_LOCK (default ~/.claude/build-os-handoff.lock), and appended lines in $HANDOFF_LOG (default ~/.claude/build-os-handoffs.log)
+mutation_type: lock
+rollback_behavior: self-releasing — `safe_release_lock` removes the pid file and rmdirs the lock, guarded by a path-safety check that refuses "/", ".", ".." and $HOME. A crashed holder leaves a stale lock, which is reclaimed by the staleness rule rather than by a human.
+required_authority: execute
+runtime_authority: execute
+deployment_mode: human_confirmed
+implementation_status: load_bearing
+empirical_status: unvalidated
+evidence_refs: build-os/tools/specialist-handoff.sh:122; build-os/tools/specialist-handoff.sh:166
+receipt_behavior: an append-only line in $HANDOFF_LOG carrying timestamp, route, result and exit — deliberately carrying NO prompt and NO cwd. It is the only receipt here written outside the repository, and it is therefore the only one no reviewer of this repository will ever see.
+notes: CITED AT THE LOG APPEND AND THE RELEASE, NOT AT THE ACQUISITION. `build-os/tools/specialist-handoff.sh:145` — the atomic `mkdir` — is already claimed by `tools.handoff_lock`, which classifies the fail-closed BUSY refusal, and section 22 forbids sharing the line. :122 and :166 are the two writes no existing entry classifies. The `write_scope` is the reason this record is worth having at all: it is the only mutator in the census whose durable effects land entirely outside the repository, where nothing in this repository's suite can fingerprint them.
+
+# =============================================================================
+# THE CENSUS'S OWN WRITER. Registered under the same rules it imposes; a census
+# that exempts the tool that maintains it is not a census.
+# =============================================================================
+
+mutator: MUT-0006-decision-telemetry-append
+control_id: metrics.decision.store_append
+actor_or_tool: build-os/metrics/record-decision.sh
+trigger: `record-decision.sh record …` and `record-decision.sh snapshot …`, after every field has validated
+read_scope: the proposed field values, the existing stores' headers and id columns, and — for a snapshot — the digest of the preceding chain row
+write_scope: build-os/metrics/decision_telemetry.tsv and build-os/metrics/signal_snapshots.tsv, one appended line each, never an edit to an existing one
+mutation_type: append
+rollback_behavior: an appended telemetry row can be deleted. A snapshot row CANNOT be deleted without breaking the digest chain of every row after it, which is the intended asymmetry: telemetry is a record and snapshots are evidence.
+required_authority: execute
+runtime_authority: execute
+deployment_mode: human_confirmed
+implementation_status: load_bearing
+empirical_status: red_driven
+evidence_refs: build-os/metrics/record-decision.sh:307; build-os/metrics/record-decision.sh:335
+receipt_behavior: prints the id it appended; the row IS the receipt, and a snapshot row additionally carries the digest that proves it has not been edited since
+notes: Registered as a mutator in the same commit that created it, rather than in a later tidying packet — which is the whole difference between a census and a backlog. Its `gate` sibling `metrics.decision.schema_invariant` classifies the validation that refuses a malformed row; this entry classifies the append that follows it.
+
+# =============================================================================
+# THE TWO THE SURVEY FOUND THAT THE BRIEF'S LIST DID NOT NAME. Both are ALREADY
+# registered controls, so neither needs a new entry — and NEITHER IS MOVED. Each
+# carries a required_authority ABOVE its runtime_authority, and that gap is a
+# FINDING addressed to the operator, recorded in findings.txt and NOT applied.
+# =============================================================================
+
+mutator: MUT-0007-managed-set-replacement
+control_id: maint.managed_set_replacement
+actor_or_tool: build-os/maintenance/install-maintenance.sh
+trigger: an operator running the maintenance installer against a target repository
+read_scope: the GRAVITO:MANAGED banner set, .gravito-managed, and the destination tree
+write_scope: OUTSIDE THIS REPOSITORY — every managed file under the installed repo's build-os/maintenance/, plus appended lines in the target's .gitignore
+mutation_type: replace
+rollback_behavior: NONE. A managed file's local edits are lost on install, which is what the banner warns about and which the entry's own rollback_behavior field already concedes.
+required_authority: execute
+runtime_authority: advise
+deployment_mode: human_confirmed
+implementation_status: implemented
+empirical_status: unvalidated
+evidence_refs: build-os/maintenance/install-maintenance.sh:79; build-os/maintenance/install-maintenance.sh:112
+receipt_behavior: prints what it copied and what it could not; nothing durable records that the install happened, and it never exits non-zero, so a failed install and a clean one are indistinguishable to any caller
+notes: THE ENTRY THE BRIEF ASKED TO EXAMINE, AND THE ANSWER IS THAT ITS AUTHORITY IS UNDERSTATED. It sits at `advise` — "its output may influence a human" — while its declared output is "files copied into an installed repo, replacing prior managed copies", its failure behaviour is "none that stops anything", and its rollback is "none". Under the corrected ladder a control that copies files over somebody's tree is not influencing a human, it is `execute`. IT IS NOT MOVED HERE. It is a PRE-EXISTING control, and moving a pre-existing control's authority is a re-authorisation, which is the operator's act and not this packet's. See FINDING-0001; governance_baseline.txt pins it at `advise` and the suite fails if it moves without that pin being edited.
+
+mutator: MUT-0008-hook-once-marker
+control_id: hooks.once_dedup
+actor_or_tool: .claude/hooks/hook-once.sh
+trigger: every SessionStart and UserPromptSubmit hook firing, on every prompt
+read_scope: the hook event name, the session id and either the prompt id or a hash of the payload
+write_scope: OUTSIDE THIS REPOSITORY — a marker directory under ${TMPDIR}/build-os-hook-once/
+mutation_type: create
+rollback_behavior: the marker lives in TMPDIR and dies with it; no explicit removal exists and none is needed
+required_authority: execute
+runtime_authority: advise
+deployment_mode: autonomous
+implementation_status: load_bearing
+empirical_status: unvalidated
+evidence_refs: .claude/hooks/hook-once.sh:44; .claude/hooks/hook-once.sh:50
+receipt_behavior: none — the marker's existence is the only trace, and it is unreadable after the temp directory is cleared
+notes: CENSUSED BECAUSE THE LINE WOULD OTHERWISE BE ARBITRARY. Its marker is a `mkdir` of a directory outside the repository used to make a side effect idempotent — which is, to the byte, the shape of MUT-0005's lock, and the lock IS on the brief's list. Treating one as a mutator and not the other would be a distinction with no rule behind it. It is the ONLY mutator here whose deployment_mode is `autonomous`: it fires on every prompt with no human in the loop. Its authority gap is much softer than FINDING-0001's — it suppresses duplicate output and destroys nothing — and it is likewise NOT moved. See FINDING-0002.

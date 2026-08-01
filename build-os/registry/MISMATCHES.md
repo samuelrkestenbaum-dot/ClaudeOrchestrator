@@ -14,7 +14,7 @@ control is a governance action and belongs to the operator.
 
 ## Three numbers, each with its derivation
 
-1. **11 of 81 classified controls gate on `unvalidated` evidence.** Eleven
+1. **11 of 90 classified controls gate on `unvalidated` evidence.** Eleven
    controls can stop the build and nothing has established that any of them
    discriminates — no measurement, no red drive, no field observation. This is
    the sharpest number in the census and the one to read first.
@@ -27,8 +27,14 @@ control is a governance action and belongs to the operator.
    `tests.nonvacuity_minimums`. Four of the eleven are Class A — an invariant on
    `unvalidated` evidence is *legal* under the licence table and still means
    nobody has watched it fire.
-2. **14 of 81 entries exercise `gate` on a class that does not license it.**
-   `grep -c '^authority_mismatch: declared' control_registry.txt`. All 14 are
+2. **14 of 20 entries carrying `authority_mismatch: declared` exercise `gate` on
+   a class that does not license it.** The bare
+   `grep -c '^authority_mismatch: declared' control_registry.txt` yields **20**,
+   because that flag now marks BOTH kinds of mismatch (see the table note below);
+   the `gate`-exercising subset — the subject of this file — needs the authority
+   filter too:
+   `awk -F': ' '/^runtime_authority: /{ra=$2} /^authority_mismatch: declared/{if(ra=="gate")n++} END{print n}' control_registry.txt`
+   → 14. All 14 are
    Class C heuristics, all 14 can exit non-zero, and none of them was wrong to
    build. The fourteenth arrived by **demotion on review** rather than by
    registration — see §14, which is the only entry in this file whose class was
@@ -66,20 +72,44 @@ the control as `UNREPORTED`.
 | `swarm.disjointness` | C | gate | advise | `build-os/tools/swarm-merge.sh:381` | 1 |
 | `swarm.hot_file_reservation` | C | gate | advise | `build-os/tools/swarm-merge.sh:311` | 3 |
 | `maint.tripwire_coverage_scan` | C | gate | advise | `build-os/maintenance/real-memory-tripwire.mjs:447` | 1 |
-| `tests.stdin_scan_nonvacuity` | C | gate | advise | `tests/build_os_tests.sh:961` | 1 |
+| `tests.stdin_scan_nonvacuity` | C | gate | advise | `tests/build_os_tests.sh:962` | 1 |
 | `tests.nonvacuity_minimums` | C | gate | advise | `tests/entitlement_tests.sh:126` (+33 more, §10) | 34 |
 | `tools.handoff_timeouts` | C | gate | advise | `build-os/tools/specialist-handoff.sh:151` | 3 |
 | `tools.supervise_timeout` | C | gate | advise | `build-os/tools/supervise.sh:49` | 2 |
 | `registry.discovery_rule` | C | gate | advise | `build-os/registry/scan-controls.sh:397` | 2 |
 | `bandwidth.active_packet_singleton` | C | gate | advise | `build-os/tools/bandwidth-check.sh:136` | 1 |
+| `maint.rotation_live_file_replacement` | A | execute | gate | `build-os/maintenance/rotate-memory.mjs:1006` | 1 |
+| `swarm.merge_commit_execution` | A | execute | gate | `build-os/tools/swarm-merge.sh:586` | 1 |
+| `metrics.record.store_append` | A | execute | gate | `build-os/metrics/record-packet.sh:276` | 1 |
+| `identity.stamp_write` | A | execute | gate | `.claude/hooks/build-os-identity.sh:160` | 1 |
+| `tools.handoff_lock_lifecycle` | A | execute | gate | `build-os/tools/specialist-handoff.sh:166` | 1 |
+| `metrics.decision.store_append` | A | execute | gate | `build-os/metrics/record-decision.sh:307` | 1 |
 
 <!-- MISMATCH-TABLE:END -->
 
+**THIS TABLE NOW CARRIES TWO DIFFERENT KINDS OF MISMATCH, and blending them
+would destroy the only number in it that means anything.** Read the `exercises`
+column:
+
+- **14 rows exercise `gate`** on a licence that reaches only `advise`. These are
+  the heuristics — fitted constants, thresholds and prose regexes that can stop a
+  build. This is the original subject of this file.
+- **6 rows exercise `execute`** on a Class A licence that reaches `gate`. These
+  are the mutator census's write actions (§17). They are over-authorised for a
+  completely different reason: **no class licenses `execute` at all**, so a
+  control that performs a durable write is out of licence by construction rather
+  than by anybody having stretched a heuristic.
+
 **`sites` is a hand count**, taken from the sections below, of the distinct
 fitted constants, thresholds and prose regexes inside each entry — not a grep.
-It totals **56**. It is in the table because the entry count (14) is the number
-that gets quoted, and the entry count is a property of how finely this registry
-was cut, not of how much heuristic authority the repository actually carries.
+**It totals 56, and that total covers the 14 `gate` rows ONLY.** The six
+`execute` rows each carry `1` because a write action has exactly one site: the
+line that performs it. Adding them to 56 would state that this repository carries
+62 fitted constants, which is false — it carries 56, plus 6 mutations that are
+not constants at all.
+
+The entry count is now **20**, and it remains a property of how finely this
+registry was cut rather than of how much authority the repository carries.
 
 There is no Class D and no Class R anywhere in this system, so the second half of
 the safety claim — that a learned model may not outrank an invariant — is
@@ -396,7 +426,7 @@ consumed for visibility and sit there — but the fifth-outcome point survives t
 fix and is why it is kept: the framework offered four outcomes and one of them
 was unavailable to five-sixths of the census for definitional reasons nobody had
 noticed. The qualifier matters and an earlier
-draft dropped it: `gate` -> `advise` remains perfectly spellable — 13 of 81 sit
+draft dropped it: `gate` -> `advise` remains perfectly spellable — 13 of 90 sit
 at `advise` today — and it is the demotion this packet actually measured.
 `maint.tripwire_coverage_scan` closed "demote" because demoting it was measured
 to destroy the tree, not because the row was unwritable. A framework whose first outcome is unavailable for five-sixths of its
@@ -414,8 +444,8 @@ packet.
 
 ## 9. `tests.stdin_scan_nonvacuity`
 
-**Gates at** `tests/build_os_tests.sh:961`. **Threshold** `PIN_MIN_SITES=10`
-(`:939`, tested at `:961`).
+**Gates at** `tests/build_os_tests.sh:962`. **Threshold** `PIN_MIN_SITES=10`
+(`:940`, tested at `:962`).
 
 "The scanner must not be blind" is Class A. `10` is the number of hook-invocation
 sites that existed the day it was written. Legitimately deleting two of them
@@ -679,10 +709,13 @@ like `swarm.disjointness` outputs a refusal; the `git commit` in the same file i
 not its output. The registry's `owning_module` granularity puts many controls in
 one mutating file without any of them being the mutation.
 
-**The registry already names the world-changing role, and only twice.**
-`nervous_system_role: motor` — *"it changes the world"* — is carried by exactly
-**2 of 81** entries (against 39 `immune`, 27 `reflex`, 6 `conscience`, 6
-`sensor`, 1 `memory`):
+**The registry already names the world-changing role.** `nervous_system_role:
+motor` — *"it changes the world"* — was carried by exactly **2 of 81** entries
+when this section was written. The mutation census (§17) added six more, so it is
+now **8 of 90** (against 41 `immune`, 28 `reflex`, 6 `conscience`, 6 `sensor`, 1
+`memory`). The two originals are the table below; that this role was almost
+unused is the observation the section was making, and the census is what changed
+it:
 
 | control | class | authority | role | what it actually does |
 |---|---|---|---|---|
@@ -785,16 +818,70 @@ own site list is the sharpest evidence available that the guard is owed.
 
 ---
 
+## 17. THE MUTATION CENSUS — acted on for the SIX, and still not for the TWO
+
+§15 surveyed the mutation coverage gap and deliberately did not act on it. This
+section records what changed, and — more importantly — what did **not**.
+
+**Six write actions are now registered, at `execute`.** They were previously
+registered at **no authority at all**: every control sitting on those modules
+classified a *check* and not a *write*. Six controls sit on `record-packet.sh`
+and each one classifies a refusal that runs **before** the append.
+`tools.handoff_lock` classifies a fail-closed acquisition, not the lock.
+`maint.rotation_conservation` classifies a property of a *plan*, not the rename
+that applies it.
+
+**Why they are in this file at all.** `execute` is a rung, not a licence. **No
+class licenses it** — README §3's table is untouched and **0 of its 25 cells**
+reach the rung — so a control that performs a durable write exceeds its licence
+*by construction*. That is what these six rows record. **It is not a grant.**
+Nothing was re-authorised to make them legal, and nothing here proposes that
+Class A should reach `execute`; that question is the operator's, and these rows
+exist to make it askable with a list attached.
+
+**How to read the `the line that gates` column for these six.** It does not name
+a line that gates, because none of them gates. It names **the line that
+mutates** — the rename, the commit, the append, the stamp write, the lock
+release. The column header is kept as it is rather than split, because
+`scan-controls.sh` §8 and `control_registry_tests.sh` §19 both parse this table
+and neither should be rewritten to accommodate prose.
+
+**THE TWO THAT WERE NOT ACTED ON, and this is the load-bearing half of the
+section.** The survey found two further modules meeting the same mechanical test
+for `execute`, and **both are left exactly where they are**:
+
+| control | at | behaviour requires | why not moved |
+|---|---|---|---|
+| `maint.managed_set_replacement` | `advise` | `execute` | **FINDING-0001** — it is a PRE-EXISTING control |
+| `hooks.once_dedup` | `advise` | `execute` | **FINDING-0002** — same, and the better remedy is a new control, not a move |
+
+**Registering a NEW control is authorised build work; moving an EXISTING one is a
+re-authorisation and belongs to the operator.** §15 said exactly this and it is
+still true. `maint.managed_set_replacement` remains the sharpest entry in the
+whole census — it declares its own output as *"files copied into an installed
+repo, replacing prior managed copies"*, its failure behaviour as *"none that
+stops anything"*, and its rollback as *"none"* — and it is **still at `advise`**,
+because moving it would be indistinguishable, in the diff, from the census
+quietly granting itself the right to relabel the things it censuses.
+
+That restraint is **mechanically enforced, not merely promised**.
+`build-os/registry/governance_baseline.txt` pins the class, runtime authority and
+mismatch flag of all **81** controls that existed at `7daedee`; both
+`scan-mutators.sh check` and `tests/mutator_registry_tests.sh` §11 fail if any of
+them moves without that file being edited in the same diff. And each finding is
+checked against its own subject, so a remedy applied without updating the finding
+— or a finding deleted to make the accusation go away — fails too.
+
 ## What this list is not
 
-It is **not** a defect list. Thirteen of these fourteen entries cover controls
+It is **not** a defect list. Thirteen of these fourteen `gate` entries cover controls
 that have caught something or plausibly would; several are the best-argued code in the
 repository, and `check-adoption.sh` in particular reasons about its own
 thresholds more carefully than most production systems ever do.
 
 The claim is narrower, and it is the whole point of the registry: **fifty-six
 fitted constants, thresholds and prose regexes can stop a build here, grouped
-into fourteen registry entries, and until this file existed, nothing anywhere
+into fourteen `gate` registry entries, and until this file existed, nothing anywhere
 said so.** A reader of `check-adoption.sh` learns that its thresholds are a
 median of four packets only by reading a hundred lines of comment. A reader of
 `supervise.sh` learns nothing at all. Whether that authority should stand is a

@@ -41,7 +41,7 @@ That buys the same four properties the TSV was chosen for, at this shape:
 - **Greppable without a parser.** `grep '^class: C' control_registry.txt` counts
   the heuristics. `grep -B4 '^runtime_authority: gate'` finds what gates.
   `grep -c '^control: '` is the census size. The number worth reading first is
-  **`gate` on `unvalidated` evidence — 11 of 81**: eleven controls can stop the
+  **`gate` on `unvalidated` evidence — 11 of 90**: eleven controls can stop the
   build and nothing has established that any of them discriminates. The one-line
   `awk` that derives it is in `control_registry.txt`'s header.
 - **Diffable at field granularity.** Changing one control's authority is a
@@ -203,7 +203,7 @@ its mismatch at exit 0, silently, while the report went on naming it.
 **An entry is not a line.** Entries are cut at different granularities:
 `metrics.record.note_minimum` classifies one comparison, and
 `tests.nonvacuity_minimums` classifies a family of 34 fitted constants across 12
-test files. So "14 of 81 declare a mismatch" is a fact about this file's
+test files. So "20 of 90 declare a mismatch" is a fact about this file's
 granularity, not a count of the heuristics that can stop a build — that number is
 **56**, in `MISMATCHES.md`'s summary table. The family's membership is not
 trusted: `tests/control_registry_tests.sh` §21 rescans the tree for the shape and
@@ -307,12 +307,13 @@ Three of those rows carry the argument:
   `empirical_status` at the author's word.
 
   **The consequentialist half, derived rather than remembered.** Capping
-  `red_driven` at `advise` would put **68 of 81 controls out of licence in a
-  single edit — 49 of them newly**, on top of the 19 already named below. A
+  `red_driven` at `advise` would put **77 of 90 controls out of licence in a
+  single edit — 52 of them newly**, on top of the 25 already named below. A
   matrix that flags nearly everything discriminates nothing. (For scale, and not
-  to be confused with it: **56** is the number of controls whose
-  `empirical_status` is exactly `red_driven`, which is the figure CROSSWALK.md
-  uses for a different question.)
+  to be confused with it: **64** is the number of controls whose
+  `empirical_status` is exactly `red_driven`, and **68** the number whose status
+  *contains* it — the second is the figure CROSSWALK.md uses, for a different
+  question.)
 
 **There is no composite evidence score, and there will not be one.** The obvious
 shape is `q = w1*class + w2*evidence`, one number, one threshold. It is refused
@@ -352,8 +353,8 @@ build-os/tools/evidence-policy.sh matrix   # the two axes and the composed grid
 build-os/tools/evidence-policy.sh check    # the out-of-licence list; always exit 0
 ```
 
-- **19 of 81 controls are out of licence** under the composed matrix.
-- **14** of those the class axis already saw — they are exactly the 14 carrying
+- **25 of 90 controls are out of licence** under the composed matrix.
+- **20** of those the class axis already saw — they are exactly the 20 carrying
   `authority_mismatch: declared`, so the new axis reproduces the old finding
   rather than replacing it.
 - **5 are visible only to the evidence axis**, and they are the point of the
@@ -709,7 +710,7 @@ in `scan-controls.sh`, with its reason beside it, where `grep` finds it;
 `scan-controls.sh patterns` prints the list and its size, so an allowance
 quietly growing is visible without reading the file. **It is empty today.**
 
-The registry carries **287** `evidence_refs`. That number is not remembered: the
+The registry carries **307** `evidence_refs`. That number is not remembered: the
 same total was previously written down in three artefacts as 218, 184 and 184
 against a live 224, because each was a hand count frozen at a different moment.
 `tests/control_registry_tests.sh` §25 recomputes it from the registry and fails

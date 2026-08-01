@@ -5,7 +5,7 @@ much authority does it exercise?* This crosswalk answers the second question
 every control should be able to answer: **what universal function does it
 instantiate?**
 
-`neurocosmology_crosswalk.txt` binds each of the **81** registered controls to
+`neurocosmology_crosswalk.txt` binds each of the **90** registered controls to
 exactly one of **17** primitives, and records for each primitive what the
 bindings *miss*. `tests/neurocosmology_crosswalk_tests.sh` reconciles it against
 the census in both directions and refuses drift.
@@ -22,7 +22,7 @@ registry is right.
 
 ## 1. Why a second file, and not a field on each control record
 
-The obvious alternative was an eighteenth field on each of the 81 registry
+The obvious alternative was an eighteenth field on each of the 90 registry
 records. It was rejected on four grounds, three of which the registry's own
 `README.md` §1 already argues.
 
@@ -36,7 +36,7 @@ records. It was rejected on four grounds, three of which the registry's own
    `known_limitations`, is **per primitive** — 17 of them — not per control.
    It has no home in a control record, so a second store was needed regardless;
    the only real question was whether to *also* denormalise a `primitive:` field
-   into the census, which buys nothing and costs 81 record edits.
+   into the census, which buys nothing and costs 90 record edits.
 3. **The census schema is pinned.** `tests/control_registry_tests.sh` fixes the
    17 field names exactly. An eighteenth would mean loosening that guard for a
    non-census reason.
@@ -70,13 +70,13 @@ the concept without performing the function and **is not coverage**.
 | meaning_metric | 0 | 0 | 0 | 0 | — | — |
 | mass | 1 | 0 | 0 | 1 | A | advise |
 | valence | 0 | 0 | 0 | 0 | — | — |
-| agency | 5 | 2 | 2 | 1 | A, C | advise, gate |
+| agency | 11 | 8 | 2 | 1 | A, C | advise, gate, execute |
 | energy | 3 | 0 | 3 | 0 | C | advise, gate |
-| homeostasis | 22 | 1 | 21 | 0 | A | advise, gate |
+| homeostasis | 23 | 1 | 22 | 0 | A | advise, gate |
 | integration_bandwidth | 2 | 1 | 1 | 0 | C | advise, gate |
 | boundary | 4 | 0 | 4 | 0 | A | advise, gate |
 | ethical_admissibility | 2 | 1 | 0 | 1 | A | gate |
-| epistemic_quality | 25 | 12 | 12 | 1 | A, B, C | advise, gate |
+| epistemic_quality | 27 | 14 | 12 | 1 | A, B, C | advise, gate |
 | latent_state | 5 | 4 | 1 | 0 | A, C | advise, gate |
 | durability | 1 | 0 | 1 | 0 | A | gate |
 | gated_plasticity | 4 | 4 | 0 | 0 | A, B, C | advise, gate |
@@ -84,7 +84,7 @@ the concept without performing the function and **is not coverage**.
 | goal_ecology | 0 | 0 | 0 | 0 | — | — |
 | wisdom | 1 | 0 | 0 | 1 | C | advise |
 
-81 bindings: **29 instantiate, 46 proxy, 6 nominal**, and **only 8 of the 17
+90 bindings: **37 instantiate, 47 proxy, 6 nominal**, and **only 8 of the 17
 primitives hold even one instantiating binding.** Every cell in this table —
 the four counts *and* the `classes` and `authorities` columns — is recomputed
 from the artefact by §10 of the suite and fails on drift; nothing in it is
@@ -102,7 +102,7 @@ never in the disclosure. The demotions took `boundary`, `durability` and
 `ethical_admissibility` **nominal-only** alongside `mass` and `wisdom`.
 
 **Two thirds of the crosswalk sits in two primitives.** `epistemic_quality` and
-`homeostasis` hold 47 of 81 bindings. That concentration is the honest result,
+`homeostasis` hold 50 of 90 bindings. That concentration is the honest result,
 not a tidy one, and it says something plain: this system is overwhelmingly built
 to *check whether an artefact is sound* and *whether the tests still pass*.
 
@@ -117,7 +117,7 @@ framework's own vocabulary.
 - **`meaning_metric`** — nothing represents which futures matter. Acceptance
   criteria exist in quantity, but an acceptance criterion is a *binary predicate
   over an artefact that already exists*, and a meaning metric is a *measure over
-  futures*. There are 81 controls that can say "this is wrong" and none that can
+  futures*. There are 90 controls that can say "this is wrong" and none that can
   say "this is worth more than that".
 - **`valence`** — nothing computes benefit, harm, expected loss or user impact.
   `defects_gated` counts caught harm; a typo and a data-loss bug increment it
@@ -160,9 +160,11 @@ The prediction was that the **valuation half** — `meaning_metric`, `mass`,
 and nothing here orders or selects.
 
 **The mechanism is confirmed exactly.** `runtime_authority: rank` — the tier that
-exists to order work or select between options — is held by **0 of 81** controls,
-and so is `observe`: the ladder is still used at **two rungs of five**. 68 are
-`gate` and 13 are `advise`.
+exists to order work or select between options — is held by **0 of 90** controls,
+and so is `observe`: the ladder is now used at **three rungs of six**. 71 are
+`gate`, 13 are `advise`, and 6 are `execute` — the third rung arrived with the
+mutation census, and it is the first authority in this system that ACTS rather
+than judges.
 
 **The "every one answers yes/no about an artefact that already exists" half of
 this finding is no longer true, and the exception is worth naming rather than
@@ -197,8 +199,8 @@ The distinction that decides whether this crosswalk earns its place. Note that
 the concept and *is not coverage* — so it is never used below as loose English
 for "in name only". Ranked by how badly the `bound` column overstates `inst`:
 
-1. **`homeostasis` — 22 bound, 1 instantiating.** The worst overstatement in the
-   table. Seventeen of the twenty-two are *test suites*, and a suite's empirical
+1. **`homeostasis` — 23 bound, 1 instantiating.** The worst overstatement in the
+   table. Eighteen of the twenty-three are *test suites*, and a suite's empirical
    status is `red_driven`: a check written against a fixture written by the same
    author in the same hour mostly proves the two agree. A green suite is evidence
    that **planted** defects are caught, not that the system is healthy. There is
@@ -278,9 +280,9 @@ remains blind to it.** The scan's own scope is the second limit: twelve named
 files from one packet, so egress introduced anywhere else in the tree is
 invisible to it.
 
-**`epistemic_quality` — 25 bindings, 12 instantiating, and the count overstates
+**`epistemic_quality` — 27 bindings, 14 instantiating, and the count overstates
 the contact.**
-56 of 81 controls are `red_driven` and only **3** are `field_observed`. The
+68 of 90 controls are `red_driven` and only **3** are `field_observed`. The
 bindings divide sharply. A small group compares a claim against something the
 claimant did not write — `metrics.record.verify_git` against git numstat,
 `adoption.lane_size_check` against measured churn, `registry.discovery_rule`
@@ -293,7 +295,7 @@ twelve repeated characters,
 and seven separate "the scan found nothing" refusals prove only that a check was
 not blind — necessary for evidence, never sufficient. One binding,
 `maint.tripwire_coverage_scan`, is registered `refuted`: measured, and found not
-to discriminate. Reading "25 of 81" as dense epistemic coverage would be exactly
+to discriminate. Reading "27 of 90" as dense epistemic coverage would be exactly
 the overclaim this registry exists to prevent.
 
 **`boundary` — every boundary here is detective, not preventive, so 0 of 4
@@ -317,7 +319,7 @@ regressions.
 `packet_metrics.tsv` carries a `defects_escaped` column and it reads `-` in
 **all 6 of 6 rows**: the system built a place to record escaped regressions and
 has never recorded one. Nothing computes D₁/D₇/D₃₀/D₉₀, nothing measures rework,
-and `rollback_behavior` is a prose field on all 81 entries that no control ever
+and `rollback_behavior` is a prose field on all 90 entries that no control ever
 executes or verifies.
 
 **`collective_coherence` — coherence is enforced as non-collision.** All five

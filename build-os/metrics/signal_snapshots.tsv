@@ -1,0 +1,56 @@
+# signal-snapshot-v1
+#
+# A SIGNAL USED IN A DECISION, FROZEN AT THE MOMENT THE DECISION WAS TAKEN.
+# Append-only and digest-chained: each row's `digest` covers its own ten fields
+# plus the previous row's digest, so an edit to a historical value breaks that
+# row and every row after it. `record-decision.sh snapshot-verify` checks it.
+# TAMPER-EVIDENT, NOT TAMPER-PROOF — see that script's header for exactly what
+# that does and does not claim.
+#
+# WHY THE VALUE AND NOT A RECIPE. A later evaluation must never recompute a
+# historical signal against the current tree: that scores a decision nobody took,
+# on information nobody had. So the VALUE is stored, with the commit it was
+# frozen at and the derivation that produced it, and reading it consults no tree.
+#
+# THE THREE DERIVATIONS, AT derivation_version v1. These are the only three
+# signals currently derivable in this repository; the schema admits more and
+# nothing here pretends the set is complete.
+#
+#   dependency_unlock_count       the number of OTHER candidates in the same
+#                                 candidate set whose text names this candidate
+#                                 as subsuming or unblocking them, read from
+#                                 build-os/memory/current_state.md's
+#                                 "Next (candidates)" block at repository_commit.
+#   licence_state                 in_licence | out_of_licence | unregistered |
+#                                 not_applicable — the standing of the
+#                                 candidate's subject controls under
+#                                 build-os/tools/evidence-policy.sh check at
+#                                 repository_commit. `unregistered` is NOT a
+#                                 synonym for in_licence: it means the subject
+#                                 owns no entry, which is a different fact.
+#   declared_mismatch_proximity   the count of controls carrying
+#                                 `authority_mismatch: declared` whose
+#                                 owning_module is one of the candidate's subject
+#                                 modules, from control_registry.txt at
+#                                 repository_commit.
+#
+# WHAT THE FIRST TWELVE ROWS RECORD, AND IT IS NOT FLATTERING TO THE SIGNALS.
+# The selected candidate scored ZERO on dependency_unlock_count while a candidate
+# that scored 1 was not selected. The selection was the operator's ruling, and it
+# outranked the only ordering signal that existed. That is recorded rather than
+# smoothed over: the point of freezing signals is to be able to ask later whether
+# the signals were worth having, and a store that only ever agrees with the choice
+# cannot answer that question.
+snapshot_id	decision_id	captured_at	repository_commit	candidate_id	signal_name	signal_value	derivation_version	source_object_versions	evidence_refs	prev_digest	digest
+SIGNAL-SNAPSHOT-0001-unlock-mutation-census	DECISION-0007-p1-mutators-ids-telemetry	2026-08-01	7daedee	PACKET-0015-mutation-census	dependency_unlock_count	0	v1	build-os/memory/current_state.md@7daedee	build-os/memory/current_state.md:648	GENESIS	175e035e20fb7d96d0394acfa0b51eebab094186f31ee4317842136b9f423ad5
+SIGNAL-SNAPSHOT-0002-licence-mutation-census	DECISION-0007-p1-mutators-ids-telemetry	2026-08-01	7daedee	PACKET-0015-mutation-census	licence_state	unregistered	v1	build-os/tools/evidence-policy.sh@7daedee	build-os/tools/evidence-policy.sh	175e035e20fb7d96d0394acfa0b51eebab094186f31ee4317842136b9f423ad5	3b880f0b4cf57d48746d0cde2e2a381be14db145da6c006cbcecd8cdaf38c809
+SIGNAL-SNAPSHOT-0003-mismatch-mutation-census	DECISION-0007-p1-mutators-ids-telemetry	2026-08-01	7daedee	PACKET-0015-mutation-census	declared_mismatch_proximity	4	v1	build-os/registry/control_registry.txt@7daedee	build-os/registry/control_registry.txt	3b880f0b4cf57d48746d0cde2e2a381be14db145da6c006cbcecd8cdaf38c809	705dbea44512e60dc47edd4f1e048e9c2d358b8c543ce131677d1b69609d5615
+SIGNAL-SNAPSHOT-0004-unlock-citation-identity-anchor	DECISION-0007-p1-mutators-ids-telemetry	2026-08-01	7daedee	PACKET-0016-citation-identity-anchor	dependency_unlock_count	1	v1	build-os/memory/current_state.md@7daedee	build-os/memory/current_state.md:648	705dbea44512e60dc47edd4f1e048e9c2d358b8c543ce131677d1b69609d5615	98dc59d152f9c10a1b8f4719adda749edb8a7c130686cffd358c568cfff1ea2b
+SIGNAL-SNAPSHOT-0005-licence-citation-identity-anchor	DECISION-0007-p1-mutators-ids-telemetry	2026-08-01	7daedee	PACKET-0016-citation-identity-anchor	licence_state	out_of_licence	v1	build-os/tools/evidence-policy.sh@7daedee	build-os/tools/evidence-policy.sh	98dc59d152f9c10a1b8f4719adda749edb8a7c130686cffd358c568cfff1ea2b	633b4eb492f9db12635471a72f7b5ed7658af10319aa2a9af946dc3f7f051e6c
+SIGNAL-SNAPSHOT-0006-mismatch-citation-identity-anchor	DECISION-0007-p1-mutators-ids-telemetry	2026-08-01	7daedee	PACKET-0016-citation-identity-anchor	declared_mismatch_proximity	1	v1	build-os/registry/control_registry.txt@7daedee	build-os/registry/control_registry.txt	633b4eb492f9db12635471a72f7b5ed7658af10319aa2a9af946dc3f7f051e6c	b4c5b7d7f3e642895e38856654e05e5595eb83ed8938a4e616a3f36d95bcad08
+SIGNAL-SNAPSHOT-0007-unlock-chain-the-live-suite	DECISION-0007-p1-mutators-ids-telemetry	2026-08-01	7daedee	PACKET-0017-chain-the-live-suite	dependency_unlock_count	0	v1	build-os/memory/current_state.md@7daedee	build-os/memory/current_state.md:648	b4c5b7d7f3e642895e38856654e05e5595eb83ed8938a4e616a3f36d95bcad08	e51c612c6e4600525cd43488824f83a05db9d8e3b6fa4045bb20157e61641bc2
+SIGNAL-SNAPSHOT-0008-licence-chain-the-live-suite	DECISION-0007-p1-mutators-ids-telemetry	2026-08-01	7daedee	PACKET-0017-chain-the-live-suite	licence_state	in_licence	v1	build-os/tools/evidence-policy.sh@7daedee	build-os/tools/evidence-policy.sh	e51c612c6e4600525cd43488824f83a05db9d8e3b6fa4045bb20157e61641bc2	d41b5ac998f5d66c857b5b49bb061578ff68c833e9d0fd6317e459b3ca64a37e
+SIGNAL-SNAPSHOT-0009-mismatch-chain-the-live-suite	DECISION-0007-p1-mutators-ids-telemetry	2026-08-01	7daedee	PACKET-0017-chain-the-live-suite	declared_mismatch_proximity	1	v1	build-os/registry/control_registry.txt@7daedee	build-os/registry/control_registry.txt	d41b5ac998f5d66c857b5b49bb061578ff68c833e9d0fd6317e459b3ca64a37e	56689ea8a98910d185536b8899aaeac06d2a69f3c91f90dc709a4bef9cf05b1e
+SIGNAL-SNAPSHOT-0010-unlock-ladder-spelling-sweep	DECISION-0007-p1-mutators-ids-telemetry	2026-08-01	7daedee	PACKET-0018-ladder-spelling-sweep	dependency_unlock_count	0	v1	build-os/memory/current_state.md@7daedee	build-os/memory/current_state.md:648	56689ea8a98910d185536b8899aaeac06d2a69f3c91f90dc709a4bef9cf05b1e	f48646c482782e5584018a1ca716a46109c701aec5dad4c7288f9abac3d87455
+SIGNAL-SNAPSHOT-0011-licence-ladder-spelling-sweep	DECISION-0007-p1-mutators-ids-telemetry	2026-08-01	7daedee	PACKET-0018-ladder-spelling-sweep	licence_state	not_applicable	v1	build-os/tools/evidence-policy.sh@7daedee	build-os/tools/evidence-policy.sh	f48646c482782e5584018a1ca716a46109c701aec5dad4c7288f9abac3d87455	ebcbfc87ba9b3318454e0aeb1a367f4a6ecdcc6d610ce35c8d2549d0b9e206b4
+SIGNAL-SNAPSHOT-0012-mismatch-ladder-spelling-sweep	DECISION-0007-p1-mutators-ids-telemetry	2026-08-01	7daedee	PACKET-0018-ladder-spelling-sweep	declared_mismatch_proximity	0	v1	build-os/registry/control_registry.txt@7daedee	build-os/registry/control_registry.txt	ebcbfc87ba9b3318454e0aeb1a367f4a6ecdcc6d610ce35c8d2549d0b9e206b4	21b0fad523a6a1f7db7ec365490b5aaf03ee0479e3ced538f97734d3c89fe659

@@ -1,0 +1,81 @@
+# Build OS — findings.
+#
+# A FINDING IS A GAP SOMEBODY ELSE HAS TO CLOSE. It records that an artefact's
+# declared authority does not match its actual behaviour, names the remedy, names
+# who may apply it, and — the load-bearing part — DOES NOT APPLY IT.
+#
+# WHY THIS IS A FILE AND NOT A SENTENCE IN A RECEIPT. A finding written in prose
+# has two failure modes and this repository has hit both. It can be silently
+# DISCHARGED — somebody applies the remedy and the finding goes on standing,
+# accusing a state that no longer exists — or it can be silently DELETED, which
+# looks identical to having been fixed. Both are invisible in a diff of a long
+# document.
+#
+# So every finding is checked against its own subject:
+# tests/mutator_registry_tests.sh section 11 reads `observed_authority` from each
+# finding whose `remedy_applied` is `no`, reads the subject's LIVE authority from
+# control_registry.txt, and FAILS IF THEY DIFFER. A finding therefore cannot be
+# discharged without being edited, and cannot be edited without appearing in a
+# diff beside the change that discharged it.
+#
+# `authority_to_apply` IS ALWAYS `operator` HERE, and that is not a formality.
+# Every finding in this file proposes moving a control's runtime authority, which
+# is a re-authorisation. The registry's own README says it: exceeding the licence
+# is permitted and recorded, changing the authority is a governance action. A
+# builder that applied one of these would be doing the single thing the control
+# registry exists to prevent — which is why the suite also fails a finding that
+# claims any other authority_to_apply.
+#
+# One field per line; a blank line separates records; `#` at column 0 is a
+# comment. Ids are stable and immutable.
+#
+#   grep -c '^finding: '                     how many findings exist
+#   grep -B6 '^remedy_applied: no'           what is still open
+
+finding: FINDING-0001-managed-set-replacement-understated
+subject: maint.managed_set_replacement
+subject_kind: control
+observed_authority: advise
+required_authority: execute
+observed_at: 7daedee
+title: A control that copies files over a customer tree is registered at `advise`
+description: The entry declares its output as "files copied into an installed repo, replacing prior managed copies", its failure behaviour as "none that stops anything — it prints what it could not do and continues; it never exits non-zero", and its rollback as "none; a managed file's local edits are lost on install". `advise` means "its output may influence a human". Copying files over somebody's working tree does not influence a human; it changes the world, which is `execute` under the corrected ladder. The entry is not wrong about what it does — every one of those quotes is its own text — it is understated about what that amounts to.
+severity: the highest in this file. It is the only mutator in the census with NO rollback, and its blast radius is a tree that is not this repository.
+remedy: move maint.managed_set_replacement from `advise` to `execute`, set authority_mismatch: declared, add a row to MISMATCHES.md, and update governance_baseline.txt in the same commit
+remedy_applied: no
+authority_to_apply: operator
+why_not_applied: it is a PRE-EXISTING control. This packet was authorised to register new controls and explicitly not to re-authorise existing ones. Moving it would be indistinguishable, in the diff, from the census quietly granting itself the right to relabel the things it censuses.
+evidence_refs: build-os/registry/control_registry.txt; build-os/maintenance/install-maintenance.sh:79; build-os/registry/mutator_registry.txt
+notes: The brief asked for this entry to be examined specifically, and this is the examination. Note what does NOT follow from it: `execute` being the right rung does not mean the installer should be stopped, gated or changed. The finding is about the REGISTER being wrong, not about the installer being wrong.
+
+finding: FINDING-0002-hook-once-marker-understated
+subject: hooks.once_dedup
+subject_kind: control
+observed_authority: advise
+required_authority: execute
+observed_at: 7daedee
+title: The dedup marker is a durable-by-its-own-lights write registered as advice
+description: `hooks.once_dedup` classifies a DECISION — first-firing or already-fired — and that classification is fair at `advise`, because the caller branches on it and nothing is stopped. But the mechanism by which the decision is made is a `mkdir` of a directory outside the repository, and that write is the state the next invocation reads. Under a ladder that measures consequence, the write and the verdict are not the same act, and only the verdict is registered.
+severity: low, and stated as low rather than inflated to match the other finding. The marker suppresses duplicate output, destroys nothing, and dies with TMPDIR.
+remedy: either move hooks.once_dedup to `execute`, or — the better shape, and the one this file recommends — register the marker write as its own control the way MUT-0001..MUT-0006 were, leaving hooks.once_dedup at `advise` to classify the verdict it actually classifies
+remedy_applied: no
+authority_to_apply: operator
+why_not_applied: same reason as FINDING-0001 — it is a pre-existing control. The recommended remedy would create a NEW control, which IS authorised work, but choosing between the two shapes is a judgement about what the existing entry means, and that judgement belongs to whoever owns the entry.
+evidence_refs: build-os/registry/control_registry.txt; .claude/hooks/hook-once.sh:50; build-os/registry/mutator_registry.txt
+notes: Recorded because the alternative was an arbitrary line. This marker is byte-for-byte the same shape as MUT-0005's lock — a mkdir outside the repository making a side effect idempotent — and the lock was on the brief's list of mutators. Censusing one and not the other would have been a distinction with no rule behind it.
+
+finding: FINDING-0003-mutators-emit-no-receipt
+subject: MUT-0001-rotation-live-file-replacement
+subject_kind: mutator
+observed_authority: execute
+required_authority: execute
+observed_at: 7daedee
+title: The most consequential write in the system emits no receipt
+description: This finding does NOT claim an authority gap — observed and required are both `execute`, and the registration is correct. It records a different gap: `receipt_behavior` across the census is weakest exactly where the mutation is largest. rotate-memory.mjs replaces the live memory files and its only durable trace is the archive file it happens to create plus git. install-maintenance.sh writes into a customer tree and records nothing at all. specialist-handoff.sh writes its receipt outside the repository, where no reviewer of this repository will ever see it. Meanwhile record-packet.sh, whose write is a single reversible appended line, emits a row that names the commit it claims and is later reconciled against git.
+severity: moderate, and structural rather than local — it is a property of the census as a whole, which is only visible now that the census exists
+remedy: none proposed here, deliberately. A receipt standard for mutators is a design decision with real cost, and the census was built to make the question askable, not to answer it.
+remedy_applied: no
+authority_to_apply: operator
+why_not_applied: no remedy is proposed, so there is nothing to apply. It is recorded so that the observation survives the packet that made it.
+evidence_refs: build-os/registry/mutator_registry.txt
+notes: Kept in this file rather than in a receipt because a receipt is read once. The check in section 11 does not constrain this record beyond its shape — observed_authority equals required_authority, so the subject-state comparison is trivially satisfied — and that is correct: not every finding is an authority gap.

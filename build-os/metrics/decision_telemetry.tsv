@@ -1,0 +1,44 @@
+# decision-telemetry-v1
+#
+# WHAT WAS CHOSEN, WHY, WHAT IT COST, AND WHAT HAPPENED. One row per decision.
+# Written only by build-os/metrics/record-decision.sh, which refuses a row this
+# store cannot later be trusted about.
+#
+# ---------------------------------------------------------------------------
+# AN UNKNOWN IS NOT A ZERO, AND THAT IS THE WHOLE POINT OF THE COLUMN FORMAT.
+# ---------------------------------------------------------------------------
+# Every quantitative field is either the literal `unknown` or `<value>@<provenance>`
+# with provenance in measured / derived / reported. A BARE NUMBER IS REFUSED.
+# Omitting a field yields `unknown`, never 0, so the easy path is the honest one.
+# `0@measured` is legal and means something completely different from `unknown`:
+# zero fix rounds is a measurement, and nobody having counted is not.
+#
+# NOTHING HERE WAS BACK-FILLED BY INFERENCE. The historical rows carry `unknown`
+# in almost every quantitative column because those quantities were never
+# measured. The two exceptions are DECISION-0001's wall_minutes and
+# serial_minutes, marked `@derived`, and the derivation is stated so it is
+# reproducible: they are copied from build-os/metrics/packet_metrics.tsv's
+# `wall_min` and `serial_min` columns for the packet
+# `gravito_fanout_lanes_scaffold_release_a`, which is the only historical packet
+# whose row carries them. Every other packet's row records `-` in those columns,
+# and that store's own note says they "were never recorded and are left empty
+# rather than reconstructed from commit timestamps". That judgement is inherited
+# here rather than quietly reversed.
+#
+# THE `defect_classes_*` COLUMNS reference DEFECT-* ids from
+# build-os/registry/defect_classes.txt, `;`-separated. They record what was
+# DETECTED and what ESCAPED at the packet's gates, migrated from the receipts —
+# which is why they too are `unknown` wherever the receipt does not say.
+#
+# `selector` records WHO CHOSE, and it is not decoration: DECISION-0007 was
+# selected by the operator against the only ordering signal that existed, and a
+# later evaluation of whether the signals are worth having needs to know that the
+# signal was overruled rather than absent.
+decision_id	decision_time	candidate_ids	selected_candidate_id	selector	selection_reason	expected_outcome	signal_snapshot_ref	started_at	completed_at	wall_minutes	serial_minutes	agent_minutes	human_attention_minutes	model_calls	estimated_tokens	estimated_cost	estimated_energy	fix_rounds	review_rounds	defect_classes_introduced	defect_classes_detected	defect_classes_escaped	rework_count	rollback_count	result	durability_status
+DECISION-0001-fanout-lanes-scaffold-release	2026-07-29	PACKET-0007-lanes;PACKET-0008-scaffold-seeding;PACKET-0009-release-metadata	PACKET-0007-lanes;PACKET-0008-scaffold-seeding;PACKET-0009-release-metadata	operator	three items were mutually independent, so they were fanned out rather than sequenced	three packets close for one packet's wall-clock	unknown	unknown	unknown	13.7@derived	37.9@derived	unknown	unknown	unknown	unknown	unknown	unknown	unknown	unknown	unknown	unknown	unknown	unknown	unknown	shipped	durable
+DECISION-0002-census-gaps-egress-bandwidth	2026-07-31	PACKET-0010-census-gaps-egress-bandwidth	PACKET-0010-census-gaps-egress-bandwidth	operator	the census had named gaps and the egress/bandwidth pair was the largest of them	the named gaps close and the census stops undercounting itself	unknown	unknown	unknown	unknown	unknown	unknown	unknown	unknown	unknown	unknown	unknown	unknown	unknown	unknown	DEFECT-0001-stale-line-reference	unknown	unknown	unknown	shipped	durable
+DECISION-0003-evidence-policy-matrix	2026-07-31	PACKET-0011-evidence-policy-matrix	PACKET-0011-evidence-policy-matrix	operator	the licence table was one-dimensional, so evidence quality could not cap authority	a second axis exists and reports, without re-authorising anything	unknown	unknown	unknown	unknown	unknown	unknown	unknown	unknown	unknown	unknown	unknown	unknown	unknown	unknown	DEFECT-0001-stale-line-reference;DEFECT-0002-stale-remembered-count	unknown	unknown	unknown	shipped	durable
+DECISION-0004-authority-envelope	2026-08-01	PACKET-0012-authority-envelope	PACKET-0012-authority-envelope	operator	who granted what, in which deployment mode, until when, was recorded nowhere	a third axis exists and binds 0 findings until an envelope is written	unknown	unknown	unknown	unknown	unknown	unknown	unknown	unknown	unknown	unknown	unknown	unknown	unknown	unknown	DEFECT-0011-undeclared-active-packet	unknown	unknown	unknown	shipped	durable
+DECISION-0005-mismatch-refuted	2026-08-01	PACKET-0013-mismatch-refuted	PACKET-0013-mismatch-refuted	operator	two controls were measured and found not to discriminate	the two demotions are measured and refused, and nothing moves silently	unknown	unknown	unknown	unknown	unknown	unknown	unknown	unknown	unknown	unknown	unknown	unknown	unknown	unknown	unknown	DEFECT-0006-unchained-live-verification	unknown	unknown	shipped	durable
+DECISION-0006-ladder-semantics	2026-08-01	PACKET-0014-ladder-semantics	PACKET-0014-ladder-semantics	operator	the refuted-to-observe cap was an unreachable remedy for definitional reasons	observe is redefined by consequence and execute is added; no licence moves	unknown	unknown	unknown	unknown	unknown	unknown	unknown	unknown	unknown	unknown	unknown	unknown	unknown	unknown	DEFECT-0001-stale-line-reference;DEFECT-0006-unchained-live-verification	unknown	unknown	unknown	shipped	durable
+DECISION-0007-p1-mutators-ids-telemetry	2026-08-01	PACKET-0015-mutation-census;PACKET-0016-citation-identity-anchor;PACKET-0017-chain-the-live-suite;PACKET-0018-ladder-spelling-sweep	PACKET-0015-mutation-census	operator	the operator ruled it, and the ruling outranked the only ordering signal that existed: the selected candidate scored 0 on dependency_unlock_count while PACKET-0016 scored 1	every known mutator becomes visible to the authority model, and the first durable decision-data structures exist	SIGNAL-SNAPSHOT-0001-unlock-mutation-census;SIGNAL-SNAPSHOT-0002-licence-mutation-census;SIGNAL-SNAPSHOT-0003-mismatch-mutation-census	2026-08-01	unknown	unknown	unknown	unknown	unknown	unknown	unknown	unknown	unknown	unknown	unknown	unknown	DEFECT-0007-incomplete-enumeration;DEFECT-0003-duplicate-semantic-truth	unknown	unknown	unknown	in_flight	unknown

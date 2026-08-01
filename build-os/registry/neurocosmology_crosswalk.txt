@@ -41,8 +41,8 @@
 # strongest kind any ONE of them holds — and section 7 of the suite enforces
 # exactly that maximum, no more. So `binding_quality: instantiates` states that
 # at least one binding instantiates and states NOTHING about the others:
-# homeostasis carries it on the strength of 1 binding out of 22, and
-# epistemic_quality on 12 out of 25. Grepping `^binding_quality: instantiates`
+# homeostasis carries it on the strength of 1 binding out of 23, and
+# epistemic_quality on 14 out of 27. Grepping `^binding_quality: instantiates`
 # answers "which primitives have any real contact at all"; it does NOT answer
 # "which primitives are covered", and using it for the second question is the
 # same inflation the nominal rule above exists to refuse. For coverage, use the
@@ -78,7 +78,7 @@ system_representation: product objective; acceptance criteria; task value; strat
 observable_proxies: none
 binding_quality: unbound
 claimed_max_authority: none
-known_limitations: EMPTY, and the near-miss is named precisely so nobody fills the slot by relabelling. Acceptance criteria DO exist here in quantity — each of the seventeen test suites is a set of them — but an acceptance criterion is a BINARY PREDICATE OVER AN ARTEFACT THAT ALREADY EXISTS, and a meaning metric is a MEASURE OVER FUTURES. This registry holds 81 controls that can say "this is wrong" and none that can say "this is worth more than that". Binding the suites here would be exactly the inflation this crosswalk exists to refuse.
+known_limitations: EMPTY, and the near-miss is named precisely so nobody fills the slot by relabelling. Acceptance criteria DO exist here in quantity — each of the seventeen test suites is a set of them — but an acceptance criterion is a BINARY PREDICATE OVER AN ARTEFACT THAT ALREADY EXISTS, and a meaning metric is a MEASURE OVER FUTURES. This registry holds 90 controls that can say "this is wrong" and none that can say "this is worth more than that". Binding the suites here would be exactly the inflation this crosswalk exists to refuse.
 
 primitive: mass
 universal_function: what pulls hardest on behaviour
@@ -86,7 +86,7 @@ system_representation: priority; severity; urgency; dependency-unlock value; att
 observable_proxies: the fixed ordering of the speed report's sections
 binding_quality: nominal
 claimed_max_authority: advise
-known_limitations: NOMINAL ONLY, and it should be read as empty by anyone applying a strict standard. `metrics.report.disclosure_ordering` is the sole ordering of anything in the census, it takes `inputs: none`, and its order was chosen once by a human — so the system orders exactly one thing, a page layout, by constant. No control assigns severity, priority or urgency; the registry has no severity field; and `runtime_authority: rank` — the authority tier that exists precisely to order work or select between options — is held by ZERO of 81 controls, as is `observe`. Nothing here computes what pulls hardest from state.
+known_limitations: NOMINAL ONLY, and it should be read as empty by anyone applying a strict standard. `metrics.report.disclosure_ordering` is the sole ordering of anything in the census, it takes `inputs: none`, and its order was chosen once by a human — so the system orders exactly one thing, a page layout, by constant. No control assigns severity, priority or urgency; the registry has no severity field; and `runtime_authority: rank` — the authority tier that exists precisely to order work or select between options — is held by ZERO of 90 controls, as is `observe`. Nothing here computes what pulls hardest from state.
 
 primitive: valence
 universal_function: which directions are attractive and which are harmful
@@ -101,8 +101,8 @@ universal_function: the ability to produce movement
 system_representation: tools; permissions; authority leases; effective execution capability
 observable_proxies: PATH resolution of required binaries; the handoff lock's acquired or BUSY state and its pid liveness; the capability-profile subcommand
 binding_quality: instantiates
-claimed_max_authority: gate
-known_limitations: Five bindings. FOUR OF THEM ARE BINARY PRECONDITIONS — is the tool on PATH, is the lock free, is the subcommand valid. `tools.handoff_lock` is a genuine authority lease and the closest thing here to agency as a quantity, but it is one bit, and `tools.capability_profile_usage` is NOMINAL: it validates a subcommand's arguments, guarding the switch that sets effective capability without ever observing capability. Nothing represents degrees of capability and nothing models what an agent can actually accomplish. The fifth binding, `envelope.grant_composition`, is the only one that is not a binary precondition: it represents an authority lease as a STRUCTURE — issuer, actor, scope, granted authority, evidence basis, deployment mode, start, expiry, revocation, rollback — and its deployment mode is the only representation anywhere here of whether an output is consumed, confirmed by a person, acted on within bounds, or acted on freely. It is still a PROXY and the reason is the one below, which it does not escape: the lease it validates is DECLARED, nothing enforces it, and NO LIVE GRANT EXISTS — the store ships empty, so this binding is real machinery over an empty set. Decisively, and unchanged by it: the permission system that really constrains agent action is EXTERNAL to this repository, so the census is structurally blind to the largest determinant of agency in the running system.
+claimed_max_authority: execute
+known_limitations: ELEVEN BINDINGS, EIGHT INSTANTIATING — AND THE SHAPE OF THE PRIMITIVE CHANGED WHEN THE MUTATOR CENSUS LANDED. It carried five bindings until then, four of them binary preconditions; this record described that set and is rewritten because six `execute` bindings were added, not because a number moved. THE SIX ARE THE FIRST OCCUPANTS OF `execute` ANYWHERE IN THIS FILE: `maint.rotation_live_file_replacement`, `swarm.merge_commit_execution`, `metrics.record.store_append`, `metrics.decision.store_append`, `identity.stamp_write`, `tools.handoff_lock_lifecycle`. They are the reason this primitive is no longer described by preconditions: agency is the ability to PRODUCE MOVEMENT, and until these were registered the census bound only checks that ran BEFORE movement and never the movement itself. That is a real gain and it is smaller than it looks — each is one write site, classified; none measures capacity, and none is a quantity. THE PRECONDITIONS REMAIN AND REMAIN BINARY — is the tool on PATH, is the lock free, is the subcommand valid. `tools.handoff_lock` is a genuine authority lease and the closest thing here to agency as a quantity, but it is one bit, and `tools.capability_profile_usage` is NOMINAL: it validates a subcommand's arguments, guarding the switch that sets effective capability without ever observing capability. Nothing represents degrees of capability and nothing models what an agent can actually accomplish. `envelope.grant_composition` is the only binding that is neither a precondition nor a write: it represents an authority lease as a STRUCTURE — issuer, actor, scope, granted authority, evidence basis, deployment mode, start, expiry, revocation, rollback — and its deployment mode is the only representation anywhere here of whether an output is consumed, confirmed by a person, acted on within bounds, or acted on freely. It is still a PROXY and the reason is the one below, which it does not escape: the lease it validates is DECLARED, nothing enforces it, and NO LIVE GRANT EXISTS — the store ships empty, so this binding is real machinery over an empty set. Decisively, and unchanged by it: the permission system that really constrains agent action is EXTERNAL to this repository, so the census is structurally blind to the largest determinant of agency in the running system.
 
 primitive: energy
 universal_function: the capacity to act and to integrate
@@ -150,7 +150,7 @@ system_representation: evidence coverage; receipts; calibration; claim-state rec
 observable_proxies: git numstat recomputation of claimed row values; vacuity refusals across seven surfaces; occupancy and length floors on evidence rows; the tree-derived discovery rule
 binding_quality: instantiates
 claimed_max_authority: gate
-known_limitations: TWENTY-FIVE BINDINGS, AND THE COUNT OVERSTATES THE CONTACT. 56 of the 81 controls in this registry are `red_driven` and only 3 are `field_observed`, so most of what binds here has been shown to fire on a defect its own author planted, and nothing more. The bindings divide sharply. A small group compares a claim against something the claimant did not write — `metrics.record.verify_git` against git numstat, `adoption.lane_size_check` against measured churn, `registry.discovery_rule` against the tree — and those genuinely instantiate the primitive. The larger group checks SHAPE, OCCUPANCY, LENGTH or VACUITY: `adoption.boundary_manifest` validates that a manifest is well-formed and not that the boundary it declares is true, which is why it sits with its siblings `adoption.schema_invariant` and `adoption.store_validate` rather than above them; `metrics.record.note_minimum` passes twelve repeated characters, `adoption.junk_row_thresholds` scores a row of plausible fabrications as full, and seven separate "the scan found nothing" refusals prove only that a check was not blind — a necessary condition for evidence and never a sufficient one. `maint.tripwire_coverage_scan` is registered `refuted`: measured, and found not to discriminate. Nothing here is `calibrated` except two threshold controls fitted to n=4 packets of this repository's own history. Reading "25 of 81" as dense epistemic coverage would be the overclaim the registry exists to prevent.
+known_limitations: TWENTY-SEVEN BINDINGS, AND THE COUNT OVERSTATES THE CONTACT. 68 of the 90 controls in this registry are `red_driven` and only 3 are `field_observed`, so most of what binds here has been shown to fire on a defect its own author planted, and nothing more. The bindings divide sharply. A small group compares a claim against something the claimant did not write — `metrics.record.verify_git` against git numstat, `adoption.lane_size_check` against measured churn, `registry.discovery_rule` against the tree — and those genuinely instantiate the primitive. The larger group checks SHAPE, OCCUPANCY, LENGTH or VACUITY: `adoption.boundary_manifest` validates that a manifest is well-formed and not that the boundary it declares is true, which is why it sits with its siblings `adoption.schema_invariant` and `adoption.store_validate` rather than above them; `metrics.record.note_minimum` passes twelve repeated characters, `adoption.junk_row_thresholds` scores a row of plausible fabrications as full, and seven separate "the scan found nothing" refusals prove only that a check was not blind — a necessary condition for evidence and never a sufficient one. `maint.tripwire_coverage_scan` is registered `refuted`: measured, and found not to discriminate. Nothing here is `calibrated` except two threshold controls fitted to n=4 packets of this repository's own history. Reading "27 of 90" as dense epistemic coverage would be the overclaim the registry exists to prevent.
 
 primitive: latent_state
 universal_function: hidden state beneath the explicit claims
@@ -166,7 +166,7 @@ system_representation: D1, D7, D30 and D90 retention; rollback; rework; escaped 
 observable_proxies: byte conservation across a memory rotation
 binding_quality: proxies
 claimed_max_authority: gate
-known_limitations: ONE BINDING, AND IT INSTANTIATES NOTHING: it measures durability across a single TRANSFORMATION rather than across TIME, and it touches NONE of the five representations this record declares — not D1, D7, D30 or D90 retention, not rollback, not rework, not escaped regressions. `maint.rotation_conservation` proves no byte is lost when memory is rotated; it says nothing about whether anything survives a week. The temporal quantities the primitive names are not merely unmeasured — for one of them the INSTRUMENT EXISTS AND IS EMPTY: `packet_metrics.tsv` carries a `defects_escaped` column and it reads `-` in all 8 of 8 rows, so the system has built a place to record escaped regressions and has never recorded one. Nothing computes D1, D7, D30 or D90. Nothing measures rework. And `rollback_behavior` is a prose field on every one of the 81 registry entries that no control ever executes, tests or verifies.
+known_limitations: ONE BINDING, AND IT INSTANTIATES NOTHING: it measures durability across a single TRANSFORMATION rather than across TIME, and it touches NONE of the five representations this record declares — not D1, D7, D30 or D90 retention, not rollback, not rework, not escaped regressions. `maint.rotation_conservation` proves no byte is lost when memory is rotated; it says nothing about whether anything survives a week. The temporal quantities the primitive names are not merely unmeasured — for one of them the INSTRUMENT EXISTS AND IS EMPTY: `packet_metrics.tsv` carries a `defects_escaped` column and it reads `-` in all 8 of 8 rows, so the system has built a place to record escaped regressions and has never recorded one. Nothing computes D1, D7, D30 or D90. Nothing measures rework. And `rollback_behavior` is a prose field on every one of the 90 registry entries that no control ever executes, tests or verifies.
 
 primitive: gated_plasticity
 universal_function: changing the rules safely
@@ -771,3 +771,66 @@ class: A
 runtime_authority: gate
 binding_kind: proxies
 rationale: Test state over the authority envelope: that the store ships empty of live grants, that every refusal state really refuses, that the deployment modes are strictly ordered, that nothing is written during a run, and that both readings of the S1 collision are recorded while neither is adopted. It binds here rather than to epistemic_quality for the same reason the other sixteen suites do: a suite's function is property preservation, and its own empirical status is red_driven.
+
+control: maint.rotation_live_file_replacement
+binds_to: agency
+class: A
+runtime_authority: execute
+binding_kind: instantiates
+rationale: THE FIRST BINDING IN THIS FILE AT `execute`, and agency's universal_function — "the ability to produce movement" — is met literally rather than by analogy: this control IS the movement. It renames a staged file onto the live memory file, and nothing about its output is a judgement that something may happen. Note what it does NOT bind: `durability`, which is where `maint.rotation_conservation` sits, because conservation is a property of the PLAN and this is the act that applies it. The two are deliberately separated so that "the plan conserves blocks" and "the rename happened" cannot be mistaken for one claim.
+
+control: swarm.merge_commit_execution
+binds_to: agency
+class: A
+runtime_authority: execute
+binding_kind: instantiates
+rationale: Produces a commit, which is movement in the most literal sense this repository has: a new object in git that did not exist before. It binds to agency and not to boundary — "which movements are permitted" — because the permission question is answered by swarm.merge_preconditions and swarm.disjointness upstream of it. By the time this control acts, the movement is already permitted; it is the acting that is classified here.
+
+control: metrics.record.store_append
+binds_to: agency
+class: A
+runtime_authority: execute
+binding_kind: instantiates
+rationale: Appends a row and, when the store is absent, creates it. It is agency rather than `latent_state` or `epistemic_quality` — where the six validating controls on the same module sit — because those judge whether the row may be written and this one writes it. The whole point of the census that produced this binding is that those six were classified and this one was not.
+
+control: identity.stamp_write
+binds_to: agency
+class: A
+runtime_authority: execute
+binding_kind: instantiates
+rationale: Writes the identity stamp into an installed tree. Its verifying sibling `identity.stamp_and_verify` binds to `ethical_admissibility`, because detecting tampering is a judgement about what is permissible; producing the artefact is not a judgement at all. This is the clearest pair in the file for the distinction the mutation census exists to draw: the same module, one control that decides and one control that acts.
+
+control: tools.handoff_lock_lifecycle
+binds_to: agency
+class: A
+runtime_authority: execute
+binding_kind: instantiates
+rationale: Creates and releases the lock directory and appends the handoff log. `tools.handoff_lock`, which binds to agency as well, classifies the fail-closed BUSY refusal — a decision about whether movement may occur. This classifies the lock's creation and removal, which is the movement. It is the only binding in this file whose durable effects land entirely outside the repository, under $HOME/.claude.
+
+control: metrics.decision.store_append
+binds_to: agency
+class: A
+runtime_authority: execute
+binding_kind: instantiates
+rationale: Appends a telemetry row or a digest-chained snapshot row. It binds to agency rather than to `latent_state` — hidden state beneath the explicit claims, where a record of what was really decided might plausibly sit — because this control's function is the writing, not the recording. What is recorded is the concern of `metrics.decision.schema_invariant`, which refuses a row whose provenance cannot be traced.
+
+control: registry.mutator_census
+binds_to: epistemic_quality
+class: A
+runtime_authority: gate
+binding_kind: instantiates
+rationale: Its function is making the system's model of itself match the tree — which is epistemic_quality's universal_function, "how good the system's contact with reality is", applied reflexively. `registry.discovery_rule` binds here for the same reason one layer along. It instantiates rather than proxies because it does not observe a stand-in: it reads the stores and the live registry directly and refuses on the disagreement, including the disagreement between a finding and the state that finding claims to have observed.
+
+control: metrics.decision.schema_invariant
+binds_to: epistemic_quality
+class: A
+runtime_authority: gate
+binding_kind: instantiates
+rationale: Refuses a quantitative value carrying no provenance, and writes `unknown` rather than 0 for anything omitted. That is contact with reality enforced at the point of recording: a store that cannot distinguish an unmeasured quantity from a measured zero has worse contact with reality than an empty one, because its numbers have a shape and no referent. `metrics.record.schema_invariant` binds here for the same reason.
+
+control: suite.mutator_registry
+binds_to: homeostasis
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Test state over the mutator census, the id substrate, defect recurrence, telemetry unknowns and snapshot immutability. It binds here rather than to epistemic_quality for the same reason the other fifteen suites do: a suite's function is property preservation, and its own empirical status is red_driven.

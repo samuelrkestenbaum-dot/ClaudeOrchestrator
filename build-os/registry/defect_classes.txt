@@ -1,0 +1,284 @@
+# Build OS — defect classes and their occurrences.
+#
+# WHAT THIS EXISTS AGAINST. Recurrence was trapped in prose. build-os/memory/residue.md
+# carries items (aa)–(ss) in English, and English cannot be counted: a defect that
+# has happened once and a defect that has happened five times look identical to a
+# reader and identical to a grep. So "this keeps happening" was an impression
+# somebody formed by reading, and impressions do not survive a change of reader.
+#
+# The whole point of this file is that `query(defect_class_id)` returns a NUMBER.
+#
+# TWO RECORD SHAPES, one field per line, a blank line between records:
+#   `defect_class:` — the recurring kind. Stable id, immutable.
+#   `occurrence:`   — one instance of that kind, at one time, in one packet.
+#
+# THE MIGRATION IS DELIBERATELY PARTIAL, AND SAYING SO IS THE HONEST PART. This
+# file does NOT normalise residue.md. It seeds the twelve classes demonstrated in
+# the session that produced it, and migrates ENOUGH OCCURRENCES TO PROVE THE QUERY
+# — which is a different and much smaller claim than "the history is now
+# structured". The classes are real, the occurrences recorded here are real and
+# each cites its evidence, and everything else in residue.md is still prose.
+#
+# THE MIGRATION PATH FOR THE REST, so that "partial" is a plan and not an excuse:
+#   1. An item of residue.md maps to an OCCURRENCE, not to a class. Most items are
+#      one instance of a class already registered here.
+#   2. Give it the next `OCCURRENCE-NNNN` and fill `defect_class_id`,
+#      `packet_id` and `evidence_refs` — those three are what make it countable.
+#      The rest may be `unknown`; an occurrence with honest gaps beats an
+#      occurrence that was not migrated.
+#   3. A residue item that fits no registered class needs a new
+#      `DEFECT-NNNN-<slug>` FIRST. Do not widen an existing class's meaning to
+#      absorb it: a class that absorbs everything counts nothing.
+#   4. Leave the prose in residue.md. This file is an index over the history, not
+#      a replacement for it, and deleting the narrative to make the index look
+#      complete would lose the only account of WHY each of these happened.
+#
+# WHAT A COUNT FROM THIS FILE MEANS, AND WHAT IT DOES NOT. It is a count of what
+# has been MIGRATED, not of what has HAPPENED. Because migration is partial, every
+# count here is a LOWER BOUND — a class showing two occurrences may have had six.
+# That asymmetry is safe in one direction only: this file can prove a defect
+# recurs, and it can NEVER prove one did not.
+#
+#   grep -c '^defect_class: '                       how many kinds are registered
+#   grep -c '^occurrence: '                         how many instances are migrated
+#   scan-mutators.sh query DEFECT-0001-…            the instances of one kind
+#   scan-mutators.sh recurrence                     every kind with more than one
+
+# =============================================================================
+# THE CLASSES. Twelve, all demonstrated in the session that produced this file.
+# =============================================================================
+
+defect_class: DEFECT-0001-stale-line-reference
+title: A reference to a `path:line` that no longer names what it named
+root_cause_class: reference_by_position
+description: A citation identifies its subject by POSITION. Any edit above that line moves the subject and leaves the citation pointing at whatever slid into place. The citation still RESOLVES, so every check that asks "does this line exist" passes. This is the most-recurring defect in this repository's history.
+detection_signature: a cited line whose content no longer matches the claim made about it; NOT detectable by resolvability, which is what scan-controls.sh actually checks
+migration_status: seeded_partial
+
+defect_class: DEFECT-0002-stale-remembered-count
+title: A count quoted from memory rather than derived from the artefact
+root_cause_class: remembered_not_derived
+description: A number written into prose — "14 entries", "56 sites", "19 of 81" — that was true when written and is not re-derived when the artefact changes. The prose and the artefact drift apart silently because nothing compares them.
+detection_signature: a literal count in prose with no test deriving it from the thing counted
+migration_status: seeded_partial
+
+defect_class: DEFECT-0003-duplicate-semantic-truth
+title: The same fact stored in two places with no reconciliation between them
+root_cause_class: unreconciled_redundancy
+description: Two artefacts each assert the same fact. Redundancy is not itself the defect — this repository uses it deliberately, in the crosswalk and in the governance baseline — the defect is redundancy WITHOUT a check that compares the copies. Then one is edited, the other is not, and both continue to read as authoritative.
+detection_signature: a value present in two files with no test asserting they are equal
+migration_status: seeded_partial
+
+defect_class: DEFECT-0004-guard-reconciles-labels-not-arguments
+title: A guard that compares names while the thing that matters is the values
+root_cause_class: checks_the_wrong_property
+description: A check reconciles identifiers, labels or presence, and never reaches the arguments, thresholds or content those labels stand for. It goes green on a change that alters behaviour completely, because the labels did not move.
+detection_signature: a guard whose assertions are all about existence or naming and none about a value
+migration_status: seeded_partial
+
+defect_class: DEFECT-0005-check-matches-wrong-output
+title: A check asserting against output that is not the output under test
+root_cause_class: checks_the_wrong_property
+description: The assertion reads a different stream, a different file or a different invocation than the one whose behaviour is claimed. It passes and it proves nothing about the subject.
+detection_signature: an assertion whose subject and whose source are not the same object
+migration_status: seeded_partial
+
+defect_class: DEFECT-0006-unchained-live-verification
+title: A verification that exists but that nothing runs
+root_cause_class: discoverable_only
+description: A suite, a scanner or a check is written, works, and is wired into no command anybody actually runs. It protects only whoever already knows it exists — which is the author, on the day they wrote it.
+detection_signature: an executable check that no aggregate command invokes
+migration_status: seeded_partial
+
+defect_class: DEFECT-0007-incomplete-enumeration
+title: A list that presents itself as exhaustive and is not
+root_cause_class: unbounded_claim
+description: A set is enumerated — patterns, cases, files, mutators — and the enumeration is believed to be complete because it is written down. Nothing derives it from the tree, so members added later are silently outside it.
+detection_signature: a hand-maintained list with no reconciliation against an independent scan
+migration_status: seeded_partial
+
+defect_class: DEFECT-0008-incomplete-application
+title: A fix applied to some instances of a pattern and not to all of them
+root_cause_class: unbounded_claim
+description: A defect is understood and corrected where it was noticed. The same pattern elsewhere is left alone, because the sweep that found the first instance was a reading rather than a search.
+detection_signature: a corrected instance of a pattern coexisting with uncorrected instances of the same pattern
+migration_status: seeded_partial
+
+defect_class: DEFECT-0009-silently-truncated-help-range
+title: A range or slice whose bounds silently stop covering their subject
+root_cause_class: reference_by_position
+description: A `sed -n 'A,Bp'` help range, a head/tail bound or a slice that was correct when written and now truncates its subject because the subject grew. It emits output, exits 0, and the missing part is invisible to anybody who has not read the original.
+detection_signature: a hard-coded line range over a file that is edited independently of it
+migration_status: seeded_partial
+
+defect_class: DEFECT-0010-same-model-review-correlation
+title: A review whose independence is assumed rather than established
+root_cause_class: correlated_judgement
+description: Two gates that are supposed to be independent share the reasoning that produced the artefact, so they fail in correlated ways and agree on exactly the errors neither can see. Concurrency does not fix it; the passes are parallel but the blind spot is shared.
+detection_signature: two gates that agree without either exercising the artefact
+migration_status: seeded_partial
+
+defect_class: DEFECT-0011-undeclared-active-packet
+title: Work performed with no packet declared, passing a guard that only refuses two
+root_cause_class: gate_permits_the_null_case
+description: `bandwidth.active_packet_singleton` refuses TWO declared packets and permits ZERO. Work that simply omits its declaration passes clean, so the guard against doing too much at once is silent about doing it undeclared.
+detection_signature: a cardinality gate with an upper bound and no lower bound
+migration_status: seeded_partial
+
+defect_class: DEFECT-0012-transient-evidence-destroyed-on-failure
+title: Evidence deleted by the cleanup path that runs when the thing fails
+root_cause_class: cleanup_outranks_diagnosis
+description: A fixture, a work directory or a log lives under a `trap ... EXIT` that removes it. On success that is tidy. On FAILURE it destroys precisely the evidence needed to diagnose the failure, and the failure is the only case where anybody wanted it.
+detection_signature: diagnostic state created inside a scope whose unconditional cleanup outlives the failure
+migration_status: seeded_partial
+
+# =============================================================================
+# THE OCCURRENCES. Migrated to prove the query, not to complete the history.
+# `packet_id` uses the packet's own name where one exists, in the PACKET
+# namespace; `unknown` is written where a value is genuinely not known, and never
+# guessed.
+# =============================================================================
+
+occurrence: OCCURRENCE-0001
+defect_class_id: DEFECT-0001-stale-line-reference
+packet_id: PACKET-0001-gravito-census-gaps-egress-bandwidth-a
+detected_stage: qa
+escaped_stage: builder
+affected_objects: build-os/registry/control_registry.txt; build-os/registry/MISMATCHES.md
+root_cause_class: reference_by_position
+symptom: evidence_refs cited line numbers that had moved after edits above them, while every ref still resolved inside its file
+prevented_by: nothing — scan-controls.sh checks that a ref RESOLVES, never that it names the same content
+could_have_been_prevented_by: identity by content anchor or digest rather than by line number, so that a moved line is a changed reference rather than a silent one
+evidence_refs: build-os/receipts/gravito_census_gaps_egress_bandwidth_a.md
+
+occurrence: OCCURRENCE-0002
+defect_class_id: DEFECT-0001-stale-line-reference
+packet_id: PACKET-0002-gravito-evidence-policy-matrix-a
+detected_stage: reviewer
+escaped_stage: builder
+affected_objects: build-os/registry/MISMATCHES.md
+root_cause_class: reference_by_position
+symptom: table rows in the mismatch report named a gating line whose number no longer matched the construct described
+prevented_by: nothing mechanical — a reviewer read the cited lines by hand
+could_have_been_prevented_by: the same content-anchor identity; a table row is a projection, and a projection keyed on a line number reintroduces the position it was meant to abstract over
+evidence_refs: build-os/receipts/gravito_evidence_policy_matrix_a.md
+
+occurrence: OCCURRENCE-0003
+defect_class_id: DEFECT-0001-stale-line-reference
+packet_id: PACKET-0004-gravito-ladder-semantics-a
+detected_stage: qa
+escaped_stage: builder
+affected_objects: build-os/registry/control_registry.txt
+root_cause_class: reference_by_position
+symptom: a third consecutive packet shipped a citation whose line had moved; the packet brief for the sequence records seven consecutive packets hitting this class in some form
+prevented_by: nothing — the same resolvability-only check passed it again
+could_have_been_prevented_by: this file's own rule, applied to citations: line numbers are navigation hints, never identity
+evidence_refs: build-os/receipts/gravito_ladder_semantics_a.md
+
+occurrence: OCCURRENCE-0004
+defect_class_id: DEFECT-0006-unchained-live-verification
+packet_id: PACKET-0003-gravito-mismatch-refuted-a
+detected_stage: escaped_to_head
+escaped_stage: qa
+affected_objects: build-os/packets/active_packet.md; build-os/maintenance/run-tests.sh
+root_cause_class: discoverable_only
+symptom: ./build-os/maintenance/run-tests.sh went 143/144 at commit 2df61ae AND THAT COMMIT WAS PUSHED; the suite is not chained into tests/build_os_tests.sh and the close brief did not ask for it, so nothing ran it
+prevented_by: nothing — the failing suite existed, worked, and was invoked by no aggregate command
+could_have_been_prevented_by: chaining the maintenance suite into the repo suite command, or naming it explicitly in every close checklist
+evidence_refs: build-os/receipts/gravito_ladder_semantics_a.md; build-os/maintenance/run-tests.sh
+
+occurrence: OCCURRENCE-0005
+defect_class_id: DEFECT-0011-undeclared-active-packet
+packet_id: PACKET-0005-gravito-authority-envelope-a
+detected_stage: reviewer
+escaped_stage: builder
+affected_objects: build-os/packets/active_packet.md; build-os/tools/bandwidth-check.sh
+root_cause_class: gate_permits_the_null_case
+symptom: an entire packet was built while active_packet.md still read NO PACKET IN FLIGHT, and the singleton guard passed because it refuses two declarations and permits zero
+prevented_by: nothing — the guard's lower bound does not exist
+could_have_been_prevented_by: a lower bound on the same cardinality check, refusing zero declared packets while a build is in flight
+evidence_refs: build-os/receipts/gravito_authority_envelope_a.md
+
+occurrence: OCCURRENCE-0006
+defect_class_id: DEFECT-0006-unchained-live-verification
+packet_id: PACKET-0004-gravito-ladder-semantics-a
+detected_stage: builder
+escaped_stage: none
+affected_objects: build-os/maintenance/run-tests.sh
+root_cause_class: discoverable_only
+symptom: the same unchained maintenance suite had to be run by hand again, one packet later, because nothing had been done to make it run automatically
+prevented_by: an explicit instruction in the packet brief — a human remembering, which is the control this class describes the absence of
+could_have_been_prevented_by: chaining it, or a close gate that refuses a receipt naming no run of it
+evidence_refs: build-os/receipts/gravito_ladder_semantics_a.md
+
+occurrence: OCCURRENCE-0007
+defect_class_id: DEFECT-0002-stale-remembered-count
+packet_id: PACKET-0002-gravito-evidence-policy-matrix-a
+detected_stage: qa
+escaped_stage: builder
+affected_objects: build-os/registry/MISMATCHES.md; build-os/registry/README.md
+root_cause_class: remembered_not_derived
+symptom: counts quoted in prose — the entry total and the hand-counted sites total — did not track the artefact they described
+prevented_by: control_registry_tests.sh section 25, which derives any stated ref TOTAL from the live count, added in response
+could_have_been_prevented_by: the same derivation applied to every stated count rather than to the one that was noticed
+evidence_refs: build-os/receipts/gravito_evidence_policy_matrix_a.md
+
+occurrence: OCCURRENCE-0008
+defect_class_id: DEFECT-0007-incomplete-enumeration
+packet_id: PACKET-0006-gravito-p1-mutators-ids-telemetry-a
+detected_stage: builder
+escaped_stage: none
+affected_objects: build-os/registry/mutator_registry.txt
+root_cause_class: unbounded_claim
+symptom: the packet brief named five mutators and instructed that the list be confirmed by survey rather than trusted; the survey found two more of the same shape, .claude/hooks/hook-once.sh and build-os/maintenance/install-maintenance.sh
+prevented_by: the brief's own instruction to survey — caught before the census was written, so nothing escaped
+could_have_been_prevented_by: nothing earlier; this is the class working as intended, recorded because a caught instance is evidence about the class exactly as an escaped one is
+evidence_refs: build-os/registry/mutator_registry.txt; build-os/packets/active_packet.md
+
+occurrence: OCCURRENCE-0009
+defect_class_id: DEFECT-0003-duplicate-semantic-truth
+packet_id: PACKET-0006-gravito-p1-mutators-ids-telemetry-a
+detected_stage: builder
+escaped_stage: none
+affected_objects: build-os/registry/mutator_registry.txt
+root_cause_class: unreconciled_redundancy
+symptom: the record shape as briefed carried both a record key and a `stable_mutator_id` field holding the same value, which is this class exactly
+prevented_by: caught while writing the store; the key IS the id, and no field repeats it
+could_have_been_prevented_by: the rule this file now states — redundancy is permitted only where a test compares the copies, as with runtime_authority, which IS reconciled against the live registry
+evidence_refs: build-os/registry/mutator_registry.txt
+
+occurrence: OCCURRENCE-0010
+defect_class_id: DEFECT-0001-stale-line-reference
+packet_id: PACKET-0006-gravito-p1-mutators-ids-telemetry-a
+detected_stage: reviewer
+escaped_stage: builder
+affected_objects: build-os/registry/MISMATCHES.md
+root_cause_class: reference_by_position
+symptom: THE PACKET THAT REGISTERED THIS CLASS SHIPPED AN INSTANCE OF IT. Inserting one chain_suite line shifted ten citations into tests/build_os_tests.sh; nine were repointed and the pair in section 9 was half-corrected — the sentence's first ref was moved to :962 while the bare `:939` and `:961` in the very next line were left, so the entry named a comment line as the definition of PIN_MIN_SITES and a loop terminator as its test
+prevented_by: nothing — scan-controls.sh passed all three, because a comment and a loop terminator both RESOLVE; this class's own detection_signature says exactly that, and it was written in this packet
+could_have_been_prevented_by: a sweep keyed on the CONTENT being repointed rather than on the number being replaced — the bare `:NNN` form carries no path, so a grep for the corrected filename or line cannot reach it, which is the specific gap that let a half-correction look complete
+evidence_refs: build-os/registry/MISMATCHES.md; build-os/registry/defect_classes.txt
+
+occurrence: OCCURRENCE-0011
+defect_class_id: DEFECT-0002-stale-remembered-count
+packet_id: PACKET-0006-gravito-p1-mutators-ids-telemetry-a
+detected_stage: reviewer
+escaped_stage: builder
+affected_objects: build-os/registry/CROSSWALK.md; build-os/registry/README.md; CHANGELOG.md; build-os/registry/neurocosmology_crosswalk.txt
+root_cause_class: remembered_not_derived
+symptom: the census grew from 81 to 90 controls and SIXTEEN prose counts did not follow — five `81` sites in CROSSWALK.md including a distribution sentence CONTRADICTING THE MARKDOWN TABLE ONE LINE ABOVE IT, the red_driven counterfactual and the exactly-red_driven figure in README.md, a self-hit tally in CHANGELOG.md that reported seven shifted citations and four silently wrong where the repo-wide census gives ten and seven, and SEVEN MORE IN THE SOURCE ARTEFACT neurocosmology_crosswalk.txt WHICH THE FIRST SWEEP MISSED ENTIRELY — five known_limitations counts, one prose enumeration describing agency as five bindings when it now holds eleven, and two binding counts in the FILE HEADER, a form no known_limitations sweep reaches. The derived doc was swept and the artefact it derives from was not
+prevented_by: nothing for prose — section 10 of neurocosmology_crosswalk_tests.sh recomputes every CELL of the table cell-by-cell and would have failed on drift, and the stale sentence sits one line beneath that table, outside the guard
+could_have_been_prevented_by: deriving each stated count from the artefact at test time, as control_registry_tests.sh section 25 already does for the ref total; every number corrected here was re-derived, and the CHANGELOG figure shows the failure is not only staleness — a count can be wrong when first written, in the direction that flatters the author
+evidence_refs: build-os/registry/CROSSWALK.md; build-os/registry/README.md; CHANGELOG.md; build-os/registry/neurocosmology_crosswalk.txt
+
+occurrence: OCCURRENCE-0012
+defect_class_id: DEFECT-0008-incomplete-application
+packet_id: PACKET-0006-gravito-p1-mutators-ids-telemetry-a
+detected_stage: reviewer
+escaped_stage: builder
+affected_objects: build-os/registry/README.md; build-os/registry/control_registry.txt
+root_cause_class: unbounded_claim
+symptom: THE PACKET THAT REGISTERED THIS CLASS SHIPPED AN INSTANCE OF IT. README section 3 was updated in this same diff to the live evidence-policy finding of 25 of 90 with 20 class-visible, and the notes field of the evidence.policy_matrix record — which states the same two derivations inside the census itself — was left reading 19 of 81 and 14
+prevented_by: nothing — the two copies are prose in different files and no test compares them, which is DEFECT-0003's condition holding underneath this instance
+could_have_been_prevented_by: searching for the pattern rather than reading for it; the corrected instance and the uncorrected one were edited in the same commit, which is this class's detection_signature verbatim
+evidence_refs: build-os/registry/README.md; build-os/registry/control_registry.txt

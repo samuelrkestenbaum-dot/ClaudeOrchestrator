@@ -1,0 +1,115 @@
+# Build OS — governance baseline.
+#
+# WHAT THIS IS FOR. Registering a NEW control is authorised build work. Moving an
+# EXISTING control's class or its runtime authority is a GOVERNANCE act and
+# belongs to the operator. Those two are hard to tell apart in a diff of a
+# 1500-line stanza file, and "we only added entries" is exactly the sentence
+# somebody says while an old entry quietly moved a rung.
+#
+# So this file pins, for every control that existed at the moment it was written,
+# the three fields that constitute a re-authorisation: `class`,
+# `runtime_authority`, `authority_mismatch`. tests/mutator_registry_tests.sh
+# section 11 requires every id named here to still carry exactly these values.
+#
+# HOW THE TWO CASES DIFFER, MECHANICALLY:
+#   * a NEW control is simply ABSENT from this file, and nothing fails;
+#   * an EXISTING control that moves fails, and the only way to make it pass is
+#     to edit a line HERE — in a small artefact, in the diff, where a reviewer
+#     reads it beside the change that caused it.
+#
+# It is deliberately redundant with control_registry.txt, for the same reason
+# neurocosmology_crosswalk.txt copies class and runtime_authority: two files that
+# can be checked against each other detect a drift that one file cannot. WHERE
+# THEY DISAGREE, THIS FILE IS NOT THE AUTHORITY — the registry is. This file is
+# the record of what the registry said before, and disagreeing with it is a claim
+# that needs a reason, not an error in itself.
+#
+# THIS FILE GRANTS NOTHING AND DEMOTES NOTHING. It creates no control, changes no
+# authority and licenses no rung. Every row is a copy.
+#
+# Written at 7daedee, the base of gravito_p1_mutators_ids_telemetry_a, and
+# covering every control registered at that commit. Format, tab-separated:
+#
+#   control<TAB>class<TAB>runtime_authority<TAB>authority_mismatch
+#
+metrics.record.schema_invariant	A	gate	none
+metrics.record.note_minimum	C	gate	declared
+metrics.record.one_row_per_packet	A	gate	none
+metrics.record.store_validate	A	gate	none
+metrics.record.verify_git	A	gate	none
+metrics.record.verify_git_vacuity	A	gate	none
+metrics.report.empty_store_refusal	A	gate	none
+metrics.report.render_reconciliation	A	gate	none
+metrics.report.unmeasured_total_is_dash	A	advise	none
+metrics.report.disclosure_ordering	A	advise	none
+adoption.boundary_manifest	A	gate	none
+adoption.receipt_row_reconciliation	A	gate	none
+adoption.junk_row_thresholds	C	gate	declared
+adoption.single_commit_attribution	C	gate	declared
+adoption.lane_size_check	C	gate	declared
+adoption.lane_override	C	gate	declared
+adoption.vacuity_guards	A	gate	none
+adoption.threshold_drift_advisory	B	advise	none
+swarm.manifest_wellformed	A	gate	none
+swarm.disjointness	C	gate	declared
+swarm.hot_file_reservation	C	gate	declared
+swarm.ambiguity_refusal	A	gate	none
+swarm.conformance_verify	A	gate	none
+swarm.merge_preconditions	A	gate	none
+swarm.post_merge_verification	A	gate	none
+swarm.fanout_vacuity	A	gate	none
+maint.real_memory_tripwire	A	gate	none
+maint.tripwire_coverage_scan	C	gate	declared
+maint.source_scan_failclosed	A	gate	none
+maint.source_scan_mask	C	advise	none
+maint.shell_fingerprint	A	gate	none
+maint.toolchain_preresolution	A	gate	none
+maint.suite_discovery_nonvacuity	A	gate	none
+maint.tripwire_armed_precondition	A	gate	none
+maint.rotation_conservation	A	gate	none
+maint.rotation_zero_block_warning	B	advise	none
+maint.rotate_node_precondition	A	gate	none
+maint.rootscan_static_assertions	A	gate	none
+maint.rotation_suite	A	gate	none
+maint.managed_set_replacement	A	advise	none
+identity.stamp_and_verify	A	gate	none
+hooks.session_capability_report	B	advise	none
+hooks.prompt_router	C	advise	none
+hooks.once_dedup	A	advise	none
+tools.supervise_timeout	C	gate	declared
+tools.handoff_lock	A	gate	none
+tools.handoff_timeouts	C	gate	declared
+tools.capability_profile_usage	A	gate	none
+tools.skill_budget_audit	C	advise	none
+bandwidth.active_packet_singleton	C	gate	declared
+bandwidth.packet_commit_ceiling	C	advise	none
+chain.suite_wiring_guard	A	gate	none
+chain.result_reconciliation	A	gate	none
+tests.stdin_scan_nonvacuity	C	gate	declared
+tests.nonvacuity_minimums	C	gate	declared
+gatedepth.sentinel_drift	A	gate	none
+lanedecl.threshold_pinning	A	gate	none
+entitlement.egress_scan	A	gate	none
+suite.bandwidth	A	gate	none
+suite.build_os	A	gate	none
+suite.build_os_maintenance	A	gate	none
+suite.entitlement	A	gate	none
+suite.gate_depth	A	gate	none
+suite.lane_declaration	A	gate	none
+suite.lane_enforcement	A	gate	none
+suite.metrics_adoption	A	gate	none
+suite.pilot_kit	A	gate	none
+suite.release_metadata	A	gate	none
+suite.scaffold_seeding	A	gate	none
+suite.speed_benchmark	A	gate	none
+suite.swarm_merge	A	gate	none
+registry.reconciliation	A	gate	none
+registry.discovery_rule	C	gate	declared
+suite.control_registry	A	gate	none
+suite.neurocosmology_crosswalk	A	gate	none
+evidence.policy_matrix	C	advise	none
+evidence.derivation_nonvacuity	A	gate	none
+suite.evidence_policy	A	gate	none
+envelope.grant_composition	C	advise	none
+envelope.derivation_nonvacuity	A	gate	none
+suite.authority_envelope	A	gate	none
