@@ -4,73 +4,143 @@
 > the builder implements exactly this and nothing else; the archivist clears it
 > on close. One packet at a time.
 
-## Status: NO PACKET IN FLIGHT
+## Status: IN FLIGHT — `gravito_p1_mutators_ids_telemetry_a`
 
-`gravito_ladder_semantics_a` **closed 2026-08-01** — receipt at
-`build-os/receipts/gravito_ladder_semantics_a.md`, commits `576751a` + `d0eff10`,
-base `2df61ae`, plus this close commit. Verdict **pass as fixed** (qa GREEN with 5
-non-functional findings; reviewer `fix-then-pass` twice). All fix rounds landed and
-were re-verified.
+**Declared 2026-08-01.** Base `7daedee` (verified: `git merge-base HEAD 7daedee`
+= `7daedee`, so the branch base is correct and nothing was built on a stale one).
+Branch `claude/project-handoff-merge-ramhds`. Lane **substantive**, ≤2 commits,
+Commit-1 green in isolation.
 
-**What it did:** corrected the authority ladder on the operator's ruling. `observe`
-is redefined by **consequence** — *"may be recorded and consumed for visibility;
-causes no operational consequence"* — instead of by non-consumption, and **`execute`**
-is added as a sixth rung above `gate`. The ladder is now
-`none < observe < advise < rank < gate < execute`.
+**Objective.** Make every known repository mutator visible to the authority
+model, and begin collecting structured decision data now. This is deliberately
+**not registry-only work**: it must leave behind the first durable data
+structures a later ranking stage can consume.
 
-**What it changed about any control's licence: NOTHING.** `evidence-policy.sh check`
-is **19 of 81, split 6/5/8 — UNMOVED**. Zero governance-field diff lines. No class
-licenses `execute`; **0 of 25 grid cells reach it**. The packet changed what `observe`
-*means*, not what anything is licensed to do — which is exactly the predicted result,
-because the previous packet had proved `refuted → observe` was an **unreachable
-remedy** (foreclosed for 67 of 81, 0 sitting there) purely for definitional reasons.
+**Five sub-objectives**, each carrying its own tests:
 
-## THIS FILE'S SHAPE IS LOAD-BEARING — it must carry ≥3 `^## ` blocks
+1. **Register the mutators** (4.2). The five named in the brief —
+   `rotate-memory.mjs`'s rename onto the live memory file, `swarm-merge.sh`'s
+   commit behind `--commit`, `record-packet.sh`'s append to the metrics store,
+   the identity hook's stamp write, `specialist-handoff.sh`'s lock — **confirmed
+   by an independent survey, not trusted from the list.** Classified on what each
+   actually guarantees, never assumed Class A.
+2. **Stable identity at birth** (4.3). The smallest ID substrate this repository
+   actually requires. **Not** the persistent memory kernel.
+3. **Structured defect-class identity** (4.4). Recurrence out of prose and into a
+   store that answers `query(defect_class_id)` mechanically.
+4. **Baseline decision telemetry** (4.5). Unknowns stay unknown; they never
+   become zero.
+5. **Decision-time signal snapshots** (4.6). Frozen at decision time, so a later
+   evaluation cannot recompute history against the current tree.
 
-**Do not clear this file to two headings.** `rotate-memory.mjs`'s `FILE_SPECS` splits
-it on `blockDelimiter: /^## /`, and the maintenance layer's two-pass rotation proof
-(`tests/scaffold_seeding_tests.sh:242`) needs **≥3 blocks per rotating file**.
+## What the survey found, and where it CONTRADICTS the brief
 
-**This is not theoretical. It has already shipped red once.** The close of
-`gravito_mismatch_refuted_a` left this file with exactly **2** blocks, so
-`./build-os/maintenance/run-tests.sh` went **143/144** at `2df61ae` — **a commit that
-was pushed.** That suite is **not chained into the 1636** and the orchestrator's close
-brief did not ask for it, so nothing caught it. `576751a` repaired it (2 blocks → 10).
+**The list of five is confirmed but INCOMPLETE, and this is recorded rather than
+quietly widened.** A content scan of `build-os tests .claude/hooks` for durable
+writes (`renameSync`/`writeFileSync`/`copyFileSync`, `git commit`, appends to a
+named store, `mkdir` of a lock or marker) returns the five **plus two more**:
 
-**The sharper hazard, with its wording corrected.** A count of **0** means the
-delimiter does not match the file's format at all and **nothing can ever rotate out of
-it**. That state is byte-identical after `--apply`, exit **0**, and **nothing fails** —
-but it is **NOT silent**: `rotate-memory.mjs` prints
-`WARNING: <path>: the block delimiter /^## / matched NOTHING … NOTHING CAN EVER ROTATE
-OUT OF IT` on stderr. **The failure mode is an IGNORABLE WARNING, not silence.**
+- **`.claude/hooks/hook-once.sh:50`** — `mkdir "$base/$key"`, the atomic
+  first-firing marker. It is *already registered*, as `hooks.once_dedup`, but
+  registered **as the decision** (first-firing / already-fired), not as the
+  write. Its marker lives under `TMPDIR` and dies with it, which is exactly the
+  shape of `specialist-handoff.sh`'s lock — and the lock IS on the brief's list.
+  Treating one as a mutator and not the other would be an arbitrary line.
+- **`build-os/maintenance/install-maintenance.sh:79`** — `cp` into an installed
+  repo, already registered as **`maint.managed_set_replacement`**, the one
+  existing entry that classifies a *write action* rather than a *refusal*.
 
-The underlying control gap is still open: `bandwidth.active_packet_singleton` refuses
-**two** declared packets but permits **zero**, so a packet that simply omits its
-declaration passes clean. Residue **(c)** / **(u)**.
+**Four candidates were REJECTED after inspection, so the survey's negative result
+is stated too.** `scan-controls.sh` and `authority-envelope.sh` append only to an
+`mktemp` file that dies on `trap`; `check-adoption.sh` and `bandwidth-check.sh`
+use `git cat-file -e` / `git rev-parse`, which read. None of the four mutates
+anything durable.
 
-## Next packet — staged, NOT declared
+**The sharpest thing the survey found:** every existing control whose
+`owning_module` is one of the five mutators classifies **the check, not the
+write** — `swarm.disjointness`, `metrics.record.schema_invariant`,
+`tools.handoff_lock`, `maint.rotation_conservation`. So the brief's claim is
+exact: the write actions themselves are registered at **no authority at all**.
 
-**The reviewer ruled the next packet should be the MUTATION CENSUS coverage gap**
-(`build-os/registry/MISMATCHES.md` §15). Five modules durably mutate and **not one of
-those write actions is a registered control at any authority** —
-`rotate-memory.mjs` (renames onto the live memory file — the most consequential write
-in the system), `swarm-merge.sh`, `record-packet.sh`, `.claude/hooks/build-os-identity.sh`,
-`specialist-handoff.sh`. The sharp case is **not** at `gate`:
-`maint.managed_set_replacement` sits at **`advise`** while its declared output is
-*"files copied into an installed repo, replacing prior managed copies"*, its failure
-behaviour is *"none that stops anything"* and its rollback is *"none; a managed file's
-local edits are lost on install"*.
+## `execute`, and the refusal to populate a rung for its own sake
 
-**Registering those actions is a RE-AUTHORISATION and therefore the operator's act.**
-Nothing here declares it. See `build-os/memory/current_state.md` → *Next (candidates)*
-for the full ordered list, including the citation guard's **resolvability-vs-identity**
-fix (anchor token or content hash, not a line number) and the ladder-**spelling** sweep
-deferred to §16.
+`execute` is **0 of 81** with **0 of 25** grid cells licensing it. The brief asks
+whether these mutators are its first legitimate occupants. **The answer is taken
+from README §2's own mechanical test for the rung — *"performs a durable write"*
+— and not from the fact that the rung is empty.** Each candidate is answered
+against that test individually; a candidate that only *proposes* a mutation does
+not get there because it would be convenient.
 
-## Declaring the next packet
+**No class licenses `execute`, so every entry that reaches it declares
+`authority_mismatch: declared` and takes a row in `MISMATCHES.md`.** That is the
+honest recording of an over-authorisation, not a grant. Registering these
+controls **will move the evidence-policy denominator off 81** and will add
+findings; that is expected and will be reported with the delta explained.
+**Existing controls must not move**, and their 19 findings must survive
+byte-identical.
 
-Write the declaration **into this file, as its own commit, BEFORE the builder's first
-edit to any other file.** `gravito_ladder_semantics_a` proved that works: Commit 1 was
-the declaration **alone** — trivially green in isolation, keeps the ≤2-commit cap, and
-**lets git attest the ordering** without a third commit and without a pre-commit hook.
-Nothing requires the docs to be the second commit.
+**`maint.managed_set_replacement` is examined and DELIBERATELY LEFT WHERE IT
+IS.** It sits at `advise` while declaring output *"files copied into an installed
+repo, replacing prior managed copies"*, failure *"none that stops anything"* and
+rollback *"none; a managed file's local edits are lost on install"*. Under the
+corrected ladder that is `execute`. **Moving it is a re-authorisation of an
+EXISTING control, which this packet is not authorised to perform.** It is
+recorded as a `FINDING-*` with its remedy named and NOT applied, and a test pins
+that it is still at `advise` — so the finding cannot be silently discharged.
+
+## Limitations accepted up front, so nothing is overclaimed
+
+Under the operator's anti-stall rule these are stated and built around, not
+paused on:
+
+- **The full signal set does not exist.** Snapshots carry only the three
+  currently derivable signals. The store admits more; nothing pretends to have
+  them.
+- **The data is not sufficient for learning, and no historical values are
+  back-filled by inference.** Telemetry rows for past packets carry explicit
+  `unknown`, never `0`. A test drives that red.
+- **Historical prose is not fully normalised.** `residue.md` (aa)–(ss) stays
+  prose. Enough occurrences migrate to prove recurrence queries; the migration
+  path for the rest is documented.
+- **Line numbers stay navigation hints and stop being identity.** The substrate
+  is the smallest one that holds; the memory kernel is explicitly not attempted.
+
+## The obligations registering a control drags along — enumerated before building
+
+Each is a real gate that has to be satisfied, not a formality:
+
+1. `neurocosmology_crosswalk.txt` — the **anti-omission guard** fails any
+   registered control that is silently unbound. Every new control needs a
+   binding.
+2. `MISMATCHES.md`'s table — every `authority_mismatch: declared` entry needs a
+   row **naming a file and a line**, reconciled both directions by
+   `scan-controls.sh` §8.
+3. **§22, no `path:line` classified twice.** `swarm-merge.sh:587` and
+   `specialist-handoff.sh:145` are **already claimed** by
+   `swarm.post_merge_verification` and `tools.handoff_lock`; the new entries must
+   cite different, non-vacuous lines.
+4. Any **new `.sh` carrying a refusal construct becomes a control surface** and
+   needs a `gate` entry, or §7 fails it as `UNREGISTERED`. A new `tests/*.sh`
+   needs both a `suite.*` entry and a `chain_suite` line, or the unwired check
+   fails it.
+5. `control_registry.txt`'s **`FIELDS` list is closed** — a new field name makes
+   the whole file malformed, and adding one to the enum would make all 81
+   existing entries incomplete. **The mutator record therefore lives in its own
+   store keyed by `control_id`, and the control registry is not widened.**
+
+## Verification this packet owes before handing back
+
+`bash tests/build_os_tests.sh` (baseline **1636 / 0**);
+`./build-os/maintenance/run-tests.sh` (**144/144** — chained into nothing, so it
+is run explicitly: clearing this file to two `^## ` blocks is what shipped
+`2df61ae` red); `scan-controls.sh check` exit 0;
+`evidence-policy.sh check` with the delta from **19 of 81 / 6-5-8** explained;
+`CHANGELOG.md` carrying the new literal `<count> passed` **unsplit by markdown**
+if the total moves; `git status --porcelain` empty.
+
+**This file must keep ≥3 `^## ` blocks.** `rotate-memory.mjs`'s `FILE_SPECS`
+splits it on `blockDelimiter: /^## /`, and the two-pass rotation proof needs ≥3
+blocks per rotating file. A count of **0** is worse and is not silent: the tool
+prints `WARNING: … matched NOTHING … NOTHING CAN EVER ROTATE OUT OF IT` on
+stderr, exits 0, and leaves the file byte-identical. The failure mode is an
+**ignorable warning**, not silence.
