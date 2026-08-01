@@ -786,9 +786,11 @@
 - **(yy) THE GOVERNANCE BASELINE HAS ONE ESCAPE HATCH, AND IT IS A COMPLETENESS HOLE, NOT A
   CONFORMANCE HOLE.** §11 of `tests/mutator_registry_tests.sh` iterates the rows **PRESENT IN**
   `build-os/registry/governance_baseline.txt` — **so deleting a row and then moving that control
-  PASSES.** The only cardinality guard is `NBASE > 0` (`tests/mutator_registry_tests.sh:573-574`,
-  **repointed 2026-08-01 from `:571-573` BY CONTENT against base `e6b825b`; anchor line is
-  `NBASE="$(grep -vc '^#' "$BASELINE" ...`**),
+  PASSES.** The only cardinality guard is `NBASE > 0` (`tests/mutator_registry_tests.sh:573-575`,
+  **repointed 2026-08-01 BY CONTENT AT BOTH ENDS — `:571-573` against base `e6b825b`, then
+  `:573-575` against base `f3c5353`; anchor lines are `NBASE="$(grep -vc '^#' "$BASELINE" ...`
+  through `[ "${NBASE:-0}" -gt 0 ] && ok`. A RANGE carries TWO positions, and the sweep that
+  moved only the first renamed a three-line guard as a two-line one**),
   which **certifies a store of one**. **The guard checks that what is listed conforms; it never
   checks that the list is complete.** Same shape as the vacuity holes elsewhere in this file.
 - **(zz) SECOND-EYES DECLARED AND NOT DELIVERED — SIXTH PACKET RUNNING, AND THIS TIME A REVIEWER
@@ -1123,6 +1125,41 @@ as this packet's items (a)–(e), in the same order.*
   correctly reporting an undecided question**, not a defect in the registrations. Of the 20 declared
   mismatches, **14 are fitted heuristics gating on an `advise` licence** and **6 are these durable
   writes**; the two kinds must not be blended into one number.
+
+- **[ADDED 2026-08-01] (aaa) THE CONDITION LETTERS IN `tests/mismatch_disposition_tests.sh:187-222`
+  DO NOT MATCH THE TOOL'S OWN.** The suite labels its four RED drives (a)(b)(c)(d); the tool's
+  conditions at `build-os/tools/mismatch-disposition.sh` are lettered differently, so test **(b)
+  drives tool (c)**, test **(c)** drives tool **(d)**, and test **(d)** drives tool **(b)**.
+  **COVERAGE IS COMPLETE — only the letters cross**, which is why this is recorded rather than
+  fixed: renaming them inside a bounded fix round is the kind of adjacent tidying that turns a
+  three-stage packet into a four-stage one. It is a **readability defect with a real cost**: a
+  reviewer checking "is condition (c) driven red?" reads the wrong assertion and gets the right
+  answer by accident. Fix with the next packet that touches that suite for its own reasons.
+- **[ADDED 2026-08-01] (bbb) `tests/claim_evidence_tests.sh` NUMBERS ITS SECTIONS OUT OF ORDER AND
+  PINS ITS CLOCK LATE.** `== 13.` is inserted immediately before `== 11.`, and `export
+  BUILD_OS_NOW` is set inside §13 rather than at file top. **Harmless TODAY** — every live
+  assertion in §§1-12 carries an `open` term, so no verdict depends on the date — but §§1-12 now
+  invoke clock-reading paths **against an unpinned clock**, which is a suite that passes in 2026
+  and may not in 2027. The fix is one line moved to the top of the file; it is deferred only
+  because it is out of the enumerated scope of the fix round that found it.
+- **[ADDED 2026-08-01] (ccc) THE TWO-POSITION CITATION RE-AUDIT FOUND SIX MORE, AND ONE IS STILL
+  OPEN.** Auditing every `path:N-M` and `path:N -> :M` in the tree against HEAD by CONTENT — not
+  only the four the reviewer enumerated — turned up **five further stale range citations**, all of
+  them pointing at `:362-386` of `build-os/registry/scan-controls.sh` for the evidence-resolution
+  loop that now lives at **`:368-392`**: two in `current_state.md`, two in
+  `gravito_ladder_semantics_a.md`, one in `packet_metrics.tsv`. *(The superseded span is written
+  here WITHOUT its path on purpose: §27a sweeps this file, and a `path:N-M` in prose is
+  indistinguishable from a live citation.)* `residue.md` had been repointed by content at P2 and the other five had
+  not, so **the tree stated the same finding with two different spans**. All five are now repointed
+  and the contradiction is checked by `tests/control_registry_tests.sh` §27d.
+  **STILL OPEN, AND DELIBERATELY NOT FIXED HERE:** `gravito_mismatch_refuted_a.md:56` cites the
+  `OBSERVE-LB` guard at `build-os/registry/scan-controls.sh:320-321`, where `:320` is now a **blank
+  line** and `:321` a **section comment** — the guard moved to `:337` when the ladder was corrected.
+  **It is NOT the two-position defect class**: BOTH ends are equally stale, so it is the ordinary
+  resolvability-not-identity drift already recorded as **(mm)**, and §27 cannot see it because a
+  citation with no second opinion in the tree has nothing to contradict. **A single-position
+  citation with no duplicate is unpoliced by everything currently in the suite**, which is the real
+  residue here: §27d only catches drift that someone else already recorded correctly.
 
 ---
 _Append-only working notes._

@@ -45,7 +45,7 @@ class licenses `execute`; 0 of 25 grid cells reach it**, pinned by a test.
 
 ## 1. THE CITATION GUARD CHECKS RESOLVABILITY, NOT IDENTITY — quantified
 
-qa located the cause at **`build-os/registry/scan-controls.sh:362-386`**. The
+qa located the cause at **`build-os/registry/scan-controls.sh:368-392`**. The
 evidence-ref loop tests **existence** (`[ ! -f "$REPO/$rf" ]`), **numeric**
 (`case "$rl" in ''|*[!0-9]*)`), **in-bounds** (`[ "$rl" -le "$tot" ]`), and
 **not-blank** (`vacuous_why`). **It never compares content.**
@@ -365,7 +365,7 @@ All figures re-derived by the archivist at close directly from
 
 ## 1. The citation guard's resolvability-vs-identity gap — and the retroactive discount
 
-`scan-controls.sh:362-386` tests four properties and **never content**. 27 of 27
+`scan-controls.sh:368-392` tests four properties and **never content**. 27 of 27
 drifted refs would have cited a different line; **20 passed every check while
 silently wrong**. **Earlier "zero drift, 287/287 verified" results tested
 resolvability and were reported as identity.** The durable fix is an **anchor token

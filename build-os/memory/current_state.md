@@ -217,7 +217,7 @@
   **THE STALE-REFERENCE SWEEP — THE METHOD MATTERS MORE THAN THE NUMBER.** 42 `evidence_refs` went
   stale when four tool headers grew; **every one was repointed by locating its base-commit line
   CONTENT in the current file, NEVER by shifting a number.** One was still missed by hand
-  (`tests/mutator_registry_tests.sh:643 -> :643`, which a `while` statement let past the §23
+  (`tests/mutator_registry_tests.sh:642 -> :643`, which a `while` statement let past the §23
   vacuity guard), so the repointing is now **verified MECHANICALLY**: every `file:line` reference in
   the tree is **paired positionally against its base-commit counterpart and compared by CONTENT**.
   **0 stale pathed refs tree-wide over 338 refs** — and that sweep **caught the reference the
@@ -360,7 +360,7 @@
   CEILING, not a grant, and `L_effective` is a MINIMUM, so it grants nobody anything).
   **THE FINDINGS MATTER MORE THAN THE FEATURE — five of them.**
   **(1) THE CITATION GUARD CHECKS RESOLVABILITY, NOT IDENTITY, and it is quantified.** qa located the
-  cause at `scan-controls.sh:362-386`: it tests **existence, numeric, in-bounds, not-blank** and
+  cause at `scan-controls.sh:368-392`: it tests **existence, numeric, in-bounds, not-blank** and
   **NEVER COMPARES CONTENT**. Of the 27 refs that drifted in the three tools, **27 of 27 would have
   cited a different line**; `VACUOUS-REF` caught **7**; **20 PASSED EVERY CHECK WHILE SILENTLY
   WRONG**. **THE REVIEWER'S COROLLARY, RECORDED BECAUSE IT DISCOUNTS EARLIER CLAIMS: a content match
@@ -923,7 +923,7 @@
      DELIBERATELY NOT MOVED** — it is `FINDING-0001` with the remedy **named and unapplied**,
      because moving a pre-existing control is the operator's act. `FINDING-0002` holds the same
      shape for `hooks.once_dedup`. **Applying either remedy is STILL OPEN and STILL THE OPERATOR'S.**
-  -1. **THE CITATION GUARD CHECKS RESOLVABILITY, NOT IDENTITY.** `scan-controls.sh:362-386` tests
+  -1. **THE CITATION GUARD CHECKS RESOLVABILITY, NOT IDENTITY.** `scan-controls.sh:368-392` tests
      existence, numeric, in-bounds and not-blank, and **never compares content** — **20 of 27
      drifted refs passed every check while silently wrong**. **The durable fix is an anchor token or
      a content hash instead of a line number**, and it also subsumes candidate 0 below. **And note

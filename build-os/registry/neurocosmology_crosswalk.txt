@@ -41,8 +41,8 @@
 # strongest kind any ONE of them holds — and section 7 of the suite enforces
 # exactly that maximum, no more. So `binding_quality: instantiates` states that
 # at least one binding instantiates and states NOTHING about the others:
-# homeostasis carries it on the strength of 1 binding out of 23, and
-# epistemic_quality on 14 out of 27. Grepping `^binding_quality: instantiates`
+# homeostasis carries it on the strength of 1 binding out of 25, and
+# epistemic_quality on 14 out of 31. Grepping `^binding_quality: instantiates`
 # answers "which primitives have any real contact at all"; it does NOT answer
 # "which primitives are covered", and using it for the second question is the
 # same inflation the nominal rule above exists to refuse. For coverage, use the

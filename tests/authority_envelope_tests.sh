@@ -1011,6 +1011,103 @@ done < <(grep -rl -e 'LAPSED' -e 'NOT-YET-LIVE' "$SRC/build-os/tools" "$SRC/buil
   && ok "all $WSEEN file(s) naming an out-of-window state name BOTH — the tool and this suite among them" \
   || no "$WBAD of $WSEEN restatement(s) name one state and omit the other, or the sweep never reached the tool and its suite"
 
+echo "== 23d. A DATE MUST BE A DATE — shape is not validity =="
+# WHY THIS EXISTS. `DATE_RE` and the `case` guarding the clock both matched
+# SHAPE only — four digits, two digits, two digits — and nothing checked that the
+# middle field was a month or the last one a day of that month. Two consequences
+# were reproduced against this tool before these assertions were written:
+#
+#   LOUD:  BUILD_OS_NOW=2025-13-01 was accepted as a clock. Because dates are
+#          compared as STRINGS, "2025-13-01" sorts after every real 2025 date, so
+#          a lapsed lease read live again. That one announces itself — the
+#          override is printed with its provenance — so a reader has a chance.
+#   QUIET: a store record carrying `expires: 2026-13-45` passed the schema and
+#          was counted a LIVE grant under the plain system clock. Nothing is
+#          announced, nothing is overridden, and an INVALID LEASE READS CLEAN.
+#
+# The second is the one that matters, and it is the same failure the window
+# enforcement exists to eliminate: a lease that cannot be evaluated must never
+# resolve to the permissive answer. This is bounded to DATE VALIDITY. It does not
+# touch the clock's ownership, its override, or the window states.
+BADDATES="2025-13-01 2026-00-10 2026-01-00 2026-01-32 2026-04-31 2026-02-30 2025-02-29 2100-02-29"
+GOODDATES="2026-01-01 2026-12-31 2024-02-29 2000-02-29 2026-04-30 2026-02-28"
+
+# (i) THE CLOCK. An unreadable date must refuse exactly as `not-a-date` does.
+CBADN=0
+for D in $BADDATES; do
+  RC="$(BUILD_OS_NOW="$D" "$TOOL" now >"$WORK/out.txt" 2>"$WORK/err.txt"; echo "$?")"
+  [ "$RC" = "2" ] || { CBADN=$((CBADN+1)); echo "      | BUILD_OS_NOW=$D was ACCEPTED as a clock (exit $RC)"; }
+done
+[ "$CBADN" -eq 0 ] \
+  && ok "RED: all 8 impossible dates are REFUSED as a clock override — a month 13 no longer sorts past every real date and un-expires a lease" \
+  || no "$CBADN impossible date(s) were accepted as a clock — shape passed for validity"
+CGOODN=0
+for D in $GOODDATES; do
+  RC="$(BUILD_OS_NOW="$D" "$TOOL" now >"$WORK/out.txt" 2>"$WORK/err.txt"; echo "$?")"
+  { [ "$RC" = "0" ] && grep -qE "^now: $D$" "$WORK/out.txt"; } || { CGOODN=$((CGOODN+1)); echo "      | BUILD_OS_NOW=$D was REFUSED (exit $RC)"; }
+done
+[ "$CGOODN" -eq 0 ] \
+  && ok "...and all 6 real dates still pass, LEAP DAYS INCLUDED (2024-02-29, 2000-02-29) — the rule is a calendar, not a blanket" \
+  || no "$CGOODN valid date(s) were refused — the calendar check is too blunt to live with"
+
+# (ii) THE STORE, and this is the quiet half. An impossible `expires` must be
+# REFUSED by the schema, so it can never be counted live.
+refuses "an \`expires\` that is shaped like a date and is not one (2026-13-45)" <<'EOF'
+envelope: e.impossible
+issuer: x
+actor: x
+control: f.classa_red
+scope: x
+granted_authority: gate
+evidence_basis: x
+deployment_mode: autonomous
+starts: 2026-01-01
+expires: 2026-13-45
+revocation: x
+reason: x
+human_confirmation: x
+rollback_behavior: x
+EOF
+refuses "a \`starts\` on the 29th of a February that has 28 days (2025-02-29)" <<'EOF'
+envelope: e.notaleapyear
+issuer: x
+actor: x
+control: f.classa_red
+scope: x
+granted_authority: gate
+evidence_basis: x
+deployment_mode: autonomous
+starts: 2025-02-29
+expires: 2026-12-31
+revocation: x
+reason: x
+human_confirmation: x
+rollback_behavior: x
+EOF
+# ...and the refusal must land BEFORE the window is computed, so the impossible
+# lease is never counted among the live grants at all.
+mkenvw "$WORK/impossible.txt" e.impossible f.classa_red gate autonomous "2026-01-01" "2026-13-45"
+RC="$(run check --store "$WORK/impossible.txt" --registry "$WORK/reg.txt")"
+LIVEN="$(awk '$1=="authority-envelope:" && $3=="live" && $4=="grant(s)"{print $2; exit}' "$WORK/out.txt")"
+{ [ "$RC" = "2" ] && [ "${LIVEN:-none}" != "1" ]; } \
+  && ok "RED: a record expiring on the 45th of the 13th month is REFUSED (exit $RC) and is NOT counted a live grant — an invalid lease no longer reads clean" \
+  || { no "RED FAILED: an impossible lease term exited $RC and reported ${LIVEN:-<unparsed>} live grant(s) — the quiet failure this section exists to close"; dump; }
+# The other direction on the same path: a real leap day is a real lease term.
+mkenvw "$WORK/leap.txt" e.leap f.classa_red gate autonomous "2024-02-29" "2026-12-31"
+RC="$(run check --store "$WORK/leap.txt" --registry "$WORK/reg.txt")"
+[ "$RC" = "0" ] \
+  && ok "and a lease starting on a REAL leap day (2024-02-29) validates — the check rejects impossible dates, not unusual ones" \
+  || { no "a leap-day lease term was refused (exit $RC)"; dump; }
+# The rule must be READABLE, like every other rule this tool enforces. Captured
+# to a file rather than piped: this suite runs under `pipefail`, and `grep -q`
+# closing the pipe early makes the tool die of SIGPIPE and the whole pipeline
+# report 141 — a green assertion reported as red for a reason that has nothing to
+# do with what is being asserted.
+"$TOOL" schema > "$WORK/schema.txt" 2>/dev/null
+grep -qiE 'calendar|real date|impossible' "$WORK/schema.txt" \
+  && ok "...and \`schema\` says dates are checked against the CALENDAR, so what is enforced is greppable rather than folklore" \
+  || no "the schema output never says a date must be a real calendar date"
+
 echo "== 21. This packet re-authorises nothing =="
 # The hardest rule in the packet, checked mechanically: the store may name no
 # control that the census already classifies, because such a record would be a

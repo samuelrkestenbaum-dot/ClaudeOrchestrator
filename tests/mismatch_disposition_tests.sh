@@ -220,6 +220,41 @@ RC="$(run validate --store "$WORK/q_d.txt" --mismatches "$BLANKMM")"
 [ "$RC" = "2" ] \
   && ok "RED (d): a subject missing from the MISMATCHES.md summary table is REFUSED — a carried mismatch that reaches no report is a cleared one" \
   || { no "RED FAILED (d): a subject absent from the anchor table was disposed anyway ($RC)"; dump; }
+# (e) THE MEASUREMENT MUST HAVE THE SHAPE OF AN IDENTIFIER, not of a word.
+# WHY THIS EXISTS. Conditions (c) and (d) are both SUBSTRING tests, and a token
+# short and common enough is a substring of everything. The literal `the` occurs
+# inside the subject's own `demotion_requirement` — satisfying (c) — and inside
+# hundreds of files under the repository — satisfying (d). Reproduced against a
+# real subject before this assertion was written: a one-word
+# `demotion_measurement` certified that "every accept_and_constrain subject
+# carries a MEASURED and refused demotion that is recorded in the census and
+# exists as an artefact." That is precisely the failure this file's own header
+# names — (d) exists so that (c) is not two documents agreeing with each other,
+# and a degenerate token makes "measured" a word rather than a fixture, which is
+# the thing (d) was written to prevent.
+#
+# The remedy is the one already used for `disposition:` ids and for the
+# constraint fillers: an ANCHORED SHAPE. A measurement id is a named artefact,
+# so it looks like one. This is not a strength test — it cannot tell a real
+# measurement from a fake one — it removes the class of token that is a
+# substring of the corpus by accident.
+mkdisp "$WORK/q_e.txt" "maint.tripwire_coverage_scan" "accept_and_constrain" "the"
+RC="$(run validate --store "$WORK/q_e.txt")"
+[ "$RC" = "2" ] \
+  && ok "RED (e): a DEGENERATE one-word \`demotion_measurement\` is REFUSED — a token that is a substring of the corpus satisfies (c) and (d) by accident, which is how \"measured\" becomes a word" \
+  || { no "RED FAILED (e): the token \"the\" certified a MEASURED and refused demotion ($RC) — (c) and (d) are both substring tests and a common word passes both"; dump; }
+out | grep -qi 'shape\|identifier' \
+  && ok "...and the refusal says it is about SHAPE, so an author is told what a measurement id must look like rather than only that this one is wrong" \
+  || { no "the refusal does not explain that the measurement must have the shape of an identifier"; dump; }
+# The other direction, and it decides whether the shape rule is usable: the LIVE
+# store's own measurement id must still pass. A shape rule that refuses the one
+# real record in the tree is a rule nobody can satisfy.
+mkdisp "$WORK/q_e_ok.txt" "maint.tripwire_coverage_scan" "accept_and_constrain" "COVERAGE-GATE-PREVENTION-DIFFERENTIAL"
+RC="$(run validate --store "$WORK/q_e_ok.txt")"
+[ "$RC" = "0" ] \
+  && ok "and the LIVE measurement id \`COVERAGE-GATE-PREVENTION-DIFFERENTIAL\` still validates — the shape rule rejects degenerate tokens, not real ids" \
+  || { no "the shape rule refuses the live store's own measurement id ($RC) — it is too blunt to live with"; dump; }
+
 # ...and the four conditions apply to `accept_and_constrain` ONLY. The other
 # four kinds are ordinary remedies and must not inherit this bar.
 mkdisp "$WORK/q_other.txt" "maint.source_scan_mask" "improve_evidence"

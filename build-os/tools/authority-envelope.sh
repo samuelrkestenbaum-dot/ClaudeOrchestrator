@@ -336,6 +336,40 @@ in_list(){ local v="$1" l; for l in $2; do [ "$v" = "$l" ] && return 0; done; re
 # honoured in one place and silently ignored in another.
 CLOCK_VAR="BUILD_OS_NOW"
 DATE_RE='^[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]$'
+# SHAPE IS NOT VALIDITY, and this file learned that the expensive way. `DATE_RE`
+# and the `case` in `clock()` matched four-two-two and nothing else, so
+# `2026-13-45` was a date as far as every check here was concerned. Two things
+# followed, and the quiet one is the reason this exists:
+#
+#   LOUD   `BUILD_OS_NOW=2025-13-01` was accepted as a clock. Dates here are
+#          compared as STRINGS, and "2025-13-01" sorts after every real 2025
+#          date, so a lapsed lease read live again. That case announces itself:
+#          the override is printed with its provenance on every run.
+#   QUIET  a store record carrying `expires: 2026-13-45` passed the schema and
+#          was counted a LIVE grant under the plain system clock. Nothing is
+#          overridden and nothing is announced. AN INVALID LEASE READ CLEAN,
+#          which is the exact failure the window enforcement was added to end.
+#
+# `date -d` is not used: it is a GNU extension and every other derivation in this
+# file is POSIX shell. The calendar is arithmetic, so it is done as arithmetic —
+# including the Gregorian leap rule, because February is where an off-by-one in a
+# lease term hides.
+valid_date(){ # <YYYY-MM-DD> -> 0 if it is a real calendar date
+  case "$1" in [0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]) ;; *) return 1 ;; esac
+  local y="${1%%-*}" rest="${1#*-}" m d dim
+  m="${rest%%-*}"; d="${rest##*-}"
+  y=$((10#$y)); m=$((10#$m)); d=$((10#$d))
+  [ "$m" -ge 1 ] && [ "$m" -le 12 ] || return 1
+  [ "$d" -ge 1 ] || return 1
+  case "$m" in
+    1|3|5|7|8|10|12) dim=31 ;;
+    4|6|9|11)        dim=30 ;;
+    2) if { [ $((y % 4)) -eq 0 ] && [ $((y % 100)) -ne 0 ]; } || [ $((y % 400)) -eq 0 ]
+       then dim=29; else dim=28; fi ;;
+    *) return 1 ;;
+  esac
+  [ "$d" -le "$dim" ]
+}
 NOW=""; NOW_SOURCE=""
 clock(){
   [ -n "$NOW" ] && return 0
@@ -345,17 +379,13 @@ clock(){
     # A MALFORMED OVERRIDE REFUSES. Falling back to today would make an
     # unreadable clock resolve to the permissive answer, which is the one thing
     # every derivation in this file is written against.
-    case "$NOW" in
-      [0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]) ;;
-      *) refuse "$CLOCK_VAR is \"$NOW\", which is not YYYY-MM-DD. An unreadable clock must never fall back to today: every lease term in the store would then be judged against a date nobody chose." ;;
-    esac
+    valid_date "$NOW" \
+      || refuse "$CLOCK_VAR is \"$NOW\", which is not a real YYYY-MM-DD calendar date. An unreadable clock must never fall back to today: every lease term in the store would then be judged against a date nobody chose. A date that is merely SHAPED right is worse than a malformed one — dates here are compared as strings, so a month 13 sorts after every real date in its year and silently un-expires every lease that ended in it."
   else
     NOW="$(date +%Y-%m-%d 2>/dev/null)"
     NOW_SOURCE="system clock"
-    case "$NOW" in
-      [0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]) ;;
-      *) refuse "the system clock produced \"$NOW\", which is not YYYY-MM-DD. Without a date no lease term can be evaluated, and evaluating none would mean composing every expired grant as if it were live." ;;
-    esac
+    valid_date "$NOW" \
+      || refuse "the system clock produced \"$NOW\", which is not a real YYYY-MM-DD calendar date. Without a date no lease term can be evaluated, and evaluating none would mean composing every expired grant as if it were live."
   fi
 }
 # THE WINDOW STATES. Three, and the two out-of-window ones are DISTINCT: a lease
@@ -430,6 +460,7 @@ if [ "$CMD" = "schema" ]; then
   printf 'field: granted_authority — what the actor may DO: a rung on the ladder above.\n'
   printf 'field: evidence_basis — the evidence relied on, in prose. The token lives on the evidence axis; this is where a human says what they actually looked at.\n'
   printf 'field: deployment_mode — one of the four modes above. The field that makes this artefact worth having.\n'
+  printf 'date-validity: every `starts`, `expires` and clock value must be a REAL CALENDAR DATE, not merely a date-shaped string. Month 01-12, day valid for that month, Gregorian leap rule applied to February. SHAPE IS NOT VALIDITY: dates here are compared as strings, so an impossible month sorts after every real date in its year — `2026-13-45` used to pass the schema and be counted a LIVE grant, which is an invalid lease reading clean.\n'
   printf 'field: starts — YYYY-MM-DD. When the lease opens. ENFORCED against the clock: before it, the record is NOT-YET-LIVE and contributes no grant.\n'
   printf 'field: expires — YYYY-MM-DD, strictly after starts. LEASES END: an authority granted with no end date is a permanent re-authorisation with a date on it. ENFORCED against the clock: on or after it, the record is LAPSED and contributes no grant.\n'
   printf 'field: revocation — how the grant is revoked before expiry, and by whom.\n'
@@ -506,8 +537,10 @@ while IFS= read -r id; do
     BAD="$BAD $id: granted_authority \"$ga\" is not a rung of the ladder ($LADDER);"
   fi
   st="$(get "$id" starts)"; ex="$(get "$id" expires)"
-  case "$st" in [0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]) ;; *) BAD="$BAD $id: starts \"$st\" is not YYYY-MM-DD;" ;; esac
-  case "$ex" in [0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]) ;; *) BAD="$BAD $id: expires \"$ex\" is not YYYY-MM-DD;" ;; esac
+  # A REAL DATE, not merely a date-shaped string. `2026-13-45` used to pass here
+  # and be counted a LIVE grant: shape was checked, the calendar never was.
+  valid_date "$st" || BAD="$BAD $id: starts \"$st\" is not a real YYYY-MM-DD calendar date;"
+  valid_date "$ex" || BAD="$BAD $id: expires \"$ex\" is not a real YYYY-MM-DD calendar date;"
   case "$st$ex" in
     [0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9][0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9])
       if ! [ "$ex" \> "$st" ]; then

@@ -426,7 +426,7 @@ Only `DECISION-0007` has a non-degenerate candidate set.
 **§11 of `tests/mutator_registry_tests.sh` iterates rows PRESENT IN
 `governance_baseline.txt`** — so **deleting a row and then moving that control
 passes**. The only cardinality guard is `NBASE > 0`
-(`tests/mutator_registry_tests.sh:572-573`), which certifies a store of one.
+(`tests/mutator_registry_tests.sh:573-575`), which certifies a store of one.
 **The guard checks conformance of what is listed, never that the list is complete.**
 Residue **(yy)**.
 

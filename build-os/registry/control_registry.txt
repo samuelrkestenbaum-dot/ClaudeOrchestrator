@@ -1051,13 +1051,13 @@ inputs: how many artefacts, files, links, scripts, blocks, rows, receipts or quo
 output: pass, or a FAIL declaring the scan vacuous
 owning_module: tests/entitlement_tests.sh
 consuming_policies: the FAIL count of twelve suites (pilot_kit, entitlement, control_registry, release_metadata, speed_benchmark, lane_declaration, metrics_adoption, build_os_maintenance, lane_enforcement, swarm_merge, scaffold_seeding, gate_depth), every one chained into tests/build_os_tests.sh
-evidence_refs: tests/pilot_kit_tests.sh:97; tests/pilot_kit_tests.sh:115; tests/pilot_kit_tests.sh:117; tests/pilot_kit_tests.sh:176; tests/pilot_kit_tests.sh:255; tests/pilot_kit_tests.sh:304; tests/pilot_kit_tests.sh:316; tests/pilot_kit_tests.sh:327; tests/pilot_kit_tests.sh:334; tests/pilot_kit_tests.sh:367; tests/pilot_kit_tests.sh:458; tests/entitlement_tests.sh:126; tests/entitlement_tests.sh:136; tests/entitlement_tests.sh:345; tests/entitlement_tests.sh:481; tests/control_registry_tests.sh:81; tests/control_registry_tests.sh:186; tests/control_registry_tests.sh:442; tests/control_registry_tests.sh:774; tests/release_metadata_tests.sh:121; tests/release_metadata_tests.sh:200; tests/release_metadata_tests.sh:315; tests/speed_benchmark_tests.sh:397; tests/speed_benchmark_tests.sh:531; tests/speed_benchmark_tests.sh:542; tests/lane_declaration_tests.sh:493; tests/lane_declaration_tests.sh:496; tests/metrics_adoption_tests.sh:418; tests/metrics_adoption_tests.sh:421; tests/build_os_maintenance_tests.sh:88; tests/lane_enforcement_tests.sh:56; tests/swarm_merge_tests.sh:404; tests/scaffold_seeding_tests.sh:241; tests/gate_depth_tests.sh:73
+evidence_refs: tests/pilot_kit_tests.sh:97; tests/pilot_kit_tests.sh:115; tests/pilot_kit_tests.sh:117; tests/pilot_kit_tests.sh:176; tests/pilot_kit_tests.sh:255; tests/pilot_kit_tests.sh:304; tests/pilot_kit_tests.sh:316; tests/pilot_kit_tests.sh:327; tests/pilot_kit_tests.sh:334; tests/pilot_kit_tests.sh:367; tests/pilot_kit_tests.sh:458; tests/entitlement_tests.sh:126; tests/entitlement_tests.sh:136; tests/entitlement_tests.sh:345; tests/entitlement_tests.sh:481; tests/control_registry_tests.sh:81; tests/control_registry_tests.sh:186; tests/control_registry_tests.sh:442; tests/control_registry_tests.sh:919; tests/release_metadata_tests.sh:121; tests/release_metadata_tests.sh:200; tests/release_metadata_tests.sh:315; tests/speed_benchmark_tests.sh:397; tests/speed_benchmark_tests.sh:531; tests/speed_benchmark_tests.sh:542; tests/lane_declaration_tests.sh:493; tests/lane_declaration_tests.sh:496; tests/metrics_adoption_tests.sh:418; tests/metrics_adoption_tests.sh:421; tests/build_os_maintenance_tests.sh:88; tests/lane_enforcement_tests.sh:56; tests/swarm_merge_tests.sh:404; tests/scaffold_seeding_tests.sh:241; tests/gate_depth_tests.sh:73; tests/control_registry_tests.sh:828
 failure_behavior: a FAIL per blind scanner; the run exits non-zero
 rollback_behavior: read-only
 promotion_requirement: n/a
 demotion_requirement: n/a
 authority_mismatch: declared
-notes: ONE ENTRY COVERING A FAMILY OF 34, IN 12 FILES — corrected from 5 refs and a claim of "six", which undercounted by 28 and was falsifiable with one grep. THE INCLUSION RULE, so the membership can be re-derived rather than trusted: a comparison in tests/*.sh of the form `-ge N` or `-gt N` with N > 1 that floors how much a scanner or driver COVERED, and whose failure makes every assertion downstream of it meaningless. N <= 1 is excluded deliberately — "the scan found at least one thing" IS the invariant and is Class A; every constant above 1 is a snapshot of the tree on the day it was written. The scan finds 37 such lines; three are excluded with stated reasons (build_os_maintenance_tests.sh:193, a self-constructed fixture's size; pilot_kit_tests.sh:340, a length floor on failure text; speed_benchmark_tests.sh:405, which mirrors metrics.record.note_minimum and would otherwise be classified twice). 34 remain and all 34 are this control; tests/control_registry_tests.sh section 21 reconciles the scan against this entry so the membership cannot drift silently again. Includes control_registry_tests.sh:772 — `[ "$PASS" -ge 40 ]`, the count of assertions that existed the day THIS packet was written, gating THIS packet's own suite. The vacuity principle is Class A and is one of the best things in this repository; all 34 constants implementing it are Class C, and they are what compares. MISMATCHES.md section 10 lists every member.
+notes: ONE ENTRY COVERING A FAMILY OF 35, IN 12 FILES — corrected from 5 refs and a claim of "six", which undercounted by 28 and was falsifiable with one grep. THE INCLUSION RULE, so the membership can be re-derived rather than trusted: a comparison in tests/*.sh of the form `-ge N` or `-gt N` with N > 1 that floors how much a scanner or driver COVERED, and whose failure makes every assertion downstream of it meaningless. N <= 1 is excluded deliberately — "the scan found at least one thing" IS the invariant and is Class A; every constant above 1 is a snapshot of the tree on the day it was written. The scan finds 37 such lines; three are excluded with stated reasons (build_os_maintenance_tests.sh:193, a self-constructed fixture's size; pilot_kit_tests.sh:340, a length floor on failure text; speed_benchmark_tests.sh:405, which mirrors metrics.record.note_minimum and would otherwise be classified twice). 34 remain and all 34 are this control; tests/control_registry_tests.sh section 21 reconciles the scan against this entry so the membership cannot drift silently again. Includes control_registry_tests.sh:772 — `[ "$PASS" -ge 40 ]`, the count of assertions that existed the day THIS packet was written, gating THIS packet's own suite. The vacuity principle is Class A and is one of the best things in this repository; all 34 constants implementing it are Class C, and they are what compares. MISMATCHES.md section 10 lists every member.
 
 control: gatedepth.sentinel_drift
 class: A
@@ -1397,7 +1397,7 @@ inputs: the live registry, the live tree, and eleven fixture registries built to
 output: a RESULT line
 owning_module: tests/control_registry_tests.sh
 consuming_policies: chained from tests/build_os_tests.sh
-evidence_refs: tests/control_registry_tests.sh:778; tests/control_registry_tests.sh:779
+evidence_refs: tests/control_registry_tests.sh:923; tests/control_registry_tests.sh:924
 failure_behavior: exits non-zero when FAIL is non-zero
 rollback_behavior: read-only outside its mktemp dir
 promotion_requirement: n/a
@@ -1491,7 +1491,7 @@ inputs: every envelope record's control, granted_authority and deployment_mode, 
 output: one line per envelope naming L_class, L_evidence, L_deployment, the composed minimum L_effective and the term that binds it; then the count of grants reaching beyond L_effective
 owning_module: build-os/tools/authority-envelope.sh
 consuming_policies: build-os/tools/evidence-policy.sh consumes the `modes` projection as the third MIN term of its composition. The report itself is read by the operator, who decides; tests/authority_envelope_tests.sh consumes it as the object under test.
-evidence_refs: build-os/tools/authority-envelope.sh:310; build-os/tools/authority-envelope.sh:314; build-os/tools/authority-envelope.sh:636; build-os/tools/authority-envelope.sh:655
+evidence_refs: build-os/tools/authority-envelope.sh:310; build-os/tools/authority-envelope.sh:314; build-os/tools/authority-envelope.sh:669; build-os/tools/authority-envelope.sh:688
 failure_behavior: none — it prints its findings and exits 0 however many there are. A grant beyond L_effective is REPORTED and the run continues.
 rollback_behavior: none needed — it reads files and prints; it writes nothing, anywhere, and both the envelope store and the registry are byte-identical after a run
 promotion_requirement: live grants to be non-vacuous over, plus a measured basis for where `shadow` and `human_confirmed` cap. Both are absent: the store ships with ZERO grants, so a gating validator would hold vacuous authority over an empty set and could only ever fire on the operator's first attempt to use the mechanism. Promotion is a governance action for the operator.
@@ -1509,7 +1509,7 @@ inputs: the parse result of the envelope store — whether it exists, whether ev
 output: pass, or a refusal naming every malformed grant and the reason each failed
 owning_module: build-os/tools/authority-envelope.sh
 consuming_policies: build-os/tools/authority-envelope.sh's own check and modes paths — exit 2 suppresses the report entirely; and build-os/tools/evidence-policy.sh, whose check REFUSES when this refuses, because an unknown third MIN term must never be composed as "no cap"
-evidence_refs: build-os/tools/authority-envelope.sh:454; build-os/tools/authority-envelope.sh:483; build-os/tools/authority-envelope.sh:488; build-os/tools/authority-envelope.sh:502; build-os/tools/authority-envelope.sh:514
+evidence_refs: build-os/tools/authority-envelope.sh:485; build-os/tools/authority-envelope.sh:514; build-os/tools/authority-envelope.sh:519; build-os/tools/authority-envelope.sh:533; build-os/tools/authority-envelope.sh:547
 failure_behavior: prints the malformed grants by id with the reason each failed, then refuses on stderr and exits 2. The refusal PROPAGATES: evidence-policy.sh quotes it and refuses in turn rather than composing a deployment term it could not read.
 rollback_behavior: none needed — the tool writes nothing, anywhere. Nothing is granted, nothing is revoked, and the store is byte-identical after a refusal.
 promotion_requirement: already gates, which is the LICENSED CEILING and not the top of the ladder. Read literally as "nothing above this authority exists" it is now FALSE — `execute` sits above `gate` since the ladder was corrected. The licensed-ceiling reading is the one meant and is stated here explicitly: Class A licenses `gate`, NO class licenses `execute`, and the composition is a minimum, so no promotion path reaches any rung above this one. Whether Class A should license `execute` is a governance question recorded for the operator; it is not a promotion this entry can request.
@@ -1527,7 +1527,7 @@ inputs: build-os/tools/authority-envelope.sh, build-os/registry/authority_envelo
 output: a per-section PASS/FAIL transcript and a RESULT line; non-zero exit if any assertion fails
 owning_module: tests/authority_envelope_tests.sh
 consuming_policies: tests/build_os_tests.sh chains it, so a failure here fails the whole suite
-evidence_refs: tests/authority_envelope_tests.sh:384; tests/authority_envelope_tests.sh:448; tests/authority_envelope_tests.sh:624; tests/authority_envelope_tests.sh:1041
+evidence_refs: tests/authority_envelope_tests.sh:384; tests/authority_envelope_tests.sh:448; tests/authority_envelope_tests.sh:624; tests/authority_envelope_tests.sh:1138
 failure_behavior: prints the failing assertion and exits non-zero, failing the chained suite
 rollback_behavior: none needed — every fixture lives under a temp dir removed on exit; it writes nothing outside it, and both live artefacts are checksummed before and after a run
 promotion_requirement: already gates, which is the LICENSED CEILING and not the top of the ladder. Read literally as "nothing above this authority exists" it is now FALSE — `execute` sits above `gate` since the ladder was corrected. The licensed-ceiling reading is the one meant and is stated here explicitly: Class A licenses `gate`, NO class licenses `execute`, and the composition is a minimum, so no promotion path reaches any rung above this one. Whether Class A should license `execute` is a governance question recorded for the operator; it is not a promotion this entry can request.
@@ -1814,7 +1814,7 @@ inputs: each envelope record's `starts` and `expires`, and the date from `author
 output: a window state per record — live, LAPSED or NOT-YET-LIVE — a live-grant count that excludes the out-of-window ones, and a `modes` projection that carries only the records in force
 owning_module: build-os/tools/authority-envelope.sh
 consuming_policies: mode_projection(), which is what build-os/tools/evidence-policy.sh consumes as the third MIN term of the licence composition; the check report's own live count and denominator
-evidence_refs: build-os/tools/authority-envelope.sh:367; build-os/tools/authority-envelope.sh:533; build-os/tools/authority-envelope.sh:591; build-os/tools/authority-envelope.sh:649
+evidence_refs: build-os/tools/authority-envelope.sh:397; build-os/tools/authority-envelope.sh:566; build-os/tools/authority-envelope.sh:624; build-os/tools/authority-envelope.sh:682
 failure_behavior: none that stops anything — an out-of-window record is REPORTED and contributes no grant. The tool exits 0. A malformed BUILD_OS_NOW refuses at exit 2, and that refusal belongs to envelope.derivation_nonvacuity
 rollback_behavior: n/a — it writes nothing, anywhere. A record that lapses is not edited; it stops being composed
 promotion_requirement: it would need live grants to be non-vacuous over. The store ships with zero, so this term is inert on today's census by construction — exactly as the deployment axis it filters is
@@ -1841,7 +1841,7 @@ inputs: every stanza of build-os/registry/mismatch_dispositions.txt, the control
 output: pass, or a per-record list of the reasons the store is not readable — an absent or empty field, an unknown field name, a field stated twice, a key that is not a DISP-NNNN stable id, a kind outside the vocabulary, a `constraint` that means nothing, a malformed or backwards review date, a subject in no census, a dangling supersession, or two LIVE dispositions for one subject
 owning_module: build-os/tools/mismatch-disposition.sh
 consuming_policies: mismatch-disposition.sh's own validate path (exit 2), and `check`, which refuses to report over a store that parses to zero; tests/mismatch_disposition_tests.sh section 6 drives every refusal red
-evidence_refs: build-os/tools/mismatch-disposition.sh:324; build-os/tools/mismatch-disposition.sh:331; build-os/tools/mismatch-disposition.sh:401
+evidence_refs: build-os/tools/mismatch-disposition.sh:350; build-os/tools/mismatch-disposition.sh:357; build-os/tools/mismatch-disposition.sh:433
 failure_behavior: prints every problem at once on stderr and exits 2; it writes nothing anywhere, so there is no partial state to unwind
 rollback_behavior: none needed — this tool writes nothing, and the refusal happens before anything is reported
 promotion_requirement: it becomes load_bearing the day a live policy other than its own suite reads the disposition store
@@ -1859,7 +1859,7 @@ inputs: an `accept_and_constrain` record's subject_id and demotion_measurement; 
 output: pass, or a refusal naming which of the four conditions failed — and, when the measurement is not the census's own, the subject's `demotion_requirement` quoted verbatim so the reason is the census's word rather than this tool's
 owning_module: build-os/tools/mismatch-disposition.sh
 consuming_policies: mismatch-disposition.sh's own validate path (exit 2); tests/mismatch_disposition_tests.sh section 3 drives the discipline case and section 4 drives each condition red on its own
-evidence_refs: build-os/tools/mismatch-disposition.sh:380; build-os/tools/mismatch-disposition.sh:390; build-os/tools/mismatch-disposition.sh:393
+evidence_refs: build-os/tools/mismatch-disposition.sh:406; build-os/tools/mismatch-disposition.sh:422; build-os/tools/mismatch-disposition.sh:425
 failure_behavior: the failing condition is added to the validate problem list and the whole store is refused at exit 2; nothing is written and no census is touched
 rollback_behavior: none needed — this tool writes nothing anywhere
 promotion_requirement: it becomes load_bearing the day the disposition store is read by something other than its own suite
@@ -1877,7 +1877,7 @@ inputs: the disposition store, the disposition tool, the envelope tool's clock, 
 output: a pass/fail verdict over the five-kind vocabulary, the narrowness predicate and its four conditions, the three "clears nothing" properties read off the LIVE tree, every schema refusal, the sourced clock, and the class-covering vocabulary sweep
 owning_module: tests/mismatch_disposition_tests.sh
 consuming_policies: chained from tests/build_os_tests.sh, which exits non-zero on its failure
-evidence_refs: tests/mismatch_disposition_tests.sh:157; tests/mismatch_disposition_tests.sh:192; tests/mismatch_disposition_tests.sh:231
+evidence_refs: tests/mismatch_disposition_tests.sh:157; tests/mismatch_disposition_tests.sh:192; tests/mismatch_disposition_tests.sh:266
 failure_behavior: prints each failing assertion and exits 1 via the house-style verdict, failing the whole chained run
 rollback_behavior: none needed — it writes only inside its own mktemp fixture directory
 promotion_requirement: already load_bearing; nothing above this status exists

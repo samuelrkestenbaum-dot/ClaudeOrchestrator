@@ -458,7 +458,7 @@ consumed for visibility and sit there — but the fifth-outcome point survives t
 fix and is why it is kept: the framework offered four outcomes and one of them
 was unavailable to five-sixths of the census for definitional reasons nobody had
 noticed. The qualifier matters and an earlier
-draft dropped it: `gate` -> `advise` remains perfectly spellable — 14 of 97 sit
+draft dropped it: `gate` -> `advise` remains perfectly spellable — 15 of 97 sit
 at `advise` today — and it is the demotion this packet actually measured.
 `maint.tripwire_coverage_scan` closed "demote" because demoting it was measured
 to destroy the tree, not because the row was unwritable. A framework whose first outcome is unavailable for five-sixths of its

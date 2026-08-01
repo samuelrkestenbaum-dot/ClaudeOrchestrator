@@ -767,6 +767,151 @@ done
   && ok "RED: a ref repointed outside the egress block is reported ($RD_OUT of 2) by the same containment test" \
   || no "RED FAILED: a citation outside the block passed the containment test, so the entry's scope is unpoliced"
 
+echo "== 27. A CITATION CARRYING TWO NUMBERS CARRIES TWO POSITIONS =="
+# WHY THIS EXISTS, AND WHAT IT COST TO NOT HAVE IT. §23 and the resolvability
+# guard in scan-controls.sh both read a citation as ONE position: a `path:line`
+# with a single number. Two notations in this tree carry TWO numbers, and the
+# repoint sweeps moved only the FIRST of them. Four citations were corrupted that
+# way in one packet, and the corruption is invisible to every check that existed:
+# each half still resolved, each landed on real code, and nothing compared them.
+#
+# THE TWO NOTATIONS ARE NOT THE SAME KIND OF THING, and the rule differs because
+# of it. This is the distinction the sweep did not draw:
+#
+#   RANGE       `path:N-M`  — N and M are two positions in the CURRENT tree,
+#                             bounding one span of one file. It is a LIVE
+#                             pointer. When the file moves it must be repointed
+#                             AT BOTH ENDS, together, or it silently renames the
+#                             span it cites. `tests/mutator_registry_tests.sh`
+#                             gained a line and the sweep produced `:573-574`
+#                             from `:572-574` — a three-line guard cited as two.
+#
+#   ARROW-PAIR  `path:N -> :M` — N and M are the SAME content at TWO DIFFERENT
+#                             COMMITS. It is not a pointer at all; it is a
+#                             HISTORICAL RECORD that a reference moved from N to
+#                             M. Repointing either number rewrites the record of
+#                             a past event. The sweep shifted the first number of
+#                             `:642 -> :643` and produced `:643 -> :643` — a
+#                             repoint asserted to have moved nothing, which
+#                             destroys the evidence that the defect ever existed.
+#
+# THE RULING THIS PACKET TAKES: ranges are repointed at both ends; arrow-pairs
+# are EXCLUDED from mechanical repointing entirely, because both of their numbers
+# are statements about commits that are not this one. The three checks below are
+# that ruling made mechanical.
+# TREE-WIDE, and deliberately so. qa's "0 stale refs" and the reviewer's four
+# corrupted citations were BOTH true because they measured different things over
+# different surfaces: resolvability over build-os/registry/, identity over
+# build-os/memory/ and the receipts. This sweep reads both properties over BOTH,
+# so neither result can be quoted about a surface it never visited.
+CIT_ALL="$SRC/build-os $SRC/tests"
+RANGE_RE='[A-Za-z0-9_./-]+\.(sh|md|txt|mjs|json|js):[0-9]+-[0-9]+'
+# Resolve a cited path — several artefacts cite by basename — to a real file.
+citfile(){
+  local p="$1"
+  [ -f "$SRC/$p" ] && { printf '%s\n' "$SRC/$p"; return 0; }
+  find "$SRC/build-os" "$SRC/tests" -name "$(basename "$p")" -type f 2>/dev/null | head -1
+}
+
+echo "== 27a. Both ends of a RANGE resolve, and they are the right way round =="
+CR_BAD=0; CR_SEEN=0
+while IFS= read -r cit; do
+  [ -n "$cit" ] || continue
+  CR_SEEN=$((CR_SEEN+1))
+  cp="${cit%:*}"; span="${cit##*:}"; cn="${span%%-*}"; cm="${span##*-}"
+  cf="$(citfile "$cp")"
+  if [ -z "$cf" ]; then CR_BAD=$((CR_BAD+1)); echo "      | $cit names no file in the tree"; continue; fi
+  ctot="$(grep -c '' "$cf")"
+  if [ "$cn" -ge "$cm" ]; then CR_BAD=$((CR_BAD+1)); echo "      | $cit ends at or before it starts"; continue; fi
+  if [ "$cm" -gt "$ctot" ]; then CR_BAD=$((CR_BAD+1)); echo "      | $cit ends past the end of a $ctot-line file"; fi
+done < <(grep -rhoE "$RANGE_RE" $CIT_ALL 2>/dev/null | sort -u)
+[ "$CR_SEEN" -ge 10 ] \
+  && ok "$CR_SEEN distinct range citation(s) found to check — this sweep has something to bite on" \
+  || no "only $CR_SEEN range citation(s) found; the sweep is vacuous"
+[ "$CR_BAD" -eq 0 ] \
+  && ok "every range citation resolves at BOTH ends: the file exists, N < M, and M is inside it" \
+  || no "$CR_BAD range citation(s) do not resolve at both ends"
+
+echo "== 27b. RED DRIVE — a range whose SECOND end was left behind is caught =="
+# The exact corruption, driven against the same predicate. `:573-574` is what the
+# sweep produced; `:573-575` is the guard. Both resolve, both land on code, and
+# only a check that reads the second number can tell them apart.
+# THE PROBES ARE BUILT AT RUN TIME AND NEVER WRITTEN AS LITERALS. This file
+# lives under the corpus 27a sweeps, so a literal malformed range here would be
+# swept as a real citation and 27a would fail on its own fixture — the same trap
+# the GHOST_MEAS token in tests/mismatch_disposition_tests.sh avoids.
+CR_F="tests/mutator_registry_tests.sh"
+CR_RED=0
+for probe in "$CR_F:$((9990))-$((9999))" "$CR_F:$((575))-$((573))"; do
+  pp="${probe%:*}"; ps="${probe##*:}"; pn="${ps%%-*}"; pm="${ps##*-}"
+  pf="$(citfile "$pp")"; ptot="$(grep -c '' "$pf")"
+  { [ "$pn" -ge "$pm" ] || [ "$pm" -gt "$ptot" ]; } && CR_RED=$((CR_RED+1))
+done
+[ "$CR_RED" -eq 2 ] \
+  && ok "RED: a range past the end of the file and a range that runs backwards are BOTH caught by 27a's predicate" \
+  || no "RED FAILED: 27a's predicate accepted $((2-CR_RED)) of 2 malformed ranges, so it does not read the second number"
+
+echo "== 27c. An ARROW-PAIR records a MOVE — its two numbers must DIFFER =="
+# `:N -> :N` is a repoint that moved nothing. Nobody writes that down. It is what
+# a first-number-only sweep produces from a real repoint record, and it is the
+# signature of the record having been corrupted rather than of a repoint having
+# been redundant. Newlines are folded first: these citations wrap in prose, and
+# the p2 receipt's pair was split across two lines.
+AP_BAD=0; AP_SEEN=0
+while IFS= read -r ap; do
+  [ -n "$ap" ] || continue
+  AP_SEEN=$((AP_SEEN+1))
+  an="$(printf '%s' "$ap" | sed -E 's/^.*:([0-9]+) *(->|→|to).*$/\1/')"
+  am="$(printf '%s' "$ap" | sed -E 's/^.*(->|→|to) *:?([0-9]+).*$/\2/')"
+  [ "$an" = "$am" ] && { AP_BAD=$((AP_BAD+1)); echo "      | $ap records a repoint that moved nothing"; }
+done < <(for f in $(grep -rlE ':[0-9]+ *(->|→|to) *:?[0-9]+' $CIT_ALL 2>/dev/null); do
+           tr '\n' ' ' < "$f" | grep -oE '[A-Za-z0-9_./-]+\.(sh|md|txt|mjs):[0-9]+ *(->|→|to) *:?[0-9]+'
+         done | sort -u)
+[ "$AP_SEEN" -ge 1 ] \
+  && ok "$AP_SEEN arrow-pair repoint record(s) found tree-wide — memory, receipts and metrics included" \
+  || no "no arrow-pair citation found, so this check is vacuous"
+[ "$AP_BAD" -eq 0 ] \
+  && ok "every arrow-pair names TWO DIFFERENT lines — no repoint record has been flattened into \`:N -> :N\`" \
+  || no "$AP_BAD arrow-pair(s) assert a repoint that moved nothing, which is the record of a defect destroyed by a first-number-only sweep"
+# RED DRIVE on the extractor itself, since the live records are (now) correct.
+# Assembled at run time for the same reason 27b's probes are: a literal
+# `:N -> :N` in this file would be swept by the loop above as a real record.
+AP_PROBE="$CR_F:$((643)) -> :$((643))"
+PN="$(printf '%s' "$AP_PROBE" | sed -E 's/^.*:([0-9]+) *(->|→|to).*$/\1/')"
+PM="$(printf '%s' "$AP_PROBE" | sed -E 's/^.*(->|→|to) *:?([0-9]+).*$/\2/')"
+[ "$PN" = "$PM" ] \
+  && ok "RED: the extractor reads BOTH numbers out of \`$AP_PROBE\` and reports them equal — 27c fails on the corruption rather than sleeping through it" \
+  || no "RED FAILED: the arrow-pair extractor does not parse both endpoints ($PN vs $PM)"
+
+echo "== 27d. Two ranges over ONE file must not CONTRADICT each other =="
+# DEFECT-0003-duplicate-semantic-truth, in the notation that invites it. When two
+# artefacts cite overlapping spans of the same file with DIFFERENT bounds, one of
+# them is stale and a reader cannot tell which — and the reader has no way to
+# find out which without opening the file, which is the work the citation existed
+# to save. This is what made the four corrupted citations legible as a defect
+# rather than as a preference: `:573-574` and `:572-573` named the same
+# three-line guard as two different things.
+CC_BAD=0; CC_PAIRS=0
+grep -rhoE "$RANGE_RE" $CIT_ALL 2>/dev/null | sort -u > "$WORK/liveranges.txt"
+while IFS= read -r r1; do
+  [ -n "$r1" ] || continue
+  f1="$(citfile "${r1%:*}")"; s1="${r1##*:}"; a1="${s1%%-*}"; b1="${s1##*-}"
+  while IFS= read -r r2; do
+    [ -n "$r2" ] || continue
+    [ "$r1" = "$r2" ] && continue
+    f2="$(citfile "${r2%:*}")"; [ "$f1" = "$f2" ] || continue
+    s2="${r2##*:}"; a2="${s2%%-*}"; b2="${s2##*-}"
+    # overlap, and not the identical span
+    if [ "$a1" -le "$b2" ] && [ "$a2" -le "$b1" ]; then
+      CC_PAIRS=$((CC_PAIRS+1))
+      [ "$a1" = "$a2" ] && [ "$b1" = "$b2" ] || { CC_BAD=$((CC_BAD+1)); echo "      | $r1 and $r2 overlap but name different spans of ${f1#"$SRC"/}"; }
+    fi
+  done < "$WORK/liveranges.txt"
+done < "$WORK/liveranges.txt"
+[ "$CC_BAD" -eq 0 ] \
+  && ok "no two range citations overlap while naming different spans — the same guard is not cited as two different things anywhere in the tree" \
+  || no "$((CC_BAD/2)) contradicting range citation pair(s): one of each pair is stale and a reader cannot tell which"
+
 echo "== 20. This suite is chained, and is not vacuous about itself =="
 grep -qF 'chain_suite "tests/control_registry_tests.sh"' "$SRC/tests/build_os_tests.sh" \
   && ok "this suite is chained from tests/build_os_tests.sh (not discoverable-only)" \

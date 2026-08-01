@@ -44,7 +44,7 @@
 #   clears the mismatch fails there rather than passing as tidying.
 #
 # ---------------------------------------------------------------------------
-# THE QUALIFICATION PREDICATE, AND WHY IT HAS FOUR CONDITIONS AND NOT ONE
+# THE QUALIFICATION PREDICATE, AND WHY IT HAS FIVE CONDITIONS AND NOT ONE
 # ---------------------------------------------------------------------------
 # The operator's ruling was explicit: do not bulk-apply this. Two maintenance
 # controls sit beside each other in the census and only one qualifies —
@@ -55,9 +55,16 @@
 #                                  LADDER WAS CORRECTED", and
 #                                  `authority_mismatch: none`       REFUSED
 #
-# — and a predicate that cannot tell those two apart is not a predicate. All four
+# — and a predicate that cannot tell those two apart is not a predicate. All five
 # conditions must hold, each of them independently falsifiable:
 #
+#   (0) THE MEASUREMENT IS NAMED LIKE AN IDENTIFIER. Checked before (c) and (d),
+#       because both of those are SUBSTRING tests and a token short or common
+#       enough is a substring of the corpus by accident: the literal `the`
+#       satisfies (c) against almost any `demotion_requirement` and (d) against
+#       almost any file, certifying a "measurement" neither condition ever
+#       looked at. An anchored shape removes that class of token. It cannot tell
+#       a real measurement from an invented one and does not claim to.
 #   (a) THERE IS A MISMATCH TO CARRY. The census must record
 #       `authority_mismatch: declared` for the subject. `accept_and_constrain`
 #       carries a mismatch; it does not invent one, and a control in licence has
@@ -145,6 +152,24 @@ DISP_FIELDS="subject_id kind mismatch_summary alternatives_considered demotion_m
 # disposition exists not to be, spelled as a disposition.
 CONSTRAINT_FILLERS="n/a none unknown any all - open tbd nothing"
 DISP_ID_RE='^DISP-[0-9]{4}(-[a-z0-9][a-z0-9-]*)?$'
+# THE MEASUREMENT ID MUST LOOK LIKE AN ID, and this is condition (0) below.
+# Conditions (c) and (d) are both SUBSTRING tests, and a token short and common
+# enough is a substring of everything. The literal `the` is inside almost every
+# `demotion_requirement` in the census, satisfying (c), and inside almost every
+# file in the tree, satisfying (d) — so a one-word `demotion_measurement`
+# certified "a MEASURED and refused demotion recorded in the census and existing
+# as an artefact" without either test looking at anything. That is exactly the
+# failure (d) was written to prevent, arrived at through (d) rather than around
+# it: two substring matches agreeing with each other is how "measured" becomes a
+# word rather than a fixture.
+#
+# The shape is anchored, and it is honest about what it is: it CANNOT tell a real
+# measurement from an invented one. It removes the class of token that matches
+# the corpus BY ACCIDENT — an id that is 8+ characters of upper-case, digits and
+# hyphens is not a word anyone writes by chance, so (c) and (d) go back to
+# testing what they claim. `COVERAGE-GATE-PREVENTION-DIFFERENTIAL`, the one live
+# measurement, satisfies it.
+MEASUREMENT_ID_RE='^[A-Z][A-Z0-9-]{7,}$'
 
 in_list(){ local v="$1" l; for l in $2; do [ "$v" = "$l" ] && return 0; done; return 1; }
 
@@ -199,7 +224,7 @@ if [ "$CMD" = "schema" ]; then
   printf 'kind: correct_class — the classification was wrong, not the authority. Re-classify, and be ready to say why the thresholds are not a heuristic.\n'
   printf 'kind: improve_evidence — the authority is defensible once the evidence supports it. Measure, then re-derive.\n'
   printf 'kind: retire_control — the control should not exist. Remove it and whatever consumes it.\n'
-  printf 'kind: accept_and_constrain — the mismatch is CARRIED, because demotion or removal has been MEASURED to be more dangerous than the mismatch. It clears nothing, names the constraint that bounds it, and keeps the finding visible. Four conditions, all required — see the `qualification:` rows.\n'
+  printf 'kind: accept_and_constrain — the mismatch is CARRIED, because demotion or removal has been MEASURED to be more dangerous than the mismatch. It clears nothing, names the constraint that bounds it, and keeps the finding visible. Five conditions, all required — see the `qualification:` rows.\n'
   for f in $DISP_FIELDS; do
     case "$f" in
       kind)          printf 'field: %s required — one of the vocabulary above. An unrecognised kind is REFUSED and never defaulted.\n' "$f" ;;
@@ -210,6 +235,7 @@ if [ "$CMD" = "schema" ]; then
       *)             printf 'field: %s required\n' "$f" ;;
     esac
   done
+  printf 'qualification: (0) the `demotion_measurement` has the SHAPE of an identifier (%s) — upper-case, digits and hyphens, 8 or more characters. Checked FIRST, because (c) and (d) are SUBSTRING tests and a degenerate one-word token satisfies both by accident, certifying a measurement neither test ever looked at.\n' "$MEASUREMENT_ID_RE"
   printf 'qualification: (a) the census records `authority_mismatch: declared` for the subject — accept_and_constrain CARRIES a mismatch and does not invent one\n'
   printf 'qualification: (b) the subject holds a row in MISMATCHES.md'"'"'s machine-read summary table — a carried mismatch that reaches no report is a cleared one\n'
   printf 'qualification: (c) the `demotion_measurement` appears VERBATIM in the subject'"'"'s own `demotion_requirement` — the measurement is the census'"'"'s record, not this store'"'"'s assertion\n'
@@ -383,8 +409,14 @@ if [ "$CMD" = "validate" ]; then
       if ! printf '%s\n' "$REPORTED" | grep -qxF "$sub"; then
         QWHY="$QWHY (b) it holds no row in ${MISMATCHES##*/}'s machine-read summary table, and a carried mismatch that reaches no report is a cleared one however this store describes it;"
       fi
+      # (0) the measurement must have the SHAPE of an id before (c) and (d) can
+      #     mean anything. Checked FIRST and reported on its own: a degenerate
+      #     token passes (c) and (d) by being a substring of the corpus, so
+      #     reporting it as a (c) or (d) failure would name the wrong defect.
+      if ! printf '%s' "$meas" | grep -qE "$MEASUREMENT_ID_RE"; then
+        QWHY="$QWHY (0) its \`demotion_measurement\` \"$meas\" does not have the SHAPE of a measurement identifier ($MEASUREMENT_ID_RE — upper-case, digits and hyphens, 8 or more characters). Conditions (c) and (d) below are SUBSTRING tests, and a token this short or this common is a substring of the census entry and of half the tree by accident, so both would pass without either looking at anything. An id that is not a word is what keeps \"measured\" a fixture rather than a word;"
       # (c) the measurement must be the CENSUS's record
-      if [ -z "$meas" ] || ! printf '%s' "$dr" | grep -qF -- "$meas"; then
+      elif [ -z "$meas" ] || ! printf '%s' "$dr" | grep -qF -- "$meas"; then
         QWHY="$QWHY (c) its own \`demotion_requirement\` in the census does not name the measurement \"$meas\", so this store would be asserting a measurement into existence on a control whose census entry says otherwise. THE CENSUS'S OWN WORDS: \"$(printf '%s' "$dr" | cut -c1-240)\";"
       # (d) ...and the measurement must EXIST as an artefact
       elif ! measurement_artefact "$meas"; then
@@ -401,7 +433,7 @@ if [ "$CMD" = "validate" ]; then
     refuse "$NP problem(s) in $STORE (named above). None is skipped and none is defaulted: a store that quietly dropped what it could not read would certify decisions nobody parsed."
   fi
   printf 'mismatch-disposition: %s disposition(s) valid in %s (schema mismatch-disposition-v1)\n' "$NID" "$STORE"
-  printf 'mismatch-disposition: every subject resolves, every kind is in the vocabulary, every constraint names something, and every `accept_and_constrain` subject carries a MEASURED and refused demotion that is recorded in the census and exists as an artefact.\n'
+  printf 'mismatch-disposition: every subject resolves, every kind is in the vocabulary, every constraint names something, and every `accept_and_constrain` subject carries a MEASURED and refused demotion whose id is SHAPED like one, is recorded verbatim in the census, and exists as an artefact.\n'
   exit 0
 fi
 
