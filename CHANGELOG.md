@@ -27,16 +27,18 @@ deprecation cycle. Pin a commit if you need stability.
   nowhere. Thirteen anchors instantiate all twelve declared object types.
 
   **Eight identity rules, each driven red before it was made to pass**: an anchor
-  survives insertion above it; two objects cannot claim one anchor; **a currently
-  resolvable line pointing at the wrong object is REJECTED**; generated
-  projections carry their identity and a projection stripped of it is refused; a
-  renamed heading supersedes an earlier one **without rewriting it**; **a
-  reference may resolve syntactically and still fail identity validation**;
-  historical references still return their original object at its original
-  version; and the sealed `DECISION-0011` evidence still resolves after this
-  packet moved the very lines it is cited by. A merely **stale** hint is reported
-  at exit 0 with the corrected projection printed beside it — the position was
-  demoted, not outlawed.
+  survives insertion above it; two objects cannot claim one anchor; **a stale line
+  number is REJECTED when — and only when — it now lands on the anchored site of a
+  DIFFERENT ANCHORED object**, which is the one case where a reader follows the
+  number, finds something real and believes it; generated projections carry their
+  identity and a projection stripped of it is refused; a renamed heading supersedes
+  an earlier one **without rewriting it**; **a reference may resolve syntactically
+  and still fail identity validation**; historical references still return their
+  original object at its original version; and the sealed `DECISION-0011` evidence
+  still resolves after this packet moved the very lines it is cited by. **Every
+  other stale hint — at 13 anchors, nearly all of them — is reported as
+  `HINT-STALE` at exit 0 with the corrected projection printed beside it**, so the
+  reader is corrected rather than misled: the position was demoted, not outlawed.
 
   **The implementation was itself deformed by the absence of the thing it
   builds.** Ten `evidence_refs`, two live ranges and four frozen receipts cite

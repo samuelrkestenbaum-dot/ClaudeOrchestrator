@@ -642,7 +642,7 @@
   former and were reported as the latter** — true statements of a **weaker property** than the one
   claimed. **Discounted, not retracted.** **The durable fix is an ANCHOR TOKEN or a CONTENT HASH
   instead of a line number**, which also subsumes item (aa)'s sweep-as-a-script. Not built.
-  **[DISCHARGED IN MECHANISM — NOT IN MIGRATION — 2026-08-02 by
+  **[A DOWN PAYMENT IN MECHANISM — NOT DISCHARGED, AND NOT MIGRATED — 2026-08-02 by
   `PACKET-0029-citation-anchor-tokens`, and the split is the honest part.** The anchor token
   exists and GATES: `build-os/registry/scan-controls.sh anchors` resolves an object by CONTENT,
   computes the line number as a return value and stores it nowhere, refuses a reference whose
@@ -1718,10 +1718,22 @@ not to be fixed outside that packet.**
 ### From `PACKET-0029-citation-anchor-tokens` (2026-08-02, `gravito_p5b_citation_anchor_tokens_a`)
 
 - **(pppp) THE SEALED `candidate_write_surface` UNDERSTATED THE REAL ONE BY FOUR ARTEFACTS, AND
-  THE DIRECTION IS THE WRONG DIRECTION.** The frozen surface for this candidate named four paths:
-  `build-os/registry/scan-controls.sh`, `build-os/registry/control_registry.txt`,
-  `tests/control_registry_tests.sh` and `build-os/memory/residue.md`. The work could not be done
-  inside them. **Adding the ONE census entry the seal itself forecast (`census_growth_controls=1`)
+  THE DIRECTION IS THE WRONG DIRECTION.** The frozen surface for this candidate, restated
+  **VERBATIM FROM `SIGNAL-SNAPSHOT-0077-anchors-surface` WITH ITS OBJECT SCOPES INTACT** — an
+  earlier restatement here stripped them, and the scopes are the load-bearing half:
+  `build-os/registry/scan-controls.sh`;
+  `build-os/registry/control_registry.txt#registry.evidence_resolution`;
+  `tests/control_registry_tests.sh#7`; `build-os/memory/residue.md`. The work could not be done
+  inside them. **AND TWO OF THE FOUR WERE ALSO OVERRUN IN-FILE BUT OFF-OBJECT, WHICH THE FIRST
+  COUNT MISSED ENTIRELY.** `control_registry.txt` was written at **two entries besides**
+  `#registry.evidence_resolution` — three `evidence_ref` repoints in all, one inside
+  `tests.nonvacuity_minimums` (`:919` -> `:1189`) and two inside `suite.control_registry`
+  (`:923` -> `:1193`, `:924` -> `:1194`), every one of them a position into
+  `tests/control_registry_tests.sh` that this packet's own 270 inserted lines moved. And the new
+  assertions landed in a **NEW SECTION 28**, not in the frozen `#7`, which received a one-line
+  heading edit and nothing else — and that heading edit is not a scope accident either: it is the
+  `ANC-0010-a` -> `ANC-0010-b` supersession, and it is precisely what exercises rules 5 and 7.
+  **Adding the ONE census entry the seal itself forecast (`census_growth_controls=1`)
   MECHANICALLY FORCES writes to four more files**, every one of them a DERIVED value that a live
   guard reconciles: `build-os/registry/README.md` (the stated `evidence_refs` total, 345 -> 355,
   pinned by suite §25); `build-os/registry/neurocosmology_crosswalk.txt` (one binding per
@@ -1731,9 +1743,39 @@ not to be fixed outside that packet.**
   the `RELEASE_METADATA_LIVE_SUITE=1` cross-check goes red). **WHY THIS MATTERS BEYOND
   BOOKKEEPING:** guard 1 of the shadow ranker screens candidates BY THEIR FROZEN WRITE SURFACE,
   and a surface that understates is a surface that could let a candidate through a screen its
-  real footprint would have failed. Nothing improper happened here — none of the four is
-  anywhere near guard 1's protected set — but the property the guard relies on was not true of
-  this candidate, and it was not true in the unsafe direction. **THE REMEDY IS NOT A LONGER HAND
+  real footprint would have failed. **AND THE SENTENCE THAT USED TO SIT HERE — *"none of the four
+  is anywhere near guard 1's protected set"* — WAS FALSE, WHICH MAKES IT THE WORST SENTENCE IN
+  THIS ITEM.** `build-os/registry/neurocosmology_crosswalk.txt` is one of the **six** entries of
+  `PROTECTED_SURFACE` (`build-os/metrics/rank-candidates.sh:195`), protected as
+  `...#ranker.s1_shadow_ordering` — and this packet wrote to it. **THE COUNTERFACTUAL IS
+  KNIFE-EDGE, BECAUSE `touches()` MATCHES A BARE PATH AGAINST A PROTECTED `path#object`:**
+  `case "$b" in "$a"'#'*) return 0 ;; esac` at `build-os/metrics/rank-candidates.sh:264` returns
+  true when the candidate's token is the bare file and the protected token names an object inside
+  it. So had the sealed surface said `build-os/registry/neurocosmology_crosswalk.txt` plainly,
+  guard 1 would have **FIRED**, `PACKET-0029` would have been excluded as `self_amendment`, there
+  would have been **no rank 1, and the experiment would be VOID**. It said
+  `#registry.evidence_resolution`, guard 1 did not hit, and rank 1 stands.
+  **THE DEFENCE THIS ITEM OWES, AND IT IS THREE THINGS AND NOT AN ASSERTION OF DISTANCE.** (1) The
+  write is **object-scoped**: the crosswalk record this packet added is
+  `control: registry.evidence_resolution`, carrying the identical key the sealed surface names,
+  and it is not the `ranker.s1_shadow_ordering` record. (2) The **seal itself already wrote at
+  object granularity** — `build-os/registry/control_registry.txt#registry.evidence_resolution` is
+  the sealed token, so reading the crosswalk write at the same granularity applies the seal's own
+  convention rather than inventing a lenient one after the fact. (3) The protected property was
+  **never violated IN FACT**: `ranker.s1_shadow_ordering`'s `evidence_refs`
+  (`build-os/registry/control_registry.txt:1898`) point only into
+  `build-os/metrics/rank-candidates.sh`, and that file has **ZERO DIFF** across this packet —
+  `git diff --stat c2d97f8..c76b4d0 -- build-os/metrics/rank-candidates.sh` is empty and the blob
+  is the same `5543ea88` at seal, at selection and at execution.
+  **AND THE CONVENTION THAT DOES ALL THAT WORK IS LOAD-BEARING AND IS CURRENTLY WRITTEN DOWN
+  NOWHERE.** Nothing in `rank-candidates.sh`, in the registry, in the suite or in any memory file
+  states when a `candidate_write_surface` token must be object-scoped rather than bare — yet the
+  choice between the two decides whether guard 1 fires and therefore whether an ordering exists at
+  all. It has been living in an agent's judgement. Recorded as the open item `(uuuu)` below; not
+  closed here, because writing the convention down is a change to the guard's own contract and
+  this packet is the one candidate forbidden to make it. Nothing improper happened here, but the
+  property the guard relies on was not true of this candidate, and it was not true in the unsafe
+  direction. **THE REMEDY IS NOT A LONGER HAND
   LIST.** It is that a write surface naming `control_registry.txt` should DERIVE the artefacts
   coupled to it, exactly as this packet's anchors derive positions. Not built; not in scope.
 
@@ -1793,3 +1835,63 @@ not to be fixed outside that packet.**
   claim available after this packet is narrower and is worth more: **the first candidate S1 ranked
   first has now actually been executed, so the ordering has begun to be falsifiable in the only
   way that counts — by outcome — and it has not yet been falsified.**
+
+- **(uuuu) THE OBJECT-GRANULARITY CONVENTION FOR `candidate_write_surface` DECIDES WHETHER GUARD 1
+  FIRES, AND IT IS WRITTEN DOWN NOWHERE.** Opened by the `(pppp)` correction above. `touches()`
+  (`build-os/metrics/rank-candidates.sh:264`) treats a bare file path as touching a protected
+  `path#object` inside it, so for the six entries of `PROTECTED_SURFACE` the granularity a sealer
+  chooses when writing a candidate's surface **is** the guard's outcome: bare
+  `build-os/registry/neurocosmology_crosswalk.txt` excludes the candidate as `self_amendment`;
+  `...#registry.evidence_resolution` does not. **NOTHING STATES WHICH IS CORRECT.** Not the script,
+  not `control_registry.txt`, not `tests/mutator_registry_tests.sh` section 13, not any memory
+  file. `PACKET-0029` sat on the permissive side of that unwritten rule and its rank 1 — the only
+  rank S1 has ever had executed — depends on it. **WHY IT IS NOT ASYMMETRIC IN THE SAFE
+  DIRECTION:** guard 1 already fails closed on ABSENCE (`guard1_unscreenable`) and on a WILDCARD
+  (`guard1_uninterpretable_surface`), and it was already driven red on four spelling aliases, so
+  every other way of being vague about a surface has a named refusal. Granularity is the one that
+  does not, and it is the one that reads as legitimate scoping rather than as evasion. **THE
+  REMEDY IS NOT TO WIDEN `PROTECTED_SURFACE`** — that argument is already settled in
+  `ranker.s1_shadow_ordering`'s notes and in `(zzz)`: a predicate that refuses every subject
+  discriminates nothing. It is to make the convention **explicit and checkable**, so that a
+  surface's granularity is a declared property of the seal rather than a judgement made once by
+  whoever wrote it. **A CONVENTION THAT CAN VOID AN EXPERIMENT MUST NOT LIVE ONLY IN AN AGENT'S
+  JUDGEMENT.** Not built, and deliberately not built here: `PACKET-0029` is the candidate guard 1
+  screened, so amending guard 1's contract is exactly the self-amendment it exists to prevent.
+
+- **(vvvv) THIS PACKET MOVED A STALE REFERENCE FURTHER OUT OF DATE, AND A FUTURE READER MUST KNOW
+  THE ANCHOR PACKET IS WHAT DID IT.** `(rrrr)` above records the two stale prose citations at
+  `control_registry.txt`'s `tests.nonvacuity_minimums` notes and at `MISMATCHES.md` as
+  PRE-EXISTING, which they are. What `(rrrr)` does not say is that this packet **widened both
+  errors**: the section 20 assertion they name went `919` -> `1189` when 270 lines were inserted
+  above it, so `DEFECT-0001-stale-line-reference`'s `:772` is now wrong by **417 lines** instead
+  of 147, and `DEFECT-0003-duplicate-semantic-truth`'s `:774` by **415** instead of 145. **THIS IS
+  NOT A SCOPE VIOLATION** — neither citation was in the frozen write surface and repairing them
+  was correctly refused as builder's-discretion scope creep. **AND IT IS ALREADY MITIGATED, WHICH
+  IS THE ONLY REASON IT IS RECORDED RATHER THAN FIXED:** `ANC-0012` anchors precisely that
+  assertion by content, so the migration that repairs these two now has a handle that will not
+  decay again. **THE HONEST SHAPE OF IT:** a packet whose thesis is that positions decay proved
+  the thesis by decaying two positions by a further 400 lines each, in the same commit that
+  shipped the remedy for exactly that. Read it as the demonstration, not as an excuse.
+
+- **(wwww) FOUR SMALLER THINGS THE FIX ROUND WAS TOLD TO RECORD AND NOT TO REPAIR.**
+  (i) **THE ZERO-REPOINT RESULT INTO `scan-controls.sh` IS MANUAL, NOT A PROPERTY OF THE SCHEME.**
+  `(qqqq)` already says so and the proof is inside the same diff: the identical situation in
+  `tests/control_registry_tests.sh` had no net-zero option available and cost **3** repoints. Six
+  hand-made net-zero edits are a builder holding a file still, not a mechanism holding it still,
+  and **it will not survive the next packet.**
+  (ii) **THE `NPROJ > 0` VACUITY FLOOR IS REAL BUT IS THE WEAKEST REAL ONE IN SECTION 28**
+  (`tests/control_registry_tests.sh:1048` and `:1056`). It asserts that at least one projection
+  was generated carrying its anchor token; it would still pass if the generator emitted **1 of 4**
+  live fixture anchors. Every other floor in that section is derived or set-based; this one is a
+  bare positive.
+  (iii) **LATENT, AND IT FAILS CLOSED.** The site-collision fallback at
+  `build-os/registry/scan-controls.sh:654` is `grep -qF "$key<"` — an **unanchored substring**
+  match, unlike the exact-match line above it — so an artifact path that is a suffix of another
+  could false-positive an `ANCHOR-SITE-COLLISION`. At 13 anchors it cannot fire; the direction is
+  a spurious refusal rather than a missed one, which is the right direction to be wrong in.
+  (iv) **`build-os/memory/tool_router.md:368` SAYS THE SECOND-EYES STREAK IS "the last nine
+  packets"; IT IS TWELVE.** Presentation staleness of the same
+  `DEFECT-0002-stale-remembered-count` shape, and **nothing pins the literal** — no suite, no
+  scanner and no policy reads it — which is exactly why it drifted three packets without anyone
+  noticing. Left as residue on purpose: this packet is frozen evidence and does not repair what it
+  merely passes.

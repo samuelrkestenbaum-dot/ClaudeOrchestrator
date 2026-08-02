@@ -29,9 +29,30 @@ packet's identity is **frozen evidence**: if what executes is not the candidate
 that was ranked, the measurement is void. **The scope below is the sealed
 `candidate_write_surface` and nothing beyond it.**
 
-- **Sealed signals:** `residue_items_closed=1`, `residue_ruling_satisfied=0`,
+- **Sealed signals — RESOLVED FROM THE SNAPSHOT STORE, NOT REMEMBERED:**
+  `residue_items_closed=2`, `residue_ruling_satisfied=0`,
   `census_growth_controls=1`, `sealed_rank=1` (**frontier, NOT dominant** —
-  `PACKET-0030` and `PACKET-0031` tie at 2 on the same frontier).
+  `PACKET-0030` and `PACKET-0031` tie at 2 on the same frontier). The derivation,
+  written down so the next reader resolves it rather than copies this line:
+  `awk -F'\t' '$1=="SIGNAL-SNAPSHOT-0078-anchors-items"{print $6" = "$7}'
+  build-os/metrics/signal_snapshots.tsv` → `residue_items_closed = 2`.
+- **AND THAT DIGIT WAS WRONG IN THIS FILE UNTIL THE FIX ROUND, WHICH IS THE VERY
+  DEFECT CLASS THIS PACKET EXISTS AGAINST.** From its first commit this file
+  declared `residue_items_closed=1`. **It was not a typo and it was not the
+  builder's arithmetic: the orchestrator's brief stated `1` and this file
+  INHERITED it.** That is `DEFECT-0002-stale-remembered-count`, committed in the
+  one artefact that says *"the scope below is the sealed
+  `candidate_write_surface` and nothing beyond it"* — the place a number must be
+  **resolved and not remembered** — and inside a brief whose own instruction was
+  *"DERIVE every count; never restate one."* **THE WORK MATCHED THE SEALED 2 AND
+  ONLY THE RESTATEMENT WAS WRONG:** both `(mm)`
+  (`build-os/memory/residue.md:645`) and `(nnn)`
+  (`build-os/memory/residue.md:1064`) carry their annotations, and the snapshot's
+  own `evidence_refs` field names exactly those two items and says in the same
+  breath why `#rrr` and `#bbbb` were **not** counted. The provenance is recorded
+  here rather than the digit quietly overwritten: a count that arrives by
+  inheritance and is repaired by overwriting leaves no trace of how it got in,
+  and the trace is the only part of this that generalises.
 - **Frozen write surface:** `build-os/registry/scan-controls.sh`;
   `build-os/registry/control_registry.txt#registry.evidence_resolution`;
   `tests/control_registry_tests.sh#7`; `build-os/memory/residue.md`.
@@ -47,6 +68,63 @@ that was ranked, the measurement is void. **The scope below is the sealed
 Branched at `c2d97f8` on `claude/project-handoff-merge-ramhds`, re-verified with
 `git merge-base` before the first edit. **Nothing is pushed, merged, tagged, PR'd
 or deployed, and no such go has been given.**
+
+## Fix round — stage 3, bounded to 7 enumerated items
+
+**qa returned GREEN and the reviewer returned `fix-then-pass` on 7 items, every
+one of them a TEXT OR RECORD correction.** No code changed, no test changed, and
+no measurement was re-run beyond the targeted commands written out below. This
+takes the packet to **3 commits, one over the `<=2` cap**, recorded as a
+deviation and not normalised. `df9f740` and `c76b4d0` are **not** squashed,
+amended or rewritten.
+
+**The outcome numbers, DECOMPOSED rather than asserted — guard 2's rule applied
+to this packet's own record.** `rework_count` was going to be reported as **2**,
+and that is not defensible against this packet's own disclosures. The components
+are published so a reader can recompute the total instead of trusting it:
+
+| component | count | disclosed at |
+|---|---|---|
+| off-surface artefacts the census entry mechanically forced | 4 | residue `(pppp)` |
+| `evidence_ref` repoints | 3 | residue `(qqqq)`, and the two other `control_registry.txt` entries named below |
+| net-zero edits made only to avoid moving a line | 6 | residue `(qqqq)` |
+| **total** | **13** | |
+
+**The builder's prose was more honest than the builder's count**, which is the
+whole finding: the four artefacts, the three repoints and the six net-zero edits
+were each written down plainly in `residue.md` and then summed to 2. The
+definition of "rework" in `build-os/metrics/COMPARISON_PROTOCOL.md` is
+pass-level, not artefact-level, which is exactly why the decomposition is
+published here and not only the total — a single number under a contested
+definition is the thing this repository keeps catching.
+
+**`fix_rounds` and `review_rounds` are DELIBERATELY UNFROZEN.** They are not
+final until this round and the re-review land, and writing `0` now would freeze a
+value that is already false. No outcome row is written for `DECISION-0011`:
+`build-os/metrics/decision_telemetry.tsv` and
+`build-os/metrics/signal_snapshots.tsv` are the live experiment and this round
+does not touch either.
+
+**The two gate numbers, each with the exact command beside it, because the labels
+were ambiguous:**
+
+- `bash tests/build_os_maintenance_tests.sh` → **67 passed, 0 failed**, exit 0.
+- `bash build-os/maintenance/run-tests.sh` → **144 passed, 0 failed** (`# tests
+  144`, `# pass 144`, `# fail 0`), exit 0.
+  **"maintenance 144/144" names the SECOND harness and never the first.** Both
+  are green; the single label covering two harnesses is what is fixed here.
+
+- **Snapshot chain verification — the recorded invocation did not exist.**
+  `bash build-os/metrics/rank-candidates.sh snapshot-verify` returns
+  `s1: REFUSED — unknown command "snapshot-verify"` at **exit 2**;
+  `snapshot-verify` is a **`record-decision.sh`** subcommand. The working command
+  is `bash build-os/metrics/record-decision.sh snapshot-verify` → **97 snapshots
+  verify** against the digest chain, exit 0.
+
+**Items 2, 3 and 7 landed outside this file** and are recorded where they were
+wrong: `(pppp)`'s false guard-1 sentence and the frozen surface's stripped object
+scopes in `build-os/memory/residue.md`; rule 3's over-broad receipt-facing
+wording in `CHANGELOG.md`.
 
 ## CLOSED — `gravito_p5_outcome_counterfactual_telemetry_a`
 
