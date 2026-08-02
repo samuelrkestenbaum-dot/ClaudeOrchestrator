@@ -860,6 +860,27 @@
   Nothing in the suite pins the literal, so this is presentation staleness and not a red gate —
   recorded so a later reader meets a decision rather than an oversight. **This is the same
   counter-goes-stale failure the item is already about, now in its third instance.]**
+  **[2026-08-02, P5b: TWELFTH CONSECUTIVE PACKET — AND IT IS THE FIRST ONE WHOSE VERDICT CARRIES
+  EXPERIMENTAL WEIGHT, WHICH IS WHY THE STREAK NOW COSTS MORE THAN IT DID.** The reviewer again
+  stated *"second eyes: NONE, single-model"* as the router requires. `PACKET-0029` is the first
+  candidate a **sealed prospective ordering** ranked first and a human then selected and executed,
+  so the pass-as-fixed verdict on it is not merely a quality judgement — **it is the outcome
+  observation the ranker will be evaluated against.** A single-model chain produced both the
+  ranking rule and the verdict on the first candidate it ranked. That is not a defect in this
+  packet and nothing here was found wrong; it is a **statement of how much weight one model's
+  opinion is currently carrying**, and it belongs on the record before n grows.
+  **The streak counter is advanced ELEVEN -> TWELVE here rather than being left to go stale**,
+  which is the failure this item is about — and it is the FOURTH consecutive close at which
+  advancing it by hand was the only thing keeping it true.
+  **THE ROUTER'S OWN COUNTER IS NOW STALE BY THREE.** `build-os/memory/tool_router.md`'s
+  second-eyes row still says the absence was checked at *"the last nine packets"*; it is now
+  **TWELVE**. **NOTHING PINS THE LITERAL** — no suite, no scanner and no policy reads it — which
+  is exactly why it drifted three packets without anyone noticing, and it is the same
+  `DEFECT-0002-stale-remembered-count` shape as the digit this very packet was built against.
+  **Remedy named and NOT applied: one builder-lite line, `nine` -> `twelve`.** The router is the
+  orchestrator's instrument and was last corrected by a BUILDER commit, so editing it is a
+  **routing act rather than bookkeeping**, and the archivist does not take routing acts.
+  **The "install Codex" half remains the only half of this item still open.**]**
 - **(aaa) THE CLOSE ITSELF BROKE TREE-QUIET, AND ONE SUITE RUN WENT RED BECAUSE OF IT.** At the
   `gravito_p1_mutators_ids_telemetry_a` close the archivist launched
   `bash tests/build_os_tests.sh` in the background and then started
@@ -1895,3 +1916,51 @@ not to be fixed outside that packet.**
   scanner and no policy reads it — which is exactly why it drifted three packets without anyone
   noticing. Left as residue on purpose: this packet is frozen evidence and does not repair what it
   merely passes.
+
+- **(xxxx) ARCHIVIST CLOSE NOTE — WHAT THIS CLOSE RE-DERIVED RATHER THAN INHERITED, AND WHY THAT
+  IS THE POINT OF THE PACKET.** Everything below was recomputed at `fbd746d` from the live tools
+  and the stores, not copied from the close brief, because a close that restates a brief is the
+  defect class this packet exists against and would have been the fourth instance of it in three
+  artefacts. **The S1 report at HEAD digests to sha256
+  `e838284e2bba52628647d0c7ddd1ed258a7aab7cc391a5ac99992ad7584eb596`, which MATCHES qa's
+  independently recorded base-run literal to the byte**; `rank_of_selected: 1` still derives at
+  exit 0; the ranking digest is unchanged; and `build-os/metrics/rank-candidates.sh` is the
+  **identical blob `5543ea88`** at the seal `44b0fab`, at the selection `c2d97f8`, at the build
+  `df9f740` and at the fix round `fbd746d`. Guard 1's live output excludes `PACKET-0033` and
+  **ranks `PACKET-0029` rather than excluding it.** Census re-derived at **101** controls; the
+  anchor corpus at **13 records over 12 declared object types, 12 resolved, 1 superseded, 0
+  violations**; **97** snapshots by row count against **176** file lines. **THE DIGEST MATCH IS
+  WORTH MORE THAN IT LOOKS:** the ranker reads two stores this packet never wrote, so a report
+  that is identical across the entire execution is evidence that **the thing measured was not
+  disturbed by the thing measuring it** — which is the property a prospective experiment lives or
+  dies on, and the only one nobody could have restored after the fact.
+
+- **(yyyy) THE PACKET ID WAS COLLISION-CHECKED AT CLOSE AND THE CHECK IS NOT CEREMONIAL.** The
+  close brief supplied `PACKET-0029` and instructed the archivist to verify rather than accept it.
+  A tree-wide sweep of every `PACKET-[0-9]{4}[a-z0-9-]*` token finds the live band
+  `PACKET-0001`..`PACKET-0034` plus the synthetic `PACKET-9001`..`PACKET-9999` fixture range, and
+  **every occurrence of `PACKET-0029` in the live band resolves to the same slug**
+  — in both decision candidate sets, in five snapshot rows, in the P4 and P5 receipts, in this
+  file, in `current_state.md`, in the anchor table and in the section 28 assertions. **No second
+  candidate holds it, so reuse is identity preserved rather than a collision.** The check earns
+  its keep historically: at the P3 close a brief supplied an id already held by a **rejected**
+  candidate, and the P4 and P5 closes both caught the same shape. **The receipt filename follows
+  the tree's convention — the `gravito_*` slug, not the `PACKET-NNNN` id** — because `ANC-0007` is
+  a live `receipt_id` anchor over the previous packet's slug and `check-adoption.sh` derives the
+  store key from the receipt's `basename`; the slug was declared by the build itself in this
+  file's own section heading and was collision-checked at close against every receipt, every store
+  row and the whole tree.
+
+- **(zzzz) THE CLOSE HAD TO AVOID WRITING POSITIONS IN ORDER TO CLOSE A PACKET ABOUT POSITIONS,
+  AND THE CONSTRAINT WAS REAL RATHER THAN STYLISTIC.** §27a treats every `path:N-M` token anywhere
+  under `build-os/` or `tests/` as a **live** range that must resolve at both ends in the current
+  tree, and §27d refuses two ranges over one file that name different spans — so a receipt written
+  in the ordinary way, citing the provenance record and the guard sites by line, would have
+  planted range citations into artefacts that **the next packet's insertions will move**, in the
+  close of the packet whose entire thesis is that this decays. **The receipt therefore cites by
+  CONTENT and carries no `path:line` and no `path:N-M` token at all**, which is the anchor
+  scheme's own discipline applied by hand to a file the scheme does not yet cover. **THAT IS THE
+  MEASUREMENT, NOT A FLOURISH:** the archivist had to hold the convention manually because
+  **receipts and memory files are outside the 3.5% the corpus has migrated**, and holding it by
+  hand is exactly what `(qqqq)` says will not survive the next packet. Two closes ago the same
+  constraint bit twice in one pass, which is why the brief named it.

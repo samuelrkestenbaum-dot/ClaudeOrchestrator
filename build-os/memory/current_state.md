@@ -188,7 +188,146 @@
   declared object types, `bash build-os/registry/scan-controls.sh anchors`. The census growth of
   exactly one is the FORECAST `census_growth_controls=1` sealed for this candidate before it was
   selected, not a coincidence and not a licence for a second.]**
-- **Last closed packet:** `gravito_p5_outcome_counterfactual_telemetry_a`
+- **Last closed packet:** `gravito_p5b_citation_anchor_tokens_a`
+  (`PACKET-0029-citation-anchor-tokens` — **REUSED, not minted:** it is the id `DECISION-0011`
+  already carries for this candidate in its own `candidate_ids` column, and the id `DECISION-0010`
+  carried before that. Collision-checked at close against every `PACKET-*` token in the tree:
+  within the live band `PACKET-0001`..`PACKET-0034`, **every occurrence of `PACKET-0029` resolves
+  to the same slug** and no second candidate holds it. **Reuse is identity preserved, not a
+  collision.**) **CLOSED 2026-08-02. VERDICT: PASS-AS-FIXED** — qa returned GREEN, the reviewer
+  returned `fix-then-pass` on **7 enumerated items**, and all 7 were fixed and verified by the
+  orchestrator rather than by opening a fourth gate stage.
+  Receipt `build-os/receipts/gravito_p5b_citation_anchor_tokens_a.md`.
+  Base `c2d97f8` (re-verified at close: `git merge-base fbd746d c2d97f8` = `c2d97f8`), commits
+  `df9f740` (build) + `c76b4d0` (memory) + `fbd746d` (fix round). **None pushed.**
+  **THIS IS THE FIRST COMPLETED PROSPECTIVE EXPERIMENT IN THIS REPOSITORY, AND THE ORDERING OF
+  THE THREE ACTS IS THE RESULT:** the ranking was **sealed** at `44b0fab` before any selection
+  could exist, the **selection** was recorded at `c2d97f8` by the **operator**, and **execution**
+  followed. `PACKET-0029` was ranked **rank 1** by S1 over a candidate set nobody had yet chosen
+  from, then selected, then executed.
+  **THE EXPERIMENT IS INTACT AND WAS VERIFIED TO THE BYTE AT THIS CLOSE, NOT RESTATED:** the S1
+  report at HEAD digests to sha256 `e838284e2bba5262...`, **identical to qa's independently
+  recorded base-run literal**; `rank_of_selected: 1` still derives at exit 0; and
+  `build-os/metrics/rank-candidates.sh` is the **same blob `5543ea88`** at the seal, at the
+  selection and at both execution commits.
+  **AND THE CLAIM IS RECORDED AT ITS TRUE WIDTH: ONE SELECTED RANK IS NOT EVIDENCE OF S1 SKILL.**
+  It is a single observation, by a selector who had read the ordering. The narrower true claim is
+  worth more: **the first candidate S1 ranked first has now been executed and closed, so the
+  ordering has begun to be falsifiable by outcome — and has not yet been falsified.**
+  **WHAT SHIPPED — IDENTITY IN, POSITION OUT.** Resolution is by CONTENT: the literal must occur
+  EXACTLY ONCE in its artifact (0 -> `ANCHOR-UNRESOLVED`, 2+ -> ambiguous, both violations), and
+  **the line number is a return value of `anchor_resolve()`, computed at every resolution and
+  stored nowhere.** qa proved no field holds a position and that an 11-field record is refused as
+  `ANCHOR-SCHEMA`, so no overflow field can smuggle one in. The written form `path:line#ANCHOR-ID`
+  grades its two halves SEPARATELY — a wrong `#` half is a **refusal**, a stale `:` half is a
+  **report with the corrected projection printed beside it**. **That is precisely the
+  resolvability/identity split this tree had failed to make for twelve packets.**
+  **13 anchor records, 12 live object types** (`section_anchor` carries a superseded pair), all
+  twelve **claimed by a live anchor** rather than merely enumerated; 12 resolved, 1 superseded,
+  0 violations. `anchors_check` is wired on the `check` path OUTSIDE the `anchors` early-exit and
+  **qa proved by MUTATION that it cannot be skipped** — renaming one anchored literal drove
+  `check` to exit 2.
+  **RULE 8 IS THE ONE THAT MATTERED, AND IT IS SELF-REFERENTIAL:** the packet moved lines its own
+  sealed evidence cites and did not invalidate the experiment measuring it. Test 28h drives
+  `ANC-0012` across a real drift of **924 -> 1189 caused by this very commit**, asserting the old
+  position no longer carries the content and the anchor absorbed it. **Executed, not arranged.**
+  **BUT THE DISTINCTION THE PACKET CONFLATES IS RECORDED HERE: the scheme property is real; the
+  ZERO-REPOINT RESULT into `scan-controls.sh` is MANUAL.** Six net-zero edits, *"none of them how
+  the code would otherwise be written"*, and the proof is in the same diff — the identical
+  situation in `tests/control_registry_tests.sh` had no net-zero option and cost 3 repoints.
+  **It will not survive the next packet.**
+  **THE FINDING THAT NEARLY VOIDED THE EXPERIMENT.** `(pppp)` originally defended the packet with
+  a FALSE sentence — *"none of the four is anywhere near guard 1's protected set"*.
+  `build-os/registry/neurocosmology_crosswalk.txt` **IS one of the six entries of
+  `PROTECTED_SURFACE`**, protected as `...#ranker.s1_shadow_ordering`, **and this packet wrote to
+  it** — and `touches()` matches a BARE PATH against a protected `path#object`. Had the sealed
+  surface said the bare path, guard 1 would have **FIRED**, `PACKET-0029` would have been excluded
+  as `self_amendment`, **there would have been no rank 1 and the experiment would be VOID.** It
+  said `#registry.evidence_resolution`, guard 1 did not hit, and rank 1 stands. The
+  object-granularity reading is correct — the seal itself wrote `control_registry.txt` at object
+  granularity and the crosswalk record carries the identical key — and the protected property was
+  **never violated in fact**: `ranker.s1_shadow_ordering`'s `evidence_refs` point only into
+  `rank-candidates.sh`, which has **zero diff**. **BUT THE CONVENTION DECIDING WHETHER THE
+  EXPERIMENT IS VOID WAS WRITTEN DOWN NOWHERE.** It is open item `(uuuu)`, deliberately NOT
+  closed: amending guard 1's contract is the self-amendment guard 1 exists to prevent. **That is
+  this packet's most important governance finding — a convention that can void an experiment must
+  not live only in an agent's judgement.**
+  **THE SCOPE RULING, RECORDED BECAUSE THE OPERATOR ASKED FOR IT DIRECTLY: MECHANICAL
+  CONSEQUENCE, NOT SCOPE GROWTH; THE EXPERIMENT IS NOT COMPROMISED.** Every off-surface write is a
+  DERIVED value reconciled by a live guard, forced by adding exactly one census entry: registry
+  `README.md` (evidence_refs 345 -> 355, live 355), `neurocosmology_crosswalk.txt` (bindings 101 =
+  census 101), `CROSSWALK.md` (coverage 32/15 -> 33/16, live 33), `CHANGELOG.md` and this file
+  (the suite total), `active_packet.md` (the declaration). **0 new files, 0 stores, 0 tools, 0
+  suite files.** **DECISIVE FOR THE ARITHMETIC:** `candidate_write_surface` is declared a
+  `SURFACE_SIGNAL` and is **deliberately excluded from `SIGNAL_DIRECTION`** — it contributes
+  **ZERO POINTS**. The rank-1 score came from `residue_items_closed`, `residue_ruling_satisfied`
+  and `census_growth_controls`, so **the overrun could not have moved the score.** Sealed signals
+  honoured: `residue_items_closed=2` (both `(mm)` and `(nnn)` annotated),
+  `residue_ruling_satisfied=0`, `census_growth_controls=1` — **one control, not
+  one-plus-consequences**: exactly one `+control:` line, `registry.evidence_resolution`, Class A /
+  `gate` / `authority_mismatch: none`.
+  **AND THE ORCHESTRATOR'S OWN DEFECT, RECORDED WITH PROVENANCE AND NOT SOFTENED.**
+  `active_packet.md` declared `residue_items_closed=1` from its first commit; **the sealed value
+  is 2.** It was not a typo and not the builder's arithmetic — **the orchestrator's brief stated
+  `1` and the file INHERITED it.** That is `DEFECT-0002-stale-remembered-count`, committed **in
+  the artefact that declares the sealed scope** — the one place a number must be resolved rather
+  than remembered — **and inside a brief whose own instruction was "DERIVE every count; never
+  restate one."** **The defect class demonstrated itself one level up, inside the packet built to
+  end it.** The fix round DERIVED the value rather than copying the correction, and **kept the
+  wrong digit visible in a provenance record in `active_packet.md`** rather than silently
+  correcting it. **That provenance record is preserved by this close and must not be tidied
+  away** — a count repaired by overwriting leaves no trace of how it got in, and the trace is the
+  only part that generalises.
+  **THE IRONY BELONGS IN THE RECORD: THE ANCHOR PACKET DECLINED TO FIX THREE STALE LINE
+  REFERENCES.** `DEFECT-0001`, `DEFECT-0003` and `DEFECT-0002` (`CROSSWALK.md` prose *"29
+  bindings, 14 instantiating"* against a derived 33/16) were all found, all pre-existing, all
+  inside `evidence_refs` prose of entries this packet edited — and all deliberately left.
+  **Correct disposition under the ceiling:** the packet is frozen evidence in a live measurement,
+  and repairing defects mid-measurement is exactly the failure the decision arm tests for.
+  **AND THIS PACKET MOVED ONE OF THEM FURTHER OUT OF DATE.** Section 20's assertion went
+  919 -> 1189, so `DEFECT-0001`'s cited `:772` is now wrong by **417** lines instead of 147 and
+  `DEFECT-0003`'s cited `:774` by **415** instead of 145. Mitigated — `ANC-0012` anchors precisely
+  that assertion — **but the anchor packet caused it.** `(vvvv)`.
+  **`(mm)` WAS RE-HEADED** to *"A DOWN PAYMENT IN MECHANISM — NOT DISCHARGED, AND NOT MIGRATED"*,
+  matching its own body: **13 anchors against 355 still-positional `evidence_refs` — 3.5%
+  coverage.** The reviewer's ruling: a down payment labelled a down payment. **`(ddd)` STAYS
+  QUEUED**, verified at 3 sites — it queues a **cross-commit** comparison and everything here
+  resolves against the artifact at the current commit; **do not mark it consumed.**
+  **TRAJECTORY (reviewer): *"a bridgehead rather than a twelfth mechanism."*** Held at true width:
+  today it IS a twelfth mechanism at 3.5% coverage — but the **first that can express the failure
+  at all**, since the eleven positional checks have no vocabulary for object identity. The
+  distinguishing evidence is the **refusal**: *"converting the census to it would be a
+  re-authorisation of every entry's evidence and is not a builder's to take."*
+  **qa's TWO LABEL CORRECTIONS, now written with exact commands:** "maintenance 144/144" names
+  `bash build-os/maintenance/run-tests.sh`; `bash tests/build_os_maintenance_tests.sh` is **67/0**.
+  And `snapshot-verify` is a **`record-decision.sh`** subcommand —
+  `rank-candidates.sh snapshot-verify` exits 2 `unknown command`.
+  **THE BUILDER REFUSED TO CERTIFY ITS OWN DIGEST MATCH:** *"I do not hold qa's base sha256
+  literal, so the re-review should compare that digest against its own recorded value rather than
+  take a match on my word."* **It could have asserted it and been right.** An agent distinguishing
+  what it VERIFIED from what it BELIEVES is the discipline this sequence exists to build.
+  **SECOND EYES: NONE — TWELFTH CONSECUTIVE PACKET.** The reviewer stated it, as the router
+  requires. `build-os/memory/tool_router.md`'s second-eyes row still says *"the last nine"*; it is
+  **twelve**. Nothing in the suite pins that literal, so it is presentation staleness of the same
+  `DEFECT-0002` shape rather than a red gate; the remedy is one builder-lite line and editing the
+  router is a **routing act rather than bookkeeping**, so it is named and not applied. `(zz)`.
+  **DEVIATION, RECORDED AND NOT NORMALISED: 3 commits against the `<=2` cap**, flagged in
+  `active_packet.md` rather than squashed. The fix round landed as its own commit rather than
+  amending commits the gates had already measured.
+  **FINAL STATE AT `fbd746d`, ALL RE-DERIVED BY THE ARCHIVIST AT CLOSE FROM THE REGISTRY FILES AND
+  THE LIVE TOOLS: 101 controls; 78 gate / 15 advise / 7 execute / 1 observe; class A76 / B3 / C22;
+  21 declared mismatches (HELD); 13 anchor records over 12 declared object types, 12 resolved and
+  1 superseded, 0 violations; 11 decisions; 97 signal snapshots BY ROW COUNT (176 file lines — the
+  row count is `grep -c '^SIGNAL-SNAPSHOT-'`, never `wc -l`); 25 of those bound to `DECISION-0011`;
+  9 mutator records; 0 live authority envelopes; suite 1995/0 exit 0 with zero `^  FAIL` and no
+  chained failures; maintenance 144/144 and 67/0; `scan-controls check` / `scan-controls anchors` /
+  `scan-mutators` / `check-adoption` all exit 0; `snapshot-verify` 97 verifying at exit 0; ZERO
+  files added in the whole range; ZERO re-authorisations (6 `+` lines, 0 `-` lines, field-anchored);
+  tree clean.**
+  **OPEN, AND NOT THE ARCHIVIST'S TO CLOSE: nothing is pushed, merged, tagged, PR'd or deployed.**
+  `c2d97f8` is the **selection anchor** and `44b0fab` is the **seal anchor**; **neither may be
+  amended**, and neither may `df9f740`, `c76b4d0` or `fbd746d`.
+- **Previously closed:** `gravito_p5_outcome_counterfactual_telemetry_a`
   (`PACKET-0032-p5-outcome-counterfactual-telemetry` — REUSED, not minted: it is the id
   `DECISION-0010` already carries for this work, collision-checked against every `PACKET-*` in
   the tree, because a fresh id would put two candidates under one key inside the store S1 reads).
@@ -388,7 +527,7 @@
   `prospective_decisions_with_a_recorded_selection` from 0 to 1 with no human having chosen —
   **the exact figure the reviewer's reproduction exploited** — and would destroy the thing the
   packet built.
-- **Previously closed:** `gravito_p4_s1_shadow_ranker_a`
+- **Earlier:** `gravito_p4_s1_shadow_ranker_a`
   (`PACKET-0034-gravito-p4-s1-shadow-ranker-a`) — **THE FIRST EXECUTIVE COMPONENT: A REAL CANDIDATE
   SET IN, AN IMMUTABLE EXPLAINED ORDERING OUT — AND THE FIRST ORDERING IT PRODUCED IS DEGENERATE**
   (receipt `build-os/receipts/gravito_p4_s1_shadow_ranker_a.md`, commits `9742a10` + `af4ce0c` +

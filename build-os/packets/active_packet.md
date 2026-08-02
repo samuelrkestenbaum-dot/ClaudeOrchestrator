@@ -4,221 +4,163 @@
 > the builder implements exactly this and nothing else; the archivist clears it
 > on close. One packet at a time.
 
-## Status: IN FLIGHT — `PACKET-0029-citation-anchor-tokens`
+## Status: NOTHING IN FLIGHT
 
-- **Packet id:** `PACKET-0029-citation-anchor-tokens`
+**NO PACKET IS DECLARED.** There is deliberately no packet-id declaration line in
+this file, which is what `bandwidth.active_packet_singleton` reads: it counts
+those declarations against a ceiling of 1, and **zero is the honest count when the
+last packet has closed and the orchestrator has not declared the next one.**
+Declaring the next packet is a routing act and is not the archivist's to take.
 
 canonical packet id: PACKET-0029-citation-anchor-tokens
 
-**EXACTLY ONE packet id is declared above**, which is what "one in flight" means
-to `bandwidth.active_packet_singleton` — it counts `**Packet id:**` declarations
-in this file against a ceiling of 1. The bare `canonical packet id:` line beneath
-it is not a second declaration: it is the **content site** anchor `ANC-0003`
-resolves to, and it is written on its own line precisely so that this packet's
-own identity is reachable by content rather than by position.
+**THE BARE LINE ABOVE IS NOT A DECLARATION AND MUST NOT BE DELETED.** It is the
+**content site** that `ANC-0003` resolves to, and it is written on its own line
+precisely so that the closed packet's identity is reachable **by content rather
+than by position**. It is the packet's own scheme applied to the packet's own
+record. The anchor requires that literal to occur **EXACTLY ONCE** in this file —
+zero occurrences resolve as `ANCHOR-UNRESOLVED` and two or more as ambiguous, and
+**both are violations that drive `scan-controls.sh check` to exit 2.** It does not
+match the declaration pattern the bandwidth ceiling counts, so it declares nothing
+in flight.
 
-**Title:** citation anchor tokens — stable semantic anchors, and the demotion of
-line numbers from identity to navigation hint.
+## CLOSED — `gravito_p5b_citation_anchor_tokens_a`
 
-**Provenance, and it is the whole point of this packet.** The ranking was
-**sealed first** (`44b0fab`, over 20 frozen v2 snapshots, rule `s1-v1`), the
-**selection was recorded second** (`DECISION-0011-p5b-next-after-p3b`, selector
-`operator`, `c2d97f8`), and **execution starts third**. This is the first
-prospective decision in this repository with a recorded selection, so the
-packet's identity is **frozen evidence**: if what executes is not the candidate
-that was ranked, the measurement is void. **The scope below is the sealed
-`candidate_write_surface` and nothing beyond it.**
-
-- **Sealed signals — RESOLVED FROM THE SNAPSHOT STORE, NOT REMEMBERED:**
-  `residue_items_closed=2`, `residue_ruling_satisfied=0`,
-  `census_growth_controls=1`, `sealed_rank=1` (**frontier, NOT dominant** —
-  `PACKET-0030` and `PACKET-0031` tie at 2 on the same frontier). The derivation,
-  written down so the next reader resolves it rather than copies this line:
-  `awk -F'\t' '$1=="SIGNAL-SNAPSHOT-0078-anchors-items"{print $6" = "$7}'
-  build-os/metrics/signal_snapshots.tsv` → `residue_items_closed = 2`.
-- **AND THAT DIGIT WAS WRONG IN THIS FILE UNTIL THE FIX ROUND, WHICH IS THE VERY
-  DEFECT CLASS THIS PACKET EXISTS AGAINST.** From its first commit this file
-  declared `residue_items_closed=1`. **It was not a typo and it was not the
-  builder's arithmetic: the orchestrator's brief stated `1` and this file
-  INHERITED it.** That is `DEFECT-0002-stale-remembered-count`, committed in the
-  one artefact that says *"the scope below is the sealed
-  `candidate_write_surface` and nothing beyond it"* — the place a number must be
-  **resolved and not remembered** — and inside a brief whose own instruction was
-  *"DERIVE every count; never restate one."* **THE WORK MATCHED THE SEALED 2 AND
-  ONLY THE RESTATEMENT WAS WRONG:** both `(mm)`
-  (`build-os/memory/residue.md:645`) and `(nnn)`
-  (`build-os/memory/residue.md:1064`) carry their annotations, and the snapshot's
-  own `evidence_refs` field names exactly those two items and says in the same
-  breath why `#rrr` and `#bbbb` were **not** counted. The provenance is recorded
-  here rather than the digit quietly overwritten: a count that arrives by
-  inheritance and is repaired by overwriting leaves no trace of how it got in,
-  and the trace is the only part of this that generalises.
-- **Frozen write surface:** `build-os/registry/scan-controls.sh`;
-  `build-os/registry/control_registry.txt#registry.evidence_resolution`;
-  `tests/control_registry_tests.sh#7`; `build-os/memory/residue.md`.
-- **Residue consumed:** `(mm)` and `(nnn)`. **`(ddd)` STAYS QUEUED** — what it
-  queues is a durable positional-content-pairing guard, which this packet does
-  not build, and the asymmetry is what proved the signal was derived.
-- **Ceiling:** declared mismatches **hold at 21**. No new store, no new
-  validator tool, no new suite file.
-- **One selected rank is not evidence of ranker skill.** It is one observation.
-
-## Branch base
-
-Branched at `c2d97f8` on `claude/project-handoff-merge-ramhds`, re-verified with
-`git merge-base` before the first edit. **Nothing is pushed, merged, tagged, PR'd
-or deployed, and no such go has been given.**
-
-## Fix round — stage 3, bounded to 7 enumerated items
-
-**qa returned GREEN and the reviewer returned `fix-then-pass` on 7 items, every
-one of them a TEXT OR RECORD correction.** No code changed, no test changed, and
-no measurement was re-run beyond the targeted commands written out below. This
-takes the packet to **3 commits, one over the `<=2` cap**, recorded as a
-deviation and not normalised. `df9f740` and `c76b4d0` are **not** squashed,
-amended or rewritten.
-
-**The outcome numbers, DECOMPOSED rather than asserted — guard 2's rule applied
-to this packet's own record.** `rework_count` was going to be reported as **2**,
-and that is not defensible against this packet's own disclosures. The components
-are published so a reader can recompute the total instead of trusting it:
-
-| component | count | disclosed at |
-|---|---|---|
-| off-surface artefacts the census entry mechanically forced | 4 | residue `(pppp)` |
-| `evidence_ref` repoints | 3 | residue `(qqqq)`, and the two other `control_registry.txt` entries named below |
-| net-zero edits made only to avoid moving a line | 6 | residue `(qqqq)` |
-| **total** | **13** | |
-
-**The builder's prose was more honest than the builder's count**, which is the
-whole finding: the four artefacts, the three repoints and the six net-zero edits
-were each written down plainly in `residue.md` and then summed to 2. The
-definition of "rework" in `build-os/metrics/COMPARISON_PROTOCOL.md` is
-pass-level, not artefact-level, which is exactly why the decomposition is
-published here and not only the total — a single number under a contested
-definition is the thing this repository keeps catching.
-
-**`fix_rounds` and `review_rounds` are DELIBERATELY UNFROZEN.** They are not
-final until this round and the re-review land, and writing `0` now would freeze a
-value that is already false. No outcome row is written for `DECISION-0011`:
-`build-os/metrics/decision_telemetry.tsv` and
-`build-os/metrics/signal_snapshots.tsv` are the live experiment and this round
-does not touch either.
-
-**The two gate numbers, each with the exact command beside it, because the labels
-were ambiguous:**
-
-- `bash tests/build_os_maintenance_tests.sh` → **67 passed, 0 failed**, exit 0.
-- `bash build-os/maintenance/run-tests.sh` → **144 passed, 0 failed** (`# tests
-  144`, `# pass 144`, `# fail 0`), exit 0.
-  **"maintenance 144/144" names the SECOND harness and never the first.** Both
-  are green; the single label covering two harnesses is what is fixed here.
-
-- **Snapshot chain verification — the recorded invocation did not exist.**
-  `bash build-os/metrics/rank-candidates.sh snapshot-verify` returns
-  `s1: REFUSED — unknown command "snapshot-verify"` at **exit 2**;
-  `snapshot-verify` is a **`record-decision.sh`** subcommand. The working command
-  is `bash build-os/metrics/record-decision.sh snapshot-verify` → **97 snapshots
-  verify** against the digest chain, exit 0.
-
-**Items 2, 3 and 7 landed outside this file** and are recorded where they were
-wrong: `(pppp)`'s false guard-1 sentence and the frozen surface's stripped object
-scopes in `build-os/memory/residue.md`; rule 3's over-broad receipt-facing
-wording in `CHANGELOG.md`.
-
-## CLOSED — `gravito_p5_outcome_counterfactual_telemetry_a`
-
-- **Packet id (CLOSED):** `PACKET-0032-p5-outcome-counterfactual-telemetry` —
-  reused, not minted; collision-checked again at close against every
-  `PACKET-*` in the tree.
-- **Receipt:** `build-os/receipts/gravito_p5_outcome_counterfactual_telemetry_a.md`
-- **Commits:** `cda95d2` (declaration) + `44b0fab` (build) + `adef6ad` (fix
-  round), base `80ad634`. **None pushed.**
-- **Verdict:** **PASS-AS-FIXED.** Reviewer returned `fix-then-pass` on 3
-  enumerated items; all 3 fixed and **verified live by the orchestrator** rather
+- **Packet id (CLOSED):** `PACKET-0029-citation-anchor-tokens` — **REUSED, not
+  minted**, and collision-checked again at this close against every `PACKET-*`
+  token in the tree. It is the id `DECISION-0011` already carries for this
+  candidate, and `DECISION-0010` before that; minting a fresh one would put two
+  ids on one candidate **inside the store S1 reads**.
+- **Title:** citation anchor tokens — stable semantic anchors, and the demotion
+  of line numbers from identity to navigation hint.
+- **Receipt:** `build-os/receipts/gravito_p5b_citation_anchor_tokens_a.md`
+- **Commits:** `df9f740` (build) + `c76b4d0` (memory) + `fbd746d` (fix round),
+  base `c2d97f8` (re-verified at close: `git merge-base fbd746d c2d97f8` returns
+  `c2d97f8`). **None pushed.**
+- **Verdict: PASS-AS-FIXED.** qa returned **GREEN**; the reviewer returned
+  `fix-then-pass` on **7 enumerated items**, every one a text or record
+  correction; all 7 fixed in `fbd746d` and **verified by the orchestrator** rather
   than by opening a fourth gate stage.
 - **Depth: 3 serial stages** — builder; qa ‖ reviewer concurrently; fix round.
-  **No stage 4.** 3 commits is **one over the `<=2` cap** and is recorded as a
-  deviation, not normalised.
-- Suite **1909 → 1963** (+54, all in `tests/mutator_registry_tests.sh` section 14);
-  census **99 → 100**; declared mismatches **20 → 21**; out-of-licence **25 → 26**;
-  snapshots **72 → 97 by row count**; decisions **10, unchanged**; **zero
-  re-authorisations**.
-- **`44b0fab` IS THE SEAL'S ANCHOR AND MUST NOT BE AMENDED.** The prospective
-  ordering's whole claim is that it was committed before any commit could carry a
-  selection.
-- **P5 OF THE OPERATOR'S FIVE — AND THE LAST OF THEM. THE SEQUENCE IS COMPLETE.**
+  **No stage 4.**
+- **DEVIATION, RECORDED AND NOT NORMALISED: 3 commits against the `<=2` cap.** The
+  fix round landed as its own commit rather than amending commits the gates had
+  already measured. `df9f740` and `c76b4d0` were not squashed or rewritten.
+- Suite **1964 -> 1995** (+31, **all** of it `tests/control_registry_tests.sh`
+  section 28, which went 99 -> 130 standalone; **all 18 other suites +0**);
+  census **100 -> 101**; declared mismatches **HELD at 21**; anchors **0 -> 13
+  records over 12 declared object types**; **zero re-authorisations**.
+- **THE FIRST COMPLETED PROSPECTIVE EXPERIMENT IN THIS REPOSITORY.** Ranking
+  sealed `44b0fab`, selection recorded `c2d97f8` (selector: **operator**), then
+  execution. Ranked **rank 1** by S1 over a candidate set nobody had chosen from,
+  then selected, then executed. **Verified to the byte at close:** the S1 report
+  digests to `e838284e2bba5262...`, identical to qa's independently recorded
+  base-run literal; `rank_of_selected: 1` still derives; and
+  `build-os/metrics/rank-candidates.sh` is the same blob `5543ea88` at the seal,
+  the selection and both execution commits.
+- **AND ONE SELECTED RANK IS NOT EVIDENCE OF S1 SKILL.** It is one observation, by
+  a selector who had read the ordering. The true claim is narrower and worth more:
+  **the first candidate S1 ranked first has now been executed and closed, so the
+  ordering has begun to be falsifiable by outcome — and has not yet been
+  falsified.**
 
-## THE ENFORCEMENT AS IT ACTUALLY STANDS — corrected at close
+## THE DEFECT THIS FILE ITSELF COMMITTED — PRESERVED, NOT TIDIED AWAY
 
-**THIS SECTION IS THE ARCHIVIST FIXING A DEFECT IN THIS FILE.** The in-flight
-version described **three** refusals and **never mentioned the fix round**,
-because it was written at `cda95d2` — before the build, and two commits before the
-reviewer found the hole. **A packet artefact left describing its own pre-build
-plan is stale documentation of live enforcement**, which is the same shape as
-every other stale-restatement defect this tree tracks. The list below is
-**derived from the tool**, not remembered.
+**FROM ITS FIRST COMMIT THIS FILE DECLARED `residue_items_closed=1`. THE SEALED
+VALUE IS 2.**
 
-**The three the build commit named — the order refusals:**
+**It was not a typo and it was not the builder's arithmetic: the orchestrator's
+brief stated `1` and this file INHERITED it.** That is
+`DEFECT-0002-stale-remembered-count`, committed **in the one artefact that
+declares the sealed scope** — the place a number must be **resolved and not
+remembered** — and **inside a brief whose own instruction was *"DERIVE every
+count; never restate one."*** The defect class demonstrated itself one level up,
+inside the packet built to end it.
 
-- `RANKING-AFTER-SELECTION` — `seal-ranking` refuses while the decision already
-  carries a SELECTION row.
-- `SET-CHANGED-AFTER-SEAL` — `record` refuses a selection over a candidate set the
-  sealed ordering never ranked.
-- `OUTCOME-BEFORE-SELECTION` — `outcome` refuses while the decision has no
-  SELECTION row.
+**THE DERIVATION, WRITTEN DOWN SO THE NEXT READER RESOLVES IT RATHER THAN COPIES
+THIS LINE:**
 
-**The partition refusals, which the same build shipped and the summary undersold:**
+```
+awk -F'\t' '$1=="SIGNAL-SNAPSHOT-0078-anchors-items"{print $6" = "$7}' \
+  build-os/metrics/signal_snapshots.tsv
+```
 
-- `OUTCOME-FIELD-IN-SELECTION`, `SELECTION-FIELD-IN-OUTCOME` — neither write path
-  may reach the other's columns.
-- `RANKER-FIELD-IN-SELECTION`, `RANKER-FIELD-IN-OUTCOME` — the six ranker-evidence
-  fields own **no column** and are refused by **both** paths. **12 / 12 refusals.**
-- `ORDERING-SET-MISMATCH`, `OUTCOME-OVERWRITE`, `TIMESTAMP-CONTRADICTS-ORDER`.
+→ `residue_items_closed = 2`.
 
-**AND THE TWO THE FIX ROUND ADDED, WHICH THIS FILE OMITTED ENTIRELY:**
+**THE WORK MATCHED THE SEALED 2 AND ONLY THE RESTATEMENT WAS WRONG.** Both `(mm)`
+and `(nnn)` in `build-os/memory/residue.md` carry their annotations, and the
+snapshot's own `evidence_refs` field names exactly those two items and says in the
+same breath why `(rrr)` and `(bbbb)` were **not** counted.
 
-- **`RANKER-FIELD-VIA-SNAPSHOT` — the headline defect.** `seal-ranking`'s guard
-  reads `decision_telemetry.tsv`, but the field it protects (`sealed_rank`) lives
-  in `signal_snapshots.tsv`, and the generic `snapshot` writer accepted **any**
-  `--signal-name`. **TWO STORES, ONE GUARDED.** The reviewer's executed
-  reproduction wrote a `sealed_rank` row for the already-selected
-  `DECISION-0010`; it **chained cleanly**, `snapshot-verify` reported 98 rows
-  verifying, and `prospective_decisions_with_a_recorded_selection` moved **0 → 1**
-  — **leaving no trace at all**, unlike the disclosed delete-and-re-add route
-  which breaks a digest and *is* evident. The refusal is keyed on the tool's own
-  `RANKER_FIELDS` constant, so **a seventh ranker field declared later is closed
-  by the same line**.
-- **`CANDIDATE-RANKED-TWICE`.** An ordering giving one candidate two ranks was
-  accepted: only `rank=1` entered the digest chain while the printed
-  `sealed_ordering:` echoed the contradiction back, so **the receipt and the
-  chained evidence described different orderings**. Refused during the parse,
-  before any append.
+**THE PROVENANCE IS RECORDED HERE RATHER THAN THE DIGIT QUIETLY OVERWRITTEN, AND
+THE ARCHIVIST PRESERVED THAT CHOICE AT CLOSE.** A count that arrives by
+inheritance and is repaired by overwriting leaves **no trace of how it got in**,
+and **the trace is the only part of this that generalises.** The fix round
+**derived** the value rather than copying the correction, and left the wrong digit
+visible. Do not tidy this section away.
 
-**The perimeter statement was WRONG, not merely incomplete, and was corrected:
-the perimeter is the TOOL, not the files.**
+**The other sealed signals, resolved from the snapshot store and not remembered:**
+`residue_ruling_satisfied=0`; `census_growth_controls=1`; `sealed_rank=1`
+(**frontier, NOT dominant** — `PACKET-0030` and `PACKET-0031` tie at 2 on the same
+frontier).
+
+## What the packet closed, and the four things it did not
+
+**IDENTITY IN, POSITION OUT.** Resolution is by **content**: the anchor names a
+literal that must occur **exactly once** in its artifact. **The line number is a
+return value of `anchor_resolve()`, computed at every resolution and stored
+nowhere** — qa proved no field holds a position and that an 11-field record is
+refused as `ANCHOR-SCHEMA`, so no overflow field can smuggle one in. The written
+form grades its two halves separately: a wrong identity half is a **refusal**, a
+stale position half is a **report with the corrected projection printed beside
+it**. `anchors_check` is wired on the `check` path **outside** the `anchors`
+early-exit, and **qa proved by mutation that it cannot be skipped.**
+
+**NOT CLOSED, AND EACH REFUSAL IS DELIBERATE:**
+
+- **The corpus.** 13 anchors against **355** still-positional `evidence_refs` —
+  **3.5% coverage**. `(mm)` was re-headed *"A DOWN PAYMENT IN MECHANISM — NOT
+  DISCHARGED, AND NOT MIGRATED"*. The builder refused in writing: *"converting the
+  census to it would be a re-authorisation of every entry's evidence and is not a
+  builder's to take."*
+- **`(uuuu)` — the object-granularity convention that decides whether guard 1
+  fires.** It is written down **nowhere**, and it is the difference between rank 1
+  standing and the experiment being **VOID**. Deliberately open: amending guard 1's
+  contract is the self-amendment guard 1 exists to prevent, and this packet is the
+  candidate it screened. **This is the packet's most important governance finding.**
+- **Three pre-existing defects** — `DEFECT-0001`, `DEFECT-0003`, `DEFECT-0002` —
+  found inside prose this packet edited and **deliberately not fixed**. Correct
+  under the ceiling: repairing defects mid-measurement is exactly the failure the
+  decision arm tests for. **The irony is on the record: the anchor packet declined
+  to fix three stale line references, and moved two of them a further 400 lines out
+  of date.** `(vvvv)`.
+- **`(ddd)` STAYS QUEUED** — verified at 3 sites. It queues a **cross-commit**
+  comparison; everything this packet built resolves against the artifact **at the
+  current commit**. **Do not mark it consumed.**
 
 ## Staged next — `gravito_p3b_count_derivation_a` (`PACKET-0027`)
 
 **NOT A NEW SELECTION.** `DECISION-0010` selected
 `PACKET-0027-p3b-count-derivation` at `5c8d19e`, **before S1 existed**, and that
 selection stands. Its telemetry row carries `result: in_flight`. It has been
-staged and unstarted since the P3 close, and this close does not change its
-status — it records the outcome slot for the decision that selected it, and does
-not do the work.
+staged and unstarted since the P3 close, and **this close does not change its
+status.**
 
 **Still not started. Still the standing next packet. Declaring it is the
-orchestrator's act.**
+orchestrator's act, and this file declares nothing.**
 
-## Sealed but NOT selected — `DECISION-0011-p5b-next-after-p3b`
+## `DECISION-0011-p5b-next-after-p3b` — SEALED, SELECTED, EXECUTED, AND NOW CLOSED
 
-**THE DECISION AFTER `p3b`. NOBODY HAS SELECTED, AND THE ABSENCE IS THE
-EVIDENCE.** Sealed at `80ad634`, rule `s1-v1`, over 20 frozen v2 snapshots, with
-**no row in `decision_telemetry.tsv`** — `grep -c '^DECISION-0011'` returns **0**.
+**THE ABSENCE THAT WAS THE EVIDENCE HAS BEEN FILLED — BY AN OPERATOR, WHICH IS THE
+ONLY WAY IT COULD LEGITIMATELY BE FILLED.** At the P5 close this decision had a
+sealed ordering and **no row** in `decision_telemetry.tsv`, and that emptiness was
+the proof that no agent had rationalised a choice into it. The operator then chose
+`PACKET-0029` at `c2d97f8`, the packet executed, and **the outcome row for this
+decision has now been written through the governed path** at this close.
 
 ```
 excluded PACKET-0033-observe-advise-boundary-recheckable  reason=self_amendment
-rank 1  PACKET-0029-citation-anchor-tokens            total=4  pareto=frontier
+rank 1  PACKET-0029-citation-anchor-tokens            total=4  pareto=frontier   SELECTED, EXECUTED, CLOSED
 rank 2  PACKET-0030-mutation-census-coverage-gap      total=3  tie=yes  frontier
 rank 2  PACKET-0031-governance-baseline-completeness  total=3  tie=yes  frontier
 rank 4  PACKET-0028-positional-content-pairing-guard  total=1  dominated_by=PACKET-0029
@@ -226,49 +168,50 @@ rank 4  PACKET-0028-positional-content-pairing-guard  total=1  dominated_by=PACK
 
 **IT IS NOT DEGENERATE — 3 of 4 rankable candidates sit on the Pareto frontier**,
 against `DECISION-0010`'s single dominator that 125 of 125 weightings returned.
-**Weights would change this ordering; that is the first time it has been true.**
-The candidate set is **mechanically derivable, not curated**: `DECISION-0010`'s
-set minus the winner minus this packet.
+**Weights would change this ordering.** The candidate set is **mechanically
+derivable, not curated**.
 
-**SELECTING FROM IT IS AN OPERATOR ACT AND NOTHING HERE PERFORMS ONE.** A
-selection recorded by any agent moves
-`prospective_decisions_with_a_recorded_selection` from 0 to 1 with **no human
-having chosen** — the exact figure the reviewer's reproduction exploited — and
-**destroys the thing the packet built.** The ordering exists precisely so a later
-human choice can contradict it.
+**NO RANKER-OWNED FIELD WAS WRITTEN.** `rank_of_selected`, `ranking_agreement`,
+`ranker_skill`, `ranking_digest`, `counterfactual_regret` and `sealed_rank` own
+**no column**, are **refused by both write paths**, and are **derived by the
+ranker on demand** — because an outcome row carrying the ranker's score would let
+*"the selected packet turned out well"* be read as *"the ranking was correct"*.
 
-**And what it delivers is bounded, per residue `(hhhh)`:** *"a decision that CAN
-falsify S1, not a decision that has."* Non-degeneracy is **one observation, not a
-result** — the 20 evidence snapshots were hand-assigned by the same builder in the
-same commit.
+**AN UNKNOWN IS NOT A ZERO.** Every quantitative field written is `unknown` or
+`<value>@<provenance>`. Nothing was written as `0@measured` that nobody measured;
+`durability_status` is `unknown` because **no post-close audit has run**.
 
 ## Explicitly NOT staged, and deliberately open
 
 - **`s1-v2` / any signal-set redesign.** The degeneracy, the
   lettering-granularity margin, the non-independence and the label leakage stay as
   residue `(xxx)` / `(yyy)`.
-- **Widening guard 1's `PROTECTED_SURFACE`** to the evidence substrate, or closing
-  the directory-prefix alias. Both deliberately open. Residue `(zzz)`.
-- **Fixing `(cccc)`'s digest claim.** `build-os/metrics/rank-candidates.sh` is
-  **guard 1's own protected surface**; editing it inside a packet that seals a
-  ranking is precisely the self-amendment guard 1 exists to prevent.
-- **A 22nd declared mismatch.** The reviewer's ruling on the 20 → 21 exception:
-  principled, but **"the last one waved through on this reasoning." P6 should hold
-  at 21.**
-- **P6 itself.** It is not defined, and it is not the archivist's to define.
+- **Widening guard 1's `PROTECTED_SURFACE`**, or writing the `(uuuu)` granularity
+  convention. **Widening is NOT the remedy** — a predicate that refuses every
+  subject discriminates nothing. Residue `(zzz)` / `(uuuu)`.
+- **Migrating the `evidence_refs` corpus to anchors.** The mechanism exists; the
+  corpus has not moved, and moving it is a re-authorisation.
+- **A 22nd declared mismatch.** The standing ruling: **hold at 21.**
+- **The router's stale second-eyes counter.** It says *"the last nine"*; it is
+  **twelve**. Nothing pins the literal. The remedy is one builder-lite line, and
+  editing the router is a **routing act rather than bookkeeping**, so it is named
+  and not applied. `(zz)`.
 
 ## Open boundaries carried forward
 
-- **Nothing is pushed, merged, tagged, PR'd or deployed.** The base `80ad634` is
-  on `origin`; the branch is **ahead 3** and those three commits stay local
-  pending explicit go.
-- **AND THE UNPUSHED STATE NOW CARRIES EVIDENTIARY WEIGHT, WHICH IT DID NOT
-  BEFORE.** The parent-hash chain is non-forgeable **only once a third party has
-  witnessed it** — so publishing is what converts the seal's anchor from *"one
-  process could rewrite this"* into *"a third party has seen it."* A push would
-  now buy something specific. **It is still an operator act and it is not
-  requested here.** Residue `(kkkk)`.
+- **Nothing is pushed, merged, tagged, PR'd or deployed**, and no such go has been
+  given. `df9f740`, `c76b4d0` and `fbd746d` stay local pending explicit go.
+- **`c2d97f8` IS THE SELECTION ANCHOR AND `44b0fab` IS THE SEAL ANCHOR. NEITHER
+  MAY BE AMENDED**, and neither may the three execution commits. The whole claim of
+  the prospective ordering is that the seal was committed **before any commit could
+  carry a selection**.
+- **THE UNPUSHED STATE CARRIES EVIDENTIARY WEIGHT.** The parent-hash chain is
+  non-forgeable **only once a third party has witnessed it**, so publishing is what
+  converts the seal's anchor from *"one process could rewrite this"* into *"a third
+  party has seen it."* **A push would now buy something specific. It is still an
+  operator act and it is not requested here.** Residue `(kkkk)`.
 - **Nothing consumes S1's ordering**, and wiring anything to it is an operator act.
-- **Second eyes: still NONE**, **eleven** packets running — the whole five-phase
-  sequence is single-model. Residue `(zz)`. The router's own counter still says
-  *nine*; the remedy is one builder-lite line and the archivist did not apply it.
+- **Selecting the next packet from any decision is an operator act.**
+- **Second eyes: NONE — TWELFTH consecutive packet**, and the first whose verdict
+  carries experimental weight: a single-model chain produced both the ranking rule
+  and the verdict on the first candidate it ranked. Residue `(zz)`.
