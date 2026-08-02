@@ -74,12 +74,63 @@
 # tool.
 #
 # ---------------------------------------------------------------------------
+# RANKING < SELECTION < EXECUTION, AND IT IS A REFUSAL RATHER THAN A COMMENT
+# ---------------------------------------------------------------------------
+# A ranking formed AFTER a choice is a rationalisation, and it is byte-identical
+# to one formed before. Nothing about the artefact distinguishes them, so the
+# order has to be something this tool refuses to violate rather than something a
+# header asserts.
+#
+# WHAT THE ENFORCEMENT IS ACTUALLY BUILT ON — stated plainly, because the failure
+# this project keeps re-paying is RESOLVABILITY MISTAKEN FOR IDENTITY, and a
+# timestamp that PARSES is not a timestamp that PROVES ORDERING. Self-reported
+# times written in one commit by one author establish nothing about sequence.
+#
+#   CONSTITUTIVE — EXISTENCE ORDER ACROSS TWO STORES THAT ARE DIFFERENT KINDS OF
+#   THING. `seal-ranking` may only write while the decision has NO row in
+#   decision_telemetry.tsv; `outcome` may only write once it HAS one; `record`
+#   may only write a selection whose candidate set is exactly the sealed one.
+#   None of those is a self-report: each is the state of a store at the instant
+#   of the write, and the seal lands in the digest-chained snapshot file where
+#   every subsequent row's digest covers it.
+#
+#   CORROBORATING — THE ISO-8601 STRINGS, AND THEY ARE WORTH MUCH LESS. They are
+#   compared, and a contradiction is refused, because a contradiction is cheap to
+#   catch and always means something is wrong. AGREEMENT BETWEEN THEM PROVES
+#   NOTHING and is never treated as proof.
+#
+#   OUTSIDE BOTH, AND THE ONLY REAL ANCHOR — GIT. A seal is committed before any
+#   commit can carry its selection. That is the same anchor the shadow ranker's
+#   non-circularity rests on: commit times across separate commits, not a field
+#   somebody typed.
+#
+#   WHAT NONE OF IT DEFEATS — the same thing the chain does not defeat. Anyone
+#   who can write these files can delete a row, seal, and re-add it. This is
+#   tamper-EVIDENT against the realistic case and is not sold as tamper-proof.
+#
+# ---------------------------------------------------------------------------
+# THE SELECTION AND THE OUTCOME ARE SEPARABLE RECORDS, BY PARTITION
+# ---------------------------------------------------------------------------
+# Discovering that the chosen candidate mattered is evidence about the CANDIDATE.
+# It is not yet evidence that anything ranked it for the right reasons. If one
+# command could write both halves of a row, "what was chosen" and "what happened"
+# would be one editable object and no later reader could tell which had been
+# adjusted to fit the other.
+#
+# So every column belongs to EXACTLY ONE of two sets, the partition is checked
+# against the schema at run time rather than trusted, and a third set names the
+# ranker-evidence fields that NEITHER path may write. `record` writes the
+# selection half; `outcome` writes the outcome half; neither reaches the other's.
+#
+# ---------------------------------------------------------------------------
 # WHAT THIS IS NOT
 # ---------------------------------------------------------------------------
 # Not a database, not an event-sourcing framework, not a ranker. Two TSV files and
 # a shell script, chosen because the substrate has to be the one this repository
 # already has. The schemas are versioned so they can migrate later; nothing here
-# learns anything, orders anything, or dispatches anything.
+# learns anything, orders anything, or dispatches anything. IT ADDS NO STORE: the
+# sealed ordering is snapshot rows in the file that already holds frozen evidence,
+# and the outcome is the outcome columns decision_telemetry.tsv already declares.
 #
 # Usage:
 #   record-decision.sh record          --decision-id ID --decision-time T … [--store F]
@@ -89,8 +140,18 @@
 #   record-decision.sh snapshot-verify                       [--snapshots F]
 #   record-decision.sh validate                              [--store F] [--snapshots F]
 #   record-decision.sh report                                [--store F]
+#   record-decision.sh seal-ranking    --decision-id ID --candidate-ids A;B --ordering 1:A;2:B …
+#   record-decision.sh outcome         --decision-id ID --result R …        [--store F]
+#   record-decision.sh outcome-report  --decision-id ID          [--store F] [--snapshots F]
+#   record-decision.sh fields
 # Exit: 0 ok, 2 refused.
 set -uo pipefail
+# NO PATHNAME EXPANSION. Candidate ids, orderings and snapshot ids are split on
+# `;` and iterated unquoted; without this a token carrying a glob metacharacter
+# would be expanded against whatever directory the tool happens to run from, so
+# the same command would mean different things from two shells. That exact defect
+# already cost this repository one review round in the ranker.
+set -f
 
 SELF_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 STORE="$SELF_DIR/decision_telemetry.tsv"
@@ -113,6 +174,33 @@ QUANT="wall_minutes serial_minutes agent_minutes human_attention_minutes model_c
 LISTY="candidate_ids defect_classes_introduced defect_classes_detected defect_classes_escaped"
 REQUIRED="decision_id decision_time candidate_ids selected_candidate_id selector selection_reason expected_outcome"
 
+# --- THE PARTITION. Every column is in exactly one of these two. --------------
+# SELECTION is what was chosen and why: it is fixed at the moment of the choice
+# and nothing that happens afterwards may reach it. OUTCOME is what the choice
+# then cost and produced: it does not exist yet when the selection is recorded,
+# and `record` may therefore only name one of these columns with the literal
+# `unknown`, which is what omission already yields.
+SELECTION_COLS="decision_id decision_time candidate_ids selected_candidate_id selector selection_reason expected_outcome signal_snapshot_ref"
+OUTCOME_COLS="started_at completed_at wall_minutes serial_minutes agent_minutes human_attention_minutes model_calls estimated_tokens estimated_cost estimated_energy fix_rounds review_rounds defect_classes_introduced defect_classes_detected defect_classes_escaped rework_count rollback_count result durability_status"
+# THE THIRD SET, WHICH NAMES NO COLUMN ON PURPOSE. These are facts about the
+# RANKER, not about the candidate: where a ranking put the thing a human then
+# chose, whether the two agreed, how well the rule scored. They are DERIVED on
+# demand by whatever holds the ranking rule, and this store refuses to hold them,
+# because an outcome row that also carried the ranker's score would let "the
+# selected packet turned out well" be read as "the ranking was correct" — two
+# different claims that no amount of prose keeps apart once they share a row.
+RANKER_FIELDS="rank_of_selected ranking_agreement ranker_skill ranking_digest counterfactual_regret sealed_rank"
+# THE SIGNAL NAME THE SEALED ORDERING IS WRITTEN UNDER, in the snapshot store.
+SEAL_SIGNAL="sealed_rank"
+# NO OUTCOME FIELD HAS A DECLARED DIRECTION, AND THAT IS DELIBERATE. Whether more
+# `defect_classes_detected` means a better gate or a worse packet has never been
+# decided here; nor has whether `superseded` is better or worse than `abandoned`.
+# Every recorded outcome value is therefore reported as UNINTERPRETED and scores
+# nothing. Declaring directions is what would turn outcome telemetry into
+# weights, and inventing one here would put an unregistered constant inside every
+# ordering that later read it.
+OUTCOME_DIRECTION=""
+
 PROVENANCE="measured derived reported"
 SELECTORS="operator orchestrator reviewer builder automatic unknown"
 RESULTS="unknown in_flight shipped reverted abandoned superseded"
@@ -124,6 +212,34 @@ ncols(){ printf '%s\n' $COLS | grep -c .; }
 idx_of(){ local i=0 c; for c in $COLS; do i=$((i+1)); [ "$c" = "$1" ] && { echo "$i"; return 0; }; done; echo 0; }
 snap_idx_of(){ local i=0 c; for c in $SNAP_COLS; do i=$((i+1)); [ "$c" = "$1" ] && { echo "$i"; return 0; }; done; echo 0; }
 in_list(){ local v="$1" l; for l in $2; do [ "$v" = "$l" ] && return 0; done; return 1; }
+count_of(){ printf '%s\n' $1 | grep -c . || true; }
+# Split a `;`-separated field into one item per line. `read` performs no
+# expansion, so a token carrying a metacharacter cannot become a filename here
+# even without `set -f` — both belts are worn on purpose.
+semi_lines(){ local s="$1" p; while [ -n "$s" ]; do p="${s%%;*}"; [ -n "$p" ] && printf '%s\n' "$p"; case "$s" in *';'*) s="${s#*;}" ;; *) s="" ;; esac; done; }
+
+# THE PARTITION IS CHECKED, NOT TRUSTED. A column added to COLS and forgotten by
+# both sets would otherwise be a column that neither path owns and both could
+# reach. It fails CLOSED: an unowned or double-owned column stops the tool.
+assert_partition(){
+  local c both="" unowned=""
+  for c in $COLS; do
+    if in_list "$c" "$SELECTION_COLS" && in_list "$c" "$OUTCOME_COLS"; then both="$both $c"
+    elif in_list "$c" "$SELECTION_COLS" || in_list "$c" "$OUTCOME_COLS"; then :
+    else unowned="$unowned $c"; fi
+  done
+  [ -z "$both" ] || die "the field partition is broken: column(s)$both belong to BOTH the selection set and the outcome set, so an outcome write could reach a selection field."
+  [ -z "$unowned" ] || die "the field partition is incomplete: column(s)$unowned belong to NEITHER set. A column nobody owns is a column both write paths may reach; classify it before using this tool."
+  for c in $RANKER_FIELDS; do
+    in_list "$c" "$COLS" && die "the ranker-evidence field \"$c\" has become a column of this store. Evidence about the RANKER may not live in the record of the CANDIDATE's outcome; that is the separation this partition exists to keep."
+  done
+}
+
+# ISO-8601 strings compare lexically, and that is ALL this does. It is a
+# CORROBORATING check: a contradiction is always wrong and cheap to catch, but
+# agreement between two strings somebody typed proves nothing about sequence.
+# Returns 0 when a is strictly before b.
+before(){ [ "$1" \< "$2" ]; }
 
 # THE HASHER IS RESOLVED ONCE, and its absence is FAIL-CLOSED for anything that
 # touches the chain. A snapshot tool that silently stopped chaining on a machine
@@ -141,12 +257,15 @@ CMD="${1:-}"
 [ $# -gt 0 ] && shift
 case "$CMD" in
   record|snapshot|snapshot-verify|validate|report) ;;
+  seal-ranking|outcome|outcome-report|fields) ;;
   get|get-snapshot)
     GID="${1:-}"; GFIELD="${2:-}"
     [ -n "$GID" ] && [ -n "$GFIELD" ] || die "$CMD needs an ID and a FIELD"
     shift 2 ;;
-  -h|--help|help) sed -n '2,100p' "${BASH_SOURCE[0]}"; exit 0 ;;
-  "") die "no command — expected one of: record, get, snapshot, get-snapshot, snapshot-verify, validate, report" ;;
+  # Through the `Exit:` line rather than to a fixed number: this header has grown
+  # twice and a numeric bound silently starts truncating it when it does.
+  -h|--help|help) sed -n '2,/^# Exit: /p' "${BASH_SOURCE[0]}"; exit 0 ;;
+  "") die "no command — expected one of: record, get, snapshot, get-snapshot, snapshot-verify, validate, report, seal-ranking, outcome, outcome-report, fields" ;;
   *)  die "unknown command \"$CMD\"" ;;
 esac
 
@@ -157,7 +276,7 @@ while [ $# -gt 0 ]; do
   case "$1" in
     --store)     [ $# -ge 2 ] || die "--store needs a value";     STORE="$2"; shift 2 ;;
     --snapshots) [ $# -ge 2 ] || die "--snapshots needs a value"; SNAPS="$2"; shift 2 ;;
-    -h|--help)   sed -n '2,100p' "${BASH_SOURCE[0]}"; exit 0 ;;
+    -h|--help)   sed -n '2,/^# Exit: /p' "${BASH_SOURCE[0]}"; exit 0 ;;
     --*)
       k="${1#--}"; k="${k//-/_}"
       [ $# -ge 2 ] || die "--${1#--} needs a value"
@@ -290,6 +409,36 @@ if [ "$CMD" = "record" ]; then
   if [ -f "$STORE" ] && awk -F'\t' -v id="${F[decision_id]}" '!/^#/ && $1==id{f=1} END{exit !f}' "$STORE"; then
     die "decision_id \"${F[decision_id]}\" is already recorded. A store that accepts a duplicate id double-counts it in every total it will ever produce."
   fi
+  assert_partition
+  # A SELECTION MAY NOT CARRY AN OUTCOME. The outcome does not exist yet when the
+  # choice is made; a value here would be a forecast filed as a measurement.
+  # Naming the column with the literal `unknown` is allowed because omission
+  # already yields exactly that, so the historical spelling still works.
+  for k in "${!F[@]}"; do
+    in_list "$k" "$OUTCOME_COLS" || continue
+    [ "${F[$k]}" = "unknown" ] && continue
+    die "OUTCOME-FIELD-IN-SELECTION — --${k//_/-} is an OUTCOME field and this is the SELECTION path. When the choice is recorded the outcome has not happened, so a value here is a forecast filed as a measurement. Record it afterwards with \`outcome\`, which refuses to run until this row exists."
+  done
+  for k in "${!F[@]}"; do
+    in_list "$k" "$RANKER_FIELDS" \
+      && die "RANKER-FIELD-IN-SELECTION — --${k//_/-} is evidence about the RANKER, not about the decision. It is derived on demand from the sealed ordering and this selection; storing it here would make a ranking's own score a field of the record it is being scored against."
+  done
+  # THE SEAL BINDS TO ITS SET. Sealing an ordering over set A and then choosing
+  # from set B leaves every artefact parsing and the ranking referring to a
+  # decision nobody took.
+  if [ -f "$SNAPS" ]; then
+    SEALED_SET="$(awk -F'\t' -v d="${F[decision_id]}" -v s="$SEAL_SIGNAL" '!/^#/ && $2==d && $6==s{print $5}' "$SNAPS" | sort)"
+    if [ -n "$SEALED_SET" ]; then
+      DECL_SET="$(semi_lines "${F[candidate_ids]}" | sort)"
+      if [ "$SEALED_SET" != "$DECL_SET" ]; then
+        die "SET-CHANGED-AFTER-SEAL — a prospective ranking was sealed for \"${F[decision_id]}\" over [$(printf '%s' "$SEALED_SET" | tr '\n' ' ')] and this selection declares [$(printf '%s' "$DECL_SET" | tr '\n' ' ')]. A seal binds to its set or it binds to nothing: choosing from a set the ordering never ranked converts a sealed prospective ranking into a post-hoc one while leaving every artefact intact."
+      fi
+      SEALED_AT="$(awk -F'\t' -v d="${F[decision_id]}" -v s="$SEAL_SIGNAL" '!/^#/ && $2==d && $6==s{print $3; exit}' "$SNAPS")"
+      if [ -n "$SEALED_AT" ] && before "${F[decision_time]}" "$SEALED_AT"; then
+        die "TIMESTAMP-CONTRADICTS-ORDER — this selection reports decision_time \"${F[decision_time]}\" and the ranking it is bound to reports captured_at \"$SEALED_AT\", so the choice claims to precede the ordering. The strings prove nothing on their own — they are self-reported — but a contradiction between them always means something is wrong, and it is refused rather than reconciled."
+      fi
+    fi
+  fi
   # OMISSION YIELDS `unknown`. This loop is the rule.
   ROW=""
   for c in $COLS; do
@@ -311,30 +460,119 @@ fi
 
 # -------------------------------------------------------------- snapshot -----
 SNAP_REQUIRED="snapshot_id decision_id captured_at repository_commit candidate_id signal_name signal_value derivation_version source_object_versions evidence_refs"
+# ONE APPEND PATH, USED BY BOTH WRITERS. `snapshot` and `seal-ranking` share it
+# rather than each computing a digest, because two copies of a chaining rule is
+# two chaining rules the moment one of them is edited — the counting form of
+# DEFECT-0003 this tree has now paid for repeatedly.
+append_snapshot(){ # the ten body fields, in SNAP_COLS order
+  ensure_store "$SNAPS" "$SNAP_SCHEMA_VERSION" $SNAP_COLS
+  printf '%s\n' "$1" | grep -qE "$SNAP_ID_RE" \
+    || die "snapshot_id \"$1\" is not a SIGNAL-SNAPSHOT-NNNN[-slug] stable id"
+  if awk -F'\t' -v id="$1" '!/^#/ && $1==id{f=1} END{exit !f}' "$SNAPS"; then
+    die "snapshot_id \"$1\" already exists. A snapshot is evidence; overwriting one is exactly the edit the chain exists to make visible."
+  fi
+  local prev body="" dig v
+  prev="$(awk -F'\t' '!/^#/ && $1!="snapshot_id" && NF>1 {d=$NF} END{print d}' "$SNAPS")"
+  [ -n "$prev" ] || prev="GENESIS"
+  for v in "$@"; do
+    case "$v" in *"$TAB"*|*$'\n'*) die "a snapshot field contains a tab or newline, which would silently split the row" ;; esac
+    body="${body}${v}${TAB}"
+  done
+  body="${body%"$TAB"}"
+  dig="$(printf '%s\t%s' "$prev" "$body" | digest_of)"
+  printf '%s\t%s\t%s\n' "$body" "$prev" "$dig" >> "$SNAPS" || die "cannot append to $SNAPS"
+}
 if [ "$CMD" = "snapshot" ]; then
   ensure_store "$SNAPS" "$SNAP_SCHEMA_VERSION" $SNAP_COLS
   for r in $SNAP_REQUIRED; do
     [ -n "${F[$r]:-}" ] || die "--${r//_/-} is required on a snapshot. A frozen signal with no commit, no derivation version or no source object versions cannot be re-read as evidence — it is a number with no referent."
   done
-  printf '%s\n' "${F[snapshot_id]}" | grep -qE "$SNAP_ID_RE" \
-    || die "snapshot_id \"${F[snapshot_id]}\" is not a SIGNAL-SNAPSHOT-NNNN[-slug] stable id"
-  if awk -F'\t' -v id="${F[snapshot_id]}" '!/^#/ && $1==id{f=1} END{exit !f}' "$SNAPS"; then
-    die "snapshot_id \"${F[snapshot_id]}\" already exists. A snapshot is evidence; overwriting one is exactly the edit the chain exists to make visible."
-  fi
-  PREV="$(awk -F'\t' '!/^#/ && $1!="snapshot_id" && NF>1 {d=$NF} END{print d}' "$SNAPS")"
-  [ -n "$PREV" ] || PREV="GENESIS"
-  BODY=""
-  for c in $SNAP_COLS; do
-    case "$c" in prev_digest|digest) continue ;; esac
-    v="${F[$c]:-unknown}"
-    case "$v" in *"$TAB"*|*$'\n'*) die "$c contains a tab or newline, which would silently split the row" ;; esac
-    BODY="${BODY}${v}${TAB}"
-  done
-  BODY="${BODY%"$TAB"}"
-  DIG="$(printf '%s\t%s' "$PREV" "$BODY" | digest_of)"
-  printf '%s\t%s\t%s\n' "$BODY" "$PREV" "$DIG" >> "$SNAPS" || die "cannot append to $SNAPS"
+  append_snapshot "${F[snapshot_id]}" "${F[decision_id]}" "${F[captured_at]}" \
+    "${F[repository_commit]}" "${F[candidate_id]}" "${F[signal_name]}" \
+    "${F[signal_value]}" "${F[derivation_version]}" "${F[source_object_versions]}" \
+    "${F[evidence_refs]}"
   printf 'recorded snapshot: %s (%s = %s, frozen at %s) -> %s\n' \
     "${F[snapshot_id]}" "${F[signal_name]}" "${F[signal_value]}" "${F[repository_commit]}" "$SNAPS"
+  exit 0
+fi
+
+# ---------------------------------------------------------- seal-ranking -----
+# SEAL AN ORDERING BEFORE ANYBODY CHOOSES. This is the only thing in this tree
+# that can turn `rank_of_selected` from an observation into evidence: a ranking
+# that already existed, in the chain, when the choice was still open.
+#
+# IT COMPUTES NO ORDERING. The rule that produced the ordering lives in the
+# ranker; duplicating it here would be two copies of one semantic truth, and the
+# copy nobody runs is the one that goes wrong. This command takes the ordering as
+# input and is responsible for exactly three things a ranker cannot do for
+# itself: that the seal precedes the selection, that it covers the whole declared
+# set and nothing else, and that it cannot be replaced afterwards.
+if [ "$CMD" = "seal-ranking" ]; then
+  SEAL_REQUIRED="decision_id candidate_ids ordering ranking_rule captured_at repository_commit snapshot_ids source_object_versions evidence_refs"
+  for r in $SEAL_REQUIRED; do
+    [ -n "${F[$r]:-}" ] || die "--${r//_/-} is required to seal a ranking. A sealed ordering with no rule, no commit or no evidence refs is a list of names nobody can re-derive."
+  done
+  printf '%s\n' "${F[decision_id]}" | grep -qE "$DECISION_ID_RE" \
+    || die "decision_id \"${F[decision_id]}\" is not a DECISION-NNNN[-slug] stable id"
+  # REFUSAL 1 — THE ONE THIS PACKET EXISTS FOR. The decision must not yet have a
+  # selection row. This is not a timestamp comparison: it is the state of the
+  # telemetry store at the instant of the write.
+  if [ -f "$STORE" ] && awk -F'\t' -v id="${F[decision_id]}" '!/^#/ && $1==id{f=1} END{exit !f}' "$STORE"; then
+    die "RANKING-AFTER-SELECTION — \"${F[decision_id]}\" already carries a SELECTION row in $STORE, so any ordering sealed now is POST-HOC. A ranking formed after a choice is a rationalisation and is byte-identical to one formed before it; the order is the only thing that ever distinguished them, and it is enforced here rather than described."
+  fi
+  # REFUSAL 2 — one decision, one prospective ranking. A seal that can be
+  # replaced records the last opinion, not the first.
+  if [ -f "$SNAPS" ] && awk -F'\t' -v d="${F[decision_id]}" -v s="$SEAL_SIGNAL" '!/^#/ && $2==d && $6==s{f=1} END{exit !f}' "$SNAPS"; then
+    die "RESEAL — \"${F[decision_id]}\" already carries a sealed ranking in $SNAPS. Sealing a second ordering over the same decision would let the ranking be revised while the choice was still open, which is the same defect as ranking after the choice with one extra step."
+  fi
+  # REFUSAL 3/4 — RESOLVABILITY IS NOT IDENTITY, one step further on. An ordering
+  # that parses is not an ordering OF the set it claims: both a rank for a
+  # candidate the set never named and a candidate the set names with no rank are
+  # refused, by name.
+  SEAL_SET="$(semi_lines "${F[candidate_ids]}" | sort)"
+  SEAL_RANKED=""
+  while IFS= read -r ent; do
+    [ -n "$ent" ] || continue
+    r="${ent%%:*}"; c="${ent#*:}"
+    [ "$r" != "$ent" ] && [ -n "$c" ] \
+      || die "the ordering entry \"$ent\" is not RANK:CANDIDATE. A rank is a positive integer or the literal \`excluded\`, which is how a candidate a guard refused stays on the record instead of vanishing from it."
+    case "$r" in excluded) ;; ''|*[!0-9]*) die "the ordering entry \"$ent\" carries the rank \"$r\", which is neither a positive integer nor \`excluded\`" ;; 0) die "the ordering entry \"$ent\" carries rank 0; ranks start at 1" ;; esac
+    in_list "$c" "$(printf '%s' "${F[candidate_ids]}" | tr ';' ' ')" \
+      || die "ORDERING-SET-MISMATCH — the ordering ranks \"$c\", which the declared candidate set does not name. The ordering parses and is still an ordering of a different set: RESOLVABILITY IS NOT IDENTITY."
+    SEAL_RANKED="$SEAL_RANKED$c
+"
+  done < <(semi_lines "${F[ordering]}")
+  SEAL_MISSING="$(comm -23 <(printf '%s\n' "$SEAL_SET" | grep .) <(printf '%s' "$SEAL_RANKED" | grep . | sort) | grep . || true)"
+  [ -z "$SEAL_MISSING" ] \
+    || die "ORDERING-SET-MISMATCH — the declared candidate set names $(printf '%s' "$SEAL_MISSING" | tr '\n' ' ')which the ordering does not rank. A seal covers the whole set or it is a filtered one, and a filtered seal quietly excuses whatever it left out."
+  # The ids are supplied, never invented. A tool that allocates its own snapshot
+  # ids is a tool that can collide with one a human already wrote down.
+  SEAL_IDS="$(semi_lines "${F[snapshot_ids]}")"
+  NIDS="$(printf '%s\n' "$SEAL_IDS" | grep -c . || true)"
+  NSET="$(printf '%s\n' "$SEAL_SET" | grep -c . || true)"
+  [ "${NIDS:-0}" -eq "${NSET:-0}" ] \
+    || die "--snapshot-ids supplies ${NIDS:-0} id(s) for ${NSET:-0} candidate(s). Ids are supplied and never invented: a tool that allocates its own would collide with one somebody already wrote down."
+  # Everything is validated before anything is appended: a seal half-written into
+  # a digest chain is worse than a seal refused.
+  SEAL_I=0
+  while IFS= read -r c; do
+    [ -n "$c" ] || continue
+    SEAL_I=$((SEAL_I+1))
+    sid="$(printf '%s\n' "$SEAL_IDS" | sed -n "${SEAL_I}p")"
+    rank=""
+    while IFS= read -r ent; do
+      [ -n "$ent" ] || continue
+      [ "${ent#*:}" = "$c" ] && { rank="${ent%%:*}"; break; }
+    done < <(semi_lines "${F[ordering]}")
+    append_snapshot "$sid" "${F[decision_id]}" "${F[captured_at]}" "${F[repository_commit]}" \
+      "$c" "$SEAL_SIGNAL" "$rank" "${F[ranking_rule]}" "${F[source_object_versions]}" "${F[evidence_refs]}"
+  done < <(semi_lines "${F[candidate_ids]}")
+  printf 'sealed ranking: %s under rule %s, %s candidate(s) -> %s\n' \
+    "${F[decision_id]}" "${F[ranking_rule]}" "${NSET:-0}" "$SNAPS"
+  printf 'sealed_ordering: %s\n' "${F[ordering]}"
+  printf 'selection_row: ABSENT from %s at the moment of this write — that absence, not a timestamp, is what establishes ranking < selection.\n' "$STORE"
+  printf 'chain_head: %s\n' "$(awk -F'\t' '!/^#/ && $1!="snapshot_id" && NF>1 {d=$NF} END{print d}' "$SNAPS")"
+  printf 'what_this_proves: the ordering existed, in an append-only digest chain, while the choice was still open. What it does NOT prove: that the ordering is any good. That needs several sealed decisions with recorded selections, and this store reports how many there are rather than asserting it.\n'
   exit 0
 fi
 
@@ -372,6 +610,165 @@ if [ "$CMD" = "snapshot-verify" ]; then
   [ "$BADS" -eq 0 ] || die "$BADS snapshot integrity problem(s) in $SNAPS"
   printf 'record-decision: %s snapshot(s) verify against the digest chain in %s (schema %s)\n' "$NS" "$SNAPS" "$SNAP_SCHEMA_VERSION"
   printf 'record-decision: TAMPER-EVIDENT, NOT TAMPER-PROOF — anyone who can write this file can rewrite the chain from an edit forward. It defeats an in-place edit, not a deliberate forgery.\n'
+  exit 0
+fi
+
+# ----------------------------------------------------------------- fields ----
+# The partition, published rather than left implicit in the code. A separation
+# nobody can read is a separation nobody can check.
+if [ "$CMD" = "fields" ]; then
+  assert_partition
+  for c in $COLS; do printf 'column: %s\n' "$c"; done
+  for c in $SELECTION_COLS; do printf 'selection_field: %s\n' "$c"; done
+  for c in $OUTCOME_COLS; do printf 'outcome_field: %s\n' "$c"; done
+  for c in $RANKER_FIELDS; do printf 'ranker_field: %s\n' "$c"; done
+  printf 'partition: every column belongs to exactly one of the selection set and the outcome set, checked against the schema rather than trusted. `record` writes the first, `outcome` writes the second, and neither reaches the other.\n'
+  printf 'ranker_fields_own_no_column: evidence about the RANKER is derived on demand and is never stored beside the outcome of the candidate it ranked.\n'
+  exit 0
+fi
+
+# ---------------------------------------------------------------- outcome ----
+# WHAT THE CHOICE THEN COST AND PRODUCED. It may only be written once the
+# selection exists, it may not touch a selection column, and it may not carry a
+# fact about the ranker.
+#
+# WHY THIS UPDATES A ROW RATHER THAN APPENDING ONE. `decision_telemetry.tsv` is a
+# RECORD and its duplicate-id refusal exists so that no total ever double-counts
+# a decision; a second row for the same decision would defeat exactly that. The
+# outcome columns are already declared here and are `unknown` until something
+# knows better, so this fills them in place — and proves it filled nothing else,
+# by comparing the selection half of the row before and after.
+if [ "$CMD" = "outcome" ]; then
+  assert_partition
+  [ -n "${F[decision_id]:-}" ] || die "--decision-id is required. An outcome with no decision is a measurement of nothing."
+  [ -f "$STORE" ] \
+    || die "OUTCOME-BEFORE-SELECTION — there is no telemetry store at $STORE, so no decision has been recorded and nothing can have an outcome yet."
+  OROW="$(awk -F'\t' -v id="${F[decision_id]}" '!/^#/ && $1==id{print; found=1; exit} END{exit !found}' "$STORE")" \
+    || die "OUTCOME-BEFORE-SELECTION — \"${F[decision_id]}\" has no SELECTION row in $STORE. An outcome cannot precede the choice it is the outcome of, and this is not a timestamp comparison: the row is either there at the moment of the write or it is not."
+  for k in "${!F[@]}"; do
+    [ "$k" = "decision_id" ] && continue
+    in_list "$k" "$RANKER_FIELDS" \
+      && die "RANKER-FIELD-IN-OUTCOME — --${k//_/-} is evidence about the RANKER, not about the candidate. Discovering that the chosen candidate mattered is evidence about the CANDIDATE; it is not yet evidence that anything ranked it for the right reasons. Those two claims stay in separate records, and this store holds only the second."
+    in_list "$k" "$SELECTION_COLS" \
+      && die "SELECTION-FIELD-IN-OUTCOME — --${k//_/-} is a SELECTION field and this is the OUTCOME path. An outcome record that could rewrite the choice it is the outcome of would make \"what was chosen\" and \"what happened\" one editable object, and no later reader could tell which had been adjusted to fit the other."
+    in_list "$k" "$OUTCOME_COLS" \
+      || die "--${k//_/-} names no outcome field. The outcome set is: $OUTCOME_COLS"
+  done
+  ODTIME="$(printf '%s' "$OROW" | cut -f"$(idx_of decision_time)")"
+  for tf in started_at completed_at; do
+    [ -n "${F[$tf]:-}" ] || continue
+    before "${F[$tf]}" "$ODTIME" \
+      && die "TIMESTAMP-CONTRADICTS-ORDER — $tf \"${F[$tf]}\" precedes this decision's decision_time \"$ODTIME\", so the work claims to have happened before the choice to do it. The strings are self-reported and prove nothing on their own; a contradiction between them is refused anyway, because a contradiction is always wrong."
+  done
+  ONEW=""; OI=0
+  for c in $COLS; do
+    OI=$((OI+1))
+    cur="$(printf '%s' "$OROW" | cut -f"$OI")"
+    v="$cur"
+    if [ -n "${F[$c]:-}" ]; then
+      nv="${F[$c]}"
+      case "$nv" in *"$TAB"*|*$'\n'*) die "$c contains a tab or newline, which would silently split the row" ;; esac
+      case " $QUANT " in *" $c "*) r="$(validate_quant "$c" "$nv")"; [ -n "$r" ] && die "$r" ;; esac
+      if [ "$cur" != "unknown" ] && [ "$cur" != "$nv" ]; then
+        die "OUTCOME-OVERWRITE — $c already records \"$cur\" for \"${F[decision_id]}\" and this would replace it with \"$nv\". An outcome that can be edited afterwards is not evidence about anything, least of all about whether a ranking was right. Re-writing the SAME value is allowed; changing one is not."
+      fi
+      v="$nv"
+    fi
+    ONEW="${ONEW}${v}${TAB}"
+  done
+  ONEW="${ONEW%"$TAB"}"
+  validate_row "$ONEW" "the amended row" || die "the amended row is not writable; nothing was changed"
+  # THE INVARIANT, CHECKED RATHER THAN ARGUED. The selection half of this row
+  # must be byte-identical across the write, whatever the flag loop above did.
+  for c in $SELECTION_COLS; do
+    i="$(idx_of "$c")"
+    [ "$(printf '%s' "$OROW" | cut -f"$i")" = "$(printf '%s' "$ONEW" | cut -f"$i")" ] \
+      || die "the outcome write would change the selection column $c. Nothing was written. This is an internal invariant failing closed, not a user error."
+  done
+  OTMP="$STORE.outcome.$$"
+  OMATCHED=0
+  while IFS= read -r line || [ -n "$line" ]; do
+    case "$line" in
+      "${F[decision_id]}$TAB"*) printf '%s\n' "$ONEW"; OMATCHED=$((OMATCHED+1)) ;;
+      *) printf '%s\n' "$line" ;;
+    esac
+  done < "$STORE" > "$OTMP"
+  if [ "$OMATCHED" -ne 1 ]; then
+    rm -f "$OTMP"
+    die "the outcome write matched $OMATCHED rows for \"${F[decision_id]}\", not exactly 1. Nothing was written."
+  fi
+  mv "$OTMP" "$STORE" || { rm -f "$OTMP"; die "cannot replace $STORE"; }
+  printf 'recorded outcome: %s -> %s\n' "${F[decision_id]}" "$STORE"
+  printf 'selection_half: unchanged, byte-for-byte, and verified field by field before the write.\n'
+  printf 'ranker_evidence: NONE. This records what the CANDIDATE cost and produced. Whether anything ranked it well is a different claim, kept in a different place.\n'
+  exit 0
+fi
+
+# --------------------------------------------------------- outcome-report ----
+# EVERY ABSENCE NAMED, AND THE DENOMINATOR BEFORE ANY TOTAL. This is the
+# missing-signal discipline the ranker applies to a signal SET, applied to the
+# outcome FIELD set: an outcome quietly written as 0, or quietly dropped, is the
+# defect that makes a measurement store worse than no store.
+#
+# THE THREE ABSENCES, AND EACH IS DERIVED FROM THE STORE RATHER THAN REMEMBERED:
+#
+#   MISSING          no value for THIS decision, and at least one other decision
+#                    in this store carries one. The quantity is collectable here;
+#                    nobody collected it for this one.
+#   NEVER-COLLECTED  no decision in this store has EVER carried a value. Nothing
+#                    in this repository has measured it.
+#   UNINTERPRETED    a value IS recorded, and no DIRECTION for outcome evaluation
+#                    has ever been declared for the field, so it is reported and
+#                    scores nothing.
+if [ "$CMD" = "outcome-report" ]; then
+  assert_partition
+  [ -n "${F[decision_id]:-}" ] || die "--decision-id is required"
+  [ -f "$STORE" ] || die "no telemetry store at $STORE"
+  RROW="$(awk -F'\t' -v id="${F[decision_id]}" '!/^#/ && $1==id{print; found=1; exit} END{exit !found}' "$STORE")" \
+    || die "no decision \"${F[decision_id]}\" in $STORE"
+  NDEC="$(awk -F'\t' '!/^#/ && $1!="decision_id" && NF>1' "$STORE" | grep -c . || true)"
+  printf 'outcome-report: %s (schema %s)\n' "${F[decision_id]}" "$SCHEMA_VERSION"
+  printf 'selected_candidate_id: %s   selector: %s\n' \
+    "$(printf '%s' "$RROW" | cut -f"$(idx_of selected_candidate_id)")" \
+    "$(printf '%s' "$RROW" | cut -f"$(idx_of selector)")"
+  RREC=0; RMISS=0; RNEVER=0
+  RLINES=""
+  for c in $OUTCOME_COLS; do
+    i="$(idx_of "$c")"
+    v="$(printf '%s' "$RROW" | cut -f"$i")"
+    kn="$(awk -F'\t' -v i="$i" '!/^#/ && $1!="decision_id" && NF>1 && $i!="unknown"' "$STORE" | grep -c . || true)"
+    if [ "$v" != "unknown" ]; then
+      RREC=$((RREC+1))
+      if in_list "$c" "$OUTCOME_DIRECTION"; then
+        RLINES="${RLINES}outcome_field $c RECORDED value=$v direction=declared"$'\n'
+      else
+        RLINES="${RLINES}outcome_field $c UNINTERPRETED value=$v — a value IS recorded and NO direction for outcome evaluation has ever been declared for this field, so it is reported and scores nothing. Guessing one would put an unregistered constant inside every ordering that later read it."$'\n'
+      fi
+    elif [ "${kn:-0}" -eq 0 ]; then
+      RNEVER=$((RNEVER+1))
+      RLINES="${RLINES}outcome_field $c NEVER-COLLECTED — 0 of $NDEC decision(s) in this store have ever carried a value. Nothing in this repository has measured it; it is named as absent rather than imputed."$'\n'
+    else
+      RMISS=$((RMISS+1))
+      RLINES="${RLINES}outcome_field $c MISSING — no value for this decision; $kn of $NDEC decision(s) here carry one, so the quantity IS collectable and nobody collected it. Not imputed, not defaulted, not dropped."$'\n'
+    fi
+  done
+  printf 'coverage: %s recorded, %s missing, %s never-collected; declared outcome fields: %s\n' \
+    "$RREC" "$RMISS" "$RNEVER" "$(count_of "$OUTCOME_COLS")"
+  printf '%s' "$RLINES"
+  printf 'aggregate: outcome_completeness — %s of %s declared outcome field(s) carry a value\n' \
+    "$RREC" "$(count_of "$OUTCOME_COLS")"
+  printf 'aggregate: every scored total — withheld: no outcome field has a declared direction, so nothing here can be summed into a quality without inventing the direction first. An absence contributes to no total, and no total is reported over a set that contains one.\n'
+  # THE SEPARATION, PUBLISHED BESIDE THE DATA. Agreement is one observation.
+  NSEALED="$(awk -F'\t' -v s="$SEAL_SIGNAL" '!/^#/ && $6==s{print $2}' "$SNAPS" 2>/dev/null | sort -u | grep -c . || true)"
+  NSEALSEL=0
+  while IFS= read -r d; do
+    [ -n "$d" ] || continue
+    awk -F'\t' -v id="$d" '!/^#/ && $1==id{f=1} END{exit !f}' "$STORE" && NSEALSEL=$((NSEALSEL+1))
+  done < <(awk -F'\t' -v s="$SEAL_SIGNAL" '!/^#/ && $6==s{print $2}' "$SNAPS" 2>/dev/null | sort -u)
+  printf 'prospective_decisions_sealed: %s\n' "${NSEALED:-0}"
+  printf 'prospective_decisions_with_a_recorded_selection: %s\n' "$NSEALSEL"
+  printf 'ranker_evidence: NONE DERIVABLE FROM THIS REPORT. Everything above is evidence about the CANDIDATE — what it cost, what it produced, whether it held. That a chosen candidate turned out well is NOT evidence that anything ranked it for the right reasons, and the two are kept in separate records so the second reading is not available by accident.\n'
+  printf 'ranker_evidence_precondition: a rank_of_selected is evidence about a ranker only for a decision whose ordering was SEALED BEFORE its selection. %s such decision(s) have since been selected. Until that number is large enough to mean something, agreement between a ranking and a choice is one observation and this tool says so rather than scoring it.\n' "$NSEALSEL"
   exit 0
 fi
 

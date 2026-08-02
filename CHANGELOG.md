@@ -14,6 +14,67 @@ deprecation cycle. Pin a commit if you need stability.
 
 ### In flight (not landed at the released commit)
 
+- **The shadow ranker now has to rank BEFORE the choice, and the tooling refuses
+  to let it do otherwise.** A ranking formed after a decision is a
+  rationalisation, and it is byte-identical to one formed before it — nothing
+  about the artefact distinguishes them. So `ranking < selection < execution` is
+  three refusals in `build-os/metrics/record-decision.sh`, each driven red on its
+  own fixture: a ranking cannot be **sealed** for a decision that already carries
+  a selection row; a selection cannot be **recorded** over a candidate set
+  different from the sealed one, and cannot carry its own outcome; an outcome
+  cannot be **recorded** for a decision nobody has taken.
+
+  **What that enforcement rests on is stated in the code rather than implied
+  away.** A timestamp that *parses* is not a timestamp that *proves ordering*.
+  What is constitutive is the **existence order of a row across two stores at the
+  instant of each write** — the seal lands in the digest-chained snapshot file
+  where every later row's digest covers it. The ISO-8601 strings are
+  **corroborating only**: a contradiction between them is refused because a
+  contradiction is always wrong, and agreement between them is never treated as
+  proof. The only real anchor is outside both stores — git, where the seal is
+  committed before any commit can carry its selection.
+
+  **A real ordering is sealed over a real candidate set that nobody has chosen
+  from yet.** `DECISION-0011-p5b-next-after-p3b`, rule `s1-v1`, over 20 frozen
+  signals: one candidate refused as self-amending, then rank 1, a genuine tie at
+  rank 2, and a dominated candidate at rank 4. It has **no row** in
+  `decision_telemetry.tsv`, deliberately, and that absence is the evidence.
+  **Three of four rankable candidates sit on the Pareto frontier** — unlike the
+  first ordering, whose single dominator survived 125 of 125 weightings and
+  therefore carried no information. Weights would change this one, which is the
+  first time that has been true.
+
+  **The outcome record is separable from the selection record by PARTITION, not
+  by convention.** Every telemetry column belongs to exactly one of a selection
+  set and an outcome set; the partition is checked against the schema at run time
+  and fails closed on a column neither set owns. A third declared set —
+  `rank_of_selected`, `ranking_agreement`, `ranker_skill` and their siblings —
+  **owns no column at all** and is refused by both write paths, because
+  discovering that the chosen candidate mattered is evidence about the
+  **candidate**, not evidence that anything ranked it for the right reasons.
+
+  **Every missing outcome is named, and the category is derived rather than
+  remembered.** Of 19 declared outcome fields on the first decision reported, 3
+  carry a value, 4 are `MISSING` (this store holds them for some other decision)
+  and 12 are `NEVER-COLLECTED` (nothing here has ever measured them) — counted
+  from the store itself. Every recorded value is reported `UNINTERPRETED` and
+  every scored total is withheld, because no outcome field in this repository has
+  a declared direction and inventing one would put an unregistered constant
+  inside every later ordering.
+
+  No new store, no new tool, no new suite file, no new primitive; **one census
+  entry**, and with it the twenty-first declared mismatch, because the in-place
+  outcome amendment is a mutation surface the census did not carry and the
+  existing record says in its own words *"never an edit to an existing one"*.
+  Suite **1952 passed**, 0 failed; `scan-controls.sh check` and
+  `scan-mutators.sh check` both exit 0; zero re-authorisations.
+
+  **And the honest half, found by execution rather than argued:** the
+  `ranking_digest` published for the first ordering **no longer reproduces**. It
+  covers the snapshot store's global chain head, so appending any snapshot for
+  any decision moves it — the ordering itself is unchanged, byte for byte, and
+  the number that was quoted as durable had a shelf life of one append.
+
 - **The first executive component: a shadow ranker that forms an explicit,
   inspectable preference among several permissible good actions — and refuses to
   rank anything that would promote it.** Everything in this system until now

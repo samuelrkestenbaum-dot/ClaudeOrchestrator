@@ -70,7 +70,7 @@ the concept without performing the function and **is not coverage**.
 | meaning_metric | 0 | 0 | 0 | 0 | — | — |
 | mass | 1 | 0 | 0 | 1 | A | advise |
 | valence | 0 | 0 | 0 | 0 | — | — |
-| agency | 12 | 8 | 3 | 1 | A, C | advise, gate, execute |
+| agency | 13 | 9 | 3 | 1 | A, C | advise, gate, execute |
 | energy | 3 | 0 | 3 | 0 | C | advise, gate |
 | homeostasis | 25 | 1 | 24 | 0 | A | advise, gate |
 | integration_bandwidth | 2 | 1 | 1 | 0 | C | advise, gate |

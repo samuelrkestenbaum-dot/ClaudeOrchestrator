@@ -45,11 +45,12 @@
   `no tags` because `tests/release_metadata_tests.sh:322` requires it, so the residue item is
   annotated rather than rewritten. Whether the tag was created with an explicit go is not
   determinable from here and no claim is made.
-- **Build/test command:** `bash tests/build_os_tests.sh` (1909 checks; no network; temp dirs)
-  — measured on a quiet tree at `ce71122` plus this packet's build, **RE-MEASURED BY THE ARCHIVIST
-  AFTER ITS OWN WRITES at the `gravito_p4_s1_shadow_ranker_a` close and UNCHANGED at 1909**, and
-  reconciled against
-  `CHANGELOG.md`, which carries the matching literal `**1909 passed**` (unsplit) in the
+- **Build/test command:** `bash tests/build_os_tests.sh` (1952 checks; no network; temp dirs)
+  — measured on a quiet tree at `80ad634` plus `gravito_p5_outcome_counterfactual_telemetry_a`'s
+  build, from a SOLO full-capture run after an anchored `pgrep -fa '^bash tests/'` returned empty
+  (**1909 at the previous close, and 1909 re-measured at this packet's Commit 1 in isolation**),
+  and reconciled against
+  `CHANGELOG.md`, which carries the matching literal `**1952 passed**` (unsplit) in the
   release block `## [Unreleased]` -> `### In flight (not landed at the released commit)`.
   **CITED BY HEADING, NOT BY LINE NUMBER, from 2026-08-01 on** — the changelog grows from the
   top, so every line-citation into it decays on every packet, guaranteed rather than
@@ -168,6 +169,63 @@
   anti-shelfware guard makes a `<=1 new control` ceiling **UNREACHABLE FOR ANY NEW REFUSING TOOL**,
   and it will fire again on the next one. **The ledger the ceiling was written against has now
   changed: 99 controls, ~20 tools, 1909 assertions, and ONE executive component.]**
+- **IN FLIGHT:** `gravito_p5_outcome_counterfactual_telemetry_a`
+  (`PACKET-0032-p5-outcome-counterfactual-telemetry` — REUSED, not minted: it is the id
+  `DECISION-0010` already carries for this work, collision-checked against every `PACKET-*` in
+  the tree, because a fresh id would put two candidates under one key inside the store S1 reads).
+  Base `80ad634`, commits `cda95d2` (declaration) + this build. **P5 OF THE OPERATOR'S FIVE.**
+  **THE POINT OF P5, AND IT IS NOT ANOTHER SUPPORTING PACKET.** P4 built the executive
+  MECHANISM and its capability is UNDEMONSTRATED. P5 makes the transition from *decision already
+  made -> S1 reconstructs a ranking* to *S1 ranks FIRST -> human chooses -> outcome occurs*.
+  **THE HARD REQUIREMENT, MECHANICALLY ENFORCED: `ranking < selection < execution`.** Three
+  refusals in `record-decision.sh`, each driven red on its own fixture:
+  `seal-ranking` REFUSES while the decision already carries a SELECTION row
+  (`RANKING-AFTER-SELECTION`); `record` REFUSES a selection whose candidate set differs from the
+  sealed one (`SET-CHANGED-AFTER-SEAL`) and REFUSES to carry an outcome at all
+  (`OUTCOME-FIELD-IN-SELECTION`); `outcome` REFUSES while the decision has NO selection row
+  (`OUTCOME-BEFORE-SELECTION`).
+  **WHAT THE EVIDENCE ESTABLISHES AND WHAT IT DOES NOT — stated in the code, not implied away.**
+  CONSTITUTIVE: the EXISTENCE ORDER of a row across two stores at the instant of each write, with
+  the seal landing in the digest-chained snapshot file where every later row covers it.
+  CORROBORATING and worth much less: the ISO-8601 strings, compared only because a contradiction
+  is always wrong, never because agreement is proof. THE ONLY REAL ANCHOR is outside both stores —
+  git, where the seal is committed before any commit can carry its selection. **A timestamp that
+  PARSES is not a timestamp that PROVES ORDERING**, which is this tree's named recurring trap one
+  level up.
+  **THE SEALED PROSPECTIVE ORDERING — `DECISION-0011-p5b-next-after-p3b`, rule `s1-v1`, sealed at
+  `80ad634` over 20 frozen v2 snapshots, and THE DECISION HAS NO ROW IN `decision_telemetry.tsv`
+  BECAUSE NOBODY HAS SELECTED YET:** `PACKET-0033` **excluded** `reason=self_amendment`; rank 1
+  `PACKET-0029` total 4, **rank 2 TIE** `PACKET-0030` and `PACKET-0031` total 3 each, rank 4
+  `PACKET-0028` total 1 (`dominated_by=PACKET-0029`). **IT IS NOT DEGENERATE — THREE candidates
+  sit on the Pareto frontier**, against DECISION-0010's single dominator that 125 of 125
+  weightings returned. The weights would actually matter here, which is the first time that has
+  been true.
+  **THE OUTCOME ARM — `DECISION-0010` / `PACKET-0027`:** `result: in_flight` recorded; **3 of 19
+  declared outcome fields carry a value, 4 are MISSING, 12 are NEVER-COLLECTED**, each category
+  DERIVED from the store rather than remembered, and **every recorded value is UNINTERPRETED**
+  because no outcome field in this repository has a declared direction and inventing one would
+  put an unregistered constant inside every later ordering.
+  **THE SEPARATION IS A PARTITION, NOT A CONVENTION.** Every telemetry column belongs to exactly
+  one of the SELECTION set (8) and the OUTCOME set (19); the partition is checked against the
+  schema at run time and fails closed on an unowned or double-owned column; a third set —
+  `rank_of_selected`, `ranking_agreement`, `ranker_skill`, `ranking_digest`,
+  `counterfactual_regret`, `sealed_rank` — OWNS NO COLUMN and is refused by both write paths.
+  `outcome-report` publishes `prospective_decisions_with_a_recorded_selection: 0` — **DERIVED** —
+  and states that that number, not any prose, is the only thing that could ever make
+  `rank_of_selected` evidence about S1.
+  **CEILING: 0 new stores, 0 new validator tools, 0 new suite files, 0 new primitives. ONE
+  DECLARED EXCEPTION — one census control** (`metrics.decision.outcome_update`, 99 -> 100) and
+  with it the **21st declared mismatch**, which P4 avoided and this packet could not: the outcome
+  amendment is an in-place row rewrite, MUT-0006 declares in its own `write_scope` "never an edit
+  to an existing one", and leaving that sentence standing would have been a knowingly-false census
+  entry. The justification is executed, not argued: `scan-controls.sh` refused it as `LAUNDERED`
+  and `UNREPORTED` until the mismatch was declared and reported.
+  **Suite 1909 -> 1952 (+43, ALL in `tests/mutator_registry_tests.sh` section 14, 93 -> 136);
+  census 99 -> 100; declared mismatches 20 -> 21; out-of-licence 25 -> 26; snapshots 72 -> 97
+  (+25, all bound to DECISION-0011); decisions 10 (UNCHANGED — the prospective decision
+  deliberately has no row); ZERO RE-AUTHORISATIONS** (no `runtime_authority`, `required_authority`,
+  `class`, `empirical_status` or `implementation_status` line was removed from any existing
+  control; the only additions belong to the new entry).
 - **Last closed packet:** `gravito_p4_s1_shadow_ranker_a`
   (`PACKET-0034-gravito-p4-s1-shadow-ranker-a`) — **THE FIRST EXECUTIVE COMPONENT: A REAL CANDIDATE
   SET IN, AN IMMUTABLE EXPLAINED ORDERING OUT — AND THE FIRST ORDERING IT PRODUCED IS DEGENERATE**
@@ -194,10 +252,24 @@
   `PACKET-0033` **excluded** `reason=self_amendment`; rank 1 `PACKET-0027` total 10 (Pareto
   frontier), rank 2 `PACKET-0029` total 4, **rank 3 TIE** `PACKET-0030` and `PACKET-0031` total 3
   each, rank 5 `PACKET-0028` total 1; `selected: PACKET-0027`, `rank_of_selected: 1`;
-  `ranking_digest: 2fa876c632bf81088793968a5d76501556fe283dc27ff97aad40459218df81c8`. **The digest
-  is byte-identical before and after the fix round**, and the archivist re-ran the tool at close:
-  exit 0, same digest, and `decision_telemetry.tsv`, `signal_snapshots.tsv` AND `residue.md` all
-  **byte-identical by md5 across the run** — the dispatch guarantee MEASURED, not asserted.
+  `ranking_digest: 2fa876c632bf81088793968a5d76501556fe283dc27ff97aad40459218df81c8`
+  **AT `b9896e0`, AND THAT DIGEST NO LONGER REPRODUCES — see below; the ORDERING above does,
+  byte for byte.** The digest was byte-identical before and after the fix round, and the
+  archivist re-ran the tool at close: exit 0, same digest, and `decision_telemetry.tsv`,
+  `signal_snapshots.tsv` AND `residue.md` all **byte-identical by md5 across the run** — the
+  dispatch guarantee MEASURED, not asserted.
+  **CORRECTED 2026-08-02 AT THE `gravito_p5_outcome_counterfactual_telemetry_a` BUILD, BY
+  MEASUREMENT: `ranking_digest` IS A FUNCTION OF THE WHOLE SNAPSHOT STORE, NOT OF THIS
+  DECISION.** The emitted body carries `snapshot_chain_head`, which is the digest of the LAST
+  row in `signal_snapshots.tsv` — so **appending any snapshot anywhere, for any decision,
+  changes every previously published `ranking_digest`.** P5 appended 25 rows, all bound to
+  `DECISION-0011`, and `DECISION-0010`'s digest moved to
+  `a509eed7ffb50552bcd0778e56a9a3f3cb2408a4fc6f83b3a7f340d27dc0b036` while
+  `snapshots_bound_to_this_decision` stayed at **28** and **every rank, total, tie, Pareto
+  status, exclusion and `rank_of_selected: 1` is unchanged**. The substantive claim survives;
+  the digest was quoted here as a durable reproducible fact and had a shelf life of one
+  snapshot append. **The sealed receipt is NOT rewritten — receipts are append-only history —
+  and it should be read as recording what the tool produced AT `b9896e0`.** Residue `(cccc)`.
   **Ties are reported, not broken. Excluded candidates stay on the record with reasons. Every absent
   signal is NAMED absent** (5 MISSING, 2 UNINTERPRETED, 6 NEVER-COLLECTED; nothing imputed).
   **Census 97 -> 99; suite 1869 -> 1909 (+40, ALL of it in `tests/mutator_registry_tests.sh`);

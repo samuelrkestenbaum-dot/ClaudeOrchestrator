@@ -1470,5 +1470,106 @@ not to be fixed outside that packet.**
   the SIXTH time in this sequence a figure relayed by an orchestrator or a reviewer has been corrected
   downstream, and the SECOND caught by the archivist** (see `(fff)`, which enumerated the first four).
 
+- **(cccc) `ranking_digest` IS A FUNCTION OF THE WHOLE SNAPSHOT STORE, NOT OF THE DECISION IT
+  NAMES — SO EVERY PUBLISHED DIGEST IS INVALIDATED BY THE NEXT SNAPSHOT ANYONE APPENDS, ABOUT ANY
+  DECISION. FOUND BY EXECUTION AT THE P5 BUILD.** S1's emitted body carries
+  `snapshot_chain_head`, which is the digest of the LAST row of `signal_snapshots.tsv`. P5
+  appended 25 rows, **all bound to `DECISION-0011`**, and `DECISION-0010`'s digest moved from
+  `2fa876c6…18df81c8` to `a509eed7…7dc0b036` while `snapshots_bound_to_this_decision` stayed at
+  **28** and **every rank, total, tie, Pareto status, exclusion and `rank_of_selected: 1` was
+  unchanged, byte for byte**. **THE SUBSTANTIVE CLAIM SURVIVES AND THE QUOTED NUMBER DOES NOT.**
+  Three artefacts quoted that digest as a durable, reproducible fact: `current_state.md` and
+  `active_packet.md` (both live memory, both corrected here) and
+  `build-os/receipts/gravito_p4_s1_shadow_ranker_a.md` — **NOT rewritten, because receipts are
+  append-only history**; it should be read as recording what the tool produced at `b9896e0`.
+  **THIS IS NOT A DEFECT IN THE CHAIN.** Binding the ordering to the chain head is what makes an
+  edit to any historical signal detectable at ranking time, which is a property worth having. The
+  defect is in what was CLAIMED for the resulting number: a digest over a global, append-only
+  chain is a **point-in-time** identifier, and it was published as a reproducible one. **NOT FIXED
+  HERE — the fix is in `rank-candidates.sh`, which is guard 1's own protected surface and is
+  `s1-v2`'s territory.** The shape of the fix, recorded for whoever takes it: either bind the
+  ordering to a digest over only the rows it consumed, or state the chain head as a separate,
+  explicitly non-reproducible field beside a digest that is.
+
+- **(dddd) THE `result` ENUM CANNOT SAY "SELECTED AND NOT YET STARTED", AND THE STORE'S `unknown`
+  MEANS SOMETHING ELSE.** `RESULTS="unknown in_flight shipped reverted abandoned superseded"`. At
+  the P5 build `PACKET-0027` is selected, staged, and has no commit, no receipt and no packet file.
+  `unknown` in this store means NOBODY MEASURED IT, which is false — the absence of the work is
+  measurable and was measured. `in_flight` was written as the nearest true reading (*the decision's
+  consequence has not concluded*) and it is **the same token the three earlier rows use for work
+  that shipped**, so the column now carries two meanings. **NOT FIXED: widening the enum is a
+  schema change and every existing row would have to be re-read against the new vocabulary.**
+  Recorded so the next reader of that column knows it is ambiguous before drawing anything from it.
+
+- **(eeee) NO OUTCOME FIELD IN THIS REPOSITORY HAS A DECLARED DIRECTION, WHICH IS WHY OUTCOME
+  TELEMETRY CANNOT YET BECOME WEIGHTS.** `outcome-report` reports every recorded outcome value as
+  `UNINTERPRETED` and withholds every scored total, because whether more `defect_classes_detected`
+  means a better gate or a worse packet has never been decided here, and nor has whether
+  `superseded` is better or worse than `abandoned`. **This is deliberate and it is also the
+  binding constraint on `s1-v2`**: the operator's standing rule is to train on *what later proved
+  best*, and "proved best" is not defined until directions are. **Declaring them is a governance
+  act with real consequences** — a direction is a constant inside every ordering that later reads
+  it — and it is not this packet's to take.
+
+- **(ffff) THE OUTCOME ARM IS THIN BECAUSE THE WORK HAS NOT HAPPENED, AND THAT IS THE HONEST
+  RESULT RATHER THAN A SHORTFALL.** `DECISION-0010` selected `PACKET-0027` and `PACKET-0027` has
+  not been executed, so **16 of 19 declared outcome fields have no value** — 4 MISSING (the store
+  holds them for some other decision) and 12 NEVER-COLLECTED (no decision here has ever carried
+  one). Cost, elapsed time, fix rounds, rework and later durability are **not observable yet** and
+  were **not invented**. The two facts that ARE recorded are `defect_classes_detected:
+  DEFECT-0003-duplicate-semantic-truth` (pre-existing) and `result: in_flight`. **The counter-
+  temptation is named so it is not taken later: writing `rollback_count: 0@measured` for
+  unexecuted work would look like a clean run and would be the `untested`-missing-from-
+  `EVIDENCE_AXIS` defect in a new place.** The value of the arm is that the missingness is
+  CATEGORISED AND DERIVED rather than defaulted — not that it is full.
+
+- **(gggg) "UNLOCKED WORK" HAS NO COLUMN AND WAS NOT GIVEN ONE.** The operator's outcome field
+  list names *unlocked work*; `decision_telemetry.tsv` has no column for it, and adding one
+  changes `ncols()` so that **all ten existing rows fail `validate` on field count** until every
+  one of them is rewritten. That is `closed_field_list_widening_required`, a signal `s1-v1` ranks
+  as a cost, and the packet ceiling forbids it without a failing fixture. It is therefore
+  **NEVER-COLLECTED and named as such**, not folded into a neighbouring column. The evidence that
+  would have gone there is real and is recorded in prose instead: `(aaaa)` is a fresh, independent
+  instance of the defect class `PACKET-0027` exists to close, found by an agent that was not
+  ranking anything. **That is evidence about the CANDIDATE and not about the RANKER**, which is
+  exactly why it does not belong in a column a ranker could later read.
+
+- **(hhhh) THE PROSPECTIVE ORDERING IS NOT DEGENERATE, AND THAT IS ONE OBSERVATION AND NOT A
+  RESULT.** `DECISION-0011` puts **three of four rankable candidates on the Pareto frontier**
+  (`PACKET-0029` rank 1 at 4; `PACKET-0030` and `PACKET-0031` tied at rank 2 with 3; `PACKET-0028`
+  rank 4 at 1, dominated), against `DECISION-0010`'s single dominator that survived 125 of 125
+  weightings. **Weights would change this ordering, which is the first time that has been true**
+  and is what `(xxx)` said was missing. **IT IS NOT EVIDENCE THAT `s1-v1` IS ANY GOOD.** Nobody
+  has selected from this set, so there is no `rank_of_selected` to be wrong about; `(yyy)`'s two
+  defects are untouched — `residue_ruling_satisfied` is still label leakage in general, and it is
+  still the signal that separates `PACKET-0030` from `PACKET-0028` here; and the frozen
+  `residue_items_closed` values still count residue LETTERS, whose granularity `(xxx)` showed can
+  invert a margin. **What P5 delivers is a decision that CAN falsify S1, not a decision that has.**
+
+- **(iiii) THE RE-DERIVATION AT `80ad634` REPRODUCED P4'S `ce71122` VALUES EXACTLY, AND THE ONE
+  JUDGEMENT CALL IN IT IS RECORDED RATHER THAN BURIED.** All twenty v2 signals for the five
+  prospective candidates came out identical to the values P4 froze for the same candidates one
+  commit earlier, which is evidence the derivation is stable rather than fitted. **The call:
+  `PACKET-0029`'s `residue_items_closed` was HELD AT 2 rather than raised to 3.** `(bbbb)`, added
+  by the P4 close, names `PACKET-0029-citation-anchor-tokens` verbatim as the remedy for its defect
+  class — but `(bbbb)` also records itself as already corrected in place (*"recorded here by
+  content, never by number"*), so there is no open obligation to discharge, and the relationship it
+  asserts is the SAME one `(mm)` already supplies and which is already counted. Counting it would
+  have been `(yyy)`'s non-independence defect committed knowingly. `(rrr)` was likewise not counted:
+  it names no candidate. **The direction of the call matters and is stated: `(xxx)` records that
+  dropping the ruling signal makes `PACKET-0029` WIN, so raising its items count would have
+  inflated the candidate the sceptical reading already favours.** The exclusions are written into
+  the snapshots' own `evidence_refs`, so the count is auditable rather than asserted.
+
+- **(jjjj) THE SELECTION PATH NOW REFUSES OUTCOME VALUES, AND ONE EXISTING PROBE HAD TO BE
+  REWRITTEN — WHICH IS WHAT THE GUARD IS FOR.** `record` previously accepted `--fix-rounds
+  0@measured`, and the measured-zero probe in section 7 used it. It now refuses any outcome column
+  carrying a value other than the literal `unknown`, so the probe writes in two steps. **The
+  historical rows keep their outcome values and nothing was rewritten to fit** — `DECISION-0001`
+  still carries `13.7@derived`. The cost is real and is named: **a decision imported retrospectively
+  with its outcome already known now takes two commands instead of one.** That is the intended
+  trade — a decision and its outcome authored in one breath is the conflation the whole packet
+  exists against — but a future importer will meet it and should meet it here first.
+
 ---
 _Append-only working notes._

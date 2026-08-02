@@ -27,9 +27,9 @@ control is a governance action and belongs to the operator.
    `tests.nonvacuity_minimums`. Four of the eleven are Class A — an invariant on
    `unvalidated` evidence is *legal* under the licence table and still means
    nobody has watched it fire.
-2. **14 of 20 entries carrying `authority_mismatch: declared` exercise `gate` on
+2. **14 of 21 entries carrying `authority_mismatch: declared` exercise `gate` on
    a class that does not license it.** The bare
-   `grep -c '^authority_mismatch: declared' control_registry.txt` yields **20**,
+   `grep -c '^authority_mismatch: declared' control_registry.txt` yields **21**,
    because that flag now marks BOTH kinds of mismatch (see the table note below);
    the `gate`-exercising subset — the subject of this file — needs the authority
    filter too:
@@ -83,7 +83,8 @@ the control as `UNREPORTED`.
 | `metrics.record.store_append` | A | execute | gate | `build-os/metrics/record-packet.sh:276` | 1 |
 | `identity.stamp_write` | A | execute | gate | `.claude/hooks/build-os-identity.sh:160` | 1 |
 | `tools.handoff_lock_lifecycle` | A | execute | gate | `build-os/tools/specialist-handoff.sh:166` | 1 |
-| `metrics.decision.store_append` | A | execute | gate | `build-os/metrics/record-decision.sh:307` | 1 |
+| `metrics.decision.store_append` | A | execute | gate | `build-os/metrics/record-decision.sh:456` | 1 |
+| `metrics.decision.outcome_update` | A | execute | gate | `build-os/metrics/record-decision.sh:695` | 1 |
 
 <!-- MISMATCH-TABLE:END -->
 
@@ -102,14 +103,20 @@ column:
 
 **`sites` is a hand count**, taken from the sections below, of the distinct
 fitted constants, thresholds and prose regexes inside each entry — not a grep.
-**It totals 56, and that total covers the 14 `gate` rows ONLY.** The six
-`execute` rows each carry `1` because a write action has exactly one site: the
-line that performs it. Adding them to 56 would state that this repository carries
-62 fitted constants, which is false — it carries 56, plus 6 mutations that are
-not constants at all.
+**It totals 56, and that total covers the 14 `gate` rows ONLY.** The `execute`
+rows each carry `1` because a write action has exactly one site: the line that
+performs it. Adding them to 56 would state that this repository carries a larger
+number of fitted constants, which is false — it carries 56, plus one mutation per
+`execute` row, and those are not constants at all. The count of `execute` rows is
+not restated here: it is the table above, filtered on the `execute` column.
 
-The entry count is now **20**, and it remains a property of how finely this
-registry was cut rather than of how much authority the repository carries.
+The entry count is now **21**, and it remains a property of how finely this
+registry was cut rather than of how much authority the repository carries. The
+twenty-first is `metrics.decision.outcome_update`, and it arrived the way the
+six before it did: a durable write, classified at the rung the corrected ladder
+gives a durable write, on a Class A licence that reaches only `gate`. Registering
+it at `advise` to avoid the row would be exactly the understatement residue (nn)
+records against `maint.managed_set_replacement`.
 
 There is no Class D and no Class R anywhere in this system, so the second half of
 the safety claim — that a learned model may not outrank an invariant — is

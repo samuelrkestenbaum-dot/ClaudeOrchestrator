@@ -414,6 +414,13 @@ done
 # A measured ZERO is a real measurement and must remain distinguishable from an
 # unknown. This is the other half, and without it the check above is satisfiable
 # by a store that simply cannot represent 0.
+#
+# IT IS WRITTEN IN TWO STEPS AND THAT IS NOT INCIDENTAL. `fix_rounds` is an
+# OUTCOME field, and the selection path now refuses to carry one: a decision
+# recorded together with its own outcome is a row in which "what was chosen" and
+# "what happened" were authored in the same breath, which is the conflation
+# section 14 exists against. The probe is stronger for it — the measured zero now
+# has to survive the outcome path as well as the store.
 "$RECDEC" record --store "$WORK/tel.tsv" \
   --decision-id DECISION-9002-measured-zero \
   --decision-time 2026-08-01T00:00:00Z \
@@ -422,8 +429,9 @@ done
   --selector operator \
   --selection-reason "a probe row proving measured zero survives" \
   --expected-outcome "fix_rounds reads back as a MEASURED zero" \
-  --fix-rounds 0@measured \
   --result unknown --durability-status unknown >/dev/null 2>&1
+"$RECDEC" outcome --store "$WORK/tel.tsv" \
+  --decision-id DECISION-9002-measured-zero --fix-rounds 0@measured >/dev/null 2>&1
 Z="$("$RECDEC" get DECISION-9002-measured-zero fix_rounds --store "$WORK/tel.tsv" 2>/dev/null)"
 [ "$Z" = "0@measured" ] \
   && ok "a MEASURED zero reads back as \`0@measured\` — distinguishable from unknown" \
@@ -960,6 +968,403 @@ mks1 "$WORK/r8neg" "./build-os/memory/residue.md"
 awk '$1=="rank" && $3=="PACKET-9101-touches-s1"{f=1} END{exit !f}' "$WORK/r8neg.out" \
   && ok "RED (other direction): a NON-protected path written in the same aliased form is still RANKED — the normaliser resolves spellings, it does not excuse itself by excluding everything" \
   || no "RED FAILED: normalisation excluded a candidate that touches nothing protected; over-broad in the unsafe direction is still broken"
+
+echo "== 14. RANKING < SELECTION < EXECUTION — enforced by refusal, not by a comment (4.7.14) =="
+# THE ONE THING THIS SECTION EXISTS FOR. Section 13 proves S1 can order a
+# candidate set. It cannot prove the ordering was formed BEFORE somebody chose,
+# and an ordering formed afterwards is a rationalisation with a digest on it.
+# DECISION-0010 is permanently retrospective: the selection was made at the P3
+# close, before S1 existed, which is what makes its `rank_of_selected`
+# non-circular and also what makes it useless as evidence that S1 can rank
+# PROSPECTIVELY. So the order has to become a thing the tooling REFUSES to
+# violate.
+#
+# WHAT THE EVIDENCE ACTUALLY ESTABLISHES, AND WHAT IT DOES NOT — stated here
+# because the trap this repository has now named five times is RESOLVABILITY
+# MISTAKEN FOR IDENTITY, and a timestamp that parses is not a timestamp that
+# proves ordering.
+#
+#   CONSTITUTIVE (what the refusals below are built on): EXISTENCE ORDER over
+#   two stores that are not the same kind of thing. A sealed ranking may only be
+#   written while the decision has NO row in decision_telemetry.tsv, and an
+#   outcome may only be written once it HAS one. Neither is a self-report: each
+#   is a state of the store at the moment of the write, and the seal lands in a
+#   digest-chained append-only file where every later row's digest covers it.
+#
+#   CORROBORATING (checked, and worth much less): the ISO-8601 strings. A
+#   `captured_at` and a `decision_time` are typed by whoever ran the tool. They
+#   are compared, and a contradiction is refused, because a contradiction is
+#   cheap to catch and always means something is wrong — but agreement between
+#   them proves nothing, and this suite does not treat it as proof.
+#
+#   OUTSIDE BOTH, AND THE ONLY REAL ANCHOR: git. The seal is committed before
+#   any commit can carry the selection, exactly as P4's non-circularity rests on
+#   commit times across three commits rather than on a field anyone typed.
+P5DEC="DECISION-9201-p5-order-fixture"
+P5CANDS="PACKET-9201-alpha;PACKET-9201-beta"
+P5ORDER="1:PACKET-9201-alpha;2:PACKET-9201-beta"
+P5SIDS="SIGNAL-SNAPSHOT-9201-alpha;SIGNAL-SNAPSHOT-9202-beta"
+p5seal(){ # <dir> [ordering] [candidate-ids]
+  mkdir -p "$1"
+  "$RECDEC" seal-ranking --store "$1/tel.tsv" --snapshots "$1/snap.tsv" \
+    --decision-id "$P5DEC" --candidate-ids "${3:-$P5CANDS}" --ordering "${2:-$P5ORDER}" \
+    --ranking-rule s1-v1 --captured-at 2026-08-02T00:00:00Z --repository-commit fixture \
+    --snapshot-ids "$P5SIDS" --source-object-versions fixture --evidence-refs fixture
+}
+p5select(){ # <dir> [candidate-ids] [decision-time]
+  mkdir -p "$1"
+  "$RECDEC" record --store "$1/tel.tsv" --snapshots "$1/snap.tsv" \
+    --decision-id "$P5DEC" --decision-time "${3:-2026-08-02T01:00:00Z}" \
+    --candidate-ids "${2:-$P5CANDS}" --selected-candidate-id PACKET-9201-beta \
+    --selector operator --selection-reason "a fixture for the order guard" \
+    --expected-outcome "the order is refused when it is violated"
+}
+p5outcome(){ # <dir> <extra flags...>
+  local d="$1"; shift
+  "$RECDEC" outcome --store "$d/tel.tsv" --snapshots "$d/snap.tsv" \
+    --decision-id "$P5DEC" "$@"
+}
+
+# --- THE THREE SETS ARE DISJOINT, AND THE TOOL SAYS SO ITSELF ----------------
+# The separation the operator required is structural or it is nothing: it must be
+# impossible to read "the selected packet turned out well" as "S1 ranked
+# correctly". Every column belongs to EXACTLY ONE of the selection set and the
+# outcome set, so a column added later cannot be silently writable by both paths,
+# and the ranker set names the things NEITHER path may write.
+"$RECDEC" fields > "$WORK/p5fields.out" 2>&1
+[ $? -eq 0 ] && ok "record-decision.sh publishes its field partition (\`fields\`) rather than keeping it implicit in the code" \
+             || { no "the tool does not publish a field partition, so the selection/outcome separation is editorial"; head -3 "$WORK/p5fields.out" | sed 's/^/      | /'; }
+P5SEL="$(awk '$1=="selection_field:"{print $2}' "$WORK/p5fields.out" | sort)"
+P5OUT="$(awk '$1=="outcome_field:"{print $2}' "$WORK/p5fields.out" | sort)"
+P5RNK="$(awk '$1=="ranker_field:"{print $2}' "$WORK/p5fields.out" | sort)"
+P5BOTH="$(comm -12 <(printf '%s\n' $P5SEL) <(printf '%s\n' $P5OUT) | grep -c . || true)"
+[ "${P5BOTH:-1}" -eq 0 ] \
+  && ok "no column belongs to BOTH the selection set and the outcome set — the partition is disjoint, so an outcome write can never reach a selection field" \
+  || no "$P5BOTH column(s) belong to both sets; the separation is a convention, not a partition"
+# Derived from the tool's own schema, never from a literal list here: a column
+# added to COLS and forgotten by both sets would otherwise be invisible.
+P5COLS="$("$RECDEC" get DECISION-0010-p4-s1-shadow-ranker decision_id --store "$TEL" >/dev/null 2>&1; awk '$1=="column:"{print $2}' "$WORK/p5fields.out" | sort)"
+P5UNCLASSED="$(comm -23 <(printf '%s\n' $P5COLS) <(printf '%s\n' $P5SEL $P5OUT | sort) | grep -c . || true)"
+[ "${P5UNCLASSED:-1}" -eq 0 ] \
+  && ok "every column in the telemetry schema is classified as selection or outcome — a new column cannot arrive unowned" \
+  || no "${P5UNCLASSED} column(s) belong to neither set; a column nobody owns is a column both paths may write"
+P5RNKN="$(printf '%s\n' $P5RNK | grep -c . || true)"
+[ "${P5RNKN:-0}" -gt 0 ] \
+  && ok "$P5RNKN ranker-evidence field name(s) are declared as writable by NEITHER path — evidence about the RANKER is not a column of the candidate's outcome" \
+  || no "no ranker-evidence field is declared, so nothing stops an outcome record from carrying S1's score"
+
+# --- R1: A RANKING SEALED AFTER THE SELECTION IS REFUSED ---------------------
+# This is the packet's central refusal. Without it S1 could quietly become
+# post-hoc again and every artefact would still look identical.
+p5select "$WORK/p5r1" >/dev/null 2>&1
+if p5seal "$WORK/p5r1" > "$WORK/p5r1.out" 2>&1; then
+  no "RED FAILED: a prospective ranking was sealed for a decision that was ALREADY SELECTED — the order is documentation, not enforcement"
+else
+  grep -q 'RANKING-AFTER-SELECTION' "$WORK/p5r1.out" \
+    && ok "RED: sealing a ranking for a decision that already carries a selection is REFUSED by name — ranking cannot follow selection" \
+    || { no "RED FAILED: the seal was refused for some other reason, so the order is not what stopped it"; head -3 "$WORK/p5r1.out" | sed 's/^/      | /'; }
+fi
+
+# --- R2: THE SAME SEAL, BEFORE ANY SELECTION, IS ACCEPTED AND CHAINED --------
+# A guard that refuses both orders is a wall. The permitted order must work.
+p5seal "$WORK/p5r2" > "$WORK/p5r2.out" 2>&1 \
+  && ok "...and the SAME seal, written while the decision has no selection row, is ACCEPTED — the guard is a predicate, not a wall" \
+  || { no "the seal was refused even in the permitted order"; head -3 "$WORK/p5r2.out" | sed 's/^/      | /'; }
+"$RECDEC" snapshot-verify --snapshots "$WORK/p5r2/snap.tsv" >/dev/null 2>&1 \
+  && ok "the sealed ranking lands IN the digest chain — every row appended after it covers it, so its position is evidence and not a self-report" \
+  || no "the sealed ranking is not chained; a seal that can be rewritten in place seals nothing"
+P5R2N="$(awk -F'\t' '$6=="sealed_rank"' "$WORK/p5r2/snap.tsv" | grep -c . || true)"
+[ "${P5R2N:-0}" -eq 2 ] \
+  && ok "one sealed_rank row per candidate is written (2 of 2) — the seal records the WHOLE ordering, not just its winner" \
+  || no "the seal wrote ${P5R2N:-0} rows for 2 candidates"
+
+# --- R3: THE CANDIDATE SET MAY NOT CHANGE BETWEEN THE SEAL AND THE SELECTION -
+# The move this closes: seal an ordering, then quietly select over a different
+# set. Every artefact still parses; the ranking simply no longer refers to the
+# decision that was taken. Sealing an ordering over set A and choosing from set B
+# is a post-hoc selection wearing a prospective seal.
+if p5select "$WORK/p5r2" "PACKET-9201-alpha;PACKET-9201-beta;PACKET-9201-gamma" > "$WORK/p5r3.out" 2>&1; then
+  no "RED FAILED: a selection was recorded over a candidate set the sealed ranking never ordered"
+else
+  grep -q 'SET-CHANGED-AFTER-SEAL' "$WORK/p5r3.out" \
+    && ok "RED: a selection taken over a DIFFERENT candidate set than the sealed one is REFUSED — a seal binds to its set, or it binds to nothing" \
+    || { no "RED FAILED: the selection was refused for some other reason"; head -3 "$WORK/p5r3.out" | sed 's/^/      | /'; }
+fi
+# R3b: the corroborating clock, labelled as corroborating. A decision_time that
+# precedes the seal contradicts the structural order; it is caught because a
+# contradiction is always wrong, NOT because the strings are trusted.
+if p5select "$WORK/p5r2" "$P5CANDS" "2026-08-01T00:00:00Z" > "$WORK/p5r3b.out" 2>&1; then
+  no "RED FAILED: a selection dated BEFORE the ranking that ordered it was accepted"
+else
+  grep -q 'TIMESTAMP-CONTRADICTS-ORDER' "$WORK/p5r3b.out" \
+    && ok "RED: a self-reported selection time that PRECEDES the seal is refused — the strings prove nothing on their own, but a contradiction between them always means something is wrong" \
+    || no "RED FAILED: a decision_time earlier than the seal was not caught"
+fi
+
+# --- R4: THE PERMITTED ORDER COMPLETES ---------------------------------------
+p5select "$WORK/p5r2" > "$WORK/p5r4.out" 2>&1 \
+  && ok "...and the selection over EXACTLY the sealed set, dated after it, is ACCEPTED — the whole permitted sequence runs end to end" \
+  || { no "the permitted sequence was refused"; head -3 "$WORK/p5r4.out" | sed 's/^/      | /'; }
+
+# --- R5: AN OUTCOME BEFORE A SELECTION IS REFUSED ----------------------------
+if p5outcome "$WORK/p5r5" --result shipped > "$WORK/p5r5.out" 2>&1; then
+  no "RED FAILED: an outcome was recorded for a decision nobody has taken — execution cannot precede selection"
+else
+  grep -q 'OUTCOME-BEFORE-SELECTION' "$WORK/p5r5.out" \
+    && ok "RED: an outcome for a decision with no recorded selection is REFUSED — the second half of the order, enforced by the same device as the first" \
+    || { no "RED FAILED: the outcome was refused for some other reason"; head -3 "$WORK/p5r5.out" | sed 's/^/      | /'; }
+fi
+
+# --- R6: AN OUTCOME AFTER THE SELECTION IS ACCEPTED --------------------------
+p5outcome "$WORK/p5r2" --result shipped --fix-rounds 2@measured > "$WORK/p5r6.out" 2>&1 \
+  && ok "...and the same outcome, once the selection exists, is ACCEPTED — ranking < selection < execution runs through in the permitted direction" \
+  || { no "the outcome was refused in the permitted order"; head -3 "$WORK/p5r6.out" | sed 's/^/      | /'; }
+"$RECDEC" validate --store "$WORK/p5r2/tel.tsv" --snapshots "$WORK/p5r2/snap.tsv" >/dev/null 2>&1 \
+  && ok "the store still validates after an outcome write — the update path cannot produce a row the store's own validator would refuse" \
+  || no "an outcome write left the store invalid"
+
+# --- R7: AN OUTCOME MAY NOT REWRITE THE SELECTION IT IS THE OUTCOME OF -------
+# This is the separation made mechanical. If an outcome record could reach the
+# selection columns, "what happened" and "what was chosen" would be one editable
+# object, and no later reader could tell which had been adjusted to fit the other.
+P5R7=0
+for sf in --selected-candidate-id --selection-reason --candidate-ids --selector; do
+  if p5outcome "$WORK/p5r2" "$sf" tampered > "$WORK/p5r7.out" 2>&1; then :; else
+    grep -q 'SELECTION-FIELD-IN-OUTCOME' "$WORK/p5r7.out" && P5R7=$((P5R7+1))
+  fi
+done
+[ "$P5R7" -eq 4 ] \
+  && ok "RED: all 4 selection fields are REFUSED by the outcome path — an outcome record cannot rewrite the choice it is the outcome of" \
+  || no "RED FAILED: only $P5R7 of 4 selection fields were refused by the outcome path"
+
+# --- R7b: AND THE SELECTION PATH MAY NOT CARRY AN OUTCOME --------------------
+# The bypass this closes is the obvious one: if `record` could write `result:
+# shipped`, a decision and its outcome could be authored in one breath and the
+# order would be enforced only against whoever chose to use two commands.
+mkdir -p "$WORK/p5r7b"
+if "$RECDEC" record --store "$WORK/p5r7b/tel.tsv" --snapshots "$WORK/p5r7b/snap.tsv" \
+     --decision-id DECISION-9202-selection-carrying-outcome --decision-time 2026-08-02T00:00:00Z \
+     --candidate-ids PACKET-9202-a --selected-candidate-id PACKET-9202-a --selector operator \
+     --selection-reason "a fixture" --expected-outcome "the outcome is refused at selection time" \
+     --result shipped > "$WORK/p5r7b.out" 2>&1; then
+  no "RED FAILED: a decision was recorded together with its own OUTCOME — the order can be bypassed by using one command instead of two"
+else
+  grep -q 'OUTCOME-FIELD-IN-SELECTION' "$WORK/p5r7b.out" \
+    && ok "RED: recording a selection that already carries its outcome is REFUSED — at selection time the outcome has not happened, so a value there is a forecast filed as a measurement" \
+    || no "RED FAILED: the selection carrying an outcome was refused for some other reason"
+fi
+mkdir -p "$WORK/p5r7c"
+"$RECDEC" record --store "$WORK/p5r7c/tel.tsv" \
+  --decision-id DECISION-9203-unknown-outcome-spelled --decision-time 2026-08-02T00:00:00Z \
+  --candidate-ids PACKET-9203-a --selected-candidate-id PACKET-9203-a --selector operator \
+  --selection-reason "a fixture" --expected-outcome "spelling an outcome column \`unknown\` is still allowed" \
+  --result unknown --durability-status unknown > "$WORK/p5r7c.out" 2>&1 \
+  && ok "...but naming an outcome column with the literal \`unknown\` is still accepted — omission already yields exactly that, so the guard refuses a claim and not a spelling" \
+  || no "the guard refused an outcome column written as \`unknown\`, which is what omission produces anyway"
+
+# --- R8: AN OUTCOME MAY NOT CARRY EVIDENCE ABOUT THE RANKER ------------------
+# The archivist's distinction, endorsed by the operator: discovering that the
+# candidate was important is evidence about the CANDIDATE, not yet evidence that
+# S1 ranked it for the right reasons. A `rank_of_selected` sitting inside an
+# outcome row would collapse the two into one record and make the second reading
+# available to anyone who glanced at it.
+P5R8=0
+for rf in --rank-of-selected --ranking-agreement --ranker-skill; do
+  if p5outcome "$WORK/p5r2" "$rf" 1 > "$WORK/p5r8.out" 2>&1; then :; else
+    grep -q 'RANKER-FIELD-IN-OUTCOME' "$WORK/p5r8.out" && P5R8=$((P5R8+1))
+  fi
+done
+[ "$P5R8" -eq 3 ] \
+  && ok "RED: all 3 ranker-evidence fields are REFUSED by the outcome path — the outcome store cannot become a scorecard for the thing that ranked it" \
+  || no "RED FAILED: only $P5R8 of 3 ranker-evidence fields were refused"
+
+# --- R9: THE UNKNOWN-IS-NOT-A-ZERO RULE SURVIVES THE NEW PATH ----------------
+# A defaulted outcome is the `untested`-missing-from-EVIDENCE_AXIS defect one
+# level up: a quantity that looks measured because nobody was asked how it was
+# known.
+if p5outcome "$WORK/p5r2" --rework-count 3 > "$WORK/p5r9.out" 2>&1; then
+  no "RED FAILED: a BARE NUMBER was accepted as an outcome — the store cannot tell it from a measurement"
+else
+  grep -qi 'provenance' "$WORK/p5r9.out" \
+    && ok "RED: a bare outcome number with no provenance is refused on the same rule as every other quantitative field — the new path did not open a hole in the old rule" \
+    || no "RED FAILED: the bare number was refused without naming provenance"
+fi
+
+# --- R10: AN OUTCOME ALREADY RECORDED IS NOT SILENTLY REPLACED ---------------
+if p5outcome "$WORK/p5r2" --result reverted > "$WORK/p5r10.out" 2>&1; then
+  no "RED FAILED: a recorded outcome was silently overwritten with a different one"
+else
+  grep -q 'OUTCOME-OVERWRITE' "$WORK/p5r10.out" \
+    && ok "RED: replacing an already-recorded outcome value with a DIFFERENT one is refused — an outcome that can be edited to agree with the ranking is not evidence" \
+    || no "RED FAILED: the overwrite was refused for some other reason"
+fi
+p5outcome "$WORK/p5r2" --result shipped >/dev/null 2>&1 \
+  && ok "...but re-writing the SAME value is accepted — the guard refuses a rewrite of history, not a repeated command" \
+  || no "an idempotent re-record of the same outcome value was refused"
+
+# --- R11: THE OUTCOME WRITE TOUCHES EXACTLY ONE ROW, AND NOT ITS LEFT HALF ---
+cp "$WORK/p5r2/tel.tsv" "$WORK/p5r11.before"
+p5outcome "$WORK/p5r2" --durability-status durable >/dev/null 2>&1
+P5DIFF="$(diff "$WORK/p5r11.before" "$WORK/p5r2/tel.tsv" | grep -c '^[<>]' || true)"
+[ "${P5DIFF:-0}" -eq 2 ] \
+  && ok "an outcome write changes exactly one line of the store (one removed, one added) — it is an update to one decision, not a rewrite of the file" \
+  || no "an outcome write changed ${P5DIFF:-0} line-halves; it is not confined to a single row"
+P5LB="$(grep "^$P5DEC$(printf '\t')" "$WORK/p5r11.before" | cut -f1-8)"
+P5LA="$(grep "^$P5DEC$(printf '\t')" "$WORK/p5r2/tel.tsv" | cut -f1-8)"
+[ "$P5LB" = "$P5LA" ] \
+  && ok "and the selection half of that row is BYTE-IDENTICAL across the write — the outcome arrived without the record of the choice moving underneath it" \
+  || no "the selection columns changed during an outcome write"
+
+# --- R12: A RE-SEAL IS A RE-RANKING, AND IT IS REFUSED -----------------------
+if p5seal "$WORK/p5r2" > "$WORK/p5r12.out" 2>&1; then
+  no "RED FAILED: a second ranking was sealed over the same decision — a seal that can be replaced records nothing"
+else
+  grep -qE 'RESEAL|RANKING-AFTER-SELECTION' "$WORK/p5r12.out" \
+    && ok "RED: sealing a second ordering over an already-sealed decision is refused — one decision, one prospective ranking" \
+    || no "RED FAILED: the re-seal was refused for some other reason"
+fi
+
+# --- R13/R14: RESOLVABILITY IS NOT IDENTITY, ONE STEP FURTHER ON -------------
+# An ordering that parses is not an ordering OF the set it claims. Both
+# directions: a rank for a candidate the set does not name, and a candidate the
+# set names with no rank.
+if p5seal "$WORK/p5r13" "1:PACKET-9201-alpha;2:PACKET-9299-never-a-candidate" > "$WORK/p5r13.out" 2>&1; then
+  no "RED FAILED: a sealed ordering ranked a candidate the declared set never named"
+else
+  grep -q 'PACKET-9299-never-a-candidate' "$WORK/p5r13.out" \
+    && ok "RED: an ordering that ranks a candidate the set does not name is refused AND the stray id is named — parsing is not belonging" \
+    || no "RED FAILED: the stray candidate was refused without being named"
+fi
+if p5seal "$WORK/p5r14" "1:PACKET-9201-alpha" > "$WORK/p5r14.out" 2>&1; then
+  no "RED FAILED: a sealed ordering left a declared candidate unranked and unexplained"
+else
+  grep -q 'PACKET-9201-beta' "$WORK/p5r14.out" \
+    && ok "RED: a sealed ordering that silently drops a declared candidate is refused — a seal covers the whole set or it is a filtered one" \
+    || no "RED FAILED: the dropped candidate was refused without being named"
+fi
+
+# --- THE LIVE PROSPECTIVE ARM ------------------------------------------------
+# Everything above is a fixture. This is the real one: an S1 ordering over a real
+# candidate set, sealed into the live chain, for a decision NOBODY HAS TAKEN YET.
+P5LIVE="DECISION-0011-p5b-next-after-p3b"
+P5LIVEN="$(awk -F'\t' -v d="$P5LIVE" '$2==d && $6=="sealed_rank"' "$SNAP" | grep -c . || true)"
+[ "${P5LIVEN:-0}" -gt 0 ] \
+  && ok "$P5LIVEN sealed_rank row(s) for $P5LIVE exist in the LIVE chain — the prospective ordering is on the record, not in a report" \
+  || no "no live sealed ranking exists; every check below would pass vacuously"
+if "$RECDEC" get "$P5LIVE" decision_id --store "$TEL" >/dev/null 2>&1; then
+  no "the prospective decision ALREADY carries a selection row — the arm is retrospective and proves nothing S1 could not have fitted"
+else
+  ok "$P5LIVE has NO row in decision_telemetry.tsv — the ordering is sealed and NOBODY HAS SELECTED YET, which is the whole point of the arm"
+fi
+# The sealed ordering must be exactly what s1-v1 produces over the frozen
+# snapshots. The provisional telemetry row below is built HERE, in $WORK, and is
+# never written to the live store — recording it there is precisely the selection
+# that has not happened.
+mkdir -p "$WORK/p5live"
+P5SET="$(awk -F'\t' -v d="$P5LIVE" '$2==d && $6=="sealed_rank"{printf "%s;",$5}' "$SNAP" | sed 's/;$//')"
+"$RECDEC" record --store "$WORK/p5live/tel.tsv" --decision-id "$P5LIVE" \
+  --decision-time PROVISIONAL --candidate-ids "$P5SET" \
+  --selected-candidate-id NOT-YET-SELECTED --selector unknown \
+  --selection-reason "a provisional row built by this test so S1 can be re-run over the sealed set; it is never written to the live store" \
+  --expected-outcome "s1-v1 reproduces the sealed ranks exactly" >/dev/null 2>&1
+"$S1" rank --decision-id "$P5LIVE" --store "$WORK/p5live/tel.tsv" --snapshots "$SNAP" \
+  > "$WORK/p5live.out" 2>&1
+P5MISMATCH=""
+while IFS="$(printf '\t')" read -r c r; do
+  [ -n "$c" ] || continue
+  if [ "$r" = "excluded" ]; then
+    grep -q "^excluded $c " "$WORK/p5live.out" || P5MISMATCH="$P5MISMATCH $c(sealed excluded, s1 ranked)"
+  else
+    got="$(awk -v c="$c" '$1=="rank" && $3==c {print $2; exit}' "$WORK/p5live.out")"
+    [ "${got:-none}" = "$r" ] || P5MISMATCH="$P5MISMATCH $c(sealed $r, s1 ${got:-none})"
+  fi
+done < <(awk -F'\t' -v d="$P5LIVE" '$2==d && $6=="sealed_rank"{print $5"\t"$7}' "$SNAP")
+[ -z "$P5MISMATCH" ] \
+  && ok "re-running s1-v1 over the sealed candidate set reproduces EVERY sealed rank — the seal is checkable against the rule, not merely quotable" \
+  || no "the sealed ordering and s1-v1 disagree:$P5MISMATCH"
+# S1 MAY NOT RANK ON ITS OWN SEALED RANK. `sealed_rank` has no row in the
+# direction table, so it is reported as uninterpreted and scores nothing — the
+# same device that keeps a guessed direction out of an ordering keeps the
+# ordering's own output out of its next input.
+grep -q '^signal sealed_rank UNINTERPRETED' "$WORK/p5live.out" \
+  && ok "the sealed rank is visible to S1 and UNINTERPRETED — a ranker cannot score a candidate on the rank it previously gave it" \
+  || no "sealed_rank is not reported as uninterpreted; the ordering can feed on its own output"
+awk '$1=="contribution" && $3=="sealed_rank"{f=1} END{exit !f}' "$WORK/p5live.out" \
+  && no "sealed_rank contributed points to a candidate's position — the ordering is scoring its own previous output" \
+  || ok "and it contributes to NO candidate's position — declared absent and scored nothing, exactly as section 13 requires of every other absence"
+# THE HONEST HALF, AND THE REASON THIS ARM WAS WORTH BUILDING: P4's one ordering
+# was degenerate — its winner Pareto-dominated every rival, so 125 of 125
+# weightings returned it and the ordering carried no information beyond "one
+# candidate dominates". An ordering with more than one candidate on the frontier
+# is one where the weights would actually matter.
+# Asserted as INEQUALITIES AGAINST TWO NAMED DEGENERATE CASES rather than as a
+# numeric floor: `0` is the vacuous frontier and `1` is P4's single dominator.
+# A `-gt N` floor here would join the tests.nonvacuity_minimums family and have
+# to be registered as a fitted constant, which this suite's own header forbids.
+P5FRONT="$(grep -c ' pareto=frontier$' "$WORK/p5live.out" || true)"
+{ [ "${P5FRONT:-0}" != "0" ] && [ "${P5FRONT:-0}" != "1" ]; } \
+  && ok "$P5FRONT candidates sit on the Pareto frontier of the sealed ordering — unlike DECISION-0010 no single candidate dominates the set, so this ordering is not degenerate by construction" \
+  || no "the sealed ordering has ${P5FRONT:-0} candidate(s) on the frontier; 0 is vacuous and 1 repeats P4's single-dominator degeneracy, and neither demonstrates anything new"
+
+# --- THE LIVE OUTCOME ARM, AND EVERY ABSENCE NAMED ---------------------------
+# The mirror of section 13's missing-signal discipline, applied to outcomes. An
+# outcome field that is quietly 0 is worse than an outcome field that is absent.
+"$RECDEC" outcome-report --decision-id DECISION-0010-p4-s1-shadow-ranker --store "$TEL" --snapshots "$SNAP" \
+  > "$WORK/p5rep.out" 2>&1 \
+  && ok "an outcome report exists for the decision whose selection is already frozen — the outcome half of the substrate is exercised on real data, not only on fixtures" \
+  || { no "outcome-report refused the live decision"; head -4 "$WORK/p5rep.out" | sed 's/^/      | /'; }
+P5OUTN="$(printf '%s\n' $P5OUT | grep -c . || true)"
+[ "${P5OUTN:-0}" -gt 0 ] \
+  && ok "$P5OUTN outcome field(s) are declared — the per-field census below is not vacuous" \
+  || no "no outcome field is declared; every category check below would pass over an empty set"
+P5UNCAT=""
+while IFS= read -r f; do
+  [ -n "$f" ] || continue
+  awk -v f="$f" '$1=="outcome_field" && $2==f && ($3=="RECORDED" || $3=="MISSING" || $3=="NEVER-COLLECTED" || $3=="UNINTERPRETED"){n++} END{exit !(n==1)}' \
+    "$WORK/p5rep.out" || P5UNCAT="$P5UNCAT $f"
+done < <(printf '%s\n' $P5OUT)
+[ -z "$P5UNCAT" ] \
+  && ok "every declared outcome field is reported in EXACTLY ONE category — nothing is defaulted, nothing is imputed, and nothing is silently dropped" \
+  || no "outcome field(s) carry no category or more than one:$P5UNCAT"
+grep -q '^outcome_field .* NEVER-COLLECTED' "$WORK/p5rep.out" \
+  && ok "the outcome quantities nothing in this repository has ever measured are named NEVER-COLLECTED rather than reported as zero" \
+  || no "no outcome field is named never-collected; a store that cannot say so writes zeros instead"
+grep -q '^outcome_field .* MISSING' "$WORK/p5rep.out" \
+  && ok "the outcome quantities this store CAN hold but does not hold for this decision are named MISSING — a different fact from never having been measured, and kept different" \
+  || no "no outcome field is named missing"
+grep -qE '^coverage: [0-9]+ recorded, [0-9]+ missing, [0-9]+ never-collected; declared outcome fields: [0-9]+$' "$WORK/p5rep.out" \
+  && ok "the report prints its DENOMINATOR before any field line — coverage first, so no reader meets a total without meeting its basis" \
+  || no "the report states no coverage denominator"
+P5COV="$(awk '$1=="coverage:"{print $2+$4+$6}' "$WORK/p5rep.out")"
+[ "${P5COV:-x}" = "$(printf '%s\n' $P5OUT | grep -c . || true)" ] \
+  && ok "recorded + missing + never-collected accounts for EVERY declared outcome field — no field falls out of the census between the count and the listing" \
+  || no "the three coverage counts sum to ${P5COV:-?} against $(printf '%s\n' $P5OUT | grep -c . || true) declared outcome fields"
+grep -q 'withheld' "$WORK/p5rep.out" \
+  && ok "and it WITHHOLDS every aggregate it cannot compute from recorded values alone — a mean over four unknowns is a number with a shape and no meaning" \
+  || no "the report emits an aggregate without withholding on absent inputs"
+# THE COUNTS ARE DERIVED FROM THE STORE, NEVER RESTATED. `(aaaa)` is a live
+# instance of the opposite: a store's cardinality remembered by hand from a
+# different derivation at each close, wrong by roughly 2x for two closes running.
+P5DECL="$(printf '%s\n' $P5OUT | grep -c . || true)"
+P5REPD="$(awk '$1=="coverage:"{print $NF}' "$WORK/p5rep.out")"
+[ "${P5REPD:-x}" = "$P5DECL" ] \
+  && ok "the report's declared-field denominator ($P5REPD) is DERIVED from the same set the tool publishes, so the two cannot drift apart the way a remembered count does" \
+  || no "the report claims ${P5REPD:-?} declared outcome fields and the tool publishes $P5DECL"
+
+# --- THE SEPARATION, STATED WHERE IT CANNOT BE MISSED ------------------------
+# Agreement is not correctness, and one observation is not a track record. The
+# report may not let a reader draw the second conclusion from the first.
+grep -qE '^ranker_evidence: ' "$WORK/p5rep.out" \
+  && ok "the outcome report states, in its own output, what it is NOT evidence about — the candidate/ranker separation is published beside the data rather than left to the reader" \
+  || no "the outcome report says nothing about the ranker, so a reader may take a good outcome as a good ranking"
+P5PROSP="$(awk '$1=="prospective_decisions_with_a_recorded_selection:"{print $2}' "$WORK/p5rep.out")"
+P5PROSPD="$(awk -F'\t' '$6=="sealed_rank"{print $2}' "$SNAP" | sort -u | while IFS= read -r d; do
+              [ -n "$d" ] || continue
+              "$RECDEC" get "$d" decision_id --store "$TEL" >/dev/null 2>&1 && echo x
+            done | grep -c . || true)"
+[ "${P5PROSP:-x}" = "${P5PROSPD:-y}" ] \
+  && ok "the number of decisions whose ranking was sealed BEFORE their selection AND has since been selected is DERIVED ($P5PROSPD) — that number, not this packet's prose, is the only thing that could ever make rank_of_selected evidence about S1" \
+  || no "the report claims ${P5PROSP:-?} prospectively-ranked selected decisions; the stores say ${P5PROSPD:-?}"
 
 echo
 echo "==== RESULT: $PASS passed, $FAIL failed ===="
