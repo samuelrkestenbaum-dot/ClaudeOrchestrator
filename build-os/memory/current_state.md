@@ -45,17 +45,20 @@
   `no tags` because `tests/release_metadata_tests.sh:322` requires it, so the residue item is
   annotated rather than rewritten. Whether the tag was created with an explicit go is not
   determinable from here and no claim is made.
-- **Build/test command:** `bash tests/build_os_tests.sh` (2082 checks; no network; temp dirs)
+- **Build/test command:** `bash tests/build_os_tests.sh` (2096 checks; no network; temp dirs)
   — measured on a quiet tree at `ea069a7` plus `PACKET-0035-cross-surface-memory-kernel`'s
-  build, from a SOLO full-capture run after an anchored `pgrep -fa '^bash tests/'` returned
-  empty. **The delta is +87, ALL of it the new `tests/memory_kernel_tests.sh`**; every other
-  chained suite is +0. **1995 at the previous close**, measured the same way — BUT SEE THE
+  build **and its bounded six-item fix round**, from a SOLO full-capture run after an anchored
+  `pgrep -fa '^bash tests/'` returned empty. **The delta is +101, ALL of it the new
+  `tests/memory_kernel_tests.sh`** (87 at the build commit, 101 after the fix round: +14 for
+  the ledger-derived handoff status, the version-bound export body, the laundering attack that
+  now refuses at BOTH gates, the scoped `project` read, and the two narrowed claims); every
+  other chained suite is +0. **1995 at the previous close**, measured the same way — BUT SEE THE
   FLAKE RECORDED IN `residue.md` `(aaaaa)`: this builder's own base run at `ea069a7`, before
   any edit, returned **1994/1** with the failure in `tests/speed_benchmark_tests.sh`, and the
   cause is a `pipefail`/SIGPIPE race in that suite reproduced at 117 of 4000 iterations. **The
   base total is therefore 1995 on a run where the race does not fire and 1994 on one where it
   does; it is not a property of this packet's changes.** Reconciled against
-  `CHANGELOG.md`, which carries the matching literal `**2082 passed**` (unsplit) in the
+  `CHANGELOG.md`, which carries the matching literal `**2096 passed**` (unsplit) in the
   release block `## [Unreleased]` -> `### In flight (not landed at the released commit)`.
   **CITED BY HEADING, NOT BY LINE NUMBER, from 2026-08-01 on** — the changelog grows from the
   top, so every line-citation into it decays on every packet, guaranteed rather than

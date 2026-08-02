@@ -85,7 +85,7 @@ the control as `UNREPORTED`.
 | `tools.handoff_lock_lifecycle` | A | execute | gate | `build-os/tools/specialist-handoff.sh:166` | 1 |
 | `metrics.decision.store_append` | A | execute | gate | `build-os/metrics/record-decision.sh:479` | 1 |
 | `metrics.decision.outcome_update` | A | execute | gate | `build-os/metrics/record-decision.sh:744` | 1 |
-| `memory.kernel_store_append` | A | execute | gate | `build-os/tools/memory-kernel.sh:541` | 1 |
+| `memory.kernel_store_append` | A | execute | gate | `build-os/tools/memory-kernel.sh:573` | 1 |
 
 <!-- MISMATCH-TABLE:END -->
 

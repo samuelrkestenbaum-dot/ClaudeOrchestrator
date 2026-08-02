@@ -1984,7 +1984,8 @@ not to be fixed outside that packet.**
   its own packet. **WHAT IT MEANS FOR EVERY COUNT ANYBODY QUOTES FROM THIS TREE:** a suite
   total from this repository is a sample, not a constant, until this class is closed — the base
   is 1995 on a run where the race does not fire and 1994 on one where it does, and the same is
-  now true of the 2082 this packet leaves behind.
+  now true of the 2096 this packet leaves behind (2082 at the build commit, 2096 after the
+  bounded fix round).
 
 - **(bbbbb) THE MISMATCH REPORT'S OWN PROSE HAD ALREADY GONE STALE BY ONE, AND THIS PACKET
   CORRECTED IT AS A MECHANICAL CONSEQUENCE RATHER THAN AS A SEPARATE ERRAND.**

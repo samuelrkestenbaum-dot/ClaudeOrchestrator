@@ -274,6 +274,6 @@ runtime_authority: execute
 deployment_mode: human_confirmed
 implementation_status: load_bearing
 empirical_status: red_driven
-evidence_refs: build-os/tools/memory-kernel.sh:541; build-os/tools/memory-kernel.sh:641
+evidence_refs: build-os/tools/memory-kernel.sh:573; build-os/tools/memory-kernel.sh:673
 receipt_behavior: prints a RECEIPT naming the actor, the execution surface, the namespace, the object and version written, the expected version it was compared against, the content hash, the event id and its integrity digest, and the store it appended to. The appended rows ARE the receipt and `validate` re-reads every one of them, which is the standard FINDING-0003 says the census is weakest against — this entry meets it rather than restating the gap.
 notes: THE SURFACE IS PLACED IN build-os/tools/ ON PURPOSE. The independent durable-write scan in tests/mutator_registry_tests.sh searches build-os/maintenance, build-os/tools, build-os/metrics and .claude/hooks; a kernel writer living beside its own stores under build-os/kernel/ would have escaped that scan entirely and been censused only on the author's goodwill. Putting the writer where writers live means the census DISCOVERS it. WHAT IS NOT CENSUSED HERE, said plainly: the eight stores can be opened in an editor like any other file, and this entry classifies the governed path, not the filesystem. That is why `validate` re-derives every object's content hash and re-walks the event chain — an edit made around the writer is caught on the next read rather than assumed impossible.

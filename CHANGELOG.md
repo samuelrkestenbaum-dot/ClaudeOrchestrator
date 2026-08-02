@@ -32,8 +32,11 @@ deprecation cycle. Pin a commit if you need stability.
   else. Everything under `exports/` is a PROJECTION: `reconcile` regenerates each
   one from the stores and refuses any that differs, and a canonical object whose
   payload points into `exports/` is refused outright. **Citations are anchors, not
-  line numbers** — the kernel reuses the `PACKET-0029` resolver and no file under
-  `build-os/kernel/` contains a `path:line` token.
+  line numbers** — the kernel reuses the `PACKET-0029` resolver and **no canonical
+  store under `build-os/kernel/` RECORDS a `path:line` token**. The generated
+  export does PRINT `path:line#ANCHOR`, and that is the distinction rather than an
+  exception: a position the resolver returned at generation time is a navigation
+  hint, and a position written into a store is an identity that decays.
 
   **The invariant the packet exists for:** a context package that PARSES but
   refers to the WRONG VERSIONS is REFUSED. A package binds exact
@@ -56,7 +59,7 @@ deprecation cycle. Pin a commit if you need stability.
   `--on-conflict record` turns the conflict into a typed `finding` object plus its
   event rather than a last write that wins.
 
-  One new suite, **`tests/memory_kernel_tests.sh` — 87 assertions, every section
+  One new suite, **`tests/memory_kernel_tests.sh` — 101 assertions, every section
   red-driven** — chained into the repository suite on an existing line so no
   citation into `tests/build_os_tests.sh` moved. **Four census entries**
   (`memory.kernel_schema`, `memory.context_package_identity`,
@@ -65,8 +68,36 @@ deprecation cycle. Pin a commit if you need stability.
   mismatches 21 -> 22**, and the twenty-second was forced by an executed refusal
   rather than argued: the write control at `execute` on a Class A licence drives
   `scan-controls.sh check` to exit 2 with `LAUNDERED` while it carries
-  `authority_mismatch: none`. Suite **2082 passed**, 0 failed (+87, all of it the
+  `authority_mismatch: none`. Suite **2096 passed**, 0 failed (+101, all of it the
   new suite; every other suite +0). Zero re-authorisations.
+
+  **Six defects the reviewer found were fixed in a bounded third commit, and four
+  of them were the packet claiming a perimeter it did not hold.** (1) The export
+  printed the handoff row's frozen `status`, so an acknowledged handoff — one the
+  committed ledger records as `HandoffAccepted` — exported as `created`; the
+  status is now DERIVED from the last acceptance event, because the module's own
+  comment already said the ledger is what carries state changes. (2) The export's
+  BODY resolved through `obj_current_row` while only its binding table resolved at
+  the bound version, so a `state: STALE` document could show section 3 at v2 and
+  section 9 at v1 **at exit 0** — `resolvability is not identity` reproduced inside
+  the artifact built to refuse it; every section now renders at the package's bound
+  `(object_id, version)`. (3) **The tamper-evidence claim was false.** The
+  package's self-hash is UNKEYED, so a recorded contradiction could be laundered
+  away, re-signed, and read past both `validate` and
+  `read-context-package --as-current` at exit 0. `ContextCompiled` now carries the
+  package `content_hash` into the digest-chained ledger, both gates cross-check it
+  (`PACKAGE-UNANCHORED`), and the old refusal text — which overstated what an
+  unkeyed self-hash detects — now says what it actually detects. (4) `project`
+  took no actor and printed a sibling namespace's object **in full, including its
+  payload**, at exit 0; it now carries the same scoping triple every other path
+  does. (5) Two false claims corrected: no canonical STORE records a `path:line`
+  token — the generated export prints resolved return values, which is the point —
+  and the export's "nothing was omitted" is now scoped **AT COMPILE TIME**, which
+  is all `pkg_state` can support, since it iterates bound ids and cannot see an
+  object recorded after the compile. (6) The export was regenerated and
+  `reconcile` returns 0 divergent. **The registry's five line-citations into the
+  two kernel files were re-pointed by CONTENT after the edits moved them** —
+  census holds at 105, declared mismatches hold at 22, zero re-authorisations.
 
 - **A line number is now a navigation hint, and it is no longer an identity.**
   Residue `(mm)` had measured the hole and named the remedy in one sentence: the

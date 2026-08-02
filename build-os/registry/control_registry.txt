@@ -1979,7 +1979,7 @@ inputs: every proposed write into the kernel stores, and on `validate` the whole
 output: acceptance, or a refusal naming its class — NAMESPACE-REFUSED, SURFACE-IDENTITY, VERSION-STALE, VERSION-NONMONOTONIC, EVENT-APPEND-ONLY, EVENT-DANGLING, CAUSAL-CHAIN-BROKEN, TRUTH-STATE-UNBACKED, AUTHORITY-MISSING, EVIDENCE-UNRESOLVED, DUPLICATE-WRITABLE-TRUTH, SECRET-INLINE, HANDOFF-UNRESOLVED, OBJECT-HASH or KERNEL-SCHEMA
 owning_module: build-os/tools/memory-kernel.sh
 consuming_policies: every writing subcommand of memory-kernel.sh refuses at exit 2 before appending; tests/memory_kernel_tests.sh drives each refusal class red and is chained into tests/build_os_tests.sh
-evidence_refs: build-os/tools/memory-kernel.sh:278; build-os/tools/memory-kernel.sh:280; build-os/tools/memory-kernel.sh:607; build-os/tools/memory-kernel.sh:631; build-os/tools/memory-kernel.sh:517
+evidence_refs: build-os/tools/memory-kernel.sh:278; build-os/tools/memory-kernel.sh:280; build-os/tools/memory-kernel.sh:639; build-os/tools/memory-kernel.sh:663; build-os/tools/memory-kernel.sh:523
 failure_behavior: prints the refusal token and its reason on stderr and exits 2 BEFORE anything is appended, so a refused write leaves no row, no event and no partial state
 rollback_behavior: none needed — every refusal happens before the append, and the stores are append-only, so there is nothing to unwind
 promotion_requirement: already load_bearing; nothing above this status exists
@@ -1997,7 +1997,7 @@ inputs: a context package's recorded (object_id, version) binding, its content_h
 output: CURRENT, or STALE with the exact drifted pairs named; and on a read that asks for the package AS CURRENT, a refusal
 owning_module: build-os/tools/memory-kernel.sh
 consuming_policies: read-context-package --as-current exits 2 on STALE; export-handoff renders the state onto the face of the export; tests/memory_kernel_tests.sh section 11 drives it red
-evidence_refs: build-os/tools/memory-kernel.sh:871; build-os/tools/memory-kernel.sh:881; build-os/tools/memory-kernel.sh:886; build-os/tools/memory-kernel.sh:510
+evidence_refs: build-os/tools/memory-kernel.sh:908; build-os/tools/memory-kernel.sh:918; build-os/tools/memory-kernel.sh:926; build-os/tools/memory-kernel.sh:513
 failure_behavior: exit 2 naming PACKAGE-STALE and every drifted (object, version) pair, or PACKAGE-IDENTITY when the package's own hash no longer describes its binding. Nothing is returned to the caller
 rollback_behavior: read-only; this path writes nothing anywhere
 promotion_requirement: already load_bearing; nothing above this status exists
@@ -2015,7 +2015,7 @@ inputs: a fully validated record, after the actor, the surface and the namespace
 output: one appended row in the target store, plus — for every object, handoff and compilation — one digest-chained row appended to the event ledger, plus a printed receipt naming actor, surface, namespace, object, version, hash and event id
 owning_module: build-os/tools/memory-kernel.sh
 consuming_policies: nothing consumes a verdict; `validate`, `read-context-package`, `export-handoff` and `reconcile` consume the rows this appends, and each event's digest is the next event's input
-evidence_refs: build-os/tools/memory-kernel.sh:541; build-os/tools/memory-kernel.sh:641
+evidence_refs: build-os/tools/memory-kernel.sh:573; build-os/tools/memory-kernel.sh:673
 failure_behavior: it does not run at all unless every check above it passed; if the machine has no sha256 implementation it refuses rather than writing rows whose hashes cannot be computed
 rollback_behavior: an appended object or handoff row can be deleted. An EVENT row cannot be removed without breaking the digest of every event after it — the intended asymmetry between a record and a piece of evidence, and the same one metrics.decision.store_append already draws
 promotion_requirement: already load_bearing; nothing above this status exists
@@ -2033,7 +2033,7 @@ inputs: the kernel module, a fixture store set built from empty on every run, th
 output: a pass/fail verdict over the end-to-end cross-surface property and over every refusal class the kernel declares
 owning_module: tests/memory_kernel_tests.sh
 consuming_policies: chained from tests/build_os_tests.sh, which exits non-zero on its failure
-evidence_refs: tests/memory_kernel_tests.sh:197; tests/memory_kernel_tests.sh:218; tests/memory_kernel_tests.sh:236; tests/memory_kernel_tests.sh:343; tests/memory_kernel_tests.sh:417; tests/memory_kernel_tests.sh:435
+evidence_refs: tests/memory_kernel_tests.sh:202; tests/memory_kernel_tests.sh:223; tests/memory_kernel_tests.sh:251; tests/memory_kernel_tests.sh:384; tests/memory_kernel_tests.sh:491; tests/memory_kernel_tests.sh:509
 failure_behavior: prints each failing assertion and exits 1 via the house-style verdict, failing the whole chained run
 rollback_behavior: none needed — every fixture lives in its own mktemp directory, and the live stores are read and never written
 promotion_requirement: already load_bearing; nothing above this status exists

@@ -7,7 +7,7 @@
 - **context package:** `CTX-0001` — **state: CURRENT**
 - **namespace:** `NS-0006` (closure-scoped; nothing outside it is included)
 - **from surface:** `claude.cowork.session.ramhds`
-- **compiled at:** `2026-08-02T14:45:52Z`  **handoff created:** `2026-08-02T14:45:50Z`  **status:** `created`
+- **compiled at:** `2026-08-02T14:45:52Z`  **handoff created:** `2026-08-02T14:45:50Z`  **status:** `accepted`
 
 ## 1. Objective
 
@@ -83,7 +83,11 @@ Decide the write-authority question recorded as OBJ-0010, which OBJ-0007 blocks.
 
 ## 8. What was deliberately NOT included
 
-Nothing was omitted from the package.
+Nothing was omitted from the package AT COMPILE TIME. That is a statement
+about the objects the compiler considered when it ran, and it is NOT a claim
+that nothing has been recorded since: the freshness check compares the BOUND
+versions and an object created in this namespace after the compile is outside
+what it can see.
 
 ## 9. The binding — read this before acting
 

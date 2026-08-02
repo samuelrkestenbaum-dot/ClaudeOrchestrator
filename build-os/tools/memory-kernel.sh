@@ -53,7 +53,7 @@
 #                                          --budget N [--must-include IDS]
 #   memory-kernel.sh read-context-package  --package CTX [--as-current]
 #   memory-kernel.sh export-handoff        --handoff HOF --package CTX [--out FILE]
-#   memory-kernel.sh project               --object OBJ [--out FILE]
+#   memory-kernel.sh project               --object OBJ --actor ACT --surface S [--out FILE]
 #   memory-kernel.sh parse-projection      --file FILE
 #   memory-kernel.sh reconcile             [--kernel DIR]
 #
@@ -319,9 +319,12 @@ next_id(){ # <file> <prefix> -> the next free NNNN id in that store
 # --------------------------------------------------------- evidence refs -----
 # An evidence reference is an ARTIFACT ID, and an artifact resolves BY CONTENT
 # through the anchor scheme PACKET-0029 shipped — never by line number. This is
-# the single most important reason nothing in build-os/kernel/ carries a
-# `path:line` token: an anchored citation survives the line moving, and this
-# tree's most-recurring defect class is the one that does not.
+# the single most important reason no canonical store under build-os/kernel/
+# RECORDS a `path:line` token: an anchored citation survives the line moving, and
+# this tree's most-recurring defect class is the one that does not. The generated
+# export does PRINT `path:line#ANCHOR`, and that is the distinction rather than an
+# exception — a position the resolver returned at generation time is a navigation
+# hint, and a position written into a store is an identity that decays.
 SCANC="$REPO/build-os/registry/scan-controls.sh"
 art_resolves(){ # <artifact-id> -> 0 and prints "path:line", or non-zero and prints why
   local ar path anc out
@@ -507,7 +510,10 @@ validate(){
     [ "$nf" = "16" ] || { viol "KERNEL-SCHEMA context package row carries $nf field(s), not 16: $(fld "$r" 1)"; continue; }
     id="$(fld "$r" 1)"
     [ "$(sha "$(cp_hash_input "$r")")" = "$(fld "$r" 16)" ] \
-      || viol "PACKAGE-IDENTITY $id carries a content_hash that does not describe its own binding. A package whose hash does not cover its sources is a package that can be rewritten without anyone noticing."
+      || viol "PACKAGE-IDENTITY $id carries a content_hash that does not describe its own fields. The row was edited without recomputing its hash — this catches a careless edit and NOT a writer, because the hash is unkeyed and can be recomputed by anyone who can write the row. The check that catches a re-signed edit is PACKAGE-UNANCHORED below."
+    # ...and THAT is the check that makes the row's hash mean anything, because it
+    # compares it against the digest-chained ledger rather than against itself.
+    local why; if why="$(pkg_anchor_fault "$r")"; then viol "PACKAGE-UNANCHORED $why"; fi
     local ids vers n1 n2
     ids="$(fld "$r" 7)"; vers="$(fld "$r" 8)"
     n1="$(evid_list "$ids" | grep -c . || true)"; n2="$(evid_list "$vers" | grep -c . || true)"
@@ -531,6 +537,32 @@ cp_hash_input(){ # <context-package-row>
   local r="$1" i out=""
   for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15; do out="$out|$(fld "$r" "$i")"; done
   printf '%s' "$out"
+}
+
+# WHAT THE SELF-HASH DOES NOT DO. `cp_hash_input` covers the package's OWN fields
+# and is UNKEYED, so anyone who can write the store can edit a field and re-sign
+# the row. That check catches a careless edit; it is not tamper evidence against a
+# writer, and a perimeter claimed wider than it is, is worse than an admitted gap.
+# THE TAMPER EVIDENCE IS THE LEDGER. `compile-context` writes the package's
+# content_hash into the ContextCompiled event as `<package-id>@<hash>`, and the
+# event ledger is digest-chained: moving that hash means re-chaining every event
+# after it. This returns the hash the ledger recorded, or empty when the ledger
+# carries no anchor for the package at all.
+pkg_ledger_hash(){ # <context-package-id> -> the anchored hash, or empty
+  rows "$F_EV" "EVT-" | awk -F'\t' -v p="$1" \
+    '$2=="ContextCompiled" && index($14, p "@")==1 {print substr($14, length(p)+2)}' | tail -1
+}
+# The one place the anchor is checked, so `validate` and the read path cannot
+# drift apart on what "anchored" means. Prints why on failure.
+pkg_anchor_fault(){ # <context-package-row> -> 0 and prints a reason, or 1
+  local id lh; id="$(fld "$1" 1)"; lh="$(pkg_ledger_hash "$id")"
+  if [ -z "$lh" ]; then
+    printf '%s carries no package content_hash in any ContextCompiled event, so nothing anchors this row to the chained ledger and its self-hash can be re-signed by anyone who can write the store' "$id"; return 0
+  fi
+  if [ "$lh" != "$(fld "$1" 16)" ]; then
+    printf '%s hashes to %s and the ContextCompiled event recorded %s. The row has been edited AND re-signed: the self-hash agrees with the edit, and the digest-chained ledger does not' "$id" "$(fld "$1" 16)" "$lh"; return 0
+  fi
+  return 1
 }
 
 # ============================================================ the writers ====
@@ -849,7 +881,12 @@ do_compile_context(){
   row="$O_ID${TAB}$(now)${TAB}$O_NS${TAB}$O_ACTOR${TAB}$O_SURFACE${TAB}$O_OBJECTIVE${TAB}$included${TAB}$vers${TAB}$rels${TAB}$evs${TAB}$omitted${TAB}$reasons${TAB}$auth${TAB}$contras${TAB}$O_BUDGET"
   hash="$(sha "$(cp_hash_input "$row")")"
   append_row "$F_CP" "$row${TAB}$hash"
-  ev="$(emit_event ContextCompiled "$O_ACTOR" "$O_SURFACE" "$O_NS" - - - - "-" - "$O_ID")"
+  # THE PACKAGE HASH GOES INTO THE LEDGER, not only into the package's own row. A
+  # row that signs itself with an unkeyed digest can be edited and re-signed by
+  # anyone who can write the file; the ledger is digest-chained, so moving this
+  # value means re-chaining every event after it. `<package-id>@<hash>` keeps the
+  # id at the front so the payload is still matchable by package.
+  ev="$(emit_event ContextCompiled "$O_ACTOR" "$O_SURFACE" "$O_NS" - - - - "-" - "$O_ID@$hash")"
   printf 'RECEIPT: memory-kernel compile-context\n  package: %s  namespace=%s  actor=%s  surface=%s  budget=%s\n  objective: %s\n  included: %s\n  versions: %s\n  omitted: %s\n  omission_reasons: %s\n  authority_state: %s\n  contradictions: %s\n  content_hash: %s\n  event: ContextCompiled %s\n  store: memory_context_packages.tsv, memory_events.tsv (append)\n' \
     "$O_ID" "$O_NS" "$O_ACTOR" "$O_SURFACE" "$O_BUDGET" "$O_OBJECTIVE" "$included" "$vers" "$omitted" "$reasons" "$auth" "$contras" "$hash" "$ev"
 }
@@ -878,7 +915,10 @@ do_read_context_package(){
   local r state
   r="$(row_by_id "$F_CP" "$O_PACKAGE")" || refuse "PACKAGE-UNKNOWN $O_PACKAGE is not a context package."
   [ "$(sha "$(cp_hash_input "$r")")" = "$(fld "$r" 16)" ] \
-    || refuse "PACKAGE-IDENTITY $O_PACKAGE does not hash to its recorded content_hash. The row has been edited since it was compiled, so nothing it says about its sources can be trusted."
+    || refuse "PACKAGE-IDENTITY $O_PACKAGE does not hash to its own recorded content_hash. The row was edited without recomputing the hash. THIS CHECK DETECTS A CARELESS EDIT AND NOT A WRITER: the hash is unkeyed, so anyone who can write this store can edit a field and re-sign the row, and PACKAGE-UNANCHORED is the check that catches that."
+  local why; if why="$(pkg_anchor_fault "$r")"; then
+    refuse "PACKAGE-UNANCHORED $why. Nothing it says about its sources can be trusted."
+  fi
   state="$(pkg_state "$r")"
   case "$state" in
     STALE*)
@@ -919,9 +959,16 @@ project_object(){ # <object-id>
   printf '\n%s object=%s version=%s namespace=%s hash=%s -->\n' "$CANON_MARK" "$id" "$ver" "$(fld "$r" 4)" "$(fld "$r" 20)"
 }
 
+# `project` IS A READ, and every read in this module identifies actor, surface and
+# namespace. It renders the object's whole envelope INCLUDING ITS PAYLOAD, so a
+# subcommand that took no actor would be a cross-namespace RETRIEVAL wearing a
+# projection's clothes — the one thing v0 refuses by default, escaping through the
+# only path that never asked who was calling.
 do_project(){
-  req --object "$O_OBJECT"
-  if [ -n "$O_OUT" ]; then project_object "$O_OBJECT" > "$O_OUT"; printf 'RECEIPT: memory-kernel project\n  object: %s -> %s (generated projection; edit the store, never this file)\n' "$O_OBJECT" "$O_OUT"
+  req --object "$O_OBJECT"; req --actor "$O_ACTOR"; req --surface "$O_SURFACE"
+  local pr; pr="$(obj_current_row "$O_OBJECT")" || refuse "OBJECT-UNKNOWN $O_OBJECT is not an object."
+  authorise "$O_ACTOR" "$O_SURFACE" "$(fld "$pr" 4)"
+  if [ -n "$O_OUT" ]; then project_object "$O_OBJECT" > "$O_OUT"; printf 'RECEIPT: memory-kernel project\n  object: %s -> %s (generated projection; edit the store, never this file)\n  actor: %s  surface: %s  namespace: %s\n' "$O_OBJECT" "$O_OUT" "$O_ACTOR" "$O_SURFACE" "$(fld "$pr" 4)"
   else project_object "$O_OBJECT"; fi
 }
 
@@ -947,6 +994,42 @@ do_parse_projection(){
 # answer. Truth states are printed per object rather than flattened into prose,
 # because "the suite is green" and "a model believes the suite is green" are
 # different claims and only one of them is checkable.
+# THE HANDOFF'S STATE LIVES IN THE LEDGER, NOT IN ITS ROW. `acknowledge-handoff`
+# deliberately does not rewrite the row — the store is append-only and a status
+# rewritten in place would erase the fact that the handoff was ever open — so the
+# row reads `created` forever and reading it back would tell a second consumer
+# that a CLAIMED handoff is unclaimed, contradicting this module's own ledger. The
+# last HandoffAccepted/HandoffRefused event naming the handoff is the state.
+# (`HandoffRefused` is not yet in EVENT_TYPES and so cannot be written in v0; the
+# branch is here because the derivation is over the vocabulary, not over what one
+# release happens to emit, and widening an enum is a governance act.)
+ho_status(){ # <handoff-id> -> one of $HANDOFF_STATUS
+  local last
+  last="$(rows "$F_EV" "EVT-" | awk -F'\t' -v h="$1" \
+    '($2=="HandoffAccepted" || $2=="HandoffRefused") && $14==h {print $2}' | tail -1)"
+  case "$last" in
+    HandoffAccepted) printf 'accepted' ;;
+    HandoffRefused)  printf 'refused' ;;
+    *) fld "$(row_by_id "$F_HO" "$1")" 15 ;;
+  esac
+}
+
+# THE PACKAGE'S BINDING IS THE EXPORT'S BINDING. A package binds (object,
+# version) pairs; every section of this document renders at those versions and at
+# no others. Rendering the body at the CURRENT version while the binding table
+# names the BOUND one produces a document whose two halves describe different
+# states while every id in it resolves — `resolvability is not identity`,
+# reproduced inside the artifact built to refuse it.
+pkg_bound_version(){ # <package-row> <object-id> -> the bound version, or non-zero
+  local ids vers n=1 id
+  ids="$(fld "$1" 7)"; vers="$(fld "$1" 8)"
+  for id in $(printf '%s' "$ids" | tr ';' ' '); do
+    [ "$id" = "$2" ] && { printf '%s' "$(printf '%s' "$vers" | cut -d';' -f"$n")"; return 0; }
+    n=$((n+1))
+  done
+  return 1
+}
+
 export_handoff(){ # <handoff-id> <package-id>
   local h p state id ver n i r
   h="$(row_by_id "$F_HO" "$1")" || refuse "HANDOFF-UNKNOWN $1 is not a handoff."
@@ -961,16 +1044,16 @@ export_handoff(){ # <handoff-id> <package-id>
   printf -- '- **context package:** `%s` — **state: %s**\n' "$2" "${state%% *}"
   printf -- '- **namespace:** `%s` (closure-scoped; nothing outside it is included)\n' "$(fld "$h" 5)"
   printf -- '- **from surface:** `%s`\n' "$(fld "$h" 3)"
-  printf -- '- **compiled at:** `%s`  **handoff created:** `%s`  **status:** `%s`\n\n' "$(fld "$p" 2)" "$(fld "$h" 14)" "$(fld "$h" 15)"
+  printf -- '- **compiled at:** `%s`  **handoff created:** `%s`  **status:** `%s`\n\n' "$(fld "$p" 2)" "$(fld "$h" 14)" "$(ho_status "$1")"
 
   printf '## 1. Objective\n\n%s\n\n' "$(fld "$h" 6)"
 
   printf '## 2. What was completed\n\n'
-  export_objects "$(fld "$h" 7)" || printf 'None recorded.\n'
+  export_objects "$(fld "$h" 7)" "$p" || printf 'None recorded.\n'
   printf '\n## 3. Current state\n\n'
-  export_objects "$(fld "$h" 8)" || printf 'None recorded.\n'
+  export_objects "$(fld "$h" 8)" "$p" || printf 'None recorded.\n'
   printf '\n## 4. What remains open — the unresolved decisions\n\n'
-  export_objects "$(fld "$h" 9)" || printf 'None recorded.\n'
+  export_objects "$(fld "$h" 9)" "$p" || printf 'None recorded.\n'
 
   printf '\n## 5. Evidence\n\n'
   printf '| artifact | kind | resolves to | anchor |\n|---|---|---|---|\n'
@@ -988,7 +1071,12 @@ export_handoff(){ # <handoff-id> <package-id>
   printf '**Acceptance criteria:** %s\n' "$(fld "$h" 13)"
 
   printf '\n## 8. What was deliberately NOT included\n\n'
-  if [ "$(fld "$p" 11)" = "-" ]; then printf 'Nothing was omitted from the package.\n'
+  if [ "$(fld "$p" 11)" = "-" ]; then
+    printf 'Nothing was omitted from the package AT COMPILE TIME. That is a statement\n'
+    printf 'about the objects the compiler considered when it ran, and it is NOT a claim\n'
+    printf 'that nothing has been recorded since: the freshness check compares the BOUND\n'
+    printf 'versions and an object created in this namespace after the compile is outside\n'
+    printf 'what it can see.\n'
   else
     printf '| omitted object | reason |\n|---|---|\n'
     for i in $(evid_list "$(fld "$p" 12)"); do
@@ -1014,10 +1102,17 @@ export_handoff(){ # <handoff-id> <package-id>
   printf '\n%s handoff=%s package=%s namespace=%s hash=%s -->\n' "$CANON_MARK" "$1" "$2" "$(fld "$h" 5)" "$(fld "$p" 16)"
 }
 
-export_objects(){ # <;-separated object ids> -> a table, or non-zero when empty
-  local i r any=0
+export_objects(){ # <;-separated object ids> <context-package-row> -> a table at the
+                  # package's BOUND versions, or non-zero when the list is empty
+  local i r v any=0
   for i in $(evid_list "$1"); do
-    r="$(obj_current_row "$i")" || continue
+    # Tier-1 mandatory inclusion puts every object the handoff names into the
+    # package, and BUDGET-BELOW-MANDATORY refuses a compilation that could not
+    # hold them — so an unbound id here is a store that broke that guarantee, and
+    # rendering it at whatever version happens to be current is exactly the defect
+    # this function was changed to close.
+    v="$(pkg_bound_version "$2" "$i")" || refuse "EXPORT-UNBOUND handoff object $i is not bound by context package $(fld "$2" 1) at any version. The export renders at the package's bound versions and has no version to render this at; rendering it at the current one would put an unbound claim in a document whose whole purpose is that every claim names its version."
+    r="$(obj_row_at "$i" "$v")" || continue
     [ "$any" = "0" ] && printf '| object | v | type | status | truth state | authority | evidence |\n|---|---|---|---|---|---|---|\n'
     any=1
     printf '| `%s` | %s | %s | %s | `%s` | `%s` | `%s` |\n' \
@@ -1026,7 +1121,8 @@ export_objects(){ # <;-separated object ids> -> a table, or non-zero when empty
   [ "$any" = "1" ] || return 1
   printf '\n'
   for i in $(evid_list "$1"); do
-    r="$(obj_current_row "$i")" || continue
+    v="$(pkg_bound_version "$2" "$i")" || continue
+    r="$(obj_row_at "$i" "$v")" || continue
     printf -- '- `%s@%s` — %s\n' "$(fld "$r" 1)" "$(fld "$r" 5)" "$(fld "$r" 21)"
   done
 }

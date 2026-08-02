@@ -89,8 +89,13 @@ Artifacts bridge to files that already exist in this repository, and they do it
 through the anchor scheme `PACKET-0029` shipped
 (`scan-controls.sh anchors`): an artifact names an **anchor id**, the anchor
 resolves **by content**, and the line number is a return value rather than an
-identity. **No file in this directory contains a `path:line` token**, so nothing
-here decays when a line moves.
+identity. **No canonical store in this directory records a `path:line` token** —
+nothing that is stored decays when a line moves. The generated export under
+`exports/` *does* print `path:line#ANCHOR` strings, and that is the point rather
+than an exception: they are **resolved return values the anchor scheme produced
+at generation time**, not stored identities, and `reconcile` regenerates them
+from the anchors on every run. A position that is recomputed is a navigation
+hint; a position that is stored is a decaying identity.
 
 ## The invariant that matters most
 

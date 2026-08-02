@@ -52,6 +52,11 @@ refused_with(){ # <token> <what>
 accepted(){ # <what>
   if [ "$KRC" = "0" ]; then ok "$1"; else no "$1 (exit $KRC)"; sed 's/^/      | /' "$KOUT" | head -4; fi
 }
+# The SAME digest the kernel computes, computed independently here. The laundering
+# attack in section 10 has to RE-SIGN a row it edited, because an attack that
+# only edits the row is caught by a hash check nobody had to think hard about.
+sha_of(){ if command -v sha256sum >/dev/null 2>&1; then printf '%s' "$1" | sha256sum | cut -d' ' -f1
+          else printf '%s' "$1" | shasum -a 256 | cut -d' ' -f1; fi; }
 
 # An empty kernel: the headers only, no rows. Everything below builds from here,
 # so nothing in this suite depends on a store somebody seeded by hand.
@@ -229,6 +234,16 @@ grep -qF 'out_of_closure_refused=1' "$KD/memory_context_packages.tsv" \
 grep -qF 'OBJ-0012' "$KD/memory_context_packages.tsv" \
   && no "the sibling project's object id LEAKED into a package compiled for another namespace" \
   || ok "the sibling project's object id does not appear anywhere in the package — the count leaks nothing"
+# ...and the boundary holds on the READ paths too, not only on the writes and the
+# compiler. `project` renders an object's full envelope INCLUDING ITS PAYLOAD; a
+# read subcommand that took no actor would be a cross-namespace retrieval wearing
+# a projection's clothes, which is the one thing v0 refuses by default.
+k project --object OBJ-0012 --actor ACT-0002 --surface "$B"
+refused_with "NAMESPACE-REFUSED" "RED: projecting a SIBLING namespace's object is refused — a read across the boundary is refused whichever subcommand asks"
+k project --object OBJ-0012
+refused_with "actor is required for \`project\`" "RED: \`project\` with no actor is refused rather than answered — every read identifies actor, surface and namespace or it does not happen"
+k project --object OBJ-0001 --actor ACT-0002 --surface "$B"
+accepted "the same subcommand, scoped and inside the closure, still projects"
 
 echo "== 6. A stale expected_version refuses, loudly, and never last-write-wins =="
 KD="$WORK/e2e"
@@ -323,6 +338,32 @@ case "$IDS" in *OBJ-0009*) ok "the package binds the CORRECTED object (OBJ-0009)
 cp -r "$WORK/e2e" "$WORK/pk"; KD="$WORK/pk"
 awk -F'\t' 'BEGIN{OFS="\t"} $1=="CTX-0001"{$8="1;1;1;1;1;1;1;1;1;1;1;1"} {print}' "$WORK/e2e/memory_context_packages.tsv" > "$WORK/pk/memory_context_packages.tsv"
 k validate; refused_with "PACKAGE-IDENTITY" "RED: rewriting the bound versions is caught by the package's own content hash"
+# THE SELF-HASH IS UNKEYED, so it detects a CARELESS edit and not a WRITER. The
+# tamper evidence is the CHAINED LEDGER: the ContextCompiled event carries the
+# package's content_hash, and re-signing the package row does not move the event.
+KD="$WORK/e2e"
+grep -qE "ContextCompiled.*CTX-0001@[0-9a-f]{64}" "$KD/memory_events.tsv" \
+  && ok "the ContextCompiled event carries the package's content_hash, so the package row is anchored to the tamper-evident ledger and not only to itself" \
+  || no "the ContextCompiled event does not carry the package hash — nothing anchors the package row to the chained ledger"
+# RED DRIVE — THE LAUNDERING ATTACK. Rewrite the recorded contradiction away and
+# RE-SIGN the row correctly, which anyone who can write the store can do. The
+# self-hash check passes. The ledger anchor does not.
+cp -r "$WORK/e2e" "$WORK/ldr"; KD="$WORK/ldr"
+CPF="$WORK/ldr/memory_context_packages.tsv"
+awk -F'\t' 'BEGIN{OFS="\t"} $1=="CTX-0001"{$14="none-detected"} {print}' "$CPF" > "$WORK/l.tsv" && mv "$WORK/l.tsv" "$CPF"
+LROW="$(grep "^CTX-0001${TAB}" "$CPF")"
+LIN=""; for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15; do LIN="$LIN|$(printf '%s' "$LROW" | cut -f$i)"; done
+LH="$(sha_of "$LIN")"
+awk -F'\t' -v h="$LH" 'BEGIN{OFS="\t"} $1=="CTX-0001"{$16=h} {print}' "$CPF" > "$WORK/l.tsv" && mv "$WORK/l.tsv" "$CPF"
+LROW2="$(grep "^CTX-0001${TAB}" "$CPF")"
+LIN2=""; for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15; do LIN2="$LIN2|$(printf '%s' "$LROW2" | cut -f$i)"; done
+[ "$(sha_of "$LIN2")" = "$(printf '%s' "$LROW2" | cut -f16)" ] \
+  && ok "the laundered package re-signs cleanly against its OWN hash — the self-hash alone is not tamper evidence, and the attack is real" \
+  || no "the laundering fixture did not actually re-sign (the attack below would pass for the wrong reason)"
+k validate
+refused_with "PACKAGE-UNANCHORED" "RED: a package field laundered and correctly RE-SIGNED is still refused — the ledger holds the hash the package was compiled with"
+k read-context-package --package CTX-0001 --as-current
+refused_with "PACKAGE-UNANCHORED" "RED: ...and the READ path refuses it too, so a laundered package cannot be consumed as current either"
 
 echo "== 11. Changing a source object makes an old package STALE, not silently current =="
 # THE INVARIANT THE WHOLE PACKET EXISTS FOR. The package still PARSES. Every id
@@ -349,6 +390,18 @@ k export-handoff --handoff HOF-0001 --package CTX-0001 --out "$WORK/stale.md"; a
 grep -qF 'state: STALE' "$WORK/stale.md" \
   && ok "...and the export says STALE on its face, where a consumer reads it first" \
   || no "the export presents a stale package without saying so"
+# THE BODY IS BOUND, NOT ONLY THE BINDING TABLE. A document whose section 3 shows
+# an object at the CURRENT version while its section 9 names the BOUND one is
+# `resolvability is not identity` reproduced inside the artifact built to refuse
+# it — every id resolves, and the two halves describe different states.
+BODYV="$(sed -n 's/^| `OBJ-0009` | \([0-9][0-9]*\) | task | .*/\1/p' "$WORK/stale.md" | head -1)"
+TBLV="$(sed -n 's/^| `OBJ-0009` | \([0-9][0-9]*\) | `[a-z]*` | .*/\1/p' "$WORK/stale.md" | head -1)"
+{ [ -n "$BODYV" ] && [ "$BODYV" = "$TBLV" ] && [ "$BODYV" = "2" ]; } \
+  && ok "the stale export's BODY and its section 9 binding table name the SAME version (OBJ-0009@$BODYV), and it is the version the package BOUND — not the one the store has moved to" \
+  || no "the export's body and its binding table disagree (body=$BODYV table=$TBLV, package bound 2, store holds 3)"
+grep -qF '`OBJ-0009@2`' "$WORK/stale.md" && ! grep -qF '`OBJ-0009@3`' "$WORK/stale.md" \
+  && ok "...and the per-object payload lines are bound too, so no part of the document silently reads the present" \
+  || no "the export's payload lines render a version the package does not bind"
 
 echo "== 12. Claude creates the handoff through GOVERNED commands only =="
 KD="$WORK/e2e"
@@ -358,6 +411,17 @@ grep -qF 'ContextCompiled' "$KD/memory_events.tsv" && ok "the compilation produc
 [ "$(awk -F'\t' '$1=="HOF-0001"{print $15}' "$KD/memory_handoffs.tsv")" = "created" ] \
   && ok "the handoff ROW still reads \`created\` after acceptance — acceptance is a later EVENT, never an in-place edit" \
   || no "acknowledgement rewrote the handoff row"
+# ...and BECAUSE the row is frozen at `created` forever, the export may not read
+# it back. The ledger is what carries the state change, so the export derives the
+# status from the ledger — otherwise a second consumer is told a claimed handoff
+# is unclaimed, by the same module whose own ledger says otherwise.
+k export-handoff --handoff HOF-0001 --package CTX-0001 --out "$WORK/acked.md"; accepted "the export renders after acknowledgement"
+grep -qF '**status:** `created`' "$WORK/acked.md" \
+  && no "an ACKNOWLEDGED handoff exports as \`created\` — the export is repeating a frozen field while the ledger records HandoffAccepted" \
+  || ok "an acknowledged handoff does NOT export as \`created\`"
+grep -qF '**status:** `accepted`' "$WORK/acked.md" \
+  && ok "...it exports as \`accepted\`, derived from the last HandoffAccepted event naming this handoff" \
+  || no "the export does not derive the handoff status from the ledger"
 cp -r "$WORK/e2e" "$WORK/hr"; KD="$WORK/hr"
 k acknowledge-handoff --handoff HOF-0001 --actor ACT-0002 --surface "$B"
 refused_with "HANDOFF-ROLE" "RED: an actor whose role the handoff does not name cannot accept it"
@@ -391,12 +455,22 @@ grep -qE '`OBJ-0011` \| 1 \| finding \| open \| `inferred`' "$E2E" \
   || no "an inferred object is not visibly labelled in the export"
 grep -qF 'consumable without the originating transcript' "$E2E" \
   && ok "the export states its own claim on its face" || no "the export makes no claim about transcript independence"
+# ...and the claims it states are the ones the mechanism supports. `pkg_state`
+# iterates the BOUND ids only, so an object recorded into the namespace AFTER the
+# compile is invisible to it: "nothing was omitted" is false the moment the
+# project moves, and the honest claim is time-scoped to the compile.
+grep -qxF 'Nothing was omitted from the package.' "$E2E" \
+  && no "the export claims nothing was omitted, full stop — a claim the freshness check cannot support once the project moves" \
+  || ok "the export does not make an unbounded no-omission claim"
+grep -qF 'AT COMPILE TIME' "$E2E" \
+  && ok "the omission claim is scoped to the compile, which is exactly what the compiler measured and all it measured" \
+  || no "the export's omission section does not scope its claim to the compile"
 
 echo "== 14. Projections reconcile against canonical objects =="
 KD="$WORK/e2e"
 RT=0
 for o in OBJ-0001 OBJ-0002 OBJ-0003 OBJ-0004 OBJ-0005 OBJ-0006 OBJ-0007 OBJ-0008 OBJ-0009; do
-  bash "$MK" project --object "$o" --kernel "$KD" --repo "$SRC" --out "$WORK/p.md" >/dev/null 2>&1
+  bash "$MK" project --object "$o" --actor ACT-0002 --surface "$B" --kernel "$KD" --repo "$SRC" --out "$WORK/p.md" >/dev/null 2>&1
   bash "$MK" parse-projection --file "$WORK/p.md" --kernel "$KD" --repo "$SRC" > "$WORK/pp.out" 2>&1 || { RT=$((RT+1)); echo "      | round trip failed: $o"; continue; }
   grep -qF 'round_trip: MATCH' "$WORK/pp.out" || { RT=$((RT+1)); echo "      | no MATCH: $o"; }
 done
@@ -404,10 +478,10 @@ done
   && ok "canonical object -> generated projection -> parsed back -> same id, version, namespace and hash, for goal, control, decision, ranking, outcome, receipt, finding, evidence and packet state" \
   || no "$RT projection round trip(s) failed"
 # RED DRIVE: edit the readable copy. It does not become a second opinion.
-bash "$MK" project --object OBJ-0003 --kernel "$KD" --repo "$SRC" --out "$WORK/p.md" >/dev/null 2>&1
+bash "$MK" project --object OBJ-0003 --actor ACT-0002 --surface "$B" --kernel "$KD" --repo "$SRC" --out "$WORK/p.md" >/dev/null 2>&1
 sed -i 's/version=1/version=7/' "$WORK/p.md"
 k parse-projection --file "$WORK/p.md"; refused_with "PROJECTION-DIVERGED" "RED: a projection edited to claim a version the store does not carry is refused"
-bash "$MK" project --object OBJ-0003 --kernel "$KD" --repo "$SRC" --out "$WORK/p.md" >/dev/null 2>&1
+bash "$MK" project --object OBJ-0003 --actor ACT-0002 --surface "$B" --kernel "$KD" --repo "$SRC" --out "$WORK/p.md" >/dev/null 2>&1
 sed -i 's/^- \*\*truth state:\*\*.*/- **truth state:** `verified`/' "$WORK/p.md"
 k parse-projection --file "$WORK/p.md"
 { [ "$KRC" = "0" ] && grep -qF 'round_trip: MATCH' "$KOUT"; } \
