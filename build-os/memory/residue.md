@@ -1964,3 +1964,39 @@ not to be fixed outside that packet.**
   **receipts and memory files are outside the 3.5% the corpus has migrated**, and holding it by
   hand is exactly what `(qqqq)` says will not survive the next packet. Two closes ago the same
   constraint bit twice in one pass, which is why the brief named it.
+
+- **(aaaaa) THE BASE SUITE IS NOT DETERMINISTIC, AND THE CAUSE WAS ISOLATED AND MEASURED RATHER
+  THAN RE-RUN AWAY.** The base run of `bash tests/build_os_tests.sh` at `ea069a7`, on a quiet
+  tree with `git status --porcelain` empty and **before any edit of this packet**, returned
+  **1994 passed / 1 failed**, not the 1995/0 the brief supplied. The single failure was
+  `no seeded row is git-backed` in `tests/speed_benchmark_tests.sh`, against a live
+  `packet_metrics.tsv` in which **16 of 17 rows carry evidence class `mixed`** — so the
+  assertion was right about the data and wrong about itself. Run alone the same suite returned
+  **169/0**; the four suites that precede it in the chain, run in order beforehand, did not
+  reproduce it. **The cause is `pipefail` plus SIGPIPE:** `datarows | awk | grep -q .` short
+  circuits at the first match, `grep -q` exits, the still-writing `awk` takes SIGPIPE, and
+  `pipefail` reports 141 as the pipeline's status. **Measured at 117 of 4000 iterations (2.9%)
+  against the live store.** Registered as `DEFECT-0013-pipefail-sigpipe-false-negative` with
+  `OCCURRENCE-0013`, and recorded as memory object `OBJ-0011` in the kernel with
+  `truth_state: observed` and its evidence artifact. **IT IS NOT FIXED HERE.** The remedy is a
+  one-line change to a pipeline in a suite this packet has no licence to touch, the same shape
+  exists at two more sites in that section and probably elsewhere, and finding all of them is
+  its own packet. **WHAT IT MEANS FOR EVERY COUNT ANYBODY QUOTES FROM THIS TREE:** a suite
+  total from this repository is a sample, not a constant, until this class is closed — the base
+  is 1995 on a run where the race does not fire and 1994 on one where it does, and the same is
+  now true of the 2082 this packet leaves behind.
+
+- **(bbbbb) THE MISMATCH REPORT'S OWN PROSE HAD ALREADY GONE STALE BY ONE, AND THIS PACKET
+  CORRECTED IT AS A MECHANICAL CONSEQUENCE RATHER THAN AS A SEPARATE ERRAND.**
+  `MISMATCHES.md` said "**6 rows exercise `execute`**" while the table between the machine-read
+  markers listed **seven** — `metrics.decision.outcome_update` was added to the table and the
+  sentence above it was not. That is `DEFECT-0002-stale-remembered-count` in the artefact whose
+  whole job is to be counted. The 22nd row this packet adds makes the honest figure **8**, and
+  the sentence now says 8. **Nothing else in that file was touched**, and one number in it is
+  still stale and is left that way deliberately: "**11 of 97 classified controls gate on
+  `unvalidated` evidence**" quotes a census size of 97 against a live 105. The **11** is
+  re-derivable and still correct — every control this packet adds is `red_driven` — but the
+  **97** is a remembered count. It is NOT corrected here because "classified controls" is not
+  a derivation anybody wrote down, and guessing which subset it meant would replace a stale
+  number with an invented one. **RESIDUE: state the derivation for "classified controls" beside
+  that number, or delete the denominator.**
