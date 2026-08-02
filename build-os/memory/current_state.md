@@ -45,12 +45,12 @@
   `no tags` because `tests/release_metadata_tests.sh:322` requires it, so the residue item is
   annotated rather than rewritten. Whether the tag was created with an explicit go is not
   determinable from here and no claim is made.
-- **Build/test command:** `bash tests/build_os_tests.sh` (1963 checks; no network; temp dirs)
+- **Build/test command:** `bash tests/build_os_tests.sh` (1964 checks; no network; temp dirs)
   — measured on a quiet tree at `80ad634` plus `gravito_p5_outcome_counterfactual_telemetry_a`'s
   build, from a SOLO full-capture run after an anchored `pgrep -fa '^bash tests/'` returned empty
   (**1909 at the previous close, and 1909 re-measured at this packet's Commit 1 in isolation**),
   and reconciled against
-  `CHANGELOG.md`, which carries the matching literal `**1963 passed**` (unsplit) in the
+  `CHANGELOG.md`, which carries the matching literal `**1964 passed**` (unsplit) in the
   release block `## [Unreleased]` -> `### In flight (not landed at the released commit)`.
   **CITED BY HEADING, NOT BY LINE NUMBER, from 2026-08-01 on** — the changelog grows from the
   top, so every line-citation into it decays on every packet, guaranteed rather than
@@ -178,7 +178,7 @@
   and it will fire again on the next one. **The ledger the ceiling was written against has now
   changed: 99 controls, ~20 tools, 1909 assertions, and ONE executive component.]**
   **[SUPERSEDED 2026-08-02 at the P5 close, and the figure is DERIVED not remembered:
-  100 controls (`grep -c '^control: '`), ~20 tools, 1963 assertions, ONE executive component
+  100 controls (`grep -c '^control: '`), ~20 tools, 1964 assertions, ONE executive component
   and ONE apparatus for measuring it. The old figures are left visible because a ledger that
   silently refreshes cannot show that it went stale.]**
 - **Last closed packet:** `gravito_p5_outcome_counterfactual_telemetry_a`
@@ -370,7 +370,7 @@
   none; class A75 / B3 / C22; 21 declared mismatches; `evidence-policy.sh check` 26 of 100 split
   6/5/15; 10 decisions (UNCHANGED); 97 signal snapshots BY ROW COUNT (176 lines — the row count
   is `grep -c '^SIGNAL-SNAPSHOT-'`, never `wc -l`); 25 of those bound to `DECISION-0011`; 9
-  mutator records; 0 live authority envelopes; suite 1963/0; maintenance 144/144;
+  mutator records; 0 live authority envelopes; suite 1964/0; maintenance 144/144;
   `scan-controls`/`scan-mutators` exit 0; `snapshot-verify` 97 verifying at exit 0; ZERO files
   added in the whole range; tree clean.**
   **SECOND EYES: NONE — ELEVENTH CONSECUTIVE PACKET.** The router requires the reviewer to state

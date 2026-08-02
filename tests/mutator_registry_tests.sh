@@ -1351,10 +1351,51 @@ P5LIVEN="$(awk -F'\t' -v d="$P5LIVE" '$2==d && $6=="sealed_rank"' "$SNAP" | grep
 [ "${P5LIVEN:-0}" -gt 0 ] \
   && ok "$P5LIVEN sealed_rank row(s) for $P5LIVE exist in the LIVE chain — the prospective ordering is on the record, not in a report" \
   || no "no live sealed ranking exists; every check below would pass vacuously"
+# WHAT MAKES THIS ARM PROSPECTIVE IS AN ORDERING, NOT AN ABSENCE.
+#
+# This block used to assert that the decision carried NO selection row, on the
+# reasoning that "nobody has selected yet" is the whole point. That reasoning
+# pins a PROXY in place of the PROPERTY, and the two come apart the moment the
+# experiment is actually used:
+#
+#   the property  the seal PRECEDED the selection   — permanent, and the only
+#                                                     thing that makes a sealed
+#                                                     ranking evidence about S1
+#   the proxy     no selection exists YET           — true only until somebody
+#                                                     selects, which is the
+#                                                     experiment WORKING
+#
+# So the old assertion failed exactly when the arm succeeded, and could only
+# ever pass while the thing it guarded had never been exercised. It is the same
+# resolvability-vs-identity error this tree keeps finding: a stand-in checked in
+# place of the property it stands in for.
+#
+# The replacement is STRICTLY STRONGER. Before a selection it asserts the same
+# absence. After one it asserts the ordering itself, by driving the guard: if a
+# ranking could still be sealed for a decision that carries a selection, the
+# seal on the record would prove nothing about when it was written.
 if "$RECDEC" get "$P5LIVE" decision_id --store "$TEL" >/dev/null 2>&1; then
-  no "the prospective decision ALREADY carries a selection row — the arm is retrospective and proves nothing S1 could not have fitted"
+  # Driven against COPIES of the live stores: a bug in the refusal path must not
+  # be able to append to the live digest chain from inside a test.
+  mkdir -p "$WORK/p5order"
+  cp "$TEL" "$WORK/p5order/tel.tsv"; cp "$SNAP" "$WORK/p5order/snap.tsv"
+  if "$RECDEC" seal-ranking --decision-id "$P5LIVE" \
+       --candidate-ids "PACKET-9999-order-probe" --ordering "1:PACKET-9999-order-probe" \
+       --ranking-rule s1-v1 --captured-at PROBE --repository-commit PROBE \
+       --snapshot-ids PROBE --source-object-versions PROBE --evidence-refs PROBE \
+       --store "$WORK/p5order/tel.tsv" --snapshots "$WORK/p5order/snap.tsv" \
+       > "$WORK/p5order.out" 2>&1; then
+    no "$P5LIVE carries a selection AND a ranking can still be sealed for it — the sealed ordering on the record proves nothing about when it was written"
+  else
+    grep -q 'RANKING-AFTER-SELECTION' "$WORK/p5order.out" \
+      && ok "$P5LIVE carries a selection, and sealing a ranking for it is now REFUSED with RANKING-AFTER-SELECTION — the seal on the record therefore PREDATES the choice, which is the ordering the arm exists to establish and is stronger than the absence this once asserted" \
+      || no "sealing after selection was refused for some other reason — the ordering is not what is being enforced"
+  fi
+  cmp -s "$WORK/p5order/snap.tsv" "$SNAP" \
+    && ok "...and the probe appended nothing to the snapshot chain — the refusal lands before any write, so driving this guard cannot itself corrupt the evidence it checks" \
+    || no "the refused probe modified the snapshot store copy"
 else
-  ok "$P5LIVE has NO row in decision_telemetry.tsv — the ordering is sealed and NOBODY HAS SELECTED YET, which is the whole point of the arm"
+  ok "$P5LIVE has NO row in decision_telemetry.tsv yet — the ordering is sealed and nobody has selected, so the arm is still awaiting its choice"
 fi
 # The sealed ordering must be exactly what s1-v1 produces over the frozen
 # snapshots. The provisional telemetry row below is built HERE, in $WORK, and is

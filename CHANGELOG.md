@@ -71,7 +71,7 @@ deprecation cycle. Pin a commit if you need stability.
   entry**, and with it the twenty-first declared mismatch, because the in-place
   outcome amendment is a mutation surface the census did not carry and the
   existing record says in its own words *"never an edit to an existing one"*.
-  Suite **1963 passed**, 0 failed; `scan-controls.sh check` and
+  Suite **1964 passed**, 0 failed; `scan-controls.sh check` and
   `scan-mutators.sh check` both exit 0; zero re-authorisations.
 
   **The seal had a second, unguarded door, and review found it.** `seal-ranking`
