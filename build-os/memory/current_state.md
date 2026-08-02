@@ -45,7 +45,19 @@
   `no tags` because `tests/release_metadata_tests.sh:322` requires it, so the residue item is
   annotated rather than rewritten. Whether the tag was created with an explicit go is not
   determinable from here and no claim is made.
-- **Build/test command:** `bash tests/build_os_tests.sh` (2096 checks; no network; temp dirs)
+- **Build/test command:** `bash tests/build_os_tests.sh` (2103 checks; no network; temp dirs)
+  — **2103 as of `PACKET-0036-measurement-integrity`.** The delta is **+7**, all of it
+  `tests/build_os_tests.sh` §28, the guard for `DEFECT-0013`; every other chained suite is
+  **+0**, including `tests/speed_benchmark_tests.sh`, which held at **169** because that
+  packet **converted** three assertions rather than adding any.
+  **AND THIS IS THE FIRST TOTAL IN SEVERAL PACKETS THAT IS A CONSTANT RATHER THAN A SAMPLE.**
+  `DEFECT-0013` is closed: the race that made this number 2095-or-2096 depending on scheduling
+  measured **628/4000 (15.70%)** before the fix and **0/4000** after, so a single green run is
+  again sufficient evidence for THIS defect. The doubled-run discipline is retained anyway,
+  for the reason given in `residue.md` — one repaired non-determinism is not a proof of
+  determinism.
+  The prior figure and its provenance are preserved below because the reasoning still stands:
+- **PREVIOUS (`PACKET-0035`):** 2096 checks
   — measured on a quiet tree at `ea069a7` plus `PACKET-0035-cross-surface-memory-kernel`'s
   build **and its bounded six-item fix round**, from a SOLO full-capture run after an anchored
   `pgrep -fa '^bash tests/'` returned empty. **The delta is +101, ALL of it the new
@@ -58,7 +70,7 @@
   cause is a `pipefail`/SIGPIPE race in that suite reproduced at 117 of 4000 iterations. **The
   base total is therefore 1995 on a run where the race does not fire and 1994 on one where it
   does; it is not a property of this packet's changes.** Reconciled against
-  `CHANGELOG.md`, which carries the matching literal `**2096 passed**` (unsplit) in the
+  `CHANGELOG.md`, which carries the matching literal `**2103 passed**` (unsplit) in the
   release block `## [Unreleased]` -> `### In flight (not landed at the released commit)`.
   **CITED BY HEADING, NOT BY LINE NUMBER, from 2026-08-01 on** — the changelog grows from the
   top, so every line-citation into it decays on every packet, guaranteed rather than

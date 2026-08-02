@@ -68,8 +68,32 @@ deprecation cycle. Pin a commit if you need stability.
   mismatches 21 -> 22**, and the twenty-second was forced by an executed refusal
   rather than argued: the write control at `execute` on a Class A licence drives
   `scan-controls.sh check` to exit 2 with `LAUNDERED` while it carries
-  `authority_mismatch: none`. Suite **2096 passed**, 0 failed (+101, all of it the
+  `authority_mismatch: none`. Suite 2096 passed, 0 failed (+101, all of it the
   new suite; every other suite +0). Zero re-authorisations.
+
+- **`gravito_measurement_integrity_a` (`PACKET-0036-measurement-integrity`) — the
+  suite stopped reporting its own plumbing as a failure.** `DEFECT-0013`: under
+  `pipefail`, `grep -q` exits on its first match, its producer dies of SIGPIPE
+  (`PIPESTATUS=[0 141 0]`), and the 141 becomes the pipeline's status — so a
+  correct assertion over a correct store printed FAIL. **Measured, not asserted:
+  628 false failures in 4000 runs (15.70%) before, 0 in 4000 after**, and on a
+  fixture past two pipe buffers 100.00% before and 0/2000 after. The fix drains
+  the consumer (`any`) instead of disabling `pipefail`, which stays on.
+
+  **The class was swept, not just the site.** 45 `pipefail`-enabling shell files,
+  235 candidate `producer | early-exiting consumer` pipelines; the 64 KiB pipe
+  buffer is the discriminator and **exactly one site could actually race**. The
+  neighbouring two assertions measured 0/4000 and were converted anyway, because
+  their safety was a property of today's file size and of which `awk` is
+  installed — measured: `grep -q`, `grep -m1`, `head -1`, `sed -n '1p;1q'` and a
+  bare `read` kill their producer 5/5; mawk's `exit` 0/5.
+
+  New guard, `tests/build_os_tests.sh` §28 — **7 assertions**, a red drive that
+  reproduces the race on an amplified fixture before the green claim is made, and
+  a static scanner over the whole tree with a **measured** allow-list. Suite
+  **2103 passed**, 0 failed (+7, all of it §28; every other suite +0). Census
+  **held at 105**, declared mismatches **held at 22**, gate-on-advise **held at
+  14**. Zero re-authorisations. **No new control.**
 
   **Six defects the reviewer found were fixed in a bounded third commit, and four
   of them were the packet claiming a perimeter it did not hold.** (1) The export

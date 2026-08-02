@@ -59,6 +59,30 @@ NCOLS=16
 datarows(){ tail -n +2 "$1" 2>/dev/null | grep -v '^[[:space:]]*$' | grep -v '^#'; }
 nrows(){ datarows "$1" | wc -l | tr -d ' '; }
 
+# `any` ANSWERS "did the upstream stage emit at least one line?" AND IT IS NOT A
+# `grep -q .` WITH A LONGER NAME. THE DRAINING IS THE WHOLE POINT.
+#
+# DEFECT-0013. `grep -q` exits the instant it matches. Its producer is then still
+# writing, gets SIGPIPE, and dies 141 — and `set -o pipefail` (line 32, and it is
+# load-bearing everywhere else in this file) promotes that 141 to the status of
+# the whole pipeline. So `producer | grep -q . && ok || no` prints FAIL while the
+# assertion is right and the data is right: the harness reports its own plumbing.
+#
+# IT IS ONE-DIRECTIONAL — it can manufacture a false FAIL and can never mask a
+# real one — which is exactly what makes it dangerous: a false "went red" written
+# into an outcome record is a lie the comparison layer will later be trained on.
+#
+# MEASURED ON THIS TREE, not inferred: at the §10 git-backed assertion the
+# shipped `grep -q` form failed **628 times in 4000** (15.70%) with
+# `PIPESTATUS=[0 141 0]`; `any` failed **0 in 4000**. The threshold is the 64 KiB
+# pipe buffer — a producer that fits in one buffer issues one write and cannot be
+# caught mid-stream, which is why the neighbouring assertions never flapped.
+#
+# `any` reads to EOF and only then decides. The producer therefore ALWAYS reaches
+# EOF, there is no SIGPIPE for `pipefail` to promote, and the answer does not
+# depend on who was scheduled first. `pipefail` stays ON for this file.
+any(){ awk 'BEGIN{r=1} {r=0} END{exit r}'; }
+
 # Body rows of a rendered report's per-packet table, TOTAL row excluded.
 rep_body(){ awk '/REPORT:PACKETS:START/{f=1;next} /REPORT:PACKETS:END/{f=0} f' "$1" \
             | grep '^| ' | grep -v '^| packet ' | grep -v '^|---' | grep -v 'TOTAL'; }
@@ -414,12 +438,27 @@ done < <(datarows "$STORE")
 # At least one row must be honest about being unmeasured, and at least one must
 # be git-backed. A corpus that is all estimate proves nothing; a corpus that is
 # all git is hiding the parts it could not measure.
-datarows "$STORE" | awk -F'\t' '$15=="git"||$15=="mixed"' | grep -q . \
+#
+# ALL THREE USE `any` AND NOT `grep -q`, AND ONLY THE FIRST WAS EVER OBSERVED TO
+# FLAP. That asymmetry is measured, not assumed: the first assertion's `awk`
+# emits 72147 bytes — past the 64 KiB pipe buffer, so it MUST issue more than one
+# write and can be caught mid-stream — and it failed 628/4000. The second and
+# third emit 462 and 519 bytes, one write each, and failed 0/4000 and 0/4000.
+#
+# THE OTHER TWO ARE CONVERTED ANYWAY, AND THE REASON IS NOT TIDINESS. Their
+# safety is a property of TODAY'S FILE SIZE, not of their structure — the third
+# is the worst of the three structurally, because its `awk` stops after 519 bytes
+# while `datarows` still has 72 KB to push. It survives only because mawk's
+# `exit` happens not to kill its producer on this toolchain (measured: 0/5 at
+# 141, against 5/5 for `grep -q`, `grep -m1`, `head -1`, `sed -n '1p;1q'` and a
+# bare `read`). A guarantee that rests on which awk is installed is not a
+# guarantee. Draining makes all three structural.
+datarows "$STORE" | awk -F'\t' '$15=="git"||$15=="mixed"' | any \
   && ok "the corpus contains at least one git-backed row" || no "no seeded row is git-backed"
-datarows "$STORE" | awk -F'\t' '$15=="transcript"||$15=="estimate"' | grep -q . \
+datarows "$STORE" | awk -F'\t' '$15=="transcript"||$15=="estimate"' | any \
   && ok "the corpus contains at least one openly non-git row (nothing is dressed up as measured)" \
   || no "no seeded row is marked transcript/estimate — every unmeasured figure would be posing as measured"
-datarows "$STORE" | awk -F'\t' '{for(i=4;i<=13;i++) if($i=="-"){print; exit}}' | grep -q . \
+datarows "$STORE" | awk -F'\t' '{for(i=4;i<=13;i++) if($i=="-"){print}}' | any \
   && ok "at least one seeded cell is left empty rather than guessed" \
   || no "no seeded cell is empty — every unknown appears to have been filled in with a guess"
 

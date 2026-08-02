@@ -80,6 +80,78 @@ position-bearing projection is itself a false-negative generator** — the same
 family as `DEFECT-0013`, arriving by a different route. Not in this packet's
 scope to fix; **named, not normalised.**
 
+## RESULT — what was measured, and the ruling
+
+**THE FIX, MEASURED AT THE SITE.** `tests/speed_benchmark_tests.sh` §10, the
+git-backed assertion, run against the live store:
+
+| form | iterations | false FAILures | rate |
+|---|---|---|---|
+| shipped `… \| awk \| grep -q .` | 4000 | **628** | **15.70%** |
+| fixed `… \| awk \| any` | 4000 | **0** | **0.0000%** |
+
+and on a fixture amplified past two pipe buffers (217972 bytes), where the effect
+saturates: **1000/1000 = 100.00% before, 0/2000 after.** `PIPESTATUS=[0 141 0]`
+— element 2, the `awk`, killed by SIGPIPE. `pipefail` **stays on** for the file;
+the consumer was made to drain instead.
+
+**THE CLASS SWEEP.** 45 `pipefail`-enabling shell files across `tests/`,
+`build-os/` and `.claude/hooks/`; **235** candidate `producer | early-exiting
+consumer` pipelines. **Exactly one could race.** The discriminator is the 64 KiB
+pipe buffer, and it was **calibrated rather than assumed**: streams under one
+buffer measured **0/4000**, streams over it **1.80%–100%**.
+
+| site | producer volume into the killer | measured | disposition |
+|---|---|---|---|
+| `speed_benchmark_tests.sh` §10 git-backed | **72147 B** — over the buffer | **628/4000** | **FIXED** |
+| `speed_benchmark_tests.sh` §10 non-git | 462 B, one write | 0/4000 | converted anyway |
+| `speed_benchmark_tests.sh` §10 empty-cell | 519 B out, **72609 B in** | 0/4000 | converted anyway |
+| `record-packet.sh` `datarows \| cut \| grep -qxF` | 622 B | 0/4000 | recorded, allow-listed |
+| `speed_benchmark_tests.sh` `datarows "$RT" \| head -n1` (×2) | ~200 B fixture | 0/4000 | recorded, allow-listed |
+| ~40 `sed … FILE \| head -N` diagnostic dumps | ≤8056 B measured | — | recorded; status discarded, no `set -e` |
+| 3 scripts with `set -e` **and** `pipefail` | — | — | **zero** early-exiting pipelines in them |
+
+**THE TWO NON-RACY §10 ASSERTIONS WERE CONVERTED ANYWAY, AND NOT FOR TIDINESS.**
+The empty-cell assertion is structurally the *worst* of the three — its `awk`
+stops after 519 bytes while `datarows` still has 72 KB to push — and it measures
+0/4000 only because **mawk's `exit` happens not to kill its producer on this
+toolchain**: measured **0/5**, against **5/5 for `grep -q`, `grep -m1`, `head -1`,
+`sed -n '1p;1q'` and a bare `read`**. A guarantee that depends on which `awk` is
+installed is not a guarantee.
+
+**THE GUARD — `tests/build_os_tests.sh` §28, 7 assertions.** Two halves, on the
+§27 precedent: (a) a **red drive** that builds a fixture past two pipe buffers and
+*demonstrates* the `grep -q` form failing on correct data before any green claim
+is made, and (b) a **static scanner** over all 45 files with a measured
+allow-list. **The scanner's power is not asserted: it caught its own red-drive
+line** on first run, which is why that line now carries an exemption marker.
+
+**WHAT THE GUARD CANNOT SEE, stated rather than implied:**
+- **Volume — the thing that actually decides.** Whether a producer exceeds 64 KiB
+  is a runtime fact about data the scan never reads. **An allow-listed site whose
+  data later grows past a buffer becomes racy with nothing turning red.**
+- **Producer idioms it does not enumerate** — a function wrapping `cat`, a process
+  substitution, a `while read` fed by a big stream.
+- **A future `set -euo pipefail` script**, where a discarded 141 becomes fatal.
+  Today all three such scripts are clean, and **nothing enforces that.**
+
+## THE RULING ON EVIDENCE — and it is not the flattering one
+
+**A single green suite run is again sufficient evidence FOR THIS DEFECT. THE
+DOUBLED-RUN DISCIPLINE STAYS IN FORCE ANYWAY.**
+
+Those are not in tension, and the distinction is the point. What was measured is
+that **one named non-determinism is gone**. What would license dropping the
+discipline is that **no unnamed one remains** — and nothing here measures that.
+The evidence for the narrow claim is strong; the evidence for the broad claim was
+never collected, and answering the second question with the first one's data is
+precisely the epistemic error this packet exists to correct.
+
+The asymmetry settles it: the error is **one-directional**, so retaining the
+discipline costs one suite run and dropping it costs the credibility of every red
+this tree will ever report. **Retiring it is an operator act** and wants a second
+measured packet's worth of clean runs behind it, not this one. Residue `(nnnnn)`.
+
 ## Branch base
 
 Branched at `a2648dc` on `claude/project-handoff-merge-ramhds`, verified with

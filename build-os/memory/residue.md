@@ -2161,3 +2161,53 @@ not to be fixed outside that packet.**
   inverting the close order, **or the cross-check reads the total from a GENERATED file the
   builder owns.** Recorded because it is a routing and contract change, and the archivist does not
   take routing acts.
+
+- **(nnnnn) `DEFECT-0013` IS CLOSED, AND THE RULING ON WHAT ONE GREEN RUN NOW PROVES IS
+  DELIBERATELY NOT THE FLATTERING ONE.** The `pipefail`/SIGPIPE race is fixed and the fix is
+  measured, not asserted: the shipped `| grep -q` form produced **628 false FAILures in 4000
+  runs (15.70%)** at the §10 git-backed assertion, `PIPESTATUS=[0 141 0]`; the draining form
+  produced **0 in 4000**. On a fixture past two pipe buffers the same comparison is **100.00%
+  before and 0/2000 after**. **THE RULING: a single green run is again sufficient evidence FOR
+  THIS DEFECT, and the doubled-run discipline STAYS IN FORCE ANYWAY.** Those are not in tension
+  and the distinction is the whole point. What was measured is that *one named non-determinism*
+  is gone; what would justify dropping the discipline is that *no unnamed one remains*, and
+  nothing here measures that. The evidence for the narrow claim is strong and the evidence for
+  the broad claim was never collected. **The discipline is cheap and the error it catches is
+  one-directional — it manufactures false FAILs and can never mask a real one — so retaining it
+  costs a suite run and dropping it costs the credibility of every red this tree ever reports.**
+  Retiring it is an operator act and wants a second measured packet's worth of clean runs behind
+  it, not this one.
+
+- **(ooooo) THE CLASS SWEEP FOUND EXACTLY ONE RACY SITE, AND THE REASON THE OTHERS ARE SAFE IS
+  NOT STRUCTURAL.** 45 `pipefail`-enabling shell files under `tests/`, `build-os/` and
+  `.claude/hooks/`; **235** pipelines matching `producer | early-exiting consumer`; **one** could
+  actually race. The discriminator is the **64 KiB pipe buffer**, calibrated rather than assumed
+  — a producer under one buffer issues one write and measured **0/4000** at every site tried,
+  while synthetic streams over it measured **1.80%–100%**. **BUT THE SAFETY OF THE SURVIVORS IS
+  A PROPERTY OF TODAY'S DATA AND TODAY'S TOOLCHAIN, NOT OF THEIR SHAPE.** Two facts make that
+  concrete. First, the §10 empty-cell assertion is structurally the *worst* of the three — its
+  `awk` stops after 519 bytes while `datarows` still has 72 KB to push — and it measured 0/4000
+  only because **mawk's `exit` happens not to kill its producer on this toolchain**: measured
+  0/5, against **5/5 for `grep -q`, `grep -m1`, `head -1`, `sed -n '1p;1q'` and a bare `read`**.
+  Second, ~40 diagnostic `sed … FILE | head -N` dumps are safe on **two** independent counts —
+  their inputs are all under 8 KB, and their status is discarded in statement position with no
+  `set -e` anywhere in the tree — and **both counts are incidental.** The three scripts that DO
+  combine `set -e` with `pipefail` contain **zero** early-exiting pipelines, which is luck that
+  nothing enforces. **Open:** nothing prevents a future `set -euo pipefail` script from adding
+  one, and the new §28 scanner cannot see volume, so it would not fire.
+
+- **(ppppp) A COMMITTED PROJECTION IS COMPARED BYTE-FOR-BYTE AND CARRIES A LINE NUMBER, SO EVERY
+  EDIT ABOVE AN ANCHOR TURNS THE SUITE RED.** `DEFECT-0001-stale-line-reference`,
+  `OCCURRENCE-0014`, found by **committing this packet's own declaration**: adding text above the
+  `ANC-0003` content site moved it 15 → 40, `memory-kernel.sh` re-rendered
+  `build-os/kernel/exports/HANDOFF-0001-chatgpt-strategy.md` with the new position, and
+  `tests/memory_kernel_tests.sh` §18 reported `PROJECTION-DIVERGED` — suite **2095/1**. **The
+  identity half never failed** (`scan-controls.sh anchors`: 12 resolved, 0 violations); only the
+  **projected position** was stale. **This is the anchor scheme's own ruling — that a line number
+  is a navigation hint and not an identity — violated by the artefact that renders it**, and it
+  makes the reconcile a false-negative generator of the same family as `DEFECT-0013` by a
+  different route. **NOT FIXED HERE and deliberately so:** the remedies (drop the position from
+  the rendered citation, exclude it from the comparison, or regenerate projections pre-commit)
+  each change what a projection *is*, which is a design act on a v0 store this packet has no
+  licence over. The repair taken was the sanctioned one — regenerate the shadow, a pure read that
+  appended **no event** and touched **no canonical store**.

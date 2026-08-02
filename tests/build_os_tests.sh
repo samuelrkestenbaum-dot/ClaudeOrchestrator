@@ -973,6 +973,134 @@ else
   printf '%s' "$PIN_LEAK"
 fi
 
+echo "== 28. A pipeline may not report FAIL because of its own exit semantics (DEFECT-0013) =="
+# THE CLASS. Under `pipefail`, a consumer that exits before draining — `grep -q`,
+# `grep -m1`, `head`, `sed -n '1p;1q'`, a bare `read` — kills its producer with
+# SIGPIPE. The producer dies 141, `pipefail` promotes 141 to the pipeline status,
+# and `producer | grep -q . && ok || no` prints FAIL while the assertion is right
+# and the data is right. It is ONE-DIRECTIONAL: it can manufacture a false FAIL
+# and can never mask a real one, which is what makes it worth a guard — a false
+# "went red" is a lie that outlives the run, in a repository whose whole point is
+# comparing outcomes over time.
+#
+# IT ONLY FIRES ABOVE THE 64 KiB PIPE BUFFER. A producer whose entire output fits
+# in one buffer issues one write and cannot be caught mid-stream. So the shape
+# alone is not the defect; the shape PLUS a producer that outgrows a pipe buffer
+# is. That is why this section is two checks and not one.
+#
+# WHAT (a) AND (b) EACH DO, AND WHAT NEITHER DOES:
+#   * (a) is the POWER check. It builds a store past two pipe buffers and shows,
+#     by running them, that the `grep -q` form DOES report false failures on it
+#     and the draining form does NOT. Without it, (b) is a regex nobody has shown
+#     can catch anything.
+#   * (b) is the REGRESSION DETECTOR. It is a static scan, so it costs no time and
+#     names the offending line.
+#   * NEITHER CAN SEE VOLUME. Whether a producer exceeds 64 KiB is a runtime fact
+#     about data this scan never reads, so (b) flags the SHAPE and an allow-list
+#     carries the measurement that says a given site is safe today. A site on the
+#     allow-list whose data later grows past a buffer becomes racy with no test
+#     turning red. That is the guard's real blind spot and it is not closable by
+#     a static scan.
+#   * (b) IS ALSO ONLY AS GOOD AS ITS TWO PATTERNS. A producer idiom it does not
+#     enumerate (a function wrapping `cat`, a process substitution, a `while read`
+#     fed by a big stream) is invisible to it, and so is any pipeline written
+#     across physical lines in a way the join below does not reassemble.
+
+# (a) Behavioural: the mechanism, demonstrated on a fixture with real power.
+#     Amplified deliberately — the live store is ~72 KB and flaps at ~16%, which
+#     needs thousands of trials to see reliably; past two buffers the false-fail
+#     rate is essentially 1, so a handful of trials is decisive and fast.
+SP_W="$WORK/sigpipe"; mkdir -p "$SP_W"
+SP_STORE="$SP_W/big.tsv"
+: > "$SP_STORE"
+sp_i=0
+while [ "$sp_i" -lt 900 ]; do
+  sp_i=$((sp_i+1))
+  printf 'row%s\tgit\t%s\n' "$sp_i" "0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789" >> "$SP_STORE"
+done
+SP_BYTES="$(wc -c < "$SP_STORE" | tr -d ' ')"
+[ "$SP_BYTES" -gt 131072 ] \
+  && ok "the SIGPIPE fixture is $SP_BYTES bytes — past two 64 KiB pipe buffers, so the producer must issue several writes" \
+  || no "the SIGPIPE fixture is only $SP_BYTES bytes; it cannot exercise the race and every check below would pass vacuously"
+# RED DRIVE. The shipped-defect form, run on that fixture. It MUST fail at least
+# once, or this section is measuring nothing.
+SP_TRIALS=12
+SP_OLD=0; sp_i=0
+while [ "$sp_i" -lt "$SP_TRIALS" ]; do
+  sp_i=$((sp_i+1))
+  # sigpipe-scan-exempt — and the exemption is EARNED, not assumed: without it
+  # the scanner below reports THIS line, which is how we know it can see the
+  # shape at all. It is the one place the defect is written on purpose.
+  ( set -o pipefail; cat "$SP_STORE" | awk -F'\t' '$2=="git"' | grep -q . ) || SP_OLD=$((SP_OLD+1))   # sigpipe-scan-exempt
+done
+[ "$SP_OLD" -gt 0 ] \
+  && ok "RED DRIVE: the \`| grep -q\` form reported $SP_OLD/$SP_TRIALS false FAILures on correct data — the race is real and this fixture reproduces it" \
+  || no "RED DRIVE FAILED: the \`| grep -q\` form never flapped in $SP_TRIALS trials, so the green result below proves nothing"
+# GREEN. The draining form, same fixture, same trials, same pipefail.
+SP_NEW=0; sp_i=0
+while [ "$sp_i" -lt "$SP_TRIALS" ]; do
+  sp_i=$((sp_i+1))
+  ( set -o pipefail; cat "$SP_STORE" | awk -F'\t' '$2=="git"' | awk 'BEGIN{r=1} {r=0} END{exit r}' ) || SP_NEW=$((SP_NEW+1))
+done
+[ "$SP_NEW" = "0" ] \
+  && ok "the draining form reported 0/$SP_TRIALS false FAILures on the same fixture — the producer always reaches EOF, so pipefail has no 141 to promote" \
+  || no "the draining form still reported $SP_NEW/$SP_TRIALS false FAILures — the fix does not hold"
+# And the two forms must actually differ, or the fix is cosmetic.
+[ "$SP_OLD" -gt "$SP_NEW" ] \
+  && ok "the two forms are measurably different on identical data ($SP_OLD vs $SP_NEW false FAILures)" \
+  || no "the shipped form and the draining form behave identically here — nothing was fixed"
+
+# (b) Static: no NEW instance of the shape may appear. A site is reported when an
+#     UNBOUNDED-ARTEFACT producer (`datarows`, `cat FILE`, `tail -n +N`) feeds a
+#     KILLER consumer in the same logical statement. Both patterns are named here
+#     rather than inline so a reader can see exactly how blind the scan is.
+SP_STREAM='datarows[[:space:]]|cat[[:space:]]+[-"$]|tail[[:space:]]+-n[[:space:]]*\+'   # sigpipe-scan-exempt
+SP_KILL='grep[[:space:]][^|]*-[a-zA-Z]*q|grep[[:space:]][^|]*-m[[:space:]]*[0-9]|head([[:space:]]|$)|sed[[:space:]]+-n[^|]*[0-9]q|\{[[:space:]]*read[[:space:]]'  # sigpipe-scan-exempt
+# THE ALLOW-LIST IS A MEASUREMENT, NOT A PARDON. Each entry was run 4000 times
+# against the live artefact and reported ZERO false failures, because the bytes
+# reaching its killer consumer fit inside one pipe buffer:
+#   build-os/metrics/record-packet.sh  `datarows | cut -f1 | grep -qxF`
+#       — `cut -f1` emits 622 bytes; 0/4000.
+#   tests/speed_benchmark_tests.sh     `datarows "$RT" | head -n1`  (x2)
+#       — `$RT` is a 1-2 row temp fixture, ~200 bytes; 0/4000.
+# Adding an entry here is a claim that you measured it. Say the number.
+SP_ALLOW='build-os/metrics/record-packet.sh|tests/speed_benchmark_tests.sh'   # sigpipe-scan-exempt
+SP_HITS=""; SP_NHIT=0; SP_NALLOW=0; SP_SCANNED=0
+while IFS= read -r sp_f; do
+  [ -f "$sp_f" ] || continue
+  SP_SCANNED=$((SP_SCANNED+1))
+  sp_rel="${sp_f#$SRC/}"
+  sp_buf=""; sp_lno=0; sp_start=0
+  while IFS= read -r sp_raw || [ -n "$sp_raw" ]; do
+    sp_lno=$((sp_lno+1))
+    [ -n "$sp_buf" ] || sp_start=$sp_lno
+    if [[ "$sp_raw" == *\\ ]]; then sp_buf="${sp_buf}${sp_raw%\\} "; continue; fi
+    if [[ "$sp_raw" =~ \|[[:space:]]*$ ]]; then sp_buf="${sp_buf}${sp_raw} "; continue; fi
+    sp_line="${sp_buf}${sp_raw}"; sp_buf=""
+    case "$sp_line" in *sigpipe-scan-exempt*) continue ;; esac   # sigpipe-scan-exempt
+    [[ "$sp_line" =~ ^[[:space:]]*# ]] && continue
+    [[ "$sp_line" =~ $SP_STREAM ]] || continue
+    # The killer must come AFTER a pipe, otherwise `head -n1 FILE` (no pipe at
+    # all, so no SIGPIPE possible) would be reported.
+    [[ "$sp_line" =~ \|[^|]*($SP_KILL) ]] || continue
+    SP_NHIT=$((SP_NHIT+1))
+    if [[ "$sp_rel" =~ ^($SP_ALLOW)$ ]]; then SP_NALLOW=$((SP_NALLOW+1)); continue; fi
+    SP_HITS="${SP_HITS}      | ${sp_rel}:${sp_start}: ${sp_line}"$'\n'
+  done < "$sp_f"
+done < <(grep -rlE '^set -[a-z]*o pipefail' "$SRC/tests" "$SRC/build-os" "$SRC/.claude/hooks" --include='*.sh' 2>/dev/null | sort)
+[ "$SP_SCANNED" -ge 40 ] \
+  && ok "the SIGPIPE scanner read $SP_SCANNED pipefail-enabling shell files (>= 40, not vacuous)" \
+  || no "the SIGPIPE scanner read only $SP_SCANNED pipefail-enabling file(s) — it has gone blind, so its verdict below means nothing"
+[ "$SP_NHIT" -ge 1 ] \
+  && ok "the SIGPIPE scanner still matches the shape at $SP_NHIT known site(s) — the pattern has not rotted into matching nothing" \
+  || no "the SIGPIPE scanner matched the shape NOWHERE, not even at the measured allow-list sites — the pattern is broken, not the tree clean"
+if [ -z "$SP_HITS" ]; then
+  ok "no unmeasured \`producer | early-exiting consumer\` pipeline exists under pipefail ($SP_NALLOW allow-listed, each measured 0/4000)"
+else
+  no "a pipeline can report FAIL from its own exit semantics — measure it over >=4000 runs, or drain the consumer"
+  printf '%s' "$SP_HITS"
+fi
+
 echo
 echo "==== RESULT: $PASS passed, $FAIL failed ===="
 [ "$FAIL" -eq 0 ]

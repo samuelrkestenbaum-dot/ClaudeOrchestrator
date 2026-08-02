@@ -302,4 +302,16 @@ root_cause_class: harness_reports_its_own_plumbing
 symptom: THE BASE RUN OF THE REPOSITORY SUITE, BEFORE ANY EDIT, RETURNED 1994 passed / 1 failed — `no seeded row is git-backed` — against a live store in which 16 of 17 rows carry evidence class `mixed`. The same suite run alone returned 169/0, and the same four suites run in chain order beforehand did not reproduce it. Isolated and MEASURED: the pipeline `datarows | awk | grep -q .` returns 141 in 117 of 4000 iterations against the live packet metrics store, because `grep -q` exits on the first match and `pipefail` then reports the producer's SIGPIPE as the pipeline's status.
 prevented_by: nothing — the suite's own verdict is the value being corrupted, so no assertion inside it can see the corruption
 could_have_been_prevented_by: capturing the producer's output and testing it (`out="$(... )"; [ -n "$out" ]`), or dropping the early-exiting consumer, in any pipeline whose status is read as a verdict under pipefail
-evidence_refs: tests/speed_benchmark_tests.sh:417; tests/speed_benchmark_tests.sh:419
+evidence_refs: tests/speed_benchmark_tests.sh:456; tests/speed_benchmark_tests.sh:458
+
+occurrence: OCCURRENCE-0014
+defect_class_id: DEFECT-0001-stale-line-reference
+packet_id: PACKET-0036-measurement-integrity
+detected_stage: builder
+escaped_stage: builder
+affected_objects: build-os/kernel/exports/HANDOFF-0001-chatgpt-strategy.md; build-os/tools/memory-kernel.sh; tests/memory_kernel_tests.sh
+root_cause_class: reference_by_position
+symptom: THE MECHANISM BUILT TO DEMOTE LINE NUMBERS COMMITTED ONE INTO A BYTE-COMPARED ARTEFACT. `memory-kernel.sh` renders each artifact citation as `path:line#ANCHOR`, where the line is a RETURN VALUE of the content resolver and correct at render time; the rendered projection is then committed, and `tests/memory_kernel_tests.sh` section 18 regenerates it and compares with `cmp -s`. Declaring this packet added text ABOVE the ANC-0003 content site in build-os/packets/active_packet.md, the resolver returned 40 where the committed file said 15, and the repository suite went 2095/1 with PROJECTION-DIVERGED. The identity half never failed: scan-controls.sh resolved ANC-0003 at the new position throughout, 0 violations. Only the projected POSITION was stale, and it was stale because it had been frozen into a file whose comparison is byte-exact
+prevented_by: nothing — every part behaved as designed. The resolver was right, the comparison was right, and the artefact was regenerable; the defect is that a POSITION was persisted at all into something compared byte for byte
+could_have_been_prevented_by: rendering the citation WITHOUT the resolved line (the anchor alone is the identity, and the scheme's own ruling is that the line is a navigation hint), or excluding the position from the reconcile comparison, or regenerating projections as a pre-commit step rather than comparing a frozen one. As it stands, EVERY content-preserving edit above ANY anchored site turns the suite red until the shadow is regenerated, so the reconcile is itself a false-negative generator of the same family as DEFECT-0013 and a different cause
+evidence_refs: build-os/tools/memory-kernel.sh; tests/memory_kernel_tests.sh; build-os/kernel/exports/HANDOFF-0001-chatgpt-strategy.md

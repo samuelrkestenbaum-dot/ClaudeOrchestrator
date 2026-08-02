@@ -472,7 +472,7 @@ FAM_EXCL="$WORK/fam_excluded.txt"
 cat > "$FAM_EXCL" <<'EOF'
 tests/build_os_maintenance_tests.sh:193
 tests/pilot_kit_tests.sh:340
-tests/speed_benchmark_tests.sh:405
+tests/speed_benchmark_tests.sh:429
 EOF
 ( cd "$SRC" && grep -rnE -- '-ge[[:space:]]+[0-9]+|-gt[[:space:]]+[0-9]+' tests/*.sh 2>/dev/null ) \
   | grep -vE -- '-ge[[:space:]]+[01][^0-9]|-gt[[:space:]]+0[^0-9]' \

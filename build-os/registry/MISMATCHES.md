@@ -540,7 +540,7 @@ audit is how a census shrinks quietly:
   and not a floor on a scan of the tree.
 - `tests/pilot_kit_tests.sh:340` (`-ge 15`) — a length floor on failure *text*
   inside a falsifiability driver, not a coverage floor.
-- `tests/speed_benchmark_tests.sh:405` (`-ge 12`) — `[ "${#nt}" -ge 12 ]` is a
+- `tests/speed_benchmark_tests.sh:429` (`-ge 12`) — `[ "${#nt}" -ge 12 ]` is a
   floor on the LENGTH OF A STRING, identical in kind to the exclusion above it,
   not a floor on how much a scan of the tree covered. The membership rule admits
   coverage and size floors; a minimum note length is neither.
@@ -551,7 +551,7 @@ audit is how a census shrinks quietly:
   line twice". Neither half held. `metrics.record.note_minimum` cites
   `build-os/metrics/record-packet.sh:51` and `:119` — the constant and the
   comparison in the recorder — and **no entry cites
-  `tests/speed_benchmark_tests.sh:405` at all**; including it produces zero
+  `tests/speed_benchmark_tests.sh:429` at all**; including it produces zero
   duplicates under §22. The exclusion was right and its justification was
   invented, which is the more dangerous of the two failures: a wrong exclusion
   gets caught by re-running the rule, and a wrong reason is what the rule is
