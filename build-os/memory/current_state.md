@@ -149,7 +149,15 @@
   begin making better decisions than today's planning approaches."*
   **THE SEQUENCE IS FIVE PHASES: P1 mutators/IDs/telemetry (DONE) -> P2 claim-scoped evidence
   (DONE) -> P3 `accept_and_constrain` (DONE) -> P4 S1 shadow ranker (**DONE**) -> P5
-  outcome/counterfactual telemetry (**NEXT**).**
+  outcome/counterfactual telemetry (**DONE**).**
+  **[THE FIVE-PHASE SEQUENCE IS COMPLETE, 2026-08-02, at the
+  `gravito_p5_outcome_counterfactual_telemetry_a` close.** What it delivered, stated at the level
+  the operator asked the question: P4 built the executive MECHANISM, P5 built the APPARATUS FOR
+  MEASURING IT. **Neither has demonstrated executive capability, and P5 says so in its own
+  residue.** The honest statement of where the sequence lands is the transition from
+  **IMPOSSIBLE TO DEMONSTRATE** to **POSSIBLE TO DEMONSTRATE**: there is now a sealed ordering
+  that a later human selection can CONTRADICT. Nobody has selected, so nothing is demonstrated
+  yet. **P6 IS NOT DEFINED AND IS NOT THE ARCHIVIST'S TO DEFINE.]**
   **P4 CARRIES A DECLARED GOVERNANCE CEILING, AND IT IS THERE BECAUSE OF P3's DENSITY:**
   **`<=1 new census control, no new registry store, no new validator tool, no new suite file`.**
   Ledger at the end of P3: **97 controls, ~20 tools, ~1869 assertions, ZERO executive components.**
@@ -169,11 +177,22 @@
   anti-shelfware guard makes a `<=1 new control` ceiling **UNREACHABLE FOR ANY NEW REFUSING TOOL**,
   and it will fire again on the next one. **The ledger the ceiling was written against has now
   changed: 99 controls, ~20 tools, 1909 assertions, and ONE executive component.]**
-- **IN FLIGHT:** `gravito_p5_outcome_counterfactual_telemetry_a`
+  **[SUPERSEDED 2026-08-02 at the P5 close, and the figure is DERIVED not remembered:
+  100 controls (`grep -c '^control: '`), ~20 tools, 1963 assertions, ONE executive component
+  and ONE apparatus for measuring it. The old figures are left visible because a ledger that
+  silently refreshes cannot show that it went stale.]**
+- **Last closed packet:** `gravito_p5_outcome_counterfactual_telemetry_a`
   (`PACKET-0032-p5-outcome-counterfactual-telemetry` — REUSED, not minted: it is the id
   `DECISION-0010` already carries for this work, collision-checked against every `PACKET-*` in
   the tree, because a fresh id would put two candidates under one key inside the store S1 reads).
-  Base `80ad634`, commits `cda95d2` (declaration) + this build. **P5 OF THE OPERATOR'S FIVE.**
+  **CLOSED 2026-08-02. VERDICT: PASS-AS-FIXED** — the reviewer returned `fix-then-pass` on 3
+  enumerated items and all 3 were fixed and verified live by the orchestrator.
+  Receipt `build-os/receipts/gravito_p5_outcome_counterfactual_telemetry_a.md`.
+  Base `80ad634` (re-verified at close: `git merge-base adef6ad 80ad634` = `80ad634`), commits
+  `cda95d2` (declaration) + `44b0fab` (build) + `adef6ad` (fix round). **None pushed.**
+  **`44b0fab` IS THE SEAL'S ANCHOR AND MUST NOT BE AMENDED** — the ordering's entire
+  before-the-selection claim is that it was committed before any commit could carry a selection.
+  **P5 OF THE OPERATOR'S FIVE — AND THE LAST OF THEM.**
   **THE POINT OF P5, AND IT IS NOT ANOTHER SUPPORTING PACKET.** P4 built the executive
   MECHANISM and its capability is UNDEMONSTRATED. P5 makes the transition from *decision already
   made -> S1 reconstructs a ranking* to *S1 ranks FIRST -> human chooses -> outcome occurs*.
@@ -247,7 +266,122 @@
   deliberately has no row); ZERO RE-AUTHORISATIONS** (no `runtime_authority`, `required_authority`,
   `class`, `empirical_status` or `implementation_status` line was removed from any existing
   control; the only additions belong to the new entry).
-- **Last closed packet:** `gravito_p4_s1_shadow_ranker_a`
+  **THE HEADLINE DEFECT, AND IT WAS IN THIS PACKET'S OWN HEADLINE GUARD.** `seal-ranking` refused
+  a post-hoc seal correctly, and the `snapshot` subcommand was A SECOND, UNGUARDED DOOR TO THE
+  SAME SIGNAL. The reviewer's EXECUTED reproduction wrote a `sealed_rank` row for the
+  already-selected `DECISION-0010`; it CHAINED CLEANLY, `snapshot-verify` reported 98 snapshots
+  verifying, and `prospective_decisions_with_a_recorded_selection` moved **0 -> 1** — the exact
+  figure this packet publishes as the ONLY thing that could ever make `rank_of_selected` evidence
+  about S1. **A permanently retrospective decision converted into a prospective one through a
+  sanctioned tool path, leaving NO TRACE.**
+  **WHY BOTH GATES WERE RIGHT, AND THIS IS THE LESSON WORTH KEEPING.** qa attacked the ordering
+  guard exhaustively and its reasoning was CORRECT: direct TSV writes CAUGHT (the guard reads
+  store STATE, not tool provenance), casing CAUGHT, reseal CAUGHT, out-of-band edits CAUGHT,
+  `SET-CHANGED-AFTER-SEAL` and `TIMESTAMP-CONTRADICTS-ORDER` both fire, and only the DISCLOSED
+  delete-then-re-add route works. But it read `decision_telemetry.tsv` for selection rows while
+  `sealed_rank` lives in `signal_snapshots.tsv`. **TWO STORES, ONE GUARDED.** The INVARIANT was
+  *"a ranking cannot be sealed after a selection"*; the IMPLEMENTATION was *"a selection row
+  cannot precede a seal IN THIS FILE."* **Those read identically until somebody writes to the
+  other file.**
+  **FIXED AND GENERALISED:** `RANKER-FIELD-VIA-SNAPSHOT` is keyed on the tool's own
+  `RANKER_FIELDS` constant, so all SIX ranker fields are refused through `snapshot` and **a
+  seventh declared later is closed by the same line**. Orchestrator-verified live — `sealed_rank`,
+  `rank_of_selected`, `ranking_agreement`, `ranker_skill`, `ranking_digest`,
+  `counterfactual_regret` all exit 2 with the stores byte-identical after every attempt
+  (`cmp -s`). **Not over-broad:** `candidate_write_surface` still writes through `snapshot` and
+  `seal-ranking` still writes `sealed_rank` through the shared primitive. **The refusal sits on
+  the CLI door, not on the chaining rule.**
+  **THE PERIMETER STATEMENT WAS WRONG, NOT MERELY INCOMPLETE, AND WAS CORRECTED.** The header
+  said *"tamper-EVIDENT against the realistic case"*. Delete-and-re-add breaks the chain and IS
+  evident; this route left the chain verifying and produced NO evidence at all. It now states
+  that **the perimeter is the TOOL, not the files.**
+  **AND `CANDIDATE-RANKED-TWICE`:** an ordering giving one candidate two ranks was ACCEPTED —
+  only `rank=1` entered the digest chain while the printed `sealed_ordering:` echoed the
+  contradiction back, so **the receipt and the chained evidence described different orderings.**
+  Now refused during the PARSE, before any append; the store directory is empty afterwards, so
+  nothing half-sealed enters the chain.
+  **THE PARTITION IS THE STRONGEST THING IN THE PACKET. 8 selection + 19 outcome = 27 = EVERY
+  COLUMN**, set-equal, verified by construction AND by driving it: `assert_partition` fails
+  closed in **all three** directions (unowned column, double-owned column, ranker field promoted
+  to a column). Six ranker fields own no column; **12/12 refusals across both paths**.
+  `sealed_rank` is reported `UNINTERPRETED` **live and derived, not hardcoded** — **a ranker
+  cannot score a candidate on the rank it gave it.**
+  **CATEGORIES ARE DERIVED, PROVEN BY PERTURBATION:** giving an UNRELATED decision a `model_calls`
+  value shifted `DECISION-0010`'s own report NEVER-COLLECTED **12 -> 11** and MISSING **4 -> 5**
+  without touching it. **`wc -l` appears nowhere in `record-decision.sh`** — the `(aaaa)`
+  discipline is live in code, and the snapshot store is **97 ROWS but 176 LINES**.
+  **SECTION 14 IS RED-DRIVEN, PROVEN BY MUTATION:** deleting the `RANKING-AFTER-SELECTION`
+  refusal drives the suite to **135/1**, *"RED FAILED: the order is documentation, not
+  enforcement"*. Removing EITHER `OUTCOME-BEFORE-SELECTION` guard alone keeps it green —
+  **defence in depth, not a coverage gap.**
+  **THE CEILING HELD STRUCTURALLY, NOT RHETORICALLY:** `git diff --diff-filter=A` returns **no
+  new files at all**; the residue diff has **0 removed lines**, purely additive; and
+  `build-os/metrics/rank-candidates.sh` is an **IDENTICAL BLOB** `5543ea88...` at base, at
+  `44b0fab` and at HEAD, re-verified by `git rev-parse` at close. No signal-set redesign, no
+  promotion, no dispatch.
+  **THE 20 -> 21 MISMATCH EXCEPTION WAS PRINCIPLED, AND THE REVIEWER VERIFIED IT RATHER THAN
+  TRUSTING IT:** `MUT-0006`'s base `write_scope` really did say *"never an edit to an existing
+  one"* and is preserved as a **byte-exact prefix** rather than rewritten; `outcome` is genuinely
+  the first amending write in the census; section 8 closes in BOTH directions and a third route
+  (reclassifying `class: A` -> `B`) is caught by `RELABELLED`. **THE REVIEWER'S RULING CARRIES
+  FORWARD UNSOFTENED: principled, but "the last one waved through on this reasoning." P6 SHOULD
+  HOLD AT 21.**
+  **THE `(cccc)` DIGEST DISPOSITION IS UPHELD.** `ranking_digest` covers the snapshot store's
+  GLOBAL chain head, so `DECISION-0010`'s moved `2fa876c6...` -> `a509eed7...` while the ENTIRE
+  S1 report differs by **exactly 2 lines** (`snapshot_chain_head`, `ranking_digest`) — every
+  rank, tie, Pareto status and `rank_of_selected: 1` byte-identical. **The ordering is immutable;
+  the digest was never an identifier of it.** A **claim defect, not an ordering defect**. Not
+  fixing it here is correct for a reason STRONGER than scope: `rank-candidates.sh` is **guard 1's
+  own protected surface**, and editing it in the packet that seals a ranking is precisely the
+  self-amendment guard 1 exists to prevent. The P4 receipt is an **identical blob**
+  `1bcb8bf3...` at base and HEAD — **not rewritten**.
+  **THE HONEST VERDICT, IN THE REVIEWER'S OWN WORDS AND UNSOFTENED:** *"P5 builds the apparatus
+  for measuring executive capability and does not yet demonstrate it. It cannot — the
+  demonstration requires a human to select from `DECISION-0011` and the work to complete, neither
+  of which has happened. What P5 legitimately delivers is the transition from IMPOSSIBLE TO
+  DEMONSTRATE to POSSIBLE TO DEMONSTRATE, plus a first ordering that can actually be wrong."*
+  And residue `(hhhh)`, written UNPROMPTED by the builder: *"What P5 delivers is a decision that
+  CAN falsify S1, not a decision that has."* **Non-degeneracy is NOT A RESULT** — the 20 evidence
+  snapshots were hand-assigned by the same builder in the same commit. **Falsifiable, not
+  falsified.**
+  **THE OUTCOME ARM IS THINNER THAN THE COMMIT MESSAGE SUGGESTS, AND THE PACKET SAYS SO:** its
+  actual new outcome data is **ONE field** (`result` `unknown` -> `in_flight`); the other two
+  recorded values pre-existed. Residue `(ffff)` names the counter-temptation explicitly — writing
+  `rollback_count: 0@measured` for unexecuted work **would have looked like a clean run** and
+  would have been a fabrication. It was not written.
+  **TWO FALSE-PASSES THE BUILDER CAUGHT IN ITS OWN RED DRIVE**, recorded because the CLASS matters
+  more than the instances: the ranker-field loop was passing because
+  `SIGNAL-SNAPSHOT-9281-rank_of_selected` failed the snapshot-id pattern on its SHAPE rather than
+  being refused on its field NAME, and a "named in the refusal" check was matching the SUCCESS
+  output. **A red drive that passes for the wrong reason is a fresh instance of
+  resolvability-vs-identity** — this tree's named recurring trap, appearing inside the test
+  written to catch it.
+  **DEPTH: 3 SERIAL STAGES — builder, then qa || reviewer CONCURRENTLY, then the fix round. NO
+  STAGE 4**: the orchestrator verified the fix round itself (all six ranker fields refused live,
+  blob identity, store immutability, commit identity) rather than opening another gate stage.
+  **3 COMMITS — ONE OVER THE <=2 CAP**, same deviation and same reason as P3 and P4, recorded and
+  not normalised. **The file-ownership manifest is NOT fully disjoint and says so:** `cda95d2`
+  owns `active_packet.md` ALONE (intersection with both others EMPTY, `comm -12` verified at
+  close), while `44b0fab` and `adef6ad` **overlap on all 8 paths the fix round touched** — a
+  strict subset, separable by ORDER and not by path. Guard convention **14 files / +1550 / -141**;
+  net diff **14 / +1522 / -113**; the row records the GUARD's numbers per residue `(ggg)`.
+  **FINAL STATE AT `adef6ad`, ALL RE-DERIVED BY THE ARCHIVIST AT CLOSE FROM THE REGISTRY FILES
+  AND THE LIVE TOOLS: 100 controls; 77 gate / 15 advise / 7 execute / 1 observe / 0 rank / 0
+  none; class A75 / B3 / C22; 21 declared mismatches; `evidence-policy.sh check` 26 of 100 split
+  6/5/15; 10 decisions (UNCHANGED); 97 signal snapshots BY ROW COUNT (176 lines — the row count
+  is `grep -c '^SIGNAL-SNAPSHOT-'`, never `wc -l`); 25 of those bound to `DECISION-0011`; 9
+  mutator records; 0 live authority envelopes; suite 1963/0; maintenance 144/144;
+  `scan-controls`/`scan-mutators` exit 0; `snapshot-verify` 97 verifying at exit 0; ZERO files
+  added in the whole range; tree clean.**
+  **SECOND EYES: NONE — ELEVENTH CONSECUTIVE PACKET.** The router requires the reviewer to state
+  it rather than silently omit it, and **the reviewer complied**. **EVERY VERDICT IN THE ENTIRE
+  FIVE-PHASE SEQUENCE IS SINGLE-MODEL.**
+  **OPEN, AND NOT THE ARCHIVIST'S TO CLOSE: SELECTING FROM `DECISION-0011` IS AN OPERATOR ACT.**
+  Recording a selection here would move
+  `prospective_decisions_with_a_recorded_selection` from 0 to 1 with no human having chosen —
+  **the exact figure the reviewer's reproduction exploited** — and would destroy the thing the
+  packet built.
+- **Previously closed:** `gravito_p4_s1_shadow_ranker_a`
   (`PACKET-0034-gravito-p4-s1-shadow-ranker-a`) — **THE FIRST EXECUTIVE COMPONENT: A REAL CANDIDATE
   SET IN, AN IMMUTABLE EXPLAINED ORDERING OUT — AND THE FIRST ORDERING IT PRODUCED IS DEGENERATE**
   (receipt `build-os/receipts/gravito_p4_s1_shadow_ranker_a.md`, commits `9742a10` + `af4ce0c` +
@@ -315,6 +449,24 @@
   **21:05:58**; ranker ABSENT at base `ce71122` **21:41:30**; created `af4ce0c` **22:28:34** — **82
   minutes later**. The telemetry row is co-committed with the tool; **the referent is prior and
   independently verifiable.**
+  **[CORRECTED 2026-08-02 AT THE P5 CLOSE — THE HEADING ABOVE OVERSTATES ITS EVIDENCE, AND THIS
+  FILE HELD BOTH READINGS AT ONCE.** The P5 block above states that commit dates are
+  SELF-ASSERTED (`GIT_AUTHOR_DATE`, `GIT_COMMITTER_DATE`) and that the same reasoning which
+  refuses a self-reported timestamp refuses them; this paragraph, written a packet earlier, still
+  said the elapsed minutes PROVE it. **Two contradictory readings of one piece of evidence inside
+  one memory file is the defect this file exists to prevent**, so it is annotated rather than
+  deleted — the history of the claim is the point. **WHAT ACTUALLY CARRIES THE CLAIM IS
+  STRUCTURAL, NOT TEMPORAL:** the selection was made by a **DIFFERENT AGENT, IN A DIFFERENT
+  PACKET, THREE COMMITS BEFORE S1 EXISTED** (`5c8d19e` then `158b5ad` then `ce71122` then
+  `9742a10`) — event ordering across independently-motivated work. **The commit COUNT is
+  structural; the minutes CORROBORATE and cannot establish.** The builder made exactly this
+  substitution during the fix round, and the reasoning is the packet at its best: a packet that
+  refuses a self-reported timestamp as constitutive and then quotes a self-reported DURATION as
+  proof has contradicted itself inside one artefact. **THE TWO ELAPSED FIGURES IN THE TREE ARE
+  BOTH CORRECT AND MEASURE DIFFERENT PAIRS**, reconciled here so a later reader does not read them
+  as a contradiction: **79 minutes** is `5c8d19e` to the P4 declaration `9742a10` (the structural
+  three-commit gap residue `(kkkk)` cites) and **82 minutes** is `5c8d19e` to the ranker's
+  creation `af4ce0c`. Neither is constitutive. Residue `(kkkk)`.]**
   **THE REVIEW'S REAL VALUE IS NEGATIVE AND IT IS RECORDED UNSOFTENED.**
   **(1) THE FIRST ORDERING IS DEGENERATE.** `PACKET-0027` scores the MAXIMUM on all three frozen
   signals and **Pareto-dominates every rival**; the reviewer swept **125 of 125 weight combinations**

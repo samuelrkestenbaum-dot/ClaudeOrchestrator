@@ -823,6 +823,28 @@
   Codex"* half open. **The streak counter is advanced NINE -> TEN here rather than being left to go
   stale a second time** — the failure this item is about. Every verdict in the entire five-phase
   sequence is single-model, INCLUDING the verdict on the first executive component.]**
+  **[2026-08-02, P5: ELEVENTH CONSECUTIVE PACKET, AND THE SEQUENCE IS NOW COMPLETE WITHOUT A
+  SINGLE INDEPENDENTLY-REVIEWED VERDICT IN IT.** The reviewer again stated *"second eyes: NONE,
+  single-model"* as the router requires; the *"install Codex"* half stays open and is the only
+  half left. **The streak counter is advanced TEN -> ELEVEN here rather than being left to go
+  stale**, which is the failure this item is about.
+  **AND IT BIT AGAIN AT P5, IN THE OPPOSITE DIRECTION FROM P3 AND P4 — THIS TIME THE SECOND
+  READER WAS THE OTHER GATE.** qa attacked the ordering guard exhaustively and its reasoning was
+  CORRECT over the surface it read; the reviewer found a SECOND UNGUARDED DOOR to the same signal
+  in a DIFFERENT STORE. **Neither agent was wrong; they held different surfaces**, and the defect
+  lived exactly in the seam between an invariant stated over a SYSTEM and an implementation scoped
+  to ONE FILE. **That is the strongest argument in this file for why a second reader is worth
+  something**, and it was obtained here only because the lane happens to run TWO read-only gates
+  concurrently — not because a second MODEL was ever available. **A single-model chain with one
+  gate would have shipped it.**
+  **THE ROUTER'S OWN COUNTER IS STALE AND THE ARCHIVIST DID NOT EDIT IT.**
+  `build-os/memory/tool_router.md`'s second-eyes row still says the absence was *"checked at each
+  of the last NINE packets"*; it is now ELEVEN. The router is the orchestrator's instrument and
+  was last corrected by a BUILDER commit (`ce71122`), so editing it is a routing act rather than
+  bookkeeping. **Remedy named and NOT applied: one builder-lite line, `nine` -> `eleven`.**
+  Nothing in the suite pins the literal, so this is presentation staleness and not a red gate —
+  recorded so a later reader meets a decision rather than an oversight. **This is the same
+  counter-goes-stale failure the item is already about, now in its third instance.]**
 - **(aaa) THE CLOSE ITSELF BROKE TREE-QUIET, AND ONE SUITE RUN WENT RED BECAUSE OF IT.** At the
   `gravito_p1_mutators_ids_telemetry_a` close the archivist launched
   `bash tests/build_os_tests.sh` in the background and then started
@@ -1271,6 +1293,33 @@ not to be fixed outside that packet.**
 - **Step 3 needs a class change or a different instrument**, and neither is designed. See residue
   item (w) — an envelope cannot promote, so step 3 cannot be executed by writing envelopes.
 
+- **[ADDED 2026-08-02 at the `gravito_p5_outcome_counterfactual_telemetry_a` close] THE THREE P5
+  COMMITS ARE UNPUSHED, AND THE UNPUSHED STATE NOW HAS EVIDENTIARY MEANING RATHER THAN MERELY
+  PROCEDURAL MEANING.** `cda95d2`, `44b0fab` and `adef6ad` are local-only; the branch is **ahead
+  3** of `origin/claude/project-handoff-merge-ramhds`, which sits at the base `80ad634`. **The
+  BASE is witnessed; the packet's own commits are not.** That matters now in a way it did not
+  before P5: the sealed prospective ordering's entire claim is that it was committed BEFORE any
+  commit could carry a selection, and **the parent-hash chain is non-forgeable only once a third
+  party has witnessed it** (residue `(kkkk)`). **Publishing is what converts the anchor from "one
+  process could rewrite this" into "a third party has seen it."** So a push would now buy
+  something specific and nameable — it is the cheapest of the three available witnesses (a push,
+  a tag a third party holds, or a second selector). **PUSH AUTHORISATION HAS NOT BEEN GIVEN FOR
+  THESE THREE COMMITS, none was requested by this close, and nothing was pushed, merged, tagged,
+  PR'd or deployed.** Recording that a boundary would be USEFUL to cross is not a request to
+  cross it.
+- **[ADDED 2026-08-02] SELECTING FROM `DECISION-0011-p5b-next-after-p3b` IS AN OPERATOR ACT AND
+  NOTHING HAS PERFORMED ONE — AND THE ABSENCE IS THE EVIDENCE.** The ordering is sealed at
+  `80ad634` over 20 frozen v2 snapshots and has **NO row in `decision_telemetry.tsv`**
+  (`grep -c '^DECISION-0011'` returns 0 at this close). S1 ranks
+  `PACKET-0029-citation-anchor-tokens` first, with `PACKET-0030` and `PACKET-0031` **tied** at
+  rank 2 and **3 of 4 rankable candidates on the Pareto frontier** — so unlike `DECISION-0010`
+  this ordering could actually be contradicted by a human choice. **A selection recorded by any
+  agent would move `prospective_decisions_with_a_recorded_selection` from 0 to 1 with no human
+  having chosen — the exact figure the reviewer's reproduction exploited — and would destroy the
+  thing the packet built.** The standing next packet is unaffected and unchanged: it remains
+  `gravito_p3b_count_derivation_a` (`PACKET-0027`), already selected by `DECISION-0010` and
+  carrying `result: in_flight`. **`DECISION-0011` is the decision AFTER that one.**
+
 - **[ADDED 2026-08-01 by `gravito_p1_mutators_ids_telemetry_a`] APPLYING ANY `FINDING-*` REMEDY IS A
   RE-AUTHORISATION AND IS THE OPERATOR'S ACT; NONE HAS BEEN PERFORMED.**
   `FINDING-0001-managed-set-replacement-understated` (move `maint.managed_set_replacement` from
@@ -1618,5 +1667,20 @@ not to be fixed outside that packet.**
   editing a released entry to match a later finding is the rewrite this tree refuses everywhere
   else. Recorded here so that a later reader meets a decision rather than an oversight.
 
----
-_Append-only working notes._
+- **(oooo) A COUNT INSIDE `(kkkk)` WENT STALE ONE COMMIT AFTER IT WAS WRITTEN, AND IT IS THIS
+  TREE'S OWN NAMED DEFECT CLASS FIRING INSIDE THE ITEM THAT NAMES IT.** `(kkkk)` states that
+  `cda95d2` and `44b0fab` are the only two of **"the repository's 102 commits"** authored
+  `builder@local`. That denominator was correct **at `44b0fab`** and became **103** the moment
+  `adef6ad` — the very commit that carries `(kkkk)` — landed. **THE NUMERATOR IS UNAFFECTED AND
+  THE ITEM'S ARGUMENT IS UNTOUCHED:** two self-asserted identities against a whole history is the
+  same observation at either denominator, and the ruling that git anchors ORDER and not
+  INDEPENDENT AGENCY does not depend on the total. What moved is a **restated total**, which is
+  `DEFECT-0003-duplicate-semantic-truth` in its COUNTING form — the exact half P3 mechanised for
+  citations and left to hand for counts, and the reason `PACKET-0027-p3b-count-derivation` exists
+  and is still queued. **IT WAS FOUND ONLY BECAUSE THE CLOSE DERIVED THE NUMBER INSTEAD OF
+  QUOTING IT** (`git rev-list --count`), which is the same discipline `(aaaa)` imposed on the
+  snapshot row count. **`(kkkk)` IS ANNOTATED BY THIS ITEM RATHER THAN REWRITTEN:** residue items
+  are the record of what was known when, and a self-describing count that is silently refreshed
+  can no longer show that it went stale. **The general remedy is not a bigger number, it is
+  fewer restated ones** — a total written into prose in a repository that is still committing has
+  a shelf life measured in commits, and this one's was exactly one.
