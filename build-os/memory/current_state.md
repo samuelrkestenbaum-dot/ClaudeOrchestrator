@@ -45,12 +45,13 @@
   `no tags` because `tests/release_metadata_tests.sh:322` requires it, so the residue item is
   annotated rather than rewritten. Whether the tag was created with an explicit go is not
   determinable from here and no claim is made.
-- **Build/test command:** `bash tests/build_os_tests.sh` (1964 checks; no network; temp dirs)
-  — measured on a quiet tree at `80ad634` plus `gravito_p5_outcome_counterfactual_telemetry_a`'s
-  build, from a SOLO full-capture run after an anchored `pgrep -fa '^bash tests/'` returned empty
-  (**1909 at the previous close, and 1909 re-measured at this packet's Commit 1 in isolation**),
-  and reconciled against
-  `CHANGELOG.md`, which carries the matching literal `**1964 passed**` (unsplit) in the
+- **Build/test command:** `bash tests/build_os_tests.sh` (1995 checks; no network; temp dirs)
+  — measured on a quiet tree at `c2d97f8` plus `PACKET-0029-citation-anchor-tokens`'s build,
+  from a SOLO full-capture run after an anchored `pgrep -fa '^bash tests/'` returned empty.
+  **The delta is +31, ALL of it `tests/control_registry_tests.sh` section 28** (99 -> 130
+  standalone), which drives the eight identity rules of the anchor scheme; every other chained
+  suite is +0. **1964 at the previous close**, measured the same way. Reconciled against
+  `CHANGELOG.md`, which carries the matching literal `**1995 passed**` (unsplit) in the
   release block `## [Unreleased]` -> `### In flight (not landed at the released commit)`.
   **CITED BY HEADING, NOT BY LINE NUMBER, from 2026-08-01 on** — the changelog grows from the
   top, so every line-citation into it decays on every packet, guaranteed rather than
@@ -181,6 +182,12 @@
   100 controls (`grep -c '^control: '`), ~20 tools, 1964 assertions, ONE executive component
   and ONE apparatus for measuring it. The old figures are left visible because a ledger that
   silently refreshes cannot show that it went stale.]**
+  **[SUPERSEDED AGAIN 2026-08-02 by `PACKET-0029-citation-anchor-tokens`, DERIVED not
+  remembered: 101 controls (`grep -c '^control: '`), ~20 tools, 1995 assertions, ONE executive
+  component, ONE apparatus for measuring it, and ONE anchor scheme — 13 anchors over the 12
+  declared object types, `bash build-os/registry/scan-controls.sh anchors`. The census growth of
+  exactly one is the FORECAST `census_growth_controls=1` sealed for this candidate before it was
+  selected, not a coincidence and not a licence for a second.]**
 - **Last closed packet:** `gravito_p5_outcome_counterfactual_telemetry_a`
   (`PACKET-0032-p5-outcome-counterfactual-telemetry` — REUSED, not minted: it is the id
   `DECISION-0010` already carries for this work, collision-checked against every `PACKET-*` in

@@ -76,7 +76,7 @@ the concept without performing the function and **is not coverage**.
 | integration_bandwidth | 2 | 1 | 1 | 0 | C | advise, gate |
 | boundary | 4 | 0 | 4 | 0 | A | advise, gate |
 | ethical_admissibility | 2 | 1 | 0 | 1 | A | gate |
-| epistemic_quality | 32 | 15 | 16 | 1 | A, B, C | advise, gate |
+| epistemic_quality | 33 | 16 | 16 | 1 | A, B, C | advise, gate |
 | latent_state | 5 | 4 | 1 | 0 | A, C | advise, gate |
 | durability | 1 | 0 | 1 | 0 | A | gate |
 | gated_plasticity | 4 | 4 | 0 | 0 | A, B, C | advise, gate |

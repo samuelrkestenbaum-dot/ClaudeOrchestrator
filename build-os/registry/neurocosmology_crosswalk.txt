@@ -725,6 +725,13 @@ runtime_authority: gate
 binding_kind: instantiates
 rationale: Derives the set of refusal-capable surfaces from the tree by pattern, needing no cooperation from any author. Derived membership rather than asserted membership — the §21 lesson, applied at file granularity.
 
+control: registry.evidence_resolution
+binds_to: epistemic_quality
+class: A
+runtime_authority: gate
+binding_kind: instantiates
+rationale: Resolves an object's identity from its CONTENT and computes the line number as a return value, so an insertion above the object cannot move the object. It is the one control here that separates RESOLVABILITY from IDENTITY and refuses a reference that has the first and not the second — the shape residue (mm) measured at 20 of 27 references passing every positional check while silently wrong. It instantiates rather than proxies because it does not observe a stand-in for the system's contact with reality: it re-derives the position from the artefact at every resolution and refuses when the artefact no longer carries the object.
+
 control: suite.neurocosmology_crosswalk
 binds_to: homeostasis
 class: A

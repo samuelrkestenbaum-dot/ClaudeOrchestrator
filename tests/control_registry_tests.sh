@@ -156,7 +156,7 @@ done < <(ids_of "$REG")
 [ "$MMUNLISTED" -eq 0 ] && ok "every over-authorised control is named in MISMATCHES.md" \
                         || no "$MMUNLISTED over-authorised control(s) are missing from MISMATCHES.md"
 
-echo "== 7. Every evidence reference resolves to a real line of a real file =="
+echo "== 7. Every evidence reference resolves — and resolvability is NOT identity (section 28) =="
 EVN=0; EVBAD=0
 while IFS= read -r id; do
   [ -n "$id" ] || continue
@@ -911,6 +911,276 @@ done < "$WORK/liveranges.txt"
 [ "$CC_BAD" -eq 0 ] \
   && ok "no two range citations overlap while naming different spans — the same guard is not cited as two different things anywhere in the tree" \
   || no "$((CC_BAD/2)) contradicting range citation pair(s): one of each pair is stale and a reader cannot tell which"
+
+echo "== 28. STABLE SEMANTIC ANCHORS — identity is CONTENT, position is a HINT =="
+# WHY THIS EXISTS, AND WHAT MEASURED THE HOLE. Residue (mm) quantified it and
+# named the remedy in one sentence: the citation guard checks RESOLVABILITY,
+# NOT IDENTITY, and "the durable fix is an ANCHOR TOKEN or a CONTENT HASH
+# instead of a line number". Sections 7, 23 and 27 above are every one of them
+# POSITIONAL. Section 7 asks whether a number lands inside a file. Section 23
+# asks whether the line it lands on does something. Section 27 asks whether a
+# citation carrying two numbers carries two positions. NOT ONE OF THEM ASKS
+# WHETHER THE LINE IS THE SAME OBJECT THE CITATION WAS WRITTEN ABOUT, which is
+# why 20 of 27 drifted references passed all of them while silently wrong.
+#
+# WHAT AN ANCHOR IS HERE. Ten fields, pipe-delimited, declared in
+# build-os/registry/scan-controls.sh between the ANCHOR-TABLE markers:
+#
+#   anchor_id | object_id | object_type | namespace_id | semantic_role |
+#   artifact_ref | content_or_symbol_ref | version | created_at | supersedes
+#
+# RESOLUTION IS BY CONTENT. The anchor names a literal that must occur EXACTLY
+# ONCE in its artifact; the line number is COMPUTED and never stored. A position
+# may still be written down as `path:line#ANCHOR-ID` — the `#` half is the
+# IDENTITY and the `:` half is a NAVIGATION HINT — and the eight subsections
+# below drive the eight rules that distinction has to satisfy, each with the
+# defect it fails on rather than only the case it passes.
+ANC_TYPES="control_id decision_id packet_id finding_id evidence_id defect_class_id receipt_id ranking_id outcome_id section_anchor symbol_anchor test_assertion_anchor"
+bash "$SCAN" anchors > "$WORK/anc_live.txt" 2>&1; ARC=$?
+[ "$ARC" = "0" ] \
+  && ok "the LIVE anchor table validates against the LIVE tree (scan-controls.sh anchors, exit 0)" \
+  || { no "the live anchor table does not validate (exit $ARC) — every claim below would be about a broken table"; sed 's/^/      | /' "$WORK/anc_live.txt" | head -25; }
+NANC="$(grep -c '^anchor: ' "$WORK/anc_live.txt" || true)"
+[ "${NANC:-0}" -gt 0 ] \
+  && ok "$NANC anchor record(s) are declared and listed (this section is not vacuous)" \
+  || no "no anchor records were listed, so everything below is meaningless"
+# Every one of the twelve declared object types must be CLAIMED by a live
+# anchor. A type enum nothing instantiates is a schema, not a scheme.
+ANC_TMISS=0; ANC_TSEEN=0
+for t in $ANC_TYPES; do
+  ANC_TSEEN=$((ANC_TSEEN+1))
+  grep -q "^anchor: .* type=$t " "$WORK/anc_live.txt" || { ANC_TMISS=$((ANC_TMISS+1)); echo "      | no live anchor claims type $t"; }
+done
+[ "$ANC_TSEEN" -eq 12 ] \
+  && ok "twelve anchor types are declared, and all twelve are checked here" \
+  || no "$ANC_TSEEN anchor type(s) checked — the declared set is not twelve"
+[ "$ANC_TMISS" -eq 0 ] \
+  && ok "all twelve object types are instantiated by at least one live anchor — the enum is a scheme, not a schema" \
+  || no "$ANC_TMISS declared anchor type(s) have no live instance"
+
+# The fixture: a tiny artifact and an anchor table over it. Built at run time so
+# no literal anchor record in this file can be mistaken for a live one.
+mkanc(){ # <dir>
+  local d="$1"
+  rm -rf "$d"; mkdir -p "$d/art"
+  printf 'alpha line\nBETA_MARK is the beta object\ngamma line\nDELTA_MARK is the delta object\nomega line\n' > "$d/art/objects.txt"
+  {
+    printf 'ANC-F001|obj.beta|control_id|fixture|the-beta-object|art/objects.txt|BETA_MARK|1|2026-08-02|-\n'
+    printf 'ANC-F002|obj.delta|decision_id|fixture|the-delta-object|art/objects.txt|DELTA_MARK|1|2026-08-02|-\n'
+  } > "$d/anchors.txt"
+}
+runanc(){ # <dir> [extra args...] -> exit code, output in $WORK/out.txt
+  local d="$1"; shift
+  bash "$SCAN" anchors --repo "$d" --anchors "$d/anchors.txt" "$@" > "$WORK/out.txt" 2>&1
+}
+ANCF="$WORK/anc"
+mkanc "$ANCF"; runanc "$ANCF"; RC=$?
+[ "$RC" = "0" ] \
+  && ok "the clean anchor fixture validates (exit 0) — the red drives below fail for their own reason" \
+  || { no "the clean anchor fixture already fails (exit $RC); every red drive after this would pass for the wrong reason"; dump; }
+
+echo "== 28a. RULE 1 — an anchor SURVIVES the insertion of lines above it =="
+# The whole defect class in four lines: the object does not move, the number
+# does. An anchor resolved by content reports a DIFFERENT line and the SAME
+# object; the number written beside it reports the same line and a different
+# object. Both are executed here rather than argued.
+mkanc "$ANCF"
+runanc "$ANCF" --ref ANC-F001
+A1_BEFORE="$(awk '/^resolved_line: /{print $2; exit}' "$WORK/out.txt")"
+A1_OBJ_BEFORE="$(awk '/^object_id: /{print $2; exit}' "$WORK/out.txt")"
+{ printf 'inserted 1\ninserted 2\ninserted 3\n'; cat "$ANCF/art/objects.txt"; } > "$ANCF/art/objects.new"
+mv "$ANCF/art/objects.new" "$ANCF/art/objects.txt"
+runanc "$ANCF" --ref ANC-F001; RC=$?
+A1_AFTER="$(awk '/^resolved_line: /{print $2; exit}' "$WORK/out.txt")"
+A1_OBJ_AFTER="$(awk '/^object_id: /{print $2; exit}' "$WORK/out.txt")"
+{ [ "$RC" = "0" ] && [ -n "$A1_BEFORE" ] && [ "$A1_AFTER" -eq "$((A1_BEFORE + 3))" ]; } \
+  && ok "three lines inserted above it move the anchor's RESOLVED POSITION from :$A1_BEFORE to :$A1_AFTER — the position is computed, not remembered" \
+  || { no "the anchor did not track the insertion (before=$A1_BEFORE after=$A1_AFTER exit $RC)"; dump; }
+{ [ -n "$A1_OBJ_BEFORE" ] && [ "$A1_OBJ_BEFORE" = "$A1_OBJ_AFTER" ]; } \
+  && ok "and it names the SAME object across the move ($A1_OBJ_AFTER) — identity survived a change of position" \
+  || no "the anchor's object changed under a pure line insertion ($A1_OBJ_BEFORE -> $A1_OBJ_AFTER)"
+# RED: the positional form, driven over the same edit.
+A1_STALE="$(sed -n "${A1_BEFORE}p" "$ANCF/art/objects.txt")"
+A1_LIVE="$(sed -n "${A1_AFTER}p" "$ANCF/art/objects.txt")"
+{ [ "$A1_STALE" != "$A1_LIVE" ] && printf '%s' "$A1_LIVE" | grep -qF 'BETA_MARK'; } \
+  && ok "RED: the line number that was correct before the insertion now names DIFFERENT content, and it still resolves — the exact shape residue (mm) measured" \
+  || no "RED FAILED: the stale position was not observed to drift, so this comparison proves nothing"
+
+echo "== 28b. RULE 2 — two different objects CANNOT claim the same stable anchor =="
+mkanc "$ANCF"; sed -i 's/^ANC-F002|/ANC-F001|/' "$ANCF/anchors.txt"
+runanc "$ANCF"; RC=$?
+{ [ "$RC" = "2" ] && saw "ANCHOR-COLLISION"; } \
+  && ok "RED: one anchor_id claimed by two different objects is REFUSED (exit $RC)" \
+  || { no "RED FAILED: two objects shared one anchor_id and it was accepted (exit $RC)"; dump; }
+# And the other direction: two ids over ONE site. Distinct names for one object
+# is how a stable anchor stops being stable.
+mkanc "$ANCF"; sed -i 's/|art\/objects.txt|DELTA_MARK|/|art\/objects.txt|BETA_MARK|/' "$ANCF/anchors.txt"
+runanc "$ANCF"; RC=$?
+{ [ "$RC" = "2" ] && saw "ANCHOR-SITE-COLLISION"; } \
+  && ok "RED: two different objects anchored at ONE content site is REFUSED (exit $RC)" \
+  || { no "RED FAILED: two objects sharing a content site was accepted (exit $RC)"; dump; }
+
+echo "== 28c. RULE 3 — a CURRENTLY RESOLVABLE line pointing at the WRONG OBJECT is REJECTED =="
+# The heart of it. Line 4 of the fixture exists, is inside the file, is not
+# blank, is not a comment and is not a closer — it passes every predicate
+# sections 7 and 23 own. It is also the site of a DIFFERENT anchored object.
+mkanc "$ANCF"
+runanc "$ANCF" --ref 'art/objects.txt:4#ANC-F001'; RC=$?
+{ [ "$RC" = "2" ] && saw "WRONG-OBJECT"; } \
+  && ok "RED: a reference whose line resolves, and resolves to ANOTHER anchored object, is REJECTED (exit $RC)" \
+  || { no "RED FAILED: a resolvable line naming the wrong object was accepted (exit $RC)"; dump; }
+grep -q '^syntactic: OK' "$WORK/out.txt" \
+  && ok "and the refusal states that the reference is SYNTACTICALLY FINE — the rejection is on identity, and says so" \
+  || { no "the refusal does not separate the syntactic verdict from the identity verdict"; dump; }
+runanc "$ANCF" --ref 'art/objects.txt:2#ANC-F001'; RC=$?
+[ "$RC" = "0" ] \
+  && ok "NEGATIVE CONTROL: the same reference at the RIGHT line is accepted (exit 0) — the check is not a blanket refusal" \
+  || { no "a correct anchored reference was refused (exit $RC)"; dump; }
+
+echo "== 28d. RULE 4 — GENERATED PROJECTIONS preserve stable identity =="
+# A projection is the positional form regenerated FROM the anchor. It carries
+# the token, so it round-trips; a projection that has been reduced to a bare
+# `path:line` has thrown the identity away and is refused as such.
+mkanc "$ANCF"
+runanc "$ANCF" --project; RC=$?
+cp "$WORK/out.txt" "$WORK/anc_proj.txt"
+NPROJ="$(grep -c '#ANC-F' "$WORK/anc_proj.txt" || true)"
+{ [ "$RC" = "0" ] && [ "${NPROJ:-0}" -gt 0 ]; } \
+  && ok "$NPROJ projection(s) generated, every one carrying its anchor token (exit $RC)" \
+  || { no "no projections carrying an anchor token were generated (exit $RC)"; dump; }
+PROJBAD=0
+while IFS= read -r p; do
+  [ -n "$p" ] || continue
+  runanc "$ANCF" --ref "$p" || PROJBAD=$((PROJBAD+1))
+done < <(grep -oE '[A-Za-z0-9_./-]+:[0-9]+#ANC-F[0-9]+' "$WORK/anc_proj.txt")
+{ [ "$PROJBAD" -eq 0 ] && [ "${NPROJ:-0}" -gt 0 ]; } \
+  && ok "every generated projection validates back to its own anchor — the generator preserves identity rather than restating a position" \
+  || no "$PROJBAD generated projection(s) do not validate against the table that generated them"
+# RED: the same projection with the identity stripped.
+PROJ1="$(grep -oE '[A-Za-z0-9_./-]+:[0-9]+#ANC-F[0-9]+' "$WORK/anc_proj.txt" | head -1)"
+runanc "$ANCF" --ref "${PROJ1%%#*}"; RC=$?
+{ [ "$RC" = "2" ] && saw "NO-ANCHOR"; } \
+  && ok "RED: the same projection with its \`#anchor\` removed is REFUSED (exit $RC) — a bare position carries no identity to preserve" \
+  || { no "RED FAILED: a projection stripped of its anchor token was accepted (exit $RC)"; dump; }
+
+echo "== 28e. RULE 5 — a RENAMED heading SUPERSEDES an earlier one without rewriting history =="
+# The rename case. The v1 record keeps its own content ref and its own
+# created_at, stops resolving, and is NOT a violation because a later record
+# declares that it superseded it. History is added to, never edited.
+mkanc "$ANCF"
+sed -i 's/^BETA_MARK is the beta object$/BETA_RENAMED is the beta object/' "$ANCF/art/objects.txt"
+printf 'ANC-F003|obj.beta|control_id|fixture|the-beta-object|art/objects.txt|BETA_RENAMED|2|2026-08-02|ANC-F001\n' >> "$ANCF/anchors.txt"
+runanc "$ANCF"; RC=$?
+[ "$RC" = "0" ] \
+  && ok "a renamed heading is carried by a v2 anchor that SUPERSEDES the v1 record, and the table validates (exit 0)" \
+  || { no "a legitimate supersession was refused (exit $RC)"; dump; }
+grep -q '^anchor: ANC-F001 .*status=SUPERSEDED' "$WORK/out.txt" \
+  && ok "the v1 record is still LISTED, marked SUPERSEDED — it was retired, not deleted" \
+  || { no "the superseded record is not reported as superseded"; dump; }
+# RED: the same rename with no supersession declared is an unresolvable anchor.
+mkanc "$ANCF"
+sed -i 's/^BETA_MARK is the beta object$/BETA_RENAMED is the beta object/' "$ANCF/art/objects.txt"
+runanc "$ANCF"; RC=$?
+{ [ "$RC" = "2" ] && saw "ANCHOR-UNRESOLVED"; } \
+  && ok "RED: the same rename with NO supersession declared is REFUSED (exit $RC) — silence is not history" \
+  || { no "RED FAILED: an anchor whose content no longer exists was accepted (exit $RC)"; dump; }
+# RED: a supersedes pointing at nothing.
+mkanc "$ANCF"
+printf 'ANC-F009|obj.beta|control_id|fixture|the-beta-object|art/objects.txt|BETA_MARK|2|2026-08-02|ANC-F404\n' >> "$ANCF/anchors.txt"
+runanc "$ANCF"; RC=$?
+{ [ "$RC" = "2" ] && saw "ANCHOR-SUPERSEDE"; } \
+  && ok "RED: a supersedes naming an anchor the table does not declare is REFUSED (exit $RC)" \
+  || { no "RED FAILED: a dangling supersedes link was accepted (exit $RC)"; dump; }
+
+echo "== 28f. RULE 6 — a reference may resolve SYNTACTICALLY and still FAIL identity validation =="
+# The generalization of 28c, and the sentence this tree has now named in six
+# substrates. The two properties are computed SEPARATELY here so that the pass
+# is not a restatement of the fail: the syntactic predicate is evaluated by this
+# test, and the identity verdict comes from the tool.
+mkanc "$ANCF"
+SYN_OK=0
+SYN_LINE=1
+[ -f "$ANCF/art/objects.txt" ] && SYN_OK=$((SYN_OK+1))
+[ "$SYN_LINE" -le "$(grep -c '' "$ANCF/art/objects.txt")" ] && SYN_OK=$((SYN_OK+1))
+[ -n "$(sed -n "${SYN_LINE}p" "$ANCF/art/objects.txt" | tr -d '[:space:]')" ] && SYN_OK=$((SYN_OK+1))
+[ "$SYN_OK" -eq 3 ] \
+  && ok "the probe reference satisfies all three positional predicates this suite already owns: the file exists, the line is in bounds, and the line is not blank" \
+  || no "the probe reference does not satisfy the positional predicates, so the identity failure below would be over-determined"
+runanc "$ANCF" --ref 'art/objects.txt:1#ANC-F404'; RC=$?
+{ [ "$RC" = "2" ] && saw "UNKNOWN-ANCHOR"; } \
+  && ok "RED: and it FAILS identity validation anyway (exit $RC) — the anchor it names is not declared. Resolvability is not identity." \
+  || { no "RED FAILED: a syntactically perfect reference to an undeclared anchor was accepted (exit $RC)"; dump; }
+# ...and a STALE HINT is reported without being refused, because a line number
+# is allowed to be a navigation hint. It is not allowed to be the identity.
+mkanc "$ANCF"
+runanc "$ANCF" --ref 'art/objects.txt:1#ANC-F001'; RC=$?
+{ [ "$RC" = "0" ] && saw "HINT-STALE"; } \
+  && ok "a reference whose ANCHOR is right and whose LINE is merely stale is REPORTED, not refused — the position is demoted to a hint, exactly as declared" \
+  || { no "a stale navigation hint was treated as an identity failure (exit $RC)"; dump; }
+grep -q '^projection: ' "$WORK/out.txt" \
+  && ok "and the corrected projection is printed beside it, so repointing is mechanical rather than manual" \
+  || { no "no corrected projection was offered for the stale hint"; dump; }
+
+echo "== 28g. RULE 7 — historical references continue to resolve their ORIGINAL objects =="
+# A receipt written a month ago cites the object as it was. Resolving its anchor
+# must return THAT object at THAT version — not the object that superseded it.
+# Silently redirecting an old citation to a new object is how a history stops
+# being a history.
+mkanc "$ANCF"
+sed -i 's/^BETA_MARK is the beta object$/BETA_RENAMED is the beta object/' "$ANCF/art/objects.txt"
+printf 'ANC-F003|obj.beta|control_id|fixture|the-beta-object|art/objects.txt|BETA_RENAMED|2|2026-08-02|ANC-F001\n' >> "$ANCF/anchors.txt"
+runanc "$ANCF" --ref ANC-F001; RC=$?
+H_VER="$(awk '/^version: /{print $2; exit}' "$WORK/out.txt")"
+H_CREF="$(sed -n 's/^content_or_symbol_ref: //p' "$WORK/out.txt" | head -1)"
+H_BY="$(awk '/^superseded_by: /{print $2; exit}' "$WORK/out.txt")"
+{ [ "$RC" = "0" ] && [ "$H_VER" = "1" ] && [ "$H_CREF" = "BETA_MARK" ]; } \
+  && ok "the historical anchor still returns its ORIGINAL version ($H_VER) and its ORIGINAL content ref ($H_CREF) — the v2 rename did not rewrite it" \
+  || { no "the historical anchor was rewritten by its successor (version=$H_VER cref=$H_CREF exit $RC)"; dump; }
+[ "$H_BY" = "ANC-F003" ] \
+  && ok "and it names its successor ($H_BY), so a reader following an old citation is told what happened rather than sent somewhere else" \
+  || { no "the historical anchor does not name the successor that superseded it (got \"$H_BY\")"; dump; }
+# The same property on the LIVE table: this packet renamed section 7's heading
+# above, and the v1 section anchor must still carry the ORIGINAL title.
+bash "$SCAN" anchors --ref ANC-0010-a > "$WORK/out.txt" 2>&1; RC=$?
+L_CREF="$(sed -n 's/^content_or_symbol_ref: //p' "$WORK/out.txt" | head -1)"
+{ [ "$RC" = "0" ] && printf '%s' "$L_CREF" | grep -qF 'resolves to a real line of a real file'; } \
+  && ok "LIVE: the v1 anchor for this suite's own renamed section 7 still carries the heading as it was written" \
+  || { no "LIVE: the pre-rename section anchor no longer carries its original heading (exit $RC)"; dump; }
+
+echo "== 28h. RULE 8 — the SEALED decision and its selection still resolve after this packet moved lines =="
+# THE SELF-REFERENTIAL CASE. This packet inserted this very section into this
+# very file and rewrote lines of scan-controls.sh, so it moved positions that
+# its own sealed evidence is cited by. If the anchors are worth anything they
+# survive that, and if they are not, the packet has invalidated the experiment
+# measuring it. Both halves are executed.
+A8_BAD=0
+for a in ANC-0002 ANC-0003 ANC-0008; do
+  bash "$SCAN" anchors --ref "$a" > "$WORK/out.txt" 2>&1 || { A8_BAD=$((A8_BAD+1)); echo "      | $a does not resolve"; continue; }
+  grep -q '^status: RESOLVED' "$WORK/out.txt" || { A8_BAD=$((A8_BAD+1)); echo "      | $a resolved with a non-RESOLVED status"; }
+done
+[ "$A8_BAD" -eq 0 ] \
+  && ok "the sealed decision, the selected candidate and the sealed ranking snapshot ALL still resolve by anchor after this packet's line movement" \
+  || no "$A8_BAD of the three sealed anchors no longer resolve"
+bash "$SCAN" anchors --ref ANC-0002 > "$WORK/out.txt" 2>&1
+A8_DLINE="$(awk '/^resolved_line: /{print $2; exit}' "$WORK/out.txt")"
+{ [ -n "$A8_DLINE" ] && sed -n "${A8_DLINE}p" "$SRC/build-os/metrics/decision_telemetry.tsv" | grep -qF 'PACKET-0029-citation-anchor-tokens'; } \
+  && ok "and the line the decision anchor resolves to still records PACKET-0029 as the selection — the resolved position is DERIVED and lands on the right row" \
+  || no "the decision anchor resolves to a line that does not carry the recorded selection"
+# The number that would be destroyed if any of this were wrong.
+bash "$SRC/build-os/metrics/rank-candidates.sh" rank --decision-id DECISION-0011-p5b-next-after-p3b > "$WORK/s1.txt" 2>&1; RC=$?
+{ [ "$RC" = "0" ] && grep -qx 'rank_of_selected: 1' "$WORK/s1.txt"; } \
+  && ok "and the sealed ordering still derives rank_of_selected: 1 for the executed candidate (exit $RC) — one observation, and NOT evidence of ranker skill" \
+  || { no "the sealed ordering no longer derives rank_of_selected: 1 (exit $RC)"; sed 's/^/      | /' "$WORK/s1.txt" | tail -12; }
+# RED: the positional form, over a line this packet ACTUALLY moved. 924 was the
+# suite verdict's line before this section existed; it is built at run time so
+# no literal here is swept as a citation.
+A8_OLD=$((924))
+bash "$SCAN" anchors --ref ANC-0012 > "$WORK/out.txt" 2>&1
+A8_NEW="$(awk '/^resolved_line: /{print $2; exit}' "$WORK/out.txt")"
+A8_CREF="$(sed -n 's/^content_or_symbol_ref: //p' "$WORK/out.txt" | head -1)"
+{ [ -n "$A8_NEW" ] && [ "$A8_NEW" != "$A8_OLD" ] && ! sed -n "${A8_OLD}p" "$SRC/tests/control_registry_tests.sh" | grep -qF "$A8_CREF"; } \
+  && ok "RED: the position that named this suite's own assertion before this packet ($A8_OLD) no longer does, while its anchor resolves at :$A8_NEW — the drift is real and the anchor absorbed it" \
+  || no "RED FAILED: the pre-packet position was not observed to drift ($A8_OLD vs $A8_NEW), so rule 8 was not exercised on a real move"
 
 echo "== 20. This suite is chained, and is not vacuous about itself =="
 grep -qF 'chain_suite "tests/control_registry_tests.sh"' "$SRC/tests/build_os_tests.sh" \

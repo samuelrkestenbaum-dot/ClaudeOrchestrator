@@ -14,6 +14,45 @@ deprecation cycle. Pin a commit if you need stability.
 
 ### In flight (not landed at the released commit)
 
+- **A line number is now a navigation hint, and it is no longer an identity.**
+  Residue `(mm)` had measured the hole and named the remedy in one sentence: the
+  citation guard checks **resolvability, not identity**, and "the durable fix is
+  an ANCHOR TOKEN or a CONTENT HASH instead of a line number". Across the three
+  tools whose references drifted, **20 of 27 pointed at a different line and
+  passed every check that existed.** So `build-os/registry/scan-controls.sh`
+  gained an anchor scheme: ten fields per record — `anchor_id`, `object_id`,
+  `object_type`, `namespace_id`, `semantic_role`, `artifact_ref`,
+  `content_or_symbol_ref`, `version`, `created_at`, `supersedes` — resolved **by
+  content**, with the line number computed at every resolution and stored
+  nowhere. Thirteen anchors instantiate all twelve declared object types.
+
+  **Eight identity rules, each driven red before it was made to pass**: an anchor
+  survives insertion above it; two objects cannot claim one anchor; **a currently
+  resolvable line pointing at the wrong object is REJECTED**; generated
+  projections carry their identity and a projection stripped of it is refused; a
+  renamed heading supersedes an earlier one **without rewriting it**; **a
+  reference may resolve syntactically and still fail identity validation**;
+  historical references still return their original object at its original
+  version; and the sealed `DECISION-0011` evidence still resolves after this
+  packet moved the very lines it is cited by. A merely **stale** hint is reported
+  at exit 0 with the corrected projection printed beside it — the position was
+  demoted, not outlawed.
+
+  **The implementation was itself deformed by the absence of the thing it
+  builds.** Ten `evidence_refs`, two live ranges and four frozen receipts cite
+  `scan-controls.sh` by line number, so the new dispatch had to be packed into
+  existing lines rather than inserted above them. That cost is recorded in the
+  module rather than tidied away.
+
+  No new store, no new tool, no new suite file; **one census entry** —
+  `registry.evidence_resolution`, Class A at `gate`, which is the
+  `census_growth_controls=1` **forecast** sealed for this candidate before anyone
+  selected it. **Declared mismatches hold at 21.** Suite **1995 passed**, 0
+  failed (+31, all of it `tests/control_registry_tests.sh` section 28);
+  `scan-controls.sh check` and `scan-mutators.sh check` both exit 0; zero
+  re-authorisations. **One selected rank is one observation and is not evidence
+  of ranker skill.**
+
 - **The shadow ranker now has to rank BEFORE the choice, and the tooling refuses
   to let it do otherwise.** A ranking formed after a decision is a
   rationalisation, and it is byte-identical to one formed before it — nothing

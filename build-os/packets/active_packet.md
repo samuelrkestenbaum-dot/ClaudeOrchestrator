@@ -4,17 +4,49 @@
 > the builder implements exactly this and nothing else; the archivist clears it
 > on close. One packet at a time.
 
-## Status: NO PACKET IN FLIGHT
+## Status: IN FLIGHT — `PACKET-0029-citation-anchor-tokens`
 
-Cleared 2026-08-02 by the archivist at the
-`gravito_p5_outcome_counterfactual_telemetry_a` close. **Zero packet ids are
-declared below**, which is what "nothing in flight" means to
-`bandwidth.active_packet_singleton` — it counts `**Packet id:**` declarations in
-this file against a ceiling of 1.
+- **Packet id:** `PACKET-0029-citation-anchor-tokens`
 
-**Declaring the next packet is the orchestrator's act, not the archivist's.** The
-staged work below is recorded so the next session starts informed; it is **not a
-declaration** and nothing here authorises a builder to start.
+canonical packet id: PACKET-0029-citation-anchor-tokens
+
+**EXACTLY ONE packet id is declared above**, which is what "one in flight" means
+to `bandwidth.active_packet_singleton` — it counts `**Packet id:**` declarations
+in this file against a ceiling of 1. The bare `canonical packet id:` line beneath
+it is not a second declaration: it is the **content site** anchor `ANC-0003`
+resolves to, and it is written on its own line precisely so that this packet's
+own identity is reachable by content rather than by position.
+
+**Title:** citation anchor tokens — stable semantic anchors, and the demotion of
+line numbers from identity to navigation hint.
+
+**Provenance, and it is the whole point of this packet.** The ranking was
+**sealed first** (`44b0fab`, over 20 frozen v2 snapshots, rule `s1-v1`), the
+**selection was recorded second** (`DECISION-0011-p5b-next-after-p3b`, selector
+`operator`, `c2d97f8`), and **execution starts third**. This is the first
+prospective decision in this repository with a recorded selection, so the
+packet's identity is **frozen evidence**: if what executes is not the candidate
+that was ranked, the measurement is void. **The scope below is the sealed
+`candidate_write_surface` and nothing beyond it.**
+
+- **Sealed signals:** `residue_items_closed=1`, `residue_ruling_satisfied=0`,
+  `census_growth_controls=1`, `sealed_rank=1` (**frontier, NOT dominant** —
+  `PACKET-0030` and `PACKET-0031` tie at 2 on the same frontier).
+- **Frozen write surface:** `build-os/registry/scan-controls.sh`;
+  `build-os/registry/control_registry.txt#registry.evidence_resolution`;
+  `tests/control_registry_tests.sh#7`; `build-os/memory/residue.md`.
+- **Residue consumed:** `(mm)` and `(nnn)`. **`(ddd)` STAYS QUEUED** — what it
+  queues is a durable positional-content-pairing guard, which this packet does
+  not build, and the asymmetry is what proved the signal was derived.
+- **Ceiling:** declared mismatches **hold at 21**. No new store, no new
+  validator tool, no new suite file.
+- **One selected rank is not evidence of ranker skill.** It is one observation.
+
+## Branch base
+
+Branched at `c2d97f8` on `claude/project-handoff-merge-ramhds`, re-verified with
+`git merge-base` before the first edit. **Nothing is pushed, merged, tagged, PR'd
+or deployed, and no such go has been given.**
 
 ## CLOSED — `gravito_p5_outcome_counterfactual_telemetry_a`
 

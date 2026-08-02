@@ -62,7 +62,7 @@
 # Usage:
 #   scan-controls.sh surfaces [--repo DIR]
 #   scan-controls.sh check    [--repo DIR] [--registry FILE] [--mismatches FILE]
-#   scan-controls.sh patterns
+#   scan-controls.sh patterns | anchors [--anchors F] [--ref ID|REF] [--project]
 # Exit: 0 reconciled, 2 refused (a violation, or a scan that cannot be trusted).
 set -uo pipefail
 
@@ -70,7 +70,7 @@ SELF_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO="$(cd "$SELF_DIR/../.." && pwd)"
 REGISTRY=""
 MISMATCHES=""
-TAB=$'\t'
+TAB=$'\t'; VIOL=0; ADVISORY=0; ANCHORS_FILE=""; AREF=""; APROJECT=0
 
 CMD="${1:-}"
 [ $# -gt 0 ] && shift
@@ -89,10 +89,10 @@ advise_note(){ ADVISORY=$((ADVISORY+1)); printf '  %s\n' "$*"; }
 in_list(){ local v="$1" l; for l in $2; do [ "$v" = "$l" ] && return 0; done; return 1; }
 
 case "$CMD" in
-  surfaces|check|patterns) ;;
+  surfaces|check|patterns|anchors) ;;
   -h|--help|help) sed -n '2,66p' "${BASH_SOURCE[0]}"; exit 0 ;;
-  "") refuse "no command — expected one of: surfaces, check, patterns" ;;
-  *)  refuse "unknown command \"$CMD\" — expected one of: surfaces, check, patterns" ;;
+  "") refuse "no command — expected one of: surfaces, check, patterns, anchors" ;;
+  *)  refuse "unknown command \"$CMD\" — expected one of: surfaces, check, patterns, anchors" ;;
 esac
 
 while [ $# -gt 0 ]; do
@@ -100,8 +100,8 @@ while [ $# -gt 0 ]; do
     --repo)       [ $# -ge 2 ] || refuse "--repo needs a value";       REPO="$2"; shift 2 ;;
     --registry)   [ $# -ge 2 ] || refuse "--registry needs a value";   REGISTRY="$2"; shift 2 ;;
     --mismatches) [ $# -ge 2 ] || refuse "--mismatches needs a value"; MISMATCHES="$2"; shift 2 ;;
-    -h|--help)    sed -n '2,66p' "${BASH_SOURCE[0]}"; exit 0 ;;
-    *) refuse "unknown option \"$1\"" ;;
+    --anchors)    [ $# -ge 2 ] || refuse "--anchors needs a value";    ANCHORS_FILE="$2"; shift 2 ;;  --ref) [ $# -ge 2 ] || refuse "--ref needs a value"; AREF="$2"; shift 2 ;;  --project) APROJECT=1; shift ;;
+    -h|--help)    sed -n '2,66p' "${BASH_SOURCE[0]}"; exit 0 ;;  *) refuse "unknown option \"$1\"" ;;
   esac
 done
 [ -n "$REGISTRY" ]   || REGISTRY="$SELF_DIR/control_registry.txt"
@@ -240,7 +240,7 @@ if [ "$CMD" = "surfaces" ]; then
   surfaces
   exit 0
 fi
-
+if [ "$CMD" != "anchors" ]; then   # ...everything to the matching `fi` is the REGISTRY reconciliation
 # ---------------------------------------------------------------- check ------
 [ -f "$REGISTRY" ]   || refuse "no registry at $REGISTRY. There is nothing to reconcile, and an absent census is not an empty one."
 [ -f "$MISMATCHES" ] || refuse "no mismatch report at $MISMATCHES. The registry is allowed to record a control exercising more authority than its class licenses; it is not allowed to record it silently."
@@ -464,6 +464,369 @@ done < <(printf '%s\n' "$IDS")
 printf 'scan-controls: %s load_bearing, %s over-authorised (declared), %s unregistered surface(s), %s phantom entr(ies), %s report row(s) reconciled\n' \
   "$LOADBEARING" "$DECLARED_MM" "$UNREG" "$PHANTOM" "$NREP"
 printf 'scan-controls: %s advisory finding(s) — reported, and deliberately NOT affecting the exit code.\n' "$ADVISORY"
+fi   # <- the matching `fi`: everything above is the REGISTRY reconciliation, which
+     #    `anchors` skips because it reconciles a different thing.
+
+# ============================================================== ANCHOR-BLOCK ==
+# STABLE SEMANTIC ANCHORS. Residue (mm) measured this hole and named the remedy
+# in one sentence: the citation guard above checks RESOLVABILITY, NOT IDENTITY,
+# and "the durable fix is an ANCHOR TOKEN or a CONTENT HASH instead of a line
+# number". Section 6 asks whether a number lands inside a file and whether the
+# line it lands on does something. It never asks whether that line is the SAME
+# OBJECT the citation was written about, and across the three tools whose refs
+# drifted, 20 of 27 references passed every positional check while silently
+# wrong.
+#
+# THE RULE THIS BLOCK ENFORCES, AND IT IS THE WHOLE DESIGN:
+#
+#     A LINE NUMBER MAY BE A NAVIGATION HINT. IT MAY NOT BE THE IDENTITY.
+#
+# An anchor names its object by CONTENT. The line number is COMPUTED at every
+# resolution and is stored nowhere, so an insertion above the object moves the
+# number and cannot move the object. A position may still be written down —
+# `path:line#ANCHOR-ID` — and the two halves are graded differently: a wrong
+# `#` half is a REFUSAL, a stale `:` half is a REPORT with the corrected
+# projection printed beside it.
+#
+# THE RECORD. Ten fields, `|`-delimited, one per line, between the ANCHOR-TABLE
+# markers below:
+#
+#   anchor_id | object_id | object_type | namespace_id | semantic_role |
+#   artifact_ref | content_or_symbol_ref | version | created_at | supersedes
+#
+# WHERE THE TABLE LIVES, AND WHY IT IS NOT A NEW STORE. It is a declaration
+# inside the module that owns it, in the same shape and for the same reason as
+# EVIDENCE_VACUITY_ALLOW above: a separate file would be one more artefact that
+# can go stale independently of the guard that reads it, and this packet's
+# ceiling forbids a new store without an executed fixture proving one necessary.
+# `--anchors FILE` overrides the table and exists FOR FIXTURES — it is how the
+# red drives in tests/control_registry_tests.sh section 28 build tables that are
+# supposed to fail. It is the same door `--registry` already opens, and it is
+# named here rather than left to be discovered.
+#
+# WHAT `--repo` DOES AND DOES NOT RETARGET. The embedded table is a declaration
+# ABOUT THE REPOSITORY THIS MODULE LIVES IN, so it resolves against that
+# repository whatever `--repo` says; `--repo` retargets the SURFACE SCAN. Only
+# when `--anchors FILE` supplies a different table does `--repo` apply to
+# resolution. Stated because the alternative — the embedded anchors silently
+# failing against every fixture tree the suite builds — would have made every
+# fixture red for a reason that has nothing to do with the fixture.
+#
+# WHY THE OPTION ARMS ABOVE ARE PACKED TWO AND THREE TO A LINE. Because ten
+# `evidence_refs`, two live ranges and four receipts cite this file BY LINE
+# NUMBER, and inserting a line above them would have moved every one of them —
+# including citations inside frozen receipts this packet has no licence to
+# edit. THE IMPLEMENTATION OF THE ANCHOR SCHEME WAS ITSELF DEFORMED BY THE
+# ABSENCE OF THE ANCHOR SCHEME. That is not a joke at the packet's expense; it
+# is the cost of positional identity, paid in the one place it is impossible to
+# argue with, and it is recorded here rather than tidied away.
+#
+# WHAT THIS DOES NOT DO, NAMED RATHER THAN IMPLIED AWAY:
+#   1. IT ANCHORS THIRTEEN OBJECTS, NOT EVERY OBJECT. The registry carries a
+#      hundred controls and the tree carries hundreds of citations; this table
+#      instantiates each of the twelve declared object types at least once and
+#      stops there. It is a scheme with live instances, not a migration.
+#   2. NOTHING YET REQUIRES A CITATION TO CARRY AN ANCHOR. `evidence_refs` are
+#      still `path:line` and are still checked positionally by section 6. This
+#      block makes the anchored form available and correct; converting the
+#      census to it would be a re-authorisation of every entry's evidence and is
+#      not this packet's to take.
+#   3. CONTENT IS A LITERAL SUBSTRING, NOT A HASH. It must occur EXACTLY ONCE in
+#      the artifact — ambiguity is a violation, because content that names two
+#      lines does not identify one object — but two artifacts may legitimately
+#      carry the same literal, and only the (artifact, content) pair is unique.
+#   4. IT CANNOT SEE AN OBJECT RENAMED WITHOUT A SUPERSEDING RECORD. That is a
+#      violation here (ANCHOR-UNRESOLVED) rather than a silent pass, which is
+#      the fail-closed direction, but nothing detects the rename FOR the author.
+ANCHOR_TYPES="control_id decision_id packet_id finding_id evidence_id defect_class_id receipt_id ranking_id outcome_id section_anchor symbol_anchor test_assertion_anchor"
+# ANCHOR-TABLE:START
+ANCHOR_TABLE=(
+'ANC-0001|registry.evidence_resolution|control_id|buildos.control|the-anchor-resolver-entry|build-os/registry/control_registry.txt|control: registry.evidence_resolution|1|2026-08-02|-'
+'ANC-0002|DECISION-0011-p5b-next-after-p3b|decision_id|buildos.decision|the-sealed-prospective-decision|build-os/metrics/decision_telemetry.tsv|DECISION-0011-p5b-next-after-p3b|1|2026-08-02|-'
+'ANC-0003|PACKET-0029-citation-anchor-tokens|packet_id|buildos.packet|the-executing-packet|build-os/packets/active_packet.md|canonical packet id: PACKET-0029-citation-anchor-tokens|1|2026-08-02|-'
+'ANC-0004|FINDING-0003-mutators-emit-no-receipt|finding_id|buildos.finding|an-open-finding|build-os/registry/findings.txt|finding: FINDING-0003-mutators-emit-no-receipt|1|2026-08-02|-'
+'ANC-0005|EV-0001-tripwire-coverage-detection-bare-node|evidence_id|buildos.evidence|a-claim-scoped-evidence-assertion|build-os/registry/evidence_assertions.txt|evidence: EV-0001-tripwire-coverage-detection-bare-node|1|2026-08-02|-'
+'ANC-0006|DEFECT-0001-stale-line-reference|defect_class_id|buildos.defect|the-class-this-packet-exists-against|build-os/registry/defect_classes.txt|defect_class: DEFECT-0001-stale-line-reference|1|2026-08-02|-'
+'ANC-0007|gravito_p5_outcome_counterfactual_telemetry_a|receipt_id|buildos.receipt|the-receipt-that-sealed-the-ranking|build-os/receipts/gravito_p5_outcome_counterfactual_telemetry_a.md|# Receipt — `gravito_p5_outcome_counterfactual_telemetry_a`|1|2026-08-02|-'
+'ANC-0008|SIGNAL-SNAPSHOT-0094-seal-anchors|ranking_id|buildos.ranking|the-sealed-rank-for-this-packet|build-os/metrics/signal_snapshots.tsv|SIGNAL-SNAPSHOT-0094-seal-anchors|1|2026-08-02|-'
+'ANC-0009|packet-outcome:gravito_p5_outcome_counterfactual_telemetry_a|outcome_id|buildos.outcome|the-recorded-outcome-row|build-os/metrics/packet_metrics.tsv|gravito_p5_outcome_counterfactual_telemetry_a|1|2026-08-02|-'
+'ANC-0010-a|section:control_registry_tests#evidence-resolution|section_anchor|buildos.section|the-evidence-resolution-section|tests/control_registry_tests.sh|== 7. Every evidence reference resolves to a real line of a real file ==|1|2026-08-01|-'
+'ANC-0010-b|section:control_registry_tests#evidence-resolution|section_anchor|buildos.section|the-evidence-resolution-section|tests/control_registry_tests.sh|== 7. Every evidence reference resolves — and resolvability is NOT identity (section 28) ==|2|2026-08-02|ANC-0010-a'
+'ANC-0011|scan-controls.sh:anchor_resolve|symbol_anchor|buildos.symbol|the-content-resolver|build-os/registry/scan-controls.sh|anchor_resolve(){|1|2026-08-02|-'
+'ANC-0012|assertion:control_registry_tests#suite-not-vacuous|test_assertion_anchor|buildos.assertion|this-suites-own-vacuity-floor|tests/control_registry_tests.sh|[ "$PASS" -ge 40 ] && ok "this suite ran $PASS assertions|1|2026-08-02|-'
+)
+# ANCHOR-TABLE:END
+
+# The repository the table is a declaration ABOUT. See the note above.
+ANC_REPO="$REPO"
+[ -n "$ANCHORS_FILE" ] || ANC_REPO="$(cd "$SELF_DIR/../.." && pwd)"
+
+# Load the records. A file overrides the embedded table; blank lines and
+# full-line comments are skipped so a fixture can be annotated.
+ANC_RECS=()
+if [ -n "$ANCHORS_FILE" ]; then
+  [ -f "$ANCHORS_FILE" ] || refuse "no anchor table at $ANCHORS_FILE"
+  while IFS= read -r arec || [ -n "$arec" ]; do
+    arec="${arec%$'\r'}"
+    case "$arec" in ''|'#'*) continue ;; esac
+    ANC_RECS+=("$arec")
+  done < "$ANCHORS_FILE"
+else
+  ANC_RECS=("${ANCHOR_TABLE[@]}")
+fi
+[ "${#ANC_RECS[@]}" -gt 0 ] || refuse "the anchor table declares 0 anchors. An empty table validates every reference in the tree at once, which is the blinded-scanner failure this module already refuses twice."
+
+# Split a record into A1..A10, with A11 catching any overflow field. Done with
+# `read` rather than a per-field awk because `check` runs this on every
+# invocation and the suite invokes `check` two dozen times.
+A1=""; A2=""; A3=""; A4=""; A5=""; A6=""; A7=""; A8=""; A9=""; A10=""; A11=""
+anc_split(){ IFS='|' read -r A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 <<<"$1"; }
+anc_nf(){ local bars="${1//[^|]/}"; printf '%s' "$(( ${#bars} + 1 ))"; }
+anc_id(){ printf '%s' "${1%%|*}"; }
+anc_sup(){ printf '%s' "${1##*|}"; }
+anc_rec(){ # <anchor-id> -> the whole record on stdout, or non-zero
+  local r; for r in "${ANC_RECS[@]}"; do case "$r" in "$1|"*) printf '%s' "$r"; return 0 ;; esac; done; return 1
+}
+anc_superseded_by(){ # <anchor-id> -> the anchor that supersedes it, or non-zero
+  local r; for r in "${ANC_RECS[@]}"; do [ "$(anc_sup "$r")" = "$1" ] && { anc_id "$r"; return 0; }; done; return 1
+}
+
+# THE RESOLVER. Identity in, position out — never the other way round. The line
+# number is a RETURN VALUE, which is the entire difference between this and
+# every positional check in this file. ON SUCCESS the line number goes to
+# stdout; ON FAILURE the REASON does, and the exit code is what tells them
+# apart. A global would have been read back empty: every caller captures this in
+# a command substitution, and a subshell cannot hand a variable to its parent.
+anchor_resolve(){ # <artifact-rel-path> <content-or-symbol-ref>
+  local f="$ANC_REPO/$1" hits n
+  [ -f "$f" ] || { printf '%s' "no artifact at $1"; return 1; }
+  hits="$(ANC_CREF="$2" awk '
+    BEGIN{ c = ENVIRON["ANC_CREF"] }
+    /^# ANCHOR-TABLE:START$/{ s=1 }
+    /^# ANCHOR-TABLE:END$/  { s=0; next }
+    s { next }
+    index($0, c) { print NR }' "$f")"
+  n="$(printf '%s\n' "$hits" | grep -c . || true)"
+  case "${n:-0}" in
+    0) printf '%s' "unresolved — no line of $1 carries the anchored content"; return 1 ;;
+    1) printf '%s' "$hits"; return 0 ;;
+    *) printf '%s' "ambiguous — ${n} lines of $1 carry the anchored content, so the content does not identify ONE object"; return 1 ;;
+  esac
+}
+
+# Validate the table itself. Every violation goes through `viol`, so the same
+# finding gates a `check` run and refuses an `anchors` run. ANC_LIST=1 prints
+# the per-record listing; the `check` path leaves it off and keeps the findings.
+anchors_check(){
+  local r pair key line seen_ids="" seen_obj="" seen_site="" seen_sup="" aid art cref
+  for r in "${ANC_RECS[@]}"; do
+    if [ "$(anc_nf "$r")" != "10" ]; then
+      viol "ANCHOR-SCHEMA  a record carries $(anc_nf "$r") field(s), not the 10 the scheme declares: $r"
+      continue
+    fi
+    anc_split "$r"
+    for pair in "anchor_id=$A1" "object_id=$A2" "object_type=$A3" "namespace_id=$A4" "semantic_role=$A5" "artifact_ref=$A6" "content_or_symbol_ref=$A7" "version=$A8" "created_at=$A9" "supersedes=$A10"; do
+      [ -n "${pair#*=}" ] || viol "ANCHOR-SCHEMA  $A1 leaves \"${pair%%=*}\" empty. A partially declared anchor is an undeclared one."
+    done
+    in_list "$A3" "$ANCHOR_TYPES" || viol "ANCHOR-TYPE    $A1 declares object_type \"$A3\", which is not one of: $ANCHOR_TYPES"
+    printf '%s' "$A4" | grep -qE '^[a-z][a-z0-9._-]*$'          || viol "ANCHOR-SCHEMA  $A1 declares namespace_id \"$A4\", which is not a namespace token"
+    printf '%s' "$A8" | grep -qE '^[0-9]+$'                     || viol "ANCHOR-SCHEMA  $A1 declares version \"$A8\", which is not a number — supersession is ordered, so the order has to be readable"
+    printf '%s' "$A9" | grep -qE '^[0-9]{4}-[0-9]{2}-[0-9]{2}$' || viol "ANCHOR-SCHEMA  $A1 declares created_at \"$A9\", which is not a date"
+
+    # RULE 2, BOTH DIRECTIONS. One id may name only one object, and one content
+    # site may host only one object: an anchor two objects answer to is not
+    # stable, and one site with two object names is the duplicate-semantic-truth
+    # class this tree already registers.
+    if in_list "$A1" "$seen_ids"; then
+      viol "ANCHOR-COLLISION $A1 is declared more than once. Two different objects cannot claim the same stable anchor; the id IS the identity."
+    else
+      seen_ids="$seen_ids $A1"
+    fi
+    key="$A4/$A2@$A8"
+    if in_list "$key" "$seen_obj"; then
+      viol "ANCHOR-COLLISION $A1 re-declares $key, which another anchor already owns. One object at one version has one anchor."
+    else
+      seen_obj="$seen_obj $key"
+    fi
+    key="$A6>$A7"
+    if printf '%s\n' "$seen_site" | grep -qxF "$key<$A2"; then
+      : # the same object anchored twice at one site across versions is legal
+    elif printf '%s\n' "$seen_site" | grep -qF "$key<"; then
+      viol "ANCHOR-SITE-COLLISION $A1 anchors $A2 at a content site another object already claims in $A6. A site that names two objects identifies neither."
+    fi
+    seen_site="$seen_site
+$key<$A2"
+
+    # RULE 5 and RULE 7. A supersedes link is history: it must name a record
+    # that exists, may not name itself, and may not be claimed twice, because a
+    # retired object with two successors has no successor.
+    if [ "$A10" != "-" ]; then
+      if [ "$A10" = "$A1" ]; then
+        viol "ANCHOR-SUPERSEDE $A1 supersedes itself, which records nothing."
+      elif ! anc_rec "$A10" >/dev/null; then
+        viol "ANCHOR-SUPERSEDE $A1 supersedes \"$A10\", which this table does not declare. History cannot point at a record that was never written."
+      elif in_list "$A10" "$seen_sup"; then
+        viol "ANCHOR-SUPERSEDE $A10 is superseded by more than one anchor. A retired object with two successors has none."
+      fi
+      seen_sup="$seen_sup $A10"
+    fi
+  done
+
+  # RULE 1 and RULE 5. Every LIVE anchor must resolve BY CONTENT; a SUPERSEDED
+  # one is exempt, because the whole point of superseding it is that its content
+  # is gone and its record survives anyway.
+  ANC_RESOLVED=0; ANC_SUPERSEDED=0
+  for r in "${ANC_RECS[@]}"; do
+    [ "$(anc_nf "$r")" = "10" ] || continue
+    anc_split "$r"; aid="$A1"; art="$A6"; cref="$A7"
+    if key="$(anc_superseded_by "$aid")"; then
+      ANC_SUPERSEDED=$((ANC_SUPERSEDED+1))
+      [ "${ANC_LIST:-0}" = "1" ] && printf 'anchor: %s type=%s object=%s at=%s:- status=SUPERSEDED by=%s\n' "$aid" "$A3" "$A2" "$art" "$key"
+      continue
+    fi
+    if line="$(anchor_resolve "$art" "$cref")"; then
+      ANC_RESOLVED=$((ANC_RESOLVED+1))
+      [ "${ANC_LIST:-0}" = "1" ] && printf 'anchor: %s type=%s object=%s at=%s:%s status=RESOLVED\n' "$aid" "$A3" "$A2" "$art" "$line"
+    else
+      [ "${ANC_LIST:-0}" = "1" ] && printf 'anchor: %s type=%s object=%s at=%s:- status=UNRESOLVED\n' "$aid" "$A3" "$A2" "$art"
+      viol "ANCHOR-UNRESOLVED $aid ($line). An anchor that resolves to nothing is a name for an object nobody can reach, and no superseding record explains where it went."
+    fi
+  done
+  return 0
+}
+
+# Print one record in full, resolved. RULE 7 lives here: a superseded anchor
+# returns ITS OWN version and ITS OWN content ref and names its successor,
+# instead of quietly becoming it.
+anchors_show(){ # <record>
+  local by line
+  anc_split "$1"
+  by="$(anc_superseded_by "$A1" || true)"
+  printf 'anchor_id: %s\nobject_id: %s\nobject_type: %s\nnamespace_id: %s\nsemantic_role: %s\nartifact_ref: %s\ncontent_or_symbol_ref: %s\nversion: %s\ncreated_at: %s\nsupersedes: %s\nsuperseded_by: %s\n' \
+    "$A1" "$A2" "$A3" "$A4" "$A5" "$A6" "$A7" "$A8" "$A9" "$A10" "${by:--}"
+  if [ -n "$by" ]; then printf 'resolved_line: -\nstatus: SUPERSEDED\n'; return 0; fi
+  if line="$(anchor_resolve "$A6" "$A7")"; then
+    printf 'resolved_line: %s\nprojection: %s:%s#%s\nstatus: RESOLVED\n' "$line" "$A6" "$line" "$A1"
+    return 0
+  fi
+  printf 'resolved_line: -\nstatus: UNRESOLVED — %s\n' "$line"
+  return 1
+}
+
+# The object_id of a record, without splitting it — used while A1..A10 are
+# being reused by an inner loop.
+anc_f_obj(){ local o="${1#*|}"; printf '%s' "${o%%|*}"; }
+
+# Validate a WRITTEN reference. THE TWO HALVES ARE GRADED SEPARATELY AND THE
+# OUTPUT SAYS SO, because the finding this packet exists for is that a reference
+# can be syntactically perfect and still name the wrong thing.
+anchors_validate(){ # <reference>
+  local ref="$1" pos aid rec rf rl art cref line other r oline
+  printf 'reference: %s\n' "$ref"
+  case "$ref" in
+    *'#'*) pos="${ref%%#*}"; aid="${ref##*#}" ;;
+    *)     printf 'syntactic: OK — the string parses as a position\n'
+           printf 'identity: REJECTED — NO-ANCHOR. "%s" carries a position and no anchor token. A position is a NAVIGATION HINT, not an identity, and it is the exact form every drifted citation in residue (mm) was written in.\n' "$ref"
+           viol "NO-ANCHOR   the reference \"$ref\" carries no anchor token"
+           return 1 ;;
+  esac
+  rf="${pos%%:*}"; rl="${pos#*:}"; [ "$rl" = "$pos" ] && rl=""
+  # The positional predicates sections 6 and 23 already own, evaluated FIRST and
+  # reported whatever the identity verdict turns out to be.
+  if [ -n "$rf" ] && [ -f "$ANC_REPO/$rf" ]; then
+    if [ -z "$rl" ]; then
+      printf 'syntactic: OK — %s exists and the reference names no line\n' "$rf"
+    elif printf '%s' "$rl" | grep -qE '^[0-9]+$' && [ "$rl" -ge 1 ] && [ "$rl" -le "$(grep -c '' "$ANC_REPO/$rf")" ]; then
+      printf 'syntactic: OK — %s exists and line %s is inside it\n' "$rf" "$rl"
+    else
+      printf 'syntactic: FAIL — "%s" does not name a line inside %s\n' "$rl" "$rf"
+    fi
+  else
+    printf 'syntactic: FAIL — %s is not a file under %s\n' "$rf" "$ANC_REPO"
+  fi
+  if ! rec="$(anc_rec "$aid")"; then
+    printf 'identity: REJECTED — UNKNOWN-ANCHOR. "%s" is a well-formed anchor token that this table does not declare. Resolving syntactically is not resolving TO SOMETHING.\n' "$aid"
+    viol "UNKNOWN-ANCHOR the reference \"$ref\" names an anchor the table does not declare"
+    return 1
+  fi
+  anc_split "$rec"; art="$A6"; cref="$A7"
+  printf 'anchor_id: %s\nobject_id: %s\ncontent_or_symbol_ref: %s\n' "$A1" "$A2" "$cref"
+  if [ "$rf" != "$art" ]; then
+    printf 'identity: REJECTED — WRONG-ARTIFACT. The reference names %s; %s is anchored in %s.\n' "$rf" "$aid" "$art"
+    viol "WRONG-ARTIFACT the reference \"$ref\" names an artifact the anchor does not live in"
+    return 1
+  fi
+  if ! line="$(anchor_resolve "$art" "$cref")"; then
+    printf 'identity: REJECTED — UNRESOLVED-ANCHOR. %s\n' "$line"
+    viol "UNRESOLVED-ANCHOR the reference \"$ref\" names an anchor that no longer resolves"
+    return 1
+  fi
+  printf 'identity: OK — %s resolves to %s at :%s\n' "$aid" "$A2" "$line"
+  if [ -n "$rl" ] && [ "$rl" != "$line" ]; then
+    # RULE 3. A hint that has merely gone stale is REPORTED. A hint that lands
+    # on the anchored site of a DIFFERENT object is REFUSED, because that is the
+    # case where a reader follows the number, finds something real, and believes
+    # it — the one failure mode a resolvability check can never catch.
+    other=""
+    for r in "${ANC_RECS[@]}"; do
+      [ "$(anc_nf "$r")" = "10" ] || continue
+      anc_split "$r"
+      [ "$A6" = "$art" ] || continue
+      [ "$A2" = "$(anc_f_obj "$rec")" ] && continue
+      oline="$(anchor_resolve "$A6" "$A7")" || continue
+      [ "$oline" = "$rl" ] && { other="$A1"; break; }
+    done
+    if [ -n "$other" ]; then
+      printf 'hint: REJECTED — WRONG-OBJECT. Line %s of %s currently resolves, and what it resolves to is the anchored site of %s, a DIFFERENT object. The reference is readable, checkable and wrong.\n' "$rl" "$art" "$other"
+      viol "WRONG-OBJECT the reference \"$ref\" points at a line that is the anchored site of $other"
+      return 1
+    fi
+    printf 'hint: HINT-STALE — the reference says :%s and the anchor resolves at :%s. A line number is a navigation hint, so this is REPORTED and not refused; the identity was never in the number.\n' "$rl" "$line"
+    printf 'projection: %s:%s#%s\n' "$art" "$line" "$aid"
+    return 0
+  fi
+  printf 'hint: OK — :%s is where the anchor resolves\n' "$line"
+  printf 'projection: %s:%s#%s\n' "$art" "$line" "$aid"
+  return 0
+}
+
+if [ "$CMD" = "anchors" ]; then
+  if [ "$APROJECT" = "1" ]; then
+    # RULE 4. The projection is GENERATED from identity, so it carries identity.
+    # A projection reduced to `path:line` has thrown away the only part of
+    # itself that could still be right tomorrow.
+    for arec in "${ANC_RECS[@]}"; do
+      [ "$(anc_nf "$arec")" = "10" ] || continue
+      anc_split "$arec"
+      anc_superseded_by "$A1" >/dev/null && continue
+      aline="$(anchor_resolve "$A6" "$A7")" || continue
+      printf '%s:%s#%s\n' "$A6" "$aline" "$A1"
+    done
+    exit 0
+  fi
+  if [ -n "$AREF" ]; then
+    case "$AREF" in
+      *'#'*|*:*) anchors_validate "$AREF" || true ;;
+      *) if arec="$(anc_rec "$AREF")"; then anchors_show "$arec" || true
+         else printf 'reference: %s\nidentity: REJECTED — UNKNOWN-ANCHOR. This table declares no anchor by that name.\n' "$AREF"; viol "UNKNOWN-ANCHOR \"$AREF\""; fi ;;
+    esac
+    [ "$VIOL" -gt 0 ] && { printf 'scan-controls: REFUSED — %s anchor violation(s).\n' "$VIOL" >&2; exit 2; }
+    exit 0
+  fi
+  printf 'scan-controls: anchor table — %s record(s), %s declared object type(s), resolved against %s\n' \
+    "${#ANC_RECS[@]}" "$(printf '%s\n' $ANCHOR_TYPES | grep -c .)" "$ANC_REPO"
+  ANC_LIST=1 anchors_check
+  printf 'scan-controls: %s anchor(s) resolved, %s superseded (history, not resolution), %s violation(s)\n' \
+    "$ANC_RESOLVED" "$ANC_SUPERSEDED" "$VIOL"
+  [ "$VIOL" -gt 0 ] && { printf 'scan-controls: REFUSED — %s anchor violation(s). An anchor is the identity of an object; a table that does not validate is a set of names for things nobody can reach.\n' "$VIOL" >&2; exit 2; }
+  exit 0
+fi
+# ...and on the `check` path the same validation GATES, because an anchor table
+# checked only when somebody asks is the shelfware this module's header is about.
+anchors_check
+printf 'scan-controls: %s anchor(s) resolved, %s superseded, over %s record(s) in %s declared object type(s)\n' \
+  "$ANC_RESOLVED" "$ANC_SUPERSEDED" "${#ANC_RECS[@]}" "$(printf '%s\n' $ANCHOR_TYPES | grep -c .)"
+# ============================================================ END ANCHOR-BLOCK
 
 if [ "$VIOL" -gt 0 ]; then
   printf 'scan-controls: REFUSED — %s violation(s) reconciling %s against %s.\n' "$VIOL" "$REGISTRY" "$REPO" >&2
