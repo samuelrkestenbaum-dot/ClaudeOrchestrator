@@ -61,7 +61,7 @@ Take over strategy for the cross-surface memory kernel: decide what the second s
 |---|---|---|---|
 | `ART-0001` | repo_file | build-os/registry/control_registry.txt:1942#ANC-0001 | `ANC-0001` |
 | `ART-0002` | repo_file | build-os/metrics/decision_telemetry.tsv:48#ANC-0002 | `ANC-0002` |
-| `ART-0003` | repo_file | build-os/packets/active_packet.md:15#ANC-0003 | `ANC-0003` |
+| `ART-0003` | repo_file | build-os/packets/active_packet.md:40#ANC-0003 | `ANC-0003` |
 | `ART-0004` | repo_file | build-os/registry/findings.txt:67#ANC-0004 | `ANC-0004` |
 | `ART-0005` | repo_file | build-os/registry/evidence_assertions.txt:95#ANC-0005 | `ANC-0005` |
 | `ART-0007` | repo_file | build-os/receipts/gravito_p5_outcome_counterfactual_telemetry_a.md:1#ANC-0007 | `ANC-0007` |

@@ -4,13 +4,38 @@
 > the builder implements exactly this and nothing else; the archivist clears it
 > on close. One packet at a time.
 
-## Status: NOTHING IN FLIGHT
+## Status: IN FLIGHT — `gravito_measurement_integrity_a`
 
-**NO PACKET IS DECLARED.** There is deliberately no packet-id declaration line in
-this file, which is what `bandwidth.active_packet_singleton` reads: it counts
-those declarations against a ceiling of 1, and **zero is the honest count when the
-last packet has closed and the orchestrator has not declared the next one.**
-Declaring the next packet is a routing act and is not the archivist's to take.
+- **Packet id:** `PACKET-0036-measurement-integrity` — **MINTED, not reused**, and
+  collision-checked **before** the mint rather than after: the live band is
+  `PACKET-0001`..`PACKET-0035`, `PACKET-0035` is the highest allocation predating
+  this packet, `git log -S'PACKET-0036' --all` returns **no commit**, and a
+  full-tree grep for the token returns **nothing**. The id was free.
+- **Base:** `a2648dc`, verified with `git merge-base` **before the first edit**
+  (`git merge-base HEAD claude/project-handoff-merge-ramhds` → `a2648dc`).
+- **Lane:** `substantive`. **Depth 2** — builder, then qa ‖ reviewer.
+- **Declared before building, in its own commit**, per the standing contract — and
+  **this commit exists because the last packet's did not.**
+
+### Why this declaration is commit 1 and not a formality
+
+The previous packet — the largest of the sequence — was built, gated and closed
+while this file read `NOTHING IN FLIGHT` and described `PACKET-0029`. The
+measurable consequence: **`bandwidth.active_packet_singleton` reported ZERO in
+flight while that packet was in flight.** The guard passed, truthfully, on a file
+describing the wrong packet.
+
+That is `DEFECT-0011-undeclared-active-packet`, **`OCCURRENCE-0005`** — a
+recurrence of a class this repository had **already registered**, and whose
+`could_have_been_prevented_by` **already names the remedy**: a *lower* bound on
+the same cardinality check, refusing zero declared packets while a build is in
+flight. Only the upper bound exists. **The class has now fired twice against a
+prevention that was specified and never built.**
+
+So this commit is not bookkeeping. It is the one action that makes the guard's
+`0`/`1` reading true of the world for the duration of this packet, and it is
+taken first so that no measurement inside this packet is taken against a file
+that is lying about what is being measured — which is the packet's whole subject.
 
 canonical packet id: PACKET-0029-citation-anchor-tokens
 
@@ -21,8 +46,99 @@ than by position**. It is the packet's own scheme applied to the packet's own
 record. The anchor requires that literal to occur **EXACTLY ONCE** in this file —
 zero occurrences resolve as `ANCHOR-UNRESOLVED` and two or more as ambiguous, and
 **both are violations that drive `scan-controls.sh check` to exit 2.** It does not
-match the declaration pattern the bandwidth ceiling counts, so it declares nothing
-in flight.
+match the declaration pattern the bandwidth ceiling counts, so **it still declares
+nothing in flight** — the count of `1` above comes from the `**Packet id:**` line
+and from nothing else.
+
+### What declaring this packet COST, measured rather than assumed
+
+**Writing the declaration turned the suite red, and the red was not about the
+declaration.** `tests/memory_kernel_tests.sh` §18 runs `memory-kernel.sh reconcile`
+against the LIVE committed projection, and the projection embeds `ART-0003` as
+`build-os/packets/active_packet.md:15#ANC-0003` — **a resolved line number.**
+Adding text above the anchor site moved it 15 → 40, `cmp -s` saw two different
+bytes, and the suite reported `PROJECTION-DIVERGED`. Base run: `2095 passed, 1
+failed`.
+
+**The identity half was never wrong.** `scan-controls.sh anchors` resolved
+`ANC-0003` cleanly at the new position throughout — 12 resolved, 1 superseded, 0
+violations — because content resolution is exactly what it was built to do. Only
+the **projection** of that resolution was stale, which is the position half doing
+what the anchor scheme demoted it for doing.
+
+**The repair is the sanctioned one and not a store edit.** A projection is
+generated and never hand-edited; `export-handoff --out` is a pure read that
+appended **no event** and touched **no canonical store** (`validate`: 8/4/11/14/25/8/1/1,
+**0 violations**; `git status` showed only the projection). `memory_events.tsv` is
+untouched. **The one-line delta is the line number and nothing else.**
+
+**This is `DEFECT-0001-stale-line-reference` reappearing inside the mechanism
+built to demote line numbers**, and it is recorded here as a finding for residue
+rather than fixed: every content-preserving edit above any anchored site is a
+red suite until someone regenerates the shadow, so **a byte-exact reconcile of a
+position-bearing projection is itself a false-negative generator** — the same
+family as `DEFECT-0013`, arriving by a different route. Not in this packet's
+scope to fix; **named, not normalised.**
+
+## Branch base
+
+Branched at `a2648dc` on `claude/project-handoff-merge-ramhds`, verified with
+`git merge-base` before the first edit. **Nothing is pushed, merged, tagged, PR'd
+or deployed, and no such go has been given.**
+
+## What this packet must make true
+
+The project's next frontier is **experience** — running
+`ranking → selection → execution → outcome → memory → comparison → repeat`
+repeatedly. That loop's payload is **comparison**, and comparison requires a
+measurement substrate that does not lie.
+
+`DEFECT-0013` is that substrate lying. It is **one-directional** — it cannot
+fabricate a success, so every prior green stands — but **it can fabricate a
+failure**, and a false "went red" written into an outcome record poisons the store
+S1 will eventually train on. Its sharpest form:
+`tests/release_metadata_tests.sh` compares a **live** suite total against memory,
+so if the race fires there, **the guard that keeps memory honest emits a false
+staleness verdict.**
+
+Four things, and only these four:
+
+1. **Fix the defect** at its site, without disabling `pipefail` for a whole file.
+2. **Sweep the class** — `producer | … | early-exiting consumer` under `pipefail`
+   — across `tests/`, `build-os/` and `.claude/hooks/`. Fix the sites that can
+   actually race; **record the ones that cannot, with the measurement that says
+   why.** A site is only racy if the producer can emit more than one pipe buffer.
+3. **Prove the fix by measurement** — the affected assertion run **≥4000 times**
+   before and after, both rates reported. "It passed once" is not evidence in this
+   tree; that is the exact epistemic error this packet exists to correct.
+4. **Add a guard for the class** in an existing suite, and say plainly what the
+   guard **cannot** see.
+
+And then one ruling, either way and not the flattering way: **is a single green
+suite run sufficient evidence in this tree again, or does the doubled-run
+discipline stand?**
+
+## Ceiling
+
+- Add only the controls strictly required. **Declared mismatches stand at 22**,
+  and a cap on that raw total is **not** a governance instrument: `lic_of` tops
+  out at `gate` for Class A and **no class licenses `execute`**, so every
+  durable-write control must declare a mismatch and no packet can decline.
+  **The number that constrains anybody is gate-on-advise: 14, unmoved since base.
+  Do not move it.**
+- **Do NOT touch `build-os/metrics/rank-candidates.sh`** (blob `5543ea88`),
+  `signal_snapshots.tsv`, or `decision_telemetry.tsv`. The live experiment's S1
+  report must still digest to
+  `e838284e2bba52628647d0c7ddd1ed258a7aab7cc391a5ac99992ad7584eb596` at hand-back,
+  with `rank_of_selected: 1` still deriving.
+- **Do NOT rewrite any row in `build-os/kernel/memory_events.tsv`.** The last
+  packet re-chained `EVT-0024`/`EVT-0025` in place — the exact operation its own
+  `EVENT-APPEND-ONLY` guard refuses — and **`validate` returns 0 violations on
+  that re-chained history**, so the kernel is blind to it and git is what caught
+  it. **Corrections create later events.** Do not rely on `validate` here.
+- `(ddd)` stays queued; `(uuuu)` stays open. **Fix no other residue item.**
+- An unrelated defect: **record a stable defect-class identity, create residue,
+  and CONTINUE.**
 
 ## CLOSED — `gravito_cross_surface_memory_kernel_v0`
 
