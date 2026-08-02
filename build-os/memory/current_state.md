@@ -45,12 +45,12 @@
   `no tags` because `tests/release_metadata_tests.sh:322` requires it, so the residue item is
   annotated rather than rewritten. Whether the tag was created with an explicit go is not
   determinable from here and no claim is made.
-- **Build/test command:** `bash tests/build_os_tests.sh` (1952 checks; no network; temp dirs)
+- **Build/test command:** `bash tests/build_os_tests.sh` (1963 checks; no network; temp dirs)
   — measured on a quiet tree at `80ad634` plus `gravito_p5_outcome_counterfactual_telemetry_a`'s
   build, from a SOLO full-capture run after an anchored `pgrep -fa '^bash tests/'` returned empty
   (**1909 at the previous close, and 1909 re-measured at this packet's Commit 1 in isolation**),
   and reconciled against
-  `CHANGELOG.md`, which carries the matching literal `**1952 passed**` (unsplit) in the
+  `CHANGELOG.md`, which carries the matching literal `**1963 passed**` (unsplit) in the
   release block `## [Unreleased]` -> `### In flight (not landed at the released commit)`.
   **CITED BY HEADING, NOT BY LINE NUMBER, from 2026-08-01 on** — the changelog grows from the
   top, so every line-citation into it decays on every packet, guaranteed rather than
@@ -177,19 +177,39 @@
   **THE POINT OF P5, AND IT IS NOT ANOTHER SUPPORTING PACKET.** P4 built the executive
   MECHANISM and its capability is UNDEMONSTRATED. P5 makes the transition from *decision already
   made -> S1 reconstructs a ranking* to *S1 ranks FIRST -> human chooses -> outcome occurs*.
-  **THE HARD REQUIREMENT, MECHANICALLY ENFORCED: `ranking < selection < execution`.** Three
+  **THE HARD REQUIREMENT, MECHANICALLY ENFORCED: `ranking < selection < execution`.** Five
   refusals in `record-decision.sh`, each driven red on its own fixture:
   `seal-ranking` REFUSES while the decision already carries a SELECTION row
   (`RANKING-AFTER-SELECTION`); `record` REFUSES a selection whose candidate set differs from the
   sealed one (`SET-CHANGED-AFTER-SEAL`) and REFUSES to carry an outcome at all
   (`OUTCOME-FIELD-IN-SELECTION`); `outcome` REFUSES while the decision has NO selection row
   (`OUTCOME-BEFORE-SELECTION`).
+  **AND THE SEAL HAD A SECOND, UNGUARDED DOOR — FOUND BY THE REVIEWER, CLOSED IN THE FIX ROUND.**
+  `seal-ranking`'s guard reads `decision_telemetry.tsv`, but the field it protects lives in
+  `signal_snapshots.tsv`, and the generic `snapshot` writer accepted **any** `--signal-name`.
+  A hand-written `sealed_rank` row for a decision that already carried a selection was accepted,
+  **chained cleanly, and left `snapshot-verify` reporting every row as verifying** — so unlike the
+  disclosed delete-and-re-add route it produced **no evidence at all**, while moving
+  `prospective_decisions_with_a_recorded_selection` from 0 to 1 on the live stores. TWO STORES,
+  ONE GUARDED DOOR. `snapshot` now REFUSES every one of the six declared ranker-evidence field
+  names (`RANKER-FIELD-VIA-SNAPSHOT`) and names `seal-ranking` as the one door; the check is on
+  the FIELD NAME, so a seventh ranker field added later is closed by the same line. `seal-ranking`
+  also REFUSES an ordering that gives one candidate two ranks (`CANDIDATE-RANKED-TWICE`), which
+  previously sealed only the first rank while printing the contradiction back — receipt and chained
+  evidence disagreeing about the same ordering.
   **WHAT THE EVIDENCE ESTABLISHES AND WHAT IT DOES NOT — stated in the code, not implied away.**
   CONSTITUTIVE: the EXISTENCE ORDER of a row across two stores at the instant of each write, with
   the seal landing in the digest-chained snapshot file where every later row covers it.
   CORROBORATING and worth much less: the ISO-8601 strings, compared only because a contradiction
-  is always wrong, never because agreement is proof. THE ONLY REAL ANCHOR is outside both stores —
-  git, where the seal is committed before any commit can carry its selection. **A timestamp that
+  is always wrong, never because agreement is proof. OUTSIDE BOTH IS GIT, AND IT ANCHORS **ORDER**
+  AND NOTHING ELSE: the seal is committed before any commit can carry its selection, and the
+  parent-hash chain makes that order non-forgeable — **but only once a third party has witnessed
+  it, and this branch is unpushed**, so the anchor is UNWITNESSED rather than proven. **It anchors
+  order, NOT INDEPENDENT AGENCY:** committer identity and both commit dates are self-asserted, and
+  the same reasoning that refuses a self-reported timestamp refuses them. P4's non-circularity never
+  rested on git identity — it rested on a selection made by a DIFFERENT AGENT in a DIFFERENT PACKET
+  before the ranker existed, and **P5 has nothing comparable until somebody actually selects from
+  `DECISION-0011`.** Residue `(kkkk)`. **A timestamp that
   PARSES is not a timestamp that PROVES ORDERING**, which is this tree's named recurring trap one
   level up.
   **THE SEALED PROSPECTIVE ORDERING — `DECISION-0011-p5b-next-after-p3b`, rule `s1-v1`, sealed at
@@ -220,7 +240,8 @@
   to an existing one", and leaving that sentence standing would have been a knowingly-false census
   entry. The justification is executed, not argued: `scan-controls.sh` refused it as `LAUNDERED`
   and `UNREPORTED` until the mismatch was declared and reported.
-  **Suite 1909 -> 1952 (+43, ALL in `tests/mutator_registry_tests.sh` section 14, 93 -> 136);
+  **Suite 1909 -> 1963 (+54, ALL in `tests/mutator_registry_tests.sh` section 14, 93 -> 147 — 43
+  at the build, 11 more in the fix round);
   census 99 -> 100; declared mismatches 20 -> 21; out-of-licence 25 -> 26; snapshots 72 -> 97
   (+25, all bound to DECISION-0011); decisions 10 (UNCHANGED — the prospective decision
   deliberately has no row); ZERO RE-AUTHORISATIONS** (no `runtime_authority`, `required_authority`,

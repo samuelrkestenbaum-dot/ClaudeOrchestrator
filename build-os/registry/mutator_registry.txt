@@ -192,7 +192,7 @@ runtime_authority: execute
 deployment_mode: human_confirmed
 implementation_status: load_bearing
 empirical_status: red_driven
-evidence_refs: build-os/metrics/record-decision.sh:456; build-os/metrics/record-decision.sh:483
+evidence_refs: build-os/metrics/record-decision.sh:479; build-os/metrics/record-decision.sh:506
 receipt_behavior: prints the id it appended; the row IS the receipt, and a snapshot row additionally carries the digest that proves it has not been edited since
 notes: Registered as a mutator in the same commit that created it, rather than in a later tidying packet — which is the whole difference between a census and a backlog. Its `gate` sibling `metrics.decision.schema_invariant` classifies the validation that refuses a malformed row; this entry classifies the append that follows it.
 
@@ -250,6 +250,6 @@ runtime_authority: execute
 deployment_mode: human_confirmed
 implementation_status: load_bearing
 empirical_status: red_driven
-evidence_refs: build-os/metrics/record-decision.sh:695; build-os/metrics/record-decision.sh:700
+evidence_refs: build-os/metrics/record-decision.sh:744; build-os/metrics/record-decision.sh:749
 receipt_behavior: prints the decision id it amended and states that the selection half was verified unchanged field by field; the amended row is the receipt, and `validate` re-reads it
 notes: THE ONE MUTATION SURFACE THIS LAYER DID NOT PREVIOUSLY HAVE, AND IT IS CENSUSED IN THE COMMIT THAT CREATED IT RATHER THAN IN A LATER TIDYING PACKET. MUT-0006 declares the telemetry append and says, in its own write_scope, "never an edit to an existing one" — that sentence is TRUE OF MUT-0006 AND WOULD HAVE BEEN FALSE OF THE MODULE the moment `outcome` shipped, which is exactly how a census stops describing the system that runs. WHY THE OUTCOME IS AN EDIT AND NOT AN APPEND, stated so the choice is auditable rather than convenient: the outcome columns ALREADY EXIST in decision_telemetry.tsv and are `unknown` until something knows better, and the store's duplicate-id refusal exists so that no total ever double-counts a decision — a second row for the same decision would defeat precisely that guard. The alternative considered and rejected was appending the outcome to signal_snapshots.tsv, which is append-only and chained: it was rejected because that store holds signals FROZEN AT DECISION TIME, an outcome observed afterwards is not one, and rows added there for a decision the shadow ranker can rank would move that decision's published `ranking_digest` — falsifying a figure a CLOSED receipt quotes, and receipts are append-only history.

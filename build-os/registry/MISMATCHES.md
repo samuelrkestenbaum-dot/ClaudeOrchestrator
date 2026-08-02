@@ -83,8 +83,8 @@ the control as `UNREPORTED`.
 | `metrics.record.store_append` | A | execute | gate | `build-os/metrics/record-packet.sh:276` | 1 |
 | `identity.stamp_write` | A | execute | gate | `.claude/hooks/build-os-identity.sh:160` | 1 |
 | `tools.handoff_lock_lifecycle` | A | execute | gate | `build-os/tools/specialist-handoff.sh:166` | 1 |
-| `metrics.decision.store_append` | A | execute | gate | `build-os/metrics/record-decision.sh:456` | 1 |
-| `metrics.decision.outcome_update` | A | execute | gate | `build-os/metrics/record-decision.sh:695` | 1 |
+| `metrics.decision.store_append` | A | execute | gate | `build-os/metrics/record-decision.sh:479` | 1 |
+| `metrics.decision.outcome_update` | A | execute | gate | `build-os/metrics/record-decision.sh:744` | 1 |
 
 <!-- MISMATCH-TABLE:END -->
 

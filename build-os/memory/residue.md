@@ -1571,5 +1571,52 @@ not to be fixed outside that packet.**
   trade — a decision and its outcome authored in one breath is the conflation the whole packet
   exists against — but a future importer will meet it and should meet it here first.
 
+- **(kkkk) THE GIT ANCHOR IS NARROWER THAN FOUR PLACES CLAIMED, AND THE PRECISE SHAPE IS: GIT
+  ANCHORS ORDER, NOT INDEPENDENT AGENCY — AND TODAY NOT EVEN ORDER AGAINST A REWRITE.** Four
+  artefacts said "the only real anchor is git"; all four are now softened to what the evidence
+  supports (`record-decision.sh`'s header, `tests/mutator_registry_tests.sh` section 14's header,
+  `current_state.md`, `CHANGELOG.md`'s in-flight entry, and `control_registry.txt`'s
+  `metrics.decision.outcome_update` notes). **Committer identity is SELF-ASSERTED:** this packet's `cda95d2` and
+  `44b0fab` are the only two of the repository's 102 commits authored `builder@local` — every
+  commit around them is `noreply@anthropic.com` — and **no `git config --local` identity is
+  persisted** (`.git/config` carries no `email` line at all), so the author field was supplied per
+  commit by whoever ran it. That is exactly the shape of the self-reported timestamp this packet
+  rightly refused to treat as constitutive, so the same reasoning refuses `%ae`. **Commit dates are equally self-asserted** (`GIT_AUTHOR_DATE`,
+  `GIT_COMMITTER_DATE`). **The parent-hash chain IS non-forgeable — but only once a third party
+  has witnessed it, and the branch is unpushed.** Nothing external has seen `44b0fab`; one process
+  could still rewrite both commits. The anchor is not worthless, it is **UNWITNESSED**. **And P4's
+  non-circularity never rested on git identity at all** — it rested on the selection being made by
+  a *different agent, in a different packet, THREE COMMITS before S1 existed* (`5c8d19e` ->
+  `158b5ad` -> `ce71122` -> `9742a10`): event ordering across independently-motivated work. **The
+  commit COUNT is structural and the elapsed time is not** — `git log` puts about 79 minutes
+  between those two commits, but that figure reads the same self-asserted dates this item has just
+  refused, so it corroborates and does not establish. **P5 has nothing comparable and cannot until
+  somebody actually selects from `DECISION-0011`.** The remedy is not a code change; it is a
+  witness (a push, a tag someone else holds, or a second selector), and every one of those is an
+  operator act.
+
+- **(llll) `OTMP` HAS NO `trap`, AND THAT IS HYGIENE RATHER THAN INTEGRITY.** The `outcome` path
+  writes the amended store to a `.outcome.<pid>` temp file and `mv`s it over the original; a
+  SIGKILL between the two leaves the temp file behind. **It cannot corrupt the store** — the
+  original is untouched until the rename, which is the whole reason the rename is there — so the
+  failure mode is a stray file in `build-os/metrics/`, not a lost or half-written record. Recorded
+  and deliberately NOT fixed in the fix round: adding a `trap` is a real improvement and it is not
+  what a bounded fix round is for.
+
+- **(mmmm) `DECISION-9402-proof` AND `DECISION-9402` ARE DISTINCT IDENTITIES, AND NOTHING RESOLVES
+  IDS BY NUMBER PREFIX.** A same-number/different-slug pair can therefore each hold their own seal
+  and their own selection row without any guard noticing they were meant to be one decision. **This
+  is a STABLE-ID ALLOCATION concern and not an ordering bypass** — neither id can reach the other's
+  rows, so no seal is written after a selection and no counter is moved. It belongs with whatever
+  packet gives `DECISION-*` allocation the collision discipline `PACKET-*` ids already get by hand.
+
+- **(nnnn) `CHANGELOG.md`'s PREVIOUS RELEASE ENTRY STILL SAYS THE `ranking_digest` REPRODUCES, AND
+  THAT DISPOSITION IS DELIBERATE.** The P4 entry states *"re-running reproduces the
+  `ranking_digest`"*, which `(cccc)` showed is imprecise: the digest covers the snapshot store's
+  global chain head, so any append for any decision moves it. **It is left standing.** The changelog
+  is append-only history, the correction is published thirteen lines above it in the same file, and
+  editing a released entry to match a later finding is the rewrite this tree refuses everywhere
+  else. Recorded here so that a later reader meets a decision rather than an oversight.
+
 ---
 _Append-only working notes._

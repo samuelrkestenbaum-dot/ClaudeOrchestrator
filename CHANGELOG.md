@@ -31,8 +31,13 @@ deprecation cycle. Pin a commit if you need stability.
   where every later row's digest covers it. The ISO-8601 strings are
   **corroborating only**: a contradiction between them is refused because a
   contradiction is always wrong, and agreement between them is never treated as
-  proof. The only real anchor is outside both stores — git, where the seal is
-  committed before any commit can carry its selection.
+  proof. Outside both stores is git, and it anchors **order** and nothing else:
+  the seal is committed before any commit can carry its selection, and the
+  parent-hash chain makes that order non-forgeable — **but only once a third
+  party has witnessed it, and this branch is unpushed**, so the anchor is
+  *unwitnessed* rather than proven. It does **not** anchor independent agency:
+  committer identity and both commit dates are self-asserted, and the same
+  reasoning that refuses a self-reported timestamp refuses those too.
 
   **A real ordering is sealed over a real candidate set that nobody has chosen
   from yet.** `DECISION-0011-p5b-next-after-p3b`, rule `s1-v1`, over 20 frozen
@@ -66,8 +71,26 @@ deprecation cycle. Pin a commit if you need stability.
   entry**, and with it the twenty-first declared mismatch, because the in-place
   outcome amendment is a mutation surface the census did not carry and the
   existing record says in its own words *"never an edit to an existing one"*.
-  Suite **1952 passed**, 0 failed; `scan-controls.sh check` and
+  Suite **1963 passed**, 0 failed; `scan-controls.sh check` and
   `scan-mutators.sh check` both exit 0; zero re-authorisations.
+
+  **The seal had a second, unguarded door, and review found it.** `seal-ranking`
+  refuses to seal once a decision carries a selection — but that refusal reads
+  `decision_telemetry.tsv`, while the field it protects lives in
+  `signal_snapshots.tsv`, and the generic `snapshot` writer accepted **any**
+  `--signal-name` at all. A hand-written `sealed_rank` row for an already-decided
+  decision was accepted, **chained cleanly, and left every row verifying** — so
+  unlike deleting a row and re-adding it, that route produced *no evidence
+  whatsoever* while converting a permanently retrospective decision into a
+  "prospective decision with a recorded selection", which is the one number this
+  substrate publishes as the only thing that could ever make `rank_of_selected`
+  evidence about a ranker. **Two stores, one guarded door.** `snapshot` now
+  refuses all six declared ranker-evidence field names and names `seal-ranking`
+  as the one door — the check is on the field name, so a seventh added later is
+  closed by the same line. `seal-ranking` additionally refuses an ordering that
+  gives one candidate two ranks, which previously sealed the first rank while
+  printing the contradiction back, leaving the receipt and the chained evidence
+  describing different orderings.
 
   **And the honest half, found by execution rather than argued:** the
   `ranking_digest` published for the first ordering **no longer reproduces**. It

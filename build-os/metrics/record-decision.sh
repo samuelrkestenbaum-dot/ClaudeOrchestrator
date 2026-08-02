@@ -70,8 +70,9 @@
 # adding one would be a different packet. What the chain defeats is the realistic
 # case: somebody changing an inconvenient historical number in place. What it does
 # not defeat is somebody deliberately forging the history, and it is not sold as
-# doing so. The commit history is the only real anchor, and it is outside this
-# tool.
+# doing so. The commit history is the anchor outside this tool, and it anchors
+# ORDER only — and only as far as something outside this working copy has
+# witnessed it. See the paragraph on git below before relying on it.
 #
 # ---------------------------------------------------------------------------
 # RANKING < SELECTION < EXECUTION, AND IT IS A REFUSAL RATHER THAN A COMMENT
@@ -99,14 +100,36 @@
 #   catch and always means something is wrong. AGREEMENT BETWEEN THEM PROVES
 #   NOTHING and is never treated as proof.
 #
-#   OUTSIDE BOTH, AND THE ONLY REAL ANCHOR — GIT. A seal is committed before any
-#   commit can carry its selection. That is the same anchor the shadow ranker's
-#   non-circularity rests on: commit times across separate commits, not a field
-#   somebody typed.
+#   OUTSIDE BOTH — GIT, WHICH ANCHORS ORDER AND NOTHING ELSE, AND TODAY NOT EVEN
+#   THAT AGAINST A REWRITE. A seal is committed before any commit can carry its
+#   selection, and the parent-hash chain makes that order non-forgeable — BUT
+#   ONLY ONCE A THIRD PARTY HAS WITNESSED THE CHAIN. This branch is unpushed:
+#   nothing outside this working copy has seen these commits, so one process can
+#   still rewrite both ends of the order it is asked to anchor. The anchor is not
+#   worthless; it is UNWITNESSED, which is a different word from proven.
 #
-#   WHAT NONE OF IT DEFEATS — the same thing the chain does not defeat. Anyone
-#   who can write these files can delete a row, seal, and re-add it. This is
-#   tamper-EVIDENT against the realistic case and is not sold as tamper-proof.
+#   AND IT ANCHORS ORDER, NOT INDEPENDENT AGENCY. Committer identity is
+#   self-asserted (`git commit --author`, and no `--local` config is persisted
+#   here), and so are both commit dates (`GIT_AUTHOR_DATE`, `GIT_COMMITTER_DATE`).
+#   They are exactly the shape of the self-reported timestamp this tool refuses to
+#   treat as constitutive, and the same reasoning refuses them. What the shadow
+#   ranker's non-circularity actually rested on was never git identity: it was a
+#   selection made by a DIFFERENT AGENT in a DIFFERENT PACKET, minutes and
+#   commits before the ranker existed — event ordering across independently
+#   motivated work. Nothing here has that yet, and nothing can until somebody
+#   actually selects from a decision whose ordering was sealed first.
+#
+#   WHAT THE PERIMETER ACTUALLY IS — THE TOOL, NOT THE FILES. Every refusal above
+#   binds a caller who goes through these commands, and there is now exactly one
+#   command that may write a ranker-evidence signal. A caller who edits the TSVs
+#   directly is not bound at all, and against that the chain is genuinely
+#   tamper-EVIDENT: an in-place edit, or a delete-seal-re-add, breaks a digest and
+#   `snapshot-verify` says so. THE ROUTE THAT WAS NEITHER — sanctioned, chaining
+#   cleanly, and therefore leaving no evidence at all — was writing `sealed_rank`
+#   through the generic `snapshot` writer, and it is refused below. So the honest
+#   statement is not "tamper-evident against the realistic case": it is that every
+#   remaining route either breaks the chain or bypasses the tool entirely, and
+#   neither is quiet. This is not sold as tamper-proof.
 #
 # ---------------------------------------------------------------------------
 # THE SELECTION AND THE OUTCOME ARE SEPARABLE RECORDS, BY PARTITION
@@ -487,6 +510,25 @@ if [ "$CMD" = "snapshot" ]; then
   for r in $SNAP_REQUIRED; do
     [ -n "${F[$r]:-}" ] || die "--${r//_/-} is required on a snapshot. A frozen signal with no commit, no derivation version or no source object versions cannot be re-read as evidence — it is a number with no referent."
   done
+  # THE SEAL HAS EXACTLY ONE DOOR, AND THIS IS THE OTHER ONE SHUT.
+  # `seal-ranking` refuses to write once a selection exists — but that refusal
+  # reads the state of decision_telemetry.tsv, and the field it protects lives
+  # HERE, in the snapshot store, which this generic writer would append to under
+  # ANY signal name at all. TWO STORES AND ONE GUARDED DOOR IS ONE GUARDED DOOR
+  # TOO FEW: a hand-written `sealed_rank` row chains cleanly and breaks no
+  # digest, so unlike deleting a row and re-adding it, it leaves NO EVIDENCE
+  # WHATSOEVER while converting a permanently retrospective decision into a
+  # prospectively-ranked one that `outcome-report` then counts.
+  #
+  # THE CHECK IS ON THE NAME AND COVERS THE WHOLE RANKER SET, not the one name a
+  # reproduction happened to use. Five of the six own no column in either store
+  # and are DERIVED on demand; the sixth is `seal-ranking`'s alone to write. A
+  # seventh added to RANKER_FIELDS later is closed by the same line.
+  if in_list "${F[signal_name]}" "$RANKER_FIELDS"; then
+    [ "${F[signal_name]}" = "$SEAL_SIGNAL" ] \
+      && die "RANKER-FIELD-VIA-SNAPSHOT — \"$SEAL_SIGNAL\" is the signal a SEALED ORDERING is written under, and \`seal-ranking\` is the only thing that may write it. That command refuses to run once the decision carries a selection row; this one never looks, so a seal written through here would put a ranking on the record for a choice already made — chained cleanly, verifying, and leaving nothing for anyone to notice. Seal it with \`seal-ranking\`, which is the one guarded door."
+    die "RANKER-FIELD-VIA-SNAPSHOT — \"${F[signal_name]}\" is evidence about the RANKER, not a signal frozen at decision time. It owns no column in either store and is DERIVED on demand from a sealed ordering and the selection that followed it; freezing it here would make a ranking's own score an input the next ranking could read, and would put a fact about the ranker into the store that holds facts about candidates. The sealed ordering itself is written by \`seal-ranking\`, which is the one guarded door."
+  fi
   append_snapshot "${F[snapshot_id]}" "${F[decision_id]}" "${F[captured_at]}" \
     "${F[repository_commit]}" "${F[candidate_id]}" "${F[signal_name]}" \
     "${F[signal_value]}" "${F[derivation_version]}" "${F[source_object_versions]}" \
@@ -539,6 +581,13 @@ if [ "$CMD" = "seal-ranking" ]; then
     case "$r" in excluded) ;; ''|*[!0-9]*) die "the ordering entry \"$ent\" carries the rank \"$r\", which is neither a positive integer nor \`excluded\`" ;; 0) die "the ordering entry \"$ent\" carries rank 0; ranks start at 1" ;; esac
     in_list "$c" "$(printf '%s' "${F[candidate_ids]}" | tr ';' ' ')" \
       || die "ORDERING-SET-MISMATCH — the ordering ranks \"$c\", which the declared candidate set does not name. The ordering parses and is still an ordering of a different set: RESOLVABILITY IS NOT IDENTITY."
+    # REFUSAL 5 — AN ORDERING IS A FUNCTION FROM CANDIDATES TO POSITIONS. Two
+    # ranks for one candidate parsed, sealed, and disagreed with itself: only the
+    # first rank reached the chain while the printed `sealed_ordering:` echoed
+    # the contradiction back, so the receipt and the chained evidence described
+    # different orderings and the receipt is the half nobody re-derives.
+    printf '%s' "$SEAL_RANKED" | grep -Fxq -- "$c" \
+      && die "CANDIDATE-RANKED-TWICE — the ordering gives \"$c\" more than one rank. An ordering is a function from candidates to positions or it is a list that merely parses: only the first rank would enter the digest chain while the ordering printed back to you kept both, leaving the receipt and the sealed evidence describing different orderings."
     SEAL_RANKED="$SEAL_RANKED$c
 "
   done < <(semi_lines "${F[ordering]}")

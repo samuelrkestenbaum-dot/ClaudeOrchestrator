@@ -997,9 +997,13 @@ echo "== 14. RANKING < SELECTION < EXECUTION — enforced by refusal, not by a c
 #   cheap to catch and always means something is wrong — but agreement between
 #   them proves nothing, and this suite does not treat it as proof.
 #
-#   OUTSIDE BOTH, AND THE ONLY REAL ANCHOR: git. The seal is committed before
-#   any commit can carry the selection, exactly as P4's non-circularity rests on
-#   commit times across three commits rather than on a field anyone typed.
+#   OUTSIDE BOTH: git, which anchors ORDER and nothing else — and only as far as
+#   something outside this working copy has witnessed the chain. The branch is
+#   unpushed, committer identity is self-asserted and so are both commit dates,
+#   so git here is an UNWITNESSED anchor on order, not evidence of independent
+#   agency. P4's non-circularity never rested on git identity: it rested on the
+#   selection being made by a different agent in a different packet before the
+#   ranker existed. Nothing below claims more than that.
 P5DEC="DECISION-9201-p5-order-fixture"
 P5CANDS="PACKET-9201-alpha;PACKET-9201-beta"
 P5ORDER="1:PACKET-9201-alpha;2:PACKET-9201-beta"
@@ -1242,6 +1246,102 @@ else
     && ok "RED: a sealed ordering that silently drops a declared candidate is refused — a seal covers the whole set or it is a filtered one" \
     || no "RED FAILED: the dropped candidate was refused without being named"
 fi
+
+# --- R15: THE SEAL HAD A SECOND DOOR, AND THE GENERIC `snapshot` WRITER WAS IT
+# `seal-ranking` refuses RANKING-AFTER-SELECTION by reading the state of
+# decision_telemetry.tsv. But `sealed_rank` does not live there — it lives in
+# signal_snapshots.tsv, and the generic `snapshot` writer accepted ANY
+# --signal-name at all. TWO STORES, ONE GUARDED DOOR. A hand-written sealed_rank
+# row for a decision that already carried a selection was accepted, CHAINED
+# CLEANLY, and left `snapshot-verify` reporting every row as verifying: unlike
+# the disclosed delete-and-re-add route it produces NO EVIDENCE WHATSOEVER,
+# because it never breaks a digest. Downstream it converts a permanently
+# retrospective decision into a `prospective_decision_with_a_recorded_selection`
+# — the one number this substrate publishes as the only thing that could ever
+# make `rank_of_selected` evidence about a ranker.
+p5snap(){ # <dir> <signal-name> [snapshot-id]
+  mkdir -p "$1"
+  "$RECDEC" snapshot --store "$1/tel.tsv" --snapshots "$1/snap.tsv" \
+    --snapshot-id "${3:-SIGNAL-SNAPSHOT-9280-backdoor}" --decision-id "$P5DEC" \
+    --candidate-id PACKET-9201-alpha --signal-name "$2" --signal-value 1 \
+    --captured-at 2026-08-02T02:00:00Z --repository-commit fixture \
+    --derivation-version s1-v1 --source-object-versions fixture --evidence-refs fixture
+}
+if p5snap "$WORK/p5r2" sealed_rank > "$WORK/p5r15.out" 2>&1; then
+  no "RED FAILED: a sealed_rank row was written through the generic \`snapshot\` path for a decision that already carries a selection — the seal has a second, unguarded door and the write leaves the digest chain verifying"
+else
+  grep -q 'RANKER-FIELD-VIA-SNAPSHOT' "$WORK/p5r15.out" \
+    && ok "RED: a ranker-evidence signal written through the generic \`snapshot\` path is REFUSED — the seal has exactly ONE guarded door, and the check is on the FIELD NAME rather than on the state of one store, because the field the guard protects lives in the other one" \
+    || no "RED FAILED: the snapshot write was refused for some other reason"
+fi
+grep -q 'seal-ranking' "$WORK/p5r15.out" \
+  && ok "...and the refusal NAMES \`seal-ranking\` — a closed door that does not say where the open one is invites the caller to go looking for another way round" \
+  || no "the refusal does not direct the caller to the one guarded door"
+# CLOSED FOR THE SET, NOT FOR ONE NAME, and the set is read from the tool's own
+# partition rather than restated here: a seventh ranker field declared later
+# cannot arrive through this door while this check still passes.
+P5DOOR=""
+for f in $P5RNK; do
+  # The id slug is `[a-z0-9-]`, so the underscores in a field name have to be
+  # translated: an id the store refuses on its SHAPE would make every iteration
+  # of this loop pass without the ranker check existing at all.
+  p5snap "$WORK/p5r15-$f" "$f" "SIGNAL-SNAPSHOT-9281-$(printf '%s' "$f" | tr '_' '-')" >/dev/null 2>&1 \
+    && P5DOOR="$P5DOOR $f"
+done
+[ -z "$P5DOOR" ] \
+  && ok "ALL $P5RNKN declared ranker-evidence field name(s) are refused by that ONE check, derived from the published partition — the door is shut for the set rather than for the one name a reproduction happened to use" \
+  || no "ranker field(s) remain writable through \`snapshot\`:$P5DOOR"
+p5snap "$WORK/p5r15ok" candidate_write_surface SIGNAL-SNAPSHOT-9282-ordinary >/dev/null 2>&1 \
+  && ok "...and an ORDINARY signal name still writes through \`snapshot\` unchanged — the check is a named-set refusal, not a shutdown of the path every frozen signal in this repository arrived through" \
+  || no "the check refuses ordinary signal names too; the door was closed on everything"
+p5seal "$WORK/p5r15seal" >/dev/null 2>&1 \
+  && ok "...and \`seal-ranking\` still writes sealed_rank through the shared append primitive — the refusal sits on the generic CLI door, not on the chaining rule both writers share, so closing it did not leave the seal with NO door" \
+  || no "closing the snapshot door also closed seal-ranking's own"
+# THE REPRODUCTION AS IT WAS EXECUTED, RE-RUN AGAINST A COPY OF THE LIVE STORES.
+# A fixture proves the refusal fires; this proves it fires on the exact write
+# that was demonstrated to work, and that the published counter does not move.
+mkdir -p "$WORK/p5r15live"
+cp "$TEL" "$WORK/p5r15live/tel.tsv"; cp "$SNAP" "$WORK/p5r15live/snap.tsv"
+p5counter(){ "$RECDEC" outcome-report --decision-id DECISION-0010-p4-s1-shadow-ranker \
+    --store "$WORK/p5r15live/tel.tsv" --snapshots "$WORK/p5r15live/snap.tsv" 2>/dev/null \
+    | awk '$1=="prospective_decisions_with_a_recorded_selection:"{print $2}'; }
+P5CNTB="$(p5counter)"
+if "$RECDEC" snapshot --store "$WORK/p5r15live/tel.tsv" --snapshots "$WORK/p5r15live/snap.tsv" \
+     --snapshot-id SIGNAL-SNAPSHOT-0998-backdoor --decision-id DECISION-0010-p4-s1-shadow-ranker \
+     --candidate-id PACKET-0027-p3b-count-derivation --signal-name sealed_rank --signal-value 1 \
+     --captured-at 2026-08-02T00:00:00Z --repository-commit fixture --derivation-version s1-v1 \
+     --source-object-versions fixture --evidence-refs fixture > "$WORK/p5r15live.out" 2>&1; then
+  no "RED FAILED: the executed reproduction still works — a sealed_rank row for the permanently retrospective DECISION-0010 was written through \`snapshot\` against a copy of the LIVE stores"
+else
+  ok "RED: the executed reproduction is now REFUSED against a copy of the live stores — the write that converted a retrospective decision into a prospectively-ranked one no longer has a path"
+fi
+P5CNTA="$(p5counter)"
+{ [ -n "$P5CNTB" ] && [ "$P5CNTB" = "$P5CNTA" ]; } \
+  && ok "and \`prospective_decisions_with_a_recorded_selection\` is UNMOVED at $P5CNTB across the attempt — the number that would make rank_of_selected evidence cannot be raised by writing a snapshot" \
+  || no "the published prospective-selection counter moved from ${P5CNTB:-?} to ${P5CNTA:-?} through a snapshot write"
+cmp -s "$SNAP" "$WORK/p5r15live/snap.tsv" \
+  && ok "and the snapshot store copy is BYTE-IDENTICAL to the live one after the refused write — nothing was appended and no digest was recomputed, so the refusal is before the write and not a report after it" \
+  || no "the snapshot store changed during a refused write"
+
+# --- R16: ONE CANDIDATE MAY NOT HOLD TWO RANKS -------------------------------
+# An ordering is a function from candidates to positions or it is a list that
+# merely parses. `1:A;2:A` was ACCEPTED: the printed `sealed_ordering:` echoed
+# the contradiction back while only the FIRST rank entered the chain, so the
+# receipt and the chained evidence disagreed about the same ordering.
+if p5seal "$WORK/p5r16" "1:PACKET-9201-alpha;2:PACKET-9201-alpha;3:PACKET-9201-beta" > "$WORK/p5r16.out" 2>&1; then
+  no "RED FAILED: an ordering ranked one candidate TWICE and was sealed — the printed ordering and the sealed rows disagree, and the receipt is the half nobody re-derives"
+else
+  grep -q 'CANDIDATE-RANKED-TWICE' "$WORK/p5r16.out" \
+    && ok "RED: an ordering that gives one candidate more than one rank is refused — a seal that echoes a contradiction back to the caller while chaining only half of it is a receipt that disagrees with its own evidence" \
+    || no "RED FAILED: the double rank was refused for some other reason"
+fi
+grep 'CANDIDATE-RANKED-TWICE' "$WORK/p5r16.out" 2>/dev/null | grep -q 'PACKET-9201-alpha' \
+  && ok "...and the doubly-ranked candidate is NAMED on the refusal line itself, exactly as ORDERING-SET-MISMATCH names its stray id — a refusal nobody can act on is a refusal somebody works around" \
+  || no "the doubly-ranked candidate was refused without being named"
+P5R16N="$(awk -F'\t' '!/^#/ && $6=="sealed_rank"' "$WORK/p5r16/snap.tsv" 2>/dev/null | grep -c . || true)"
+[ "${P5R16N:-1}" -eq 0 ] \
+  && ok "...and NOTHING was appended to the chain — the contradiction is caught during the parse, before any write, so a half-sealed ordering never enters the digest chain at all" \
+  || no "$P5R16N sealed_rank row(s) were appended despite the refusal"
 
 # --- THE LIVE PROSPECTIVE ARM ------------------------------------------------
 # Everything above is a fixture. This is the real one: an S1 ordering over a real
