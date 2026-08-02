@@ -642,6 +642,21 @@
   former and were reported as the latter** — true statements of a **weaker property** than the one
   claimed. **Discounted, not retracted.** **The durable fix is an ANCHOR TOKEN or a CONTENT HASH
   instead of a line number**, which also subsumes item (aa)'s sweep-as-a-script. Not built.
+  **[DISCHARGED IN MECHANISM — NOT IN MIGRATION — 2026-08-02 by
+  `PACKET-0029-citation-anchor-tokens`, and the split is the honest part.** The anchor token
+  exists and GATES: `build-os/registry/scan-controls.sh anchors` resolves an object by CONTENT,
+  computes the line number as a return value and stores it nowhere, refuses a reference whose
+  anchor is right and whose object is wrong, and refuses a bare position outright as carrying no
+  identity. `registry.evidence_resolution` is Class A at `gate` and runs on the `check` path too,
+  so it cannot be skipped. **WHAT IS NOT DISCHARGED, STATED PLAINLY BECAUSE THE COUNT WOULD
+  OTHERWISE OVERSTATE:** the anchor table carries **13 objects**, and the registry's own
+  `evidence_refs` — **355 of them** — are still `path:line` and still checked positionally. So
+  the CLASS has a durable remedy and the CORPUS has not been migrated to it; the 20-of-27
+  measurement above would be caught today only for a reference that carries an anchor, and
+  nothing yet requires one to. Migration is the successor packet, not this one, and it is a
+  RE-AUTHORISATION of every entry's evidence rather than a sweep. **The CONTENT HASH half of this
+  sentence was NOT taken either:** content is a literal substring, which detects a MOVED object
+  and an AMBIGUOUS one and does not detect an EDITED one that still contains the literal.]**
 - **(nn) THE MUTATION-CENSUS COVERAGE GAP — THE REVIEWER CALLED IT THE PACKET'S MOST VALUABLE OUTPUT
   AND RULED IT THE NEXT PACKET.** `build-os/registry/MISMATCHES.md` §15 surveys all 81 controls
   against the new `execute` rung.
@@ -1046,6 +1061,21 @@ not to be fixed outside that packet.**
   (22 repointed, **0** drifts), but what `(ddd)` queues is a **DURABLE GUARD**, and §27 covers
   **two-position citations only**. **An inline verification performed once is not a guard — do not
   mark it consumed.**
+  **[PARTIALLY DISCHARGED 2026-08-02 by `PACKET-0029-citation-anchor-tokens`, and `(ddd)` STILL
+  STAYS QUEUED.** The generalization — *"a single-position citation with no duplicate is unpoliced
+  by everything currently in the suite"* — is now false **for a single-position citation that
+  carries an anchor**: `scan-controls.sh anchors --ref 'path:line#ANCHOR-ID'` grades the two
+  halves separately and refuses the identity half, with no duplicate and no second position
+  required. It remains TRUE for every citation that does not carry one, which is nearly all of
+  them. **`(ddd)` IS NOT CONSUMED AND MUST NOT BE MARKED SO:** what it queues is a positional
+  content-pairing guard that walks every `file:line` in the tree against its BASE-COMMIT
+  counterpart, which is a CROSS-COMMIT comparison. Everything this packet built is a
+  SINGLE-COMMIT comparison — the reviewer's corollary inside `(mm)` says exactly what that is
+  worth: *"a content match at a SINGLE COMMIT tests RESOLVABILITY; only a CROSS-COMMIT comparison
+  tests IDENTITY."* An anchor makes the single-commit test mean much more than it did, because
+  the content is DECLARED IN ADVANCE rather than read off the line it is being compared to. It is
+  still not the cross-commit test, and claiming otherwise here would be this packet committing
+  the error it was cut to fix.]**
   **CLOSED, NOT RESIDUE, recorded so the count is not re-litigated:** five further stale ranges over
   the same citation guard were found by the re-audit — `current_state.md` (**2**),
   `gravito_ladder_semantics_a.md` (**2**), `packet_metrics.tsv` (**1**) — **stale since P2, NOT
@@ -1684,3 +1714,82 @@ not to be fixed outside that packet.**
   can no longer show that it went stale. **The general remedy is not a bigger number, it is
   fewer restated ones** — a total written into prose in a repository that is still committing has
   a shelf life measured in commits, and this one's was exactly one.
+
+### From `PACKET-0029-citation-anchor-tokens` (2026-08-02, `gravito_p5b_citation_anchor_tokens_a`)
+
+- **(pppp) THE SEALED `candidate_write_surface` UNDERSTATED THE REAL ONE BY FOUR ARTEFACTS, AND
+  THE DIRECTION IS THE WRONG DIRECTION.** The frozen surface for this candidate named four paths:
+  `build-os/registry/scan-controls.sh`, `build-os/registry/control_registry.txt`,
+  `tests/control_registry_tests.sh` and `build-os/memory/residue.md`. The work could not be done
+  inside them. **Adding the ONE census entry the seal itself forecast (`census_growth_controls=1`)
+  MECHANICALLY FORCES writes to four more files**, every one of them a DERIVED value that a live
+  guard reconciles: `build-os/registry/README.md` (the stated `evidence_refs` total, 345 -> 355,
+  pinned by suite §25); `build-os/registry/neurocosmology_crosswalk.txt` (one binding per
+  registered control, or the crosswalk suite reports `binding count 100 does not equal census size
+  101`); `build-os/registry/CROSSWALK.md` (the derived coverage cell for `epistemic_quality`,
+  32/15 -> 33/16); and `CHANGELOG.md` + `build-os/memory/current_state.md` (the suite total, or
+  the `RELEASE_METADATA_LIVE_SUITE=1` cross-check goes red). **WHY THIS MATTERS BEYOND
+  BOOKKEEPING:** guard 1 of the shadow ranker screens candidates BY THEIR FROZEN WRITE SURFACE,
+  and a surface that understates is a surface that could let a candidate through a screen its
+  real footprint would have failed. Nothing improper happened here — none of the four is
+  anywhere near guard 1's protected set — but the property the guard relies on was not true of
+  this candidate, and it was not true in the unsafe direction. **THE REMEDY IS NOT A LONGER HAND
+  LIST.** It is that a write surface naming `control_registry.txt` should DERIVE the artefacts
+  coupled to it, exactly as this packet's anchors derive positions. Not built; not in scope.
+
+- **(qqqq) THE ANCHOR SCHEME'S IMPLEMENTATION WAS DEFORMED BY THE ABSENCE OF THE ANCHOR SCHEME,
+  AND THE DEFORMATION IS THE EVIDENCE.** `build-os/registry/scan-controls.sh` is cited by line
+  number in ten `evidence_refs`, in two live ranges, and inside four receipts that are frozen
+  records this packet has no licence to edit — and §27d refuses a tree where two ranges over one
+  file name different spans, so a PARTIAL repoint is a hard red and a full one would have meant
+  editing history. **The only safe edit was therefore an edit that moves NO LINE.** So the new
+  `anchors` command's option arms are packed two and three onto existing lines, and the
+  reconciliation body is wrapped by converting a BLANK LINE into the opening `if` — six net-zero
+  edits, none of them how the code would otherwise be written. **IT WORKED, AND THAT IS
+  MEASURABLE:** all fourteen pre-existing positions into that file — 141, 144, 280, 289, 320,
+  321, 335, 345, 354, 368, 392, 403, 444, 460 — land on exactly the content they were written
+  about, and ZERO repoints into it were needed. The three repoints this packet did make were into
+  `tests/control_registry_tests.sh`, where 270 lines were inserted and there was no such option.
+  **The cost of positional identity is not an argument here; it is a diff.**
+
+- **(rrrr) THREE STALE PROSE CITATIONS FOUND, ALL PRE-EXISTING, NONE FIXED — RECORDED AS
+  OCCURRENCES AND LEFT.** Each was already wrong at base `c2d97f8` and each is a live instance of
+  a registered class. (i) `control_registry.txt`'s `tests.nonvacuity_minimums` notes say *"Includes
+  control_registry_tests.sh:772"* for `[ "$PASS" -ge 40 ]`, which was at **919** at base and is at
+  **1189** now — `DEFECT-0001-stale-line-reference`. (ii) `MISMATCHES.md` says the same assertion
+  is at *":774"*, so the tree states one line in two places and disagrees with itself in both —
+  `DEFECT-0003-duplicate-semantic-truth`. (iii) `CROSSWALK.md`'s prose says `epistemic_quality`
+  has *"29 bindings, 14 instantiating"* against a derived 33/16 — `DEFECT-0002-stale-remembered-count`,
+  and the reconciled TABLE CELL two hundred lines above it is correct, which is precisely why the
+  prose went stale unnoticed. **ALL THREE ARE INSIDE THE `evidence_refs` PROSE OF ENTRIES THIS
+  PACKET EDITED, so fixing them was one keystroke away and was deliberately not taken**: the
+  packet is frozen evidence in a live measurement, and a builder who repairs whatever he passes
+  is a builder whose scope nobody can reconstruct afterwards. **(i) and (ii) are exactly what an
+  ANCHOR would have prevented and a POSITION did not** — which is the argument for the migration
+  `(mm)` still queues, made by the tree rather than by a builder.
+
+- **(ssss) THE ANCHOR TABLE IS INSIDE THE MODULE THAT READS IT, AND THAT IS A CHOICE WITH A
+  COST.** It lives between `ANCHOR-TABLE` markers in `scan-controls.sh` in the same shape as
+  `EVIDENCE_VACUITY_ALLOW`, because the packet's ceiling forbids a new store without an executed
+  fixture proving one necessary and none was executed. **THE COST IS REAL AND IS NAMED HERE:** the
+  resolver has to EXCLUDE its own table region when it searches a file, or every anchor into this
+  module resolves to its own declaration — the self-reference is handled, and it is handled
+  because it bit during the build. **The second cost is that the table cannot be read by anything
+  that is not this script.** A store would have been queryable; a bash array is not. That trade is
+  correct at 13 anchors and is obviously wrong at 500, and the crossing point is not measured.
+  Whoever migrates the corpus should expect to move the table out, and should do it with an
+  executed fixture rather than an argument, which is the same bar this packet held itself to.
+
+- **(tttt) `rank_of_selected: 1` HELD THROUGH THIS PACKET, AND IT IS STILL ONE OBSERVATION.** The
+  sealed ordering re-derives after every line this packet moved: `ANC-0002` (the decision row),
+  `ANC-0003` (this packet's own id) and `ANC-0008` (the sealed rank snapshot) all resolve by
+  content, the decision anchor's resolved line still carries `PACKET-0029` as the recorded
+  selection, and `rank-candidates.sh rank --decision-id DECISION-0011-p5b-next-after-p3b` still
+  prints `rank_of_selected: 1` at exit 0 with the ranking digest unchanged, because the two stores
+  it reads were not written to. **WHAT THAT IS NOT.** It is not evidence that S1 ranks well. One
+  decision, one selection, one execution, by a selector who had read the ordering — the tool's own
+  output says it (*"agreement on a single decision is not evidence of skill"*) and the count that
+  would make it evidence, `prospective_decisions_with_a_recorded_selection`, is **1**. The honest
+  claim available after this packet is narrower and is worth more: **the first candidate S1 ranked
+  first has now actually been executed, so the ordering has begun to be falsifiable in the only
+  way that counts — by outcome — and it has not yet been falsified.**
