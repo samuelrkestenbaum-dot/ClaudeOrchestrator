@@ -1,0 +1,16 @@
+# Build OS memory kernel — artifacts: the bridge to files already in this tree.
+# An artifact cites an ANCHOR, and an anchor resolves BY CONTENT. No path:line
+# token appears in this directory, deliberately.
+# FIELDS: artifact_id	namespace_id	artifact_kind	path	anchor_ref	content_hash	created_at	created_by
+# Row count: grep -c "^ART-".
+ART-0001	NS-0006	repo_file	build-os/registry/control_registry.txt	ANC-0001	-	2026-08-02T14:45:43Z	ACT-0002
+ART-0002	NS-0006	repo_file	build-os/metrics/decision_telemetry.tsv	ANC-0002	-	2026-08-02T14:45:43Z	ACT-0002
+ART-0003	NS-0006	repo_file	build-os/packets/active_packet.md	ANC-0003	-	2026-08-02T14:45:43Z	ACT-0002
+ART-0004	NS-0006	repo_file	build-os/registry/findings.txt	ANC-0004	-	2026-08-02T14:45:43Z	ACT-0002
+ART-0005	NS-0006	repo_file	build-os/registry/evidence_assertions.txt	ANC-0005	-	2026-08-02T14:45:43Z	ACT-0002
+ART-0006	NS-0006	repo_file	build-os/registry/defect_classes.txt	ANC-0006	-	2026-08-02T14:45:43Z	ACT-0002
+ART-0007	NS-0006	repo_file	build-os/receipts/gravito_p5_outcome_counterfactual_telemetry_a.md	ANC-0007	-	2026-08-02T14:45:43Z	ACT-0002
+ART-0008	NS-0006	repo_file	build-os/metrics/signal_snapshots.tsv	ANC-0008	-	2026-08-02T14:45:43Z	ACT-0002
+ART-0009	NS-0006	repo_file	build-os/metrics/packet_metrics.tsv	ANC-0009	-	2026-08-02T14:45:44Z	ACT-0002
+ART-0010	NS-0006	repo_file	build-os/registry/scan-controls.sh	ANC-0011	-	2026-08-02T14:45:44Z	ACT-0002
+ART-0011	NS-0006	repo_file	tests/speed_benchmark_tests.sh	-	-	2026-08-02T14:45:44Z	ACT-0002

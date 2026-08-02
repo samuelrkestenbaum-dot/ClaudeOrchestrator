@@ -1,0 +1,11 @@
+# Build OS memory kernel — namespaces. Canonical. Tab-separated.
+# FIELDS: namespace_id	parent_namespace_id	namespace_type	owner_id	created_at	status	label
+# Row count: grep -c "^NS-" (never wc -l).
+NS-0001	-	organization	ACT-0001	2026-08-02T14:45:43Z	active	gravito
+NS-0002	NS-0001	workspace	ACT-0001	2026-08-02T14:45:43Z	active	build-os
+NS-0003	NS-0002	project	ACT-0001	2026-08-02T14:45:43Z	active	claude-orchestrator
+NS-0004	NS-0003	repository	ACT-0001	2026-08-02T14:45:43Z	active	ClaudeOrchestrator
+NS-0005	NS-0004	branch	ACT-0001	2026-08-02T14:45:43Z	active	claude/project-handoff-merge-ramhds
+NS-0006	NS-0005	packet	ACT-0001	2026-08-02T14:45:43Z	active	PACKET-0035-cross-surface-memory-kernel
+NS-0007	NS-0006	execution	ACT-0001	2026-08-02T14:45:43Z	active	the build execution of PACKET-0035
+NS-0008	NS-0002	project	ACT-0001	2026-08-02T14:45:43Z	active	a SIBLING project — present so namespace isolation is proved against live data rather than only in a fixture

@@ -1,0 +1,11 @@
+# Build OS memory kernel — typed relationships. Canonical. Tab-separated.
+# FIELDS: relationship_id	source_object_id	relationship_type	target_object_id	namespace_id	valid_from	valid_until	created_by	evidence_refs
+# Row count: grep -c "^REL-".
+REL-0001	OBJ-0003	selected_from	OBJ-0004	NS-0006	2026-08-02T14:45:47Z	-	ACT-0002	ART-0008
+REL-0002	OBJ-0003	resulted_in	OBJ-0005	NS-0006	2026-08-02T14:45:47Z	-	ACT-0002	ART-0009
+REL-0003	OBJ-0006	supports	OBJ-0005	NS-0006	2026-08-02T14:45:47Z	-	ACT-0002	ART-0007
+REL-0004	OBJ-0009	governed_by	OBJ-0002	NS-0006	2026-08-02T14:45:48Z	-	ACT-0002	ART-0001
+REL-0005	OBJ-0007	blocks	OBJ-0010	NS-0006	2026-08-02T14:45:48Z	-	ACT-0002	ART-0004
+REL-0006	OBJ-0008	supports	OBJ-0002	NS-0006	2026-08-02T14:45:48Z	-	ACT-0002	ART-0005
+REL-0007	OBJ-0011	contradicts	OBJ-0013	NS-0006	2026-08-02T14:45:48Z	-	ACT-0002	ART-0011
+REL-0008	OBJ-0009	addresses	OBJ-0001	NS-0006	2026-08-02T14:45:48Z	-	ACT-0002	ART-0003

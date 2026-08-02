@@ -914,3 +914,31 @@ class: A
 runtime_authority: execute
 binding_kind: instantiates
 rationale: The first write in this census that AMENDS a record rather than extending one, and it binds to agency for the same reason its append sibling does: the function is the writing. What makes it worth its own binding is the shape of the movement rather than its size — it is MONOTONE and BOUNDED BY REFUSAL. A column may only move from `unknown` to a value; the eight selection columns are compared field by field and must be byte-identical; a run that would change a recorded value, reach a selection column, or carry a fact about the ranker refuses before the temporary file is moved. Agency here is therefore not "can rewrite the store" but "can add exactly one kind of information to exactly one row", which is the narrowest write surface anything in this file holds. It does NOT bind to `time`: the ordering it enforces — a ranking before a selection before an outcome — is established by the EXISTENCE of a row at the instant of a write, not by any clock this repository reads.
+
+control: memory.kernel_schema
+binds_to: epistemic_quality
+class: A
+runtime_authority: gate
+binding_kind: instantiates
+rationale: It decides whether a recorded belief may enter the system's memory at all: whether it is attributable to an actor and an execution surface, whether it carries the version the writer actually read, whether a claim labelled `observed` cites evidence that resolves in the tree, and whether the ledger's digest chain still closes. That is contact with reality checked at the point of RECORDING rather than after the fact, and it INSTANTIATES because the unsound record is never written — the refusal precedes the append. IT DELIBERATELY DOES NOT BIND TO `boundary`, and the reason is worth reading: its namespace refusal is PREVENTIVE, which would be the first preventive binding that primitive has, and raising `boundary` from proxies to instantiates on the strength of one control whose dominant function is epistemic would be exactly the coverage inflation this file exists to refuse. The namespace closure is recorded here as a predicate of an epistemic gate; classifying it as boundary coverage is a judgement left to whoever owns that primitive's claim.
+
+control: memory.context_package_identity
+binds_to: epistemic_quality
+class: A
+runtime_authority: gate
+binding_kind: instantiates
+rationale: The narrowest and sharpest epistemic check in the census: it compares a package's recorded (object, version) binding against the CURRENT version of every object it names, and refuses to let a package that describes a state the project has left answer a request for the present. Every other guard bound here establishes that a reference RESOLVES; this one establishes that it still means what it meant, which is the difference the tree has now found in twelve substrates. It INSTANTIATES because the stale answer is never returned — the caller gets exit 2 and no package, not a warning beside a result they will use anyway.
+
+control: memory.kernel_store_append
+binds_to: agency
+class: A
+runtime_authority: execute
+binding_kind: instantiates
+rationale: The function is the writing, as it is for every other binding here. What is worth naming is the SHAPE of the agency rather than its size: it is APPEND-ONLY in the strong sense — no path in the module rewrites or deletes a stored row, an acceptance is a later event, a correction is a new version, and a version conflict becomes a new finding. It can therefore add a fact and cannot destroy one, which is a narrower agency than MUT-0009's monotone amendment and much narrower than the managed-set replacement two rows above it.
+
+control: suite.memory_kernel
+binds_to: homeostasis
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Test state over the cross-surface memory kernel: the end-to-end property rebuilt from empty stores on every run, and every refusal class the kernel declares driven red on its own — a stale expected version, an edited event, a deleted event, a cross-namespace write, a cross-namespace edge, a handoff naming an object that does not exist, a budget below the mandatory set, a hand-edited projection, a stale package read as current. It binds here rather than to epistemic_quality for the same reason the other twenty suites do: a suite's function is property preservation, and its own empirical status is red_driven.

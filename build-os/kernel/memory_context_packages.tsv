@@ -1,0 +1,6 @@
+# Build OS memory kernel — immutable compiled context packages. Canonical.
+# A PACKAGE BINDS (object_id, version) PAIRS. When a source version advances the
+# package becomes STALE, not silently current.
+# FIELDS: context_package_id	compiled_at	namespace_id	actor_id	surface_id	objective	source_object_ids	source_object_versions	included_relationship_ids	included_event_ids	omitted_object_ids	omission_reasons	authority_state	contradictions	token_or_size_budget	content_hash
+# Row count: grep -c "^CTX-".
+CTX-0001	2026-08-02T14:45:52Z	NS-0006	ACT-0003	chatgpt.web.session.strategy-01	Strategy takeover for the cross-surface memory kernel — what is done, what is open, what must be decided next.	OBJ-0001;OBJ-0002;OBJ-0003;OBJ-0009;OBJ-0006;OBJ-0004;OBJ-0005;OBJ-0008;OBJ-0007;OBJ-0010;OBJ-0011;OBJ-0013	1;1;1;2;1;1;1;1;1;1;1;1	REL-0001;REL-0002;REL-0003;REL-0004;REL-0005;REL-0006;REL-0007;REL-0008	EVT-0001;EVT-0002;EVT-0003;EVT-0004;EVT-0005;EVT-0006;EVT-0007;EVT-0008;EVT-0009;EVT-0010;EVT-0011;EVT-0012;EVT-0014;EVT-0015;EVT-0016;EVT-0017;EVT-0018;EVT-0019;EVT-0020;EVT-0021;EVT-0022	-	-	scope=NS-0006;closure=NS-0006,NS-0007;out_of_closure_refused=1;effective=operator	REL-0007:OBJ-0011-contradicts-OBJ-0013	14	a8676c9d658d696d0ebd1d6f74d34a7bcba973b69a7bc7152c48bed116b0eec6

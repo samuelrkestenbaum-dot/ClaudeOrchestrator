@@ -1956,3 +1956,87 @@ promotion_requirement: n/a — already load_bearing
 demotion_requirement: it stops being load_bearing the day nothing acts on its exit code, and it becomes UNSOUND the day a stale line number is allowed to override the anchor, because the whole claim is that identity is in the content and not in the position
 authority_mismatch: none
 notes: THE ONE ENTRY THIS PACKET ADDS, AND IT IS THE FORECAST ONE. `census_growth_controls=1` was the signal sealed for PACKET-0029 before it was selected, and it was a FORECAST: "one new entry for the anchor-token resolver". This is that entry, and the census moves 100 to 101. WHAT IT ENFORCES, IN ONE SENTENCE: a line number may be a NAVIGATION HINT and may not be the IDENTITY. Anchors name their object by CONTENT, the line is computed at every resolution and stored nowhere, and an insertion above the object moves the number and cannot move the object. WHY IT IS CLASS A AND NOT CLASS C. Every predicate here is an invariant over the anchor table's own text — a duplicate id, an unknown type, a dangling supersedes link, content that occurs zero or two times — and not one of them is a fitted threshold or a chosen approximation of "what is an anchor". That is the same argument registry.reconciliation stands on, and it is deliberately NOT the argument registry.discovery_rule stands on: that entry is Class C at gate and declares its mismatch, because deciding what counts as a control surface is a heuristic. Deciding whether a declared literal occurs exactly once in a named file is not. WHAT IT DOES NOT DO, AND THE SECOND ONE IS THE LIMIT WORTH READING. It anchors THIRTEEN objects instantiating the twelve declared types, not every object in the tree — a scheme with live instances, not a migration. And NOTHING YET REQUIRES A CITATION TO CARRY AN ANCHOR: every `evidence_refs` in this file is still `path:line` and is still checked positionally by scan-controls section 6 and by suite sections 7, 23 and 27. This entry makes the anchored form available, correct and gating over what it covers; converting the census to it would be a re-authorisation of every entry's evidence and is not a builder's to take. CONTENT IS A LITERAL SUBSTRING AND NOT A HASH, which is weaker than the residue (mm) remedy's second option and is stated as the weaker one: it detects a moved object and an ambiguous one, and it does not detect an EDITED one that still contains the literal. THE SELF-EXCLUSION IS NOT COSMETIC: a resolution search skips the ANCHOR-TABLE block of the file it is searching, because the table stores the very literals it looks for and without the exclusion every anchor into this module would resolve to its own declaration.
+
+# =============================================================================
+# THE CROSS-SURFACE MEMORY KERNEL (v0). Four entries, and the ceiling this
+# packet was given names exactly what they may protect: namespace isolation,
+# append-only events, object version integrity, context-package identity and
+# governed mutation. Five protections, THREE controls plus the suite — because
+# four of the five are predicates of ONE validator and splitting a validator
+# into a control per predicate inflates a census without adding a guard. The
+# fifth, the write itself, is a different ACT and therefore a different entry:
+# that is the same line metrics.decision.schema_invariant and
+# metrics.decision.store_append already draw one layer along.
+# =============================================================================
+
+control: memory.kernel_schema
+class: A
+implementation_status: load_bearing
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: immune
+inputs: every proposed write into the kernel stores, and on `validate` the whole store set: namespaces, actors, artifacts, objects at every version, the event ledger's digest chain, relationships, handoffs and context packages
+output: acceptance, or a refusal naming its class — NAMESPACE-REFUSED, SURFACE-IDENTITY, VERSION-STALE, VERSION-NONMONOTONIC, EVENT-APPEND-ONLY, EVENT-DANGLING, CAUSAL-CHAIN-BROKEN, TRUTH-STATE-UNBACKED, AUTHORITY-MISSING, EVIDENCE-UNRESOLVED, DUPLICATE-WRITABLE-TRUTH, SECRET-INLINE, HANDOFF-UNRESOLVED, OBJECT-HASH or KERNEL-SCHEMA
+owning_module: build-os/tools/memory-kernel.sh
+consuming_policies: every writing subcommand of memory-kernel.sh refuses at exit 2 before appending; tests/memory_kernel_tests.sh drives each refusal class red and is chained into tests/build_os_tests.sh
+evidence_refs: build-os/tools/memory-kernel.sh:278; build-os/tools/memory-kernel.sh:280; build-os/tools/memory-kernel.sh:607; build-os/tools/memory-kernel.sh:631; build-os/tools/memory-kernel.sh:517
+failure_behavior: prints the refusal token and its reason on stderr and exits 2 BEFORE anything is appended, so a refused write leaves no row, no event and no partial state
+rollback_behavior: none needed — every refusal happens before the append, and the stores are append-only, so there is nothing to unwind
+promotion_requirement: already load_bearing; nothing above this status exists
+demotion_requirement: it stops being load_bearing the day a second writer can reach the kernel stores without passing through it
+authority_mismatch: none
+notes: WHY ONE ENTRY AND NOT FOUR. Namespace isolation, append-only events, object version integrity and attribution are four PREDICATES OF ONE VALIDATOR, on one store set, in one module, refusing at one place — the door. `evidence.assertion_schema` is registered the same way and for the same reason. WHY CLASS A. Every predicate is an invariant over the stores' own text: an id declared twice, a version that skips a number, a digest that does not follow from the row before it, a namespace that is not in the actor's closure, an evidence id naming an artifact that does not exist. Not one of them is a fitted threshold or an approximation of a concept, so the A licence reaching `gate` is aligned and no mismatch is declared. THE TWO LIMITS, NAMED RATHER THAN IMPLIED AWAY. First, it takes the PAYLOAD at the author's word: nothing re-derives a claim recorded as `observed`, it only refuses one that cites no resolvable evidence at all — the truth-state rule is about the LABEL, not about the world. Second, the namespace closure is enforced against writes and reads THROUGH THIS MODULE; anything with a text editor can still open the .tsv, which is why `validate` re-reads the whole store set and refuses a row whose content_hash no longer describes it.
+
+control: memory.context_package_identity
+class: A
+implementation_status: load_bearing
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: conscience
+inputs: a context package's recorded (object_id, version) binding, its content_hash, and the CURRENT version of every object it names
+output: CURRENT, or STALE with the exact drifted pairs named; and on a read that asks for the package AS CURRENT, a refusal
+owning_module: build-os/tools/memory-kernel.sh
+consuming_policies: read-context-package --as-current exits 2 on STALE; export-handoff renders the state onto the face of the export; tests/memory_kernel_tests.sh section 11 drives it red
+evidence_refs: build-os/tools/memory-kernel.sh:871; build-os/tools/memory-kernel.sh:881; build-os/tools/memory-kernel.sh:886; build-os/tools/memory-kernel.sh:510
+failure_behavior: exit 2 naming PACKAGE-STALE and every drifted (object, version) pair, or PACKAGE-IDENTITY when the package's own hash no longer describes its binding. Nothing is returned to the caller
+rollback_behavior: read-only; this path writes nothing anywhere
+promotion_requirement: already load_bearing; nothing above this status exists
+demotion_requirement: it becomes UNSOUND the day a stale package is allowed to answer a request for current state, which is the entire claim
+authority_mismatch: none
+notes: THE ENTRY THIS PACKET EXISTS FOR, AND IT IS THE TWELFTH-SUBSTRATE INSTANCE OF ONE DEFECT CLASS. A context package that PARSES, whose every id RESOLVES, and whose versions have moved on, is `resolvability is not identity` wearing a memory layer's clothes: it reads as a description of the present and is a description of the past. Nothing about it is malformed, so no schema check can see it — only a comparison against the CURRENT version can, and that comparison is this control. IT IS SEPARATE FROM memory.kernel_schema DELIBERATELY: the schema gate asks whether a record is well formed, and a stale package is perfectly well formed. Two questions that cannot fail together should not share an entry. WHAT IT DOES NOT DO: it does not recompile. A caller handed a refusal gets a refusal, not a silently refreshed package, because a compiler that quietly re-runs on read would make every stale binding invisible again — the caller must decide, and be seen to decide, to compile a new one.
+
+control: memory.kernel_store_append
+class: A
+implementation_status: load_bearing
+empirical_status: red_driven
+runtime_authority: execute
+nervous_system_role: motor
+inputs: a fully validated record, after the actor, the surface and the namespace closure have been checked and after the expected version has been compared against the store
+output: one appended row in the target store, plus — for every object, handoff and compilation — one digest-chained row appended to the event ledger, plus a printed receipt naming actor, surface, namespace, object, version, hash and event id
+owning_module: build-os/tools/memory-kernel.sh
+consuming_policies: nothing consumes a verdict; `validate`, `read-context-package`, `export-handoff` and `reconcile` consume the rows this appends, and each event's digest is the next event's input
+evidence_refs: build-os/tools/memory-kernel.sh:541; build-os/tools/memory-kernel.sh:641
+failure_behavior: it does not run at all unless every check above it passed; if the machine has no sha256 implementation it refuses rather than writing rows whose hashes cannot be computed
+rollback_behavior: an appended object or handoff row can be deleted. An EVENT row cannot be removed without breaking the digest of every event after it — the intended asymmetry between a record and a piece of evidence, and the same one metrics.decision.store_append already draws
+promotion_requirement: already load_bearing; nothing above this status exists
+demotion_requirement: it stops being load_bearing the day nothing reads the kernel stores
+authority_mismatch: declared
+notes: REGISTERED IN THE COMMIT THAT CREATED IT, and censused as MUT-0010-memory-kernel-store-append in the same commit, rather than in a later tidying packet. THE MISMATCH IS DECLARED BECAUSE NO CLASS LICENSES `execute` AT ALL: an invariant's licence reaches `gate`, and a control that performs a durable write is out of licence by construction rather than by anybody having stretched a heuristic. That is the same reason the other seven `execute` rows in MISMATCHES.md are there, and it was proved rather than argued — an entry carrying `authority_mismatch: none` at `execute` drives `scan-controls.sh check` to exit 2 with `LICENCE`, which is the executed fixture that forced this declaration. WHAT KEEPS THE WRITE NARROW: it only ever APPENDS. No subcommand of this module rewrites or deletes a stored row — an acceptance is a later event, a correction is a new version, and a conflict is a new finding. There is therefore no path here that can destroy a fact, only paths that can add one.
+
+control: suite.memory_kernel
+class: A
+implementation_status: load_bearing
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: immune
+inputs: the kernel module, a fixture store set built from empty on every run, the LIVE committed kernel stores, the committed projections, the anchor resolver and the control census
+output: a pass/fail verdict over the end-to-end cross-surface property and over every refusal class the kernel declares
+owning_module: tests/memory_kernel_tests.sh
+consuming_policies: chained from tests/build_os_tests.sh, which exits non-zero on its failure
+evidence_refs: tests/memory_kernel_tests.sh:197; tests/memory_kernel_tests.sh:218; tests/memory_kernel_tests.sh:236; tests/memory_kernel_tests.sh:343; tests/memory_kernel_tests.sh:417; tests/memory_kernel_tests.sh:435
+failure_behavior: prints each failing assertion and exits 1 via the house-style verdict, failing the whole chained run
+rollback_behavior: none needed — every fixture lives in its own mktemp directory, and the live stores are read and never written
+promotion_requirement: already load_bearing; nothing above this status exists
+demotion_requirement: it stops being load_bearing the day it is unchained from the repo suite
+authority_mismatch: none
+notes: ITS SECTION 0 IS THE PACKET. The end-to-end property — Claude records typed state, hands off, the ledger records it, the compiler binds a package, the export renders, and a consumer answers six questions with no transcript on disk — is REBUILT FROM EMPTY STORES ON EVERY RUN rather than asserted against a seeded fixture, so the proof is re-earned and not remembered. Its section 18 additionally validates and reconciles the LIVE committed stores, which is what makes "this suite writes nothing outside its own mktemp directory" a checked claim rather than a promise.

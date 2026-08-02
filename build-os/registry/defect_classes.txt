@@ -13,7 +13,7 @@
 #   `occurrence:`   — one instance of that kind, at one time, in one packet.
 #
 # THE MIGRATION IS DELIBERATELY PARTIAL, AND SAYING SO IS THE HONEST PART. This
-# file does NOT normalise residue.md. It seeds the twelve classes demonstrated in
+# file does NOT normalise residue.md. It seeds the thirteen classes demonstrated in
 # the session that produced it, and migrates ENOUGH OCCURRENCES TO PROVE THE QUERY
 # — which is a different and much smaller claim than "the history is now
 # structured". The classes are real, the occurrences recorded here are real and
@@ -45,7 +45,9 @@
 #   scan-mutators.sh recurrence                     every kind with more than one
 
 # =============================================================================
-# THE CLASSES. Twelve, all demonstrated in the session that produced this file.
+# THE CLASSES. Thirteen. Twelve were demonstrated in the session that produced this
+# file; the thirteenth was measured at the base of
+# PACKET-0035-cross-surface-memory-kernel and is registered with its measurement.
 # =============================================================================
 
 defect_class: DEFECT-0001-stale-line-reference
@@ -130,6 +132,13 @@ title: Evidence deleted by the cleanup path that runs when the thing fails
 root_cause_class: cleanup_outranks_diagnosis
 description: A fixture, a work directory or a log lives under a `trap ... EXIT` that removes it. On success that is tidy. On FAILURE it destroys precisely the evidence needed to diagnose the failure, and the failure is the only case where anybody wanted it.
 detection_signature: diagnostic state created inside a scope whose unconditional cleanup outlives the failure
+migration_status: seeded_partial
+
+defect_class: DEFECT-0013-pipefail-sigpipe-false-negative
+title: A guard reports FAIL because of its own pipeline's exit semantics, not because the thing it checks is wrong
+root_cause_class: harness_reports_its_own_plumbing
+description: Under `set -o pipefail`, a producer killed by SIGPIPE when a short-circuiting consumer such as `grep -q` exits on the first match makes the pipeline return 141. The assertion is CORRECT, the data is CORRECT, and the check reports FAIL — nondeterministically, because whether the producer is still writing when the consumer exits is a scheduling race. It is strictly worse than a wrong assertion: it is a guard that is right about the world and wrong about itself, and it fails RARELY, so the natural response is to re-run and move on.
+detection_signature: a pipeline of the shape `producer | grep -q` (or any early-exiting consumer) inside a script that sets pipefail, whose exit status is consumed as a verdict
 migration_status: seeded_partial
 
 # =============================================================================
@@ -282,3 +291,15 @@ symptom: THE PACKET THAT REGISTERED THIS CLASS SHIPPED AN INSTANCE OF IT. README
 prevented_by: nothing — the two copies are prose in different files and no test compares them, which is DEFECT-0003's condition holding underneath this instance
 could_have_been_prevented_by: searching for the pattern rather than reading for it; the corrected instance and the uncorrected one were edited in the same commit, which is this class's detection_signature verbatim
 evidence_refs: build-os/registry/README.md; build-os/registry/control_registry.txt
+
+occurrence: OCCURRENCE-0013
+defect_class_id: DEFECT-0013-pipefail-sigpipe-false-negative
+packet_id: PACKET-0035-cross-surface-memory-kernel
+detected_stage: builder
+escaped_stage: builder
+affected_objects: tests/speed_benchmark_tests.sh
+root_cause_class: harness_reports_its_own_plumbing
+symptom: THE BASE RUN OF THE REPOSITORY SUITE, BEFORE ANY EDIT, RETURNED 1994 passed / 1 failed — `no seeded row is git-backed` — against a live store in which 16 of 17 rows carry evidence class `mixed`. The same suite run alone returned 169/0, and the same four suites run in chain order beforehand did not reproduce it. Isolated and MEASURED: the pipeline `datarows | awk | grep -q .` returns 141 in 117 of 4000 iterations against the live packet metrics store, because `grep -q` exits on the first match and `pipefail` then reports the producer's SIGPIPE as the pipeline's status.
+prevented_by: nothing — the suite's own verdict is the value being corrupted, so no assertion inside it can see the corruption
+could_have_been_prevented_by: capturing the producer's output and testing it (`out="$(... )"; [ -n "$out" ]`), or dropping the early-exiting consumer, in any pipeline whose status is read as a verdict under pipefail
+evidence_refs: tests/speed_benchmark_tests.sh:417; tests/speed_benchmark_tests.sh:419

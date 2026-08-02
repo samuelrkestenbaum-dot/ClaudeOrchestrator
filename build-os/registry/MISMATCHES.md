@@ -27,9 +27,9 @@ control is a governance action and belongs to the operator.
    `tests.nonvacuity_minimums`. Four of the eleven are Class A — an invariant on
    `unvalidated` evidence is *legal* under the licence table and still means
    nobody has watched it fire.
-2. **14 of 21 entries carrying `authority_mismatch: declared` exercise `gate` on
+2. **14 of 22 entries carrying `authority_mismatch: declared` exercise `gate` on
    a class that does not license it.** The bare
-   `grep -c '^authority_mismatch: declared' control_registry.txt` yields **21**,
+   `grep -c '^authority_mismatch: declared' control_registry.txt` yields **22**,
    because that flag now marks BOTH kinds of mismatch (see the table note below);
    the `gate`-exercising subset — the subject of this file — needs the authority
    filter too:
@@ -85,6 +85,7 @@ the control as `UNREPORTED`.
 | `tools.handoff_lock_lifecycle` | A | execute | gate | `build-os/tools/specialist-handoff.sh:166` | 1 |
 | `metrics.decision.store_append` | A | execute | gate | `build-os/metrics/record-decision.sh:479` | 1 |
 | `metrics.decision.outcome_update` | A | execute | gate | `build-os/metrics/record-decision.sh:744` | 1 |
+| `memory.kernel_store_append` | A | execute | gate | `build-os/tools/memory-kernel.sh:541` | 1 |
 
 <!-- MISMATCH-TABLE:END -->
 
@@ -95,7 +96,7 @@ column:
 - **14 rows exercise `gate`** on a licence that reaches only `advise`. These are
   the heuristics — fitted constants, thresholds and prose regexes that can stop a
   build. This is the original subject of this file.
-- **6 rows exercise `execute`** on a Class A licence that reaches `gate`. These
+- **8 rows exercise `execute`** on a Class A licence that reaches `gate`. These
   are the mutator census's write actions (§17). They are over-authorised for a
   completely different reason: **no class licenses `execute` at all**, so a
   control that performs a durable write is out of licence by construction rather

@@ -70,13 +70,13 @@ the concept without performing the function and **is not coverage**.
 | meaning_metric | 0 | 0 | 0 | 0 | — | — |
 | mass | 1 | 0 | 0 | 1 | A | advise |
 | valence | 0 | 0 | 0 | 0 | — | — |
-| agency | 13 | 9 | 3 | 1 | A, C | advise, gate, execute |
+| agency | 14 | 10 | 3 | 1 | A, C | advise, gate, execute |
 | energy | 3 | 0 | 3 | 0 | C | advise, gate |
-| homeostasis | 25 | 1 | 24 | 0 | A | advise, gate |
+| homeostasis | 26 | 1 | 25 | 0 | A | advise, gate |
 | integration_bandwidth | 2 | 1 | 1 | 0 | C | advise, gate |
 | boundary | 4 | 0 | 4 | 0 | A | advise, gate |
 | ethical_admissibility | 2 | 1 | 0 | 1 | A | gate |
-| epistemic_quality | 33 | 16 | 16 | 1 | A, B, C | advise, gate |
+| epistemic_quality | 35 | 18 | 16 | 1 | A, B, C | advise, gate |
 | latent_state | 5 | 4 | 1 | 0 | A, C | advise, gate |
 | durability | 1 | 0 | 1 | 0 | A | gate |
 | gated_plasticity | 4 | 4 | 0 | 0 | A, B, C | advise, gate |

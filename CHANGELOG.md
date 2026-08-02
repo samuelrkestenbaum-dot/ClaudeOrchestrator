@@ -14,6 +14,60 @@ deprecation cycle. Pin a commit if you need stability.
 
 ### In flight (not landed at the released commit)
 
+- **Claude closed work into governed project memory, and a second AI surface
+  consumed that state without anybody copying the transcript.** That sentence is
+  the whole packet, and it is an EXECUTED FIXTURE rather than a design: the
+  committed `build-os/kernel/` stores were written by the governed adapter, the
+  handoff `HOF-0001` was created through it, the ledger recorded every step,
+  `CTX-0001` was compiled for the `gravito.chatgpt.strategy` role, and
+  `build-os/kernel/exports/HANDOFF-0001-chatgpt-strategy.md` is what the receiving
+  surface reads. A consumer with no access to the Claude session can answer, from
+  that file alone, what was completed, what remains open, what evidence supports
+  it, what authority applies, and what decision is required next.
+
+  **Eight canonical stores, one writer, and no second editable truth.**
+  `namespaces · actors · memory_objects · memory_events · memory_relationships ·
+  memory_artifacts · memory_handoffs · memory_context_packages`, all tab-separated,
+  all append-only, all written by `build-os/tools/memory-kernel.sh` and by nothing
+  else. Everything under `exports/` is a PROJECTION: `reconcile` regenerates each
+  one from the stores and refuses any that differs, and a canonical object whose
+  payload points into `exports/` is refused outright. **Citations are anchors, not
+  line numbers** — the kernel reuses the `PACKET-0029` resolver and no file under
+  `build-os/kernel/` contains a `path:line` token.
+
+  **The invariant the packet exists for:** a context package that PARSES but
+  refers to the WRONG VERSIONS is REFUSED. A package binds exact
+  `(object_id, version)` pairs; when a source advances, the package becomes
+  **STALE, not silently current**, `read-context-package --as-current` exits 2 and
+  names the drifted pair, and the export prints `state: STALE` on its face. That is
+  `resolvability is not identity` in a twelfth substrate.
+
+  **Namespace isolation refuses by default** — a write, a read or a relationship
+  edge that reaches into a sibling project exits 2, and a package records how many
+  objects were refused for being outside its closure **without naming them**, so
+  the count leaks nothing. **Logical role and execution surface stay separate
+  fields**, and a role claiming a surface it does not own is refused. **Truth state
+  is not evidence:** `observed`, `verified` and `refuted` require a resolvable
+  evidence reference and `decided` requires an authority, so a model-generated
+  inference may enter memory and may not enter it as an observation.
+
+  **Concurrency is optimistic and never silent:** every mutation carries an
+  expected version, a stale one is a loud refusal that stores nothing, and
+  `--on-conflict record` turns the conflict into a typed `finding` object plus its
+  event rather than a last write that wins.
+
+  One new suite, **`tests/memory_kernel_tests.sh` — 87 assertions, every section
+  red-driven** — chained into the repository suite on an existing line so no
+  citation into `tests/build_os_tests.sh` moved. **Four census entries**
+  (`memory.kernel_schema`, `memory.context_package_identity`,
+  `memory.kernel_store_append`, `suite.memory_kernel`), census **101 -> 105**, and
+  **one new mutator record** `MUT-0010-memory-kernel-store-append`. **Declared
+  mismatches 21 -> 22**, and the twenty-second was forced by an executed refusal
+  rather than argued: the write control at `execute` on a Class A licence drives
+  `scan-controls.sh check` to exit 2 with `LAUNDERED` while it carries
+  `authority_mismatch: none`. Suite **2082 passed**, 0 failed (+87, all of it the
+  new suite; every other suite +0). Zero re-authorisations.
+
 - **A line number is now a navigation hint, and it is no longer an identity.**
   Residue `(mm)` had measured the hole and named the remedy in one sentence: the
   citation guard checks **resolvability, not identity**, and "the durable fix is

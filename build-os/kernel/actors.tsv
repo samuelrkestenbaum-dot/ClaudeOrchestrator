@@ -1,0 +1,8 @@
+# Build OS memory kernel — actors. Canonical. Tab-separated.
+# LOGICAL ROLE AND EXECUTION SURFACE ARE DIFFERENT FIELDS AND MUST STAY SO.
+# FIELDS: actor_id	actor_type	logical_role	surface_family	surface_instance	provider	model	session_id	namespace_id
+# Row count: grep -c "^ACT-".
+ACT-0001	human	gravito.operator	human.operator	operator.sam.local	-	-	-	NS-0001
+ACT-0002	ai_agent	gravito.builder	claude.cowork.session	claude.cowork.session.ramhds	anthropic	claude-opus-5	session-ramhds	NS-0005
+ACT-0003	ai_agent	gravito.chatgpt.strategy	chatgpt.web.session	chatgpt.web.session.strategy-01	openai	unspecified	session-unbound	NS-0005
+ACT-0004	ai_agent	gravito.sibling.builder	claude.cowork.session	claude.cowork.session.sibling	anthropic	claude-opus-5	session-sibling	NS-0008

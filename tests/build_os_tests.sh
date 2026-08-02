@@ -851,7 +851,7 @@ chain_suite "tests/evidence_policy_tests.sh"      "the evidence-policy matrix: c
 chain_suite "tests/authority_envelope_tests.sh"   "the authority envelope: who granted what, in which deployment mode, until when"
 chain_suite "tests/mutator_registry_tests.sh"     "the mutator census, stable ids, defect recurrence, decision telemetry and frozen signal snapshots"
 chain_suite "tests/claim_evidence_tests.sh"       "claim-scoped evidence: many claims per control, and the legacy projection that cannot flatter"
-chain_suite "tests/mismatch_disposition_tests.sh" "mismatch dispositions: the fifth disposition, the narrowness predicate that refuses its neighbour, and the lease term the clock now enforces"
+chain_suite "tests/mismatch_disposition_tests.sh" "mismatch dispositions: the fifth disposition, the narrowness predicate that refuses its neighbour, and the lease term the clock now enforces" ; chain_suite "tests/memory_kernel_tests.sh" "the cross-surface memory kernel: namespace isolation, append-only events, version integrity and context-package identity"   # PACKED ONTO ONE LINE DELIBERATELY: eight evidence_refs cite lines BELOW this point in this file, and a new line here would move every one of them. The same device scan-controls.sh uses, for the same reason.
 
 # A chained suite that is added to the repo but never wired here would be
 # discoverable-only — the exact defect chaining exists to prevent. Assert the
