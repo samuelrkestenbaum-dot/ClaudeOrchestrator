@@ -24,6 +24,91 @@ zero occurrences resolve as `ANCHOR-UNRESOLVED` and two or more as ambiguous, an
 match the declaration pattern the bandwidth ceiling counts, so it declares nothing
 in flight.
 
+## CLOSED — `gravito_cross_surface_memory_kernel_v0`
+
+- **Packet id (CLOSED):** `PACKET-0035-cross-surface-memory-kernel` — **MINTED, not reused**,
+  and the mint was **collision-checked at this close rather than accepted from the brief**,
+  because that check has caught a real defect before. The derivation: the live band runs
+  `PACKET-0001`..`PACKET-0035`; the highest allocation predating this packet is `PACKET-0034`;
+  `git log -S'PACKET-0035' --all` returns **exactly one commit**, this packet's own `d2c09c6`;
+  and `git grep -l 'PACKET-0035' ea069a7` returns **nothing** — the token did not exist at the
+  base. **The id was free and collides with nothing.**
+- **Title:** cross-surface memory kernel v0 — governed project memory that a second surface can
+  consume without the transcript.
+- **Receipt:** `build-os/receipts/gravito_cross_surface_memory_kernel_v0.md`
+- **Commits:** `d2c09c6` (build) + `8ba368a` (residue) + `727de75` (fix round), base `ea069a7`
+  (re-verified at close: `git merge-base 727de75 ea069a7` returns `ea069a7`). **None pushed.**
+- **Verdict: PASS-AS-FIXED.** qa returned **GREEN**; the reviewer returned `fix-then-pass` on
+  **6 enumerated items**, all 6 fixed in `727de75` and **verified by the orchestrator** rather
+  than by opening a fourth gate stage.
+- **Depth: 3 serial stages** — builder; qa ‖ reviewer concurrently; bounded fix round.
+  **No stage 4.**
+- **THE SUCCESS CONDITION WAS EXECUTED, NOT DESIGNED: Claude closed work into Gravito memory, and
+  ChatGPT consumed the governed project state without Sam copying the transcript.** The ledger
+  PERFORMED the loop — `EVT-0023 HandoffCreated` (ACT-0002, `claude.cowork.session.ramhds`) ->
+  `EVT-0024 ContextCompiled` (ACT-0003, `chatgpt.web.session.strategy-01`) ->
+  `EVT-0025 HandoffAccepted`. **The surface changes between the first and second event and the
+  actor changes with it.** qa confirmed all six section-19 questions are answerable from the
+  export **alone**, found **no transcript text anywhere** in the stores, and established the
+  stores were **adapter-written**: a 25-row SHA-256 chain, each digest a function of its own
+  fields and its predecessor's, `recorded_at` monotonic across a **9-second window**.
+- **AND THE REFUSAL THE PACKET EXISTS FOR:** `PACKAGE-STALE` refuses a package read
+  `--as-current` that binds versions the project has left — *"resolvability is not identity"*,
+  EXIT=2 — while the **same package read as history returns exit 0 with `state: STALE`.**
+- Suite **1995 -> 2096** (+101, **all** of it the new `tests/memory_kernel_tests.sh`: 87 at the
+  build commit, 101 after the fix round); census **101 -> 105**; declared mismatches **21 -> 22**;
+  anchors **12 resolved / 1 superseded / 0 violations**; **zero re-authorisations**.
+- **DEVIATION, RECORDED AND NOT NORMALISED: 3 commits against the `<=2` cap**, the same shape as
+  the previous close. The fix round landed as its own commit rather than amending commits the
+  gates had already measured. **The three commits OVERLAP** — build and fix share 10 files,
+  residue and fix share 1 — so the receipt's manifest is a **sequential attribution by role, not
+  a disjoint partition**. Legitimate for three serial passes by one agent; **not a precedent for
+  a fan-out.**
+- **DEVIATION, RECORDED AND NOT NORMALISED: THE FIX ROUND REWROTE TWO COMMITTED EVENT ROWS IN
+  PLACE.** `EVT-0024` and `EVT-0025`, 2 insertions / 2 deletions, digests **recomputed** — and
+  `EVT-0025`'s own fields did not change at all, which is the signature of a re-derived chain.
+  **That is precisely the operation this packet's own `EVENT-APPEND-ONLY` guard refuses, and
+  whose red-drive is section 3 of its own suite.** A correction event could have carried the
+  anchor. Mitigating: v0 store, created here, consumed by nothing outside the packet, prior
+  digests recoverable from git. **Not a stage-4 defect.** Residue `(ddddd)`.
+- **`DEFECT-0013` OUTRANKS THIS PACKET AND IS NOT ITS FAULT.** The base tree is
+  non-deterministic — **6.26% per invocation quiet, 19.97% under load** — via a
+  `pipefail`/SIGPIPE race proven by `PIPESTATUS=[0 0 0 141 0]`. **The error is one-directional**,
+  so every prior green stands and every prior red on that assertion is suspect. **A single green
+  run is no longer sufficient evidence in this tree.** Residue `(ccccc)`.
+- **Second eyes: NONE — THIRTEENTH consecutive packet**, re-verified at close.
+
+## THE DECLARATION THAT WAS NEVER WRITTEN — THIS FILE'S OWN DEFECT, AGAIN
+
+**THIS FILE READ `NOTHING IN FLIGHT` AND DESCRIBED `PACKET-0029` FOR THE ENTIRE LIFE OF THE
+LARGEST PACKET IN THIS SEQUENCE.**
+
+Every prior packet in the sequence opened with a `docs(packet): declare ...` commit **before
+building**. **The orchestrator dispatched this builder without one.** The id was minted inside
+the build commit; **the declaration and the in-flight record were never written here.**
+
+**THE MEASURABLE CONSEQUENCE:** `bandwidth.active_packet_singleton` **reported ZERO in flight
+while the largest packet of the sequence was in flight** — the guard passed, truthfully, on a
+file that was describing the wrong packet.
+
+**PROVENANCE: ORCHESTRATOR, NOT BUILDER.** It is recorded that way for the same reason the
+`residue_items_closed=1` provenance was recorded at the previous close: **a count or a
+declaration that arrives by omission and is repaired by overwriting leaves no trace of how it got
+in, and the trace is the only part that generalises.**
+
+**AND THIS IS A RECURRENCE OF A CLASS THIS REPOSITORY ALREADY REGISTERED.**
+`build-os/registry/defect_classes.txt` carries `DEFECT-0011-undeclared-active-packet` at
+`OCCURRENCE-0005`, whose symptom reads *"an entire packet was built while active_packet.md still
+read NO PACKET IN FLIGHT, and the singleton guard passed because it refuses two declarations and
+permits zero"*, and whose `could_have_been_prevented_by` already names the remedy: **a lower
+bound on the same cardinality check, refusing zero declared packets while a build is in flight.**
+**The remedy still does not exist, and the class has now fired twice.**
+
+**NO REGISTRY OCCURRENCE ROW WAS WRITTEN AT THIS CLOSE.** Appending one is a registry mutation
+that would move counts the gates measure, and the archivist's write scope is the receipt and
+memory. **It is named here and carried as residue `(eeeee)` so the next packet records it through
+the governed path rather than as bookkeeping.** Do not tidy this section away.
+
 ## CLOSED — `gravito_p5b_citation_anchor_tokens_a`
 
 - **Packet id (CLOSED):** `PACKET-0029-citation-anchor-tokens` — **REUSED, not
@@ -191,16 +276,37 @@ ranker on demand** — because an outcome row carrying the ranker's score would 
   subject discriminates nothing. Residue `(zzz)` / `(uuuu)`.
 - **Migrating the `evidence_refs` corpus to anchors.** The mechanism exists; the
   corpus has not moved, and moving it is a re-authorisation.
-- **A 22nd declared mismatch.** The standing ruling: **hold at 21.**
+- **A 22nd declared mismatch.** ~~The standing ruling: **hold at 21.**~~ **THE RULING WAS
+  BROKEN AT THIS CLOSE, AND IT WAS WITHDRAWN ON EVIDENCE RATHER THAN QUIETLY EXCEEDED.** The
+  count is **22**. The reviewer withdrew its own P5 ruling because `lic_of` in
+  `scan-controls.sh` **tops out at rank 4 (`gate`) for Class A and no class returns 5 — no class
+  licenses `execute`.** **Therefore every durable-write control this repository will ever add
+  MUST declare a mismatch; there is no legal alternative, for anyone, ever**, and holding at 21
+  could only have been honoured by refusing to register real durable-write surfaces. **A cap on
+  the RAW TOTAL is negotiable by construction and no packet can decline it. The number that
+  actually constrains anybody did not move: gate-on-advise — the heuristics that can stop a
+  build — is 14 at base and 14 at HEAD.** All growth is in the `execute` bucket. **ROUTED TO THE
+  OPERATOR: re-express the ceiling on the gate-on-advise subset.** Residue `(lllll)`.
 - **The router's stale second-eyes counter.** It says *"the last nine"*; it is
-  **twelve**. Nothing pins the literal. The remedy is one builder-lite line, and
-  editing the router is a **routing act rather than bookkeeping**, so it is named
-  and not applied. `(zz)`.
+  **THIRTEEN** as of this close — now stale by four. Nothing pins the literal. The
+  remedy is one builder-lite line, and editing the router is a **routing act rather
+  than bookkeeping**, so it is named and not applied for the third close running.
+  `(zz)`.
 
 ## Open boundaries carried forward
 
 - **Nothing is pushed, merged, tagged, PR'd or deployed**, and no such go has been
-  given. `df9f740`, `c76b4d0` and `fbd746d` stay local pending explicit go.
+  given. `df9f740`, `c76b4d0` and `fbd746d` stay local pending explicit go — and so
+  do `d2c09c6`, `8ba368a`, `727de75` and this close commit. **None of the four may
+  be amended:** the first three are the commits the gates measured.
+- **`DEFECT-0013` IS OPEN AND IS ITS OWN PACKET.** Fixing it needs a licence to edit
+  `tests/speed_benchmark_tests.sh`, which the memory-kernel packet did not have and
+  this close does not have. **Until it is closed, a suite total from this tree is a
+  sample and not a constant.**
+- **The CHANGELOG / `current_state` cross-check has no green path for a builder** on
+  any total-changing packet. Either the archivist runs before the gates, or the
+  cross-check reads the total from a generated file the builder owns. **The choice
+  is a routing act and is the operator's.** Residue `(mmmmm)`.
 - **`c2d97f8` IS THE SELECTION ANCHOR AND `44b0fab` IS THE SEAL ANCHOR. NEITHER
   MAY BE AMENDED**, and neither may the three execution commits. The whole claim of
   the prospective ordering is that the seal was committed **before any commit could

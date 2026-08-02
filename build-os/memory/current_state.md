@@ -195,7 +195,105 @@
   declared object types, `bash build-os/registry/scan-controls.sh anchors`. The census growth of
   exactly one is the FORECAST `census_growth_controls=1` sealed for this candidate before it was
   selected, not a coincidence and not a licence for a second.]**
-- **Last closed packet:** `gravito_p5b_citation_anchor_tokens_a`
+  **[SUPERSEDED AGAIN 2026-08-02 by `PACKET-0035-cross-surface-memory-kernel`, DERIVED not
+  remembered: 105 controls (`grep -c '^control: '`), ~21 tools, 2096 assertions, ONE executive
+  component, ONE apparatus for measuring it, ONE anchor scheme, and — new here — **ONE
+  CROSS-SURFACE MEMORY KERNEL**: eight canonical stores, all seven namespace types, an
+  append-only digest-chained ledger of 25 events (`grep -c '^EVT-'`) with all 13 event types
+  live, and one governed adapter. **The census grew by FOUR, which is the largest single-packet
+  growth in this sequence, and the declared mismatch count went 21 -> 22 — breaking the previous
+  standing ruling to HOLD AT 21.** That is not a lapse and it is recorded as such in residue
+  `(lllll)`: `lic_of` tops out at `gate` and NO class licenses `execute`, so **every
+  durable-write control this repository will ever add MUST declare a mismatch.** The number that
+  actually constrains anybody — **gate-on-advise — is 14 at base and 14 at HEAD.**]**
+- **Last closed packet:** `gravito_cross_surface_memory_kernel_v0`
+  (`PACKET-0035-cross-surface-memory-kernel` — **MINTED, not reused**, and the mint was
+  **collision-checked at close rather than accepted from the brief**: the live band runs
+  `PACKET-0001`..`PACKET-0035`, the highest allocation predating this packet is `PACKET-0034`,
+  `git log -S'PACKET-0035' --all` returns **exactly one commit** — this packet's own `d2c09c6` —
+  and `git grep -l 'PACKET-0035' ea069a7` returns **nothing**. The token did not exist at the
+  base.)
+  **THE HEADLINE, AND IT WAS EXECUTED RATHER THAN DESIGNED: Claude closed work into Gravito
+  memory, and ChatGPT consumed the governed project state without Sam copying the transcript.**
+  The ledger PERFORMED the loop — `EVT-0023 HandoffCreated` (ACT-0002, surface
+  `claude.cowork.session.ramhds`) -> `EVT-0024 ContextCompiled` (ACT-0003, surface
+  `chatgpt.web.session.strategy-01`) -> `EVT-0025 HandoffAccepted`. **The surface changes between
+  the first and second event and the actor changes with it**; that single transition is the whole
+  claim. qa confirmed all six of the export's section-19 questions are answerable from
+  `build-os/kernel/exports/HANDOFF-0001-chatgpt-strategy.md` **ALONE**, swept the stores and found
+  **no transcript text anywhere**, and — the part a skeptic needs — established the stores were
+  **adapter-written rather than hand-authored**: a 25-row SHA-256 chain in which each digest is a
+  function of its own fields and its predecessor's, `recorded_at` monotonic across a **9-second
+  window**. Hand-authoring a valid 25-link chain inside nine seconds is not credible.
+  **AND THE REFUSAL THE PACKET EXISTS FOR:** `PACKAGE-STALE` refuses a context package read
+  `--as-current` when it binds source versions the project has left — *"It PARSES, every id in it
+  RESOLVES, and it describes a state the project has left — resolvability is not identity"*,
+  EXIT=2. **It is not a wall:** the same package read as history returns exit 0 with
+  `state: STALE`. The refusal is scoped to the CLAIM, not to the package.
+  **Verdict: PASS-AS-FIXED.** qa **GREEN**; the reviewer returned `fix-then-pass` on **6
+  enumerated items**, all 6 fixed in `727de75` and verified by the orchestrator rather than by
+  opening a fourth gate stage. **Depth: 3 serial stages.**
+  **Receipt:** `build-os/receipts/gravito_cross_surface_memory_kernel_v0.md`
+  **Commits:** `d2c09c6` (build) + `8ba368a` (residue) + `727de75` (fix round), base `ea069a7`
+  (re-verified at close: `git merge-base 727de75 ea069a7` returns `ea069a7`). **None pushed.**
+  **DEVIATION 1, RECORDED AND NOT NORMALISED — THE FIX ROUND REWROTE TWO COMMITTED EVENT ROWS IN
+  PLACE.** The diff on `build-os/kernel/memory_events.tsv` across the residue and fix commits is
+  **2 insertions / 2 deletions**: `EVT-0024` gained the package hash, and **`EVT-0025`'s own
+  fields did not change at all while its digest changed anyway** — the signature of a **re-derived
+  chain**. **That is precisely the operation this packet's own `EVENT-APPEND-ONLY` guard refuses,
+  and whose red-drive is section 3 of its own suite**; it validates now only because the chain was
+  re-derived, which is structurally identical to qa's Attack B, the laundering the round was
+  fixing. Mitigating and recorded alongside rather than instead: the store is v0, created in this
+  packet, consumed by nothing outside it, and both prior digests are recoverable from git.
+  **Not a stage-4 defect. A deviation.** Residue `(ddddd)`.
+  **DEVIATION 2 — THE PACKET WAS NEVER DECLARED, AND THE PROVENANCE IS THE ORCHESTRATOR, NOT THE
+  BUILDER.** `active_packet.md` read `NOTHING IN FLIGHT` and described `PACKET-0029` for the
+  entire life of the largest packet in the sequence, so
+  **`bandwidth.active_packet_singleton` reported ZERO in flight while it was in flight.** The id
+  was minted; the declaration and the in-flight record were not. **It is a RECURRENCE of the
+  already-registered `DEFECT-0011-undeclared-active-packet` (`OCCURRENCE-0005`), whose own
+  `could_have_been_prevented_by` names the unbuilt remedy — a lower bound on the same cardinality
+  check.** Residue `(eeeee)`.
+  **DEVIATION 3: 3 commits against the `<=2` cap**, the same shape as the previous close — the fix
+  round landed as its own commit rather than amending commits the gates had already measured.
+  **THE THREE COMMITS OVERLAP AND THE MANIFEST SAYS SO:** the build and fix commits share **10
+  files**, the residue and fix commits share **1**; the manifest in the receipt is a **sequential
+  attribution by role, not a disjoint partition**, which is legitimate for three serial passes by
+  one agent and is **not a precedent for a fan-out**.
+  **SECOND EYES: NONE — THIRTEENTH CONSECUTIVE PACKET**, re-verified at close (`which codex` exits
+  1, no plugin directory). The router's second-eyes row still says *"the last nine"*; it is
+  **thirteen**, now stale by four. Nothing pins the literal; editing the router is a **routing act
+  rather than bookkeeping**, so it is named and not applied. `(zz)`.
+  **`DEFECT-0013` IS THE FINDING THAT OUTRANKS THIS PACKET, AND IT IS NOT THIS PACKET'S FAULT.**
+  The base tree is **non-deterministic and was so before this work began**:
+  **6.26% per invocation on a quiet machine (501/8000)**, 3.65-7.75% across quiet batches,
+  **19.97% under load**, 4.0% per standalone suite run. **Mechanism proven, not inferred:**
+  `PIPESTATUS=[0 0 0 141 0]` — `awk` dies of SIGPIPE after emitting **68,734 bytes** past the
+  64 KiB pipe buffer, `grep -q` exits 0, and `set -uo pipefail` promotes 141; the sibling
+  pipelines emit **462 bytes in one write** and measured **0/2000**. **The error is
+  ONE-DIRECTIONAL** — it can manufacture a false FAIL and never mask a real one, **so every prior
+  green in this tree stands and every prior red on that one assertion is suspect.** **A SINGLE
+  GREEN RUN IS NO LONGER SUFFICIENT EVIDENCE IN THIS TREE**, which is why the orchestrator ran the
+  suite TWICE at `727de75`. **Sharpest consequence: the live-suite cross-check in
+  `tests/release_metadata_tests.sh` compares a LIVE total against memory, so if the race fires
+  there, the guard that keeps memory honest emits a FALSE STALENESS VERDICT.** Residue `(ccccc)`.
+  **FINAL STATE AT `727de75`, ALL RE-DERIVED BY THE ARCHIVIST AT CLOSE FROM THE REGISTRY FILES AND
+  THE LIVE TOOLS: 105 controls (`grep -c '^control: '`, a row count and never `wc -l`); 22
+  declared mismatches, 0 violations; 12 anchors resolved / 1 superseded / 0 violations over 13
+  records in 12 declared object types; 25 kernel events (`grep -c '^EVT-'`); crosswalk 105; README
+  refs 372; `MUT-0010` added; suite 2096/0 exit 0 with zero `^  FAIL` and no chained failures,
+  across TWO independent orchestrator runs plus six qa runs; Commit-1 green in isolation at
+  `d2c09c6` in a fresh clone at 2082/0; `RELEASE_METADATA_LIVE_SUITE=1` MATCH at 2096; maintenance
+  144/144 and 67/0; `scan-controls check` / `scan-controls anchors` / `scan-mutators check` /
+  `check-adoption` / `memory-kernel validate` / `memory-kernel reconcile` all exit 0, reconcile
+  reporting 1 projection and 0 divergent; ZERO re-authorisations, field-anchored.**
+  **THE SEALED EXPERIMENT IS UNDISTURBED:** S1 digest `e838284e...`, `rank_of_selected: 1`,
+  `rank-candidates.sh` blob `5543ea88` — all unchanged; `signal_snapshots.tsv` and
+  `decision_telemetry.tsv` untouched by the packet and by this close.
+  **OPEN, AND NOT THE ARCHIVIST'S TO CLOSE: nothing is pushed, merged, tagged, PR'd or deployed.**
+  `d2c09c6`, `8ba368a`, `727de75` and this close commit stay **local**. `c2d97f8` remains the
+  **selection anchor** and **may not be amended**, and neither may the three execution commits.
+- **Previously closed:** `gravito_p5b_citation_anchor_tokens_a`
   (`PACKET-0029-citation-anchor-tokens` — **REUSED, not minted:** it is the id `DECISION-0011`
   already carries for this candidate in its own `candidate_ids` column, and the id `DECISION-0010`
   carried before that. Collision-checked at close against every `PACKET-*` token in the tree:

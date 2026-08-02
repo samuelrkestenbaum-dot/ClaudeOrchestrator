@@ -881,6 +881,25 @@
   orchestrator's instrument and was last corrected by a BUILDER commit, so editing it is a
   **routing act rather than bookkeeping**, and the archivist does not take routing acts.
   **The "install Codex" half remains the only half of this item still open.**]**
+  **[2026-08-02, PACKET-0035-cross-surface-memory-kernel: THIRTEENTH CONSECUTIVE PACKET.** The
+  reviewer again stated *"second eyes: NONE, single-model"* as the router requires, and the
+  archivist re-verified the absence at close rather than restating it: `which codex` exits 1 and
+  no plugin directory exists. **The streak counter is advanced TWELVE -> THIRTEEN here rather
+  than being left to go stale**, which is the failure this item is about, and it is the FIFTH
+  consecutive close at which advancing it by hand was the only thing keeping it true.
+  **THE ROUTER'S OWN COUNTER IS NOW STALE BY FOUR.** `build-os/memory/tool_router.md`'s
+  second-eyes row still says the absence was checked at *"the last nine packets"*; it is now
+  **THIRTEEN**. **Remedy named and NOT applied: one builder-lite line, `nine` -> `thirteen`.**
+  Editing the router is a **routing act rather than bookkeeping**, and the archivist does not
+  take routing acts. **WHAT THIS PACKET ADDS TO THE ARGUMENT, AND IT IS THE STRONGEST INSTANCE
+  YET: THE TWO-GATE SEAM CAUGHT A FALSE PERIMETER.** qa laundered a recorded contradiction past
+  BOTH `read-context-package --as-current` AND `validate`, both exit 0, because the package hash
+  was unkeyed, self-covering and never anchored in the ledger. **The packet had SHIPPED A
+  TAMPER-EVIDENCE CLAIM THAT WAS FALSE**, which is worse than an admitted gap — and it is the
+  same shape P5 shipped. It was found because the lane runs TWO read-only gates concurrently,
+  **not because a second MODEL was ever available.** A single-model chain with one gate would
+  have shipped a security property that did not hold.
+  **The "install Codex" half remains the only half of this item still open.**]**
 - **(aaa) THE CLOSE ITSELF BROKE TREE-QUIET, AND ONE SUITE RUN WENT RED BECAUSE OF IT.** At the
   `gravito_p1_mutators_ids_telemetry_a` close the archivist launched
   `bash tests/build_os_tests.sh` in the background and then started
@@ -2001,3 +2020,144 @@ not to be fixed outside that packet.**
   a derivation anybody wrote down, and guessing which subset it meant would replace a stale
   number with an invented one. **RESIDUE: state the derivation for "classified controls" beside
   that number, or delete the denominator.**
+
+- **(ccccc) `DEFECT-0013` IS QUANTIFIED, AND THE BUILDER'S OWN FIGURE IN `(aaaaa)` IS SUPERSEDED
+  RATHER THAN OVERWRITTEN.** `(aaaaa)` recorded the SIGPIPE race at **117 of 4000 (2.9%)** and
+  reported that a standalone run returned `169/0`, which reads as a chained-only condition. **qa
+  settled both, and both were understatements of a smaller sample.** The rate is **6.26% per
+  invocation on a quiet machine (501 of 8000)**, **3.65% - 7.75% across quiet batches**, **19.97%
+  under load**, and **4.0% per standalone suite run (1 of 25)**. **IT FIRES STANDALONE AS READILY
+  AS CHAINED** — the builder's `169/0` was one draw from a ~95%-green distribution, not evidence
+  of a chained-only condition. **THE MECHANISM IS PROVEN AND NO LONGER INFERRED:**
+  `PIPESTATUS=[0 0 0 141 0]` — `awk` is element 4 and dies of SIGPIPE, `grep -q` exits 0, and
+  `set -uo pipefail` promotes 141. **The failing `awk` emits 68,734 bytes, past the 64 KiB pipe
+  buffer**, so it MUST issue multiple writes and CAN be killed mid-stream; the two sibling
+  pipelines in the same section emit **462 bytes in one write** and measured **0 of 2000**. The
+  orchestrator's simplified fixture produced too little output to race, which is exactly why it
+  returned 0/2000 and could not confirm. **A bare `rc=$?` RESETS `PIPESTATUS`** — that is why both
+  earlier probes were ambiguous, and it is the reusable lesson. **THE ERROR IS ONE-DIRECTIONAL:**
+  it can manufacture a false FAIL and can never mask a real one, so **every prior green in this
+  tree stands and every prior red on that one assertion is suspect.** **THE OPERATIONAL
+  CONSEQUENCE, AND IT CHANGES HOW EVERY FUTURE PACKET CLOSES: A SINGLE GREEN RUN IS NO LONGER
+  SUFFICIENT EVIDENCE IN THIS TREE.** The orchestrator therefore ran the suite TWICE at
+  `727de75` — 2096/0 both times, zero `^  FAIL` lines, no `no seeded row` line in either.
+  **NOT CAUSED BY THIS PACKET:** `tests/speed_benchmark_tests.sh` is absent from the
+  `ea069a7..727de75` diff entirely. **THE SHARPEST CONSEQUENCE:** the live-suite cross-check in
+  `tests/release_metadata_tests.sh` compares a LIVE suite total against the figure remembered in
+  `current_state.md`. **If the race fires there, the guard that keeps memory honest emits a false
+  staleness verdict** — the instrument reports the memory as stale when the memory is correct, and
+  a guard that cries wolf is a guard that gets disabled. **STILL NOT FIXED. It is its own packet
+  and needs a licence to edit a suite the memory-kernel packet did not have.**
+
+- **(ddddd) THE FIX ROUND REWROTE TWO COMMITTED EVENT ROWS IN PLACE — THE EXACT OPERATION THIS
+  PACKET'S OWN `EVENT-APPEND-ONLY` GUARD REFUSES.** `git diff 8ba368a..727de75 --` on
+  `build-os/kernel/memory_events.tsv` is **2 insertions / 2 deletions**: `EVT-0024` and
+  `EVT-0025`. `EVT-0024`'s reference field gained the package hash (`CTX-0001` became
+  `CTX-0001@a8676c9d...`), which is fix 3. **`EVT-0025`'s own fields did not change at all and its
+  digest changed anyway** (`4659686a...` to `d657ab44...`) — the signature of a **re-derived
+  chain**, where the successor's digest moves because its predecessor's did. **THE GUARD'S OWN
+  REFUSAL TEXT DESCRIBES WHAT WAS DONE:** *"EVENT-APPEND-ONLY <id> breaks the integrity chain. Its
+  digest does not follow from its own fields and the digest of the event before it, so a row has
+  been edited, inserted or removed."* **Its red-drive is section 3 of the packet's own suite** —
+  *"an event rewritten in place breaks the digest chain and is refused"*. **It validates now ONLY
+  because the chain was re-derived, which is structurally identical to qa's Attack B — the
+  laundering this very fix round was fixing.** The packet's stated rule is *"events are
+  append-only; corrections create later events"*, and **a correction event could have carried the
+  anchor.** The builder's hand-back calls it *"migrated and re-chained"* **without naming it as the
+  thing the invariant forbids**, and that omission is the durable part. **MITIGATION, RECORDED
+  ALONGSIDE AND NOT INSTEAD:** the store is v0, was created inside this packet, is consumed by
+  nothing outside it, and the rewrite is visible in git history with **both prior digests
+  recoverable** and quoted above. **NOT treated as a stage-4 defect. RECORDED AS A DEVIATION AND
+  NOT NORMALISED.** **REMEDY FOR v1, STATED AND NOT APPLIED:** an anchor that arrives late is a
+  **later event**, never an edit to an earlier one.
+
+- **(eeeee) THE PACKET WAS NEVER DECLARED, THE PROVENANCE IS THE ORCHESTRATOR, AND IT IS A
+  RECURRENCE OF A CLASS THIS REPOSITORY ALREADY REGISTERED.**
+  `build-os/packets/active_packet.md` read `Status: NOTHING IN FLIGHT` and described
+  `PACKET-0029` for the **entire life** of the largest packet in this sequence. Every prior packet
+  opened with a `docs(packet): declare ...` commit before building; **the orchestrator dispatched
+  this builder without one.** The id was minted in `d2c09c6`; the declaration and the in-flight
+  record were not written. **THE MEASURABLE CONSEQUENCE: `bandwidth.active_packet_singleton`
+  reported ZERO in flight while the largest packet of the sequence was in flight.** **PROVENANCE:
+  ORCHESTRATOR, NOT BUILDER** — recorded the same way the `residue_items_closed=1` defect's
+  provenance was recorded at the previous close, because HOW the error got in is the only part
+  that generalises. **THE CLASS HAS NOW FIRED TWICE.**
+  `build-os/registry/defect_classes.txt` already carries `DEFECT-0011-undeclared-active-packet` at
+  `OCCURRENCE-0005`, whose symptom reads *"an entire packet was built while active_packet.md still
+  read NO PACKET IN FLIGHT, and the singleton guard passed because it refuses two declarations and
+  permits zero"*, and whose `could_have_been_prevented_by` already names the remedy — **a lower
+  bound on the same cardinality check, refusing zero declared packets while a build is in
+  flight.** That remedy still does not exist. **NO REGISTRY OCCURRENCE ROW WAS WRITTEN AT THIS
+  CLOSE:** appending one is a registry mutation that would move counts the gates measure, and the
+  archivist's write scope is the receipt and memory. **RESIDUE: record `OCCURRENCE-0014` against
+  `DEFECT-0011` through the governed path, and build the lower bound.**
+
+- **(fffff) ATTACK A — STALENESS BY ADDITION DEFEATS THE PACKAGE STATE CHECK, AND IT IS NOT
+  FIXED.** Recording a **new** object into a context package's own namespace leaves the package
+  reading **`CURRENT` at exit 0**, because `pkg_state()` iterates **only the bound ids**. qa's
+  probe is the part that makes this more than theoretical: it recorded `OBJ-0014` — *"S1 PROMOTED
+  AND AUTONOMOUS DISPATCH ENABLED"* — **the literal thing the export forbids the second surface
+  from doing.** A package can therefore certify itself current while the namespace it describes has
+  acquired exactly the fact that would invalidate the handoff. **NEEDS A DESIGN ANSWER IN v1: a
+  package's identity has to cover what its namespace GAINED, not only what it BOUND.**
+
+- **(ggggg) `payload_ref` IS PROSE-VS-REFERENCE AMBIGUOUS, AND THE PACKET'S OWN TEST FOR IT PASSES
+  FOR THE WRONG REASON.** `export_objects` prints field 21 **verbatim** while the validator treats
+  it as a **path-like ref**. **The "consumable without the transcript" property is therefore held
+  up by AUTHORIAL CONVENTION, not by CONSTRUCTION** — nothing stops a writer putting a pointer
+  where the reader expects prose, and the export would then hand the second surface a dangling
+  reference. **AND THE PACKET'S OWN SECTION 0 WOULD NOT CATCH THE DEGRADATION:** its `q()` helper
+  greps for section **HEADINGS** that the tool `printf`s **UNCONDITIONALLY**, so the assertion is
+  satisfied by the template rather than by the content. **A test passing for the wrong reason,
+  inside the packet built to prevent exactly that.** The fix is to assert on the ANSWER, not on
+  the heading above it.
+
+- **(hhhhh) `parse-projection` NEVER HASHES THE BODY.** Editing `truth state: reported` to
+  `verified` in a projection still returns `round_trip: MATCH`. The round-trip therefore attests
+  the STRUCTURE and not the CONTENT. **`reconcile` is the real mechanism**, and it covers **only
+  `exports/`** — so any projection written anywhere else is unguarded.
+
+- **(iiiii) DEAD FIELDS AND DUPLICATED TYPES IN THE v0 SCHEMA.** `memory_artifacts.content_hash`
+  is hardcoded `-` and **read by nothing** — a field that looks like an integrity control and is
+  not one, which is the `(ccccc)`-adjacent hazard of a wrong perimeter rather than an admitted
+  gap. Separately, the `handoff` and `context_package` **object types** duplicate the **dedicated
+  stores**, so the same fact has two homes and nothing reconciles them. Both are v0 schema debt,
+  named here so v1 meets a decision rather than an oversight.
+
+- **(jjjjj) `ART-0011` HAS ANCHOR `-`, AND IT IS THE EVIDENCE FOR THE SIGPIPE FINDING ITSELF.** It
+  is a **bare file reference**. **An anchor resolves an IDENTITY TOKEN, not a CONTENT DIGEST**, so
+  the text around a token can change and the evidence silently cites different content. **That is
+  `resolvability is not identity`, one level down, inside the layer built to prevent it** — and
+  the artifact it degrades is the one backing `DEFECT-0013`, the most consequential finding
+  currently open. **REMEDY: anchor it, or record a content digest beside it.**
+
+- **(kkkkk) THE EXPORT TELLS THE SECOND SURFACE WHAT TO DO AND NOT HOW TO DO IT, AND ONE
+  ACCEPTANCE CRITERION CAN NEVER BE MET AS WRITTEN.** The export **never names the tool, the
+  subcommand or the actor id** required to satisfy its own acceptance criteria — so a second
+  surface that read it faithfully still could not act through the governed path. Separately,
+  **`HOF-0001`'s criteria say *"at version 1"*** while section 7 names **`OBJ-0010`, already at
+  v1**, so deciding it produces **v2** and the criterion is unsatisfiable by construction. Both
+  are content defects in the generated artifact, not in the generator's plumbing.
+
+- **(lllll) THE MISMATCH CEILING SHOULD BE RE-EXPRESSED ON THE GATE-ON-ADVISE SUBSET, AND THE
+  REVIEWER WITHDREW ITS OWN P5 RULING ON EVIDENCE TO SAY SO.** `lic_of` in
+  `build-os/registry/scan-controls.sh` **tops out at rank 4 (`gate`) for Class A, and no class
+  returns 5 — no class licenses `execute`.** **THEREFORE EVERY DURABLE-WRITE CONTROL THIS
+  REPOSITORY WILL EVER ADD MUST DECLARE A MISMATCH. THERE IS NO LEGAL ALTERNATIVE, FOR ANYONE,
+  EVER.** A cap on the **raw total of 22** is negotiable by construction and **no packet can
+  decline it**; the previous standing ruling *"hold at 21"* could only have been honoured by
+  refusing to register real durable-write surfaces, which is worse than declaring them. **THE
+  NUMBER THAT MATTERS DID NOT MOVE: gate-on-advise — the original subject of `MISMATCHES.md`, the
+  heuristics that CAN STOP A BUILD — is 14 at base and 14 at HEAD.** All growth is in the
+  `execute` bucket. **ROUTED TO THE OPERATOR AND NOT ACTED ON:** re-express the ceiling on the
+  gate-on-advise subset, where it constrains something an operator can actually choose.
+
+- **(mmmmm) THE CHANGELOG / `current_state` CROSS-CHECK HAS NO GREEN PATH FOR A BUILDER.** The
+  cross-check forces builders into memory files on **any total-changing packet**: the new suite
+  total must be written into `CHANGELOG.md` and `current_state.md` **before** the gates can be
+  green, which is precisely the window in which those files belong to the archivist. **There was
+  no green path, and this packet's builder took the only one available by writing them.** Two
+  remedies, and the choice is the operator's: **either the archivist runs BEFORE the gates**,
+  inverting the close order, **or the cross-check reads the total from a GENERATED file the
+  builder owns.** Recorded because it is a routing and contract change, and the archivist does not
+  take routing acts.
