@@ -45,8 +45,17 @@
   `no tags` because `tests/release_metadata_tests.sh:322` requires it, so the residue item is
   annotated rather than rewritten. Whether the tag was created with an explicit go is not
   determinable from here and no claim is made.
-- **Build/test command:** `bash tests/build_os_tests.sh` (2103 checks; no network; temp dirs)
-  — **2103 as of `PACKET-0036-measurement-integrity`.** The delta is **+7**, all of it
+- **Build/test command:** `bash tests/build_os_tests.sh` (2121 checks; no network; temp dirs)
+  — **2121 as of `PACKET-0037-residue-reblock`.** The delta is **+18**, all of it
+  `tests/build_os_maintenance_tests.sh` §8 — the section that measures whether THIS
+  repository's own `residue.md` can be rotated at all, and whether its standing region
+  can be archived. That suite goes **67 -> 85**; every other chained suite is **+0**.
+  Derived from a SOLO full-capture run after an anchored `pgrep -fa '^bash tests/'`
+  returned empty, and reconciled against `CHANGELOG.md`, which carries the matching
+  literal `**2121 passed**` (unsplit) under `## [Unreleased]` ->
+  `### In flight (not landed at the released commit)`. **CITED BY HEADING, NOT BY LINE.**
+  The prior figure and its provenance are preserved below:
+  — **2103 as of `PACKET-0036-measurement-integrity`.** The delta was **+7**, all of it
   `tests/build_os_tests.sh` §28, the guard for `DEFECT-0013`; every other chained suite is
   **+0**, including `tests/speed_benchmark_tests.sh`, which held at **169** because that
   packet **converted** three assertions rather than adding any.

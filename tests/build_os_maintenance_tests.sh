@@ -427,6 +427,214 @@ fi
 grep -q 'Full version rollback' "$SRC/build-os/maintenance/PORTING.md" \
   && ok "PORTING.md states the version-rollback boundary explicitly" || no "PORTING.md does not state the rollback boundary"
 
+echo "== 8. THIS repository's live residue.md is rotatable, and its standing region is not =="
+# WHY THIS SECTION EXISTS, AND WHY IT IS ABOUT THE LIVE FILE RATHER THAN A FIXTURE.
+#
+# Sections 1-7 prove the maintenance layer works on synthetic memory. They said
+# nothing about whether it can do anything for THIS repository's memory, and the
+# answer was no: `build-os/memory/residue.md` reached 204658 B against the
+# 204800 B ceiling `rotate-memory.test.mjs` enforces — 142 B of headroom, so the
+# next close had no green path — while carrying exactly THREE `^## ` blocks.
+# `rotate-memory.mjs`'s `routeSegments` retains `blocks.slice(0, keepN)`, so at
+# the shipped `keep=10` it retained all three and archived 0 blocks and 0 bytes.
+# The preventative tool had nothing to prevent with, and it REFUSES at exit 3
+# (EXIT.CEILING) once the file is already over — a precondition the failure it
+# prevents violates. Nothing in the suite could see that, because every rotation
+# proof ran on a generated fixture with 120 blocks.
+#
+# SELECTION IS BY POSITION, AND THE POSITION IT KEEPS IS THE PREFIX. Measured,
+# not read: on a 5-block fixture `--keep 2` reports `would archive block_3..
+# block_5`. So content that must survive rotation belongs at the HEAD of the
+# file, and the header's warning — "a standing gate sitting in the archive
+# region is archived like anything else" — is a statement about the TAIL.
+#
+# WHAT THIS SECTION DOES NOT CLAIM. It does not rotate the live tree; every
+# invocation below carries an explicit `--root` into $WORK and the live file is
+# only ever READ. It does not claim the archived content is unimportant — the
+# archive is append-only, committed, and named by the banner. It claims exactly
+# two things: rotation can now reclaim real space from this file, and the
+# standing region cannot be what it reclaims.
+#
+# ON THE COMPARISON OPERATORS. Every threshold below is written as a `-lt`/`-le`
+# REFUSAL rather than a `-ge`/`-gt` floor. That is deliberate and is stated so it
+# is auditable rather than incidental: `tests.nonvacuity_minimums` groups
+# `-ge N`/`-gt N` with N > 1 in tests/*.sh by a SYNTACTIC rule, and its members
+# are fitted floors on how much a SCANNER COVERED. These are not that — they are
+# substantive thresholds on a measured property of a memory file — so they are
+# written in the form that does not enrol them in a family they do not belong to.
+RES_LIVE="$SRC/build-os/memory/residue.md"
+RES_CEIL=204800                      # rotate-memory.mjs DEFAULT_MAX_BYTES, 200 KB
+RES_MIN_RECLAIM=40960                # 40 KB: the floor this packet had to clear
+RES_ROOT="$WORK/live-residue"
+mkdir -p "$RES_ROOT/build-os/memory"
+cp "$RES_LIVE" "$RES_ROOT/build-os/memory/residue.md"
+cmp -s "$RES_LIVE" "$RES_ROOT/build-os/memory/residue.md" \
+  && ok "the live residue.md is copied byte-identically into a scratch root (the live tree is only READ)" \
+  || no "the scratch copy of residue.md is not byte-identical — every measurement below would be about the wrong file"
+
+# (a) THE BLOCK STRUCTURE. Three blocks is the condition under which rotation is
+#     a reported no-op at the shipped keep, whatever the file's size.
+RES_BLOCKS="$(grep -c '^## ' "$RES_LIVE")"
+if [ "${RES_BLOCKS:-0}" -le 10 ]; then
+  no "residue.md carries $RES_BLOCKS \`^## \` block(s); at the shipped keep=10 rotation retains min(10,$RES_BLOCKS)=$RES_BLOCKS and archives NOTHING, so the file cannot be relieved by the tool built to relieve it"
+else
+  ok "residue.md carries $RES_BLOCKS \`^## \` blocks — more than the shipped keep=10, so rotation has a tail to archive"
+fi
+
+# (b) THE SHIPPED-KEEP ROTATION ACTUALLY ARCHIVES. Dry run, so nothing is
+#     written anywhere; the exit code is captured DIRECTLY off the tool and
+#     never off the tail of a pipeline.
+RES_DRY="$WORK/residue-dry.json"
+node "$SRC/build-os/maintenance/rotate-memory.mjs" \
+     --root "$RES_ROOT" --file residue --keep 10 --json > "$RES_DRY" 2>"$WORK/residue-dry.err"
+RES_DRY_RC=$?
+[ "$RES_DRY_RC" -eq 0 ] \
+  && ok "a --keep 10 DRY RUN over a scratch copy of the live residue.md exits 0 (no ceiling refusal)" \
+  || no "the --keep 10 dry run exited $RES_DRY_RC: $(head -c 300 "$WORK/residue-dry.err")"
+node -e '
+const fs = require("fs");
+const r = JSON.parse(fs.readFileSync(process.argv[1], "utf8")).results[0];
+const out = [r.totalBlocks, r.retainedBlocks, r.archivedBlocks, r.archivedBytes,
+             r.retainedBytes, r.originalBytes, r.withinCeiling ? 1 : 0].join(" ");
+fs.writeFileSync(process.argv[2], out + "\n");
+' "$RES_DRY" "$WORK/residue-dry.fields" 2>"$WORK/residue-fields.err"
+RES_FIELDS_RC=$?
+if [ "$RES_FIELDS_RC" -eq 0 ]; then
+  read -r RES_TOT RES_KEPT RES_ARCH_N RES_ARCH_B RES_RETB RES_ORIGB RES_OK < "$WORK/residue-dry.fields"
+  ok "the dry run reports machine-readable counts ($RES_TOT blocks -> keep $RES_KEPT, archive $RES_ARCH_N)"
+else
+  RES_TOT=0; RES_KEPT=0; RES_ARCH_N=0; RES_ARCH_B=0; RES_RETB=0; RES_ORIGB=0; RES_OK=0
+  no "the dry-run report could not be parsed: $(head -c 300 "$WORK/residue-fields.err")"
+fi
+if [ "${RES_ARCH_N:-0}" -le 0 ]; then
+  no "rotation at the shipped keep=10 would archive $RES_ARCH_N blocks — it is a REPORTED NO-OP at exit 0, which reads exactly like \"already rotated\""
+else
+  ok "rotation at the shipped keep=10 would archive $RES_ARCH_N block(s) of residue.md"
+fi
+
+# (c) RECLAIMABLE BYTES, AND THE HEADROOM THEY BUY. Zero reclaimable bytes is
+#     the live condition; the floor is what says the re-block was worth doing.
+if [ "${RES_ARCH_B:-0}" -lt "$RES_MIN_RECLAIM" ]; then
+  no "rotation at keep=10 would reclaim only ${RES_ARCH_B:-0} B from residue.md (floor $RES_MIN_RECLAIM B) — the file is $RES_ORIGB B and there is nothing the tool can take"
+else
+  ok "rotation at keep=10 would reclaim $RES_ARCH_B B from residue.md (>= the $RES_MIN_RECLAIM B floor)"
+fi
+RES_HEADROOM=$(( RES_CEIL - ${RES_RETB:-RES_CEIL} ))
+if [ "$RES_HEADROOM" -lt "$RES_MIN_RECLAIM" ]; then
+  no "after a keep=10 rotation residue.md would still be ${RES_RETB:-?} B, leaving $RES_HEADROOM B under the $RES_CEIL B ceiling — a close writing more than that has no green path"
+else
+  ok "after a keep=10 rotation residue.md would be $RES_RETB B, leaving $RES_HEADROOM B of headroom under the $RES_CEIL B ceiling"
+fi
+[ "${RES_OK:-0}" = "1" ] \
+  && ok "the tool itself reports the post-rotation size within its own ceiling" \
+  || no "the tool reports the post-rotation size OUTSIDE its ceiling — rotation cannot fix this file"
+
+# (d) THE PROTECTED REGION — PROVEN BY EXECUTION, NOT BY THE ORDER THINGS WERE
+#     WRITTEN IN. `rotate-memory.mjs` has no notion of protected content and this
+#     does not give it one. It proves a POSITIONAL fact: the standing region is
+#     the file's FIRST block, retention is a prefix, and `--keep` is validated
+#     `>= 1`, so no legal invocation of the tool can archive it. Each of the
+#     three literals `tests/release_metadata_tests.sh:322-324` pins is required
+#     to live there and NOWHERE ELSE, so no archived block can be what satisfies
+#     that suite.
+RES_HEAD_BLOCK="$(grep -m1 '^## ' "$RES_LIVE")"
+case "$RES_HEAD_BLOCK" in
+  "## Standing"*) ok "residue.md's FIRST block is the designated standing region: $RES_HEAD_BLOCK" ;;
+  *)              no "residue.md's first block is \"$RES_HEAD_BLOCK\", not a designated \`## Standing\` region — nothing in this file marks what rotation must not reach" ;;
+esac
+# BLOCK 1 IS EXTRACTED BY ITS OWN DELIMITER, not by a remembered line number:
+# from the FIRST `^## ` heading up to but excluding the SECOND. That is also
+# what makes the byte comparison below survivable — rotation inserts its
+# ~506 B archive-pointer banner into the PREAMBLE, ahead of the first heading,
+# so a preamble-inclusive comparison would report a difference on every run that
+# actually rotates and would be measuring the banner, not the standing content.
+res_block1(){ awk '/^## /{n++} n==1' "$1"; }
+res_not_block1(){ awk '/^## /{n++} n!=1' "$1"; }
+RES_B1="$WORK/residue-block1.txt"
+res_block1 "$RES_LIVE" > "$RES_B1"
+RES_OUTSIDE="$WORK/residue-outside-block1.txt"
+res_not_block1 "$RES_LIVE" > "$RES_OUTSIDE"
+RES_PINNED_IN=0; RES_PINNED_OUT=0
+for term in "license model" "no tags" "single-platform"; do
+  grep -qiF "$term" "$RES_B1" && RES_PINNED_IN=$((RES_PINNED_IN+1))
+  grep -qiF "$term" "$RES_OUTSIDE" && RES_PINNED_OUT=$((RES_PINNED_OUT+1))
+done
+[ "$RES_PINNED_IN" -eq 3 ] \
+  && ok "all three gate-pinned literals (license model / no tags / single-platform) live inside the standing block" \
+  || no "only $RES_PINNED_IN of the 3 gate-pinned literals are inside the standing block — the rest sit where rotation can take them"
+[ "$RES_PINNED_OUT" -eq 0 ] \
+  && ok "none of the three gate-pinned literals occurs OUTSIDE the standing block, so no archivable block is what keeps tests/release_metadata_tests.sh green" \
+  || no "$RES_PINNED_OUT of the gate-pinned literals also occur outside the standing block — an archived block could be what satisfies the release-metadata suite"
+
+# EXECUTED, at EVERY legal N: 1..totalBlocks. A fresh scratch copy per pass,
+# --apply, then the rotated live file and the archive are both examined.
+#
+# TWO OUTCOMES ARE LEGITIMATE AND THEY ARE SEPARATED RATHER THAN LUMPED. A keep
+# large enough that the RETAINED file would still exceed the 200 KB ceiling is
+# refused at EXIT.CEILING (3) — the tool reporting and stopping, never
+# auto-reducing N — and such a run writes NOTHING, so it cannot archive
+# anything either. Counting a ceiling refusal as a protection failure would be
+# reporting the tool's own safety as a defect; counting it as a success without
+# checking that it wrote nothing would be worse. Both are checked.
+RES_N_ROT=0; RES_N_REFUSED=0; RES_N_BAD=0; RES_N_LEAK=0; RES_N_DRIFT=0
+RES_N=1
+while [ "$RES_N" -le "${RES_TOT:-0}" ]; do
+  RES_NR="$WORK/keep-$RES_N"
+  mkdir -p "$RES_NR/build-os/memory"
+  cp "$RES_LIVE" "$RES_NR/build-os/memory/residue.md"
+  node "$SRC/build-os/maintenance/rotate-memory.mjs" \
+       --root "$RES_NR" --file residue --keep "$RES_N" --apply \
+       > "$WORK/keep-$RES_N.out" 2>&1
+  RES_N_RC=$?
+  if [ "$RES_N_RC" -eq 3 ]; then
+    # a ceiling refusal must be a NO-WRITE: the copy is untouched and no
+    # archive was created, so nothing was archived and nothing was lost
+    RES_N_REFUSED=$((RES_N_REFUSED+1))
+    cmp -s "$RES_LIVE" "$RES_NR/build-os/memory/residue.md" || RES_N_BAD=$((RES_N_BAD+1))
+    [ -e "$RES_NR/build-os/memory/archive" ] && RES_N_BAD=$((RES_N_BAD+1))
+  elif [ "$RES_N_RC" -ne 0 ]; then
+    RES_N_BAD=$((RES_N_BAD+1))
+  else
+    RES_N_ROT=$((RES_N_ROT+1))
+    for term in "license model" "no tags" "single-platform"; do
+      grep -qiF "$term" "$RES_NR/build-os/memory/residue.md" || RES_N_BAD=$((RES_N_BAD+1))
+      if [ -f "$RES_NR/build-os/memory/archive/residue.archive.md" ]; then
+        grep -qiF "$term" "$RES_NR/build-os/memory/archive/residue.archive.md" && RES_N_LEAK=$((RES_N_LEAK+1))
+      fi
+    done
+    # the standing block must survive byte-identically, not merely in substance
+    RES_NB1="$WORK/keep-$RES_N.block1"
+    res_block1 "$RES_NR/build-os/memory/residue.md" > "$RES_NB1"
+    cmp -s "$RES_B1" "$RES_NB1" || RES_N_DRIFT=$((RES_N_DRIFT+1))
+  fi
+  RES_N=$((RES_N+1))
+done
+if [ "${RES_TOT:-0}" -le 0 ]; then
+  no "the keep-sweep had no block count to sweep over — the proof below is vacuous"
+else
+  ok "the keep-sweep ran every legal N from 1 to $RES_TOT (--keep is validated >= 1, so this is the tool's whole legal domain)"
+fi
+[ $(( RES_N_ROT + RES_N_REFUSED )) -eq "${RES_TOT:-0}" ] \
+  && ok "every legal keep ended in one of exactly two ways: $RES_N_ROT rotated, $RES_N_REFUSED refused at the ceiling (exit 3) writing nothing" \
+  || no "a legal keep ended some third way — $RES_N_ROT rotated + $RES_N_REFUSED refused != ${RES_TOT:-0} sweeps"
+[ "$RES_N_BAD" -eq 0 ] \
+  && ok "at all $RES_N_ROT rotating keeps the live file still carries all three gate-pinned literals, and every ceiling refusal wrote nothing at all" \
+  || no "$RES_N_BAD failure(s): a legal --keep archived a gate-pinned literal out of the live file, or a refusal still wrote"
+[ "$RES_N_LEAK" -eq 0 ] \
+  && ok "at all $RES_N_ROT rotating keeps, NO gate-pinned literal ever reaches the archive" \
+  || no "$RES_N_LEAK gate-pinned literal(s) reached the archive — the standing region is reachable by rotation after all"
+[ "$RES_N_DRIFT" -eq 0 ] \
+  && ok "at all $RES_N_ROT rotating keeps, block 1 is byte-identical to the source (the standing region is never rewritten; only the preamble gains a banner)" \
+  || no "$RES_N_DRIFT keep(s) changed the standing block's bytes"
+
+# The live tree was only read. Proven, not asserted.
+cmp -s "$RES_LIVE" "$RES_ROOT/build-os/memory/residue.md" \
+  && ok "the live residue.md is byte-identical to the copy taken before this section ran" \
+  || no "the live residue.md changed during this section — a rotation reached the real tree"
+[ -d "$SRC/build-os/memory/archive" ] \
+  && ok "note: the real archive directory exists (append-only; its presence is not evidence this section wrote to it)" \
+  || ok "no archive directory was created in the real tree by this section"
+
 echo ""
 echo "==== RESULT: $PASS passed, $FAIL failed ===="
 [ "$FAIL" -eq 0 ]

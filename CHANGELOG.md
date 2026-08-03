@@ -14,6 +14,47 @@ deprecation cycle. Pin a commit if you need stability.
 
 ### In flight (not landed at the released commit)
 
+- **`build-os/memory/residue.md` was re-blocked so that rotation can reclaim
+  space from it, and so that the part of it which must never rotate cannot.**
+  The file had reached **204,658 B** against the **204,800 B** ceiling
+  `build-os/maintenance/run-tests.sh` enforces — **142 B of headroom** — while
+  carrying exactly **three** `^## ` blocks. `rotate-memory.mjs` retains
+  `blocks.slice(0, keepN)`, so at the shipped `keep=10` it retained all three
+  and archived **0 blocks / 0 bytes**: the preventative tool had nothing to
+  prevent with, and it refuses at exit 3 once the file is already over.
+
+  **Nothing was deleted, paraphrased or silenced, and no ceiling was raised.**
+  The migration is a pure re-partition: **162 units carried verbatim**, **130
+  lettered items** and **7 `### From <packet>` era markers** preserved, and the
+  only line removed from the file is the old `## Deferred (follow-up packets)`
+  heading, replaced by **29** named sections. Sections are cut at the file's own
+  era markers, never across one, and named by the letter range they hold —
+  because `build-os/metrics/signal_snapshots.tsv` already addresses this file by
+  letter (`build-os/memory/residue.md#ddd`), not by line.
+
+  **The protection is positional and it is executed, not argued.** Retention is
+  a PREFIX and `--keep` is validated `>= 1`, so block 1 — the standing region,
+  holding all three literals `tests/release_metadata_tests.sh:322-324` pins —
+  cannot be reached by any legal invocation. `tests/build_os_maintenance_tests.sh`
+  §8 sweeps **every legal N from 1 to 29** on scratch copies: **28 rotate** with
+  block 1 byte-identical and no pinned literal ever reaching the archive, **1
+  refuses at the ceiling writing nothing at all**, and no pinned literal occurs
+  anywhere outside block 1, so no archivable block is what keeps the
+  release-metadata suite green.
+
+  **Measured, at `--keep 10`, from a dry run:** 29 blocks -> keep 10, archive
+  19; **127,142 B reclaimable**; post-rotation size **81,258 B**, leaving
+  **123,542 B** of headroom where there were 142. The live file itself grew
+  **204,658 -> 207,894 B** (+3,236: 26 net headings and the ordering note), which
+  is **above** `DEFAULT_MAX_BYTES` — the ceiling is enforced on the POST-ROTATION
+  size, and the only way to bring the live file under it is to actually rotate.
+  **Rotation was NOT applied**; that is an operator act and is recorded as one.
+  Suite **2121 passed**, 0 failed (+18, all of it §8; every other suite +0).
+  Census **held at 105**, declared mismatches **held at 22**. **No new control** —
+  one `evidence_refs` line-number correction only, `suite.build_os_maintenance`
+  `:431/:432 -> :639/:640`, which is `DEFECT-0001-stale-line-reference` arriving
+  again by way of an insertion above a cited line.
+
 - **Claude closed work into governed project memory, and a second AI surface
   consumed that state without anybody copying the transcript.** That sentence is
   the whole packet, and it is an EXECUTED FIXTURE rather than a design: the
