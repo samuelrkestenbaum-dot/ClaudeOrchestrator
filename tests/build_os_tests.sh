@@ -978,10 +978,26 @@ echo "== 28. A pipeline may not report FAIL because of its own exit semantics (D
 # `grep -m1`, `head`, `sed -n '1p;1q'`, a bare `read` — kills its producer with
 # SIGPIPE. The producer dies 141, `pipefail` promotes 141 to the pipeline status,
 # and `producer | grep -q . && ok || no` prints FAIL while the assertion is right
-# and the data is right. It is ONE-DIRECTIONAL: it can manufacture a false FAIL
-# and can never mask a real one, which is what makes it worth a guard — a false
-# "went red" is a lie that outlives the run, in a repository whose whole point is
-# comparing outcomes over time.
+# and the data is right. A false "went red" is a lie that outlives the run, in a
+# repository whose whole point is comparing outcomes over time.
+#
+# ONE-DIRECTIONALITY IS A PROPERTY OF THE `&& ok || no` POLARITY, NOT OF THE
+# CLASS: at that polarity the race can only manufacture a false FAIL, but
+# INVERTED — `producer | grep -q . && no || ok` — the same 141 routes to `ok`
+# and the identical race yields a FALSE PASS that masks a real failure. THE
+# EARLIER CLAIM HERE — that this class "can never mask a real one" — WAS FALSE
+# AS A CLASS CLAIM and is corrected rather than softened, because a wrong number
+# in a test comment is a nuisance and a wrong claim in the defect registry is
+# training data. MEASURED COUNTEREXAMPLE, LATENT AND NOT LIVE:
+# tests/build_os_maintenance_tests.sh:414 is written at the inverted polarity —
+# a `find` producer piped into `grep -q .`, then `&& no ... || ok ...` — so a
+# SIGPIPE 141 routes to `ok`. At 270890 B that construct returned non-zero
+# 2000/2000; with a draining consumer, 0/2000. It is unreachable today: it needs
+# more than 64 KiB, roughly 1100+ leftover paths, in a directory the test
+# expects EMPTY. It is also invisible to (b) below, because its producer is
+# `find` and SP_STREAM does not enumerate `find`. RECORDED, NOT FIXED — that
+# file is outside this packet's ownership, and the measurement travels with the
+# record so the next packet inherits the number rather than the impression.
 #
 # IT ONLY FIRES ABOVE THE 64 KiB PIPE BUFFER. A producer whose entire output fits
 # in one buffer issues one write and cannot be caught mid-stream. So the shape
@@ -1004,7 +1020,46 @@ echo "== 28. A pipeline may not report FAIL because of its own exit semantics (D
 #   * (b) IS ALSO ONLY AS GOOD AS ITS TWO PATTERNS. A producer idiom it does not
 #     enumerate (a function wrapping `cat`, a process substitution, a `while read`
 #     fed by a big stream) is invisible to it, and so is any pipeline written
-#     across physical lines in a way the join below does not reassemble.
+#     across physical lines in a way the join below does not reassemble. FIVE
+#     SUCH IDIOMS WERE VERIFIED TO WALK PAST IT: `git log --oneline` into
+#     `grep -q .`; a function wrapping `cat`; `find /tmp -type f` into
+#     `grep -q .`; `cat "$BIG"` into a `while read` that breaks; and `grep -q .`
+#     fed by a process substitution.
+#   * SP_KILL DOES NOT ENUMERATE `awk '...exit'`, which is precisely the idiom
+#     this packet's own measurement proves toolchain-dependent — mawk's `exit`
+#     killed its producer 0/200 here, where `sed -n '1p;1q'` killed it 200/200.
+#     THE CHOICE MADE WAS TO NAME THE LIVE SITES RATHER THAN WIDEN THE PATTERN,
+#     because widening changes what the guard reports and this round corrects
+#     claims only. The two live sites: build-os/metrics/check-adoption.sh:252
+#     and :478 both run `datarows` over the 72754-byte packet store under
+#     `pipefail`, and WOULD race under a lethal awk. They are unexposed only
+#     because all three call sites (:270, :391, :478) capture the VALUE with
+#     `row="$(...)"` and test it with -n/-z, never reading the status, and the
+#     file sets `-uo pipefail` with no `-e`. That is a property of how those
+#     three callers happen to be written, not of the pipelines.
+#   * THE ALLOW-LIST IS FILE-GRANULAR, NOT SITE-GRANULAR, and the section below
+#     does not say so. SP_ALLOW is matched as `^($SP_ALLOW)$` against the whole
+#     relative path, while its comment enumerates three specific pipelines with
+#     their measured byte counts — which reads as a per-pipeline exemption and is
+#     not one. Demonstrated: appending `datarows "$STORE"` into `grep -q` to
+#     tests/speed_benchmark_tests.sh is silently ALLOWED, and the identical line
+#     in tests/entitlement_tests.sh is REPORTED. So the one file that actually
+#     shipped DEFECT-0013 is wholesale exempt from the guard against it. Left
+#     file-granular deliberately — tightening to site-granularity would put line
+#     numbers back into an identity, which is the coupling this tree is shedding
+#     — so the reader is told instead.
+#   * (b) SCANS 45 OF THE 54 pipefail-enabling shell files in this tree. Its file
+#     list is rooted at tests/, build-os/ and .claude/hooks/, so NINE are outside
+#     it: connect-project.sh, init-build-os.sh, install-accelerators.sh,
+#     install-global.sh, install-project.sh, repair-host-integrations.sh,
+#     templates/session-start-bootstrap.sh, docs/sample-project/check.sh and
+#     docs/sample-project/slugify.sh. FOUR of those carry `set -euo pipefail`
+#     (connect-project, init-build-os, install-global, install-project), so the
+#     `set -e` plus `pipefail` combination this packet recorded elsewhere as a
+#     FUTURE blind spot IS ALREADY PRESENT TODAY. Measured harmless, not
+#     assumed: running these same two patterns over all 54 files yields the SAME
+#     3 hits, all three already allow-listed. The gap is real and currently
+#     costs nothing; it is the scope that would have to widen, not the patterns.
 
 # (a) Behavioural: the mechanism, demonstrated on a fixture with real power.
 #     Amplified deliberately — the live store is ~72 KB and flaps at ~16%, which

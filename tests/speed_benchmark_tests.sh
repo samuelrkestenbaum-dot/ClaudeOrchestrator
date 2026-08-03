@@ -60,27 +60,27 @@ datarows(){ tail -n +2 "$1" 2>/dev/null | grep -v '^[[:space:]]*$' | grep -v '^#
 nrows(){ datarows "$1" | wc -l | tr -d ' '; }
 
 # `any` ANSWERS "did the upstream stage emit at least one line?" AND IT IS NOT A
-# `grep -q .` WITH A LONGER NAME. THE DRAINING IS THE WHOLE POINT.
+# `grep -q .` WITH A LONGER NAME. THE DRAINING IS THE WHOLE POINT: `any` reads to
+# EOF and only then decides, so the producer always reaches EOF and `pipefail`
+# has no 141 to promote. IT IS ALSO WIDER THAN `grep -q .`: on input that is
+# only blank lines `any` returns 0 where `grep -q .` returns 1. Unreachable at
+# all three §10 call sites — the producers print whole non-empty rows and
+# `datarows` strips blanks — but stated here rather than left to be found.
 #
-# DEFECT-0013. `grep -q` exits the instant it matches. Its producer is then still
-# writing, gets SIGPIPE, and dies 141 — and `set -o pipefail` (line 32, and it is
-# load-bearing everywhere else in this file) promotes that 141 to the status of
-# the whole pipeline. So `producer | grep -q . && ok || no` prints FAIL while the
-# assertion is right and the data is right: the harness reports its own plumbing.
+# DEFECT-0013. `grep -q` exits the instant it matches; its producer is still
+# writing, gets SIGPIPE, dies 141, and `set -o pipefail` (line 32) promotes that
+# 141 to the whole pipeline's status. Measured at §10: the shipped `grep -q`
+# form failed 628/4000 (15.70%), `PIPESTATUS=[0 141 0]`; `any` failed 0/4000.
 #
-# IT IS ONE-DIRECTIONAL — it can manufacture a false FAIL and can never mask a
-# real one — which is exactly what makes it dangerous: a false "went red" written
-# into an outcome record is a lie the comparison layer will later be trained on.
-#
-# MEASURED ON THIS TREE, not inferred: at the §10 git-backed assertion the
-# shipped `grep -q` form failed **628 times in 4000** (15.70%) with
-# `PIPESTATUS=[0 141 0]`; `any` failed **0 in 4000**. The threshold is the 64 KiB
-# pipe buffer — a producer that fits in one buffer issues one write and cannot be
-# caught mid-stream, which is why the neighbouring assertions never flapped.
-#
-# `any` reads to EOF and only then decides. The producer therefore ALWAYS reaches
-# EOF, there is no SIGPIPE for `pipefail` to promote, and the answer does not
-# depend on who was scheduled first. `pipefail` stays ON for this file.
+# ONE-DIRECTIONALITY IS A PROPERTY OF THE `&& ok || no` POLARITY, NOT OF THE
+# CLASS: at that polarity the race can only manufacture a false FAIL, but
+# INVERTED — `producer | grep -q . && no || ok` — the same 141 routes to `ok`
+# and the identical race yields a FALSE PASS that masks a real failure. Measured
+# counterexample, LATENT AND NOT LIVE: tests/build_os_maintenance_tests.sh:414
+# is written at that inverted polarity and returned non-zero 2000/2000 at
+# 270890 B, 0/2000 draining. It needs >64 KiB — ~1100+ leftover paths in a
+# directory the test expects EMPTY — and §28 cannot see it: its producer is
+# `find`. Recorded, not fixed; that file is outside this packet's ownership.
 any(){ awk 'BEGIN{r=1} {r=0} END{exit r}'; }
 
 # Body rows of a rendered report's per-packet table, TOTAL row excluded.
@@ -445,14 +445,14 @@ done < <(datarows "$STORE")
 # write and can be caught mid-stream — and it failed 628/4000. The second and
 # third emit 462 and 519 bytes, one write each, and failed 0/4000 and 0/4000.
 #
-# THE OTHER TWO ARE CONVERTED ANYWAY, AND THE REASON IS NOT TIDINESS. Their
-# safety is a property of TODAY'S FILE SIZE, not of their structure — the third
-# is the worst of the three structurally, because its `awk` stops after 519 bytes
-# while `datarows` still has 72 KB to push. It survives only because mawk's
-# `exit` happens not to kill its producer on this toolchain (measured: 0/5 at
-# 141, against 5/5 for `grep -q`, `grep -m1`, `head -1`, `sed -n '1p;1q'` and a
-# bare `read`). A guarantee that rests on which awk is installed is not a
-# guarantee. Draining makes all three structural.
+# THE OTHER TWO ARE CONVERTED ANYWAY, AND NOT FOR TIDINESS. Their safety is a
+# property of TODAY'S FILE SIZE, not of their structure — the third is the worst
+# structurally, its `awk` stopping after 519 bytes while `datarows` still has
+# 72 KB to push — and it survives only because mawk's `exit` happens not to kill
+# its producer on this toolchain. MEASURED OVER N=200 TRIALS EACH, producer
+# killed: mawk `exit` 0/200 (0.0%); `grep -q .` 16/200 (8.0%); `grep -m1 .`
+# 19/200 (9.5%); `head -1` 105/200 (52.5%); `sed -n '1p;1q'` 200/200 (100%);
+# bare `read` 5/5 (n=5 cannot tell 8% from 100% — that is why N=200).
 datarows "$STORE" | awk -F'\t' '$15=="git"||$15=="mixed"' | any \
   && ok "the corpus contains at least one git-backed row" || no "no seeded row is git-backed"
 datarows "$STORE" | awk -F'\t' '$15=="transcript"||$15=="estimate"' | any \

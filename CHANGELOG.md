@@ -80,13 +80,17 @@ deprecation cycle. Pin a commit if you need stability.
   fixture past two pipe buffers 100.00% before and 0/2000 after. The fix drains
   the consumer (`any`) instead of disabling `pipefail`, which stays on.
 
-  **The class was swept, not just the site.** 45 `pipefail`-enabling shell files,
-  235 candidate `producer | early-exiting consumer` pipelines; the 64 KiB pipe
-  buffer is the discriminator and **exactly one site could actually race**. The
-  neighbouring two assertions measured 0/4000 and were converted anyway, because
-  their safety was a property of today's file size and of which `awk` is
-  installed — measured: `grep -q`, `grep -m1`, `head -1`, `sed -n '1p;1q'` and a
-  bare `read` kill their producer 5/5; mawk's `exit` 0/5.
+  **The class was swept, not just the site.** 45 `pipefail`-enabling shell files
+  — **45 of the 54 in the tree**, and the nine outside the scan are enumerated in
+  the §28 header with the measurement that the gap is currently harmless — and
+  **258** candidate `producer | early-exiting consumer` pipelines, comment lines
+  excluded, each figure stated with the command that reproduces it. The 64 KiB
+  pipe buffer is the discriminator and **exactly one site could actually race**.
+  The neighbouring two assertions measured 0/4000 and were converted anyway,
+  because their safety was a property of today's file size and of which `awk` is
+  installed — measured over **N=200 trials each**: `sed -n '1p;1q'` kills its
+  producer 200/200, `head -1` 105/200, `grep -m1 .` 19/200, `grep -q .` 16/200,
+  and **mawk's `exit` 0/200**.
 
   New guard, `tests/build_os_tests.sh` §28 — **7 assertions**, a red drive that
   reproduces the race on an amplified fixture before the green claim is made, and
@@ -94,6 +98,29 @@ deprecation cycle. Pin a commit if you need stability.
   **2103 passed**, 0 failed (+7, all of it §28; every other suite +0). Census
   **held at 105**, declared mismatches **held at 22**, gate-on-advise **held at
   14**. Zero re-authorisations. **No new control.**
+
+  **Seven claim defects were corrected in a bounded third commit, and the first
+  of them was the packet's own headline sentence.** `DEFECT-0013` had been
+  recorded in three places as *"ONE-DIRECTIONAL: it can manufacture a false FAIL
+  and can never mask a real one"*. **That is false as a class claim, and it had
+  already been relayed to the operator twice.** One-directionality is a property
+  of the `&& ok || no` **polarity**, not of the class: inverted, the same 141
+  routes to `ok` and the identical race yields a **false PASS masking a real
+  failure**. `tests/build_os_maintenance_tests.sh:414` is written that way and
+  returned non-zero **2000/2000** at 270890 B, 0/2000 draining — **latent, not
+  live** (it needs >64 KiB in a directory the test expects empty) and **invisible
+  to the new scanner**, whose producer patterns do not enumerate `find`. The
+  greens still stand, but because that counterexample is unreachable rather than
+  because the class cannot mask failures. The remaining six were figures and
+  scope: the `5/5` consumer-lethality table replaced by N=200 measurements, the
+  scanner's 45-of-54 file scope and its four already-present `set -euo pipefail`
+  scripts, the file-granular allow-list, the unenumerated `awk '…exit'` idiom
+  with its two live sites, and **two figures withdrawn because no derivation in
+  the tree reproduces them** (`235` candidate pipelines, `~40` `sed … | head`
+  dumps). **No behaviour changed, no assertion was added or removed, and the
+  suite total is unmoved.** Every retained figure now carries the command that
+  reproduces it. The registry's four line-citations into
+  `tests/build_os_tests.sh` were re-pointed after the comment edits moved them.
 
   **Six defects the reviewer found were fixed in a bounded third commit, and four
   of them were the packet claiming a perimeter it did not hold.** (1) The export

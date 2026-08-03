@@ -95,11 +95,27 @@ saturates: **1000/1000 = 100.00% before, 0/2000 after.** `PIPESTATUS=[0 141 0]`
 — element 2, the `awk`, killed by SIGPIPE. `pipefail` **stays on** for the file;
 the consumer was made to drain instead.
 
-**THE CLASS SWEEP.** 45 `pipefail`-enabling shell files across `tests/`,
-`build-os/` and `.claude/hooks/`; **235** candidate `producer | early-exiting
-consumer` pipelines. **Exactly one could race.** The discriminator is the 64 KiB
-pipe buffer, and it was **calibrated rather than assumed**: streams under one
-buffer measured **0/4000**, streams over it **1.80%–100%**.
+**THE CLASS SWEEP. EVERY FIGURE BELOW CARRIES THE COMMAND THAT REPRODUCES IT**,
+because the first draft of this section stated two that nothing in the tree could
+reproduce, which is `DEFECT-0002` committed inside a packet about measurement.
+
+**45** `pipefail`-enabling shell files across `tests/`, `build-os/` and
+`.claude/hooks/` —
+`grep -rlE '^set -[a-z]*o pipefail' tests build-os .claude/hooks --include='*.sh' | wc -l`.
+**That is 45 of the 54 in the whole tree** (same command rooted at `.`, minus
+`.git`); the nine outside the scan are named in the §28 header, **four of them
+carry `set -euo pipefail`**, and the gap is measured harmless — the same two
+patterns over all 54 files yield the **same 3 hits, all allow-listed**.
+
+**258** candidate `producer | early-exiting consumer` pipelines, comment lines
+excluded — the 45 files piped through
+`xargs grep -hE "\|[^|]*($SP_KILL)" | grep -vE '^[[:space:]]*#' | wc -l` with
+`SP_KILL` as written at `tests/build_os_tests.sh`; **257** excluding the one
+line carrying the scan-exempt marker, and **70** lines matching `SP_STREAM`.
+**The earlier figure of 235 is withdrawn: no derivation reproduces it.**
+**Exactly one could race.** The discriminator is the 64 KiB pipe buffer, and it
+was **calibrated rather than assumed**: streams under one buffer measured
+**0/4000**, streams over it **1.80%–100%**.
 
 | site | producer volume into the killer | measured | disposition |
 |---|---|---|---|
@@ -108,16 +124,42 @@ buffer measured **0/4000**, streams over it **1.80%–100%**.
 | `speed_benchmark_tests.sh` §10 empty-cell | 519 B out, **72609 B in** | 0/4000 | converted anyway |
 | `record-packet.sh` `datarows \| cut \| grep -qxF` | 622 B | 0/4000 | recorded, allow-listed |
 | `speed_benchmark_tests.sh` `datarows "$RT" \| head -n1` (×2) | ~200 B fixture | 0/4000 | recorded, allow-listed |
-| ~40 `sed … FILE \| head -N` diagnostic dumps | ≤8056 B measured | — | recorded; status discarded, no `set -e` |
+| `sed … FILE \| head -N` diagnostic dumps (**count withdrawn**) | ≤8056 B measured | — | recorded; status discarded, no `set -e` |
 | 3 scripts with `set -e` **and** `pipefail` | — | — | **zero** early-exiting pipelines in them |
+
+**THE `sed … \| head -N` COUNT IS WITHDRAWN RATHER THAN RESTATED.** "~40" is not
+reproducible: a strict `sed … \| head` scan over the 45 files gives **13**, every
+`\| head` line gives **87**, and neither is 40. **The load-bearing half survives
+and is derived:** the three scripts that combine `set -e` with `pipefail` are
+`build-os/maintenance/install-maintenance.sh`, `build-os/maintenance/rotate-memory.sh`
+and `build-os/tools/capability-profile.sh`, and
+`grep -hE "\|[^|]*($SP_KILL)" <those three> | grep -vE '^[[:space:]]*#' | wc -l`
+returns **0**. So no early-exiting pipeline anywhere in this tree sits under
+`set -e`, its status is discarded in statement position, and it cannot become a
+verdict. **A number nobody can re-derive is not evidence, and one is not kept
+here merely because it was already written down.**
 
 **THE TWO NON-RACY §10 ASSERTIONS WERE CONVERTED ANYWAY, AND NOT FOR TIDINESS.**
 The empty-cell assertion is structurally the *worst* of the three — its `awk`
 stops after 519 bytes while `datarows` still has 72 KB to push — and it measures
 0/4000 only because **mawk's `exit` happens not to kill its producer on this
-toolchain**: measured **0/5**, against **5/5 for `grep -q`, `grep -m1`, `head -1`,
-`sed -n '1p;1q'` and a bare `read`**. A guarantee that depends on which `awk` is
-installed is not a guarantee.
+toolchain**. **THE FIGURES BELOW REPLACE AN EARLIER "5/5", WHICH WAS TRUE OF ONLY
+TWO OF THE FIVE CONSUMERS AND WAS DRAWN FROM A SAMPLE (n=5) THAT CANNOT
+DISTINGUISH 8% FROM 100%.** Measured over **N=200 trials each**, producer killed:
+
+| consumer | producer killed |
+|---|---|
+| mawk `exit` | **0/200 = 0.0%** |
+| `grep -q .` | 16/200 = **8.0%** |
+| `grep -m1 .` | 19/200 = **9.5%** |
+| `head -1` | 105/200 = **52.5%** |
+| `sed -n '1p;1q'` | 200/200 = **100%** |
+| bare `{ read }` | 5/5 |
+
+**The conclusion is unchanged and strengthened by the 0/200**: mawk's `exit` is
+uniquely non-lethal, so the safety of that assertion is a fact about which `awk`
+is installed and not about its shape. A guarantee that depends on the toolchain
+is not a guarantee, and draining removes the dependency.
 
 **THE GUARD — `tests/build_os_tests.sh` §28, 7 assertions.** Two halves, on the
 §27 precedent: (a) a **red drive** that builds a fixture past two pipe buffers and
@@ -147,10 +189,13 @@ The evidence for the narrow claim is strong; the evidence for the broad claim wa
 never collected, and answering the second question with the first one's data is
 precisely the epistemic error this packet exists to correct.
 
-The asymmetry settles it: the error is **one-directional**, so retaining the
-discipline costs one suite run and dropping it costs the credibility of every red
-this tree will ever report. **Retiring it is an operator act** and wants a second
-measured packet's worth of clean runs behind it, not this one. Residue `(nnnnn)`.
+The asymmetry settles it, **with the asymmetry stated correctly**: the error is
+one-directional **at the `&& ok || no` polarity every assertion in this suite is
+written at** — it is not one-directional as a class, and the counterexample is
+measured and recorded in `(qqqqq)`. Retaining the discipline costs one suite run
+and dropping it costs the credibility of every red this tree will ever report.
+**Retiring it is an operator act** and wants a second measured packet's worth of
+clean runs behind it, not this one. Residue `(nnnnn)`, corrected by `(qqqqq)`.
 
 ## Branch base
 
@@ -165,10 +210,14 @@ The project's next frontier is **experience** — running
 repeatedly. That loop's payload is **comparison**, and comparison requires a
 measurement substrate that does not lie.
 
-`DEFECT-0013` is that substrate lying. It is **one-directional** — it cannot
-fabricate a success, so every prior green stands — but **it can fabricate a
-failure**, and a false "went red" written into an outcome record poisons the store
-S1 will eventually train on. Its sharpest form:
+`DEFECT-0013` is that substrate lying. **At the `&& ok || no` polarity — which is
+how every assertion in the affected suites is written — it cannot fabricate a
+success, so every prior green stands** — but **it can fabricate a failure**, and
+a false "went red" written into an outcome record poisons the store S1 will
+eventually train on. **That scoping is load-bearing and was missing from the
+first draft of this packet: at the INVERTED polarity the same race yields a false
+PASS. Measured counterexample and its unreachability: `(qqqqq)`.** Its sharpest
+form:
 `tests/release_metadata_tests.sh` compares a **live** suite total against memory,
 so if the race fires there, **the guard that keeps memory honest emits a false
 staleness verdict.**
@@ -261,9 +310,10 @@ discipline stand?**
   digests recoverable from git. **Not a stage-4 defect.** Residue `(ddddd)`.
 - **`DEFECT-0013` OUTRANKS THIS PACKET AND IS NOT ITS FAULT.** The base tree is
   non-deterministic — **6.26% per invocation quiet, 19.97% under load** — via a
-  `pipefail`/SIGPIPE race proven by `PIPESTATUS=[0 0 0 141 0]`. **The error is one-directional**,
-  so every prior green stands and every prior red on that assertion is suspect. **A single green
-  run is no longer sufficient evidence in this tree.** Residue `(ccccc)`.
+  `pipefail`/SIGPIPE race proven by `PIPESTATUS=[0 0 0 141 0]`. **The error is one-directional at
+  the `&& ok || no` polarity these assertions are written at** — so every prior green stands and
+  every prior red on that assertion is suspect — **but not as a class: see `(qqqqq)`.** **A single
+  green run is no longer sufficient evidence in this tree.** Residue `(ccccc)`.
 - **Second eyes: NONE — THIRTEENTH consecutive packet**, re-verified at close.
 
 ## THE DECLARATION THAT WAS NEVER WRITTEN — THIS FILE'S OWN DEFECT, AGAIN

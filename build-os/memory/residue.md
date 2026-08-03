@@ -2173,28 +2173,37 @@ not to be fixed outside that packet.**
   is gone; what would justify dropping the discipline is that *no unnamed one remains*, and
   nothing here measures that. The evidence for the narrow claim is strong and the evidence for
   the broad claim was never collected. **The discipline is cheap and the error it catches is
-  one-directional — it manufactures false FAILs and can never mask a real one — so retaining it
-  costs a suite run and dropping it costs the credibility of every red this tree ever reports.**
+  one-directional AT THE `&& ok || no` POLARITY EVERY ASSERTION IN THESE SUITES IS WRITTEN AT —
+  not as a class; see `(qqqqq)` for the measured counterexample — so retaining it costs a suite
+  run and dropping it costs the credibility of every red this tree ever reports.**
   Retiring it is an operator act and wants a second measured packet's worth of clean runs behind
   it, not this one.
 
 - **(ooooo) THE CLASS SWEEP FOUND EXACTLY ONE RACY SITE, AND THE REASON THE OTHERS ARE SAFE IS
   NOT STRUCTURAL.** 45 `pipefail`-enabling shell files under `tests/`, `build-os/` and
-  `.claude/hooks/`; **235** pipelines matching `producer | early-exiting consumer`; **one** could
-  actually race. The discriminator is the **64 KiB pipe buffer**, calibrated rather than assumed
+  `.claude/hooks/` — **45 of the 54 in the tree; the nine outside the scan and their four
+  `set -euo pipefail` members are enumerated in the §28 header, and the gap is measured
+  harmless** — **258** pipelines matching `producer | early-exiting consumer` with comment lines
+  excluded (**257** excluding the scan-exempt marker line; **the earlier figure of 235 is
+  withdrawn, no derivation reproduces it**); **one** could actually race. The discriminator is the **64 KiB pipe buffer**, calibrated rather than assumed
   — a producer under one buffer issues one write and measured **0/4000** at every site tried,
   while synthetic streams over it measured **1.80%–100%**. **BUT THE SAFETY OF THE SURVIVORS IS
   A PROPERTY OF TODAY'S DATA AND TODAY'S TOOLCHAIN, NOT OF THEIR SHAPE.** Two facts make that
   concrete. First, the §10 empty-cell assertion is structurally the *worst* of the three — its
   `awk` stops after 519 bytes while `datarows` still has 72 KB to push — and it measured 0/4000
   only because **mawk's `exit` happens not to kill its producer on this toolchain**: measured
-  0/5, against **5/5 for `grep -q`, `grep -m1`, `head -1`, `sed -n '1p;1q'` and a bare `read`**.
-  Second, ~40 diagnostic `sed … FILE | head -N` dumps are safe on **two** independent counts —
-  their inputs are all under 8 KB, and their status is discarded in statement position with no
-  `set -e` anywhere in the tree — and **both counts are incidental.** The three scripts that DO
-  combine `set -e` with `pipefail` contain **zero** early-exiting pipelines, which is luck that
-  nothing enforces. **Open:** nothing prevents a future `set -euo pipefail` script from adding
-  one, and the new §28 scanner cannot see volume, so it would not fire.
+  **0/200 (0.0%) over N=200 trials, against `grep -q .` 16/200 (8.0%), `grep -m1 .` 19/200
+  (9.5%), `head -1` 105/200 (52.5%), `sed -n '1p;1q'` 200/200 (100%) and a bare `read` 5/5** —
+  **the earlier "5/5 for all five" was true of only two of them and rested on n=5, which cannot
+  distinguish 8% from 100%.** Second, the diagnostic `sed … FILE | head -N` dumps are safe on
+  **two** independent counts — their inputs are all under 8 KB, and their status is discarded in
+  statement position with no `set -e` anywhere in the tree — and **both counts are incidental.**
+  **Their number is withdrawn rather than restated: "~40" reproduces under no scan (13 strict,
+  87 for all `| head`).** The three scripts that DO combine `set -e` with `pipefail` —
+  `install-maintenance.sh`, `rotate-memory.sh`, `capability-profile.sh` — contain **zero**
+  early-exiting pipelines, which is luck that nothing enforces. **Open, and no longer in the
+  future tense:** four scripts outside the scanner's scope ALREADY carry `set -euo pipefail`,
+  the §28 scanner cannot see volume, and it does not read those four at all.
 
 - **(ppppp) A COMMITTED PROJECTION IS COMPARED BYTE-FOR-BYTE AND CARRIES A LINE NUMBER, SO EVERY
   EDIT ABOVE AN ANCHOR TURNS THE SUITE RED.** `DEFECT-0001-stale-line-reference`,
@@ -2211,3 +2220,81 @@ not to be fixed outside that packet.**
   each change what a projection *is*, which is a design act on a v0 store this packet has no
   licence over. The repair taken was the sanctioned one — regenerate the shadow, a pure read that
   appended **no event** and touched **no canonical store**.
+
+- **(qqqqq) THE ONE-DIRECTIONALITY CLAIM WAS FALSE AS A CLASS CLAIM, AND IT HAD ALREADY BEEN
+  RELAYED TO THE OPERATOR TWICE.** `DEFECT-0013` was recorded — in `tests/speed_benchmark_tests.sh`,
+  in `tests/build_os_tests.sh` §28 and in `defect_classes.txt` — as *"ONE-DIRECTIONAL: it can
+  manufacture a false FAIL and can never mask a real one"*. **The corrected claim, now carried
+  verbatim in all three: one-directionality is a property of the `&& ok || no` POLARITY, not of
+  the class. At that polarity the race can only manufacture a false FAIL; INVERTED —
+  `producer | grep -q . && no || ok` — the same 141 routes to `ok` and the identical race yields
+  a FALSE PASS that masks a real failure.** **Measured counterexample:**
+  `tests/build_os_maintenance_tests.sh:414` is written at the inverted polarity — a `find`
+  producer into `grep -q .`, then `&& no … || ok …` — and at **270890 B returned non-zero
+  2000/2000**, **0/2000** with a draining consumer. **LATENT, NOT LIVE:** reaching it needs
+  >64 KiB, roughly **1100+ leftover paths**, in a directory the test expects EMPTY. **INVISIBLE
+  TO THE GUARD:** its producer is `find`, which `SP_STREAM` does not enumerate, so §28 would
+  never report it. **The greens still stand — but because this counterexample is unreachable,
+  NOT because the class cannot mask failures**, and that is a different sentence with a different
+  warrant. **NOT FIXED HERE:** `tests/build_os_maintenance_tests.sh` is outside this packet's
+  ownership; this entry carries the measurement so the next packet inherits a number rather than
+  an impression.
+  **WHERE THE SUPERSEDED CLAIM STILL STANDS, AND WHY IT WAS NOT REWRITTEN.** Three copies live in
+  records of the PREVIOUS packet, closed before this correction existed:
+  `build-os/receipts/gravito_cross_surface_memory_kernel_v0.md:407-408`,
+  `build-os/memory/residue.md:2038-2039` and `build-os/memory/current_state.md:286`. **They were
+  left as written**, on the same rule this tree applies to `memory_events.tsv` — *a correction
+  creates a later record, it does not edit an earlier one* — because rewriting them would
+  misrepresent what was known at that close. **Every LIVE copy was corrected in place**
+  (`tests/speed_benchmark_tests.sh`, `tests/build_os_tests.sh` §28,
+  `build-os/registry/defect_classes.txt`, `build-os/packets/active_packet.md` ×3, `CHANGELOG.md`,
+  and `(nnnnn)`/`(ooooo)` above), because correcting one copy and leaving its sibling is
+  `DEFECT-0003` and this repository has already shipped that class inside the packet that
+  registered it. **Open, and an operator call rather than a builder's:** whether a closed receipt
+  carrying a claim since measured false should gain a pointer to its correction. It has none
+  today, and a reader arriving at that receipt will read the false sentence with nothing beside
+  it.
+
+- **(rrrrr) FIVE PRODUCER IDIOMS WALK PAST THE §28 STATIC SCANNER**, verified rather than
+  reasoned: `git log --oneline | grep -q .`; a function wrapping `cat`; `find /tmp -type f |
+  grep -q .`; `cat "$BIG" | while read -r l; do break; done`; and `grep -q . < <(emit_rows)`.
+  `SP_STREAM` enumerates `datarows`, `cat FILE` and `tail -n +N` and nothing else, and `SP_KILL`
+  does not enumerate `awk '…exit'` — **the one consumer idiom this packet's own measurement
+  proves toolchain-dependent** (mawk 0/200 here; `sed -n '1p;1q'` 200/200). The two live
+  `awk '…exit'` sites are **`build-os/metrics/check-adoption.sh:252` and `:478`**, both running
+  `datarows` over the **72754-byte** store under `pipefail`; they **would race under a lethal
+  awk** and are unexposed only because all three call sites (`:270`, `:391`, `:478`) capture the
+  **value** with `row="$(…)"` and test `-n`/`-z`, never the status, in a file with no `set -e`.
+  **The scanner was left alone and the blind spots were named instead** — widening the pattern
+  changes what the guard reports, and this was a claim-correction round. **Also recorded, and it
+  is an integrity control working:** the repo's own *"sibling suite present but never chained"*
+  check caught a planted file during this sweep.
+
+- **(sssss) THE §28 ALLOW-LIST IS FILE-GRANULAR AND ITS COMMENT READS AS PER-PIPELINE.**
+  `SP_ALLOW` is matched `^($SP_ALLOW)$` against the whole relative path, while the comment beside
+  it enumerates three specific pipelines with measured byte counts. **So the one file that
+  actually shipped `DEFECT-0013` — `tests/speed_benchmark_tests.sh` — is wholesale exempt from
+  the guard against `DEFECT-0013`**: a new `datarows "$STORE" | grep -q …` there is silently
+  ALLOWED, while the identical line in `entitlement_tests.sh` is REPORTED. **Left as is, and
+  said out loud in the header:** tightening to site-granularity would put line numbers back
+  inside an identity, which is the coupling this tree is shedding.
+
+- **(ttttt) WHAT THE DOUBLED RUN IS ACTUALLY SAMPLING, AND WHAT WOULD LICENSE RETIRING IT.** The
+  strongest justification is no longer an argument but a reconciliation: **the same code on the
+  same machine measured 7.53% on a 17-row store and 14.55% on an 18-row store** — *the rate of a
+  latent non-determinism is a function of a data volume nobody is watching*, which is the §28
+  guard's own declared blind spot arriving from the other direction. Under load the site went
+  **15.33% → 42.60%**, and CI is not quiet. **What would license retirement is not another
+  assertion-level measurement.** It is a **suite-level determinism measurement**: N≥200
+  consecutive full-suite runs at a fixed commit, quiet and under controlled load, with **zero
+  variation in the per-suite PASS/FAIL VECTOR rather than in the total**, plus a per-assertion
+  harness rerunning each assertion K times against frozen fixtures. **Until the invariant is "the
+  verdict vector does not move", the doubled run is the only sampler in place.**
+
+- **(uuuuu) OPERATOR-FACING, PROMOTED OUT OF `(ppppp)`: the projection embeds a resolved line
+  number and should stop.** The reviewer's ruling, recorded verbatim because it is the argument
+  and not a summary of one: *"a byte-compared artefact that embeds a resolved line number, inside
+  the mechanism whose stated thesis is that line numbers are not identity, is self-contradictory"*.
+  Its cost is not hypothetical: **every content-preserving edit above any anchored site ships red
+  until a projection is regenerated.** `(ppppp)` stays as the finding; this is the request that it
+  become a **cut packet** rather than open-ended residue. **Not a design act taken here.**
