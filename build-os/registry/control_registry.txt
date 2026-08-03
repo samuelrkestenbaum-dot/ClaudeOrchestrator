@@ -670,7 +670,7 @@ inputs: the original bytes of each memory file, the segment partition, the retai
 output: a rotation plan, or a thrown RotateError with a specific exit code
 owning_module: build-os/maintenance/rotate-memory.mjs
 consuming_policies: rotate-memory.sh's exit status; if ANY file fails conservation, NOTHING is written for ANY file
-evidence_refs: build-os/maintenance/rotate-memory.mjs:326; build-os/maintenance/rotate-memory.mjs:377; build-os/maintenance/rotate-memory.mjs:381; build-os/maintenance/rotate-memory.mjs:1443
+evidence_refs: build-os/maintenance/rotate-memory.mjs:326; build-os/maintenance/rotate-memory.mjs:377; build-os/maintenance/rotate-memory.mjs:381; build-os/maintenance/rotate-memory.mjs:1495
 failure_behavior: throws at EXIT.CONSERVATION / EXIT.RETENTION / EXIT.CEILING before any write
 rollback_behavior: dry-run is the default and every check runs before the write, so there is nothing to roll back; the archive is append-only and never rewritten
 promotion_requirement: n/a
@@ -688,7 +688,7 @@ inputs: a file's parsed block count and whether its original text has any non-wh
 output: a WARNING on stderr naming the file and the delimiter that matched nothing; totalBlocks and originalHasContent in --json
 owning_module: build-os/maintenance/rotate-memory.mjs
 consuming_policies: a human reading stderr, or a caller reading --json; deliberately consumed by no policy that changes the exit code
-evidence_refs: build-os/maintenance/rotate-memory.mjs:1887; build-os/maintenance/rotate-memory.mjs:1891
+evidence_refs: build-os/maintenance/rotate-memory.mjs:1887; build-os/maintenance/rotate-memory.mjs:1943
 failure_behavior: none — "the exit code is deliberately unchanged"
 rollback_behavior: n/a
 promotion_requirement: it should not be promoted: an empty or not-yet-written memory file parses to zero blocks legitimately, so failing a run on it would be wrong
@@ -1159,7 +1159,7 @@ inputs: a cold install of the maintenance layer into a scratch repo, plus execut
 output: a RESULT line
 owning_module: tests/build_os_maintenance_tests.sh
 consuming_policies: chained from tests/build_os_tests.sh
-evidence_refs: tests/build_os_maintenance_tests.sh:302; tests/build_os_maintenance_tests.sh:1347; tests/build_os_maintenance_tests.sh:1348
+evidence_refs: tests/build_os_maintenance_tests.sh:302; tests/build_os_maintenance_tests.sh:1548; tests/build_os_maintenance_tests.sh:1549
 failure_behavior: exits non-zero when FAIL is non-zero
 rollback_behavior: read-only with respect to the real tree
 promotion_requirement: n/a
@@ -1575,7 +1575,7 @@ inputs: a verified rotation plan, a staging file written and read back byte-for-
 output: the live memory file REPLACED by the staged one, via an atomic rename
 owning_module: build-os/maintenance/rotate-memory.mjs
 consuming_policies: nothing consumes its verdict — it has none; the file system consumes its effect, and build-os/maintenance/run-tests.sh fingerprints the four watched files before and after any test run precisely because this write exists
-evidence_refs: build-os/maintenance/rotate-memory.mjs:1622; build-os/maintenance/rotate-memory.mjs:1646
+evidence_refs: build-os/maintenance/rotate-memory.mjs:1674; build-os/maintenance/rotate-memory.mjs:1698
 failure_behavior: throws RotateError(EXIT.IO) before the rename if the read-back does not match or the append-only precondition would be violated; the live file is untouched on every failure path
 rollback_behavior: partial and asymmetric — rotated-out blocks survive in the archive, but the live file's prior bytes exist only in git. There is no --undo.
 promotion_requirement: already load_bearing; nothing above this status exists

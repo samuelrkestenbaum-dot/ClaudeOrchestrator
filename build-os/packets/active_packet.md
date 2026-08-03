@@ -1054,3 +1054,95 @@ figure was 15398 B, the same 619 B); `--keep 15 --apply` with no `--pre-registra
 FAILING.** `minimum_safe_keep` 25 against 25 blocks. It stays at **431 B** of headroom. The next
 writer of that file has no rotation path to more, and the remedy is an operator act — see the
 receipt.
+
+## FIX ROUND — CORRECTIONS, WRITTEN AS LATER RECORDS
+
+**NOTHING BELOW EDITS AN EARLIER RECORD.** Two commit messages (`3a590ed`, `89b261b`) and one
+immutable receipt carry figures and a claim that are wrong. They are corrected HERE, by a later
+record, because a commit message cannot be rewritten without rewriting history and a receipt that
+declares itself immutable is worth nothing if its author edits it when it becomes inconvenient.
+
+### C-1. THE OVERSTATED CLAIM — this packet's own thesis, overstated, and it is this packet's own defect class
+
+**WHAT WAS CLAIMED**, in the "THE RESIDUE FINDING" section above and, in the same words, in
+`3a590ed`'s commit message:
+
+> a positional marker scan derives 15 and archives the object it was built to protect
+
+**WHAT IS TRUE, MEASURED BY EXECUTING THE COUNTERFACTUAL THAT WAS NEVER EXECUTED.** A purely
+positional scan — every marker anchored at its own block, nothing resolved by identity — over the
+whole of `build-os/memory/residue.md` derives a floor of **25**, not 15. The markers at
+`residue.md:2333` (`[STILL OPEN AND STILL UNDIAGNOSABLE]`, `(o)`) and `:2339` (`OPERATOR DECISION`,
+`(S1)`) sit in **block 25 themselves**, so the positional maximum is 25 whatever happens to
+`(ddd)`. **On this tree a positional scan would refuse `--keep 10` identically, and would NOT
+archive `(ddd)` at exit 0.** Re-derive it; do not take this paragraph's word for it either.
+
+**THE TRUE, NARROWER CLAIM, WHICH IS THE ONE THE EVIDENCE SUPPORTS:** identity resolution is what
+makes **`(ddd)` resolve to block 16 — its declaration — rather than block 15, where its marker
+sits**. That is a fact about one object's resolved position, it is proven by the discriminating
+fixture in `tests/build_os_maintenance_tests.sh` §10(b) (which re-derives both blocks from the live
+file rather than quoting them) and by mutation M1 killing 2 tests, and it is **not** the claim that
+identity resolution is what saves `(ddd)` from the archive on this particular tree. It is not.
+What saves `(ddd)` here is that two other objects sit deeper. The mechanism's value is that it does
+not DEPEND on that accident — on a tree whose deepest marker sat above the deepest declaration,
+positional and identity would diverge and only identity would be right. That is a statement about
+robustness, not about a harm demonstrated here.
+
+**THIS IS THE PACKET'S OWN DEFECT CLASS, COMMITTED INSIDE THE GUARD BUILT TO PREVENT IT.** The
+class is *a counterfactual asserted as a measured result* — the same shape as three instruments
+reporting 1 / 2 / 31 citation breaks when the true count was 0. The guard's own source comment is
+honest about exactly this distinction for the REJECTED `awaiting explicit go` marker ("WHAT IT
+COSTS, STATED RATHER THAN GLOSSED: nothing measurable on this tree"). The claim corrected here was
+not held to that standard, in the same file, in the same packet.
+
+**PROVENANCE, RECORDED RATHER THAN QUIETLY NARROWED:** the builder wrote it; it went into
+`3a590ed`'s commit message, where it is now immutable; and **the orchestrator repeated it to the
+operator**. Three surfaces carried an unexecuted counterfactual as a measured result before a gate
+executed it. The gate that caught it was qa, running the counterfactual rather than reading the
+claim — which is the only thing that would have caught it at any of the three earlier points.
+
+### C-2. TWO WRONG DIGITS IN AN IMMUTABLE RECEIPT
+
+`build-os/memory/archive/ROTATION-RECEIPT-2026-08-03T19-53-21Z.md` is **not edited**. Its body
+stands as written; these are its corrections.
+
+- **`:102` "its 26763 B archived payload".** The conserved payload is **26762 B**. 26763 B is the
+  length of the archive BODY REGION, which includes one trailing newline the archive writer appends
+  and which is not part of the source. Derived: `bodyRegion.slice(0, 26762)` is a byte-exact
+  substring of `residue.md` at `3ec519b`; `slice(0, 26763)` is not. Rotation #1's own receipt
+  records **26762** in six places, including its executable restore recipe
+  (`const ARCHIVED_BYTES = 26762;`). **`89b261b`'s commit message carries the same wrong digit.**
+  Nothing about the round-trip proof changes — the payload still reconstructs byte-exact — only the
+  figure quoted for it.
+- **`:100` "Batch 1's 15 rows are still rows 1..15".** Batch 1 has **4 rows**, one per archived
+  block (`block_26..block_29`, and the archive's own batch header says `(4)`). `INDEX.md` holds
+  **9** rows total: 4 + 5. The append-only property the sentence was about is true and was proved
+  byte-exactly; only the count was invented.
+
+### C-3. TWO SPEC REVISIONS, RECORDED AND NOT BUILT
+
+Both are out of this packet's ceiling and each needs its own cut and an operator decision. They are
+written down so the next rotation inherits a decision to make rather than a surprise.
+
+1. **CROSS-FILE IDENTITY RESOLUTION for refusal condition 2.** The scan is single-file scoped, so
+   an object that lives in another memory file or a registry and is only CITED here is
+   indistinguishable from one that has gone missing, and both refuse. That assumption produces
+   **both** live C2 hits: `DEFECT-0014` (class record in `build-os/registry/defect_classes.txt`,
+   cited in `residue.md`) and `(S1)` (declared in `residue.md`, cited in `active_packet.md`).
+   Widening "resolve" to span files changes what the rule MEANS, which makes it a spec revision.
+   The limitation is now stated where the rule is stated, in `rotate-memory.mjs`.
+2. **DISTINGUISHING A LIVE MARKER FROM A QUOTED ONE.** A sentence quoting `[STILL OPEN ...]` to
+   describe an object arms the scan exactly as the object's own status tag does. This is why
+   `active_packet.md` became unrotatable the moment this packet's declaration cited `(S1)` and
+   `(ddd)`. Also a spec revision.
+
+### C-4. THE COMMIT CAP WAS BREACHED, AND IT IS RECORDED PLAINLY
+
+The working contract allows **<=2 commits per packet**. This packet has **3**: `3a590ed` (guard +
+tests + pre-registration), `89b261b` (rotation #2), and this fix round. **The third exists because
+the reviewer returned a bounded `fix-then-pass` list and the two earlier commits are the pushed
+tip's descendants that must not be rewritten** — squashing or amending either would destroy the
+very ordering evidence the pre-registration exists to provide, and `89b261b`'s ordering proof rests
+on `3a590ed` being a distinct ancestor commit. **The cap is breached; it is not excused.** It is
+the fifth close running to breach it (residue `(dddddd)` records four), and this one at least has a
+stated cause rather than a discovered one.

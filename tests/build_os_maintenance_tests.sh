@@ -714,16 +714,38 @@ fi
 if [ "$RES_N_SENT" -lt $(( ${RES_MIN_SAFE:-1} - 1 )) ]; then
   no "the sentinel refused only $RES_N_SENT of the $(( ${RES_MIN_SAFE:-1} - 1 )) keeps that sit below the derived floor $RES_MIN_SAFE — at least one unsafe keep was permitted"
 else
-  ok "the sentinel refused all $RES_N_SENT keeps below its derived floor of $RES_MIN_SAFE, over the whole 1..$RES_TOT domain of --keep"
+  # THE TITLE SEPARATES THE TWO POPULATIONS, because they are not the same size
+  # and the earlier wording read as though they were. Only $(( RES_MIN_SAFE - 1 ))
+  # keeps sit BELOW the floor; the remaining sentinel refusals are keeps at or
+  # above it that are refused for a different reason (on this file, C2's
+  # unresolvable identity and C7's close budget). Reporting the total as "all N
+  # keeps below the floor" overstates the floor's own coverage by exactly the
+  # difference.
+  ok "the sentinel refused $RES_N_SENT keep(s) of the 1..$RES_TOT domain, which covers all $(( ${RES_MIN_SAFE:-1} - 1 )) keep(s) strictly BELOW its derived floor of $RES_MIN_SAFE plus $(( RES_N_SENT - ${RES_MIN_SAFE:-1} + 1 )) at or above it refused on other conditions"
+fi
+# THE NEXT THREE ARE VACUOUS ON THIS FILE TODAY, AND THE TITLES SAY SO RATHER
+# THAN IMPLYING COVERAGE. `RES_N_ROT` is 0 here: residue.md's floor equals its
+# block count, so no keep in the whole domain both passes the sentinel and
+# archives anything, and the three counters below can only increment inside a
+# branch that never executes. That is a true and useful fact about the file —
+# nothing can rotate out of it — but it is NOT evidence that the tool protects
+# gate-pinned literals, and a title reading "at all 0 rotating keeps ..." asserts
+# the second while measuring the first. Section 9 carries the non-vacuous arm of
+# this same proof (its sweep DOES rotate, and asserts separation in both
+# directions); section 8 cannot, and says so instead of pretending.
+if [ "${RES_N_ROT:-0}" -eq 0 ]; then
+  RES_SWEEP_SCOPE="VACUOUS BY CONSTRUCTION — 0 keeps rotated, so this counter could not have incremented; the load-bearing arm of this proof is section 9's sweep"
+else
+  RES_SWEEP_SCOPE="over the $RES_N_ROT keep(s) that rotated"
 fi
 [ "$RES_N_BAD" -eq 0 ] \
-  && ok "at all $RES_N_ROT rotating keeps the live file still carries all three gate-pinned literals, and every ceiling refusal wrote nothing at all" \
+  && ok "gate-pinned literals survived every rotating keep and every refusal wrote nothing [$RES_SWEEP_SCOPE]" \
   || no "$RES_N_BAD failure(s): a legal --keep archived a gate-pinned literal out of the live file, or a refusal still wrote"
 [ "$RES_N_LEAK" -eq 0 ] \
-  && ok "at all $RES_N_ROT rotating keeps, NO gate-pinned literal ever reaches the archive" \
+  && ok "no gate-pinned literal reached the archive [$RES_SWEEP_SCOPE]" \
   || no "$RES_N_LEAK gate-pinned literal(s) reached the archive — the standing region is reachable by rotation after all"
 [ "$RES_N_DRIFT" -eq 0 ] \
-  && ok "at all $RES_N_ROT rotating keeps, block 1 is byte-identical to the source (the standing region is never rewritten; only the preamble gains a banner)" \
+  && ok "block 1 stayed byte-identical to the source [$RES_SWEEP_SCOPE]" \
   || no "$RES_N_DRIFT keep(s) changed the standing block's bytes"
 
 # The live tree was only read. Proven, not asserted.
@@ -1040,13 +1062,44 @@ fs.writeFileSync(process.argv[1], o.join(""));
 ' "$root/build-os/memory/residue.md"
 }
 
-# read one field out of a --json report's sentinel block
-sent_field(){ # <json file> <expr over s>
+# Read one field out of a --json report's sentinel block.
+#
+# THE INDIRECT `eval` THAT USED TO BE HERE IS GONE. It read
+# `const v = (0, eval)(process.argv[2]);` — test-only, evaluating literal
+# expressions written a few lines above it in this same file, so it was never a
+# live hazard. It is removed rather than merely declared because removal was
+# trivial: every call site wanted either a named field or the block position of
+# one id, and `new Function` on a fixed template covers both without an
+# arbitrary-expression evaluator. `build-os/maintenance/source-scan.mjs` reports
+# exactly this shape in the maintenance tree, and a device this suite would flag
+# in shipped source does not earn an exemption for sitting in a test.
+sent_field(){ # <json file> <field name>
   node -e '
 const fs = require("fs");
 const s = JSON.parse(fs.readFileSync(process.argv[1], "utf8")).results[0].sentinel;
-const v = (0, eval)(process.argv[2]);
-process.stdout.write(Array.isArray(v) ? v.join(",") : String(v));
+const v = s[process.argv[2]];
+process.stdout.write(v === undefined ? "" : Array.isArray(v) ? v.join(",") : String(v));
+' "$1" "$2" 2>/dev/null
+}
+
+# The block position(s) a single protected identity resolved to. Separate from
+# sent_field because it is a LOOKUP, not a field read — and because keeping it
+# separate is what let the evaluator above be deleted.
+sent_block_of(){ # <json file> <object id>
+  node -e '
+const fs = require("fs");
+const s = JSON.parse(fs.readFileSync(process.argv[1], "utf8")).results[0].sentinel;
+const hits = s.protected_objects.filter((o) => o.id === process.argv[2]);
+process.stdout.write(hits.map((o) => o.block_position).join(","));
+' "$1" "$2" 2>/dev/null
+}
+
+# How many protected objects of a given KIND the scan resolved.
+sent_kind_count(){ # <json file> <kind>
+  node -e '
+const fs = require("fs");
+const s = JSON.parse(fs.readFileSync(process.argv[1], "utf8")).results[0].sentinel;
+process.stdout.write(String(s.protected_objects.filter((o) => o.kind === process.argv[2]).length));
 ' "$1" "$2" 2>/dev/null
 }
 
@@ -1108,13 +1161,13 @@ REDJRC=$?
 [ "$REDJRC" -eq 0 ] \
   && ok "SENTINEL: --sentinel-report is a PURE QUERY — it reports the refusal at exit 0 instead of refusing to say what the safe value is" \
   || no "SENTINEL: --sentinel-report exited $REDJRC: $(head -c 300 "$S10/redjson.err")"
-DDD_AT="$(sent_field "$S10/red.json" 's.protected_objects.filter(o=>o.id==="(ddd)").map(o=>o.block_position).join(",")')"
+DDD_AT="$(sent_block_of "$S10/red.json" '(ddd)')"
 [ "$DDD_AT" = "$DDD_DECL" ] \
   && ok "SENTINEL: (ddd) resolves to block $DDD_AT — its DECLARATION — not to block $DDD_MARK where its marker sits. IDENTITY, not position." \
   || no "SENTINEL: (ddd) resolved to block '$DDD_AT', expected the declaration block $DDD_DECL — the guard is reading position and calling it identity"
-[ "$(sent_field "$S10/red.json" 's.minimum_safe_keep')" = "25" ] \
+[ "$(sent_field "$S10/red.json" minimum_safe_keep)" = "25" ] \
   && ok "SENTINEL: residue.md's derived minimum_safe_keep is 25 — the same value a human hand-derived for rotation #1, now derived by the tool" \
-  || no "SENTINEL: residue.md's minimum_safe_keep is $(sent_field "$S10/red.json" 's.minimum_safe_keep'), not 25"
+  || no "SENTINEL: residue.md's minimum_safe_keep is $(sent_field "$S10/red.json" minimum_safe_keep), not 25"
 cmp -s "$SRC/build-os/memory/residue.md" "$RED/build-os/memory/residue.md" \
   && ok "SENTINEL: --sentinel-report wrote nothing at all" || no "SENTINEL: --sentinel-report mutated the file"
 
@@ -1122,7 +1175,10 @@ cmp -s "$SRC/build-os/memory/residue.md" "$RED/build-os/memory/residue.md" \
 S7=0; S7MISS=""
 for f in requested_keep minimum_safe_keep protected_object_ids protected_block_positions \
          blocks_to_archive bytes_to_reclaim post_rotation_headroom; do
-  if [ "$(sent_field "$S10/red.json" "JSON.stringify(s.$f) !== undefined && s.$f !== undefined")" = "true" ]; then
+  # PRESENT means the key exists and carries a value, not merely that reading it
+  # did not throw: `sent_field` prints the empty string for an absent key, and
+  # every one of these seven is non-empty on a real report.
+  if [ -n "$(sent_field "$S10/red.json" "$f")" ]; then
     S7=$((S7+1))
   else
     S7MISS="$S7MISS $f"
@@ -1154,12 +1210,12 @@ fi
 # ...and the floor it enforces is the DECLARATION's block, not the marker's
 A1J="$S10/c1.json"
 node "$SENT" --root "$A1" --file residue --keep 4 --sentinel-report --json > "$A1J" 2>/dev/null
-[ "$(sent_field "$A1J" 's.minimum_safe_keep')" = "8" ] \
+[ "$(sent_field "$A1J" minimum_safe_keep)" = "8" ] \
   && ok "SENTINEL C1: the fixture's minimum_safe_keep is 8 — the oldest block holding an open item — and not 5, where that object's marker sits" \
-  || no "SENTINEL C1: minimum_safe_keep is $(sent_field "$A1J" 's.minimum_safe_keep'), expected 8"
-[ "$(sent_field "$A1J" 's.protected_objects.filter(o=>o.id==="(qqq)").map(o=>o.block_position).join(",")')" = "6" ] \
+  || no "SENTINEL C1: minimum_safe_keep is $(sent_field "$A1J" minimum_safe_keep), expected 8"
+[ "$(sent_block_of "$A1J" '(qqq)')" = "6" ] \
   && ok "SENTINEL C1: the non-consumable object (qqq) resolves to block 6, where it is DECLARED, though its marker sits in block 5" \
-  || no "SENTINEL C1: (qqq) resolved to block $(sent_field "$A1J" 's.protected_objects.filter(o=>o.id==="(qqq)").map(o=>o.block_position).join(",")'), expected 6"
+  || no "SENTINEL C1: (qqq) resolved to block $(sent_block_of "$A1J" '(qqq)'), expected 6"
 
 # C2 — a protected identity that cannot be resolved
 A2="$S10/c2"; sent_unresolvable "$A2"
@@ -1185,8 +1241,21 @@ else
 fi
 A3="$S10/c3"; sent_armed "$A3"
 sha256sum < "$A3/build-os/memory/residue.md" > "$S10/c3.before"
-node "$M3" --root "$A3" --file residue --keep 4 --apply > "$S10/c3.out" 2>"$S10/c3.err"
+# A MATCHING PRE-REGISTRATION, so C3 is the ONLY condition left standing. Without
+# one, C5 fires alongside it and the exit code stops discriminating: only the
+# `grep -q SENTINEL-C3` half would be load-bearing, and a fixture whose exit code
+# proves nothing is half a fixture. C4, C6 and C7 already isolate this way.
+sent_prereg "$S10/c3.json" residue 4 "$A3/build-os/memory/residue.md"
+node "$M3" --root "$A3" --file residue --keep 4 --apply \
+     --pre-registration "$S10/c3.json" > "$S10/c3.out" 2>"$S10/c3.err"
 C3RC=$?
+# ISOLATION, ASSERTED RATHER THAN ASSUMED: C3 must be the only code in the
+# refusal. If another condition creeps back in, the fixture has stopped being
+# about C3 and this says so instead of passing on the grep alone.
+C3_CODES="$(grep -oE 'SENTINEL-C[0-9]' "$S10/c3.err" | sort -u | tr '\n' ' ')"
+[ "$(echo "$C3_CODES" | tr -d ' ')" = "SENTINEL-C3" ] \
+  && ok "SENTINEL C3: the refusal names C3 and NOTHING ELSE — the fixture isolates the condition it is for" \
+  || no "SENTINEL C3: the refusal names [$C3_CODES], so the exit code is not evidence about C3 alone"
 if [ "$C3RC" -eq 7 ] && grep -q 'SENTINEL-C3' "$S10/c3.err" \
    && [ "$(sha256sum < "$A3/build-os/memory/residue.md")" = "$(cat "$S10/c3.before")" ]; then
   SC_FIRED=$((SC_FIRED+1)); ok "SENTINEL C3: with the floor suppressed, the independent routing check still refuses — an open object landing in the archive is caught by a second instrument"
@@ -1283,6 +1352,138 @@ fi
 [ "$SC_FIRED" -eq 7 ] && [ "$SC_BAD" -eq 0 ] \
   && ok "SENTINEL: ALL SEVEN refusal conditions are driven by a fixture that fires them, and every one of the seven wrote nothing" \
   || no "SENTINEL: $SC_FIRED of 7 conditions fired and $SC_BAD failed — a refusal condition with no fixture that fires it is a claim, not a guard"
+
+# ---------------- (d2) THE TWO INVARIANTS NOTHING ASSERTED ON — M5 AND M4 --------
+# WHY THESE EXIST, AND THEY ARE NOT SPECULATIVE. Two mutants of this tool were
+# built and executed against the whole 2179-check suite, and each killed EXACTLY
+# ZERO tests:
+#
+#   M5  `const hasStandingRegion = objects.some(o => o.kind === "protected-region")`
+#       -> `const hasStandingRegion = false`, which disarms SENTINEL_GATE_PINS
+#       entirely. Observable and unasserted: on this repository's residue.md the
+#       resolved-object count falls 18 -> 15 and the gate pins 3 -> 0; on
+#       current_state.md 4 -> 2 and 2 -> 0. Sections 8 and 9 grep the pinned
+#       LITERALS out of the files directly and never route through the sentinel,
+#       so no assertion anywhere noticed. The rotation-#2 receipt meanwhile
+#       claims those pins were "verified BY IDENTITY" — an unenforced claim in a
+#       receipt is exactly the shape this repository keeps paying for.
+#
+#   M4  the declaration index preferring the SHALLOWEST declaration instead of
+#       the DEEPEST (`declaredAt.get(id).block < at` -> `> at`). Retention is a
+#       prefix, so the deepest declaration is the safe anchor and the shallowest
+#       strands every later copy. It is inert only because no marker on this tree
+#       currently names a doubly-declared id — `DEFECT-0013` already IS declared
+#       in two blocks of active_packet.md, so the condition is one marker away.
+#
+# Both are driven here on generated fixtures, at the level the sentinel reports
+# rather than at the level of a literal grep, which is the whole point: an
+# assertion that greps the literal cannot tell whether the SENTINEL protected it.
+M5="$S10/mutant-m5.mjs"; cp "$SENT" "$M5"
+perl -0pi -e 's/const hasStandingRegion = objects\.some\(\(o\) => o\.kind === "protected-region"\);/const hasStandingRegion = false;/' "$M5"
+grep -q 'const hasStandingRegion = false;' "$M5" \
+  && ok "SENTINEL M5: the mutant was built — SENTINEL_GATE_PINS is disarmed and nothing else changed" \
+  || no "SENTINEL M5: the mutant could not be built, so this differential is vacuous"
+
+# The pins are read off THIS repository's live current_state.md, on a scratch
+# copy: they are the literals `tests/release_metadata_tests.sh` section 5 reads
+# with `head -n1`, so the file that actually has them is the honest fixture.
+M5R="$S10/m5-root"; mkdir -p "$M5R/build-os/memory"
+cp "$CS_LIVE" "$M5R/build-os/memory/current_state.md"
+node "$SENT" --root "$M5R" --file current_state --keep 10 --sentinel-report --json \
+     > "$S10/m5.shipped.json" 2>/dev/null
+node "$M5"   --root "$M5R" --file current_state --keep 10 --sentinel-report --json \
+     > "$S10/m5.mutant.json" 2>/dev/null
+M5_SHIPPED="$(sent_kind_count "$S10/m5.shipped.json" gate-pin)"
+M5_MUTANT="$(sent_kind_count "$S10/m5.mutant.json" gate-pin)"
+# DIRECTION 1 — the shipped tool resolves BOTH pins, as protected objects, by kind.
+[ "${M5_SHIPPED:-0}" -eq 2 ] \
+  && ok "SENTINEL: the sentinel itself resolves both of current_state.md's gate-pinned literals as protected objects (kind gate-pin), so the receipt's \"verified BY IDENTITY\" claim is now enforced by an assertion rather than asserted in prose" \
+  || no "SENTINEL: the sentinel resolved ${M5_SHIPPED:-0} gate-pin object(s) in current_state.md, expected 2 — the pins are not protected by the guard at all"
+# ...and each resolves to the block that actually holds its FIRST occurrence,
+# derived here from the file rather than remembered.
+M5_PIN_BLK_OK=0
+for t in '**Build/test command:**' '**Last closed packet:**'; do
+  EXPECT="$(awk -v t="$t" '/^## /{n++} index($0,t){print n; exit}' "$M5R/build-os/memory/current_state.md")"
+  GOT="$(sent_block_of "$S10/m5.shipped.json" "GATE-PIN:$t")"
+  [ -n "$EXPECT" ] && [ "$GOT" = "$EXPECT" ] || M5_PIN_BLK_OK=$((M5_PIN_BLK_OK+1))
+done
+[ "$M5_PIN_BLK_OK" -eq 0 ] \
+  && ok "SENTINEL: each gate pin resolves to the block holding its FIRST occurrence — the occurrence a head -n1 reader would find — re-derived from the file, not remembered" \
+  || no "SENTINEL: $M5_PIN_BLK_OK gate pin(s) resolved to a block that does not hold their first occurrence"
+# DIRECTION 2 — THE KILL. Disarming the pins must be visible.
+[ "${M5_MUTANT:-9}" -eq 0 ] && [ "${M5_SHIPPED:-0}" -ne "${M5_MUTANT:-9}" ] \
+  && ok "SENTINEL M5 KILLED: disarming SENTINEL_GATE_PINS drops the resolved gate-pin objects from ${M5_SHIPPED} to ${M5_MUTANT}, and this assertion is what now sees it — before this check the same mutant killed 0 of 2179 tests" \
+  || no "SENTINEL M5 SURVIVES: shipped resolved ${M5_SHIPPED:-?} gate-pin object(s) and the disarmed mutant ${M5_MUTANT:-?} — the invariant is still unenforced"
+
+M4="$S10/mutant-m4.mjs"; cp "$SENT" "$M4"
+perl -0pi -e 's/if \(at >= 1 && \(!declaredAt\.has\(id\) \|\| declaredAt\.get\(id\)\.block < at\)\) \{/if (at >= 1 \&\& (!declaredAt.has(id) || declaredAt.get(id).block > at)) {/' "$M4"
+grep -q 'declaredAt.get(id).block > at' "$M4" \
+  && ok "SENTINEL M4: the mutant was built — the declaration index prefers the SHALLOWEST declaration instead of the deepest" \
+  || no "SENTINEL M4: the mutant could not be built, so this differential is vacuous"
+
+# A fixture carrying a DOUBLY-DECLARED id that a marker names: `(www)` is
+# declared in block 3 AND again in block 9, and the marker in block 2 names it.
+# Deepest-wins resolves to 9 and the floor is 9; shallowest-wins resolves to 3
+# and the floor collapses to 3, stranding the block-9 copy in the archive.
+M4R="$S10/m4-root"; mkdir -p "$M4R/build-os/memory"
+node -e '
+const fs = require("fs");
+const o = ["# Residue\n\n> generated fixture preamble.\n\n"];
+o.push("## Standing open items — PROTECTED REGION (block 1; rotation cannot reach it)\n\n");
+o.push("- **(aaa) A STANDING ITEM.** " + "s".repeat(200) + "\n\n");
+o.push("## History — the block that NAMES the doubly-declared object\n\n");
+o.push("- **(nnn) CITES ANOTHER OBJECT.** `(www)` IS NOT CONSUMED AND MUST NOT BE MARKED SO.\n");
+o.push("  " + "m".repeat(400) + "\n\n");
+o.push("## History — the SHALLOW declaration of (www)\n\n");
+o.push("- **(www) FIRST DECLARATION.** " + "w".repeat(400) + "\n\n");
+for (let i = 4; i <= 8; i++) o.push(`## History — filler ${i}\n\n- **(k${i}) FILLER.** ${"k".repeat(400)}\n\n`);
+o.push("## History — the DEEP declaration of (www)\n\n");
+o.push("- **(www) SECOND DECLARATION, and the one retention must reach.** " + "W".repeat(400) + "\n\n");
+for (let i = 10; i <= 12; i++) o.push(`## History — filler ${i}\n\n- **(j${i}) FILLER.** ${"j".repeat(400)}\n\n`);
+fs.writeFileSync(process.argv[1], o.join(""));
+' "$M4R/build-os/memory/residue.md"
+M4_DECL_N="$(grep -c '^- \*\*(www)' "$M4R/build-os/memory/residue.md")"
+[ "$M4_DECL_N" -eq 2 ] \
+  && ok "SENTINEL M4: the fixture is non-vacuous — (www) is DECLARED twice, in two different blocks, and a marker names it (the condition DEFECT-0013 already satisfies in active_packet.md)" \
+  || no "SENTINEL M4: the fixture declares (www) $M4_DECL_N time(s), so the deepest-vs-shallowest choice cannot be observed"
+node "$SENT" --root "$M4R" --file residue --keep 5 --sentinel-report --json > "$S10/m4.shipped.json" 2>/dev/null
+node "$M4"   --root "$M4R" --file residue --keep 5 --sentinel-report --json > "$S10/m4.mutant.json" 2>/dev/null
+M4_S_BLK="$(sent_block_of "$S10/m4.shipped.json" '(www)')"
+M4_M_BLK="$(sent_block_of "$S10/m4.mutant.json" '(www)')"
+M4_S_FLOOR="$(sent_field "$S10/m4.shipped.json" minimum_safe_keep)"
+M4_M_FLOOR="$(sent_field "$S10/m4.mutant.json" minimum_safe_keep)"
+# DIRECTION 1 — the shipped tool takes the DEEPEST declaration.
+[ "$M4_S_BLK" = "9" ] && [ "$M4_S_FLOOR" = "9" ] \
+  && ok "SENTINEL: a doubly-declared identity resolves to its DEEPEST declaration (block 9, floor 9) — retention is a prefix, so the deepest anchor is the only one that retains every copy" \
+  || no "SENTINEL: (www) resolved to block '$M4_S_BLK' with floor '$M4_S_FLOOR', expected 9 and 9"
+# DIRECTION 2 — THE KILL.
+{ [ "$M4_M_BLK" = "3" ] || [ "$M4_M_FLOOR" != "$M4_S_FLOOR" ]; } \
+  && ok "SENTINEL M4 KILLED: preferring the shallowest declaration moves (www) to block '$M4_M_BLK' and the floor to '$M4_M_FLOOR', stranding the deeper copy in the archive — before this check the same mutant killed 0 of 2179 tests" \
+  || no "SENTINEL M4 SURVIVES: the mutant resolved (www) to block '$M4_M_BLK' with floor '$M4_M_FLOOR', indistinguishable from the shipped tool"
+# ...and the consequence is executed, not merely computed: at the mutant's own
+# floor the deep declaration really does leave the live file.
+M4A="$S10/m4-apply"; mkdir -p "$M4A/build-os/memory"
+cp "$M4R/build-os/memory/residue.md" "$M4A/build-os/memory/residue.md"
+sent_prereg "$S10/m4.prereg.json" residue 3 "$M4A/build-os/memory/residue.md"
+node "$M4" --root "$M4A" --file residue --keep 3 --apply \
+     --pre-registration "$S10/m4.prereg.json" > "$S10/m4.apply.out" 2>"$S10/m4.apply.err"
+M4_RC=$?
+if [ "$M4_RC" -eq 0 ] && [ -f "$M4A/build-os/memory/archive/residue.archive.md" ] \
+   && grep -qF -- '- **(www) SECOND DECLARATION' "$M4A/build-os/memory/archive/residue.archive.md"; then
+  ok "SENTINEL M4: the harm is EXECUTED, not argued — under the mutant, --keep 3 exits 0 and (www)'s deeper declaration is found in the archive"
+else
+  no "SENTINEL M4: the mutant's --keep 3 did not reproduce the harm (exit $M4_RC), so the kill above is not tied to a demonstrated loss"
+fi
+# ...and the SHIPPED tool refuses that same command.
+M4B="$S10/m4-shipped-apply"; mkdir -p "$M4B/build-os/memory"
+cp "$M4R/build-os/memory/residue.md" "$M4B/build-os/memory/residue.md"
+sent_prereg "$S10/m4b.prereg.json" residue 3 "$M4B/build-os/memory/residue.md"
+node "$SENT" --root "$M4B" --file residue --keep 3 --apply \
+     --pre-registration "$S10/m4b.prereg.json" > "$S10/m4b.out" 2>"$S10/m4b.err"
+M4B_RC=$?
+[ "$M4B_RC" -eq 7 ] && [ ! -e "$M4B/build-os/memory/archive" ] \
+  && ok "SENTINEL M4: ...and the SHIPPED tool refuses that identical command at exit 7, writing nothing — the differential is the deepest-declaration rule and nothing else" \
+  || no "SENTINEL M4: the shipped tool exited $M4B_RC on the command the mutant executed; the two arms do not separate"
 
 # ------------------------------------ (e) THE POSITIVE CONTROL: a governed apply --
 # A guard that only ever refuses proves nothing about the rotation it is supposed

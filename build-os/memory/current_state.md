@@ -79,14 +79,21 @@ legal `--keep` retains it.
   `no tags` because `tests/release_metadata_tests.sh:322` requires it, so the residue item is
   annotated rather than rewritten. Whether the tag was created with an explicit go is not
   determinable from here and no claim is made.
-- **Build/test command:** `bash tests/build_os_tests.sh` (2179 checks; no network; temp dirs)
-  — **2179 as of `PACKET-0040-rotation-sentinel-guard`.** The delta is **+39**, all of it
-  `tests/build_os_maintenance_tests.sh`, which goes **104 -> 143**: a new §10 driving the
+- **Build/test command:** `bash tests/build_os_tests.sh` (2190 checks; no network; temp dirs)
+  — **2190 as of `PACKET-0040-rotation-sentinel-guard`.** The delta is **+50**, all of it
+  `tests/build_os_maintenance_tests.sh`, which goes **104 -> 154**: a new §10 driving the
   rotation sentinel's seven refusal conditions, plus §8/§9 reworked around the DERIVED
   keep instead of the literal 10. Every other chained suite is **+0**. Derived from a SOLO
   full-capture run after an anchored `pgrep -fa '^bash tests/'` returned empty, and
-  reconciled against `CHANGELOG.md`, which carries the matching literal `**2179 passed**`
-  (unsplit) under `## [Unreleased]`. The prior figures are preserved below.
+  reconciled against `CHANGELOG.md`, which carries the matching literal `**2190 passed**`
+  (unsplit) under `## [Unreleased]`.
+  — **The last +11 are the packet's FIX ROUND**, and they exist because two mutants of the
+  new guard each killed **ZERO** of 2179 tests: disarming `SENTINEL_GATE_PINS` (observable
+  as 18 -> 15 resolved objects on `residue.md` and 4 -> 2 on this file, with the pins going
+  3 -> 0 and 2 -> 0), and inverting the declaration index from DEEPEST to SHALLOWEST. Both
+  are now killed — 3 and 2 failures respectively. **A guard whose removal breaks nothing is
+  not a guard**, and the first of the two was being cited as "verified BY IDENTITY" in a
+  rotation receipt while nothing asserted it. The prior figures are preserved below.
   — **2140 as of `PACKET-0038-current-state-reblock`.** The delta was **+19**, all of it
   `tests/build_os_maintenance_tests.sh` §9 — the section that measures whether THIS
   repository's own `current_state.md` can be rotated at all, and whether its standing

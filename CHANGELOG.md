@@ -60,12 +60,42 @@ deprecation cycle. Pin a commit if you need stability.
   statements that are true: with (1d) disabled the sentinel catches it at exit 7,
   and only with **both** disabled does the cut run to completion at exit 0.
 
-  Suite **2179 passed**, 0 failed (+39, all of it
-  `tests/build_os_maintenance_tests.sh`, which goes **104 → 143**; every other
+  **TWO CORRECTIONS THE FIX ROUND OWES, BECAUSE THE CLAIM ABOVE WAS FIRST
+  WRITTEN TOO WIDE.** (1) A purely POSITIONAL scan over the whole `residue.md`
+  also derives a floor of **25**, because the markers at `:2333`/`:2339` sit in
+  block 25 themselves — so on THIS tree a positional scan refuses `--keep 10`
+  identically and does not archive `(ddd)` at exit 0. The supported claim is the
+  narrower one: identity resolution is what makes `(ddd)` resolve to block 16
+  rather than 15. The counterfactual was executed by qa, not by the author who
+  asserted it — the packet's own defect class, committed inside the guard built
+  to prevent it. (2) Rotation #1's conserved payload is **26762 B**, not 26763;
+  the larger figure is the archive body region including a trailing newline that
+  is not source content.
+
+  **TWO INVARIANTS WERE UNENFORCED AND ARE NOW CLOSED.** Disarming
+  `SENTINEL_GATE_PINS` killed **0 of 2179** tests despite being plainly
+  observable (resolved objects 18 → 15 on `residue.md`, 4 → 2 on
+  `current_state.md`; pins 3 → 0 and 2 → 0) — and a rotation receipt was
+  meanwhile claiming those pins were "verified BY IDENTITY". Inverting the
+  declaration index from DEEPEST to SHALLOWEST also killed **0**, inert only
+  until a marker names a doubly-declared id, which `DEFECT-0013` in
+  `active_packet.md` already is. Both mutants now die (3 and 2 failures).
+
+  **KNOWN LIMITATION, STATED WHERE THE RULE IS STATED:** identity resolution is
+  SINGLE-FILE SCOPED, so an object living in another memory file or a registry
+  and merely CITED here is indistinguishable from a missing one and both refuse.
+  That is what produces both live condition-2 hits. A cross-file resolver is a
+  spec revision, recorded and NOT built.
+
+  Suite **2190 passed**, 0 failed (+50, all of it
+  `tests/build_os_maintenance_tests.sh`, which goes **104 → 154**; every other
   chained suite +0). The installed maintenance suite goes **125 → 145**.
-  **No new census control**; 6 stale line-pinned citations into
+  **No new census control**; 10 stale line-pinned citations into
   `rotate-memory.mjs` and `build_os_maintenance_tests.sh` were repointed **by
-  content**, never by offset.
+  content**, never by offset. The packet used **3 commits against a cap of 2**;
+  the breach is recorded plainly in `build-os/packets/active_packet.md` — the
+  two earlier commits carry the pre-registration ordering proof and could not be
+  squashed or amended without destroying it.
 
 - **`build-os/memory/current_state.md` was re-blocked BEFORE it ran out of
   headroom — the same repair as `residue.md`, taken prospectively.** The file

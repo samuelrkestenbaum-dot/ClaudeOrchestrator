@@ -703,6 +703,29 @@ export function composeRetained(retainedSegments, banner) {
  * widens the protected set, it never narrows it.
  *
  * -------------------------------------------------------------------------
+ * RESOLUTION IS SINGLE-FILE SCOPED, AND THAT LIMITATION IS STATED HERE
+ * BECAUSE IT IS WHERE THE RULE ABOVE IS STATED
+ * -------------------------------------------------------------------------
+ * "No block declares it" means NO BLOCK OF THE FILE CURRENTLY BEING PLANNED.
+ * This scan reads one file. It does not consult the other memory files, the
+ * registries, or the archive, so an object that legitimately LIVES ELSEWHERE
+ * and is merely CITED here is indistinguishable, to this scan, from an object
+ * that has gone missing. Both refuse.
+ *
+ * THAT ASSUMPTION IS WHAT PRODUCES BOTH REFUSALS ON THIS TREE, and neither is
+ * a missing object: `DEFECT-0014` is marked `STAYS OPEN` in `residue.md` while
+ * its class record lives in `build-os/registry/defect_classes.txt`, and `(S1)`
+ * is cited in `active_packet.md` while it is declared in `residue.md`.
+ *
+ * THE TIE BREAKS TOWARDS REFUSING, and that is a choice rather than a
+ * discovery: a cross-file resolver could tell the two apart, and building one
+ * is a SPEC REVISION — it widens what "resolve" means — so it is recorded here
+ * and routed to the operator rather than smuggled in under a fix. Until then
+ * the cost is real and is named: a file that only CITES open objects it does
+ * not own cannot be rotated, and the refusal names the identity and the line
+ * so the reader can act on it.
+ *
+ * -------------------------------------------------------------------------
  * ARMING IS EXPLICIT, AND AN UNARMED SENTINEL SAYS SO
  * -------------------------------------------------------------------------
  * A file in which the scan resolves ZERO protected objects is UNARMED: a
@@ -947,7 +970,12 @@ export function scanProtectedObjects(text, spec) {
             named_in_block: block,
             reason:
               "a protection marker names this identity and no block in this file DECLARES it, " +
-              "so the block that holds the object cannot be established from this file alone",
+              "so the block that holds the object cannot be established from this file alone. " +
+              "THIS SCAN IS SINGLE-FILE SCOPED: it cannot tell a MISSING object from one that " +
+              "legitimately lives in another memory file or a registry and is only CITED here, " +
+              "so it refuses both. Three things resolve it: declare the object in this file, " +
+              "stop marking it protected here, or — if it is declared in another file — leave " +
+              "it and accept that this file will not rotate until a cross-file resolver exists",
           });
         }
       }
@@ -1054,8 +1082,13 @@ export function evaluateSentinel(input) {
       detail:
         `${scan.unresolvable.length} protected identity/identities cannot be resolved to a block in ` +
         `${spec.path}: ${scan.unresolvable.map((u) => `${u.id} (named at line ${u.named_at_line})`).join(", ")}. ` +
-        `An unresolvable identity is a REFUSAL, not a skip — declare the object in this file, or ` +
-        `stop marking it protected here.`,
+        `An unresolvable identity is a REFUSAL, not a skip. THE SCAN IS SINGLE-FILE SCOPED, so ` +
+        `an object that lives in ANOTHER memory file or a registry and is only CITED here looks ` +
+        `identical to one that has gone missing, and both refuse. Three remedies, and the right ` +
+        `one depends on where the object actually lives: (a) declare it in this file; (b) stop ` +
+        `marking it protected here; or (c) if it is declared in another file, nothing is wrong ` +
+        `with the record — this file simply cannot rotate until a cross-file resolver exists, ` +
+        `which is a spec revision and not something this tool decides on its own.`,
     });
   }
 
@@ -1119,8 +1152,18 @@ export function evaluateSentinel(input) {
     });
   }
 
-  // C7 — the projected result cannot absorb the packet's own close.
+  /*
+   * C7 — the projected result cannot absorb the packet's own close.
+   *
+   * THE REMEDY IS ORDERED BY WHAT IS ACTUALLY FOLLOWABLE, which the first
+   * wording got backwards. It led with "lower --keep", and on a file whose
+   * floor equals its block count there IS no lower keep: every one of them
+   * trips C1 immediately, so the advice sent the reader into a second refusal.
+   * `--close-budget` leads, and the dead end is named rather than left to be
+   * discovered.
+   */
   if (derived.armed && s.post_rotation_headroom < closeBudget) {
+    const atFloor = requestedKeep <= sentinelFloor;
     refusals.push({
       condition: 7,
       code: "SENTINEL-C7",
@@ -1128,8 +1171,17 @@ export function evaluateSentinel(input) {
         `the projected result leaves ${s.post_rotation_headroom} B of headroom under the ` +
         `${maxBytes} B ceiling, which does not cover the ${closeBudget} B close budget. A rotation ` +
         `that does not leave room for its own close moves the breach past the point where this ` +
-        `tool can still act — past the ceiling it refuses at EXIT.CEILING. Lower --keep, or set ` +
-        `--close-budget deliberately.`,
+        `tool can still act — past the ceiling it refuses at EXIT.CEILING. ` +
+        (atFloor
+          ? `THIS REQUEST IS ALREADY AT OR BELOW THE FLOOR (minimum_safe_keep ${sentinelFloor}), ` +
+            `SO THERE IS NO LOWER --keep TO TRY: every one of them trips SENTINEL-C1. Set ` +
+            `--close-budget deliberately if the real close is smaller than ${closeBudget} B; ` +
+            `otherwise ROTATION CANNOT RELIEVE THIS FILE AT ALL and the content has to go ` +
+            `somewhere rotation is not the answer to — close the open objects, or move them to ` +
+            `the head of the file so the tail becomes archivable.`
+          : `Set --close-budget deliberately if the real close is smaller than ${closeBudget} B, ` +
+            `or lower --keep — but not below minimum_safe_keep ${sentinelFloor}, which leaves ` +
+            `${requestedKeep - sentinelFloor} step(s) of room.`),
     });
   }
 
