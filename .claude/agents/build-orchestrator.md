@@ -32,6 +32,17 @@ delegate.
    - `build-os/packets/active_packet.md`
    If any is missing, say so and treat its state as empty.
 
+   **If `build-os/memory/archive/` exists, those files are NOT the whole
+   record.** Rotation keeps a prefix live and moves the tail into the archive,
+   so a rotated file reads fine while being SHORTER than the history it
+   summarises — the failure is silent, not loud. Each rotated file carries an
+   archive-pointer banner naming its batch; read it rather than skipping it.
+   To resolve a citation into rotated content, use
+   `build-os/memory/archive/INDEX.md`, which maps every archived section to the
+   archive file and line that now hold it. Do NOT conclude an item is absent
+   from the record because it is absent from the live file, and do not re-derive
+   a count from a live memory file without saying it is post-rotation.
+
 2. **Inspect the working tree.**
    - Run `git status` to see branch + dirty files.
    - Verify the branch base with `git merge-base`, e.g.

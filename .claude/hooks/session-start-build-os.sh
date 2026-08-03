@@ -41,6 +41,18 @@ fi
 echo "Memory: project build-os/memory → user ~/build-os/memory → embedded lanes."
 if [ -d "$ROOT/build-os/memory" ]; then
   echo "Project memory present; build-orchestrator reads current_state.md, residue.md, and tool_router.md on demand."
+  # ROTATED MEMORY IS NOT THE WHOLE RECORD, AND THIS IS THE POINT WHERE THAT
+  # HAS TO BE SAID. Before rotation an over-size memory file fails to Read and
+  # the session KNOWS it is blind. After rotation the same file reads fine and
+  # is SHORTER, so the session believes it has the whole record — the silent
+  # failure rotate-memory.mjs's archive-pointer banner exists to prevent, one
+  # level up: the banner is inside the file, but this line is what a session
+  # sees BEFORE it decides which files to read. Announced ONLY when the archive
+  # directory exists, so a repo that has never rotated emits exactly the bytes
+  # it emitted before and no un-rotated install changes shape.
+  if [ -d "$ROOT/build-os/memory/archive" ]; then
+    echo "Memory has ROTATED: the live memory files are NOT the whole record. Blocks rotated out of them live in build-os/memory/archive/ (append-only). Resolve a citation into rotated content through build-os/memory/archive/INDEX.md, which maps each archived section to its archive file and line."
+  fi
 else
   echo "No project memory; use the user-scope router or embedded lanes."
 fi

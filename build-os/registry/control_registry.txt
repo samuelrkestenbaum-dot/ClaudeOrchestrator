@@ -800,7 +800,7 @@ inputs: ~/.claude/settings.json enabledPlugins, native user/project skill direct
 output: a startup report separating enabled plugins, native skills and plugin-cache CANDIDATES, with a VERIFY LIVE note
 owning_module: .claude/hooks/session-start-build-os.sh
 consuming_policies: the agent reading the session preamble; tests/build_os_tests.sh §2 pins that the cache never leaks into the native set
-evidence_refs: .claude/hooks/session-start-build-os.sh:136; .claude/hooks/session-start-build-os.sh:151
+evidence_refs: .claude/hooks/session-start-build-os.sh:148; .claude/hooks/session-start-build-os.sh:163
 failure_behavior: none — it cannot exit non-zero, and a missing file yields an empty section
 rollback_behavior: n/a
 promotion_requirement: n/a
