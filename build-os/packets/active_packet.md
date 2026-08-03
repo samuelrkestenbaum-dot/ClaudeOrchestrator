@@ -1184,3 +1184,118 @@ committed projection with `cmp -s`. An append moves no line at or above 89.**
 - **OPEN BOUNDARY:** all three commits and the close commit are **LOCAL AND UNPUSHED**. `188472f`
   is the pushed tip and push was authorised only through it. No push, merge, PR, tag, deploy,
   secret, `git config`, amend or rebase was performed, and no such go has been given.
+
+## DECLARED AND BUILT — `gravito_p3b_count_derivation_a` (`PACKET-0041-count-derivation`), 2026-08-03
+
+- **Packet id:** `PACKET-0041-count-derivation` — **MINTED, collision-checked BEFORE the mint.**
+  The live band is `PACKET-0001`..`PACKET-0040`; at the base commit `099d7bf`,
+  `git grep -lF 'PACKET-0041' 099d7bf` returns **0 files** and the only commit in
+  `git log -S'PACKET-0041' --all` is this packet's own `a714d8a`. **Re-derived after commit 1,
+  not accepted from the brief.**
+- **Lane:** `substantive`. **Depth 2** — builder, then qa ‖ reviewer.
+- **THIS DECLARATION IS APPENDED BELOW LINE 89 ON PURPOSE.** `ANC-0003` resolves at
+  `build-os/packets/active_packet.md:89`, and `build-os/kernel/exports/HANDOFF-0001-chatgpt-strategy.md:64`
+  embeds that resolved line number in a projection `tests/memory_kernel_tests.sh` §18 compares
+  with `cmp -s`. Appending moves nothing above the anchor site, so no projection needs
+  regenerating and `DEFECT-0001-stale-line-reference` does not fire here. **This is the
+  declaration arriving LATE — after commit 1, not before it — which is
+  `DEFECT-0011-undeclared-active-packet` recurring, and it is recorded rather than excused.**
+- **Branch base:** `099d7bf` on `claude/project-handoff-merge-ramhds`, verified with
+  `git merge-base HEAD 188472f` → `188472f` **before the first edit**; `188472f` is the pushed
+  tip and the four commits above it, plus both of this packet's, are **LOCAL AND UNPUSHED**.
+  **Nothing was pushed, merged, tagged, PR'd, deployed, and no secret or `git config` was
+  touched. No such go was given and none was asked for.**
+
+### What it had to make true, and what it does
+
+**Make count derivation MECHANICAL rather than DISCIPLINARY.** `scan-controls.sh counts` —
+a COUNT-TABLE inside `build-os/registry/scan-controls.sh`, modelled line for line on the
+ANCHOR-TABLE beside it. Eight fields; **the record stores no number**; the stated value is
+read out of live prose and the derived value computed from the live source at every run.
+Resolution is **by content**, so the reported line is a computed hint that is stored nowhere.
+Two derivation kinds, `lines` (ERE that **must** begin `^`) and `files` (a name glob), and
+deliberately **no line-count kind and no shell-command field**. Gates the `check` path too.
+
+### The red fixture, EXECUTED on the live tree before the fix
+
+    $ bash build-os/registry/scan-controls.sh counts
+      COUNT-STALE  DC-0001 — build-os/memory/tool_router.md:368 states "nine" (= 9);
+      deriving it from build-os/receipts with "gravito_*.md" gives 19.
+    exit 2
+
+The correction to **nineteen** was made **by that derivation**, not by hand, and the count
+table was **byte-identical** across the fix — the record stores no number, so correcting the
+prose did not create a second place to be wrong.
+
+**THE COUNTERFACTUAL WAS RUN, NOT ASSERTED.** At `099d7bf`, with the stale "nine" in the
+tree: the full suite was **2190 passed / 0 failed**, `scan-controls.sh check` exit **0**,
+`scan-controls.sh anchors` exit **0**, and **no instrument in the repository read that count
+at all**. §25 — the nearest prior art — is bespoke to `evidence_refs` and finds **0** totals
+in the same document; that is executed in §29a, not argued.
+
+### Coverage, each instance stated as EXECUTED or NOT TESTED
+
+1. **Router's stale streak — CAUGHT, executed** on the live tree and re-driven in §29a.
+2. **`wc -l` for a record count — CAUGHT, executed on a FIXTURE** (§29c: 7 lines stated over
+   3 records). Not executed against `signal_snapshots.tsv`, which is do-not-touch. The
+   structural claim is that no line-count kind exists, so the error is inexpressible.
+3. **Unanchored vs anchored grep — CAUGHT, executed on a FIXTURE** (§29b, 5 vs 3, the same
+   shape as the live 27 vs 22), and the unanchored form is refused by the schema at
+   declaration time rather than caught after the fact.
+4. **Suite total in `CHANGELOG.md` + `current_state.md` — NOT CAUGHT, and NOT TESTED.** No
+   static derivation reaches it: the number is produced by RUNNING the suite. It stays with
+   `RELEASE_METADATA_LIVE_SUITE=1`. **This packet updated that very pair — 2190 → 2220 — by
+   hand, in two places, which is the defect it exists against, surviving inside its own close.**
+5. **The `213,824 B` and `residue_items_closed=1` slips — NOT CAUGHT, and NOT TESTED.** Both
+   were numbers in transient prose that no record binds. Nothing here discovers an
+   unregistered restatement, and that limit is written into the block's own header.
+
+### Ceiling compliance — 0 / 0 / 0 / 0
+
+**0 new tools** (extended `scan-controls.sh`) · **0 new stores** (embedded table, same shape
+and same reason as `ANCHOR_TABLE` and `EVIDENCE_VACUITY_ALLOW`) · **0 new suite files** (§29
+of the existing `tests/control_registry_tests.sh`) · **0 new governance primitives** and **0
+new census controls** — census holds at **105**, `DEFAULT_MAX_BYTES` untouched, declared
+mismatches **22** anchored, re-authorisations **0**.
+
+### CONSEQUENCE THE ARCHIVIST MUST ACT ON, STATED BEFORE IT BITES
+
+Writing `build-os/receipts/gravito_p3b_count_derivation_a.md` makes the receipt store
+**twenty**, and `DC-0001` will then refuse at exit 2 until `tool_router.md` says **twenty**.
+**That is the mechanism working, not a defect:** the close can no longer leave the
+second-eyes streak stale in silence, which is exactly the failure this packet was cut for.
+`twenty` is inside the cardinal table, so the fix is a one-word prose edit.
+
+### RESIDUE — HELD HERE BECAUSE `residue.md` IS FROZEN
+
+**This placement is DISPLACEMENT FORCED BY A FROZEN FILE, NOT A CHOICE.**
+`build-os/memory/residue.md` has **431 B** of headroom and is provably unrotatable at every
+legal `--keep` — all 25 of 25 blocks exit 7 under the sentinel — so unfreezing it is an
+**operator act and not a builder's**. Not one byte was written to it; its blob is unchanged.
+
+- **(a)** Instance 4 is **unmechanised and unmechanisable by this design**: two copies of the
+  suite total, reconciled only under an opt-in env var. A `mirror` kind — site A must equal
+  site B, with no derivation at all — would bind it, and was **deliberately not built**
+  because no executed fixture in instances 1–3 justifies the kind.
+- **(b)** The counts block is a **gating control living inside an already-registered file**,
+  which is `README.md` section 4's known hole number one. It has **no census entry of its
+  own**, because registering it moves the census off the 105 this packet was told to hold.
+  **The operator's call**, and a one-entry follow-up packet.
+- **(c)** Three line-pinned citations into `tests/control_registry_tests.sh` (`:1189` →
+  `:1444`, `:1193` → `:1448`, `:1194` → `:1449`) had to be repointed by content because this
+  packet inserted above them. **`ANC-0012`, which covers the SAME file, absorbed the identical
+  move with no edit at all.** Line-pinned citations keep costing; anchors keep not costing.
+- **(d)** The cardinal table **stops at twenty**. A stated count above twenty must be a
+  numeral. Fail-closed, and cheap to widen — but it is a fitted bound and is named as one.
+- **(e)** Two real defects in this packet's own code were found **by its own tests, not by
+  review**: an id regex too tight for fixture ids, and `rc=$?` read back after `if ! cmd`,
+  which reports the status of the negation and mislabelled a `COUNT-UNANCHORED` finding as
+  `COUNT-SOURCE`. The second is the exact trap the brief warns about, made in the same packet
+  that quotes the warning.
+- **(f)** Carried forward, untouched by this packet: `residue.md` frozen at 431 B, spec
+  revisions (i) and (ii) on the rotation sentinel, `3a590ed`'s permanently false commit
+  message, and the five-consecutive-closes-at-3-commits cap question.
+
+- **OPEN BOUNDARY:** both of this packet's commits are **LOCAL AND UNPUSHED**. `188472f` is
+  the pushed tip and push was authorised only through it. **NOTHING IS IN FLIGHT** once qa
+  and the reviewer report.
