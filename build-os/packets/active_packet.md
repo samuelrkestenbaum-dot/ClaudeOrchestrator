@@ -28,10 +28,10 @@
 
 ## Branch base
 
-Branched at `9c740d7` on `claude/project-handoff-merge-ramhds`, verified with
-`git merge-base HEAD claude/project-handoff-merge-ramhds` → `9c740d7`, **before
+Branched at `3ec519b` on `claude/project-handoff-merge-ramhds`, verified with
+`git merge-base HEAD claude/project-handoff-merge-ramhds` → `3ec519b`, **before
 the first edit**. **Nothing is pushed, merged, tagged, PR'd or deployed by this
-packet, and no such go has been given.**
+packet, and no such go has been given.** (Previous base `9c740d7`; see the close.)
 
 ## What `gravito_current_state_reblock_a` must make true
 
@@ -737,9 +737,9 @@ in flight** until a builder is actually dispatched:
    and cover **this file** — which is the third rotating file and has **no protection section at
    all**. Nothing currently checks that it stays fine.
 
-## DECLARED LATE — `gravito_governed_rotation_a` — IN FLIGHT
+## DECLARED LATE, NOW CLOSED — `gravito_governed_rotation_a` — CLOSED 2026-08-03
 
-- **Packet id:** `PACKET-0039-governed-rotation` — **MINTED, and collision-checked at the mint.**
+- **Packet id (CLOSED):** `PACKET-0039-governed-rotation` — **MINTED, and collision-checked at the mint.**
   The live band is `PACKET-0001`..`PACKET-0038` (`PACKET-9201`/`9202`/`9203`/`9299`/`9999` are
   test fixtures in `tests/mutator_registry_tests.sh` and two receipts, not allocations);
   `PACKET-0038` is the highest allocation predating this packet;
@@ -804,3 +804,100 @@ this fix round's declared file scope and the round's ceiling is 0 new stores. Th
 Also open and untouched by boundary: `(ddd)`, `(uuuu)`, `(ppppp)`, `(eeeeee)`'s stale pointer —
 which the next packet must repoint **by content**, after re-deriving the position, because
 `current_state.md` moved again at this close.
+
+## CLOSED — `gravito_governed_rotation_a` — closed 2026-08-03 by the archivist. NOTHING IN FLIGHT.
+
+- **Packet id (CLOSED):** `PACKET-0039-governed-rotation`. **Re-derived at close, not accepted from
+  the brief:** at declaration `git log -S'PACKET-0039' --all --oneline` returned **0 commits** and
+  `grep -rlF 'PACKET-0039' . --exclude-dir=.git` **0 files**; at close the token resolves to this
+  packet's own records. **The mint preceded the build and the id was free.**
+- **Base `3ec519b`; HEAD at close `8115ac4`. Commits `7bd152e` (the rotation) + `8115ac4` (the fix
+  round) — TWO, INSIDE THE `<=2` CAP, FOR THE FIRST TIME IN SIX CLOSES.** The four preceding closes
+  each ran to three and each recorded the breach. `git rev-list --count 3ec519b..HEAD` = **2**.
+  **Recorded as a measurement, not as a compliment.** No commit squashed, amended, rebased or
+  rewritten. **Nothing pushed, merged, tagged, PR'd or deployed, and no such go was given.**
+- **Verdict: PASS-AS-FIXED.** qa **RED on one claim** (backlinks) — **disposition right, warrant
+  wrong** — and GREEN on everything else, independently reproduced; reviewer `fix-then-pass` with
+  **10** items, all landed in `8115ac4`; **no stage 4.** **Second eyes: NONE — eighteenth
+  consecutive packet** (`command -v codex` exits 1).
+- **Receipt:** `build-os/receipts/gravito_governed_rotation_a.md`.
+- **What it made true:** the **first governed rotation in this repository's history**.
+  `build-os/memory/residue.md` **218062 -> 191805 B** — from **13262 B OVER** the **204800 B**
+  ceiling to **12995 B UNDER** it; `build-os/memory/archive/` **created**; `block_26`..`block_29`
+  archived (**26762 B**, all `## History`, anchors (a)-(n)); **26257 B reclaimed**, the 505 B
+  difference being the archive-pointer banner. **Reversible, and proven so by an agent other than
+  the one that performed it** — the reviewer re-derived the restoration to `sha256 1977817f...`,
+  which is the base blob at `3ec519b`. **The cut was DERIVED, not chosen**: *archive every block
+  older than the oldest still-open item* → `--keep 25`, bounded by two executed constraints
+  (`--keep 27` refuses at `EXIT.CEILING`; section 8 needs `keep >= 16`). Recorded as `(iiiiii)`.
+- **The finding that outranks the rotation:** **the true count of citation breaks this packet caused
+  is ZERO**, and three instruments each reported a different non-zero answer (qa 1 by semantics,
+  reviewer 2 positionally, orchestrator 31 mechanically). **The builder falsified the premise and
+  refused to execute the routed repoint** — the only reason a knowingly false claim did not enter
+  memory. `DEFECT-0001-stale-line-reference` / *resolvability is not identity*, at residue
+  `(hhhhhh)`.
+- **Proof:** suite **2140 passed / 0 failed** — twice in the packet, twice solo in the fix round,
+  once more by the archivist after every write in this close; **20-line chained verdict vector
+  byte-identical to the pre-rotation baseline**. **Commit-1 green in isolation at `7bd152e`:
+  2140 / 0**, re-derived in a clean clone. Census **105**, declared **22**, gate **14** / execute
+  **8**, occurrences **18**, **zero re-authorisations, no new control**; `scan-controls.sh check`
+  and `anchors` both exit 0; ceiling **0 / 0 / 0 / 0**.
+- **Deviations and open items, recorded and NOT normalised:** the `--apply` **ordering is testimony,
+  not tree-verifiable** (mitigation is proven reversibility; remedy is pre-registration).
+  `DEFECT-0011-undeclared-active-packet` fired again and the packet was declared **late**;
+  `OCCURRENCE-0019` derived and **queued, not minted**.
+  `DEFECT-0014-retention-order-assumed-not-verified` **stays open** and names
+  `build-os/memory/current_state.md` as the next file it bites.
+
+### THE BRANCH BASE SECTION ABOVE WAS STALE, AND AN INSTRUMENT WAS READING IT
+
+`build-os/tools/bandwidth-check.sh` derives its commit count from the **FIRST** `## Branch base`
+section of this file. That section still named `9c740d7` — the base of the **previous, already
+closed** packet — so `bandwidth-check.sh check` reported `commits EXCEEDED — 6 commits since the
+declared base 9c740d7` for a packet whose real count against its real base is **2**. **The
+instrument that measures the working contract was reading a field belonging to a closed packet.**
+**That section sits ABOVE the `ANC-0003` site, so the repair had to be line-count-neutral, and it
+is: four lines of prose replaced by four, in place, naming `3ec519b`.** After the repair the same
+command reports `commits OK — 2 commit(s) since the declared base 3ec519b`.
+
+**NOTHING FORCES THAT SECTION TO BE REWRITTEN AT A DECLARATION, SO IT WILL GO STALE AGAIN.** No
+guard is added here (this close builds nothing). Recorded in residue `(jjjjjj)` so the next
+declaration inherits the hazard rather than rediscovering it.
+
+### THIS CLOSE'S EDITS ARE LINE-COUNT-NEUTRAL ABOVE THE `ANC-0003` SITE, AS ALWAYS
+
+`build-os/kernel/exports/HANDOFF-0001-chatgpt-strategy.md` embeds
+`build-os/packets/active_packet.md:89#ANC-0003` as a **resolved line number**, and
+`tests/memory_kernel_tests.sh` section 18 compares it with `cmp -s`. This close changed **four lines
+in place, one for one**, above `:89` (the branch-base prose), renamed the `**Packet id:**` marker to
+`**Packet id (CLOSED):**` and the section heading **below** `:89`, and **appended everything else at
+the end of the file**. `ANC-0003` re-verified resolving at `build-os/packets/active_packet.md:89`
+after the edits, by `scan-controls.sh anchors`; **no projection regeneration was required.**
+
+## Staged next after the 2026-08-03 rotation close — NOT DECLARED, NOT IN FLIGHT
+
+**Nothing is declared here, so this file reads 0 packets in flight against a ceiling of 1.** The
+candidates, in the order the evidence puts them:
+
+1. **ROTATE BEFORE WRITING. This is now the first act of whichever packet comes next.** Both memory
+   files sit within ~2.5 KB of the 204800 B ceiling at this close — `residue.md` after taking this
+   close's terse entry, `current_state.md` after taking its detail. **DERIVE both sizes; do not
+   quote a figure from anywhere.** The rule for the cut already exists as prose in residue
+   `(iiiiii)`. **A packet that writes into either file without rotating first will breach the
+   ceiling it was handed.**
+2. **Build the retention guard that `DEFECT-0014` names.** Nothing executable asserts that the
+   retained prefix contains every still-open item; the scan is MANUAL. Natural home is
+   `tests/build_os_maintenance_tests.sh` section 8 — but `(ffffff)`'s open choice about the
+   section 8 / section 9 duplication **should be settled first**, or the guard becomes a fourth
+   clone.
+3. **Pre-registration for `--apply`.** Commit the intended `--keep`, the predicted byte deltas and
+   the expected refusals **before** running it, so ordering stops being testimony.
+4. **The LOWER bound on `bandwidth.active_packet_singleton`** — refuse zero declared packets while a
+   build is in flight. Named by `DEFECT-0011`'s `could_have_been_prevented_by` at four consecutive
+   closes now, and still not built. **Mint `OCCURRENCE-0019` when it is.**
+5. **`(eeeeee)`'s stale pointer** — repoint **by content**, after re-deriving the position, because
+   `current_state.md` moved again at this close. **Do not sweep it mechanically**; that is the
+   defect this packet just recorded.
+
+Also open and untouched by boundary: `(ddd)`, `(uuuu)`, `(ppppp)`. Still NONE: second eyes, now
+**eighteen** consecutive packets, while `build-os/memory/tool_router.md:368` self-reports **"nine"**.

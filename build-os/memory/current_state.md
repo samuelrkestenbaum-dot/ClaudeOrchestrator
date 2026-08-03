@@ -197,8 +197,8 @@ legal `--keep` retains it.
 
 ### Last close
 
-- **Last closed packet:** `gravito_current_state_reblock_a`
-  (`PACKET-0038-current-state-reblock`). The full close record — id derivation,
+- **Last closed packet:** `gravito_governed_rotation_a`
+  (`PACKET-0039-governed-rotation`). The full close record — id derivation,
   base, commits, verdict, and what it made true — is the newest history block
   below, preserved verbatim where it was written.
   **THIS LITERAL IS GATE-PINNED AND MUST STAY IN BLOCK 1.**
@@ -339,6 +339,15 @@ legal `--keep` retains it.
   held at **169** because three assertions were CONVERTED rather than added, and no assertion was
   lost. This is the first ledger entry in the sequence whose assertion count is a **constant**
   rather than a sample.]**
+  **[SUPERSEDED AGAIN 2026-08-03 by `PACKET-0039-governed-rotation`, AND THE LINE THAT CHANGED IS
+  NOT A COUNT — IT IS THAT ROTATION HAS NOW ACTUALLY RUN.** Every governance count is identical at
+  base and at HEAD: 105 controls, 22 declared mismatches, gate 14 / execute 8, 18 occurrences,
+  anchors 12 resolved / 1 superseded / 0 violations, suite 2140 / 0 with a byte-identical chained
+  vector. **THE CEILING IN FORCE IS UNCHANGED AT 204800 B and `DEFAULT_MAX_BYTES` IS STILL
+  `200 * 1024` — NO CEILING WAS RAISED TO MAKE THE ROTATION SUCCEED.** What changed is that
+  `build-os/memory/archive/` **now exists** and `residue.md` went from 13262 B OVER the ceiling to
+  12995 B UNDER it. **THAT RELIEF IS ALREADY MOSTLY SPENT ON BOTH FILES — DERIVE the current sizes
+  (residue `(cccccc)`), do not quote one from here, and expect to rotate before writing much.]**
 
 ## Active decisions, open rulings, and the standing backlog
 
@@ -477,6 +486,101 @@ legal `--keep` retains it.
   worse. Both outcomes are closed with the measurement attached.
   Carried, unrelated: decide Context Mode routing enablement (stays non-secret pilot); name a target
   repo + approve a secret for the GH Actions; authorize/enable the deferred connectors.
+
+## History — `gravito_governed_rotation_a` — the last close, and the first rotation
+
+**Everything below is the summary. The long form — full derivations, the manifest, the three-way
+instrument failure in detail — is `build-os/receipts/gravito_governed_rotation_a.md`, which has no
+byte ceiling. This file does, and it is nearly out; that is why this block is short.**
+
+- **Closed 2026-08-03:** `gravito_governed_rotation_a` (`PACKET-0039-governed-rotation` — MINTED,
+  not reused, collision-checked before the mint and re-derived at close). Base `3ec519b`; HEAD
+  `8115ac4`; commits `7bd152e` + `8115ac4`. **Verdict PASS-AS-FIXED** — qa **RED on one claim**
+  (backlinks), **disposition right, warrant wrong**, GREEN on everything else; reviewer
+  `fix-then-pass`, **10** items, all landed in `8115ac4`; no stage 4.
+- **TWO COMMITS, AGAINST THE `<=2` CAP — THE FIRST TIME IN SIX CLOSES.** The four preceding closes
+  each ran to three; the last called itself *the fifth consecutive close with this shape*.
+  `git rev-list --count 3ec519b..HEAD` = **2**. **A measurement, not a compliment.**
+  **ONE INSTRUMENT DISAGREED, AND THAT IS ITSELF A FINDING:** `bandwidth-check.sh check` reported
+  `commits EXCEEDED — 6 commits since the declared base 9c740d7`, because it reads the FIRST
+  `## Branch base` section of `build-os/packets/active_packet.md` and that section still named the
+  **previous, already-closed** packet's base. **The instrument that measures the working contract
+  was reading a field belonging to a closed packet.** Repaired in place here; it now reports
+  `commits OK — 2 commit(s) since the declared base 3ec519b`. **AND A SECOND BLIND SPOT IN THE SAME
+  TOOL, RULED AT THIS CLOSE:** it cannot tell a packet BUILD commit from the archivist CLOSE commit,
+  so a compliant 2-commit packet reads **3, EXCEEDED** once its close is committed — as this one is.
+  **NOT an amnesty for the four prior breaches**, which were build-commit counts of 3 and were real.
+  **No fix built:** a reading error, not a safety failure. Same class as the branch-base defect
+  above, and as `(hhhhhh)`: an instrument reading a field whose identity it never establishes.
+- **ROTATION EXECUTED, FOR THE FIRST TIME IN THIS REPOSITORY'S HISTORY.** `residue.md`
+  **218062 -> 191805 B** at `7bd152e`: from **13262 B OVER** the **204800 B** ceiling to
+  **12995 B UNDER**; **29 -> 25** `^## ` blocks; `build-os/memory/archive/` **created**. **Archived
+  `block_26`..`block_29` by stable id — 26762 B, every one a `## History` block, anchors (a)-(n) and
+  nothing else.** Reclaimed **26257 B**; the **505 B** difference is the archive-pointer banner, so
+  conservation is byte-exact once the banner is accounted for. **REVERSIBLE, AND PROVEN SO BY AN
+  AGENT OTHER THAN THE ONE THAT PERFORMED IT:** the reviewer re-executed the restoration
+  independently to `sha256 1977817f...`, exactly `git show 3ec519b:build-os/memory/residue.md |
+  sha256sum`. `build-os/memory/archive/residue.archive.md` is blob `f475d53e` and **is load-bearing
+  evidence — the restoration proof depends on its bytes, so it is excluded from every later
+  writable set.**
+- **THE CUT WAS DERIVED, NOT CHOSEN.** *Archive every block older than the oldest still-open item*;
+  retention is a **PREFIX** and blocks run newest-first, so `--keep` = the index of the oldest block
+  still holding an open item — **block 25** (`(S1)`, plus a flake still open), hence **`--keep 25`**;
+  `--keep 24` was executed in scratch and **rejected**. Bounded by two **executed** constraints:
+  `--keep 27` **refuses** at `EXIT.CEILING` (206496 B); `tests/build_os_maintenance_tests.sh`
+  section 8 needs `keep >= 16`. Recorded as `(iiiiii)`. **THE QUEUED VALUE WAS NOT THE VALUE USED:**
+  `--keep 10 --apply` was **defective as written** and, at 25 blocks, **actively destructive** — a
+  prefix retention would archive blocks 11-25, taking `(ddd)`, `(S1)` and the still-open flake, the
+  exact objects the packet proved protected. Now SUPERSEDED AND DEFECTIVE.
+- **THE FINDING THAT MATTERS MOST — THE TRUE COUNT OF CITATION BREAKS THIS PACKET CAUSED IS ZERO,
+  AND THREE INSTRUMENTS EACH REPORTED A DIFFERENT NON-ZERO ANSWER.** qa classified by **semantic
+  identity** → **1**; the reviewer verified two sites **positionally** → **2**; the orchestrator
+  swept **mechanically** → **31**. All three conflated **positional shift** with **semantic
+  identity**: `pre[N] == live[N+10]` is mechanically true of **all 31** retained sites and says
+  nothing about whether a citation ever named what it claims. **THE BUILDER FALSIFIED THE PREMISE
+  AND REFUSED TO EXECUTE THE ROUTED REPOINT, WHICH IS THE ONLY REASON A KNOWINGLY FALSE CLAIM DID
+  NOT ENTER MEMORY.** Both routed sites were **already semantically stale at `3ec519b`** when checked
+  by content. Then the fact that explains it: **of the 11 line-pinned citations into `residue.md`,
+  11 were already stale at base and 0 were correct — the insertions could not break a correct
+  citation because there were none to break.** Stable identity:
+  `DEFECT-0001-stale-line-reference` / *resolvability is not identity*, at `(hhhhhh)`. **THE RULE:**
+  *a content match at a single commit tests RESOLVABILITY; only a cross-commit comparison against
+  what the citing sentence CLAIMS tests IDENTITY.* **TWO AGGRAVATIONS, NOT SOFTENED:** it occurred
+  **inside the instruments built to measure that very class**, and **the orchestrator committed it
+  immediately after articulating the distinction and correcting qa for it** — stating a rule and
+  violating it in the next action removes the excuse that the distinction was unavailable.
+- **THE `--apply` ORDERING IS TESTIMONY, NOT TREE-VERIFIABLE, AND IS NOT SOFTENED.** The receipt's
+  mtime `16:13:33` **postdated** the apply at `16:09:49` by 3m44s; **no artefact predates any run.**
+  **Mitigation: proven reversibility. Remedy: pre-registration.** **THE EVIDENCE HAS ALREADY
+  DECAYED:** that mtime now reads `17:21:44`, overwritten by the fix round's legitimate edit —
+  **mtime is not durable evidence.**
+- **`DEFECT-0011-undeclared-active-packet` — A FURTHER OCCURRENCE, AGGRAVATED BY SUBJECT MATTER.**
+  Built, committed and gated while `active_packet.md` declared nothing in flight, so
+  `bandwidth.active_packet_singleton` read zero in flight while a packet **about a memory file** was
+  in flight. **The builder's reasoning — that declaring would move the `ANC-0003` site and turn
+  `tests/memory_kernel_tests.sh` section 18 red — was assessed as AN EXCUSE, NOT A CONSTRAINT:** the
+  line-count-neutral remedy was already executed **twice in that same file**, `ANC-0003` re-verified
+  at `build-os/packets/active_packet.md:89` after each. Declared now, and **late**; the LOWER-bound
+  remedy stays specified and unbuilt, `OCCURRENCE-0019` derived and **queued not minted**.
+- **PROOF.** Suite **2140 passed / 0 failed** — twice in the packet, twice solo in the fix round,
+  once more after every write in this close: exit 0, `grep -c '^  FAIL'` = 0, no failing `CHAINED`
+  line. **The 20-line chained verdict vector is byte-identical across runs and identical to the
+  pre-rotation baseline (`sha256 a69575133a461220...`) — the first rotation in this repository's
+  history changed no assertion outcome anywhere in the tree.** **Commit-1 green in isolation at
+  `7bd152e`, re-derived in a clean clone rather than taken from the brief: 2140 / 0**, same vector,
+  so **`tests_added` is 0 and that is correct**. Census **105** / 46 / 88 / 0 / 0, declared
+  mismatches **22** (anchored), gate **14** / execute **8**, occurrences **18**, **zero
+  re-authorisations, no new control**; `scan-controls.sh check` and `anchors` both **exit 0**;
+  ceiling held at **0 / 0 / 0 / 0**. **UI smoke: not applicable.**
+- **TRAJECTORY, HONESTLY: ONE HAND-CRAFTED SAFE ROTATION, NOT YET A REPEATABLE CAPABILITY.**
+  **Nothing executable asserts that the retained prefix contains every still-open item** —
+  `(iiiiii)` is **prose**, and the scan is still MANUAL.
+  **`DEFECT-0014-retention-order-assumed-not-verified` remains OPEN and names THIS FILE as the next
+  one it bites.** **Second eyes NONE — EIGHTEENTH consecutive packet**, while
+  `build-os/memory/tool_router.md:368` still self-reports the streak as **"nine"**; both figures
+  carried on purpose. **The close brief itself carried stale figures** (213824 B / 9024 over,
+  against an actual 218062 / 13262) — a restated count inside a brief whose own trap list says
+  DERIVE every count.
 
 ## History — `gravito_current_state_reblock_a` — the last close
 

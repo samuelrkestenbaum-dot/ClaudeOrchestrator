@@ -297,6 +297,34 @@
   rule rather than an anecdote. **Its natural home is `tests/build_os_maintenance_tests.sh` §8, and
   `(ffffff)`'s open choice about section 8/9 duplication should be settled BEFORE it is written, or
   it becomes a fourth clone.**
+- **(jjjjjj) `gravito_governed_rotation_a` CLOSED** (`PACKET-0039-governed-rotation`, `3ec519b` ->
+  `8115ac4`, `7bd152e`+`8115ac4`, PASS-AS-FIXED). **Receipt:
+  `build-os/receipts/gravito_governed_rotation_a.md` — READ IT BEFORE THE NEXT ROTATION. This entry
+  is short because THIS FILE IS THE THING THAT IS OUT OF ROOM.**
+  **THE STANDING RISK THAT BITES NEXT: BOTH memory files now sit within ~2.5 KB of the 204800 B
+  ceiling** — this one after the close, `current_state.md` after taking the close's detail. The
+  rotation bought 26257 B; the fix round and this close spent most of it. **DERIVE both sizes
+  (`(cccccc)`), never quote one from here. The next packet writing into either file should rotate
+  FIRST, at a `--keep` derived by `(iiiiii)`'s rule, and budget for it in its declaration rather
+  than discovering it at close.**
+  **`DEFECT-0014-retention-order-assumed-not-verified` STAYS OPEN and now names `current_state.md`
+  as the next file it bites** — nothing executable asserts the retained prefix holds every open
+  item; `(iiiiii)` is prose and the scan is MANUAL.
+  **A NEW INSTRUMENT DEFECT:** `bandwidth-check.sh check` reported `commits EXCEEDED — 6 commits
+  since the declared base 9c740d7` for a packet whose real count against its real base is **2** —
+  the first time in six closes the `<=2` cap was met. It reads the FIRST `## Branch base` section of
+  `build-os/packets/active_packet.md`, which still named the PREVIOUS, CLOSED packet's base:
+  **the instrument that measures the working contract was reading a field belonging to a closed
+  packet**, the same shape as `(hhhhhh)` from another direction. Repaired in place here, but
+  **nothing forces that section to be updated at a declaration, so it will go stale again.**
+  **THE SAME TOOL HAS A SECOND BLIND SPOT, RULED HERE:** it counts EVERY commit since the declared
+  base, so it cannot tell a packet BUILD commit from the archivist CLOSE commit — a compliant
+  2-commit packet reads as **3, EXCEEDED**. Same class: an instrument reading a field whose identity
+  it never establishes. **NOT A RETROACTIVE AMNESTY** — the four prior breaches were build-commit
+  counts of 3 and were real. **No fix built**: the ceiling forbids one without an executed failing
+  fixture, and this is a reading error, not a safety failure.
+  Still queued, unminted: `OCCURRENCE-0019`. Still NONE: second eyes, **eighteen** consecutive
+  packets, against `tool_router.md:368`'s **"nine"**.
 
 ## Known risks / debt
 
