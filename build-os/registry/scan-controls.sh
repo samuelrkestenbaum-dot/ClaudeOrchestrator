@@ -62,7 +62,7 @@
 # Usage:
 #   scan-controls.sh surfaces [--repo DIR]
 #   scan-controls.sh check    [--repo DIR] [--registry FILE] [--mismatches FILE]
-#   scan-controls.sh patterns | anchors [--anchors F] [--ref ID|REF] [--project]
+#   scan-controls.sh patterns | anchors [--anchors F] [--ref ID|REF] [--project] | counts [--counts F] [--repo DIR]
 # Exit: 0 reconciled, 2 refused (a violation, or a scan that cannot be trusted).
 set -uo pipefail
 
@@ -70,7 +70,7 @@ SELF_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO="$(cd "$SELF_DIR/../.." && pwd)"
 REGISTRY=""
 MISMATCHES=""
-TAB=$'\t'; VIOL=0; ADVISORY=0; ANCHORS_FILE=""; AREF=""; APROJECT=0
+TAB=$'\t'; VIOL=0; ADVISORY=0; ANCHORS_FILE=""; AREF=""; APROJECT=0; COUNTS_FILE=""
 
 CMD="${1:-}"
 [ $# -gt 0 ] && shift
@@ -89,10 +89,10 @@ advise_note(){ ADVISORY=$((ADVISORY+1)); printf '  %s\n' "$*"; }
 in_list(){ local v="$1" l; for l in $2; do [ "$v" = "$l" ] && return 0; done; return 1; }
 
 case "$CMD" in
-  surfaces|check|patterns|anchors) ;;
+  surfaces|check|patterns|anchors|counts) ;;
   -h|--help|help) sed -n '2,66p' "${BASH_SOURCE[0]}"; exit 0 ;;
-  "") refuse "no command — expected one of: surfaces, check, patterns, anchors" ;;
-  *)  refuse "unknown command \"$CMD\" — expected one of: surfaces, check, patterns, anchors" ;;
+  "") refuse "no command — expected one of: surfaces, check, patterns, anchors, counts" ;;
+  *)  refuse "unknown command \"$CMD\" — expected one of: surfaces, check, patterns, anchors, counts" ;;
 esac
 
 while [ $# -gt 0 ]; do
@@ -100,7 +100,7 @@ while [ $# -gt 0 ]; do
     --repo)       [ $# -ge 2 ] || refuse "--repo needs a value";       REPO="$2"; shift 2 ;;
     --registry)   [ $# -ge 2 ] || refuse "--registry needs a value";   REGISTRY="$2"; shift 2 ;;
     --mismatches) [ $# -ge 2 ] || refuse "--mismatches needs a value"; MISMATCHES="$2"; shift 2 ;;
-    --anchors)    [ $# -ge 2 ] || refuse "--anchors needs a value";    ANCHORS_FILE="$2"; shift 2 ;;  --ref) [ $# -ge 2 ] || refuse "--ref needs a value"; AREF="$2"; shift 2 ;;  --project) APROJECT=1; shift ;;
+    --anchors)    [ $# -ge 2 ] || refuse "--anchors needs a value";    ANCHORS_FILE="$2"; shift 2 ;;  --ref) [ $# -ge 2 ] || refuse "--ref needs a value"; AREF="$2"; shift 2 ;;  --project) APROJECT=1; shift ;;  --counts) [ $# -ge 2 ] || refuse "--counts needs a value"; COUNTS_FILE="$2"; shift 2 ;;
     -h|--help)    sed -n '2,66p' "${BASH_SOURCE[0]}"; exit 0 ;;  *) refuse "unknown option \"$1\"" ;;
   esac
 done
@@ -240,7 +240,7 @@ if [ "$CMD" = "surfaces" ]; then
   surfaces
   exit 0
 fi
-if [ "$CMD" != "anchors" ]; then   # ...everything to the matching `fi` is the REGISTRY reconciliation
+if [ "$CMD" != "anchors" ] && [ "$CMD" != "counts" ]; then   # ...everything to the matching `fi` is the REGISTRY reconciliation
 # ---------------------------------------------------------------- check ------
 [ -f "$REGISTRY" ]   || refuse "no registry at $REGISTRY. There is nothing to reconcile, and an absent census is not an empty one."
 [ -f "$MISMATCHES" ] || refuse "no mismatch report at $MISMATCHES. The registry is allowed to record a control exercising more authority than its class licenses; it is not allowed to record it silently."
@@ -823,10 +823,289 @@ if [ "$CMD" = "anchors" ]; then
 fi
 # ...and on the `check` path the same validation GATES, because an anchor table
 # checked only when somebody asks is the shelfware this module's header is about.
-anchors_check
+if [ "$CMD" != "counts" ]; then anchors_check   # `counts` SKIPS the anchor table: it reconciles a different thing, exactly as `anchors` skips the registry above, and a count fixture must never go red for an anchor's reason.
 printf 'scan-controls: %s anchor(s) resolved, %s superseded, over %s record(s) in %s declared object type(s)\n' \
-  "$ANC_RESOLVED" "$ANC_SUPERSEDED" "${#ANC_RECS[@]}" "$(printf '%s\n' $ANCHOR_TYPES | grep -c .)"
+  "$ANC_RESOLVED" "$ANC_SUPERSEDED" "${#ANC_RECS[@]}" "$(printf '%s\n' $ANCHOR_TYPES | grep -c .)"; fi
 # ============================================================ END ANCHOR-BLOCK
+
+# =============================================================== COUNT-BLOCK ==
+# DERIVED COUNTS. This repository's own doctrine — "DERIVE every count; never
+# restate one" — is written in four artefacts and was enforced by discipline
+# alone, and discipline kept failing. The executed instances, all from this tree:
+#
+#   1. build-os/memory/tool_router.md stated that the second-eyes provider had
+#      been absent "at each of the last **nine** packets" while the true streak
+#      was NINETEEN. The file that tracks review discipline understated the gap
+#      by more than half, and a 2190-assertion suite was green over it.
+#   2. A signal-snapshot total was taken with `wc -l` where
+#      `grep -c '^SIGNAL-SNAPSHOT-'` was meant, overstating a store by ~2x for
+#      two closes — 176 file lines reported where 97 records were meant.
+#   3. `grep -c 'authority_mismatch: declared'` gives 27 and the anchored
+#      `grep -c '^authority_mismatch: declared'` gives 22, because five prose
+#      lines mention the field mid-sentence.
+#
+# THE RULE THIS BLOCK ENFORCES, AND IT IS THE WHOLE DESIGN:
+#
+#     A COUNT THAT APPEARS IN THE RECORD IS CHECKED AGAINST ITS SOURCE.
+#     THE RECORD THAT BINDS THEM STORES NO NUMBER.
+#
+# A record says WHERE a count is stated and HOW it is derived. The stated value
+# is READ OUT of the live prose at every run; the derived value is COMPUTED from
+# the live source at every run; neither is stored here. That is not a stylistic
+# preference — a table that carried the number would be a THIRD copy of the very
+# truth it polices, and would go stale exactly the way the two it watches did.
+# It is the same discipline the anchor table above applies to positions: an
+# anchor stores no line number, and a count record stores no count.
+#
+# THE RECORD. Eight fields, `|`-delimited, one per line, between the COUNT-TABLE
+# markers below:
+#
+#   count_id | stated_artifact | stated_content | derivation_kind |
+#   derivation_source | derivation_pattern | created_at | note
+#
+# `stated_content` is a LITERAL that must occur EXACTLY ONCE in the artifact and
+# must contain the placeholder `{N}` exactly once, standing where the number is
+# written. Resolution is BY CONTENT: the line number is computed and reported as
+# a navigation hint, and is stored nowhere. Zero matches or two matches are both
+# REFUSALS — content that names two lines identifies neither, so there is no
+# "the" stated value to compare.
+#
+# THE TWO DERIVATION KINDS, AND WHY THERE IS NO THIRD:
+#
+#   lines  — the number of lines of `derivation_source` matching the ERE
+#            `derivation_pattern`, WHICH MUST BEGIN WITH `^`. That requirement
+#            is instance 3 made structural: the unanchored form is not a mistake
+#            that can be made quietly here, it is a form the schema refuses.
+#   files  — the number of entries of directory `derivation_source` whose NAME
+#            matches the glob `derivation_pattern` (no `/` — a name, not a path).
+#
+# THERE IS DELIBERATELY NO LINE-COUNT KIND. Instance 2 was `wc -l` standing in
+# for a record count; here a count of records has to be spelled as an anchored
+# pattern match, so the `wc -l` answer is not discouraged, it is INEXPRESSIBLE.
+#
+# NO `eval`, AND NO SHELL COMMAND FIELD. The derivation is a CLOSED ENUM over
+# two kinds, not a command the table gets to run. A record that could name an
+# arbitrary command would make this table a code-execution surface reachable by
+# anyone who can edit a text file, and an indirect `eval` was already introduced
+# into this repository once and removed for the same reason.
+#
+# READING THE STATED VALUE. A numeral, with thousands separators stripped, or a
+# lowercase English cardinal in the bounded table below — prose that says
+# "nineteen" stays prose and is still machine-comparable. THE TABLE STOPS AT
+# TWENTY, and that is the fail-closed direction: anything it cannot read is
+# COUNT-UNREADABLE and REFUSED, never quietly treated as agreement. A count
+# above twenty is written as a numeral, which is better prose anyway.
+#
+# A ZERO DERIVATION IS REFUSED (COUNT-VACUOUS) even when a stated zero "agrees"
+# with it, because a broken derivation and a genuinely empty one are
+# indistinguishable from the outside, and this module has already been burned
+# three times by a scan that certified itself against nothing.
+#
+# WHERE THE TABLE LIVES, AND WHY IT IS NOT A NEW STORE. Same shape and same
+# reason as ANCHOR_TABLE and EVIDENCE_VACUITY_ALLOW above: a separate file is one
+# more artefact that goes stale independently of the guard that reads it.
+# `--counts FILE` overrides it and exists FOR FIXTURES — the door `--registry`
+# and `--anchors` already open — and only then does `--repo` retarget resolution.
+#
+# WHAT THIS DOES NOT DO, NAMED RATHER THAN IMPLIED AWAY:
+#   1. IT BINDS THE COUNTS DECLARED HERE, NOT EVERY COUNT IN THE TREE. Nothing
+#      discovers an unregistered restatement. It is a scheme with live
+#      instances, not a migration, and an unregistered number is exactly as
+#      unchecked as it was before.
+#   2. IT CANNOT DERIVE A COUNT THAT ONLY A PROCESS PRODUCES. The suite total
+#      restated in CHANGELOG.md and current_state.md is one truth in two places,
+#      and no static derivation reaches it — it is produced by running the
+#      suite. That pair stays covered by RELEASE_METADATA_LIVE_SUITE=1 and is
+#      NOT covered here.
+#   3. IT CANNOT SEE A COUNT WHOSE STATED SITE WAS DELETED WITH ITS RECORD. A
+#      deleted site is COUNT-UNRESOLVED, which is fail-closed; deleting both is
+#      not detected, and no table detects its own deletion.
+COUNT_KINDS="lines files"
+# COUNT-TABLE:START
+COUNT_TABLE=(
+'DC-0001|build-os/memory/tool_router.md|checked at each of the last **{N}** packets|files|build-os/receipts|gravito_*.md|2026-08-03|THE RED FIXTURE THAT JUSTIFIED THIS BLOCK. The second-eyes streak: one receipt per closed packet since the streak opened, and no packet in it has ever had a second-eyes provider, so the streak IS the receipt count. This site said "nine" against a live nineteen.'
+'DC-0002|build-os/registry/MISMATCHES.md|control_registry.txt` yields **{N}**|lines|build-os/registry/control_registry.txt|^authority_mismatch: declared|2026-08-03|Instance 3. The anchored form is the derivation; the unanchored one sweeps up five prose lines and reports 27.'
+'DC-0003|build-os/registry/MISMATCHES.md|**14 of {N} entries carrying|lines|build-os/registry/control_registry.txt|^authority_mismatch: declared|2026-08-03|The SECOND restatement of DC-0002s truth, four lines from the first. Duplicate semantic truth is not fixed by deleting one copy — both copies are bound to the one source that produces the number.'
+)
+# COUNT-TABLE:END
+
+# The repository the table is a declaration ABOUT. Same rule as ANC_REPO.
+CNT_REPO="$REPO"
+[ -n "$COUNTS_FILE" ] || CNT_REPO="$(cd "$SELF_DIR/../.." && pwd)"
+
+CNT_RECS=()
+if [ -n "$COUNTS_FILE" ]; then
+  [ -f "$COUNTS_FILE" ] || refuse "no count table at $COUNTS_FILE"
+  while IFS= read -r crec || [ -n "$crec" ]; do
+    crec="${crec%$'\r'}"
+    case "$crec" in ''|'#'*) continue ;; esac
+    CNT_RECS+=("$crec")
+  done < "$COUNTS_FILE"
+else
+  CNT_RECS=("${COUNT_TABLE[@]}")
+fi
+[ "${#CNT_RECS[@]}" -gt 0 ] || refuse "the count table declares 0 derived counts. A table that binds nothing validates every stated number in the tree at once, which is the blinded-scanner failure this module already refuses three times."
+
+C1=""; C2=""; C3=""; C4=""; C5=""; C6=""; C7=""; C8=""; C9=""
+cnt_split(){ IFS='|' read -r C1 C2 C3 C4 C5 C6 C7 C8 C9 <<<"$1"; }
+cnt_nf(){ local bars="${1//[^|]/}"; printf '%s' "$(( ${#bars} + 1 ))"; }
+
+# READING A STATED VALUE. Fail-closed: a token this cannot read returns non-zero
+# and becomes a violation, so an unreadable number is never silent agreement.
+cnt_num(){ # <token> -> integer on stdout, or non-zero
+  local t="$1"
+  t="${t//,/}"
+  t="${t#"${t%%[![:space:]]*}"}"; t="${t%"${t##*[![:space:]]}"}"
+  case "$t" in ''|*[!0-9]*) ;; *) printf '%s' "$((10#$t))"; return 0 ;; esac
+  case "$(printf '%s' "$t" | tr '[:upper:]' '[:lower:]')" in
+    zero) printf 0 ;; one) printf 1 ;; two) printf 2 ;; three) printf 3 ;;
+    four) printf 4 ;; five) printf 5 ;; six) printf 6 ;; seven) printf 7 ;;
+    eight) printf 8 ;; nine) printf 9 ;; ten) printf 10 ;; eleven) printf 11 ;;
+    twelve) printf 12 ;; thirteen) printf 13 ;; fourteen) printf 14 ;;
+    fifteen) printf 15 ;; sixteen) printf 16 ;; seventeen) printf 17 ;;
+    eighteen) printf 18 ;; nineteen) printf 19 ;; twenty) printf 20 ;;
+    *) return 1 ;;
+  esac
+  return 0
+}
+
+# THE RESOLVER. Identity in, position AND stated token out — never the reverse.
+# Emits "<line><TAB><token>" on success; on failure the reason, with the exit
+# code telling them apart, exactly as anchor_resolve does.
+count_resolve(){ # <artifact-rel-path> <literal-before-{N}> <literal-after-{N}>
+  local f="$CNT_REPO/$1" hits n
+  [ -f "$f" ] || { printf '%s' "no artifact at $1"; return 1; }
+  hits="$(CNT_P="$2" CNT_S="$3" awk '
+    BEGIN{ p = ENVIRON["CNT_P"]; s = ENVIRON["CNT_S"] }
+    /^# COUNT-TABLE:START$/{ b=1 }
+    /^# COUNT-TABLE:END$/  { b=0; next }
+    b { next }
+    {
+      i = index($0, p); if (i == 0) next
+      rest = substr($0, i + length(p))
+      if (s == "") { tok = rest }
+      else { j = index(rest, s); if (j == 0) next; tok = substr(rest, 1, j - 1) }
+      print NR "\t" tok
+    }' "$f")"
+  n="$(printf '%s\n' "$hits" | grep -c . || true)"
+  case "${n:-0}" in
+    0) printf '%s' "unresolved — no line of $1 carries the stated content"; return 1 ;;
+    1) printf '%s' "$hits"; return 0 ;;
+    *) printf '%s' "ambiguous — ${n} lines of $1 carry the stated content, so the content does not identify ONE stated count"; return 1 ;;
+  esac
+}
+
+# THE DERIVATION. A closed enum over two kinds. Exit 2 is "the pattern is not
+# legal for this kind"; exit 1 is "the source is not there"; exit 3 is "no such
+# kind". Every one of them is a refusal, and none of them is a zero.
+count_derive(){ # <kind> <source> <pattern> -> number on stdout, or reason + non-zero
+  local n=0 e
+  case "$1" in
+    lines)
+      case "$3" in ^*) ;; *) printf '%s' "the pattern \"$3\" is not anchored"; return 2 ;; esac
+      [ -f "$CNT_REPO/$2" ] || { printf '%s' "no file at $2"; return 1; }
+      printf '%s' "$(grep -cE -- "$3" "$CNT_REPO/$2" 2>/dev/null || true)" ;;
+    files)
+      case "$3" in */*) printf '%s' "the glob \"$3\" names a path, not a file name"; return 2 ;; esac
+      [ -d "$CNT_REPO/$2" ] || { printf '%s' "no directory at $2"; return 1; }
+      for e in "$CNT_REPO/$2"/$3; do [ -e "$e" ] && n=$((n+1)); done
+      printf '%s' "$n" ;;
+    *) printf '%s' "unknown kind"; return 3 ;;
+  esac
+  return 0
+}
+
+# Validate and reconcile the table. Every finding goes through `viol`, so the
+# same finding gates a `check` run and refuses a `counts` run.
+counts_check(){
+  local r seen_ids="" occ tmp pre post res line tok stated derived rc why
+  CNT_OK=0; CNT_N=0
+  for r in "${CNT_RECS[@]}"; do
+    CNT_N=$((CNT_N+1))
+    if [ "$(cnt_nf "$r")" != "8" ]; then
+      viol "COUNT-SCHEMA   a record carries $(cnt_nf "$r") field(s), not the 8 the scheme declares: $r"
+      continue
+    fi
+    cnt_split "$r"
+    for pair in "count_id=$C1" "stated_artifact=$C2" "stated_content=$C3" "derivation_kind=$C4" "derivation_source=$C5" "derivation_pattern=$C6" "created_at=$C7" "note=$C8"; do
+      [ -n "${pair#*=}" ] || { viol "COUNT-SCHEMA   $C1 leaves \"${pair%%=*}\" empty. A partially declared count is an undeclared one."; continue 2; }
+    done
+    printf '%s' "$C1" | grep -qE '^DC-[A-Z0-9][A-Z0-9-]*$' || viol "COUNT-SCHEMA   $C1 is not a count id of the form DC-<TOKEN>"
+    printf '%s' "$C7" | grep -qE '^[0-9]{4}-[0-9]{2}-[0-9]{2}$' || viol "COUNT-SCHEMA   $C1 declares created_at \"$C7\", which is not a date"
+    in_list "$C4" "$COUNT_KINDS" || { viol "COUNT-KIND     $C1 declares derivation_kind \"$C4\", which is not one of: $COUNT_KINDS. An unrecognised kind must never fall through to permissive."; continue; }
+    if in_list "$C1" "$seen_ids"; then
+      viol "COUNT-COLLISION $C1 is declared more than once. Two counts cannot claim one id; the id IS the identity."
+      continue
+    fi
+    seen_ids="$seen_ids $C1"
+    # The placeholder, exactly once. A stated_content with none states no count;
+    # one with two does not say which number it is talking about.
+    tmp="${C3//\{N\}/}"; occ=$(( (${#C3} - ${#tmp}) / 3 ))
+    if [ "$occ" != "1" ]; then
+      viol "COUNT-SCHEMA   $C1 declares stated_content carrying $occ \"{N}\" placeholder(s), not exactly one. The placeholder is what says WHERE the number is written."
+      continue
+    fi
+    pre="${C3%%\{N\}*}"; post="${C3#*\{N\}}"
+    if [ -z "$pre" ]; then
+      viol "COUNT-SCHEMA   $C1 declares stated_content beginning with \"{N}\", so the site is identified by nothing to its left."
+      continue
+    fi
+    # DERIVE FIRST, so a pattern that is not legal for its kind is refused even
+    # when the stated site has already rotted away.
+    # THE EXIT CODE IS CAPTURED DIRECTLY. `if ! cmd; then rc=$?` reads back the
+    # status of the NEGATION — always 0 on the branch that was taken — which is
+    # exactly how a COUNT-UNANCHORED finding first came out labelled
+    # COUNT-SOURCE here. The suite caught it; the assignment form is the fix.
+    derived="$(count_derive "$C4" "$C5" "$C6")"; rc=$?
+    if [ "$rc" != "0" ]; then
+      why="$derived"
+      case "$rc" in
+        2) if [ "$C4" = "lines" ]; then
+             viol "COUNT-UNANCHORED $C1 derives a line count from $why. \`grep -c 'x'\` and \`grep -c '^x'\` are different questions: in this repository they answer 27 and 22 over the same file, and the five extra hits are prose. A \`lines\` pattern must be anchored to the start of the line; if a loose count is genuinely meant, it is not this kind."
+           else
+             viol "COUNT-SOURCE   $C1 derives a file count and $why. A name glob may not reach across directories."
+           fi ;;
+        *) viol "COUNT-SOURCE   $C1 names derivation_source \"$C5\", and $why. A derivation whose source is absent produces no evidence about anything." ;;
+      esac
+      continue
+    fi
+    if [ "$derived" = "0" ]; then
+      viol "COUNT-VACUOUS  $C1 derives ZERO from $C5 with \"$C6\". A derivation that finds nothing is indistinguishable from a derivation that is broken, so it is refused even if the stated value agrees with it — agreeing with nothing is how a blinded scan certifies itself."
+      continue
+    fi
+    if ! res="$(count_resolve "$C2" "$pre" "$post")"; then
+      viol "COUNT-UNRESOLVED $C1 ($res). A stated count whose site cannot be identified is not a count that passed; it is a count nobody can find."
+      continue
+    fi
+    line="${res%%$TAB*}"; tok="${res#*$TAB}"
+    if ! stated="$(cnt_num "$tok")"; then
+      viol "COUNT-UNREADABLE $C1 states \"$tok\" at $C2:$line, which this scheme cannot read as a number. It reads numerals and the English cardinals up to twenty; everything else is REFUSED rather than assumed to agree."
+      continue
+    fi
+    if [ "$stated" != "$derived" ]; then
+      viol "COUNT-STALE    $C1 — $C2:$line states \"$tok\" (= $stated); deriving it from $C5 with \"$C6\" gives $derived. The record is the restatement; the source is the truth. $C8"
+      [ "${CNT_LIST:-0}" = "1" ] && printf 'count: %s stated=%s derived=%s at=%s:%s kind=%s token="%s" status=STALE\n' "$C1" "$stated" "$derived" "$C2" "$line" "$C4" "$tok"
+      continue
+    fi
+    CNT_OK=$((CNT_OK+1))
+    [ "${CNT_LIST:-0}" = "1" ] && printf 'count: %s stated=%s derived=%s at=%s:%s kind=%s token="%s" status=AGREES\n' "$C1" "$stated" "$derived" "$C2" "$line" "$C4" "$tok"
+  done
+  return 0
+}
+
+if [ "$CMD" = "counts" ]; then
+  printf 'scan-controls: count table — %s record(s), %s declared derivation kind(s), resolved against %s\n' \
+    "${#CNT_RECS[@]}" "$(printf '%s\n' $COUNT_KINDS | grep -c .)" "$CNT_REPO"
+  CNT_LIST=1 counts_check
+  printf 'scan-controls: %s of %s derived count(s) agree with their source, %s violation(s)\n' "$CNT_OK" "$CNT_N" "$VIOL"
+  [ "$VIOL" -gt 0 ] && { printf 'scan-controls: REFUSED — %s derived-count violation(s). A number that is restated rather than derived is a number that will be wrong somewhere and right nowhere in particular.\n' "$VIOL" >&2; exit 2; }
+  exit 0
+fi
+# ...and on the `check` path the same reconciliation GATES, for the reason the
+# anchor block above gives: a table checked only when somebody asks is shelfware.
+counts_check
+printf 'scan-controls: %s of %s derived count(s) agree with the source they are bound to\n' "$CNT_OK" "$CNT_N"
+# ============================================================= END COUNT-BLOCK
 
 if [ "$VIOL" -gt 0 ]; then
   printf 'scan-controls: REFUSED — %s violation(s) reconciling %s against %s.\n' "$VIOL" "$REGISTRY" "$REPO" >&2

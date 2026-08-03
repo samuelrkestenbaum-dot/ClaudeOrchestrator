@@ -79,14 +79,21 @@ legal `--keep` retains it.
   `no tags` because `tests/release_metadata_tests.sh:322` requires it, so the residue item is
   annotated rather than rewritten. Whether the tag was created with an explicit go is not
   determinable from here and no claim is made.
-- **Build/test command:** `bash tests/build_os_tests.sh` (2190 checks; no network; temp dirs)
-  — **2190 as of `PACKET-0040-rotation-sentinel-guard`.** The delta is **+50**, all of it
-  `tests/build_os_maintenance_tests.sh`, which goes **104 -> 154**: a new §10 driving the
-  rotation sentinel's seven refusal conditions, plus §8/§9 reworked around the DERIVED
-  keep instead of the literal 10. Every other chained suite is **+0**. Derived from a SOLO
-  full-capture run after an anchored `pgrep -fa '^bash tests/'` returned empty, and
-  reconciled against `CHANGELOG.md`, which carries the matching literal `**2190 passed**`
-  (unsplit) under `## [Unreleased]`.
+- **Build/test command:** `bash tests/build_os_tests.sh` (2220 checks; no network; temp dirs)
+  — **2220 as of `PACKET-0041-count-derivation`.** The delta is **+30**, all of it
+  `tests/control_registry_tests.sh`, which goes **130 -> 160**: a new §29 driving the
+  derived-count table — the live binding, seven red drives, and two executed
+  counterfactuals. Every other chained suite is **+0**, confirmed by comparing the
+  per-suite CHAINED **vector** across two solo runs, not the total alone (`DEFECT-0013`).
+  Derived from SOLO full-capture runs after an anchored `pgrep -fa '^bash tests/'` returned
+  empty, and reconciled against `CHANGELOG.md`, which carries the matching literal
+  `**2220 passed**` (unsplit) under `## [Unreleased]`.
+  — **THIS PAIR IS ITSELF INSTANCE 4 OF THE DEFECT `PACKET-0041` EXISTS AGAINST**, and it is
+  the one instance that packet could NOT mechanise. Two copies of one truth, held in sync
+  by a cross-check that only fires under `RELEASE_METADATA_LIVE_SUITE=1`. No static
+  derivation reaches it: the number is produced by RUNNING the suite, and the count table
+  derives from files, never from processes. Stated here rather than quietly left out of the
+  coverage claim.
   — **The last +11 are the packet's FIX ROUND**, and they exist because two mutants of the
   new guard each killed **ZERO** of 2179 tests: disarming `SENTINEL_GATE_PINS` (observable
   as 18 -> 15 resolved objects on `residue.md` and 4 -> 2 on this file, with the pins going

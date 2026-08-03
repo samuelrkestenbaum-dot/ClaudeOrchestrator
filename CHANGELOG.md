@@ -14,6 +14,50 @@ deprecation cycle. Pin a commit if you need stability.
 
 ### In flight (not landed at the released commit)
 
+- **COUNT DERIVATION IS NOW MECHANICAL RATHER THAN DISCIPLINARY.** The doctrine
+  "DERIVE every count; never restate one" was written in four artefacts and
+  enforced by discipline alone, and discipline kept failing.
+  `build-os/memory/tool_router.md` — the file that tracks review discipline —
+  stated that a second-eyes provider had been absent "at each of the last
+  **nine** packets" while the true streak was **nineteen**, understating the gap
+  by more than half, and the entire green suite was silent about it.
+  `scan-controls.sh counts` closes that: a **COUNT-TABLE** of eight-field
+  records, each naming WHERE a count is stated and HOW it is derived, reconciled
+  at exit 2 on disagreement, and gating the `check` path as well.
+
+  **THE RECORD STORES NO NUMBER**, which is the design and not a flourish. The
+  stated value is read out of the live prose at every run and the derived value
+  is computed from the live source at every run, so the table cannot become a
+  third stale copy of the truth it polices — the same discipline the anchor
+  table applies to positions, where an anchor stores no line number. Resolution
+  is **by content**: the stated literal must occur exactly once, and the line
+  number is a computed navigation hint. **Two derivation kinds and no third:**
+  `lines` (an ERE that **must** be anchored with `^`) and `files` (a name glob).
+  There is deliberately **no line-count kind**, so the `wc -l`-for-a-record-count
+  error is not discouraged, it is inexpressible; and there is **no shell-command
+  field**, so the table is not a code-execution surface. Everything it cannot
+  read fails closed — an unreadable stated value, an unresolvable or ambiguous
+  site, an unknown kind, and a derivation that produces **zero even when a stated
+  zero agrees with it**, because a broken derivation and an empty one are
+  indistinguishable from outside.
+
+  **No new tool, no new store, no new suite file, no new census control**: the
+  block lives inside `build-os/registry/scan-controls.sh`, beside the anchor
+  table it is modelled on, and the tests are §29 of the existing
+  `tests/control_registry_tests.sh`. Three live records: the router's
+  second-eyes streak (bound to the receipt store), and **both** restatements of
+  the declared-mismatch total in `MISMATCHES.md`, four lines apart — duplicate
+  semantic truth is not fixed by deleting one copy but by binding every copy to
+  the one source. The router's "nine" was corrected to **nineteen** by
+  derivation, not by hand.
+
+  Suite **2220 passed**, 0 failed (+30, all of it
+  `tests/control_registry_tests.sh`, which goes **130 → 160**; every other
+  chained suite +0). Three stale line-pinned citations into
+  `control_registry_tests.sh` were repointed **by content**; the one anchor
+  covering that file absorbed the same move with no edit at all, which is the
+  anchor scheme paying for itself.
+
 - **ROTATION IS NOW A GOVERNED RUNTIME CAPABILITY RATHER THAN A GOVERNED ACT.**
   The first governed rotation of this repository's memory was safe because a
   human read the open-item markers, found the oldest, and hand-derived

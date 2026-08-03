@@ -1182,6 +1182,261 @@ A8_CREF="$(sed -n 's/^content_or_symbol_ref: //p' "$WORK/out.txt" | head -1)"
   && ok "RED: the position that named this suite's own assertion before this packet ($A8_OLD) no longer does, while its anchor resolves at :$A8_NEW — the drift is real and the anchor absorbed it" \
   || no "RED FAILED: the pre-packet position was not observed to drift ($A8_OLD vs $A8_NEW), so rule 8 was not exercised on a real move"
 
+echo "== 29. DERIVED COUNTS — a stated count is CHECKED AGAINST ITS SOURCE, not remembered =="
+# WHAT MEASURED THE HOLE, IN THIS REPOSITORY'S OWN RECORD. The doctrine "DERIVE
+# every count; never restate one" is written in four artefacts and enforced by
+# discipline alone, and discipline kept failing:
+#
+#   1. build-os/memory/tool_router.md said the second-eyes provider had been
+#      absent "at each of the last **nine** packets" while the true streak was
+#      NINETEEN. The file that tracks review discipline understated the gap by
+#      more than half, and the whole 2190-assertion suite was green over it.
+#   2. A signal-snapshot total was taken with `wc -l` where
+#      `grep -c '^SIGNAL-SNAPSHOT-'` was meant, overstating a store by ~2x for
+#      two closes: 176 file lines reported for 97 records.
+#   3. `grep -c 'authority_mismatch: declared'` gives 27 and the anchored
+#      `grep -c '^authority_mismatch: declared'` gives 22, because five prose
+#      lines mention the field mid-sentence. Every brief has to warn about it.
+#
+# Section 25 above is the closest prior art and it is BESPOKE: it hard-codes ONE
+# count (evidence_refs) and one extractor regex. The mechanism driven here is
+# section 25 generalised — a DECLARATIVE table, checked the same way.
+#
+# THE RECORD. Eight fields, pipe-delimited, declared in
+# build-os/registry/scan-controls.sh between the COUNT-TABLE markers:
+#
+#   count_id | stated_artifact | stated_content | derivation_kind |
+#   derivation_source | derivation_pattern | created_at | note
+#
+# AND THE DESIGN CLAIM THE SUBSECTIONS BELOW EXIST TO DRIVE: **THE RECORD STORES
+# NO NUMBER.** It stores WHERE a count is stated and HOW it is derived. The
+# stated value is read out of the live prose at resolution and the derived value
+# is computed from the live source at resolution, so the table itself can never
+# become the third stale copy of the truth it is policing. Resolution is BY
+# CONTENT — the stated literal must occur EXACTLY ONCE, and the line number is a
+# computed navigation hint, never an identity.
+CNTF="$WORK/cnt"
+mkcnt(){ # <dir> — the tree the fixture tables are declarations about
+  local d="$1" i
+  rm -rf "$d"; mkdir -p "$d/doc" "$d/store" "$d/recs"
+  # A router-shaped document carrying the SAME stale sentence the live one did.
+  {
+    printf 'preamble line\n'
+    printf '| Second-eyes | NONE. Absent from every surface, checked at each of the last **nine** packets. Until a provider is live... |\n'
+    printf 'tail line\n'
+  } > "$d/doc/router.md"
+  # Nineteen closed packets, one receipt file each — the derivation source.
+  for i in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19; do
+    printf '# receipt %s\n' "$i" > "$d/recs/gravito_p$i.md"
+  done
+  # A record store whose LINE count (7) is not its RECORD count (3) — instance 2.
+  printf '# header\nSNAP-0001\tone\n  wrapped 0001\nSNAP-0002\ttwo\n  wrapped 0002\nSNAP-0003\tthree\n  wrapped 0003\n' > "$d/store/snapshots.tsv"
+  # A registry-shaped file where anchored (3) and unanchored (5) differ — instance 3.
+  printf 'authority_mismatch: declared\nnotes: the flag authority_mismatch: declared marks both kinds\nauthority_mismatch: declared\nnotes: see authority_mismatch: declared above\nauthority_mismatch: declared\n' > "$d/store/registry.txt"
+  # The prose that restates those counts.
+  printf 'report\nthe anchored grep yields **3** declarations\nthe store holds **7** records\nthe roster names **several** items\n' > "$d/doc/report.md"
+}
+cnttab(){ printf '%s\n' "$@" > "$CNTF/counts.txt"; }
+runcnt(){ bash "$SCAN" counts --repo "$CNTF" --counts "$CNTF/counts.txt" > "$WORK/out.txt" 2>&1; }
+CR_STREAK='DC-F001|doc/router.md|checked at each of the last **{N}** packets|files|recs|gravito_*.md|2026-08-03|the second-eyes streak'
+CR_ANCH='DC-F002|doc/report.md|the anchored grep yields **{N}** declarations|lines|store/registry.txt|^authority_mismatch: declared|2026-08-03|anchored, and the anchoring is the point'
+CR_RECS='DC-F003|doc/report.md|the store holds **{N}** records|lines|store/snapshots.tsv|^SNAP-|2026-08-03|records, not lines'
+
+# --- the LIVE table, against the LIVE tree -----------------------------------
+bash "$SCAN" counts > "$WORK/cnt_live.txt" 2>&1; CRC=$?
+[ "$CRC" = "0" ] \
+  && ok "the LIVE derived-count table agrees with the live tree (scan-controls.sh counts, exit 0)" \
+  || { no "the live derived-count table does not agree (exit $CRC) — every claim below would be about a broken table"; sed 's/^/      | /' "$WORK/cnt_live.txt" | head -25; }
+NCNT="$(grep -c '^count: ' "$WORK/cnt_live.txt" || true)"
+[ "${NCNT:-0}" -gt 0 ] \
+  && ok "$NCNT derived-count record(s) are declared and listed (this section is not vacuous)" \
+  || no "no derived-count records were listed, so everything below is meaningless"
+[ "$(grep -c 'status=STALE' "$WORK/cnt_live.txt" || true)" = "0" ] \
+  && ok "no live record is STALE" \
+  || no "a live derived-count record is STALE"
+# THE LIVE BINDING, RECOMPUTED HERE INDEPENDENTLY. The suite must not learn the
+# expected value from the instrument it is checking, so the streak is counted
+# from the receipt store directly and compared to what the scanner derived.
+LIVESTREAK="$(find "$SRC/build-os/receipts" -maxdepth 1 -name 'gravito_*.md' | grep -c . || true)"
+SCANSTREAK="$(sed -n 's/^count: DC-0001 .*derived=\([0-9]*\).*/\1/p' "$WORK/cnt_live.txt" | head -1)"
+{ [ "${LIVESTREAK:-0}" -gt 0 ] && [ "$LIVESTREAK" = "$SCANSTREAK" ]; } \
+  && ok "DC-0001 derives the second-eyes streak as $SCANSTREAK, which is independently $LIVESTREAK closed-packet receipts" \
+  || no "DC-0001 derived '$SCANSTREAK'; counting the receipt store here gives '$LIVESTREAK'"
+STATEDSTREAK="$(sed -n 's/^count: DC-0001 stated=\([0-9]*\) .*/\1/p' "$WORK/cnt_live.txt" | head -1)"
+{ [ -n "$STATEDSTREAK" ] && [ "$STATEDSTREAK" = "$LIVESTREAK" ]; } \
+  && ok "and the router STATES $STATEDSTREAK — the number that was wrong is now bound to the store that produces it" \
+  || no "the router states '$STATEDSTREAK' where the receipt store gives '$LIVESTREAK'"
+# The counts block GATES the `check` path too — a table checked only when
+# somebody asks is the shelfware this module's header is about.
+bash "$SCAN" check > "$WORK/cnt_check.txt" 2>&1
+grep -q 'derived count(s)' "$WORK/cnt_check.txt" \
+  && ok 'the "check" path runs the derived-count reconciliation as well (not an ask-only subcommand)' \
+  || { no "scan-controls.sh check does not run the derived-count reconciliation"; sed 's/^/      | /' "$WORK/cnt_check.txt" | tail -10; }
+
+# --- the clean fixture -------------------------------------------------------
+mkcnt "$CNTF"
+sed -i 's/\*\*nine\*\*/**19**/' "$CNTF/doc/router.md"
+sed -i 's/\*\*7\*\* records/**3** records/' "$CNTF/doc/report.md"
+cnttab "$CR_STREAK" "$CR_ANCH" "$CR_RECS"
+runcnt; RC=$?
+[ "$RC" = "0" ] \
+  && ok "the clean count fixture validates (exit 0) — the red drives below fail for their own reason" \
+  || { no "the clean count fixture already fails (exit $RC); every red drive after it would pass for the wrong reason"; dump; }
+
+echo "== 29a. RED DRIVE — the router's stale streak, the fixture that justified this tool =="
+# The live defect, reproduced: a document saying "nine" over a store of nineteen.
+mkcnt "$CNTF"; cnttab "$CR_STREAK"
+runcnt; RC=$?
+[ "$RC" = "2" ] \
+  && ok "RED: a document stating 'nine' over a store of nineteen is REFUSED (exit 2)" \
+  || { no "RED FAILED: the stale streak was not refused (exit $RC)"; dump; }
+grep -q 'COUNT-STALE' "$WORK/out.txt" \
+  && ok "RED: the finding is classified COUNT-STALE" \
+  || { no "RED FAILED: no COUNT-STALE finding"; dump; }
+{ grep -q 'stated=9' "$WORK/out.txt" && grep -q 'derived=19' "$WORK/out.txt"; } \
+  && ok "RED: it prints BOTH numbers — stated=9, derived=19 — so the reader is not asked to take the verdict on trust" \
+  || { no "RED FAILED: the stated and derived values are not both reported"; dump; }
+grep -q 'nine' "$WORK/out.txt" \
+  && ok "RED: and it quotes the offending token ('nine') as written, so the site is findable by content" \
+  || { no "RED FAILED: the stated token is not quoted"; dump; }
+# THE COUNTERFACTUAL, EXECUTED RATHER THAN ASSERTED. Section 25's extractor is
+# the nearest thing this repository already had to a derived-count check. Run it
+# over the same stale document: it finds nothing, because it is bound to one
+# hard-coded subject. That is why the stale "nine" survived 2190 green assertions.
+S25HITS="$(statedrefs "$CNTF/doc/router.md" | grep -c . || true)"
+[ "${S25HITS:-0}" = "0" ] \
+  && ok "COUNTERFACTUAL: section 25's bespoke extractor finds 0 totals in the same stale document — the old way misses this defect, executed rather than argued" \
+  || no "section 25's extractor unexpectedly found $S25HITS total(s) in the fixture router"
+# And the fix is a one-word prose edit, with NO edit to the table.
+CNTTAB_BEFORE="$(cat "$CNTF/counts.txt")"
+sed -i 's/\*\*nine\*\*/**nineteen**/' "$CNTF/doc/router.md"
+runcnt; RC=$?
+{ [ "$RC" = "0" ] && [ "$CNTTAB_BEFORE" = "$(cat "$CNTF/counts.txt")" ]; } \
+  && ok "GREEN: correcting the prose to 'nineteen' clears it at exit 0 with the count table BYTE-IDENTICAL — the record stores no number, so the fix is not a second place to be wrong" \
+  || { no "the corrected document did not clear (exit $RC), or the table had to change"; dump; }
+grep -q 'stated=19' "$WORK/out.txt" \
+  && ok "and the English cardinal 'nineteen' reads as 19 — prose stays prose and is still machine-comparable" \
+  || { no "the cardinal 'nineteen' was not read as 19"; dump; }
+
+echo "== 29b. RED DRIVE — instance 3: an UNANCHORED line pattern is refused, not silently widened =="
+# `grep -c 'authority_mismatch: declared'` gives 27; `grep -c '^authority_...'`
+# gives 22. The five extras are prose. The kind `lines` therefore REQUIRES `^`:
+# the sloppy form is not a mistake that can be made quietly here, it is a form
+# the schema refuses to accept.
+mkcnt "$CNTF"
+cnttab 'DC-F002|doc/report.md|the anchored grep yields **{N}** declarations|lines|store/registry.txt|authority_mismatch: declared|2026-08-03|UNANCHORED ON PURPOSE'
+runcnt; RC=$?
+{ [ "$RC" = "2" ] && grep -q 'COUNT-UNANCHORED' "$WORK/out.txt"; } \
+  && ok "RED: an unanchored 'lines' pattern is REFUSED as COUNT-UNANCHORED (exit 2) — the 27-vs-22 form cannot be declared" \
+  || { no "RED FAILED: the unanchored pattern was accepted (exit $RC)"; dump; }
+cnttab "$CR_ANCH"
+runcnt; RC=$?
+{ [ "$RC" = "0" ] && grep -q 'derived=3' "$WORK/out.txt"; } \
+  && ok "GREEN: the anchored pattern derives 3 — the two prose mentions that the unanchored form would have swept up are excluded" \
+  || { no "the anchored pattern did not derive 3 (exit $RC)"; dump; }
+# The counterfactual, executed: what the unanchored form WOULD have counted.
+LOOSE="$(grep -c 'authority_mismatch: declared' "$CNTF/store/registry.txt" || true)"
+ANCH="$(grep -c '^authority_mismatch: declared' "$CNTF/store/registry.txt" || true)"
+{ [ "$LOOSE" = "5" ] && [ "$ANCH" = "3" ]; } \
+  && ok "COUNTERFACTUAL: on the same file the unanchored grep gives $LOOSE and the anchored gives $ANCH — the gap is real and is the gap the schema closes" \
+  || no "the fixture does not reproduce the anchored/unanchored gap (loose=$LOOSE anchored=$ANCH)"
+
+echo "== 29c. RED DRIVE — instance 2: a RECORD count is not a LINE count =="
+# 176 file lines reported where 97 records were meant. There is no line-count
+# derivation kind at all: a count of records must be spelled as an anchored
+# pattern match, so the `wc -l` answer is not merely discouraged, it is refused.
+mkcnt "$CNTF"; cnttab "$CR_RECS"
+FIXLINES="$(grep -c '' "$CNTF/store/snapshots.tsv" || true)"
+runcnt; RC=$?
+{ [ "$RC" = "2" ] && grep -q 'COUNT-STALE' "$WORK/out.txt" && grep -q 'derived=3' "$WORK/out.txt"; } \
+  && ok "RED: a store stated at its LINE count ($FIXLINES) is refused against its RECORD count (3) — the ~2x overstatement is caught" \
+  || { no "RED FAILED: the line-count restatement was not caught (exit $RC)"; dump; }
+grep -q "stated=$FIXLINES" "$WORK/out.txt" \
+  && ok "RED: and the report names the wrong figure ($FIXLINES) beside the right one, which is what makes it fixable" \
+  || { no "RED FAILED: the stated line count was not reported"; dump; }
+
+echo "== 29d. RULE — identity is CONTENT; the line number is a computed hint =="
+mkcnt "$CNTF"
+sed -i 's/\*\*nine\*\*/**19**/' "$CNTF/doc/router.md"
+cnttab "$CR_STREAK"
+runcnt
+C_BEFORE="$(sed -n 's/^count: DC-F001 .* at=doc\/router.md:\([0-9]*\) .*/\1/p' "$WORK/out.txt" | head -1)"
+{ printf 'inserted 1\ninserted 2\ninserted 3\ninserted 4\n'; cat "$CNTF/doc/router.md"; } > "$CNTF/doc/router.new"
+mv "$CNTF/doc/router.new" "$CNTF/doc/router.md"
+runcnt; RC=$?
+C_AFTER="$(sed -n 's/^count: DC-F001 .* at=doc\/router.md:\([0-9]*\) .*/\1/p' "$WORK/out.txt" | head -1)"
+{ [ "$RC" = "0" ] && [ -n "$C_BEFORE" ] && [ "$C_AFTER" -eq "$((C_BEFORE + 4))" ]; } \
+  && ok "four lines inserted above it move the reported position from :$C_BEFORE to :$C_AFTER and change nothing else — the position is computed at every resolution, not stored" \
+  || { no "the count record did not track the insertion (before=$C_BEFORE after=$C_AFTER exit $RC)"; dump; }
+# ...and the record has no line number in it to go stale in the first place.
+grep -qE '\|[0-9]+\|' "$CNTF/counts.txt" \
+  && no "a fixture count record carries a bare integer field — the scheme's whole claim is that it stores no number" \
+  || ok "no count record carries a bare integer field: not the stated value, and not a line number"
+
+echo "== 29e. RED DRIVE — an UNRESOLVED or AMBIGUOUS stated site fails CLOSED =="
+# The blinded-scanner failure, in its two forms. A site that resolves to nothing
+# and a site that resolves to two places must both REFUSE: a check that shrugs
+# when it cannot find its subject is a check that passes whatever the tree says.
+mkcnt "$CNTF"; cnttab "$CR_STREAK"
+sed -i 's/checked at each of the last/checked at each of the previous/' "$CNTF/doc/router.md"
+runcnt; RC=$?
+{ [ "$RC" = "2" ] && grep -q 'COUNT-UNRESOLVED' "$WORK/out.txt"; } \
+  && ok "RED: a stated site whose content no longer exists is COUNT-UNRESOLVED and REFUSED, not skipped" \
+  || { no "RED FAILED: a vanished stated site did not refuse (exit $RC)"; dump; }
+mkcnt "$CNTF"; cnttab "$CR_STREAK"
+sed -n '2p' "$CNTF/doc/router.md" >> "$CNTF/doc/router.md"
+runcnt; RC=$?
+{ [ "$RC" = "2" ] && grep -q 'COUNT-UNRESOLVED' "$WORK/out.txt"; } \
+  && ok "RED: a stated site that occurs TWICE is REFUSED — content that names two lines identifies neither, so there is no 'the' stated value" \
+  || { no "RED FAILED: an ambiguous stated site did not refuse (exit $RC)"; dump; }
+
+echo "== 29f. RED DRIVE — an unreadable stated value, and a VACUOUS derivation =="
+mkcnt "$CNTF"
+cnttab 'DC-F004|doc/report.md|the roster names **{N}** items|files|recs|gravito_*.md|2026-08-03|the stated value is a word this scheme cannot read'
+runcnt; RC=$?
+{ [ "$RC" = "2" ] && grep -q 'COUNT-UNREADABLE' "$WORK/out.txt"; } \
+  && ok "RED: a stated value of 'several' is COUNT-UNREADABLE and REFUSED — an unparseable number is never treated as agreement" \
+  || { no "RED FAILED: an unreadable stated value did not refuse (exit $RC)"; dump; }
+mkcnt "$CNTF"
+printf 'report\nthe empty roster names **0** items\n' > "$CNTF/doc/report.md"
+cnttab 'DC-F005|doc/report.md|the empty roster names **{N}** items|files|recs|nothing_matches_*.md|2026-08-03|a glob that matches nothing'
+runcnt; RC=$?
+{ [ "$RC" = "2" ] && grep -q 'COUNT-VACUOUS' "$WORK/out.txt"; } \
+  && ok "RED: a derivation that produces ZERO is REFUSED as COUNT-VACUOUS even though the stated 0 'agrees' — a broken derivation and a genuinely empty one are indistinguishable, so this fails closed" \
+  || { no "RED FAILED: a zero derivation certified itself by agreeing with a stated zero (exit $RC)"; dump; }
+
+echo "== 29g. RED DRIVE — the schema refuses a malformed, colliding or unknown-kind record =="
+mkcnt "$CNTF"
+cnttab 'DC-F001|doc/router.md|checked at each of the last **{N}** packets|files|recs|gravito_*.md|2026-08-03'
+runcnt; RC=$?
+{ [ "$RC" = "2" ] && grep -q 'COUNT-SCHEMA' "$WORK/out.txt"; } \
+  && ok "RED: a 7-field record is COUNT-SCHEMA — a partially declared count is an undeclared one" \
+  || { no "RED FAILED: a short record was accepted (exit $RC)"; dump; }
+mkcnt "$CNTF"; sed -i 's/\*\*nine\*\*/**19**/' "$CNTF/doc/router.md"
+cnttab "$CR_STREAK" "$CR_STREAK"
+runcnt; RC=$?
+{ [ "$RC" = "2" ] && grep -q 'COUNT-COLLISION' "$WORK/out.txt"; } \
+  && ok "RED: a duplicated count_id is COUNT-COLLISION — the id IS the identity" \
+  || { no "RED FAILED: a duplicated id was accepted (exit $RC)"; dump; }
+mkcnt "$CNTF"
+cnttab 'DC-F006|doc/router.md|checked at each of the last **{N}** packets|bytes|recs|gravito_*.md|2026-08-03|no such kind'
+runcnt; RC=$?
+{ [ "$RC" = "2" ] && grep -q 'COUNT-KIND' "$WORK/out.txt"; } \
+  && ok "RED: an unrecognised derivation kind is COUNT-KIND and REFUSED — an unknown kind must never fall through to permissive" \
+  || { no "RED FAILED: an unknown derivation kind was accepted (exit $RC)"; dump; }
+mkcnt "$CNTF"
+cnttab 'DC-F007|doc/router.md|checked at each of the last packets|files|recs|gravito_*.md|2026-08-03|no {N} placeholder'
+runcnt; RC=$?
+{ [ "$RC" = "2" ] && grep -q 'COUNT-SCHEMA' "$WORK/out.txt"; } \
+  && ok "RED: a stated_content with no {N} placeholder is COUNT-SCHEMA — a site with no number in it states no count" \
+  || { no "RED FAILED: a record with no {N} was accepted (exit $RC)"; dump; }
+mkcnt "$CNTF"
+: > "$CNTF/counts.txt"
+runcnt; RC=$?
+[ "$RC" = "2" ] \
+  && ok "RED: an EMPTY count table is REFUSED — a table that declares nothing validates everything at once, which is the blinded-scanner failure this module already refuses three times" \
+  || { no "RED FAILED: an empty count table was accepted (exit $RC)"; dump; }
+
 echo "== 20. This suite is chained, and is not vacuous about itself =="
 grep -qF 'chain_suite "tests/control_registry_tests.sh"' "$SRC/tests/build_os_tests.sh" \
   && ok "this suite is chained from tests/build_os_tests.sh (not discoverable-only)" \
