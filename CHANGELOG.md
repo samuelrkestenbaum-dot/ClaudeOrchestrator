@@ -60,19 +60,123 @@ deprecation cycle. Pin a commit if you need stability.
   **CONSERVATION WAS PROVED IN THE OTHER DIRECTION TOO** — the original file is
   reconstructed **byte-exact** from the new one by putting the migrated segments
   back into their original order, with a delta that is enumerated rather than
-  summarised: three `^## ` headings demoted or renamed, one marker moved into
-  block 1 with its entry left whole where it was written, and 21 added lines.
+  summarised: three `^## ` headings demoted or renamed (`## Project` and
+  `## Stable facts (slow-changing)` demoted to `### `, `## Where we are`
+  renamed); **one marker RENAMED IN PLACE — not moved** —
+  `**Last closed packet:**` → `**Closed 2026-08-03:**` at `current_state.md:476`,
+  its 18-line entry left **byte-identical** where it was written (`cmp` clean,
+  base `:243-260` vs HEAD `:477-494`); a **new 4-line stub** in block 1 under a
+  new `### Last close` heading, pointing at that entry, so the literal
+  `**Last closed packet:**` still occurs **exactly once** in the file; the
+  suite-total claim rewritten `2121 → 2140`; and **21 added lines** of
+  orientation note.
+
+  **THE EARLIER WORDING SAID "one marker moved into block 1", AND A RENAME PLUS A
+  STUB IS NOT A MOVE.** The substance was right — entry whole, literal present
+  once — but the mechanism was mis-described, and **the 4 stub lines and their
+  `### Last close` heading fall OUTSIDE the "21 added lines" figure**, which
+  counts the orientation note alone. The full multiset delta is derived rather
+  than restated —
+  `diff <(sort <base>) <(sort <head>) | grep '^>' | grep -vc '^> *$'` → **57**
+  added non-blank lines and **11** removed — and it partitions exactly:
+  **21** orientation note + **18** new `^## ` block headings + **3** `### `
+  headings (`Project`, `Stable facts`, `Last close`) + **3** stub continuation
+  lines + **11** suite-total-claim lines + **1** renamed marker = **57**.
 
   Suite **2140 passed**, 0 failed (+19, all of it
   `tests/build_os_maintenance_tests.sh` §9, which goes **85 → 104**; every other
   chained suite +0). Census **held at 105**, declared mismatches **held at 22**,
-  gate-on-advise **14**, **no new control**. Two `evidence_refs` line numbers were
+  gate-on-advise **14**, **no new control**.
+
+  **THE MISMATCH COUNT IS ANCHORED, BECAUSE THE UNANCHORED GREP DISAGREES WITH
+  THE TOOL AND THE TOOL IS RIGHT.**
+  `grep -c 'authority_mismatch: declared' build-os/registry/control_registry.txt`
+  returns **27**; `grep -c '^authority_mismatch: declared'` on the same file
+  returns **22**, which is what `scan-controls.sh` reports. The five-line gap is
+  **commentary, not entries** — `control_registry.txt:24`, `:1370`, `:1500`,
+  `:1551` and `:1886` quote the field inside a header or a `notes:` body, and
+  only a line-initial occurrence is a stanza field. **Cite the anchored form.**
+  Gate-on-advise derives from splitting those same 22 by `runtime_authority`:
+  `awk -F': ' '/^runtime_authority: /{ra=$2} /^authority_mismatch: declared/{n[ra]++} END{for(k in n) print k, n[k]}'`
+  → **gate 14, execute 8**, identical at base `9c740d7` and at HEAD.
+
+  Two `evidence_refs` line numbers were
   repointed — `suite.build_os_maintenance` and `OCCURRENCE-0016`, both citing this
   suite's own trailing `RESULT`/exit lines, `:639/:640 → :846/:847` — recorded as
   `OCCURRENCE-0018` of `DEFECT-0001-stale-line-reference`. The four other
   citations into that file (`:88`, `:193`, `:295`, `:414`) were **prevented rather
-  than repaired**: the header note was rewritten line-count-neutral, 15 lines in
-  and 15 out, specifically so none of them moved.
+  than repaired**: the header note was rewritten line-count-neutral —
+  **the edit replaced 5 lines with 5 lines, leaving the note region unchanged at
+  15 lines, so no line below it moved.** Both figures are measured and an earlier
+  wording ("15 lines in, 15 lines out") conflated them: **5** is what the edit
+  REPLACED (`diff` over the region: 5 `<`, 5 `>`), **15** is the SIZE of the note
+  region on both sides (`sed -n '10,24p' … | wc -l` = 15 at base and at HEAD).
+  The consequence is the load-bearing part and it is verified independently:
+  lines **25..635 are byte-identical** base-to-HEAD (`cmp` clean), so `:88`,
+  `:193`, `:295` and `:414` still name the same content.
+
+  **QUEUED, NOT FIXED — A PRE-EXISTING STALE POINTER THIS MIGRATION MOVED
+  FURTHER, AND IT PREDATES THIS PACKET.** `build-os/memory/residue.md:582`
+  carries the line-pinned pointer `build-os/memory/current_state.md:286`. It was
+  **valid at `2a3c070`** — `:286` then sat inside the cited claim — was
+  **already stale at `95e2c7b`**, which is *before* this packet's base `9c740d7`
+  (at `95e2c7b` the claim's own anchor line is `:293`, seven lines below the
+  pointer), and this migration carried the content further still. **The claim
+  itself is conserved:** the anchor `counterexample is unreachable` occurs
+  **exactly once** at base and **exactly once** at HEAD
+  (`grep -c 'counterexample is unreachable'` → 1 both sides), and the block that
+  contains it is byte-identical across the migration —
+  `cmp <(git show 2a3c070:…current_state.md | sed -n '282,288p') <(sed -n '557,563p' …)`
+  is clean, a constant offset of **+275**, so `2a3c070:286` is **HEAD `:561`**.
+  **It is NOT repointed here:** `residue.md` is a declared byte-identical
+  boundary for this packet, so touching it is out of scope. Queued with the
+  measurement above so the next packet repoints it **by content**, not by
+  shifting a digit.
+
+  **THE LONG-TERM DEBT THIS PACKET CREATED IS DUPLICATION, NOT POSITION —
+  RECORDED, DELIBERATELY NOT BUILT.** `tests/build_os_maintenance_tests.sh` §9
+  is a **structural clone of §8**: §8 spans `:430-637` (**208 lines**) and §9
+  spans `:638-847` (**210 lines**), same shape, literals swapped, hand-maintained
+  — the cost is **O(files)**, and a third rotating file would pay it a third
+  time. **`build-os/packets/active_packet.md` is that third file and has no such
+  section at all** (`grep -c '^## '` → **20** blocks, so it is currently fine and
+  nothing checks that it stays fine). The pattern does **not** generalise for
+  free. The follow-up is a choice, not a defect: either abstract §8/§9 into one
+  helper parameterised by *(file, standing-heading prefix, pinned literals)*, or
+  accept the duplication deliberately and add coverage for `active_packet.md`.
+
+  **TWO DIFFERENT PRESERVATION MECHANISMS, AND THEY MUST NOT BE CONFLATED.**
+  `build-os/maintenance/rotate-memory.mjs:49` states the doctrine
+  *"Preservation is a property of LOCATION, not of text"* — and **LOCATION there
+  means WHICH FILE**: content that must never rotate belongs in a file absent
+  from `FILE_SPECS`, i.e. `standing_gates.md`, which the tool never reads or
+  writes. **Pattern (A), used by §8 and §9, protects by POSITION WITHIN a
+  rotating file** — the standing region is block 1, retention is a prefix, and
+  `--keep` is validated `>= 1`. These are **different mechanisms with different
+  failure modes**, and (A) is **not** an application of that header's doctrine:
+  the header's mechanism fails only if a path is added to `FILE_SPECS`, while
+  (A) fails if anything is ever prepended above block 1, or if a pinned literal
+  gains a second occurrence outside it. **Two memory files now depend on (A)**,
+  so a future packet must not cite the `rotate-memory.mjs` header as authority
+  for positional protection. **In (A)'s favour, and recorded as such:** all three
+  of its legs are pinned by *executed* assertions rather than by prose —
+  including `case "$CS_HEAD_BLOCK" in "## Standing"*)` at
+  `tests/build_os_maintenance_tests.sh:756-757`, which catches exactly the
+  future prepend that would silently demote the standing region to block 2.
+
+  **AND THIS ENTRY'S OWN LINE MOVEMENT IS DISCLOSED RATHER THAN LEFT IMPLICIT.**
+  Writing the corrections above lengthened `CHANGELOG.md` by **104 lines**
+  (1627 → 1731, `wc -l`), which moves every line below them. **No citation was
+  newly invalidated by it, and that is measured, not assumed:** the six
+  line-pinned citations into this file — `:124`, `:198`, `:223`, `:267` from
+  `build-os/memory/residue.md`, and `:32`, `:106`, `:131`, `:133`, `:135` from
+  two closed receipts — were **already naming other content at `b41aa5d`**,
+  before this edit existed. That is the structural decay `residue.md` item **(r)**
+  already registers: *"this will happen to EVERY `CHANGELOG.md` line-citation on
+  EVERY future packet, because the changelog grows from the top."* The live
+  cross-file guard on this file is **content-addressed, not positional** —
+  `tests/release_metadata_tests.sh` §5 greps for the literal `2140 passed`, which
+  is present **exactly once and unsplit** — so it is unaffected.
 
 - **`build-os/memory/residue.md` was re-blocked so that rotation can reclaim
   space from it, and so that the part of it which must never rotate cannot.**
