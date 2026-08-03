@@ -218,7 +218,216 @@
   `(lllll)`: `lic_of` tops out at `gate` and NO class licenses `execute`, so **every
   durable-write control this repository will ever add MUST declare a mismatch.** The number that
   actually constrains anybody — **gate-on-advise — is 14 at base and 14 at HEAD.**]**
-- **Last closed packet:** `gravito_cross_surface_memory_kernel_v0`
+  **[SUPERSEDED AGAIN 2026-08-03 by `PACKET-0036-measurement-integrity`, DERIVED not
+  remembered at this close: 105 controls (`grep -c '^control: '` — UNCHANGED, **zero `+control`
+  lines in the whole range and NO new control**), ~21 tools, **2103 assertions**, ONE executive
+  component, ONE apparatus for measuring it, ONE anchor scheme, ONE cross-surface memory kernel
+  (still 25 events — none appended, none rewritten), and — new here — **ONE GUARD OVER THE
+  MEASUREMENT SUBSTRATE ITSELF**. Declared mismatches hold at **22**; gate-on-advise holds at
+  **14**, execute at **8**, identical at base and at HEAD; `evidence_refs` **372 -> 374 by
+  derivation**; anchors **12 resolved / 1 superseded / 0 violations**; **zero re-authorisations**.
+  **THE +7 IS THE WHOLE DELTA AND ALL OF IT IS THE NEW GUARD** — `tests/speed_benchmark_tests.sh`
+  held at **169** because three assertions were CONVERTED rather than added, and no assertion was
+  lost. This is the first ledger entry in the sequence whose assertion count is a **constant**
+  rather than a sample.]**
+- **Last closed packet:** `gravito_measurement_integrity_a`
+  (`PACKET-0036-measurement-integrity` — **MINTED, not reused**, and the mint was
+  **collision-checked BEFORE the mint by the builder and RE-DERIVED AT CLOSE by the archivist
+  rather than accepted from the brief**, because that check has caught a bad id at three prior
+  closes: `git log -S'PACKET-0036' --oneline a2648dc` returns **no commit**;
+  `git grep -n 'PACKET-0036' a2648dc` returns **nothing**, so the token did not exist in the base
+  tree; `git log -S'PACKET-0036' --all --oneline` returns **exactly two commits**, both this
+  packet's own; and `git grep -ho 'PACKET-00[0-9][0-9]' HEAD | sort -u` shows a contiguous live
+  band `PACKET-0001`..`PACKET-0036` whose highest prior allocation is `PACKET-0035`. **The id was
+  free.**)
+  **WHY IT EXISTED, AND IT IS NOT TEST HYGIENE:** the project's next frontier is **experience** —
+  running `ranking -> selection -> execution -> outcome -> memory -> comparison` repeatedly. That
+  loop's payload is **comparison**, and **a measurement substrate that manufactures false verdicts
+  poisons the outcome store the executive will train on.** `DEFECT-0013` was closed **before** the
+  loop starts accumulating outcomes. It also **repaired the previous packet's `DEFECT-0011`
+  recurrence by declaring first**: `bandwidth` went **0 -> 1 packet in flight, ceiling 1**.
+  **THE HEADLINE, AND IT IS THE PACKET'S MOST IMPORTANT OUTPUT: THE 6.26%-vs-15.70% DISCREPANCY
+  WAS FIXTURE, NOT LOAD, AND NOT A DISAGREEMENT ABOUT WHAT WAS MEASURED.** qa's controlled A/B —
+  same machine, same load, same code, **only the data store swapped** — measured a **17-row store**
+  at 68,734 bytes emitted (3,198 past the 64 KiB buffer) failing **301/4000 = 7.53%**, and the
+  **18-row store** at 72,147 bytes (6,611 past the buffer) failing **582/4000 = 14.55%**.
+  **THE STORE GREW BY ONE ROW AND THE FAILURE RATE DOUBLED.** Generalisation, recorded because it
+  is the strongest argument in the packet: **the rate of a latent non-determinism is a function of
+  a data volume nobody is watching** — precisely the new guard's own declared blind spot. **A site
+  measured at 0% today can flap tomorrow with no code change and no test turning red.**
+  **THE FIX HELD UNDER EVERYTHING THROWN AT IT.** Shipped form 613/4000 = **15.33%** (qa) and
+  628/4000 = 15.70% (builder, within 1 sigma); shipped under 4-way CPU load **1704/4000 =
+  42.60%**; **fixed form 0/4000 quiet AND 0/4000 under 4-way load**; on an amplified 217,972-byte
+  fixture, **100% before and 0/2000 after**. `pipefail` **stays on** and nothing turns it off
+  (`grep -c 'set +o pipefail'` on that suite = **0**) — **the consumer was made to drain**:
+  `any(){ awk 'BEGIN{r=1} {r=0} END{exit r}'; }`, with **no `exit` in a main rule**, so it reads to
+  EOF under *any* awk. qa could not make it exit early with a 33.9 MB stream, a 64 MB single record
+  with no newline, NUL bytes, or invalid UTF-8. **All three converted assertions were driven red
+  and still fail correctly.**
+  **AND THE FIX CARRIES NO AWK-IMPLEMENTATION DEPENDENCY** — at the empty-cell assertion the
+  builder **removed the `exit`** rather than relying on mawk draining, so the guard's allow-list is
+  keyed on **measured bytes** and not on which awk is installed. **A gawk or busybox image breaks
+  neither.**
+  **THE CLAIM THAT WAS FALSE, AND IT HAD ALREADY PROPAGATED.** Committed in **three live files**:
+  *"It is ONE-DIRECTIONAL — it can manufacture a false FAIL and can never mask a real one."*
+  **False as a class claim.** qa's counterexample is an assertion in
+  `tests/build_os_maintenance_tests.sh` with **inverted polarity** —
+  `find ... | grep -q . && no "..." || ok "..."` — where a SIGPIPE 141 routes to **`ok`**: **a
+  false PASS masking a real failure.** At 270,890 bytes it returned non-zero **2000/2000**;
+  draining, **0/2000**. Corrected verbatim in all three: **one-directionality is a property of the
+  `&& ok || no` POLARITY, not of the class.** **THE BUILDER FOUND THE THIRD LIVE COPY ITSELF** —
+  section 28 of `tests/build_os_tests.sh`, which the orchestrator's fix brief did not name —
+  declining to correct two of three because that *"would have been `DEFECT-0003` in the same
+  commit."*
+  **THE PROPAGATION IS RECORDED HONESTLY BECAUSE THE ORCHESTRATOR PROPAGATED IT:** *"every green
+  stands, the defect can only fake failure"* was relayed to the operator **twice** on the strength
+  of the false claim. **The greens DO stand — but because that counterexample is unreachable
+  (>64 KiB, ~1100+ leftover paths, in a directory the test expects EMPTY), not because the class
+  cannot mask failures.** The site is also **invisible to the new guard**, its producer being
+  `find`. **Recorded, not fixed** — outside this packet's ownership. `(qqqqq)`.
+  **OTHER CORRECTED CLAIMS, ALL RE-MEASURED RATHER THAN RESTATED.** *"5/5"* was wrong and rested on
+  n=5, which cannot distinguish 8% from 100%; at **N=200**: mawk `exit` **0/200**, `grep -q .`
+  8.0%, `grep -m1 .` 9.5%, `head -1` 52.5%, `sed -n '1p;1q'` 100%. **The conclusion is unchanged
+  and STRENGTHENED by the 0/200** — mawk's `exit` is uniquely non-lethal, so draining is right.
+  The scanner scopes **45 of 54** `pipefail`-enabling files; of the nine outside its roots **four
+  already carry `set -euo pipefail`**, so the case declared a FUTURE blind spot **is present
+  TODAY** — corrected to *"already present, measured harmless"* (same 3 hits over all 54, all
+  allow-listed). The allow-list is **FILE-granular**, so **the one file that shipped the defect is
+  wholesale exempt from the guard against it** — demonstrated (a new racy line there is ALLOWED,
+  the identical line in `tests/entitlement_tests.sh` is REPORTED), **left file-granular
+  deliberately** because site-granularity reintroduces positional coupling, and now disclosed in
+  the blind-spot list. **Two figures were WITHDRAWN rather than restated:** *"235 candidates"* ->
+  258 derived, and *"~40 `sed ... | head -N`"* withdrawn entirely (13 strict / 87 all-`| head`,
+  neither is 40); the load-bearing half holds and is derived — **0 killer pipelines in the 3
+  scripts carrying `set -e` + `pipefail`.**
+  **THE GUARD: 7 assertions, POWER DEMONSTRATED RATHER THAN ASSERTED.** qa independently stripped
+  the exemption marker from the red-drive line in a clone and **the guard reported its own line**
+  (suite 2101/2, exit 1) — the exemption is earned. **Its declared blind spots were all confirmed
+  REAL by qa's sneak test**, five idioms walking straight past: `git log --oneline | grep -q .`; a
+  function wrapping `cat`; `find /tmp -type f | grep -q .`;
+  `cat "$BIG" | while read -r l; do break; done`; `grep -q . < <(emit_rows)`. **AND THE REPO CAUGHT
+  qa** — its own *"sibling suite present but never chained"* control caught the planted file, an
+  independent integrity control working in the wild.
+  **THE EVIDENCE RULING, AND IT IS DOCTRINE: A SINGLE GREEN RUN IS AGAIN SUFFICIENT FOR THIS
+  DEFECT, AND THE DOUBLED-RUN DISCIPLINE STAYS IN FORCE.** *What was measured is that one NAMED
+  non-determinism is gone; what would license dropping the discipline is that NO UNNAMED one
+  remains, and nothing here measures that.* **qa's criterion for retiring it** is not another
+  assertion-level measurement but a **suite-level determinism measurement**: N>=200 consecutive
+  full-suite runs at a fixed commit, quiet and under controlled load, with **zero variation in the
+  per-suite PASS/FAIL VECTOR rather than in the total**, plus a per-assertion harness rerunning
+  each assertion K times against frozen fixtures. **Until the invariant is "the verdict vector does
+  not move", the doubled run is the only sampler in place. Retiring it is an operator act.**
+  `(ttttt)`.
+  **LINE-MOVEMENT DISCIPLINE, RECORDED AS A REUSABLE TECHNIQUE.**
+  `tests/speed_benchmark_tests.sh` was held to a **strict net-zero line delta across the fix
+  round** (712 in, 712 out) so all **nine** inbound citations still resolve to the same content.
+  `tests/build_os_tests.sh` genuinely grew (978 -> 1106 -> 1161), so its **four** inbound registry
+  citations were re-pointed **BY CONTENT**, and the registry suite's section 21 **re-derives that
+  membership from the tree** and passes. **`ANC-0003` did not move at the fix round**, so no
+  projection regeneration was needed there — it moved 15 -> 40 at the DECLARATION commit and was
+  repaired the sanctioned way, **regenerated and never hand-edited**.
+  **AN ORCHESTRATOR ERROR, RECORDED BECAUSE THE CLASS KEEPS PROVING IT IS NOT RETIRED.** While
+  auditing the fix round the orchestrator grepped for the corrected statement **on a single line**
+  and concluded it was missing from two of three files. **It was present in all three** — the
+  statement **wraps across comment lines** (`NOT OF THE` / `# CLASS`) and the single-line pattern
+  could not see it. That is the **line-wrapped enumeration** escape form, one of the five this tree
+  already catalogued, **walked into while auditing a packet about false measurements**.
+  **Verdict: PASS-AS-FIXED.** qa **GREEN**; the reviewer returned `fix-then-pass`, and every item
+  was fixed in `aa0a7b3` and verified by the orchestrator rather than by opening a fourth gate
+  stage. **Depth: 3 serial stages.**
+  **Receipt:** `build-os/receipts/gravito_measurement_integrity_a.md`
+  **Commits:** `0cdb3b7` (declaration) + `53b92d4` (fix, sweep, guard) + `aa0a7b3` (claim
+  corrections), base `a2648dc` (re-verified at close: `git merge-base aa0a7b3 a2648dc` returns
+  `a2648dc`). **None pushed.**
+  **DEVIATION, RECORDED AND NOT NORMALISED: 3 commits against the `<=2` cap** — the third close in
+  a row with this shape. The fix round landed as its own commit rather than amending commits the
+  gates had already measured, which was the right trade: amending `53b92d4` would have invalidated
+  the proof to satisfy a counting rule. The receipt's manifest is a **sequential attribution by
+  role, not a disjoint partition** (`0cdb3b7`/`53b92d4` share 1 path, `53b92d4`/`aa0a7b3` share 7)
+  and is **not a precedent for a fan-out**.
+  **THE TWO DIFF CONVENTIONS DISAGREE AND BOTH ARE RECORDED, because a net-diff row was REFUSED at
+  the last close:** `record-packet.sh --verify-git` computes **PER-COMMIT SUMS**, so the metrics
+  row states **12 distinct paths / +768 / -96**
+  (`git show --numstat --format='' 0cdb3b7 53b92d4 aa0a7b3`), while the **NET UNION DIFF**
+  `git diff --numstat a2648dc aa0a7b3` is **12 / +699 / -27**. **The 69-line gap on both sides is
+  exactly the overlap** — lines the fix round rewrote that the build commit had already written.
+  **FINAL STATE AT `aa0a7b3`, ALL RE-DERIVED BY THE ARCHIVIST AT CLOSE:** suite **2103/0 exit 0**
+  with `grep -c '^  FAIL'` = **0** and the **per-suite CHAINED verdict vector byte-identical across
+  runs** — two SOLO full-capture runs by the builder at the committed tree plus three by qa;
+  **Commit-1 green in isolation at `0cdb3b7`, 2096/0 in a fresh clone**; live gate
+  `RELEASE_METADATA_LIVE_SUITE=1` **MATCH at 2103**; maintenance **144/0**; `scan-controls check`
+  exit 0 with census **105**, **22** declared, **gate 14 / execute 8**, identical at base and HEAD,
+  **0 `+control` lines and NO new control**; `scan-controls anchors` **12 resolved / 1 superseded /
+  0 violations**; `memory-kernel reconcile` **1 projection, 0 divergent**; `evidence_refs`
+  **372 -> 374 by derivation**; **zero re-authorisations, field-anchored.**
+  **THE SEALED EXPERIMENT IS UNDISTURBED AND WAS RE-DERIVED, NOT RESTATED:** the S1 report digests
+  to `e838284e2bba52628647d0c7ddd1ed258a7aab7cc391a5ac99992ad7584eb596` recomputed live at this
+  close, `rank_of_selected: 1` still derives at exit 0, and `rank-candidates.sh` is the **same blob
+  `5543ea8` at base and at HEAD**. **PRECISION, BECAUSE TWO DIGESTS ARE IN PLAY:** the report's own
+  internal `ranking_digest` line reads `db96737e713b10d6...`; `e838284e...` is the sha256 of the
+  **whole report**. A reader comparing the wrong one will conclude the seal broke when it did not.
+  `signal_snapshots.tsv` and `decision_telemetry.tsv` have **zero diff**; `memory_events.tsv` has
+  **zero diff** and the base file is a **byte-exact prefix** of HEAD's — **no rewritten row and no
+  appended event**, by the packet or by this close.
+  **AN ARCHIVIST OBSERVATION, RECORDED AT ITS TRUE SMALL WIDTH AND NOT AS A FINDING:** the **first**
+  `scan-controls.sh check` of this close session reported `PHANTOM tests/gate_depth_tests.sh`, 1
+  phantom entry, and REFUSED; **it did not reproduce in 14 further attempts — 8 quiet and 6 under
+  4-way CPU load, all rc=0, all 0 phantom lines.** No rate is claimed and no mechanism is claimed.
+  It is written down because this packet's own headline says a latent non-determinism's rate is a
+  function of conditions nobody is watching, and the honest response to seeing one flicker is to
+  record what was seen **and** what could not be reproduced. `(vvvvv)`.
+  **AND THE PIPING TRAP THAT NEARLY MISREAD IT:** that first observation was taken through
+  `... | tail -15; echo "EXIT=$?"`, which reports the exit status of **`tail`, not of the
+  scanner** — the same "the shell told you about the wrong process" family this entire packet is
+  about. **Do not read a gate's verdict through a pipe.**
+  **AND THIS CLOSE MOVED THE VERY QUANTITY THE HEADLINE IDENTIFIES AS THE HIDDEN DRIVER.**
+  Recording this packet appended the **nineteenth** row to `build-os/metrics/packet_metrics.tsv`:
+  measured, **72,754 -> 73,992 bytes (+1,238)**, data rows **18 -> 19**. By arithmetic on qa's
+  emitted-stream figure — arithmetic, **not** a fresh measurement — the margin past the 64 KiB
+  buffer moves **6,611 -> about 7,849, up ~19% in one close**. Nothing is wrong now: the racing
+  site drains and mawk's `exit` measured 0/200. **The point is the trend is monotonic and nothing
+  watches it** — every close adds ~1.2 KB, there is no ceiling and no assertion, and **the new
+  guard explicitly cannot see volume**. `(xxxxx)`.
+  **AND THE CLOSE ITSELF HIT A CEILING, WHICH IS THE MOST ACTIONABLE THING ON THIS PAGE.**
+  `residue.md` sits **3,608 B under a 204,800 B ceiling** at `aa0a7b3`; this close's first draft
+  was **+7,934 B** and drove `build-os/maintenance/run-tests.sh` **RED on 4 subtests**. It was
+  rewritten to **+3,466 B**, leaving **142 B of headroom**, and the argument was moved into the
+  receipt. **`rotate-memory.sh` is NOT the escape:** it selects **by recency over BLOCKS** and its
+  dry run reports that file as **3 blocks -> keep 3 newest, would archive 0**, so for any N >= 3 it
+  reclaims **nothing** — and it **REFUSES at exit 3 once the file is already over the ceiling**, so
+  **the preventative tool has a precondition that the failure it prevents violates.** **THE NEXT
+  CLOSE HAS NO GREEN PATH** unless an operator re-blocks the file, raises `--max-bytes`
+  deliberately, or moves standing content to `standing_gates.md`, which the rotator never reads.
+  **A blind `--apply` is NOT safe** — selection is recency-only and that file carries literals other
+  suites pin. `(yyyyy)`.
+  **SECOND EYES: NONE — FOURTEENTH CONSECUTIVE PACKET.** The router's second-eyes row still says
+  the absence was checked at *"the last nine packets"*; it is now **fourteen**, stale by five.
+  **Nothing in the suite pins the literal**, which is why it drifts. Editing the router is a
+  **routing act rather than bookkeeping**, so it is named and not applied. `(zz)`.
+  **ROUTED TO THE OPERATOR, RECORDED AND NOT ACTED ON.** (1) **A closed receipt carrying a
+  since-falsified claim has no pointer to its correction.** Three copies of the superseded
+  one-directionality claim survive in **prior-packet records** — the cross-surface-memory-kernel
+  receipt, `residue.md` and this file — and the builder correctly **did not rewrite them**, on the
+  rule that a correction creates a later record rather than editing an earlier one. **This close
+  upholds that rule and touched no prior receipt.** But a reader arriving there **reads the false
+  sentence with nothing beside it**, and the memory kernel already has `supersedes` and
+  `contradicts` relationship types **that receipts do not participate in**. Should receipts become
+  first-class kernel objects reachable by a `contradicts` edge? **A design act on the kernel, not
+  the archivist's to take.** `(wwwww)`. (2) **`(uuuuu)`** — the projection embeds a **resolved line
+  number** inside a **byte-compared** artefact, so **every content-preserving edit above any
+  anchored site ships red until a projection is regenerated**; the reviewer: *"a byte-compared
+  artefact that embeds a resolved line number, inside the mechanism whose stated thesis is that
+  line numbers are not identity, is self-contradictory."* **This packet paid that tax on its very
+  first commit.** The tax compounds as anchor coverage grows past 3.5%.
+  **PRE-EXISTING, OUT OF SCOPE, NOT ACTED ON:** the control registry's prose names one line of
+  `tests/speed_benchmark_tests.sh` as a section-21 exclusion while the executable list in
+  `tests/control_registry_tests.sh` names a different one. **No test reads the prose copy**, which
+  is why it drifted.
+  **OPEN, AND NOT THE ARCHIVIST'S TO CLOSE: nothing is pushed, merged, tagged, PR'd or deployed.**
+  `0cdb3b7`, `53b92d4`, `aa0a7b3` and this close commit stay **local**, and **none of the three may
+  be amended** — they are the commits the gates measured. `c2d97f8` remains the selection anchor
+  of the still-intact prospective experiment.
+- **Previously closed:** `gravito_cross_surface_memory_kernel_v0`
   (`PACKET-0035-cross-surface-memory-kernel` — **MINTED, not reused**, and the mint was
   **collision-checked at close rather than accepted from the brief**: the live band runs
   `PACKET-0001`..`PACKET-0035`, the highest allocation predating this packet is `PACKET-0034`,
@@ -305,7 +514,7 @@
   **OPEN, AND NOT THE ARCHIVIST'S TO CLOSE: nothing is pushed, merged, tagged, PR'd or deployed.**
   `d2c09c6`, `8ba368a`, `727de75` and this close commit stay **local**. `c2d97f8` remains the
   **selection anchor** and **may not be amended**, and neither may the three execution commits.
-- **Previously closed:** `gravito_p5b_citation_anchor_tokens_a`
+- **Closed before that:** `gravito_p5b_citation_anchor_tokens_a`
   (`PACKET-0029-citation-anchor-tokens` — **REUSED, not minted:** it is the id `DECISION-0011`
   already carries for this candidate in its own `candidate_ids` column, and the id `DECISION-0010`
   carried before that. Collision-checked at close against every `PACKET-*` token in the tree:

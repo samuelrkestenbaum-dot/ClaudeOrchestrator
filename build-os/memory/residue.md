@@ -900,6 +900,10 @@
   **not because a second MODEL was ever available.** A single-model chain with one gate would
   have shipped a security property that did not hold.
   **The "install Codex" half remains the only half of this item still open.**]**
+  **[2026-08-03, PACKET-0036: FOURTEENTH CONSECUTIVE PACKET.** Advanced by hand, sixth close
+  running; router still says *"the last nine"* — **stale by five**, remedy named not applied.
+  **NEW: the chain caught ITSELF** — the reviewer refused a claim this chain had relayed to the
+  operator **twice**. One model; only the gates being read-only and concurrent separated them.]**
 - **(aaa) THE CLOSE ITSELF BROKE TREE-QUIET, AND ONE SUITE RUN WENT RED BECAUSE OF IT.** At the
   `gravito_p1_mutators_ids_telemetry_a` close the archivist launched
   `bash tests/build_os_tests.sh` in the background and then started
@@ -2298,3 +2302,41 @@ not to be fixed outside that packet.**
   Its cost is not hypothetical: **every content-preserving edit above any anchored site ships red
   until a projection is regenerated.** `(ppppp)` stays as the finding; this is the request that it
   become a **cut packet** rather than open-ended residue. **Not a design act taken here.**
+
+- **(vvvvv) A GATE FLICKERED ONCE AND WOULD NOT REPRODUCE — AN OBSERVATION, NOT A FINDING.** The
+  first `scan-controls.sh check` of this close reported `PHANTOM tests/gate_depth_tests.sh` and
+  REFUSED; **it did not reproduce in 14 further runs — 8 quiet, 6 under 4-way load, all rc=0.** The
+  odd run was the only one **concurrent with another tool call**. **No rate, no mechanism claimed.**
+  If it recurs, **measure under CONCURRENCY, not load.** **PIPING TRAP:** that reading came through
+  `| tail -15; echo "EXIT=$?"`, where `$?` is **`tail`'s**. **Never read a gate's verdict through a
+  pipe** — `(aaa)` again.
+
+- **(wwwww) OPERATOR-FACING: A CLOSED RECEIPT CARRYING A SINCE-FALSIFIED CLAIM HAS NO POINTER TO
+  ITS CORRECTION.** Builder-raised **design question**, stated in full in the receipt and in
+  `current_state.md`. Three copies of the superseded *"ONE-DIRECTIONAL ..."* claim survive in
+  prior-packet records; **rightly not rewritten** — a correction creates a later record. **But the
+  kernel declares `supersedes`/`contradicts` and receipts do not participate in them**, so a reader
+  arriving at the sealed record meets the false sentence alone. **A design act, not the
+  archivist's.** Kin to `(uuuuu)`, `(ppppp)`.
+
+- **(xxxxx) THIS CLOSE MOVED THE QUANTITY THE PACKET NAMED AS THE HIDDEN DRIVER.** A **one-row**
+  growth doubled the rate (**7.53% -> 14.55%**); **this close appended the NINETEENTH row to that
+  same store** — `packet_metrics.tsv` **72,754 -> 73,992 B**, rows **18 -> 19**, so by arithmetic
+  (**not** fresh measurement) the margin past 65,536 goes **6,611 -> ~7,849, +19% in one close.**
+  Nothing is wrong now — that site drains. **The trend is monotonic and unwatched:** ~1.2 KB per
+  close, no ceiling, no assertion, and the new guard **cannot see volume**. **Remedy named in the
+  receipt, not built here.**
+
+- **(yyyyy) THIS FILE IS 98% FULL, ROTATION CAN RECLAIM NOTHING FROM IT, AND THIS CLOSE WAS TRIMMED
+  TO FIT — `(mmmmm)`'s NO-GREEN-PATH SHAPE AGAIN.** Derived: at `aa0a7b3` **201,192 B against a
+  204,800 B ceiling — 3,608 B headroom**, while a normal close writes several KB. **This close's
+  first draft was +7,934 B and drove `build-os/maintenance/run-tests.sh` RED (4 subtests); it was
+  rewritten to fit**, which is why these items are terse and the argument lives in the receipt.
+  **ROTATION IS NOT THE ESCAPE:** `rotate-memory.sh` selects **by recency over BLOCKS** and its dry
+  run reports this file as **3 blocks -> keep 3 newest, would archive 0** — **for any N >= 3 it
+  reclaims NOTHING.** **Worse, it REFUSES at exit 3 once the file is over the ceiling: the
+  preventative tool has a precondition that the failure it prevents violates.** **NOT FIXED HERE** —
+  the fixes are operator-facing (re-block the file, raise `--max-bytes` deliberately, or move
+  standing content to `standing_gates.md`, which the rotator never reads), and since selection is
+  **recency ONLY** a blind `--apply` could archive literals other suites pin. **The next close has
+  no green path unless one is taken.**

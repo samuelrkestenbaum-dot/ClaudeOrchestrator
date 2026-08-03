@@ -4,9 +4,9 @@
 > the builder implements exactly this and nothing else; the archivist clears it
 > on close. One packet at a time.
 
-## Status: IN FLIGHT — `gravito_measurement_integrity_a`
+## Status: CLOSED, NOTHING IN FLIGHT — `gravito_measurement_integrity_a` closed 2026-08-03
 
-- **Packet id:** `PACKET-0036-measurement-integrity` — **MINTED, not reused**, and
+- **Packet id (CLOSED):** `PACKET-0036-measurement-integrity` — **MINTED, not reused**, and
   collision-checked **before** the mint rather than after: the live band is
   `PACKET-0001`..`PACKET-0035`, `PACKET-0035` is the highest allocation predating
   this packet, `git log -S'PACKET-0036' --all` returns **no commit**, and a
@@ -79,6 +79,55 @@ red suite until someone regenerates the shadow, so **a byte-exact reconcile of a
 position-bearing projection is itself a false-negative generator** — the same
 family as `DEFECT-0013`, arriving by a different route. Not in this packet's
 scope to fix; **named, not normalised.**
+
+## CLOSED — `gravito_measurement_integrity_a` — NOTHING IN FLIGHT
+
+**Closed 2026-08-03 at `aa0a7b3`. The declaration above is preserved verbatim rather than
+deleted**, because this packet exists partly to prove that the declaration was written BEFORE the
+build; a record that is erased on close cannot testify to that. What changed at close is the
+STATUS and the `**Packet id:**` marker — the bandwidth guard's declaration pattern no longer
+matches, so `bandwidth.active_packet_singleton` correctly reads **0 packets in flight against a
+ceiling of 1**, which is true of the world again.
+
+- **Verdict: PASS-AS-FIXED.** qa **GREEN**; reviewer `fix-then-pass`, every item fixed in
+  `aa0a7b3` and verified by the orchestrator rather than by opening a fourth gate stage.
+  **Depth: 3 serial stages.**
+- **Receipt:** `build-os/receipts/gravito_measurement_integrity_a.md`
+- **Commits:** `0cdb3b7` (declaration) + `53b92d4` (fix, sweep, guard) + `aa0a7b3` (claim
+  corrections), base `a2648dc`, re-verified at close — `git merge-base aa0a7b3 a2648dc` returns
+  `a2648dc`. **None pushed. None may be amended.**
+- **THE FOUR THINGS THE PACKET HAD TO MAKE TRUE WERE ALL MADE TRUE, AND THE RULING WAS GIVEN.**
+  (1) The defect is fixed at its site **without disabling `pipefail`** — the consumer drains.
+  (2) The class was swept, and the sites that cannot race are recorded **with the measurement
+  that says why** rather than deleted from the list. (3) The fix is proven at **4000 iterations
+  before and after**, quiet and under load: **15.33% -> 0.0000%** quiet, **42.60% -> 0.0000%**
+  under 4-way load, **100% -> 0/2000** on an amplified fixture. (4) The guard is 7 assertions in
+  an existing suite and **says plainly what it cannot see** — and every declared blind spot was
+  **confirmed real by qa's sneak test**, five idioms walking straight past it.
+- **THE RULING: a single green run is again sufficient FOR THIS DEFECT, and the doubled-run
+  discipline STAYS IN FORCE.** *What was measured is that one NAMED non-determinism is gone; what
+  would license dropping the discipline is that NO UNNAMED one remains, and nothing here measures
+  that.* Retiring it is an **operator act** with a stated price: N>=200 consecutive full-suite
+  runs at a fixed commit with **zero variation in the per-suite PASS/FAIL VECTOR**, not in the
+  total. `(ttttt)`.
+- **THE HEADLINE OUTPUT IS NOT THE FIX. It is that the 6.26%-vs-15.70% discrepancy was FIXTURE,
+  not load** — a **one-row** store growth doubled the failure rate, 7.53% -> 14.55%, same machine
+  and same code. **The rate of a latent non-determinism is a function of a data volume nobody is
+  watching**, so a site measured at 0% today can flap tomorrow with no code change and no test
+  turning red.
+- **THE CEILING HELD.** Census **105** and **zero `+control` lines — NO new control**; declared
+  mismatches **22**; gate-on-advise **14**, execute **8**, identical at base and HEAD;
+  `rank-candidates.sh` the same blob `5543ea8`; `signal_snapshots.tsv`, `decision_telemetry.tsv`
+  and `memory_events.tsv` all **zero diff**; `(ddd)` still queued and `(uuuu)` still open.
+- **DEVIATION, RECORDED AND NOT NORMALISED: 3 commits against the `<=2` cap**, the third close in
+  a row with this shape. The fix round landed as its own commit rather than amending commits the
+  gates had already measured. The receipt's manifest is a **sequential attribution by role, not a
+  disjoint partition**, and is **not a precedent for a fan-out**.
+- **NOTHING IS STAGED NEXT, AND THAT IS DELIBERATE.** Declaring the next packet is a **routing
+  act**, not bookkeeping, and the archivist does not take routing acts. Two candidates are
+  **routed and not chosen** in the receipt: making receipts participate in the kernel's
+  `contradicts` edges `(wwwww)`, and removing the resolved line number from the byte-compared
+  projection `(uuuuu)`.
 
 ## RESULT — what was measured, and the ruling
 
