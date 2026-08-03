@@ -4,54 +4,54 @@
 > the builder implements exactly this and nothing else; the archivist clears it
 > on close. One packet at a time.
 
-## Status: CLOSED, NOTHING IN FLIGHT — `gravito_residue_reblock_a` closed 2026-08-03
+## ACTIVE — `gravito_current_state_reblock_a` — ONE PACKET IN FLIGHT
 
-- **Packet id (CLOSED):** `PACKET-0037-residue-reblock` — **MINTED, collision-checked
-  BEFORE the mint rather than after.** The live band is
-  `PACKET-0001`..`PACKET-0036`; `PACKET-0036` is the highest allocation predating
-  this packet; `git log -S'PACKET-0037' --all --oneline` returns **0 commits** and
-  a full-tree `grep -rlF 'PACKET-0037' . --exclude-dir=.git` returns **0 files**.
-  The id was free.
+- **Packet id:** `PACKET-0038-current-state-reblock` — **MINTED, and
+  collision-checked BEFORE the mint rather than after.** The live band is
+  `PACKET-0001`..`PACKET-0037`, `PACKET-0037` is the highest allocation
+  predating this packet, `git log -S'PACKET-0038' --all --oneline` returns **0
+  commits** and `grep -rlF 'PACKET-0038' . --exclude-dir=.git` **0 files**.
 - **Lane:** `substantive`. **Depth 2** — builder, then qa ‖ reviewer.
-- **This commit is the declaration, and it is commit 1.** The packet before last
-  was dispatched without one; that is `DEFECT-0011-undeclared-active-packet`,
-  **`OCCURRENCE-0005`**, and the measurable consequence was that
-  `bandwidth.active_packet_singleton` read **0 in flight while a packet was in
-  flight** — the guard passing truthfully on a file describing the wrong packet.
-  This commit exists so that reading is **1** for the duration of this packet,
-  and it is taken first so that no measurement inside a packet about a memory
-  file is taken against a packet file that is lying about what is in flight.
+- **This commit is the declaration, and it is commit 1**, so that
+  `bandwidth.active_packet_singleton` reads **1 in flight** for the whole life
+  of this packet: no measurement taken inside a packet ABOUT a memory file may
+  be taken against a packet file lying about what is in flight.
+  `DEFECT-0011-undeclared-active-packet` sits at `OCCURRENCE-0005` and the
+  remedy it names — a LOWER bound on the same cardinality check — does not exist.
+- **THIS EDIT IS LINE-COUNT-NEUTRAL ABOVE THE `ANC-0003` SITE ON PURPOSE.**
+  `DEFECT-0001-stale-line-reference` fired at this exact site at each of the
+  last two declarations: the committed kernel projection embeds
+  `build-os/packets/active_packet.md:89#ANC-0003` as a RESOLVED line number and
+  `tests/memory_kernel_tests.sh` §18 compares it with `cmp -s`. This
+  declaration replaces the previous one **in place, line for line**, so the
+  anchor site does not move and no projection needs regenerating.
 
 ## Branch base
 
-Branched at `2a3c070` on `claude/project-handoff-merge-ramhds`, verified with
-`git merge-base HEAD claude/project-handoff-merge-ramhds` → `2a3c070`, **before
-the first edit**. **Nothing is pushed, merged, tagged, PR'd or deployed, and no
-such go has been given.**
+Branched at `9c740d7` on `claude/project-handoff-merge-ramhds`, verified with
+`git merge-base HEAD claude/project-handoff-merge-ramhds` → `9c740d7`, **before
+the first edit**. **Nothing is pushed, merged, tagged, PR'd or deployed by this
+packet, and no such go has been given.**
 
-## What `gravito_residue_reblock_a` must make true
+## What `gravito_current_state_reblock_a` must make true
 
-`build-os/memory/residue.md` is **204,658 B** against the **204,800 B** ceiling
-`build-os/maintenance/run-tests.sh` enforces through
-`rotate-memory.test.mjs` — **142 B of headroom**, so the next close has no green
-path. The preventative tool cannot relieve it: the file carries **exactly 3
-`^## ` blocks**, and `rotate-memory.mjs`'s `routeSegments` retains
-`blocks.slice(0, keepN)`, so at the shipped `keep=10` it retains all 3 and
-archives **0 blocks / 0 bytes**.
+`build-os/memory/current_state.md` is in the dead end `residue.md` was just
+taken out of, and this time **prospectively**: `wc -c` reports **185204 B**
+against the **204800 B** ceiling `rotate-memory.test.mjs` enforces — **19596 B
+of headroom** — while `grep -c '^## '` reports **exactly 3** blocks, so
+`routeSegments`' `blocks.slice(0, keepN)` retains all 3 at the shipped
+`keep=10` and archives **0 blocks / 0 bytes** at **exit 0**.
 
-1. **Failing tests first**, reproducing the live condition: three large blocks,
-   the shipped-keep rotation archiving nothing, and **zero reclaimable bytes**.
-2. **Re-block** `residue.md` into enough coherent `##` sections that rotation
-   reclaims meaningful space — preserving every item's letter and text, and every
-   gate-pinned literal (`license model`, `no tags`, `single-platform`,
-   `tests/release_metadata_tests.sh:322-324`).
-3. **A protected region rotation cannot reach**, proven by an executed test
-   rather than argued — not selected by recency.
-4. `--dry-run` verified before anything is applied; scanner exit codes captured
-   **directly**, never through a `tail` pipeline.
+1. **Failing tests first**, reproducing the live condition, with the RED shown.
+2. **Re-block** it so rotation reclaims real space: standing/current truth
+   first, active risks next, history newest-first, cut at the file's own era
+   markers and never mid-entry.
+3. **A protected region rotation cannot reach**, proven by an executed sweep
+   over every legal `--keep`, not argued.
+4. `--dry-run` only. **Rotation is NOT applied** — a separate operator packet.
 
-**Out of scope:** raising any ceiling, silencing any gate, fixing any residue
-item, and applying rotation to the live tree.
+**Out of scope:** raising any ceiling, applying rotation, moving standing
+content into `standing_gates.md`, and fixing any residue item.
 
 ## Status: CLOSED, NOTHING IN FLIGHT — `gravito_measurement_integrity_a` closed 2026-08-03
 
