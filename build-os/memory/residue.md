@@ -103,17 +103,48 @@
   `blocks: 3 total -> keep 3 newest, would archive 0` and
   `would archive : nothing — already rotated (no-op)` — **the identical condition residue.md was
   in, reported at exit 0 in words that read like success.**
-- **(bbbbbb) QUEUED FOR THE OPERATOR — THE ROTATION `PACKET-0037-residue-reblock` MADE POSSIBLE
-  AND DELIBERATELY DID NOT APPLY.** The live `residue.md` stands **ABOVE**
-  `DEFAULT_MAX_BYTES` (`200 * 1024` = 204800 B) and stays there until somebody rotates.
-  **THE OVERAGE IS DERIVED, NOT REMEMBERED** — this item is inside the file it is about, so any
+- **(bbbbbb) [EXECUTED 2026-08-03 — THE ROTATION HAS NOW RUN, AT `--keep 25` AND NOT AT THE VALUE
+  THIS ITEM NAMES. THE PENDING ACTION BELOW IS SUPERSEDED AND DEFECTIVE; DO NOT RUN IT. See
+  `build-os/memory/archive/ROTATION-RECEIPT-2026-08-03T16-09-49Z.md`, batch `2026-08-03T16:09:49Z`,
+  applied by `gravito_governed_rotation_a`.]** The item is kept as written below, on this tree's own
+  rule — *a correction creates a later record, it does not edit an earlier one* — except for the one
+  sentence whose premise inverted, which is corrected in place because leaving it would assert the
+  opposite of the measured state rather than merely an outdated one.
+  **WHY `--keep 10 --apply` MUST NOT BE RUN TODAY, AND IT IS A LIVE HAZARD RATHER THAN A DEAD
+  NOTE.** Retention is a **PREFIX** (`routeSegments` keeps `blocks.slice(0, keepN)`), and after the
+  rotation this file carries **25** `^## ` blocks. So `--keep 10` today retains blocks 1–10 and
+  archives **blocks 11–25 — fifteen blocks**, among them **block 16**, which holds `(ddd)`, the item
+  marked *"IS NOT CONSUMED AND MUST NOT BE MARKED SO"*, and **block 25**, which holds `(S1) THE S1
+  EVIDENCE-TOKEN DECISION` and the flake item marked `[STILL OPEN AND STILL UNDIAGNOSABLE]`. **Those
+  are the exact standing objects the rotation packet proved it had protected** — it retained block 25
+  precisely because it is the oldest block holding a still-open item. Running the superseded command
+  would archive them. **Blocks are named by INDEX and items by LETTER on purpose: this item has been
+  the subject of two line-number corrections already and will not carry a third.**
+  **[CORRECTED — THE PREMISE OF THE NEXT SENTENCE INVERTED AT THE ROTATION.]** The live `residue.md`
+  now stands **UNDER** `DEFAULT_MAX_BYTES` (`200 * 1024` = 204800 B); it was **ABOVE** it when this
+  item was written, and rotation is what moved it, so the file no longer "stays there until somebody
+  rotates" — somebody did.
+  **THE HEADROOM IS DERIVED, NOT REMEMBERED** — this item is inside the file it is about, so any
   digit written here would be stale the moment the item was written:
-  `echo $(( $(wc -c < build-os/memory/residue.md) - 204800 ))`.
+  `echo $(( 204800 - $(wc -c < build-os/memory/residue.md) ))`. **BOTH SIDES RE-DERIVED, AND PINNED
+  TO A NAMED COMMIT RATHER THAN TO "NOW", WHICH IS THE ONLY WAY A SIZE DIGIT FOR THIS FILE IS EVER
+  STABLE:** at **`7bd152e`**, the rotation commit, `wc -c` = **191805 B** against **204800 B** —
+  **UNDER by 12995 B**, where before rotation it was **218062 B**, i.e. **OVER by 13262 B**. Those
+  two figures are frozen because the commit is. **NO FIGURE IS QUOTED FOR "NOW", ON PURPOSE:** by
+  `(cccccc)`'s standing discipline any such digit is stale on write, and this fix round proved it
+  again at its own expense — **writing these annotations consumed a large part of the headroom the
+  rotation had just bought**, which is `(cccccc)` happening a second time inside the item that
+  records it. Derive it with the command above; do not read a number here.
   **THE BLOCKER WAS CONVERTED, NOT CLEARED**, and that is the honest statement of what the packet
   bought: from *"142 B of headroom and a tool that can reclaim 0"* to *"over an unenforced
   constant, with a tool that can reclaim 127142 B on one command."* Real progress; a
   **different object**, and it is queued here because it was queued nowhere else.
-  **THE PENDING ACTION:** `node build-os/maintenance/rotate-memory.mjs --file residue --keep 10
+  **THE PENDING ACTION [SUPERSEDED AND DEFECTIVE — DO NOT RUN. Superseded by the executed
+  `--keep 25`; defective independently of that, because at `--keep 10` the retained file carries
+  exactly 10 blocks and `tests/build_os_maintenance_tests.sh` §8 fails three ways — §8(a) refuses
+  `RES_BLOCKS -le 10`, §8(b) `archivedBlocks` becomes 0, §8(c) reclaimable bytes fall under the
+  `RES_MIN_RECLAIM=40960` floor. It was already defective as written when it was queued]:**
+  `node build-os/maintenance/rotate-memory.mjs --file residue --keep 10
   --apply` (dry-run first, without `--apply`).
   **WHY THE PACKET DID NOT APPLY IT:** applying it relocates **live, still-open items** — `(ddd)`,
   queued and verified at 3 sites, and `(uuuu)`, open — out of this file and into
@@ -190,6 +221,82 @@
   newly invalidated. Item **(r)** already registers this as structural and guaranteed; opening a
   second item for it would be `DEFECT-0003-duplicate-semantic-truth` committed in the ledger that
   tracks it.
+- **(hhhhhh) THE FIRST GOVERNED ROTATION BROKE **ZERO** CITATIONS, AND THREE SEPARATE SWEEPS
+  DISAGREED ABOUT THAT BECAUSE ALL THREE CONFLATED POSITIONAL SHIFT WITH SEMANTIC IDENTITY.**
+  `DEFECT-0001-stale-line-reference`; the `resolvability is not identity` family, whose standing
+  statement is `(mm)` and whose registered form is the citation guard's own limitation —
+  *`scan-controls.sh` checks that a ref RESOLVES, never that it names the same content.*
+  **THE MEASUREMENT.** The rotation's banner moved every retained line **+10**, so for any line `N`
+  in the pre-rotation file `pre[N] == live[N+10]`. That identity holds **mechanically at all 31
+  retained citation sites** and is therefore **worth nothing as evidence about any individual
+  citation**: it says the bytes moved, not that the citation ever named them. A sweep that
+  establishes it and reports "verified by content" has proved the wrong proposition.
+  **THE TWO CITATIONS PROPOSED FOR REPOINTING, AND WHY NEITHER WAS REPOINTED.** Both were checked
+  against the base blob `3ec519b:build-os/memory/residue.md` (sha256 `1977817f…`) by reading what the
+  citing sentence CLAIMS and comparing it with what the cited lines HOLD. **Base line numbers are
+  quoted against a named immutable commit, which is the one way a line number is identity-stable;
+  the citing items are named by LETTER because their own positions are not.**
+  - Item `(yyy)` cites `residue.md:947-951` and claims it *"is a **single sentence** — it supplies
+    **both** `residue_items_closed=5` … **and** `residue_ruling_satisfied=1`"*. At `3ec519b` those
+    lines are the tail
+    of item `(xxxx)` — *"…dies on, and the only one nobody could have restored after the fact."* —
+    followed by a blank line and the `## History — items (pppp)–(rrrr)` heading. Not one sentence,
+    and it supplies neither signal. The string `residue_items_closed=5` occurs **exactly once** in
+    the whole base file, at `3ec519b`'s `:1359` — **inside `(yyy)` itself**, i.e. the citing text.
+  - The passage inside `(qqqqq)` that enumerates surviving copies of the superseded one-directional
+    claim cites `residue.md:2038-2039`. At `3ec519b` those lines hold item `(hh)`'s verbatim
+    reviewer-withdrawal quote. Every base copy of the superseded claim is at `:509`, `:560`,
+    `:608-612` and `:830-831` — **none at `:2038-2039`**.
+  **BOTH WERE ALREADY SEMANTICALLY STALE AT THE BASE COMMIT, so this rotation did not break them and
+  a `+10` shift would only have manufactured a differently-wrong pointer.** **AND THE SHIFT IS NO
+  LONGER `+10`:** writing this very item moved everything below it again, so relative to `3ec519b`
+  the retained content now sits at **`+117`**, re-derived by locating the base line's bytes in the
+  live file rather than by adding. **A repoint deferred is a repoint that would have had to be
+  redone** — which is the second argument for never having made it, after the fact that it would
+  have been wrong. Both ranges remain **in bounds** for `tests/control_registry_tests.sh` §27a
+  (`951` and `2039` against a **2351**-line file), so no gate is made red by leaving them and none
+  would be made green by moving them. Same disposition and same
+  reasoning as `(eeeeee)` — **A STALE LINE-PINNED POINTER, MEASURED AND DELIBERATELY NOT REPAIRED** —
+  and the same standing rule: *a wrong repoint is worse than a stale one.* **NOT REPOINTED, ON
+  PURPOSE. Do not let a later mechanical sweep "fix" them.**
+  **THE WIDER RESULT, DERIVED WHILE CHECKING THE TWO.** Of the **11** line-pinned citations into this
+  file enumerated tree-wide by the rotation receipt, **11 were already semantically stale at
+  `3ec519b` and 0 were correct** — `:242` claims *"0 of 78"* which lives at base `:2380`; `:442`
+  claims *"BUSY exit 75"* which lives at base `:261`; `:631` claims the *superseded-span-without-path*
+  convention which lives at base `:1475`; `:280` and `:582` were already recorded as stale by
+  `(eeeeee)` and the receipt. **The count of citations into this file that this packet could
+  possibly have broken is therefore ZERO, because the count that were correct going in was ZERO.**
+  **WHY IT IS WORTH AN ITEM RATHER THAN A FOOTNOTE — THE INSTRUMENTS FAILED, NOT THE TOOL.** Three
+  readers measured this and all three were wrong in different directions: one classified by semantics
+  and found **one** break; one verified **two** positionally and reported them as semantic; one swept
+  **31** mechanically. The true answer is **0**. This is the tree's named recurring defect class
+  occurring **inside the machinery built to detect it**, which is the same shape `(mm)` recorded at
+  20-of-27 references passing every positional check while silently wrong. **THE RULE THAT FALLS OUT,
+  AND IT IS THE DURABLE PART:** *a content match at a single commit tests RESOLVABILITY; only a
+  cross-commit comparison against what the citing sentence CLAIMS tests IDENTITY* — and `pre[N] ==
+  live[N+k]` is not that comparison, it is the positional check wearing its clothes.
+  **NO OCCURRENCE ROW IS MINTED HERE.** `build-os/registry/defect_classes.txt` is outside this fix
+  round's declared file scope and the round's ceiling is 0 new stores; the next free id is
+  **`OCCURRENCE-0019`** (derived: `grep -c '^occurrence: '` = **18**, highest `OCCURRENCE-0018`).
+  **QUEUED, not silently dropped** — and deliberately not written as a dangling id.
+- **(iiiiii) THE `--keep` DERIVATION RULE IS RECORDED HERE BECAUSE IT LIVED ONLY IN ONE RECEIPT'S
+  PROSE, AND THE NEXT ROTATION WOULD OTHERWISE REDO THE MARKER SCAN BY HAND.** **THE RULE:** *archive
+  every block older than the oldest still-open item* — equivalently, **set `--keep` to the index of
+  the oldest block that still holds an open item**, since retention is a prefix and blocks run
+  newest-first. **HOW IT WAS APPLIED, AS THE WORKED EXAMPLE:** the oldest still-open item sat in
+  **block 25** (`(S1)`, plus the flake marked `[STILL OPEN AND STILL UNDIAGNOSABLE]`), so the cut fell
+  at `--keep 25`; `--keep 24` was executed in scratch and **rejected** because block 25 carries those
+  items. **THE RULE IS NOT THE ONLY CONSTRAINT** — it must land inside the window the other two
+  bounds leave: the byte ceiling above (`--keep 27` refuses at `EXIT.CEILING`) and
+  `tests/build_os_maintenance_tests.sh` §8(c)'s reclaim floor below. When the three disagree, that is
+  a finding, not a tie to be broken silently.
+  **NOTHING ENFORCES THIS AND NOTHING IS BUILT HERE.** No guard, no validator, no test asserts that a
+  chosen `--keep` retains every open item — the rotation packet's own ceiling forbade adding one and
+  this fix round inherits that ceiling. **The scan is still MANUAL: read the open-item markers, find
+  the oldest, take its block index.** Registered as the queued guard so the next rotation inherits a
+  rule rather than an anecdote. **Its natural home is `tests/build_os_maintenance_tests.sh` §8, and
+  `(ffffff)`'s open choice about section 8/9 duplication should be settled BEFORE it is written, or
+  it becomes a fourth clone.**
 
 ## Known risks / debt
 

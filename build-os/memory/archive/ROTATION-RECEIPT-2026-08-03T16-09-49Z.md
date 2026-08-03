@@ -137,6 +137,26 @@ The 505 B banner sits at the tail of the preamble, so every retained line moved
 all ten distinct targets, not by assuming the banner's height. The citations were
 still **not** repointed, on two separate grounds:
 
+> **[CORRECTED BY THE FIX ROUND — "CONTENT IDENTITY" IS THE WRONG NAME FOR THE
+> CHECK IN THE PARAGRAPH ABOVE, AND IT IS THE ONE FALSIFIED CLAIM IN THIS
+> RECEIPT.]** Comparing `sed -n Np` pre against `sed -n N+10p` post establishes
+> **POSITIONAL SHIFT** — that the bytes formerly at `N` are now at `N+10`. It
+> holds **mechanically at every retained site in the file**, so it discriminates
+> nothing and cannot support the phrase *content identity*, which a reader will
+> take to mean *the citation names what it claims to name*. **The second
+> proposition was never tested by that check.** When it was tested — by reading
+> what each citing sentence CLAIMS against what the cited lines HOLD at the named
+> base commit `3ec519b` — the result was that **all 11 enumerated citations into
+> `residue.md` were ALREADY semantically stale at `3ec519b`, and 0 were correct.**
+> The two singled out as fresh breaks (`residue.md:947-951` cited by `(yyy)`, and
+> `residue.md:2038-2039` cited from within `(qqqqq)`) were **already wrong at the
+> base commit** and were correctly left alone; had they been repointed `+10` they
+> would have been moved to a differently-wrong place. **THE DISPOSITION IN THE
+> TWO BULLETS BELOW IS UNCHANGED AND WAS RIGHT — nothing was repointed, and
+> nothing should have been. What was wrong is the WARRANT, and the count of
+> citations this rotation broke is ZERO.** Full derivation at residue `(hhhhhh)`;
+> class `DEFECT-0001-stale-line-reference`, *resolvability is not identity*.
+
 - **Historical records.** `residue.md:629` sits inside a passage that lists those
   very citations and says *"They were left as written"*, on this tree's own rule
   *a correction creates a later record, it does not edit an earlier one*. The four
@@ -250,6 +270,39 @@ then applied is counted as two records, not one.
 A keep sweep (`--keep 16/20/22/24/26/27`) was also run in scratch as **dry runs
 only**, which write nothing; `--keep 27` refused at `EXIT.CEILING` (3) as expected.
 
+**THE "recorded before?" COLUMN IS BUILDER ATTESTATION AND IS NOT
+TREE-VERIFIABLE. STATED PLAINLY BECAUSE IT IS THE EXACT SHAPE THE OPERATOR'S
+WARNING NAMED.** The instruction this packet ran under was *do not run an
+unrecorded `--apply`*. The column above answers `yes` four times, and **no
+artefact in this tree predates any of those invocations**, so nothing here can
+corroborate it:
+
+- this receipt's own mtime is **`16:13:33`**, which **POSTDATES** the live
+  `--apply` at **`16:09:49`** by 3m44s — it is a record written *after* the act,
+  not a commitment made *before* it;
+- the scratch roots the first two invocations ran in are **gone**, so the
+  records that were allegedly written before them cannot be produced;
+- there is no pre-registration store, no append-only log and no timestamped
+  commit standing between the plan and the execution.
+
+**So a reader has the builder's word and nothing else, and a receipt that
+presents an unfalsifiable claim in a table beside falsifiable ones invites them
+to be read at the same weight. They must not be.** Sections 3, 5 and 6 are
+executed and independently re-derivable from committed bytes; this column is
+testimony.
+
+**THE MITIGATION IS REVERSIBILITY, AND IT IS PROVEN RATHER THAN ASSERTED.** What
+makes the unverifiable ordering tolerable is that the operation it describes is
+**exactly invertible**: section 6's restoration was executed twice and
+round-trips to sha256 `1977817f…`, the blob at `3ec519b`, byte-for-byte. An
+`--apply` whose full effect can be undone from committed bytes carries a bounded
+worst case whatever order it was recorded in. **That is a mitigation, not a
+substitute** — it bounds the damage, it does not make the claim checkable.
+**THE REAL REMEDY IS PRE-REGISTRATION** — write the intended invocation to a
+committed, append-only record *before* running it, so the ordering is a property
+of the tree rather than of the narrator. **NOT BUILT HERE** (ceiling: no new
+stores) and queued as such.
+
 ---
 
 ## 8. WHAT THIS ROTATION DOES NOT CLAIM
@@ -270,3 +323,79 @@ only**, which write nothing; `--keep 27` refused at `EXIT.CEILING` (3) as expect
   Those bytes are deliberately **not** edited: editing them would break the
   byte-exact conservation the archive is worth anything for, and would break the
   round-trip in section 6.
+  **[CORRECTED — THIS ROTATION DID NOT CREATE THAT BROKEN DEIXIS, IT INHERITED
+  IT, AND THE SENTENCE ABOVE TAKES CREDIT IT IS NOT OWED.]** The phrasing
+  *"although `(S1)` is now in a different file"* reads as though the archiving
+  is what falsified the word *below*. It is not. **The deixis was ALREADY WRONG
+  at the base commit `3ec519b`, before anything was archived:** the sentence
+  lived at `3ec519b:build-os/memory/residue.md:2387` and said *"See item (S1)
+  below"*, while `(S1)` was at `:2194` — **193 lines ABOVE it**, not below.
+  Verified by reading both lines at the named commit. So rotation changed the
+  deixis from *wrong within one file* to *wrong across two*, which is a
+  different defect from the one this bullet describes and a smaller one than it
+  claims. The **disposition is unchanged** — the bytes still must not be edited,
+  for exactly the conservation reason given — but the **attribution** is
+  corrected: this is a pre-existing `DEFECT-0001` instance, inherited, and it is
+  the same conflation recorded at residue `(hhhhhh)` — noticing that a reference
+  moved is not the same as establishing it was ever right.
+
+---
+
+## 9. FULL SUITE, BEFORE AND AFTER
+
+**THIS SECTION WAS ABSENT FROM THE RECEIPT ENTIRELY AND IS ADDED BY THE FIX
+ROUND.** A rotation receipt that documents conservation, restoration and
+backlinks but never states whether the tree still passes its own tests is
+missing the one number a reader checks first. There is no numbered
+"requirements" list anywhere in this tree to append to — so it is recorded here
+as a section, and the gap is named rather than quietly filled.
+
+| tree | run | passed | failed |
+|---|---|---:|---:|
+| `3ec519b` (pre-rotation baseline) | 1 | **2140** | **0** |
+| `7bd152e` (rotation commit) | 1 | **2140** | **0** |
+| `7bd152e` (rotation commit) | 2 | **2140** | **0** |
+| this fix-round commit | 1 | **2140** | **0** |
+| this fix-round commit | 2 | **2140** | **0** |
+
+**The per-suite VECTOR — not merely the total — is identical across every run
+above.** That is the check that matters here and it is required by
+`DEFECT-0013-pipefail-sigpipe-false-negative`: two runs can agree on a total
+while disagreeing on which suite produced it, and a total-only comparison cannot
+tell those apart. Each run was taken **solo and in the foreground**, after
+confirming no test process was already live (`pgrep -fa '^bash tests/'` empty),
+because a concurrently-running suite is exactly the condition that manufactures
+the false counts that class describes.
+
+**Rotation moved 26762 B of closed History out of a memory file and changed no
+count in either direction.** That is the expected result and it is the point:
+the archived content was not load-bearing for any gate. Two literals *are*
+gate-pinned in `residue.md` (`no tags` via `tests/release_metadata_tests.sh:322`,
+plus the standing-region literals swept by
+`tests/build_os_maintenance_tests.sh` §8) and section 3 proves each stayed live.
+
+---
+
+## 10. THE CONTEXT-COMPILER WORK THIS PACKET ALSO DID
+
+Rotation creates a **silent** failure mode for every reader of these files: an
+over-size memory file fails to Read and the reader *knows* it is blind, whereas
+a rotated file reads fine and is merely SHORTER than the history it summarises.
+Three surfaces were changed so a session is told, and one was assessed and left
+alone.
+
+| surface | change |
+|---|---|
+| `.claude/agents/build-orchestrator.md` | +11 lines in the memory-reading step: if `build-os/memory/archive/` exists the live files are NOT the whole record; read the archive-pointer banner; resolve citations into rotated content through `INDEX.md`; do not conclude an item is absent from the record because it is absent from the live file, and do not re-derive a count from a live memory file without saying it is post-rotation. |
+| `.claude/hooks/session-start-build-os.sh` | +12 lines emitting a ROTATED-MEMORY line at session start. **Gated on `build-os/memory/archive/` existing**, so a repo that has never rotated emits byte-identical output to before and no un-rotated install changes shape. |
+| `build-os/registry/control_registry.txt:803` | `evidence_refs` bumped `:136;:151` → `:148;:163` — **+12**, the exact height of the block inserted above them in the owning module. A genuine fresh break, correctly repaired in the same commit that caused it. |
+
+**`build-os/tools/memory-kernel.sh:753` `compile-context` WAS ASSESSED AND IS
+UNAFFECTED.** It was the obvious candidate — it has "context" and "compile" in
+its name and it assembles packages for a second surface — but it **compiles from
+the kernel's own object stores, not from the markdown memory files**, so
+rotating `residue.md` cannot change what it emits or make any package it has
+already emitted less true. `do_compile_context` reads rows by id out of the
+kernel stores and never opens `build-os/memory/*.md`. **Recorded because "assessed
+and unaffected" and "not considered" are different states and a reader cannot
+tell them apart from silence.**

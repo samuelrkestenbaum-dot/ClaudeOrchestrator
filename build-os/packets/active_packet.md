@@ -4,7 +4,7 @@
 > the builder implements exactly this and nothing else; the archivist clears it
 > on close. One packet at a time.
 
-## CLOSED — `gravito_current_state_reblock_a` — NOTHING IN FLIGHT (closed 2026-08-03)
+## CLOSED — `gravito_current_state_reblock_a` (closed 2026-08-03) — SEE THE LATE DECLARATION BELOW
 
 - **Packet id (CLOSED):** `PACKET-0038-current-state-reblock` — **MINTED, and
   collision-checked BEFORE the mint rather than after.** The live band is
@@ -736,6 +736,70 @@ in flight** until a builder is actually dispatched:
    by *(file, standing-heading prefix, pinned literals)*, or accept the duplication deliberately
    and cover **this file** — which is the third rotating file and has **no protection section at
    all**. Nothing currently checks that it stays fine.
+
+## DECLARED LATE — `gravito_governed_rotation_a` — IN FLIGHT
+
+- **Packet id:** `PACKET-0039-governed-rotation` — **MINTED, and collision-checked at the mint.**
+  The live band is `PACKET-0001`..`PACKET-0038` (`PACKET-9201`/`9202`/`9203`/`9299`/`9999` are
+  test fixtures in `tests/mutator_registry_tests.sh` and two receipts, not allocations);
+  `PACKET-0038` is the highest allocation predating this packet;
+  `git log -S'PACKET-0039' --all --oneline` returns **0 commits** and
+  `grep -rlF 'PACKET-0039' . --exclude-dir=.git` **0 files**.
+- **Lane:** `substantive`. **Scope:** the first governed rotation of `build-os/memory/residue.md`
+  (`--keep 25`, batch `2026-08-03T16:09:49Z`) plus this bounded fix round.
+- **Base:** `3ec519b`, verified with `git merge-base` before the first edit. **Nothing is pushed,
+  merged, tagged, PR'd or deployed by this packet, and no such go has been given.**
+- **THIS DECLARATION IS APPENDED BELOW THE `ANC-0003` SITE, AND THE ONE EDIT ABOVE IT IS
+  LINE-COUNT-NEUTRAL.** Exactly one line above `:89` changed — the `## CLOSED` heading, rewritten
+  **in place, one for one**, to drop the now-false words `NOTHING IN FLIGHT`. Everything else is
+  appended here. `ANC-0003` re-verified at `:89` after the edit; **no projection regeneration was
+  required.** This is the technique this file already used twice, at its own account of it.
+
+### `DEFECT-0011-undeclared-active-packet` — A FURTHER OCCURRENCE, AND THIS FILE STATED THE RULE
+
+**THE BREACH.** `gravito_governed_rotation_a` was built, committed at `7bd152e`, and gated
+**while this file declared `NOTHING IN FLIGHT`**. `bandwidth.active_packet_singleton` therefore
+reported **ZERO in flight while the packet was in flight** — the guard passing truthfully against
+a file describing the wrong state. The declaration above is the repair, and it is **late**: it
+cannot make the guard's reading true for the part of the packet already executed, only for the
+remainder. **That is precisely why the rule requires the declaration to be commit 1.**
+
+**THE RULE THIS PACKET BROKE IS WRITTEN VERBATIM IN THIS FILE, AT `:15-20`, BY THE PREVIOUS
+PACKET:**
+
+> - **This commit is the declaration, and it is commit 1**, so that
+>   `bandwidth.active_packet_singleton` reads **1 in flight** for the whole life
+>   of this packet: no measurement taken inside a packet ABOUT a memory file may
+>   be taken against a packet file lying about what is in flight.
+>   `DEFECT-0011-undeclared-active-packet` sits at `OCCURRENCE-0005` and the
+>   remedy it names — a LOWER bound on the same cardinality check — does not exist.
+
+**THE AGGRAVATION IS THE SUBJECT MATTER.** That rule does not merely exist somewhere in the tree;
+it is stated **in this file**, by the **immediately preceding packet**, and its stated reason is
+*no measurement taken inside a packet ABOUT a memory file may be taken against a packet file lying
+about what is in flight*. `gravito_governed_rotation_a` is a packet **about memory files** — it
+rotated one — so it is the exact case the sentence names, and every measurement it took was taken
+against a file lying about what was in flight.
+
+**THE CLASS HAS NOW FIRED AGAINST A PREVENTION THAT WAS SPECIFIED AND NEVER BUILT.** Only the
+UPPER bound on `bandwidth.active_packet_singleton` exists; the `could_have_been_prevented_by`
+already names the LOWER bound — refusing zero declared packets while a build is in flight — and it
+still does not exist. **Nothing is built for it here** (this fix round's ceiling is 0 new
+validators), and pretending otherwise would be the fourth consecutive record of a remedy named and
+not delivered.
+
+**AN EARLIER ROUND OF THIS PACKET DECLINED TO DECLARE, REASONING THAT DECLARING WOULD MOVE THE
+`ANC-0003` SITE AT `:89` AND TURN `tests/memory_kernel_tests.sh` §18 RED. THAT WAS AN EXCUSE, NOT A
+CONSTRAINT, AND IT IS RECORDED AS SUCH.** The remedy was already executed **twice in this very
+file** — at `:21` and again at `:716`, both headed *"THIS EDIT IS LINE-COUNT-NEUTRAL ABOVE THE
+`ANC-0003` SITE ON PURPOSE"* — and `:725` records `ANC-0003` re-verified at `:89` afterwards. The
+technique was documented, proven, and sitting in the file the packet was declining to edit. **A
+constraint with a known, in-file, twice-executed workaround is not a constraint.**
+
+**NO OCCURRENCE ROW IS MINTED IN `build-os/registry/defect_classes.txt`.** That store is outside
+this fix round's declared file scope and the round's ceiling is 0 new stores. The next free id is
+**`OCCURRENCE-0019`** (derived: `grep -c '^occurrence: '` = **18**, highest `OCCURRENCE-0018`).
+**QUEUED for the archivist, and deliberately not written here as a dangling id.**
 
 Also open and untouched by boundary: `(ddd)`, `(uuuu)`, `(ppppp)`, `(eeeeee)`'s stale pointer —
 which the next packet must repoint **by content**, after re-deriving the position, because
