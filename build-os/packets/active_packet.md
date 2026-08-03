@@ -4,9 +4,9 @@
 > the builder implements exactly this and nothing else; the archivist clears it
 > on close. One packet at a time.
 
-## ACTIVE — `gravito_current_state_reblock_a` — ONE PACKET IN FLIGHT
+## CLOSED — `gravito_current_state_reblock_a` — NOTHING IN FLIGHT (closed 2026-08-03)
 
-- **Packet id:** `PACKET-0038-current-state-reblock` — **MINTED, and
+- **Packet id (CLOSED):** `PACKET-0038-current-state-reblock` — **MINTED, and
   collision-checked BEFORE the mint rather than after.** The live band is
   `PACKET-0001`..`PACKET-0037`, `PACKET-0037` is the highest allocation
   predating this packet, `git log -S'PACKET-0038' --all --oneline` returns **0
@@ -684,3 +684,59 @@ archive 0` / `nothing — already rotated (no-op)` at **exit 0**. The instrument
 reports the file as **healthy right up until it is unfixable**. Re-blocking it is
 the obvious next packet; it is deliberately left **undeclared** here so this file
 keeps reading **0 in flight** until a builder is actually dispatched.
+
+## Close record — `gravito_current_state_reblock_a` (`PACKET-0038-current-state-reblock`), 2026-08-03
+
+- **Packet id (CLOSED):** `PACKET-0038-current-state-reblock`. Re-checked at close, not accepted
+  from the brief: at declaration `git log -S'PACKET-0038' --all --oneline` returned **0 commits**
+  and `grep -rlF 'PACKET-0038' . --exclude-dir=.git` **0 files**; at close the token resolves to
+  **exactly this packet's own three commits** and to three live records. **The mint preceded the
+  build and the id was free.**
+- **Base `9c740d7`; HEAD at close `d885657`.** Commits `06e9f1c` (declaration), `b41aa5d`
+  (migration), `d885657` (fix round). **Nothing pushed, merged, tagged, PR'd or deployed, and no
+  such go was given.** No commit squashed, amended, rebased or rewritten.
+- **Verdict: PASS-AS-FIXED.** qa GREEN; reviewer `fix-then-pass` with **2** items, both closed in
+  a bounded fix round together with **4 orchestrator-added corrections** — **6 record corrections,
+  prose only, 2 files, +110/-6**. **No fourth gate stage.**
+- **Receipt:** `build-os/receipts/gravito_current_state_reblock_a.md`.
+- **What it made true:** `build-os/memory/current_state.md` went **3 -> 18** `^## ` blocks, so
+  `rotate-memory --file current_state --keep 10` went from `would archive 0` /
+  `nothing — already rotated (no-op)` to **8 blocks / 66332 B** archivable at exit 0. **The live
+  file GREW** (185204 -> 188188 B); what changed is reachability, not size.
+- **Proof:** suite **2140 passed / 0 failed** (twice at `b41aa5d`, twice solo in the fix round,
+  once more by the archivist at `d885657`); **Commit-1 green in isolation at `06e9f1c`: 2121
+  passed / 0 failed** in a clean clone; **+19** is `tests/build_os_maintenance_tests.sh` going
+  **85 -> 104**, every other chained suite **+0**. Census **105**, declared mismatches **22**
+  (anchored), gate **14** / execute **8**, **zero re-authorisations, no new control**.
+  `scan-controls.sh check` and `anchors` both exit 0.
+- **Deviations, recorded and NOT normalised:** **3 commits against the `<=2` cap** — the fifth
+  consecutive breach. **Rotation NOT applied**; `build-os/memory/archive/` does not exist; **no
+  ceiling raised.** **Second eyes NONE — seventeenth consecutive packet.**
+
+### THIS EDIT IS LINE-COUNT-NEUTRAL ABOVE THE `ANC-0003` SITE, AGAIN AND ON PURPOSE
+
+The committed kernel projection `build-os/kernel/exports/HANDOFF-0001-chatgpt-strategy.md` embeds
+`build-os/packets/active_packet.md:89#ANC-0003` as a **resolved line number**, and
+`tests/memory_kernel_tests.sh` section 18 compares it with `cmp -s`. **Any close that adds a line
+above `:89` turns the suite red with `PROJECTION-DIVERGED`.** So the close changed exactly two
+lines **in place, one for one** — the status heading and the `**Packet id:**` marker, the latter
+renamed to `**Packet id (CLOSED):**` so `bandwidth.active_packet_singleton` correctly reads **0
+packets in flight against a ceiling of 1** — and **appended everything else BELOW the anchor**.
+`ANC-0003` re-verified at `:89` after the edit; **no projection regeneration was required.**
+
+### Staged next — NOT DECLARED, NOT IN FLIGHT
+
+Two candidates are on the table and **neither is declared here**, so this file keeps reading **0
+in flight** until a builder is actually dispatched:
+
+1. **The un-run rotation, residue `(bbbbbb)` — an OPERATOR decision, not a builder's.** Both
+   memory files are now one command from real relief and the command has not been given.
+   Applying it relocates still-open items into an archive, which is why no packet has applied it.
+2. **The `(ffffff)` choice on section 8 / section 9 duplication.** Either parameterise one helper
+   by *(file, standing-heading prefix, pinned literals)*, or accept the duplication deliberately
+   and cover **this file** — which is the third rotating file and has **no protection section at
+   all**. Nothing currently checks that it stays fine.
+
+Also open and untouched by boundary: `(ddd)`, `(uuuu)`, `(ppppp)`, `(eeeeee)`'s stale pointer —
+which the next packet must repoint **by content**, after re-deriving the position, because
+`current_state.md` moved again at this close.

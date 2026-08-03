@@ -133,6 +133,53 @@
   rewritten, correctly — amending is out of bounds at close. **Recorded, NOT normalised.** A cap
   breached four consecutive times is either a cap nobody intends to hold or a packet-cutting
   problem, and the distinction is an operator's to draw. **Nothing here proposes relaxing it.**
+- **(eeeeee) A STALE LINE-PINNED POINTER, MEASURED AND DELIBERATELY NOT REPAIRED — AND IT PREDATES
+  THE PACKET THAT FOUND IT.** `residue.md:582` (this file) carries the pointer
+  `build-os/memory/current_state.md:286`. It was valid at `2a3c070`, was **ALREADY STALE at
+  `95e2c7b`** — which is *before* `PACKET-0038-current-state-reblock`'s base `9c740d7` — so that
+  packet did not cause it; its migration only carried the content further. **The cited claim is
+  conserved:** the anchor `counterexample is unreachable` occurs **exactly once** at base and
+  **exactly once** at HEAD (`grep -c`), and the containing block is byte-identical at a **constant
+  offset of +275**, so the derived current location is `build-os/memory/current_state.md:286 ->
+  :561` — an ARROW-PAIR, the SAME CONTENT AT TWO COMMITS, and it is **never** to be repointed.
+  **AN EARLIER HAND-BACK SAID `:523`; THE DERIVED VALUE IS `:561`**, confirmed by reading `:561`
+  and finding the cited sentence there — recorded because a wrong repoint is worse than a stale
+  one. **NOT FIXED HERE, AND THE REASON IS THE BOUNDARY, NOT THE DIFFICULTY:** this file was a
+  declared byte-identical boundary for that packet (blob `cb18fb9d`), and its close appended new
+  items only and did not touch line `:582`. **The next packet must repoint it BY CONTENT, not by
+  shifting a digit** — and must re-derive the position first, because `current_state.md` moved
+  again at that close.
+- **(ffffff) THE DEBT THE RE-BLOCK PATTERN CREATED IS DUPLICATION, AND IT IS AN OPEN CHOICE RATHER
+  THAN A DEFECT.** In `tests/build_os_maintenance_tests.sh`, section 9 is a **structural clone of
+  section 8** — section 8 spans `:430-637` (**208 lines**), section 9 spans `:638-847` (**210
+  lines**), same shape, literals swapped, hand-maintained. **The cost is O(files).** And
+  `build-os/packets/active_packet.md` is the **THIRD rotating file, with no such section at all**
+  (`grep -c '^## '` returned **20** blocks at that packet's HEAD), so it is currently fine and
+  **nothing checks that it stays fine**. **The pattern does not generalise for free.** Two ways
+  out, and choosing is an owner's call: **(1)** parameterise ONE helper by *(file,
+  standing-heading prefix, pinned literals)* and drive all three files through it, or **(2)**
+  accept the duplication deliberately and pay it a third time for `active_packet.md`. **NOT BUILT.
+  Do not let a future packet quietly pick (2) by writing a fourth clone.**
+- **(gggggg) TWO COUNTERS ADVANCE AT THIS CLOSE, AND THIS ITEM EXISTS TO ADVANCE THEM WITHOUT
+  EDITING THE EARLIER RECORDS.** A correction creates a later record; it does not rewrite an
+  earlier one — so `(dddddd)` and the second-eyes streak items stay exactly as written, and this
+  item names them as its antecedents so nobody has to guess which figure is current.
+  **(i) THE `<=2` COMMITS-PER-PACKET CAP IS NOW BREACHED FIVE CLOSES RUNNING**, most recently at
+  3 commits (`06e9f1c` + `b41aa5d` + `d885657`); `(dddddd)`'s "four" was correct when written.
+  `bandwidth-check.sh check` reports it in its own words: `commits EXCEEDED ... ceiling 2
+  (advisory: advise — reported, not refused)`. **Still recorded, still NOT normalised.**
+  **(ii) SECOND EYES HAVE NOW BEEN ABSENT FOR SEVENTEEN CONSECUTIVE PACKETS**, and
+  `build-os/memory/tool_router.md:368` **still self-reports the streak as "nine"** — stale by
+  eight, inside the router that routes. `which codex` exits 1 and no plugin directory exists,
+  re-checked live at this close. **BOTH NUMBERS ARE CARRIED: the streak AND the router's wrong
+  record of the streak.** The second is the more interesting defect, because it is a memory file
+  reporting on its own currency and getting it wrong.
+  **(iii) NO NEW ITEM IS OPENED FOR THE `CHANGELOG.md` DECAY, ON PURPOSE.** That file grew
+  **1627 -> 1731** lines in the fix round and **1567 -> 1731** across the packet (`wc -l`), and
+  **all nine line-pinned citations into it already named other content at `b41aa5d`** — none was
+  newly invalidated. Item **(r)** already registers this as structural and guaranteed; opening a
+  second item for it would be `DEFECT-0003-duplicate-semantic-truth` committed in the ledger that
+  tracks it.
 
 ## Known risks / debt
 

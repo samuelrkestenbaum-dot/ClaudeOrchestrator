@@ -197,10 +197,17 @@ legal `--keep` retains it.
 
 ### Last close
 
-- **Last closed packet:** `gravito_residue_reblock_a`
-  (`PACKET-0037-residue-reblock`). The full close record — id derivation, base,
-  commits, verdict, and what it made true — is the newest history block below,
-  preserved verbatim where it was written.
+- **Last closed packet:** `gravito_current_state_reblock_a`
+  (`PACKET-0038-current-state-reblock`). The full close record — id derivation,
+  base, commits, verdict, and what it made true — is the newest history block
+  below, preserved verbatim where it was written.
+  **THIS LITERAL IS GATE-PINNED AND MUST STAY IN BLOCK 1.**
+  `tests/release_metadata_tests.sh` section 5 reads `**Last closed packet:**` and
+  `**Build/test command:**` out of this file with `head -n1`, and
+  `tests/build_os_maintenance_tests.sh` section 9 refuses if either occurs
+  OUTSIDE the standing block. The history entry below therefore carries the
+  renamed marker `**Closed <date>:**`, never this one. Renaming, not moving, is
+  what keeps the count at exactly one.
 
 ### Stable facts (slow-changing)
 
@@ -470,6 +477,65 @@ legal `--keep` retains it.
   worse. Both outcomes are closed with the measurement attached.
   Carried, unrelated: decide Context Mode routing enablement (stays non-secret pilot); name a target
   repo + approve a secret for the GH Actions; authorize/enable the deferred connectors.
+
+## History — `gravito_current_state_reblock_a` — the last close
+
+- **Closed 2026-08-03:** `gravito_current_state_reblock_a`
+  (`PACKET-0038-current-state-reblock` — **MINTED, not reused**; collision-checked BEFORE the mint
+  and **RE-DERIVED AT CLOSE by the archivist**, because that check has caught a bad id at four
+  prior closes: at the packet's declaration `git log -S'PACKET-0038' --all --oneline` returned
+  **0 commits** and `grep -rlF 'PACKET-0038' . --exclude-dir=.git` **0 files**; at this close the
+  token resolves to **exactly this packet's own three commits** and to three live records — this
+  file, `build-os/packets/active_packet.md` and `build-os/registry/defect_classes.txt`.
+  **The id was free and the mint preceded the build.**)
+  Base `9c740d7`; HEAD `d885657`; commits `06e9f1c` + `b41aa5d` + `d885657`.
+  **Verdict PASS-AS-FIXED** — qa GREEN, reviewer `fix-then-pass` with **2** items, both closed in
+  a bounded fix round together with **4 orchestrator-added corrections** (**6 total, prose only,
+  2 files, +110/-6**), no stage 4.
+  **Receipt:** `build-os/receipts/gravito_current_state_reblock_a.md`.
+  **WHAT IT MADE TRUE:** this file went **3 -> 18** `^## ` blocks (`grep -c '^## '`), so
+  `rotate-memory --file current_state --keep 10` went from `would archive 0` /
+  `nothing — already rotated (no-op)` to **8 blocks / 66332 B** archivable, post-rotation retained
+  **122367 B** against the **204800 B** ceiling. **THE LIVE FILE GOT BIGGER, NOT SMALLER**
+  (185204 -> 188188 B, **+2984**, `wc -c`), so live headroom FELL by 2984 B; what changed is
+  REACHABILITY, not size, and the two are different objects. **Sizes here are DERIVED, never
+  quoted** — residue `(cccccc)` records why.
+  **THE CRUX THE BRIEF GOT BACKWARDS — FOR THE SECOND PACKET RUNNING:** rotation retains a
+  **PREFIX** (`blocks.slice(0, keepN)`) and archives the **TAIL**, so standing content must sit at
+  the HEAD. The brief said the inverse; **had it been followed, all three gate-pinned literals
+  would have been archived on the first rotation.** The builder DEMONSTRATED the correction on a
+  5-block fixture, did not touch the tool, and reported it; **qa reproduced it independently** and
+  drove the hazard RED at **95 passed / 9 failed** with a gate-pinned literal genuinely reaching
+  the archive. Block 1 is now `## Standing truth — PROTECTED REGION` and holds **both** pinned
+  literals that `tests/release_metadata_tests.sh` section 5 greps out of this file (the
+  build/test-command marker and the last-closed-packet marker — **named descriptively HERE ON
+  PURPOSE, because section 9 refuses if either LITERAL occurs outside the standing block, and
+  a history entry quoting them would BE that second occurrence**) with **nothing outside block
+  1 holding either**; the sweep over every legal `--keep` reports **18 rotated / 0 refused /
+  0 leak / 0 drift, 29 files**.
+  **THE FIX ROUND'S CENTRAL LESSON, BECAUSE IT IS REUSABLE:** two gates disagreed about
+  "LINE-COUNT-NEUTRAL (15 lines in, 15 lines out)" **and both were right** — the edit replaced
+  **5 lines with 5**, and the note REGION stayed **15 lines**. One sentence conflated two truly
+  measured quantities. The fix states BOTH with their derivations and keeps the old wording
+  visible as cited history: `OCCURRENCE-0018` is a **ledger of accuracy failures**, and a silent
+  overwrite would leave no trace. **Swapping 15 -> 5 would have discarded a true fact to repair a
+  false reading.**
+  **PROOF:** suite **2140 passed / 0 failed**, twice at `b41aa5d` and twice solo in the fix round,
+  chained vectors identical; re-derived once by the archivist at `d885657` — 2140/0, exit 0,
+  `grep -c '^  FAIL'` = 0, no `CHAINED: N passed, 1 failed`. **Commit-1 green in isolation at
+  `06e9f1c`: 2121 passed / 0 failed** in a clean clone, derived at close because the brief did not
+  carry it; the **+19** is `tests/build_os_maintenance_tests.sh` going **85 -> 104**, every other
+  chained suite **+0**. Census **105**, 46 surfaces, 88 load_bearing, 0 unregistered, 0 phantom,
+  declared mismatches **22** (anchored `grep -c '^authority_mismatch: declared'`; the unanchored
+  form returns 27 and the 5 extra are commentary), gate **14** / execute **8**, **zero
+  re-authorisations and no new control**. `scan-controls.sh check` and `anchors` both exit 0
+  (12 resolved / 1 superseded / 0 violations).
+  **DEVIATIONS, NOT NORMALISED:** **3 commits against the `<=2` cap** — the same shape as the last
+  three closes and the fifth consecutive breach, reported by `bandwidth-check.sh check` as
+  `commits EXCEEDED ... ceiling 2 (advisory)`. **Rotation NOT applied**, `build-os/memory/archive/`
+  still does not exist, **no ceiling raised** (`DEFAULT_MAX_BYTES` still `200 * 1024`).
+  **Second eyes NONE — SEVENTEENTH consecutive packet**; `which codex` exits 1 and
+  `build-os/memory/tool_router.md` still self-reports the streak as **"nine"**.
 
 ## History — `gravito_residue_reblock_a` — the last close
 
