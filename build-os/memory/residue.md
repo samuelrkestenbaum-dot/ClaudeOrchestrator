@@ -62,6 +62,62 @@
   come from clean templates) and did not fix it. A **sibling packet in this same session** is
   fixing it — at the time this note was written that fix had **not** landed, so treat the leak as
   open until that packet's own receipt says otherwise.
+- **(aaaaaa) ROTATION WOULD HAVE ARCHIVED THE NEWEST RESIDUE AND KEPT THE OLDEST — A LATENT
+  DATA-LOSS DEFECT, FOUND AND SILENTLY REPAIRED BY `PACKET-0037-residue-reblock`, AND NOT WRITTEN
+  DOWN UNTIL ITS FIX ROUND.** `rotate-memory.mjs` retains a **PREFIX** — `routeSegments` keeps
+  `blocks.slice(0, keepN)` — while its own report prints `keep N newest` and
+  `selection : RECENCY ONLY`. **It ASSERTS a recency semantics it never verifies**, because it
+  reads no date and has no way to know a block's age; the prefix IS the age, by assumption.
+  `residue.md` was written **oldest-first**. The two facts compose into data loss.
+  **REPRODUCED ON THE BASE FILE RATHER THAN ARGUED.**
+  `git show bbdd85c:build-os/memory/residue.md > <scratch>/build-os/memory/residue.md` then
+  `node build-os/maintenance/rotate-memory.mjs --root <scratch> --file residue --keep 2 --apply`
+  → exit 0, `blocks: 3 total -> keep 2 newest, would archive 1`,
+  `block_3..block_3 (90150 B)` written to `archive/residue.archive.md`. The **NEWEST** era marker
+  ``### From `PACKET-0029-citation-anchor-tokens` (2026-08-02)`` is then in the **archive**
+  (live count 0, archive count 1) and the **OLDEST**,
+  ``### From `gravito_census_gaps_egress_bandwidth_a`` (2026-07-31), is still **live** (count 1).
+  **HAD ROTATION EVER RUN ON THE OLD FILE IT WOULD HAVE ARCHIVED THE MOST RECENT RESIDUE.**
+  The same tool at `--keep 10` on the re-blocked HEAD file inverts it back the right way round:
+  newest era live (count 1), oldest era archived (count 1).
+  **THE ORDERING IS THE ACTUAL REPAIR AND IT IS INVISIBLE TO EVERY GATE.** A re-block that
+  inserted 26 headings and left the order alone passes every count-driven check in
+  `tests/build_os_maintenance_tests.sh` §8 identically — block count, archived blocks,
+  reclaimable bytes, headroom, the 1..29 keep sweep, the standing-region byte comparison — and
+  still loses the newest content on the first rotation. **Nothing in the tool and nothing in any
+  test asserts that block order matches the recency the tool prints.**
+  Registered as `DEFECT-0014-retention-order-assumed-not-verified`, `OCCURRENCE-0015`.
+  **STILL OPEN, AND THE NEXT FILE IT BITES IS NAMED:** `build-os/memory/current_state.md` is
+  **182545 B** and carries **exactly 3** `^## ` blocks, so
+  `rotate-memory.mjs --file current_state --keep 10` reports
+  `blocks: 3 total -> keep 3 newest, would archive 0` and
+  `would archive : nothing — already rotated (no-op)` — **the identical condition residue.md was
+  in, reported at exit 0 in words that read like success.**
+- **(bbbbbb) QUEUED FOR THE OPERATOR — THE ROTATION `PACKET-0037-residue-reblock` MADE POSSIBLE
+  AND DELIBERATELY DID NOT APPLY.** The live `residue.md` stands **ABOVE**
+  `DEFAULT_MAX_BYTES` (`200 * 1024` = 204800 B) and stays there until somebody rotates.
+  **THE OVERAGE IS DERIVED, NOT REMEMBERED** — this item is inside the file it is about, so any
+  digit written here would be stale the moment the item was written:
+  `echo $(( $(wc -c < build-os/memory/residue.md) - 204800 ))`.
+  **THE BLOCKER WAS CONVERTED, NOT CLEARED**, and that is the honest statement of what the packet
+  bought: from *"142 B of headroom and a tool that can reclaim 0"* to *"over an unenforced
+  constant, with a tool that can reclaim 127142 B on one command."* Real progress; a
+  **different object**, and it is queued here because it was queued nowhere else.
+  **THE PENDING ACTION:** `node build-os/maintenance/rotate-memory.mjs --file residue --keep 10
+  --apply` (dry-run first, without `--apply`).
+  **WHY THE PACKET DID NOT APPLY IT:** applying it relocates **live, still-open items** — `(ddd)`,
+  queued and verified at 3 sites, and `(uuuu)`, open — out of this file and into
+  `build-os/memory/archive/residue.archive.md`. Moving open items into an archive is an
+  **operator act**, not a builder's, and uninstall/downgrade never removes that archive.
+  **NOTHING ENFORCES `DEFAULT_MAX_BYTES` ON THE LIVE SIZE**, so this will not turn a gate red on
+  its own — the ceiling is checked against the POST-ROTATION size. **One gate does read the live
+  size**, and it is the customer-facing one: `docs/PILOT.md` `<!-- PILOT:CHECK id=R7 -->` runs
+  `find "$PILOT_REPO/build-os/memory" -type f -size +262143c`, red-driven at
+  `tests/pilot_kit_tests.sh:415`. It **passes** today — that `find` returns nothing — and its
+  headroom is derived the same way rather than restated:
+  `echo $(( 262144 - $(wc -c < build-os/memory/residue.md) ))`. **R7 is the thing that
+  eventually goes red if this item is never actioned**, and it is the 11th reader of this file
+  and the only live-size one.
 
 ## Known risks / debt
 

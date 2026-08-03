@@ -23,37 +23,129 @@ deprecation cycle. Pin a commit if you need stability.
   and archived **0 blocks / 0 bytes**: the preventative tool had nothing to
   prevent with, and it refuses at exit 3 once the file is already over.
 
+  **THE REPAIR THAT MATTERS IS THE ORDERING, AND IT IS INVISIBLE TO EVERY GATE.**
+  `rotate-memory.mjs` retains a **PREFIX** while its report prints `keep N newest`
+  and `selection : RECENCY ONLY` — **it asserts a recency semantics it never
+  verifies**, because it reads no date and has no way to know a block's age.
+  `residue.md` was written **oldest-first**. Composed, that is **latent data
+  loss**, and it is reproduced rather than argued: `git show
+  bbdd85c:build-os/memory/residue.md` into a scratch root, then `rotate-memory.mjs
+  --root <scratch> --file residue --keep 2 --apply` → exit 0, `block_3..block_3
+  (90150 B)` archived, and the **newest** era marker ``### From
+  `PACKET-0029-citation-anchor-tokens` (2026-08-02)`` lands in the **archive**
+  while the **oldest** (2026-07-31) stays live. **Had rotation ever run on the old
+  file it would have archived the most recent residue and kept the oldest.** The
+  new sections therefore run **newest-first**, and at `--keep 10` on the re-blocked
+  file the direction is inverted back: newest era live, oldest era archived. **A
+  re-block that inserted 26 headings and left the order alone would pass every
+  count-driven check in §8 identically and still lose the newest content on the
+  first rotation**, so no gate in this tree can tell the two apart. Registered as
+  `DEFECT-0014-retention-order-assumed-not-verified`, `OCCURRENCE-0015`, and
+  **still open as a class** — `build-os/memory/current_state.md` is next: 182,545 B
+  in exactly **3** `^## ` blocks, for which `--keep 10` reports `would archive :
+  nothing — already rotated (no-op)` at exit 0.
+
   **Nothing was deleted, paraphrased or silenced, and no ceiling was raised.**
-  The migration is a pure re-partition: **162 units carried verbatim**, **130
-  lettered items** and **7 `### From <packet>` era markers** preserved, and the
-  only line removed from the file is the old `## Deferred (follow-up packets)`
-  heading, replaced by **29** named sections. Sections are cut at the file's own
-  era markers, never across one, and named by the letter range they hold —
-  because `build-os/metrics/signal_snapshots.tsv` already addresses this file by
-  letter (`build-os/memory/residue.md#ddd`), not by line.
+  The migration is a pure re-partition: **162 units carried verbatim = 129
+  lettered items + 26 `## History` blocks + 7 `### From <packet>` era markers**,
+  and the only line removed from the file is the old `## Deferred (follow-up
+  packets)` heading, replaced by **29** named sections. Sections are cut at the
+  file's own era markers, never across one, and named by the letter range they
+  hold — because `build-os/metrics/signal_snapshots.tsv` already addresses this
+  file by letter (`build-os/memory/residue.md#ddd`), not by line.
+  **CORRECTED FROM "130 lettered items", WHICH WAS OFF BY ONE AND ALSO DID NOT
+  CLOSE ITS OWN TOTAL** (at 130 the sum is 163, not 162). `(a)`…`(yyyyy)` is
+  26+26+26+26+25 = **129 by construction**, and the file holds exactly that, zero
+  missing and zero duplicated. Derivation:
+  `grep -oE '^\- \*\*\([a-z]+\)' build-os/memory/residue.md | wc -l` — which
+  returns **131** on the file as it now stands, because this packet's fix round
+  added the two standing items `(aaaaaa)` and `(bbbbbb)`; the migration figure is
+  **129** and is measured at `d888766`. The earlier `130` came from
+  `grep -cE '^\- \*\*\('`, which also matches the non-lettered `- **(S1)` item.
 
   **The protection is positional and it is executed, not argued.** Retention is
   a PREFIX and `--keep` is validated `>= 1`, so block 1 — the standing region,
   holding all three literals `tests/release_metadata_tests.sh:322-324` pins —
   cannot be reached by any legal invocation. `tests/build_os_maintenance_tests.sh`
-  §8 sweeps **every legal N from 1 to 29** on scratch copies: **28 rotate** with
-  block 1 byte-identical and no pinned literal ever reaching the archive, **1
-  refuses at the ceiling writing nothing at all**, and no pinned literal occurs
+  §8 sweeps **every legal N from 1 to 29** on scratch copies: **27 rotate** with
+  block 1 byte-identical and no pinned literal ever reaching the archive, **2
+  refuse at the ceiling writing nothing at all**, and no pinned literal occurs
   anywhere outside block 1, so no archivable block is what keeps the
-  release-metadata suite green.
+  release-metadata suite green. **That sweep covers the whole domain of the
+  parameter that determines routing, NOT the tool's whole legal domain** —
+  `--max-bytes` is equally user-settable and is not swept; raising it converts the
+  N=29 ceiling refusal into a rotation the sweep never executed. Harmless, because
+  `routeSegments(segments, keepN)` (`rotate-memory.mjs:328`) takes no ceiling
+  parameter and so no `--max-bytes` value can change WHICH blocks are archived —
+  but the claim as first written was broader than what was measured, and §8 now
+  says the narrower thing. **The split was 28/1 at `d888766` and is 27/2 here**
+  because the fix round's two residue items pushed the `--keep 28` retention over
+  the ceiling; both outcomes are legitimate and §8 separates rather than lumps
+  them.
 
-  **Measured, at `--keep 10`, from a dry run:** 29 blocks -> keep 10, archive
-  19; **127,142 B reclaimable**; post-rotation size **81,258 B**, leaving
-  **123,542 B** of headroom where there were 142. The live file itself grew
-  **204,658 -> 207,894 B** (+3,236: 26 net headings and the ordering note), which
-  is **above** `DEFAULT_MAX_BYTES` — the ceiling is enforced on the POST-ROTATION
-  size, and the only way to bring the live file under it is to actually rotate.
-  **Rotation was NOT applied**; that is an operator act and is recorded as one.
-  Suite **2121 passed**, 0 failed (+18, all of it §8; every other suite +0).
+  **FAILING TESTS FIRST, and the RED is reported at its true value: 80 passed /
+  5 failed, exit 1** — the five being 3 blocks, keep=10 archiving 0 blocks, 0
+  reclaimable bytes against a 40,960 B floor, 142 B of headroom, and no designated
+  standing region. **Corrected from "79 passed": 79 is unreachable.** The
+  §8-augmented suite is 85 checks
+  (`bash tests/build_os_maintenance_tests.sh` → `85 passed, 0 failed`) and every
+  check reports exactly once, so 85 = 80 + 5.
+
+  **Measured, at `--keep 10`, from a dry run over a scratch copy, at the tree as
+  this packet closes:** 29 blocks -> keep 10, archive 19; **127,142 B
+  reclaimable**; post-rotation size **85,931 B**, leaving **118,869 B** of
+  headroom under the 204,800 B ceiling. **The headroom GAIN is stated with the
+  baseline it is relative to, because the two differ:** **+118,727 B** against the
+  **142 B** the base file had, and **+126,636 B** against the current live file's
+  **−7,767 B** (126,636 = 127,142 archived − the 506 B archive-pointer banner, and
+  it is invariant under anything added to the retained prefix). The 123,400 B
+  figure quoted at `d888766` was the base-relative one at that commit; the
+  live-relative figure there was 126,636 B. The live file grew
+  **204,658 -> 207,894 B** at `d888766` (+3,236: 26 net headings and the ordering
+  note) **-> 212,567 B** here (+4,673: the two standing residue items), and is now
+  **7,767 B above** `DEFAULT_MAX_BYTES`.
+  **Rotation was NOT applied**; that is an operator act — it would relocate the
+  still-open items `(ddd)` and `(uuuu)` into the archive — and it is now **queued
+  for the operator at `(bbbbbb)`**, which is where the un-run rotation was
+  previously queued nowhere. **The blocker was CONVERTED, not cleared:** from
+  *142 B of headroom and a tool that can reclaim 0* to *7,767 B over an unenforced
+  constant and a tool that can reclaim 127,142 B on one command*.
+
+  **`DEFAULT_MAX_BYTES` is not enforced on the live size — but one gate DOES read
+  the live size, and it is the customer-facing one.** `docs/PILOT.md`
+  `<!-- PILOT:CHECK id=R7 -->` runs
+  `find "$PILOT_REPO/build-os/memory" -type f -size +262143c`, red-driven at
+  `tests/pilot_kit_tests.sh:415`. It **passes**: the largest memory file is
+  `residue.md` at **212,567 B** against the **262,144 B** Read limit — **49,577 B
+  of headroom** (54,250 B at `d888766`). **No blocker was traded**, and the earlier
+  flat claim that "no gate reads the live size" was false as written; the true
+  statement is that **no gate ENFORCES `DEFAULT_MAX_BYTES` on the live size**.
+  R7 is the **11th** reader of this file and the only live-size one, and it was
+  missing from the 10-row reader sweep this packet first reported.
+
+  Suite **2121 passed**, 0 failed (+18, all of it §8; every other suite +0; the
+  fix round is +0 — it CONVERTED one check rather than adding or removing one).
   Census **held at 105**, declared mismatches **held at 22**. **No new control** —
   one `evidence_refs` line-number correction only, `suite.build_os_maintenance`
   `:431/:432 -> :639/:640`, which is `DEFECT-0001-stale-line-reference` arriving
-  again by way of an insertion above a cited line.
+  again by way of an insertion above a cited line, now recorded as
+  `OCCURRENCE-0016` alongside `OCCURRENCE-0017` for the `ANC-0003` content-site
+  move `:40 -> :89` that drove `reconcile` to exit 2 — **the third consecutive
+  packet to pay that tax, and the first to increment the counter built to count
+  it.**
+
+  **A CHECK THAT COULD NOT FAIL WAS CONVERTED, NOT DELETED.** §8's closing
+  assertion was `[ -d … ] && ok … || ok …` — an `ok` on **both** branches,
+  contributing one non-discriminating check to the 2121 total, and contradicting
+  this tree's own standard as stated at `rotate-memory.mjs:309-315`: *"A guard
+  that cannot fail reads as safety and adds no discriminating power."* It now
+  asserts that **nothing under the real `build-os/memory/archive` is newer than
+  the scratch copy taken at the top of the section** — i.e. that no rotation
+  reached the real tree *during* §8 — which fails when a file appears there mid-run
+  and passes both when the directory is absent and when it holds only older files.
+  The conversion is **line-count-neutral by construction**, so that the
+  `control_registry.txt` `evidence_refs` at `:639`/`:640` still resolve to the same
+  two lines.
 
 - **Claude closed work into governed project memory, and a second AI surface
   consumed that state without anybody copying the transcript.** That sentence is

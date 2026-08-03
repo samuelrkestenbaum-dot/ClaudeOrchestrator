@@ -315,3 +315,46 @@ symptom: THE MECHANISM BUILT TO DEMOTE LINE NUMBERS COMMITTED ONE INTO A BYTE-CO
 prevented_by: nothing — every part behaved as designed. The resolver was right, the comparison was right, and the artefact was regenerable; the defect is that a POSITION was persisted at all into something compared byte for byte
 could_have_been_prevented_by: rendering the citation WITHOUT the resolved line (the anchor alone is the identity, and the scheme's own ruling is that the line is a navigation hint), or excluding the position from the reconcile comparison, or regenerating projections as a pre-commit step rather than comparing a frozen one. As it stands, EVERY content-preserving edit above ANY anchored site turns the suite red until the shadow is regenerated, so the reconcile is itself a false-negative generator of the same family as DEFECT-0013 and a different cause
 evidence_refs: build-os/tools/memory-kernel.sh; tests/memory_kernel_tests.sh; build-os/kernel/exports/HANDOFF-0001-chatgpt-strategy.md
+
+defect_class: DEFECT-0014-retention-order-assumed-not-verified
+title: A retention tool asserts a recency semantics it never verifies, so the artefact's own order silently decides whether the newest or the oldest content is destroyed
+root_cause_class: unverified_ordering_assumption
+description: build-os/maintenance/rotate-memory.mjs retains a PREFIX — routeSegments keeps blocks.slice(0, keepN) — while its report prints `keep N newest` and `selection : RECENCY ONLY`. It reads no date and has no way to establish a block's age: THE PREFIX IS THE AGE, BY ASSUMPTION. Where the artefact's own order contradicts that assumption the tool does the exact OPPOSITE of what it reports, at exit 0, and its byte-exact conservation check still passes because conservation holds in either direction. THE FAILURE IS INVISIBLE TO EVERY COUNT-DRIVEN GATE: block count, archived blocks, reclaimable bytes, post-rotation headroom and a full 1..N keep sweep are all IDENTICAL whether the order is right or wrong, so a re-block that inserts headings and leaves the order alone passes every check and still destroys the newest content on the first rotation. It stays latent wherever rotation has never run, which is also why it survives — the only signal is the loss itself, after the fact
+detection_signature: a retention or eviction rule that selects by POSITION while its report, header or documentation claims selection by RECENCY, over an artefact whose ordering nothing enforces
+migration_status: seeded_partial
+
+occurrence: OCCURRENCE-0015
+defect_class_id: DEFECT-0014-retention-order-assumed-not-verified
+packet_id: PACKET-0037-residue-reblock
+detected_stage: reviewer
+escaped_stage: builder
+affected_objects: build-os/memory/residue.md; build-os/maintenance/rotate-memory.mjs; build-os/memory/current_state.md
+root_cause_class: unverified_ordering_assumption
+symptom: build-os/memory/residue.md was written OLDEST-FIRST while rotate-memory.mjs retains a PREFIX and prints `keep N newest`. REPRODUCED ON THE BASE FILE RATHER THAN ARGUED: `git show bbdd85c:build-os/memory/residue.md` into a scratch root, then `rotate-memory.mjs --root <scratch> --file residue --keep 2 --apply` exits 0, reports `blocks: 3 total -> keep 2 newest, would archive 1` and writes `block_3..block_3 (90150 B)` to archive/residue.archive.md — after which the NEWEST era marker "### From `PACKET-0029-citation-anchor-tokens` (2026-08-02)" is in the ARCHIVE (live count 0, archive count 1) and the OLDEST, "### From `gravito_census_gaps_egress_bandwidth_a`" (2026-07-31), is still LIVE (count 1). HAD ROTATION EVER RUN ON THE OLD FILE IT WOULD HAVE ARCHIVED THE MOST RECENT RESIDUE AND KEPT THE OLDEST. The same tool at --keep 10 on the re-blocked file inverts it back the right way round: newest era live, oldest era archived. THE PACKET FIXED THIS AND DID NOT WRITE IT DOWN — the content diff shows zero new residue items, the CHANGELOG explained prefix mechanics without ever stating the inversion or its consequence, and this registry stopped at DEFECT-0013
+prevented_by: nothing — the defect was repaired as a side effect of ordering the new sections newest-first, and every gate in tests/build_os_maintenance_tests.sh section 8 passes identically with the order inverted, so no check in this tree can tell the two apart
+could_have_been_prevented_by: an assertion that the retained PREFIX is actually the newest content — comparing block order against the artefact's own era markers or against git dates — or a tool that refuses to print `keep N newest` and `RECENCY ONLY` for a selection it made purely by position, or a delimiter-level ordering contract written into the memory file's header and checked
+evidence_refs: build-os/memory/residue.md; build-os/maintenance/rotate-memory.mjs; tests/build_os_maintenance_tests.sh
+
+occurrence: OCCURRENCE-0016
+defect_class_id: DEFECT-0001-stale-line-reference
+packet_id: PACKET-0037-residue-reblock
+detected_stage: builder
+escaped_stage: builder
+affected_objects: build-os/registry/control_registry.txt; tests/build_os_maintenance_tests.sh
+root_cause_class: reference_by_position
+symptom: inserting section 8 at the end of tests/build_os_maintenance_tests.sh moved the two lines suite.build_os_maintenance cited as evidence_refs. The refs :431 and :432 still RESOLVED inside the file and now pointed at comment-only lines, and scan-controls.sh check refused with 2 VACUOUS-REF violations, exit 2 captured directly off the command. Corrected to :639 and :640 — a line-number fix, no class change and no authority change
+prevented_by: nothing — scan-controls.sh checks that a ref resolves and that the line is not vacuous; it cannot check that the line is the SAME line, which is the whole of DEFECT-0001
+could_have_been_prevented_by: citing those two lines by ANCHOR rather than by position — the mechanism PACKET-0029 built and which still covers 13 of 355+ positional evidence_refs — or by any content-bearing identity such as the literal text of the assertion
+evidence_refs: build-os/registry/control_registry.txt; tests/build_os_maintenance_tests.sh:639; tests/build_os_maintenance_tests.sh:640
+
+occurrence: OCCURRENCE-0017
+defect_class_id: DEFECT-0001-stale-line-reference
+packet_id: PACKET-0037-residue-reblock
+detected_stage: builder
+escaped_stage: builder
+affected_objects: build-os/packets/active_packet.md; build-os/kernel/exports/HANDOFF-0001-chatgpt-strategy.md
+root_cause_class: reference_by_position
+symptom: writing this packet's declaration added text ABOVE the ANC-0003 content site in build-os/packets/active_packet.md, moving it from :40 to :89. The committed kernel projection embeds ART-0003 as a RESOLVED line number and tests/memory_kernel_tests.sh compares it with `cmp -s`, so `memory-kernel.sh reconcile` exited 2 with PROJECTION-DIVERGED. The identity half never failed — scan-controls.sh anchors resolved ANC-0003 at :89 throughout, 0 violations. Repaired by regeneration with `export-handoff --out`, a pure read that appended no event and left memory_events.tsv byte-identical; the whole delta is one line number. THIS IS THE SECOND CONSECUTIVE PACKET IN WHICH DECLARING THE PACKET TURNED THE SUITE RED FOR THIS REASON — see OCCURRENCE-0014, same class, same site, one packet earlier
+prevented_by: nothing — every part behaved as designed, exactly as recorded at OCCURRENCE-0014, and the remedy that occurrence names was not built, so the class fired again by the same route
+could_have_been_prevented_by: rendering the citation WITHOUT the resolved line, or excluding the position from the byte-exact reconcile comparison, or regenerating projections as a pre-commit step. THE COST OF NOT DOING IT IS NOW MEASURED RATHER THAN PREDICTED: two consecutive packets have paid one forced regeneration each, purely for declaring themselves
+evidence_refs: build-os/packets/active_packet.md; build-os/kernel/exports/HANDOFF-0001-chatgpt-strategy.md; build-os/registry/defect_classes.txt

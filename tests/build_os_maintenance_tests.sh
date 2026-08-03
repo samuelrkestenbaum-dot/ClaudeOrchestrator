@@ -612,7 +612,7 @@ done
 if [ "${RES_TOT:-0}" -le 0 ]; then
   no "the keep-sweep had no block count to sweep over — the proof below is vacuous"
 else
-  ok "the keep-sweep ran every legal N from 1 to $RES_TOT (--keep is validated >= 1, so this is the tool's whole legal domain)"
+  ok "the keep-sweep ran every legal N from 1 to $RES_TOT — the whole domain of the PARAMETER THAT DETERMINES ROUTING (--keep is validated >= 1 and routeSegments(segments, keepN) takes no other input), NOT the tool's whole legal domain: --max-bytes is equally user-settable and is not swept"
 fi
 [ $(( RES_N_ROT + RES_N_REFUSED )) -eq "${RES_TOT:-0}" ] \
   && ok "every legal keep ended in one of exactly two ways: $RES_N_ROT rotated, $RES_N_REFUSED refused at the ceiling (exit 3) writing nothing" \
@@ -631,9 +631,9 @@ fi
 cmp -s "$RES_LIVE" "$RES_ROOT/build-os/memory/residue.md" \
   && ok "the live residue.md is byte-identical to the copy taken before this section ran" \
   || no "the live residue.md changed during this section — a rotation reached the real tree"
-[ -d "$SRC/build-os/memory/archive" ] \
-  && ok "note: the real archive directory exists (append-only; its presence is not evidence this section wrote to it)" \
-  || ok "no archive directory was created in the real tree by this section"
+[ -z "$(find "$SRC/build-os/memory/archive" -newer "$RES_ROOT/build-os/memory/residue.md" 2>/dev/null)" ] \
+  && ok "nothing under the real build-os/memory/archive is newer than the scratch copy taken at the top of this section, so this section wrote no archive into the real tree (it was BOTH branches of an \`ok\`, and a guard that cannot fail reads as safety and adds no discriminating power)" \
+  || no "a path under the real build-os/memory/archive is newer than this section's first write — a rotation reached the real tree"
 
 echo ""
 echo "==== RESULT: $PASS passed, $FAIL failed ===="
