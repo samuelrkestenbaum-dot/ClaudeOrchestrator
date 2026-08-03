@@ -4,6 +4,55 @@
 > the builder implements exactly this and nothing else; the archivist clears it
 > on close. One packet at a time.
 
+## Status: IN FLIGHT — `gravito_residue_reblock_a`, declared 2026-08-03 BEFORE the first build edit
+
+- **Packet id:** `PACKET-0037-residue-reblock` — **MINTED, and collision-checked
+  BEFORE the mint rather than after.** The live band is
+  `PACKET-0001`..`PACKET-0036`; `PACKET-0036` is the highest allocation predating
+  this packet; `git log -S'PACKET-0037' --all --oneline` returns **0 commits** and
+  a full-tree `grep -rlF 'PACKET-0037' . --exclude-dir=.git` returns **0 files**.
+  The id was free.
+- **Lane:** `substantive`. **Depth 2** — builder, then qa ‖ reviewer.
+- **This commit is the declaration, and it is commit 1.** The packet before last
+  was dispatched without one; that is `DEFECT-0011-undeclared-active-packet`,
+  **`OCCURRENCE-0005`**, and the measurable consequence was that
+  `bandwidth.active_packet_singleton` read **0 in flight while a packet was in
+  flight** — the guard passing truthfully on a file describing the wrong packet.
+  This commit exists so that reading is **1** for the duration of this packet,
+  and it is taken first so that no measurement inside a packet about a memory
+  file is taken against a packet file that is lying about what is in flight.
+
+## Branch base
+
+Branched at `2a3c070` on `claude/project-handoff-merge-ramhds`, verified with
+`git merge-base HEAD claude/project-handoff-merge-ramhds` → `2a3c070`, **before
+the first edit**. **Nothing is pushed, merged, tagged, PR'd or deployed, and no
+such go has been given.**
+
+## What `gravito_residue_reblock_a` must make true
+
+`build-os/memory/residue.md` is **204,658 B** against the **204,800 B** ceiling
+`build-os/maintenance/run-tests.sh` enforces through
+`rotate-memory.test.mjs` — **142 B of headroom**, so the next close has no green
+path. The preventative tool cannot relieve it: the file carries **exactly 3
+`^## ` blocks**, and `rotate-memory.mjs`'s `routeSegments` retains
+`blocks.slice(0, keepN)`, so at the shipped `keep=10` it retains all 3 and
+archives **0 blocks / 0 bytes**.
+
+1. **Failing tests first**, reproducing the live condition: three large blocks,
+   the shipped-keep rotation archiving nothing, and **zero reclaimable bytes**.
+2. **Re-block** `residue.md` into enough coherent `##` sections that rotation
+   reclaims meaningful space — preserving every item's letter and text, and every
+   gate-pinned literal (`license model`, `no tags`, `single-platform`,
+   `tests/release_metadata_tests.sh:322-324`).
+3. **A protected region rotation cannot reach**, proven by an executed test
+   rather than argued — not selected by recency.
+4. `--dry-run` verified before anything is applied; scanner exit codes captured
+   **directly**, never through a `tail` pipeline.
+
+**Out of scope:** raising any ceiling, silencing any gate, fixing any residue
+item, and applying rotation to the live tree.
+
 ## Status: CLOSED, NOTHING IN FLIGHT — `gravito_measurement_integrity_a` closed 2026-08-03
 
 - **Packet id (CLOSED):** `PACKET-0036-measurement-integrity` — **MINTED, not reused**, and
