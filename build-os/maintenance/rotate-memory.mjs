@@ -99,6 +99,7 @@
  * slot; both qualifications are measured and stated in section 4.)
  */
 
+import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -110,6 +111,34 @@ import { fileURLToPath } from "node:url";
 export const DEFAULT_KEEP = 10;
 export const DEFAULT_MAX_BYTES = 200 * 1024; // 200 KB
 
+/**
+ * THE CLOSE-SIZE BUDGET — DERIVED FROM THIS REPOSITORY'S OWN CLOSES, NOT INVENTED.
+ *
+ * Refusal condition 7 needs to know how many bytes the packet that is rotating
+ * will itself write back into the file afterwards. A rotation that leaves less
+ * headroom than the close needs has not solved the problem it was run for; it
+ * has moved the breach past the point where this tool can still act, because
+ * once a file is over `maxBytes` rotation refuses at EXIT.CEILING.
+ *
+ * THE NUMBER IS THE LARGEST SINGLE-COMMIT GROWTH ANY FILE IN `FILE_SPECS` HAS
+ * EVER TAKEN IN THIS REPOSITORY. Measured, not chosen — the maximum of the
+ * positive per-commit byte deltas over each file's whole history:
+ *
+ *   build-os/memory/current_state.md   62 commits, max +18702  (at `2a3c070`)
+ *   build-os/memory/residue.md         61 commits, max +13763
+ *   build-os/packets/active_packet.md  39 commits, max +8257
+ *
+ * The MAXIMUM is used rather than a percentile on purpose: undershooting is the
+ * failure mode this condition exists to prevent, and a median close (about 1-3
+ * KB here) tells you nothing about the close that actually breaches. Re-derive
+ * it rather than trusting the digit — `git log --format=%H -- <path>`, then
+ * difference `git cat-file -s` across each consecutive pair.
+ *
+ * IT IS A DEFAULT, NOT A CONSTANT: `--close-budget N` overrides it explicitly,
+ * which is the honest way to carry a number whose provenance is one repository.
+ */
+export const DEFAULT_CLOSE_BUDGET_BYTES = 18702;
+
 export const EXIT = {
   OK: 0,
   RETENTION: 1,
@@ -118,6 +147,7 @@ export const EXIT = {
   CONFIG: 4,
   CONSERVATION: 5,
   IO: 6,
+  SENTINEL: 7,
 };
 
 /**
@@ -617,6 +647,534 @@ export function composeRetained(retainedSegments, banner) {
 }
 
 /* ------------------------------------------------------------------ */
+/* 4b. THE ROTATION SENTINEL                                           */
+/* ------------------------------------------------------------------ */
+
+/*
+ * WHAT THIS IS, AND WHAT IT IS NOT.
+ *
+ * Everything above rotates BY RECENCY and says so: "IT DOES NOT: make ANY
+ * guarantee about WHICH CONTENT survives, by meaning, importance, or kind."
+ * That statement is still true of the routing. The sentinel does not change it.
+ * It adds ONE thing, in front of the routing, and refuses rather than reroutes:
+ *
+ *   minimum_safe_keep = max( block position of every protected or still-open object )
+ *
+ * and any requested `--keep` below that value is REFUSED BEFORE MUTATION. The
+ * tool still keeps a prefix; it now knows how short a prefix it is allowed to
+ * keep. A refusal is the whole remedy — the sentinel never silently raises N,
+ * because auto-correcting a dangerous request is how a guard becomes invisible.
+ *
+ * WHY IT EXISTS. The first governed rotation of a real memory file in this
+ * repository was safe because a HUMAN read the open-item markers, found the
+ * oldest, and derived `--keep 25` by hand. That rule was then written down as
+ * prose, which recorded the knowledge and enforced nothing:
+ * `DEFECT-0014-retention-order-assumed-not-verified` is the standing entry for
+ * exactly that gap. This is the enforcement, and it is deliberately in THIS
+ * file rather than in a new validator: a guard that lives beside the routing it
+ * guards cannot be forgotten at the call site.
+ *
+ * -------------------------------------------------------------------------
+ * IT RESOLVES BY IDENTITY. IT DOES NOT TRUST WHERE A MARKER SITS.
+ * -------------------------------------------------------------------------
+ * This is the single most important property here and it is not decorative.
+ * A protection marker is a sentence ABOUT an object; it is not the object. In
+ * this repository's own `residue.md` the marker "IS NOT CONSUMED AND MUST NOT
+ * BE MARKED SO" for `(ddd)` sits in BLOCK 15, while `(ddd)` is DECLARED in
+ * BLOCK 16. A scan that takes the marker's own block derives 15, permits
+ * `--keep 15`, and archives the object it was built to protect — at exit 0.
+ *
+ * That is this tree's named recurring defect class: a POSITIONAL fact reported
+ * as a SEMANTIC one. It has already cost three separate instruments reporting
+ * 1 / 2 / 31 citation breaks when the true count was 0, each because it
+ * conflated positional shift with identity. A guard built to prevent an
+ * archiving accident must not commit the very error that produces one, so:
+ *
+ *   - a marker NAMES identities (a backticked letter tag, or any stable id);
+ *   - each named identity is resolved to the block that DECLARES it;
+ *   - an identity a marker names and no block declares is a REFUSAL, NOT A
+ *     SKIP — the guard cannot prove which block holds an object it cannot
+ *     find, so it cannot prove any keep protects it;
+ *   - and a marker additionally anchors at its OWN owner (the declaration it
+ *     sits under, or failing that its own block), so a marker that names
+ *     nothing still protects the thing it is written on.
+ *
+ * The two anchorings are a MAX, never an either/or: naming another object
+ * widens the protected set, it never narrows it.
+ *
+ * -------------------------------------------------------------------------
+ * ARMING IS EXPLICIT, AND AN UNARMED SENTINEL SAYS SO
+ * -------------------------------------------------------------------------
+ * A file in which the scan resolves ZERO protected objects is UNARMED: a
+ * scaffolded repo, a generated fixture, a memory file that has not yet grown a
+ * standing region. Conditions 1, 2 and 3 are then vacuous by construction (no
+ * objects, no identities, nothing to strand), and conditions 5 and 7 — the
+ * pre-registration requirement and the close budget — are NOT applied, because
+ * both are governance obligations about a governed memory file and imposing
+ * them on a blank scaffold would break every honest caller.
+ *
+ * THAT IS EXACTLY THE SHAPE OF A GUARD THAT DEGRADES TO NOTHING WITHOUT SAYING
+ * SO, so it says so: an unarmed file raises `SENTINEL NOT ARMED` on STDERR,
+ * the same way `delimiterMatchedNothing` refuses to let a silent no-op read as
+ * success. Conditions 4 and 6 are cross-checks on the tool's own arithmetic and
+ * run for every file, armed or not.
+ */
+
+/** The stable identity families this tree mints, longest alternative first. */
+const SENTINEL_ID_FAMILIES =
+  "SIGNAL-SNAPSHOT|OCCURRENCE|DECISION|DEFECT|PACKET|DISP|EVT|HOF|ANC|ART|ACT|CTX|MUT|OBJ|REL|NS|EV";
+
+export const SENTINEL_ID_RE = new RegExp(`\\b(?:${SENTINEL_ID_FAMILIES})-\\d{4}\\b`, "g");
+
+/*
+ * THE LETTER-TAG FAMILY, AND WHY IT IS ONLY READ INSIDE BACKTICKS.
+ *
+ * This tree names residue items `(a)`..`(zzzzzz)` and the operator decision
+ * `(S1)`. Read bare, that pattern also matches ordinary English parentheticals
+ * — `(ci)`, `(see)`, `(and)` — and every false positive becomes a REFUSAL
+ * under the unresolvable rule, which would jam the tool on prose. This tree
+ * cites a tag in backticks every time it means the object (`(ddd)`, `(S1)`),
+ * so the backtick is the disambiguator, measured rather than assumed.
+ *
+ * A DECLARATION is matched WITHOUT the backtick requirement, because a
+ * declaration opens a bullet: `- **(ddd) ...`.
+ */
+export const SENTINEL_NAMED_TAG_RE = /`\((S\d+|[a-z]{1,6})\)/g;
+export const SENTINEL_DECL_RE = new RegExp(
+  `^\\s*[-*]\\s+\\*\\*\`?(?:\\((S\\d+|[a-z]{1,6})\\)|((?:${SENTINEL_ID_FAMILIES})-\\d{4}))`
+);
+
+/**
+ * The protection vocabulary, as this repository actually writes it.
+ *
+ * Every entry was taken from a marker that occurs in the live memory files, not
+ * invented: the list is short on purpose. A wide vocabulary produces false
+ * positives, every false positive is a refusal, and a guard that refuses
+ * everything is uninstalled within a week.
+ */
+export const SENTINEL_MARKERS = [
+  { kind: "non-consumable", re: /IS NOT CONSUMED AND MUST NOT BE MARKED SO/ },
+  { kind: "still-open", re: /\bSTILL OPEN\b/ },
+  { kind: "stays-open", re: /\bSTAYS OPEN\b/ },
+  { kind: "remains-open", re: /\bREMAINS OPEN\b/ },
+  { kind: "open-standing", re: /\bOPEN as a standing\b/ },
+  { kind: "operator-decision", re: /\bOPERATOR DECISION\b/ },
+  { kind: "non-archivable", re: /\b(?:MUST NOT BE ARCHIVED|NON-ARCHIVABLE|MUST NOT ROTATE)\b/ },
+];
+
+/*
+ * ONE CANDIDATE MARKER WAS MEASURED AND THEN REJECTED, AND IT IS RECORDED HERE
+ * RATHER THAN QUIETLY OMITTED.
+ *
+ * `awaiting explicit go` was in this list. It is a real phrase — this
+ * repository's `residue.md` carries a whole block headed
+ * `## Open boundaries (awaiting explicit go)`. It was removed because a HEADING
+ * names a SECTION KIND, not the status of the objects inside it, and this
+ * repository's own generated fixtures reuse that heading verbatim
+ * (`rotate-memory.test.mjs`'s 114-block residue fixture cycles nine real
+ * heading conventions including that one). Measured: with it in the list, six
+ * synthetic blocks in a fixture whose bodies read "- residue line for block N"
+ * were protected, `minimum_safe_keep` came out 107 of 114, and 38 tests in the
+ * shipped suite failed on a rotation that endangers nothing.
+ *
+ * WHAT IT COSTS, STATED RATHER THAN GLOSSED: nothing measurable on this tree.
+ * `residue.md`'s open-boundaries block is block 3 and the floor there is 25, so
+ * the phrase never moved the answer. Protection is decided by the OBJECTS a
+ * block holds. The only headings that protect on their own are the ones that
+ * say so — see `SENTINEL_PROTECTED_HEADING_RE`.
+ */
+
+/** A block heading that declares its whole block protected. */
+export const SENTINEL_PROTECTED_HEADING_RE = /^##\s+(?:Standing\b|.*PROTECTED REGION)/;
+
+/**
+ * Literals other suites read out of these files with `head -n1`, so an archived
+ * FIRST occurrence would silently re-point the guard that reads them. A pin
+ * that is absent from a file is recorded as `absent` and is NOT a refusal:
+ * rotation cannot archive a literal the file does not contain.
+ */
+export const SENTINEL_GATE_PINS = {
+  residue: [
+    { literal: "license model", ci: true },
+    { literal: "no tags", ci: true },
+    { literal: "single-platform", ci: true },
+  ],
+  current_state: [
+    { literal: "**Build/test command:**", ci: false },
+    { literal: "**Last closed packet:**", ci: false },
+  ],
+  active_packet: [],
+};
+
+/**
+ * An INDEPENDENT block map, derived by its own line scan rather than by reusing
+ * `segmentFile`'s output.
+ *
+ * That independence is the entire point: refusal condition 4 compares this map
+ * with the segments the plan was built from, so a defect in either one is
+ * caught by the other. Reusing `segmentFile` here would produce a check that
+ * agrees with itself, which is the shape this file has already deleted twice.
+ */
+export function sentinelBlockMap(text, spec) {
+  const delim = spec.blockDelimiter;
+  const map = [];
+  let i = 0;
+  let lineNo = 0;
+  const n = text.length;
+  while (i < n) {
+    const nl = text.indexOf("\n", i);
+    const lineEnd = nl === -1 ? n : nl;
+    const line = text.slice(i, lineEnd);
+    lineNo++;
+    if (delim.test(line)) {
+      if (map.length > 0) map[map.length - 1].endOffset = i;
+      map.push({
+        index: map.length + 1,
+        header: line,
+        startOffset: i,
+        startLine: lineNo,
+        endOffset: n,
+      });
+    }
+    i = nl === -1 ? n : nl + 1;
+  }
+  return map;
+}
+
+/**
+ * Resolve every protected object in `text` to the block that holds it.
+ *
+ * Returns `{ objects, unresolvable }`. `objects` carries one record per
+ * protected object with the block position it resolved to and the evidence that
+ * put it there; `unresolvable` carries every identity a marker named that no
+ * block declares. Both are reported in full — nothing is dropped silently,
+ * which is what "a REFUSAL, not a skip" means in practice.
+ */
+export function scanProtectedObjects(text, spec) {
+  const lines = text.split("\n");
+  const blockOfLine = [];
+  let blockNo = 0;
+  for (const line of lines) {
+    if (spec.blockDelimiter.test(line)) blockNo++;
+    blockOfLine.push(blockNo);
+  }
+
+  // (1) DECLARATION INDEX: id -> the DEEPEST block that declares it. Deepest,
+  //     not first: retention is a prefix, so protecting the deepest declaration
+  //     retains every copy. A shallower choice would strand a later duplicate.
+  const declaredAt = new Map();
+  lines.forEach((line, i) => {
+    const m = SENTINEL_DECL_RE.exec(line);
+    if (!m) return;
+    const id = m[1] ? `(${m[1]})` : m[2];
+    const at = blockOfLine[i];
+    if (at >= 1 && (!declaredAt.has(id) || declaredAt.get(id).block < at)) {
+      declaredAt.set(id, { block: at, line: i + 1 });
+    }
+  });
+
+  const objects = [];
+  const unresolvable = [];
+  const seen = new Set();
+  const add = (id, kind, block, line, resolution) => {
+    const key = `${id}|${kind}|${block}`;
+    if (seen.has(key)) return;
+    seen.add(key);
+    objects.push({ id, kind, block_position: block, evidence_line: line, resolution });
+  };
+
+  // (2) STRUCTURAL: a block whose own heading declares it protected.
+  lines.forEach((line, i) => {
+    if (blockOfLine[i] >= 1 && SENTINEL_PROTECTED_HEADING_RE.test(line)) {
+      add(`PROTECTED-REGION:block_${blockOfLine[i]}`, "protected-region", blockOfLine[i], i + 1, "heading");
+    }
+  });
+
+  /*
+   * (3) GATE PINS: literals other suites read out of this file with `head -n1`,
+   *     so the FIRST occurrence is the one that must not move — an archived
+   *     first occurrence silently re-points that reader at whatever comes next,
+   *     or at nothing.
+   *
+   * THEY ARE ARMED ONLY IN A FILE THAT HAS DECLARED A STANDING REGION, and that
+   * qualification is load-bearing rather than decorative. The pins are required
+   * to live INSIDE the standing region and nowhere else — that is exactly what
+   * `tests/build_os_maintenance_tests.sh` sections 8(d) and 9(d) assert. A file
+   * with no standing region has not been governed yet: in the SHIPPED SCAFFOLD
+   * these two literals are template placeholders sitting in blocks 1 and 2 of a
+   * three-block file, and arming on them there would set a floor of 2 on memory
+   * that carries nothing worth protecting. Measured: doing so broke the
+   * two-pass rotation proof in `rotate-memory.test.mjs` on a scaffold whose
+   * `**Last closed packet:**` line reads "none — no packet has closed".
+   *
+   * A pin that is ABSENT is recorded and skipped, not refused: rotation cannot
+   * archive a literal the file does not contain.
+   */
+  const hasStandingRegion = objects.some((o) => o.kind === "protected-region");
+  for (const pin of (hasStandingRegion ? SENTINEL_GATE_PINS[spec.name] : undefined) ?? []) {
+    const needle = pin.ci ? pin.literal.toLowerCase() : pin.literal;
+    let at = -1;
+    for (let i = 0; i < lines.length; i++) {
+      const hay = pin.ci ? lines[i].toLowerCase() : lines[i];
+      if (hay.includes(needle)) { at = i; break; }
+    }
+    if (at === -1) continue;
+    if (blockOfLine[at] >= 1) {
+      add(`GATE-PIN:${pin.literal}`, "gate-pin", blockOfLine[at], at + 1, "first-occurrence");
+    }
+  }
+
+  // (4) MARKERS, resolved BY IDENTITY and, separately, by ownership.
+  lines.forEach((line, i) => {
+    const block = blockOfLine[i];
+    if (block < 1) return;
+    for (const marker of SENTINEL_MARKERS) {
+      if (!marker.re.test(line)) continue;
+
+      // (4a) identities this marker NAMES
+      const named = new Set();
+      for (const m of line.matchAll(SENTINEL_ID_RE)) named.add(m[0]);
+      for (const m of line.matchAll(SENTINEL_NAMED_TAG_RE)) named.add(`(${m[1]})`);
+      for (const id of named) {
+        const decl = declaredAt.get(id);
+        if (decl) {
+          add(id, marker.kind, decl.block, decl.line, "declaration");
+        } else {
+          unresolvable.push({
+            id,
+            kind: marker.kind,
+            named_at_line: i + 1,
+            named_in_block: block,
+            reason:
+              "a protection marker names this identity and no block in this file DECLARES it, " +
+              "so the block that holds the object cannot be established from this file alone",
+          });
+        }
+      }
+
+      // (4b) the marker's OWN anchor: the declaration it sits under, without
+      //      crossing a block boundary, or failing that its own block.
+      let owner = null;
+      for (let j = i; j >= 0 && blockOfLine[j] === block; j--) {
+        const m = SENTINEL_DECL_RE.exec(lines[j]);
+        if (m) { owner = m[1] ? `(${m[1]})` : m[2]; break; }
+      }
+      if (owner) {
+        const decl = declaredAt.get(owner) ?? { block, line: i + 1 };
+        add(owner, marker.kind, decl.block, decl.line, "owning-declaration");
+      } else {
+        add(`BLOCK:${block}`, marker.kind, block, i + 1, "owning-block");
+      }
+    }
+  });
+
+  objects.sort((a, b) => a.block_position - b.block_position || a.id.localeCompare(b.id));
+  return { objects, unresolvable, declaredAt };
+}
+
+/**
+ * `max( block position of every protected or still-open object )`, or 0 when
+ * the file carries none (an UNARMED file).
+ */
+export function deriveMinimumSafeKeep(scan) {
+  let max = 0;
+  for (const o of scan.objects) if (o.block_position > max) max = o.block_position;
+  return { minimumSafeKeep: max, armed: scan.objects.length > 0 };
+}
+
+function sentinelRefusalLines(path, s) {
+  const L = [];
+  L.push(`SENTINEL REFUSED — ${path}. Nothing was written, for this file or any other.`);
+  L.push(`  requested_keep            ${s.requested_keep}`);
+  L.push(`  minimum_safe_keep         ${s.minimum_safe_keep}`);
+  L.push(`  protected_object_ids      ${s.protected_object_ids.join(", ") || "(none)"}`);
+  L.push(`  protected_block_positions ${s.protected_block_positions.join(", ") || "(none)"}`);
+  L.push(`  blocks_to_archive         ${s.blocks_to_archive}`);
+  L.push(`  bytes_to_reclaim          ${s.bytes_to_reclaim}`);
+  L.push(`  post_rotation_headroom    ${s.post_rotation_headroom}`);
+  for (const r of s.refusals) L.push(`  ${r.code}: ${r.detail}`);
+  return L.join("\n");
+}
+
+/**
+ * Evaluate all seven refusal conditions and return the sentinel report.
+ *
+ * EVERY violated condition is reported, not just the first. Reporting only the
+ * first turns a fix round into a queue: the operator repairs one thing, re-runs,
+ * and is handed the next — which is exactly how a fix list arrives in
+ * installments. The conditions are also deliberately overlapping, so more than
+ * one firing at once is normal rather than a sign of double-counting.
+ */
+export function evaluateSentinel(input) {
+  const {
+    spec, scan, requestedKeep, archivedBlocks, archivedBytes, retainedBytes,
+    maxBytes, closeBudget, apply, preRegistration, mapAgreement, restorationOk,
+  } = input;
+
+  const derived = deriveMinimumSafeKeep(scan);
+  // NAMED AND ASSIGNED ON ITS OWN LINE so a mutation fixture can suppress it and
+  // prove that conditions 3, 4 and 6 are not merely shadowed by condition 1.
+  const sentinelFloor = derived.minimumSafeKeep;
+
+  const refusals = [];
+  const s = {
+    armed: derived.armed,
+    requested_keep: requestedKeep,
+    minimum_safe_keep: sentinelFloor,
+    protected_object_ids: [...new Set(scan.objects.map((o) => o.id))],
+    protected_block_positions: [...new Set(scan.objects.map((o) => o.block_position))].sort((a, b) => a - b),
+    blocks_to_archive: archivedBlocks,
+    bytes_to_reclaim: archivedBytes,
+    post_rotation_headroom: maxBytes - retainedBytes,
+    close_budget_bytes: closeBudget,
+    protected_objects: scan.objects,
+    unresolvable_identities: scan.unresolvable,
+    refusals,
+    verdict: "ALLOW",
+  };
+
+  // C1 — the rule itself.
+  if (requestedKeep < sentinelFloor) {
+    refusals.push({
+      condition: 1,
+      code: "SENTINEL-C1",
+      detail:
+        `requested --keep ${requestedKeep} is BELOW the derived minimum_safe_keep ${sentinelFloor}. ` +
+        `Retention is a PREFIX, so every block from ${requestedKeep + 1} to the end would be ` +
+        `archived, and a protected or still-open object is anchored at block ${sentinelFloor}. ` +
+        `N is NOT auto-raised: re-run with --keep ${sentinelFloor} or higher, or close the object.`,
+    });
+  }
+
+  // C2 — a protected identity that cannot be resolved.
+  if (scan.unresolvable.length > 0) {
+    refusals.push({
+      condition: 2,
+      code: "SENTINEL-C2",
+      detail:
+        `${scan.unresolvable.length} protected identity/identities cannot be resolved to a block in ` +
+        `${spec.path}: ${scan.unresolvable.map((u) => `${u.id} (named at line ${u.named_at_line})`).join(", ")}. ` +
+        `An unresolvable identity is a REFUSAL, not a skip — declare the object in this file, or ` +
+        `stop marking it protected here.`,
+    });
+  }
+
+  // C3 — an open object would move to the archive. Derived from the ROUTING that
+  //      is actually about to happen, not from the floor, so it still fires when
+  //      the floor is wrong.
+  const stranded = scan.objects.filter((o) => o.block_position > requestedKeep);
+  if (stranded.length > 0) {
+    refusals.push({
+      condition: 3,
+      code: "SENTINEL-C3",
+      detail:
+        `${stranded.length} protected object(s) sit in blocks this rotation would ARCHIVE: ` +
+        `${stranded.map((o) => `${o.id}@block ${o.block_position} (${o.kind})`).join(", ")}. ` +
+        `Moving an open object into an append-only archive is an operator act, not a tool's.`,
+    });
+  }
+
+  // C4 — the block map and the live file disagree.
+  if (!mapAgreement.ok) {
+    refusals.push({
+      condition: 4,
+      code: "SENTINEL-C4",
+      detail:
+        `the independently-derived block map and the segments this plan was built from disagree ` +
+        `for ${spec.path}: ${mapAgreement.detail}. Every block position above is measured against ` +
+        `a map that does not describe the file, so none of them can be trusted.`,
+    });
+  }
+
+  // C5 — the apply was not pre-registered.
+  if (apply && derived.armed) {
+    if (!preRegistration) {
+      refusals.push({
+        condition: 5,
+        code: "SENTINEL-C5",
+        detail:
+          `this --apply over a file carrying ${scan.objects.length} protected object(s) was NOT ` +
+          `pre-registered. Pass --pre-registration <file> naming { file, keep, sourceSha256 }, ` +
+          `written and committed BEFORE the apply, so the ordering is checkable from the tree ` +
+          `rather than from the builder's word for it.`,
+      });
+    } else if (!preRegistration.ok) {
+      refusals.push({
+        condition: 5,
+        code: "SENTINEL-C5",
+        detail: `the pre-registration does not bind this run: ${preRegistration.detail}`,
+      });
+    }
+  }
+
+  // C6 — deterministic restoration cannot be proved.
+  if (!restorationOk.ok) {
+    refusals.push({
+      condition: 6,
+      code: "SENTINEL-C6",
+      detail:
+        `deterministic restoration cannot be proved for ${spec.path}: ${restorationOk.detail}. ` +
+        `The archive is the only copy of what leaves, so a move that cannot be reversed on paper ` +
+        `is not a move this tool will make.`,
+    });
+  }
+
+  // C7 — the projected result cannot absorb the packet's own close.
+  if (derived.armed && s.post_rotation_headroom < closeBudget) {
+    refusals.push({
+      condition: 7,
+      code: "SENTINEL-C7",
+      detail:
+        `the projected result leaves ${s.post_rotation_headroom} B of headroom under the ` +
+        `${maxBytes} B ceiling, which does not cover the ${closeBudget} B close budget. A rotation ` +
+        `that does not leave room for its own close moves the breach past the point where this ` +
+        `tool can still act — past the ceiling it refuses at EXIT.CEILING. Lower --keep, or set ` +
+        `--close-budget deliberately.`,
+    });
+  }
+
+  s.verdict = refusals.length > 0 ? "REFUSE" : "ALLOW";
+  return s;
+}
+
+/** Read and validate a pre-registration record against the run it authorises. */
+function readPreRegistration(recordPath, spec, keep, originalBytes) {
+  if (!fs.existsSync(recordPath)) {
+    return { ok: false, detail: `no pre-registration record at ${recordPath}` };
+  }
+  let doc;
+  try {
+    doc = JSON.parse(fs.readFileSync(recordPath, "utf8"));
+  } catch (e) {
+    return { ok: false, detail: `the pre-registration at ${recordPath} is not valid JSON (${e.message})` };
+  }
+  const records = Array.isArray(doc) ? doc : Array.isArray(doc.records) ? doc.records : [doc];
+  const mine = records.filter((r) => r && r.file === spec.name);
+  if (mine.length === 0) {
+    return { ok: false, detail: `the pre-registration names no record for file "${spec.name}"` };
+  }
+  const sha = crypto.createHash("sha256").update(Buffer.from(originalBytes, "latin1")).digest("hex");
+  for (const r of mine) {
+    if (r.keep !== keep) {
+      return {
+        ok: false,
+        detail: `the pre-registration for "${spec.name}" names keep ${r.keep}, this run requested ${keep}`,
+      };
+    }
+    if (r.sourceSha256 !== sha) {
+      return {
+        ok: false,
+        detail:
+          `the pre-registration for "${spec.name}" was taken over source sha256 ${r.sourceSha256} ` +
+          `and the file on disk is now ${sha} — the record is bound to the exact bytes it was ` +
+          `written over, so it cannot authorise a rotation of different ones`,
+      };
+    }
+  }
+  return { ok: true, sha, detail: "matches file, keep and source sha256" };
+}
+
+/* ------------------------------------------------------------------ */
 /* 5. PLANNING (no writes)                                             */
 /* ------------------------------------------------------------------ */
 
@@ -890,6 +1448,86 @@ function planFile(root, spec, opts) {
     );
   }
 
+  /*
+   * (4) THE SENTINEL, LAST IN THE PLAN AND FIRST IN AUTHORITY.
+   *
+   * It runs AFTER every conservation and ceiling check because it consumes
+   * their outputs — the routing that is actually about to happen, and the exact
+   * byte count that would be written. It runs BEFORE any write because a
+   * refusal that arrives after the archive has been appended is not a refusal.
+   *
+   * `planFile` is called for EVERY file before ANY file is written, so a
+   * sentinel refusal on one file stops the whole run, exactly as a conservation
+   * failure does.
+   */
+  const scan = scanProtectedObjects(original, spec);
+
+  // The INDEPENDENT cross-check behind refusal condition 4. `crossMap` is built
+  // by its own line scan; `segments` came from `segmentFile`. Comparing them is
+  // only worth anything while they stay independent — do not "simplify" this by
+  // deriving one from the other.
+  const crossMap = sentinelBlockMap(original, spec);
+  const planBlocks = segments.filter((s) => s.kind === "block");
+  let mapAgreement = { ok: true, detail: "block count, headers and offsets agree" };
+  if (crossMap.length !== planBlocks.length) {
+    mapAgreement = {
+      ok: false,
+      detail: `${crossMap.length} blocks in the re-derived map vs ${planBlocks.length} in the plan`,
+    };
+  } else {
+    for (let i = 0; i < crossMap.length; i++) {
+      if (crossMap[i].header !== planBlocks[i].headerLine || crossMap[i].startOffset !== planBlocks[i].startOffset) {
+        mapAgreement = {
+          ok: false,
+          detail:
+            `block ${i + 1} differs — re-derived ${JSON.stringify(clip(crossMap[i].header, 60))} at byte ` +
+            `${crossMap[i].startOffset}, plan ${JSON.stringify(clip(planBlocks[i].headerLine ?? "", 60))} at ` +
+            `byte ${planBlocks[i].startOffset}`,
+        };
+        break;
+      }
+    }
+  }
+
+  // The RESTORATION PROOF behind refusal condition 6, re-derived here from the
+  // two outputs rather than inherited from check (1d) above, so the two are
+  // independent instruments and not one instrument counted twice.
+  const restorationSource = contentText + archivedText;
+  let restorationOk = { ok: true, detail: "retained ++ archived reconstructs the source byte-exact" };
+  if (restorationSource !== original) {
+    let at = 0;
+    while (at < restorationSource.length && restorationSource[at] === original[at]) at++;
+    restorationOk = {
+      ok: false,
+      detail:
+        `the retained bytes followed by the archived bytes are ${restorationSource.length} B against ` +
+        `${original.length} B of source, first divergence at byte ${at}`,
+    };
+  }
+
+  const preRegistration = opts.preRegistration
+    ? readPreRegistration(opts.preRegistration, spec, opts.keep, original)
+    : null;
+
+  const sentinel = evaluateSentinel({
+    spec,
+    scan,
+    requestedKeep: opts.keep,
+    archivedBlocks: archived.length,
+    archivedBytes: archived.reduce((a, s) => a + s.text.length, 0),
+    retainedBytes,
+    maxBytes: opts.maxBytes,
+    closeBudget: opts.closeBudget,
+    apply: opts.apply === true,
+    preRegistration,
+    mapAgreement,
+    restorationOk,
+  });
+
+  if (sentinel.verdict === "REFUSE" && !opts.sentinelReport) {
+    throw new RotateError(EXIT.SENTINEL, sentinelRefusalLines(spec.path, sentinel));
+  }
+
   return {
     spec,
     full,
@@ -898,8 +1536,10 @@ function planFile(root, spec, opts) {
     retained,
     archived,
     retainedText,
+    sentinel,
     report: {
       name: spec.name,
+      sentinel,
       path: spec.path,
       delimiter: String(spec.blockDelimiter),
       batchId: opts.batchId,
@@ -1134,6 +1774,25 @@ creates — put such content there rather than in the files listed below.
   --file NAME             restrict to one of: ${Object.keys(FILE_SPECS).join(", ")}
   --root DIR              repo root (default: two levels above this script)
   --json                  machine-readable report on stdout
+
+THE ROTATION SENTINEL is always on. It derives, per file,
+
+  minimum_safe_keep = max( block position of every protected or still-open object )
+
+resolving objects BY IDENTITY — a marker names an object, it is not the object —
+and REFUSES a rotation below that floor at exit ${EXIT.SENTINEL}, before anything is written.
+N is never auto-raised. A file in which it resolves zero protected objects is
+UNARMED and says so on stderr.
+
+  --sentinel-report       report the floor and the verdict and EXIT 0 without
+                          writing. This is how you ask what the safe --keep is;
+                          it implies a dry run and never refuses.
+  --pre-registration F    JSON record { file, keep, sourceSha256 } authorising
+                          this apply. REQUIRED for --apply over a file that
+                          carries protected objects.
+  --close-budget B        bytes the packet's own close must still fit after the
+                          rotation (default ${DEFAULT_CLOSE_BUDGET_BYTES}, derived from this
+                          repository's largest observed single-commit growth)
   -h, --help              this text
 `;
 
@@ -1146,6 +1805,9 @@ export function parseArgs(argv) {
     root: null,
     json: false,
     help: false,
+    sentinelReport: false,
+    preRegistration: null,
+    closeBudget: DEFAULT_CLOSE_BUDGET_BYTES,
   };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
@@ -1158,6 +1820,9 @@ export function parseArgs(argv) {
       case "--apply": opts.apply = true; break;
       case "--json": opts.json = true; break;
       case "-h": case "--help": opts.help = true; break;
+      case "--sentinel-report": opts.sentinelReport = true; break;
+      case "--pre-registration": opts.preRegistration = need("--pre-registration"); break;
+      case "--close-budget": opts.closeBudget = Number(need("--close-budget")); break;
       case "--keep": opts.keep = Number(need("--keep")); break;
       case "--max-bytes": opts.maxBytes = Number(need("--max-bytes")); break;
       case "--file": opts.file = need("--file"); break;
@@ -1172,6 +1837,16 @@ export function parseArgs(argv) {
   if (!Number.isInteger(opts.maxBytes) || opts.maxBytes < 1) {
     throw new RotateError(EXIT.USAGE, `--max-bytes must be an integer >= 1 (got ${opts.maxBytes})`);
   }
+  if (!Number.isInteger(opts.closeBudget) || opts.closeBudget < 0) {
+    throw new RotateError(EXIT.USAGE, `--close-budget must be an integer >= 0 (got ${opts.closeBudget})`);
+  }
+  /*
+   * `--sentinel-report` IMPLIES A DRY RUN, and does so by force rather than by
+   * documentation. It is the one mode that returns 0 on a verdict of REFUSE, so
+   * letting it coexist with `--apply` would build a bypass: ask the question in
+   * a mode that cannot refuse, and write anyway.
+   */
+  if (opts.sentinelReport) opts.apply = false;
   if (opts.file !== null && !(opts.file in FILE_SPECS)) {
     throw new RotateError(
       EXIT.USAGE,
@@ -1286,9 +1961,60 @@ function renderHuman(reports, opts) {
       );
     }
     L.push(`  selection         : RECENCY ONLY — no content is exempt from rotation`);
+    /*
+     * THE SENTINEL LINES ARE PRINTED FOR EVERY PROPOSED ROTATION, ALLOWED OR
+     * REFUSED. A floor that is only shown on the way to a refusal teaches
+     * nobody the safe value; showing it on every run is what stops the next
+     * rotation from re-deriving it by hand.
+     */
+    const s = r.sentinel;
+    if (s) {
+      L.push(
+        `  sentinel          : ${s.verdict}${s.armed ? "" : " (NOT ARMED — 0 protected objects resolved)"}` +
+          ` — requested_keep ${s.requested_keep}, minimum_safe_keep ${s.minimum_safe_keep}`
+      );
+      L.push(
+        `  protected objects : ${s.protected_object_ids.length} at block(s) ` +
+          `${s.protected_block_positions.join(", ") || "-"}` +
+          `${s.protected_object_ids.length ? ` — ${clip(s.protected_object_ids.join(", "), 200)}` : ""}`
+      );
+      L.push(
+        `  projection        : blocks_to_archive ${s.blocks_to_archive}, bytes_to_reclaim ` +
+          `${s.bytes_to_reclaim}, post_rotation_headroom ${s.post_rotation_headroom} B ` +
+          `(close budget ${s.close_budget_bytes} B)`
+      );
+      for (const u of s.unresolvable_identities) {
+        L.push(`  UNRESOLVED IDENTITY: ${u.id} named at line ${u.named_at_line} — ${u.reason}`);
+      }
+      for (const ref of s.refusals) L.push(`  ${ref.code}: ${ref.detail}`);
+    }
     L.push("");
   }
   return L.join("\n");
+}
+
+/*
+ * AN UNARMED SENTINEL IS THE FAILURE MODE THIS FILE HAS ALREADY PAID FOR ONCE,
+ * in `delimiterMatchedNothing`: a guard that finds nothing, reports success, and
+ * is indistinguishable from a guard that found nothing to complain about. The
+ * two states are separated here the same way and for the same reason, on STDERR
+ * so `--json` on stdout stays machine-parseable, and WITHOUT changing the exit
+ * code — a scaffolded repo whose memory has no standing region yet is a
+ * legitimate unarmed file, not an error.
+ */
+export function sentinelNotArmed(report) {
+  return report.sentinel !== undefined && report.sentinel.armed === false;
+}
+
+function renderNotArmedWarning(r) {
+  return (
+    `SENTINEL NOT ARMED: ${r.path}: the protection scan resolved ZERO protected objects, so ` +
+    `minimum_safe_keep is 0 and NO --keep can be refused for this file on the rule's account. ` +
+    `Conditions 5 (pre-registration) and 7 (close budget) are NOT applied either. That is correct ` +
+    `for a freshly scaffolded or generated memory file and WRONG for a governed one: if this file ` +
+    `is supposed to carry standing content, it is carrying none that the scan can see, and the ` +
+    `guard is protecting nothing. Exit code is unchanged.`
+  );
 }
 
 export function main(argv, io = { out: process.stdout, err: process.stderr }) {
@@ -1350,6 +2076,7 @@ export function main(argv, io = { out: process.stdout, err: process.stderr }) {
   // `delimiterMatchedNothing` for why this is a warning and not an error.
   for (const r of reports) {
     if (delimiterMatchedNothing(r)) io.err.write(`${renderDelimiterWarning(r)}\n`);
+    if (sentinelNotArmed(r)) io.err.write(`${renderNotArmedWarning(r)}\n`);
   }
   return EXIT.OK;
 }

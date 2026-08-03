@@ -69,8 +69,15 @@ legal `--keep` retains it.
   `no tags` because `tests/release_metadata_tests.sh:322` requires it, so the residue item is
   annotated rather than rewritten. Whether the tag was created with an explicit go is not
   determinable from here and no claim is made.
-- **Build/test command:** `bash tests/build_os_tests.sh` (2140 checks; no network; temp dirs)
-  — **2140 as of `PACKET-0038-current-state-reblock`.** The delta is **+19**, all of it
+- **Build/test command:** `bash tests/build_os_tests.sh` (2179 checks; no network; temp dirs)
+  — **2179 as of `PACKET-0040-rotation-sentinel-guard`.** The delta is **+39**, all of it
+  `tests/build_os_maintenance_tests.sh`, which goes **104 -> 143**: a new §10 driving the
+  rotation sentinel's seven refusal conditions, plus §8/§9 reworked around the DERIVED
+  keep instead of the literal 10. Every other chained suite is **+0**. Derived from a SOLO
+  full-capture run after an anchored `pgrep -fa '^bash tests/'` returned empty, and
+  reconciled against `CHANGELOG.md`, which carries the matching literal `**2179 passed**`
+  (unsplit) under `## [Unreleased]`. The prior figures are preserved below.
+  — **2140 as of `PACKET-0038-current-state-reblock`.** The delta was **+19**, all of it
   `tests/build_os_maintenance_tests.sh` §9 — the section that measures whether THIS
   repository's own `current_state.md` can be rotated at all, and whether its standing
   region can be archived. That suite goes **85 -> 104**; every other chained suite is

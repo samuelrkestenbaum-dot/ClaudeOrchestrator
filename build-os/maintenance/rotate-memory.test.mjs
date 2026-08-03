@@ -2641,20 +2641,50 @@ describe("MUTATION: an INTERLEAVED cut is caught by routing reconstruction (1d)"
     assert.ok(!fs.existsSync(path.join(root, "build-os/memory/archive")));
   });
 
-  test("with (1d) disabled the same cut exits 0 and archives the newest block — no other guard fires", () => {
+  /*
+   * (1d) IS NO LONGER THE ONLY INSTRUMENT THAT SEES THIS, AND THAT IS RECORDED
+   * RATHER THAN GLOSSED. The rotation sentinel's refusal condition 6 re-derives
+   * `retained ++ archived === original` INDEPENDENTLY of (1d), so an interleaved
+   * cut is now caught twice by two checks that do not consult each other. The
+   * previous form of the test below asserted "no other guard fires", which was
+   * true when it was written and is false now — so it is split into the two
+   * statements that are true:
+   *
+   *   (1) with (1d) disabled, THE SENTINEL catches the same cut, at EXIT.SENTINEL;
+   *   (2) with BOTH disabled, the cut runs to completion at exit 0 and silently
+   *       moves the newest block out of the live file — which is what proves the
+   *       pair is discriminating rather than decorative.
+   */
+  const DISABLE_1D = [
+    "  if (contentText + archivedText !== original) {",
+    "  if (false && contentText + archivedText !== original) {",
+  ];
+  const DISABLE_C6 = [
+    "  const restorationSource = contentText + archivedText;",
+    "  const restorationSource = original;",
+  ];
+
+  test("with (1d) disabled the SENTINEL still catches the same cut, at EXIT.SENTINEL", () => {
+    const mjs = mutatedTool("interleave-no-1d-sentinel", [...INTERLEAVE, DISABLE_1D]);
+    const root = makeRoot("interleave-no-1d-sentinel");
+    const before = hashTree(root);
+
+    const res = runNodeJson(mjs, ["--root", root, "--file", "residue", "--keep", "10", "--apply"]);
+
+    assert.equal(res.status, EXIT.SENTINEL, `the sentinel did not catch the cut: ${res.all}`);
+    assert.match(res.all, /SENTINEL-C6/);
+    assert.deepEqual(hashTree(root), before, "a sentinel refusal must write NOTHING");
+    assert.ok(!fs.existsSync(path.join(root, "build-os/memory/archive")));
+  });
+
+  test("with BOTH (1d) and the sentinel's condition 6 disabled the cut exits 0 and archives the newest block", () => {
     /*
-     * Proves (1d) is discriminating rather than decorative. With the routing
-     * reconstruction disabled and nothing else changed, the same interleaved cut
-     * runs to completion, exits 0, and silently moves the newest block out of
-     * the live file.
+     * Proves the PAIR is discriminating rather than decorative. With both
+     * independent reconstructions disabled and nothing else changed, the same
+     * interleaved cut runs to completion, exits 0, and silently moves the newest
+     * block out of the live file.
      */
-    const mjs = mutatedTool("interleave-no-1d", [
-      ...INTERLEAVE,
-      [
-        "  if (contentText + archivedText !== original) {",
-        "  if (false && contentText + archivedText !== original) {",
-      ],
-    ]);
+    const mjs = mutatedTool("interleave-no-1d", [...INTERLEAVE, DISABLE_1D, DISABLE_C6]);
     const root = makeRoot("interleave-no-1d");
     const original = read(root, RETAINED.residue);
     const firstBlockHeader = "## TRUTH-UP 1 — stage-health recorder LIVE";
@@ -3678,13 +3708,20 @@ describe("a zero-block file WITH CONTENT is warned about, not reported as a no-o
     // DIRECTION 2: the benign files are NOT warned about. This is the half that
     // makes the warning worth having — one that fires on every empty scaffold
     // is noise, and noise is ignored.
+    //
+    // SCOPED TO THE DELIMITER WARNING'S OWN LINES, not to the whole stream. The
+    // rotation sentinel writes its own NOT-ARMED line to the same stream and
+    // legitimately names all three of these files, so a whole-stream
+    // `includes()` would now be measuring the wrong warning. What this pair is
+    // about is which files the DELIMITER warning fires on.
+    const delimLines = res.stderr.split("\n").filter((l) => l.includes("matched NOTHING"));
     assert.ok(
-      !res.stderr.includes("build-os/memory/residue.md"),
+      !delimLines.some((l) => l.includes("build-os/memory/residue.md")),
       `an EMPTY file was warned about; the warning fires on the wrong condition. ` +
         `stderr=${JSON.stringify(res.stderr)}`
     );
     assert.ok(
-      !res.stderr.includes("build-os/packets/active_packet.md"),
+      !delimLines.some((l) => l.includes("build-os/packets/active_packet.md")),
       `a WHITESPACE-ONLY file was warned about; "has content" must mean a ` +
         `non-whitespace byte. stderr=${JSON.stringify(res.stderr)}`
     );
@@ -3697,13 +3734,31 @@ describe("a zero-block file WITH CONTENT is warned about, not reported as a no-o
 
     // ...and a fully legitimate tree — case (c), parsed fine, nothing old
     // enough to archive — stays silent too.
+    //
+    // WRITTEN AS "NO DELIMITER WARNING", NOT AS "AN EMPTY STREAM". It used to be
+    // `quiet.stderr === ""`, which was a statement about the whole stream and
+    // therefore about every future writer to it. The rotation sentinel is one
+    // such writer: these fixtures carry no protected object, so it correctly
+    // reports NOT ARMED here. Asserting emptiness would make this test the thing
+    // that fails when a DIFFERENT warning starts working, which is measuring the
+    // stream instead of the claim.
     const clean = makeRoot("delimiter-fine");
     const quiet = run(["--root", clean, "--keep", "1000"]);
     assert.equal(quiet.status, 0, quiet.all);
     assert.equal(
-      quiet.stderr,
-      "",
-      `a parsed-fine no-op wrote to stderr: ${JSON.stringify(quiet.stderr)}`
+      countOf(quiet.stderr, "matched NOTHING"),
+      0,
+      `a parsed-fine no-op raised the delimiter warning: ${JSON.stringify(quiet.stderr)}`
+    );
+    // ...and every line it DID write is accounted for, so "no delimiter warning"
+    // cannot be satisfied by an unexamined stream full of something else.
+    const unaccounted = quiet.stderr
+      .split("\n")
+      .filter((l) => l.trim() !== "" && !l.startsWith("SENTINEL NOT ARMED:"));
+    assert.deepEqual(
+      unaccounted,
+      [],
+      `unaccounted stderr from a parsed-fine no-op: ${JSON.stringify(unaccounted)}`
     );
   });
 });

@@ -670,7 +670,7 @@ inputs: the original bytes of each memory file, the segment partition, the retai
 output: a rotation plan, or a thrown RotateError with a specific exit code
 owning_module: build-os/maintenance/rotate-memory.mjs
 consuming_policies: rotate-memory.sh's exit status; if ANY file fails conservation, NOTHING is written for ANY file
-evidence_refs: build-os/maintenance/rotate-memory.mjs:296; build-os/maintenance/rotate-memory.mjs:347; build-os/maintenance/rotate-memory.mjs:351; build-os/maintenance/rotate-memory.mjs:885
+evidence_refs: build-os/maintenance/rotate-memory.mjs:326; build-os/maintenance/rotate-memory.mjs:377; build-os/maintenance/rotate-memory.mjs:381; build-os/maintenance/rotate-memory.mjs:1443
 failure_behavior: throws at EXIT.CONSERVATION / EXIT.RETENTION / EXIT.CEILING before any write
 rollback_behavior: dry-run is the default and every check runs before the write, so there is nothing to roll back; the archive is append-only and never rewritten
 promotion_requirement: n/a
@@ -688,7 +688,7 @@ inputs: a file's parsed block count and whether its original text has any non-wh
 output: a WARNING on stderr naming the file and the delimiter that matched nothing; totalBlocks and originalHasContent in --json
 owning_module: build-os/maintenance/rotate-memory.mjs
 consuming_policies: a human reading stderr, or a caller reading --json; deliberately consumed by no policy that changes the exit code
-evidence_refs: build-os/maintenance/rotate-memory.mjs:1212; build-os/maintenance/rotate-memory.mjs:1216
+evidence_refs: build-os/maintenance/rotate-memory.mjs:1887; build-os/maintenance/rotate-memory.mjs:1891
 failure_behavior: none — "the exit code is deliberately unchanged"
 rollback_behavior: n/a
 promotion_requirement: it should not be promoted: an empty or not-yet-written memory file parses to zero blocks legitimately, so failing a run on it would be wrong
@@ -1051,13 +1051,13 @@ inputs: how many artefacts, files, links, scripts, blocks, rows, receipts or quo
 output: pass, or a FAIL declaring the scan vacuous
 owning_module: tests/entitlement_tests.sh
 consuming_policies: the FAIL count of twelve suites (pilot_kit, entitlement, control_registry, release_metadata, speed_benchmark, lane_declaration, metrics_adoption, build_os_maintenance, lane_enforcement, swarm_merge, scaffold_seeding, gate_depth), every one chained into tests/build_os_tests.sh
-evidence_refs: tests/pilot_kit_tests.sh:97; tests/pilot_kit_tests.sh:115; tests/pilot_kit_tests.sh:117; tests/pilot_kit_tests.sh:176; tests/pilot_kit_tests.sh:255; tests/pilot_kit_tests.sh:304; tests/pilot_kit_tests.sh:316; tests/pilot_kit_tests.sh:327; tests/pilot_kit_tests.sh:334; tests/pilot_kit_tests.sh:367; tests/pilot_kit_tests.sh:458; tests/entitlement_tests.sh:126; tests/entitlement_tests.sh:136; tests/entitlement_tests.sh:345; tests/entitlement_tests.sh:481; tests/control_registry_tests.sh:81; tests/control_registry_tests.sh:186; tests/control_registry_tests.sh:442; tests/control_registry_tests.sh:1189; tests/release_metadata_tests.sh:121; tests/release_metadata_tests.sh:200; tests/release_metadata_tests.sh:315; tests/speed_benchmark_tests.sh:421; tests/speed_benchmark_tests.sh:570; tests/speed_benchmark_tests.sh:581; tests/lane_declaration_tests.sh:493; tests/lane_declaration_tests.sh:496; tests/metrics_adoption_tests.sh:418; tests/metrics_adoption_tests.sh:421; tests/build_os_maintenance_tests.sh:88; tests/lane_enforcement_tests.sh:56; tests/swarm_merge_tests.sh:404; tests/scaffold_seeding_tests.sh:241; tests/gate_depth_tests.sh:73; tests/control_registry_tests.sh:828; tests/build_os_tests.sh:1077; tests/build_os_tests.sh:1146
+evidence_refs: tests/pilot_kit_tests.sh:97; tests/pilot_kit_tests.sh:115; tests/pilot_kit_tests.sh:117; tests/pilot_kit_tests.sh:176; tests/pilot_kit_tests.sh:255; tests/pilot_kit_tests.sh:304; tests/pilot_kit_tests.sh:316; tests/pilot_kit_tests.sh:327; tests/pilot_kit_tests.sh:334; tests/pilot_kit_tests.sh:367; tests/pilot_kit_tests.sh:458; tests/entitlement_tests.sh:126; tests/entitlement_tests.sh:136; tests/entitlement_tests.sh:345; tests/entitlement_tests.sh:481; tests/control_registry_tests.sh:81; tests/control_registry_tests.sh:186; tests/control_registry_tests.sh:442; tests/control_registry_tests.sh:1189; tests/release_metadata_tests.sh:121; tests/release_metadata_tests.sh:200; tests/release_metadata_tests.sh:315; tests/speed_benchmark_tests.sh:421; tests/speed_benchmark_tests.sh:570; tests/speed_benchmark_tests.sh:581; tests/lane_declaration_tests.sh:493; tests/lane_declaration_tests.sh:496; tests/metrics_adoption_tests.sh:418; tests/metrics_adoption_tests.sh:421; tests/build_os_maintenance_tests.sh:92; tests/lane_enforcement_tests.sh:56; tests/swarm_merge_tests.sh:404; tests/scaffold_seeding_tests.sh:241; tests/gate_depth_tests.sh:73; tests/control_registry_tests.sh:828; tests/build_os_tests.sh:1077; tests/build_os_tests.sh:1146
 failure_behavior: a FAIL per blind scanner; the run exits non-zero
 rollback_behavior: read-only
 promotion_requirement: n/a
 demotion_requirement: n/a
 authority_mismatch: declared
-notes: ONE ENTRY COVERING A FAMILY OF 35, IN 12 FILES — corrected from 5 refs and a claim of "six", which undercounted by 28 and was falsifiable with one grep. THE INCLUSION RULE, so the membership can be re-derived rather than trusted: a comparison in tests/*.sh of the form `-ge N` or `-gt N` with N > 1 that floors how much a scanner or driver COVERED, and whose failure makes every assertion downstream of it meaningless. N <= 1 is excluded deliberately — "the scan found at least one thing" IS the invariant and is Class A; every constant above 1 is a snapshot of the tree on the day it was written. The scan finds 37 such lines; three are excluded with stated reasons (build_os_maintenance_tests.sh:193, a self-constructed fixture's size; pilot_kit_tests.sh:340, a length floor on failure text; speed_benchmark_tests.sh:405, which mirrors metrics.record.note_minimum and would otherwise be classified twice). 34 remain and all 34 are this control; tests/control_registry_tests.sh section 21 reconciles the scan against this entry so the membership cannot drift silently again. Includes control_registry_tests.sh:772 — `[ "$PASS" -ge 40 ]`, the count of assertions that existed the day THIS packet was written, gating THIS packet's own suite. The vacuity principle is Class A and is one of the best things in this repository; all 34 constants implementing it are Class C, and they are what compares. MISMATCHES.md section 10 lists every member.
+notes: ONE ENTRY COVERING A FAMILY OF 35, IN 12 FILES — corrected from 5 refs and a claim of "six", which undercounted by 28 and was falsifiable with one grep. THE INCLUSION RULE, so the membership can be re-derived rather than trusted: a comparison in tests/*.sh of the form `-ge N` or `-gt N` with N > 1 that floors how much a scanner or driver COVERED, and whose failure makes every assertion downstream of it meaningless. N <= 1 is excluded deliberately — "the scan found at least one thing" IS the invariant and is Class A; every constant above 1 is a snapshot of the tree on the day it was written. The scan finds 37 such lines; three are excluded with stated reasons (build_os_maintenance_tests.sh:200, a self-constructed fixture's size; pilot_kit_tests.sh:340, a length floor on failure text; speed_benchmark_tests.sh:405, which mirrors metrics.record.note_minimum and would otherwise be classified twice). 34 remain and all 34 are this control; tests/control_registry_tests.sh section 21 reconciles the scan against this entry so the membership cannot drift silently again. Includes control_registry_tests.sh:772 — `[ "$PASS" -ge 40 ]`, the count of assertions that existed the day THIS packet was written, gating THIS packet's own suite. The vacuity principle is Class A and is one of the best things in this repository; all 34 constants implementing it are Class C, and they are what compares. MISMATCHES.md section 10 lists every member.
 
 control: gatedepth.sentinel_drift
 class: A
@@ -1159,7 +1159,7 @@ inputs: a cold install of the maintenance layer into a scratch repo, plus execut
 output: a RESULT line
 owning_module: tests/build_os_maintenance_tests.sh
 consuming_policies: chained from tests/build_os_tests.sh
-evidence_refs: tests/build_os_maintenance_tests.sh:295; tests/build_os_maintenance_tests.sh:846; tests/build_os_maintenance_tests.sh:847
+evidence_refs: tests/build_os_maintenance_tests.sh:302; tests/build_os_maintenance_tests.sh:1347; tests/build_os_maintenance_tests.sh:1348
 failure_behavior: exits non-zero when FAIL is non-zero
 rollback_behavior: read-only with respect to the real tree
 promotion_requirement: n/a
@@ -1575,7 +1575,7 @@ inputs: a verified rotation plan, a staging file written and read back byte-for-
 output: the live memory file REPLACED by the staged one, via an atomic rename
 owning_module: build-os/maintenance/rotate-memory.mjs
 consuming_policies: nothing consumes its verdict — it has none; the file system consumes its effect, and build-os/maintenance/run-tests.sh fingerprints the four watched files before and after any test run precisely because this write exists
-evidence_refs: build-os/maintenance/rotate-memory.mjs:982; build-os/maintenance/rotate-memory.mjs:1006
+evidence_refs: build-os/maintenance/rotate-memory.mjs:1622; build-os/maintenance/rotate-memory.mjs:1646
 failure_behavior: throws RotateError(EXIT.IO) before the rename if the read-back does not match or the append-only precondition would be violated; the live file is untouched on every failure path
 rollback_behavior: partial and asymmetric — rotated-out blocks survive in the archive, but the live file's prior bytes exist only in git. There is no --undo.
 promotion_requirement: already load_bearing; nothing above this status exists

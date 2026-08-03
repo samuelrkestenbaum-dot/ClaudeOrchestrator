@@ -535,7 +535,7 @@ this control.**
 **The three exclusions, each with its reason** — an exclusion list nobody can
 audit is how a census shrinks quietly:
 
-- `tests/build_os_maintenance_tests.sh:193` (`-gt 180000`) — a property of a
+- `tests/build_os_maintenance_tests.sh:200` (`-gt 180000`) — a property of a
   fixture *this test constructs itself*, so it is deterministic by construction
   and not a floor on a scan of the tree.
 - `tests/pilot_kit_tests.sh:340` (`-ge 15`) — a length floor on failure *text*

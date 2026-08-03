@@ -470,7 +470,7 @@ echo "== 21. The non-vacuity family is reconciled against the TREE, not against 
 # snapshot of the tree on the day it was written.
 FAM_EXCL="$WORK/fam_excluded.txt"
 cat > "$FAM_EXCL" <<'EOF'
-tests/build_os_maintenance_tests.sh:193
+tests/build_os_maintenance_tests.sh:200
 tests/pilot_kit_tests.sh:340
 tests/speed_benchmark_tests.sh:429
 EOF

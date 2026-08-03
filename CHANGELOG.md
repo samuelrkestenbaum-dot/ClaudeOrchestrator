@@ -14,6 +14,59 @@ deprecation cycle. Pin a commit if you need stability.
 
 ### In flight (not landed at the released commit)
 
+- **ROTATION IS NOW A GOVERNED RUNTIME CAPABILITY RATHER THAN A GOVERNED ACT.**
+  The first governed rotation of this repository's memory was safe because a
+  human read the open-item markers, found the oldest, and hand-derived
+  `--keep 25`. That rule lived in prose and enforced nothing;
+  `DEFECT-0014-retention-order-assumed-not-verified` was the standing record of
+  the gap. `build-os/maintenance/rotate-memory.mjs` now derives it itself:
+
+      minimum_safe_keep = max( block position of every protected or still-open object )
+
+  and REFUSES any lower `--keep` at a new exit code **7** (`EXIT.SENTINEL`),
+  before a byte moves. **N is never auto-raised** — auto-correcting a dangerous
+  request is how a guard becomes invisible. **No new tool, no new store, no new
+  validator, no new suite file**: the guard lives beside the routing it guards.
+
+  **IT RESOLVES BY IDENTITY, AND THAT IS NOT A DETAIL.** A protection marker is a
+  sentence *about* an object, not the object. In this repository's `residue.md`
+  the marker `IS NOT CONSUMED AND MUST NOT BE MARKED SO` for `(ddd)` sits in
+  **block 15** while `(ddd)` is DECLARED in **block 16**. A scan that trusts
+  where the marker sits derives 15, permits `--keep 15`, and archives the object
+  it was built to protect — at exit 0. Objects are resolved through the stable id
+  families (`DECISION-`, `DEFECT-`, `OCCURRENCE-`, `PACKET-`,
+  `SIGNAL-SNAPSHOT-`, `ANC-`, `EV-`, `DISP-`, `MUT-`, and the kernel
+  `ACT/ART/CTX/EVT/HOF/NS/OBJ/REL-NNNN` families) plus this tree's letter-tag
+  family, and **an identity a marker names that no block declares is a REFUSAL,
+  not a skip**.
+
+  **THE RED-DRIVEN FIXTURE WAS ALREADY IN THE TREE.** `--keep 10 --apply` sat
+  queued in `residue.md` as a pending action; against today's 25-block file it
+  archives blocks 11–25, including block 16 (`(ddd)`) and block 25 (`(S1)` and
+  the flake marked `[STILL OPEN AND STILL UNDIAGNOSABLE]`). It now exits 7 and
+  writes nothing. **Seven refusal conditions, each driven by a fixture that fires
+  it**: keep below the floor; an unresolvable identity; an open object that would
+  move to the archive; a block map that disagrees with the file; an `--apply`
+  that was not pre-registered; restoration that cannot be proved; and a
+  projected headroom that cannot absorb the packet's own close. The close budget
+  defaults to **18,702 B** — **derived, not invented**: the largest single-commit
+  growth any `FILE_SPECS` file has ever taken here (`current_state.md` at
+  `2a3c070`) — and is overridable with `--close-budget`.
+
+  **A SECOND INDEPENDENT INSTRUMENT NOW SEES THE INTERLEAVED CUT.** The
+  sentinel's condition 6 re-derives `retained ++ archived === original` without
+  consulting routing-reconstruction check (1d), so the mutation test that used
+  to assert "with (1d) disabled no other guard fires" is split into the two
+  statements that are true: with (1d) disabled the sentinel catches it at exit 7,
+  and only with **both** disabled does the cut run to completion at exit 0.
+
+  Suite **2179 passed**, 0 failed (+39, all of it
+  `tests/build_os_maintenance_tests.sh`, which goes **104 → 143**; every other
+  chained suite +0). The installed maintenance suite goes **125 → 145**.
+  **No new census control**; 6 stale line-pinned citations into
+  `rotate-memory.mjs` and `build_os_maintenance_tests.sh` were repointed **by
+  content**, never by offset.
+
 - **`build-os/memory/current_state.md` was re-blocked BEFORE it ran out of
   headroom — the same repair as `residue.md`, taken prospectively.** The file
   measured **185,204 B** against the **204,800 B** ceiling

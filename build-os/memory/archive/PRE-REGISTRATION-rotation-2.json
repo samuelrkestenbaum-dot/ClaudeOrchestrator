@@ -1,0 +1,11 @@
+{
+  "tool": "build-os/maintenance/rotate-memory.sh",
+  "packet": "PACKET-0040-rotation-sentinel-guard",
+  "written_at_commit": "188472f (base) — this record lands in COMMIT 1; the apply it authorises lands in COMMIT 2",
+  "file": "current_state",
+  "path": "build-os/memory/current_state.md",
+  "keep": 15,
+  "sourceSha256": "91fa454856bb7612b78ee1da843aa6e72e20851d6bef525ba046adb9f6a02cee",
+  "sourceBytes": 203642,
+  "note": "Rotation #2. build-os/memory/residue.md is DELIBERATELY NOT a record here: its minimum_safe_keep is 25 of 25 blocks, so no legal keep reclaims anything from it. See build-os/packets/active_packet.md for the derivation of keep=15 and the window [14,17] it sits in."
+}

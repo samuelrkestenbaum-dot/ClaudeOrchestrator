@@ -901,3 +901,124 @@ candidates, in the order the evidence puts them:
 
 Also open and untouched by boundary: `(ddd)`, `(uuuu)`, `(ppppp)`. Still NONE: second eyes, now
 **eighteen** consecutive packets, while `build-os/memory/tool_router.md:368` self-reports **"nine"**.
+
+## DECLARED AND IN FLIGHT — `gravito_rotation_sentinel_guard_a`
+
+- **Packet id:** `PACKET-0040-rotation-sentinel-guard` — **MINTED, collision-checked BEFORE the
+  mint.** The live band is `PACKET-0001`..`PACKET-0039`; `git log -S'PACKET-0040' --all --oneline`
+  returns **0** commits and `grep -rlF 'PACKET-0040' . --exclude-dir=.git` **0** files.
+- **Lane:** `substantive`. **Depth 2** — builder, then qa ‖ reviewer.
+- **THIS DECLARATION IS APPENDED AT THE TAIL, NOT WRITTEN AT THE HEAD, AND THAT IS DELIBERATE.**
+  `build-os/packets/active_packet.md:89` is the content site `ANC-0003` resolves to and
+  `tests/memory_kernel_tests.sh` §18 compares the committed projection with `cmp -s`. An append
+  moves no line at or above 89. The COST is stated rather than hidden: the FIRST `## Branch base`
+  section in this file still belongs to a CLOSED packet, so `bandwidth-check.sh`'s `commits`
+  dimension keeps reading a closed packet's base — residue `(jjjjjj)`'s instrument defect, unfixed
+  here because it is out of this packet's declared scope and the dimension is `advise`, not a gate.
+- **This packet is NOT recorded in `build-os/memory/residue.md`, ON PURPOSE.** That file has
+  **431 B** of headroom against the 204800 B ceiling at base `188472f` (derive it:
+  `echo $(( 204800 - $(wc -c < build-os/memory/residue.md) ))`). It cannot absorb a declaration,
+  and — as this packet's own guard then proves — it cannot be rotated to make room either.
+
+## Branch base — `gravito_rotation_sentinel_guard_a`
+
+Branched at `188472f` on `claude/project-handoff-merge-ramhds`, verified with
+`git merge-base HEAD 188472f` → `188472f`, **before the first edit**, with
+`git status --porcelain` empty and `origin/claude/project-handoff-merge-ramhds` at the same commit.
+**Nothing is pushed, merged, tagged, PR'd or deployed by this packet, and no such go has been
+given.** The two commits this packet is permitted are BOTH local.
+
+## What `gravito_rotation_sentinel_guard_a` must make true
+
+**THE SUCCESS CONDITION, operator-stated:** *future rotations no longer require a human to
+rediscover the safe keep value.* Rotation #1 was safe because a human hand-derived `--keep 25`;
+this packet converts that act into a runtime capability.
+
+1. **A ROTATION SENTINEL, inside `build-os/maintenance/rotate-memory.mjs`** — not a new tool.
+   It derives `minimum_safe_keep = max( block position of every protected or still-open object )`
+   and REFUSES any requested `--keep` below it, BEFORE any mutation.
+2. **Identity, not literal matching.** Objects are resolved through stable identity families
+   (`DECISION-`, `DEFECT-`, `OCCURRENCE-`, `PACKET-`, `SIGNAL-SNAPSHOT-`, `ANC-`, `EV-`, `DISP-`,
+   `MUT-`, and the kernel `ACT/ART/CTX/EVT/HOF/NS/OBJ/REL-NNNN` families) plus this tree's own
+   letter-tag family `(a)`..`(zzzzzz)`/`(S1)`. **An identity a protection marker names and the
+   scan cannot resolve is a REFUSAL, not a skip.**
+3. **Seven report fields for every proposed rotation:** `requested_keep`, `minimum_safe_keep`,
+   `protected_object_ids`, `protected_block_positions`, `blocks_to_archive`, `bytes_to_reclaim`,
+   `post_rotation_headroom`.
+4. **Seven refusal conditions**, each driven by an executed fixture.
+5. **THE RED-DRIVEN FIXTURE, operator-named:** `--keep 10 --apply` over this repository's live
+   `residue.md` must REFUSE. It sat queued in the tree and would have archived blocks 11–25,
+   among them block 16 (`(ddd)`, marked *"IS NOT CONSUMED AND MUST NOT BE MARKED SO"*) and
+   block 25 (`(S1)` and the flake marked `[STILL OPEN AND STILL UNDIAGNOSABLE]`).
+6. **Rotation #2 executed under the guard**, pre-registered BEFORE the apply and anchored in the
+   tree so the ordering is checkable from git rather than from builder testimony — the one thing
+   rotation #1 could not attest.
+
+## Ceiling — `gravito_rotation_sentinel_guard_a`
+
+**The operator authorised this guard and nothing else.** 0 new tools, 0 new stores, 0 new
+validators, 0 new suite files, 0 new governance primitives, 0 new census controls.
+`DEFAULT_MAX_BYTES` is **NOT** raised. Rotation #1's archived bytes are **NOT** rewritten.
+Out of bounds: `build-os/metrics/rank-candidates.sh`, `decision_telemetry.tsv`,
+`signal_snapshots.tsv`, `build-os/memory/standing_gates.md`.
+
+## PRE-REGISTRATION OF ROTATION #2 — WRITTEN AND COMMITTED BEFORE THE APPLY
+
+**THIS SECTION IS THE THING ROTATION #1 DID NOT HAVE.** Rotation #1's ordering was builder
+attestation only: the receipt's mtime postdated the apply, so nothing in the tree could show the
+intent predated the mutation. This record lands in **commit 1**; the apply lands in **commit 2**.
+`git log --format=%H -- build-os/packets/active_packet.md` and
+`git log --format=%H -- build-os/memory/current_state.md` therefore order the two from the tree.
+
+The machine-readable copy the guard itself reads is
+`build-os/memory/archive/PRE-REGISTRATION-rotation-2.json`, committed in the same commit as this
+section. `--apply` over a file carrying protected objects REFUSES unless that record is present
+and matches the run on every field, including the **sha256 of the source file as it stood when
+the registration was written**.
+
+- **Target:** `build-os/memory/current_state.md` — and it is the ONLY target.
+- **`build-os/memory/residue.md` IS NOT ROTATED, AND THE GUARD IS WHY.** Its
+  `minimum_safe_keep` is **25** and it carries exactly **25** blocks, so the only keep the
+  sentinel permits archives **nothing**. The file is already at its safe floor; rotation #1 put
+  it there. This is reported, not worked around: the guard is not weakened to make a rotation fit.
+- **`requested_keep`: 15.** It is chosen inside the window three independent bounds leave, and
+  the window is stated so the choice is auditable rather than incidental:
+  - **floor from the sentinel:** `minimum_safe_keep` = **3**;
+  - **floor from `tests/build_os_maintenance_tests.sh` §9(a)/(b)/(c):** the post-rotation file
+    must keep **more than 10** blocks and a subsequent `--keep 10` must still reclaim
+    **>= 40960 B**, which needs `requested_keep >= 14`;
+  - **ceiling from refusal condition 7:** `post_rotation_headroom` must cover the close budget
+    (**18702 B**, derived below), which needs `requested_keep <= 17`.
+  - **The window is [14, 17]. 15 is taken**, leaving 11835 B of margin over the §9 reclaim floor
+    and 20112 B over the close budget. 14 would reclaim 9253 B more and leave only 2582 B of
+    §9 margin — too thin to survive the next close's block insertion.
+- **Predicted, and to be checked against the tool's own report rather than restated from it:**
+  `blocks_to_archive` = **5** (blocks 16..20), `bytes_to_reclaim` = **37548 B**,
+  live size **203028 B -> 165986 B** (165480 B retained content + 506 B banner),
+  `post_rotation_headroom` = **38814 B**.
+- **Expected refusals, pre-registered so they cannot be discovered and then narrated as intended:**
+  `--keep 2` REFUSES (below `minimum_safe_keep` 3); `--keep 18` REFUSES (condition 7, headroom
+  15398 B < 18702 B); `--keep 15 --apply` with no pre-registration REFUSES (condition 5).
+- **THE CLOSE BUDGET IS DERIVED, NOT INVENTED: 18702 B.** It is the largest single-commit growth
+  any file in `FILE_SPECS` has ever taken in this repository — `build-os/memory/current_state.md`
+  at `2a3c070` (`181818 - 163116`). Re-derive it, do not trust this digit:
+  `git log --format=%H -- <path>` then differencing `git cat-file -s` across each pair. Measured
+  over all history at base `188472f`: `current_state.md` 62 commits / max **+18702**,
+  `residue.md` 61 commits / max **+13763**, `active_packet.md` 39 commits / max **+8257**.
+  It is overridable with `--close-budget N`.
+
+## THE RESIDUE FINDING, RECORDED HERE BECAUSE RESIDUE CANNOT HOLD IT
+
+`build-os/memory/residue.md` has **431 B** of headroom and the guard proves it has **no rotation
+path to more**: its `minimum_safe_keep` is 25 of 25 blocks, because block 25 holds `(o)` (the
+flake, `[STILL OPEN AND STILL UNDIAGNOSABLE]`) and `(S1)` (an unresolved operator decision), and
+block 16 holds `(ddd)`. **The next writer of that file cannot rotate its way out.** The two
+things that WOULD move it are both operator acts, and neither is taken here: close `(o)`/`(S1)`,
+or move the still-open items to the head of the file so the tail becomes archivable.
+
+**AND THE IDENTITY MECHANISM IS WHAT MAKES THAT NUMBER RIGHT, MEASURED IN THIS TREE:** the
+`IS NOT CONSUMED AND MUST NOT BE MARKED SO` marker for `(ddd)` occurs at `residue.md` line 1648,
+which is inside **block 15** — while `(ddd)` is DECLARED at line 1711, inside **block 16**. A
+positional marker scan derives 15 and archives the object it was built to protect. Only identity
+resolution derives 16. That is this tree's named recurring defect class — *positional shift
+mistaken for semantic identity* — and the guard exists precisely to not commit it.

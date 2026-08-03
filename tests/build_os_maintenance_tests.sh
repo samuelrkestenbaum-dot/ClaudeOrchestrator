@@ -22,6 +22,10 @@
 #      customer file byte-identical
 #   8/9. THIS repository's live residue.md and its live current_state.md are
 #      each rotatable, and neither's standing region is what rotation reclaims
+#   10. THE ROTATION SENTINEL: `--keep` below the derived minimum_safe_keep is
+#      REFUSED BEFORE MUTATION, protected objects are resolved BY IDENTITY rather
+#      than by position, and each of the seven refusal conditions is driven by a
+#      fixture that fires it
 set -uo pipefail
 
 SRC="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -88,7 +92,10 @@ INSTALLED_FAIL="$(grep -m1 '^# fail ' "$WRAP1" | tr -dc '0-9')"
 [ "${INSTALLED_PASS:-0}" -ge 100 ] 2>/dev/null && ok "installed suite is not vacuous (>=100 tests)" || no "installed suite ran only ${INSTALLED_PASS:-0} tests"
 
 # ...and a dry-run rotation works on the scaffolded memory, finding real blocks
-DRY="$( cd "$R1" && ./build-os/maintenance/rotate-memory.sh --json 2>&1 )"
+# STDOUT ONLY. The tool documents that its warnings go to STDERR precisely so
+# `--json` stays machine-parseable, and this capture used to merge the two with
+# `2>&1` — which parsed only while the tool happened to be silent on stderr.
+DRY="$( cd "$R1" && ./build-os/maintenance/rotate-memory.sh --json 2>"$WORK/dry.stderr" )"
 if node -e '
 const r = JSON.parse(process.argv[1]);
 if (r.mode !== "dry-run") { console.error("not a dry run"); process.exit(1); }
@@ -427,6 +434,22 @@ fi
 grep -q 'Full version rollback' "$SRC/build-os/maintenance/PORTING.md" \
   && ok "PORTING.md states the version-rollback boundary explicitly" || no "PORTING.md does not state the rollback boundary"
 
+# A matching pre-registration record, written BEFORE the apply it authorises.
+# Used by the keep-sweeps in sections 8 and 9 and by section 10: since the
+# rotation sentinel shipped, an --apply over a file carrying protected objects
+# is refused unless one of these binds it (refusal condition 5).
+sent_prereg(){ # <path> <file> <keep> <source>
+  node -e '
+const fs = require("fs"), crypto = require("crypto");
+const [out, file, keep, src] = process.argv.slice(1);
+fs.writeFileSync(out, JSON.stringify({
+  tool: "build-os/maintenance/rotate-memory.sh",
+  file, keep: Number(keep),
+  sourceSha256: crypto.createHash("sha256").update(fs.readFileSync(src)).digest("hex"),
+}, null, 2) + "\n");
+' "$1" "$2" "$3" "$4"
+}
+
 echo "== 8. THIS repository's live residue.md is rotatable, and its standing region is not =="
 # WHY THIS SECTION EXISTS, AND WHY IT IS ABOUT THE LIVE FILE RATHER THAN A FIXTURE.
 #
@@ -481,16 +504,28 @@ else
   ok "residue.md carries $RES_BLOCKS \`^## \` blocks — more than the shipped keep=10, so rotation has a tail to archive"
 fi
 
-# (b) THE SHIPPED-KEEP ROTATION ACTUALLY ARCHIVES. Dry run, so nothing is
-#     written anywhere; the exit code is captured DIRECTLY off the tool and
-#     never off the tail of a pipeline.
+# (b) WHAT THE SHIPPED KEEP WOULD DO, AND WHY IT IS NO LONGER ALLOWED TO DO IT.
+#
+#     THIS SUBSECTION CHANGED WHEN THE ROTATION SENTINEL SHIPPED, AND THE CHANGE
+#     IS AN INVERSION RATHER THAN AN ADJUSTMENT. It used to assert that a
+#     `--keep 10` rotation of this file EXITS 0 and reclaims at least 40960 B.
+#     Both were true measurements and the ACTION they measured was unsafe: after
+#     the first governed rotation this file carries 25 blocks, and `--keep 10`
+#     archives blocks 11..25 — among them block 16 (`(ddd)`, marked "IS NOT
+#     CONSUMED AND MUST NOT BE MARKED SO") and block 25 (`(S1)` and the flake
+#     marked "[STILL OPEN AND STILL UNDIAGNOSABLE]"). The old assertions were
+#     measuring the value of a rotation that would have destroyed the property
+#     the section above proves. They are replaced, not deleted: the measurement
+#     is still taken, through `--sentinel-report`, which is the mode that reports
+#     without refusing.
 RES_DRY="$WORK/residue-dry.json"
 node "$SRC/build-os/maintenance/rotate-memory.mjs" \
-     --root "$RES_ROOT" --file residue --keep 10 --json > "$RES_DRY" 2>"$WORK/residue-dry.err"
+     --root "$RES_ROOT" --file residue --keep 10 --sentinel-report --json \
+     > "$RES_DRY" 2>"$WORK/residue-dry.err"
 RES_DRY_RC=$?
 [ "$RES_DRY_RC" -eq 0 ] \
-  && ok "a --keep 10 DRY RUN over a scratch copy of the live residue.md exits 0 (no ceiling refusal)" \
-  || no "the --keep 10 dry run exited $RES_DRY_RC: $(head -c 300 "$WORK/residue-dry.err")"
+  && ok "a --keep 10 --sentinel-report over a scratch copy of the live residue.md exits 0 — the tool will always SAY what a rotation would do, even one it refuses to perform" \
+  || no "the --keep 10 sentinel report exited $RES_DRY_RC: $(head -c 300 "$WORK/residue-dry.err")"
 node -e '
 const fs = require("fs");
 const r = JSON.parse(fs.readFileSync(process.argv[1], "utf8")).results[0];
@@ -507,23 +542,72 @@ else
   no "the dry-run report could not be parsed: $(head -c 300 "$WORK/residue-fields.err")"
 fi
 if [ "${RES_ARCH_N:-0}" -le 0 ]; then
-  no "rotation at the shipped keep=10 would archive $RES_ARCH_N blocks — it is a REPORTED NO-OP at exit 0, which reads exactly like \"already rotated\""
+  no "rotation at the shipped keep=10 would archive $RES_ARCH_N blocks — it is a REPORTED NO-OP, which reads exactly like \"already rotated\""
 else
-  ok "rotation at the shipped keep=10 would archive $RES_ARCH_N block(s) of residue.md"
+  ok "rotation at the shipped keep=10 would archive $RES_ARCH_N block(s) of residue.md — the tail is still there, which is what makes the refusal below a REAL refusal rather than a description of a no-op"
 fi
 
-# (c) RECLAIMABLE BYTES, AND THE HEADROOM THEY BUY. Zero reclaimable bytes is
-#     the live condition; the floor is what says the re-block was worth doing.
-if [ "${RES_ARCH_B:-0}" -lt "$RES_MIN_RECLAIM" ]; then
-  no "rotation at keep=10 would reclaim only ${RES_ARCH_B:-0} B from residue.md (floor $RES_MIN_RECLAIM B) — the file is $RES_ORIGB B and there is nothing the tool can take"
+# (b2) ...AND THE SENTINEL REFUSES IT, BEFORE MUTATION. This is the operator-named
+#      fixture, stated here as the fact about THIS FILE; section 10 drives the
+#      guard's seven conditions in general.
+RES_REFUSE_ROOT="$WORK/residue-refuse"
+mkdir -p "$RES_REFUSE_ROOT/build-os/memory"
+cp "$RES_LIVE" "$RES_REFUSE_ROOT/build-os/memory/residue.md"
+sha256sum < "$RES_REFUSE_ROOT/build-os/memory/residue.md" > "$WORK/residue-refuse.before"
+node "$SRC/build-os/maintenance/rotate-memory.mjs" \
+     --root "$RES_REFUSE_ROOT" --file residue --keep 10 --apply \
+     > "$WORK/residue-refuse.out" 2>"$WORK/residue-refuse.err"
+RES_REFUSE_RC=$?
+[ "$RES_REFUSE_RC" -eq 7 ] \
+  && ok "\`--keep 10 --apply\` over this file is REFUSED at exit 7 — the command that sat queued in this repository's own residue as a pending action cannot be run by accident" \
+  || no "\`--keep 10 --apply\` over residue.md exited $RES_REFUSE_RC, not 7"
+[ "$(sha256sum < "$RES_REFUSE_ROOT/build-os/memory/residue.md")" = "$(cat "$WORK/residue-refuse.before")" ] \
+  && ok "...and the refusal came BEFORE MUTATION — the file is byte-identical and no archive exists" \
+  || no "the refused --keep 10 --apply still wrote"
+
+# (c) WHAT ROTATION CAN LEGALLY RECLAIM FROM THIS FILE, WHICH IS THE NUMBER THAT
+#     REPLACED THE OLD 40960 B FLOOR.
+#
+#     The old floor asserted that a keep=10 rotation reclaims >= 40 KB. It does
+#     — and it is forbidden, so the number describes an action nobody may take.
+#     The number that matters now is what the SAFE keep reclaims, and for this
+#     file the honest answer is currently ZERO: `minimum_safe_keep` equals the
+#     block count, so the only keep the sentinel permits archives nothing. That
+#     is not a defect in the guard; it is the file's true state, and the two
+#     things that would change it are both operator acts — close the still-open
+#     items, or move them to the head of the file.
+RES_MIN_SAFE="$(node -e '
+const fs = require("fs");
+const s = JSON.parse(fs.readFileSync(process.argv[1], "utf8")).results[0].sentinel;
+process.stdout.write(String(s.minimum_safe_keep));
+' "$RES_DRY" 2>/dev/null)"
+# RE-DERIVED INDEPENDENTLY IN BASH, so this is a cross-check and not the tool
+# agreeing with itself: the deepest block carrying a bracketed STILL-OPEN status
+# tag is a lower bound on the floor, whatever else the scan finds.
+RES_OPEN_BLK="$(awk '/^## /{n++} /\[STILL OPEN/{print n}' "$RES_LIVE" | sort -n | tail -1)"
+if [ -z "$RES_MIN_SAFE" ] || [ -z "$RES_OPEN_BLK" ]; then
+  no "residue.md's minimum_safe_keep ('$RES_MIN_SAFE') or its independently-derived open-item block ('$RES_OPEN_BLK') could not be measured"
+elif [ "$RES_MIN_SAFE" -lt "$RES_OPEN_BLK" ]; then
+  no "the tool derives minimum_safe_keep $RES_MIN_SAFE for residue.md while block $RES_OPEN_BLK still carries a [STILL OPEN marker — the floor is below an open item, so a permitted keep would archive it"
 else
-  ok "rotation at keep=10 would reclaim $RES_ARCH_B B from residue.md (>= the $RES_MIN_RECLAIM B floor)"
+  ok "residue.md's derived minimum_safe_keep is $RES_MIN_SAFE, at or below which nothing may rotate, and it is at least the block ($RES_OPEN_BLK) an independent bash scan finds still carrying a [STILL OPEN marker"
 fi
-RES_HEADROOM=$(( RES_CEIL - ${RES_RETB:-RES_CEIL} ))
-if [ "$RES_HEADROOM" -lt "$RES_MIN_RECLAIM" ]; then
-  no "after a keep=10 rotation residue.md would still be ${RES_RETB:-?} B, leaving $RES_HEADROOM B under the $RES_CEIL B ceiling — a close writing more than that has no green path"
+RES_RECLAIMABLE=$(( ${RES_TOT:-0} - ${RES_MIN_SAFE:-0} ))
+if [ "$RES_RECLAIMABLE" -lt 0 ]; then
+  no "residue.md's minimum_safe_keep ($RES_MIN_SAFE) exceeds its block count (${RES_TOT:-0}) — the floor cannot be satisfied by any legal keep at all"
 else
-  ok "after a keep=10 rotation residue.md would be $RES_RETB B, leaving $RES_HEADROOM B of headroom under the $RES_CEIL B ceiling"
+  ok "residue.md: $RES_TOT blocks, floor $RES_MIN_SAFE, so exactly $RES_RECLAIMABLE block(s) are legally reclaimable from it by rotation"
+fi
+RES_HEADROOM=$(( RES_CEIL - $(wc -c < "$RES_LIVE") ))
+# NOT A FLOOR ON THE HEADROOM. This file is at its safe floor, so its headroom
+# cannot be improved by the tool and asserting a minimum would be asserting
+# something no action available here can deliver. What IS asserted is that the
+# number is derived and reported, and that the file is still under the ceiling —
+# past it the tool refuses at EXIT.CEILING and the window closes entirely.
+if [ "$RES_HEADROOM" -lt 0 ]; then
+  no "residue.md is $(wc -c < "$RES_LIVE") B, already past the $RES_CEIL B ceiling — rotation refuses at EXIT.CEILING from here and $RES_RECLAIMABLE block(s) are reclaimable, so the preventative window is closed"
+else
+  ok "residue.md is $(wc -c < "$RES_LIVE") B, leaving $RES_HEADROOM B under the $RES_CEIL B ceiling — derived here, never quoted, because this file measures itself"
 fi
 [ "${RES_OK:-0}" = "1" ] \
   && ok "the tool itself reports the post-rotation size within its own ceiling" \
@@ -576,20 +660,27 @@ done
 # anything either. Counting a ceiling refusal as a protection failure would be
 # reporting the tool's own safety as a defect; counting it as a success without
 # checking that it wrote nothing would be worse. Both are checked.
-RES_N_ROT=0; RES_N_REFUSED=0; RES_N_BAD=0; RES_N_LEAK=0; RES_N_DRIFT=0
+RES_N_ROT=0; RES_N_REFUSED=0; RES_N_SENT=0; RES_N_BAD=0; RES_N_LEAK=0; RES_N_DRIFT=0
 RES_N=1
 while [ "$RES_N" -le "${RES_TOT:-0}" ]; do
   RES_NR="$WORK/keep-$RES_N"
   mkdir -p "$RES_NR/build-os/memory"
   cp "$RES_LIVE" "$RES_NR/build-os/memory/residue.md"
+  # THE SWEEP PRE-REGISTERS EVERY APPLY. Without one, refusal condition 5 would
+  # refuse every pass and the whole sweep would collapse into a single fact
+  # about pre-registration — a vacuous proof wearing a sweep's clothes.
+  sent_prereg "$WORK/keep-$RES_N.prereg.json" residue "$RES_N" "$RES_NR/build-os/memory/residue.md"
   node "$SRC/build-os/maintenance/rotate-memory.mjs" \
        --root "$RES_NR" --file residue --keep "$RES_N" --apply \
+       --pre-registration "$WORK/keep-$RES_N.prereg.json" \
        > "$WORK/keep-$RES_N.out" 2>&1
   RES_N_RC=$?
-  if [ "$RES_N_RC" -eq 3 ]; then
-    # a ceiling refusal must be a NO-WRITE: the copy is untouched and no
-    # archive was created, so nothing was archived and nothing was lost
-    RES_N_REFUSED=$((RES_N_REFUSED+1))
+  if [ "$RES_N_RC" -eq 3 ] || [ "$RES_N_RC" -eq 7 ]; then
+    # A REFUSAL MUST BE A NO-WRITE, whichever guard raised it: the copy is
+    # untouched and no archive was created, so nothing was archived and nothing
+    # was lost. The two are counted separately because they mean different
+    # things — 3 is the byte ceiling, 7 is the rotation sentinel.
+    if [ "$RES_N_RC" -eq 3 ]; then RES_N_REFUSED=$((RES_N_REFUSED+1)); else RES_N_SENT=$((RES_N_SENT+1)); fi
     cmp -s "$RES_LIVE" "$RES_NR/build-os/memory/residue.md" || RES_N_BAD=$((RES_N_BAD+1))
     [ -e "$RES_NR/build-os/memory/archive" ] && RES_N_BAD=$((RES_N_BAD+1))
   elif [ "$RES_N_RC" -ne 0 ]; then
@@ -614,9 +705,17 @@ if [ "${RES_TOT:-0}" -le 0 ]; then
 else
   ok "the keep-sweep ran every legal N from 1 to $RES_TOT — the whole domain of the PARAMETER THAT DETERMINES ROUTING (--keep is validated >= 1 and routeSegments(segments, keepN) takes no other input), NOT the tool's whole legal domain: --max-bytes is equally user-settable and is not swept"
 fi
-[ $(( RES_N_ROT + RES_N_REFUSED )) -eq "${RES_TOT:-0}" ] \
-  && ok "every legal keep ended in one of exactly two ways: $RES_N_ROT rotated, $RES_N_REFUSED refused at the ceiling (exit 3) writing nothing" \
-  || no "a legal keep ended some third way — $RES_N_ROT rotated + $RES_N_REFUSED refused != ${RES_TOT:-0} sweeps"
+[ $(( RES_N_ROT + RES_N_REFUSED + RES_N_SENT )) -eq "${RES_TOT:-0}" ] \
+  && ok "every legal keep ended in one of exactly three ways: $RES_N_ROT rotated, $RES_N_REFUSED refused at the byte ceiling (exit 3), $RES_N_SENT refused by the rotation sentinel (exit 7) — and all three write nothing" \
+  || no "a legal keep ended some fourth way — $RES_N_ROT rotated + $RES_N_REFUSED ceiling + $RES_N_SENT sentinel != ${RES_TOT:-0} sweeps"
+# THE SENTINEL'S SHARE OF THAT SWEEP IS ASSERTED, because a guard that refuses
+# nothing over the whole domain of the parameter it guards is indistinguishable
+# from one that is switched off.
+if [ "$RES_N_SENT" -lt $(( ${RES_MIN_SAFE:-1} - 1 )) ]; then
+  no "the sentinel refused only $RES_N_SENT of the $(( ${RES_MIN_SAFE:-1} - 1 )) keeps that sit below the derived floor $RES_MIN_SAFE — at least one unsafe keep was permitted"
+else
+  ok "the sentinel refused all $RES_N_SENT keeps below its derived floor of $RES_MIN_SAFE, over the whole 1..$RES_TOT domain of --keep"
+fi
 [ "$RES_N_BAD" -eq 0 ] \
   && ok "at all $RES_N_ROT rotating keeps the live file still carries all three gate-pinned literals, and every ceiling refusal wrote nothing at all" \
   || no "$RES_N_BAD failure(s): a legal --keep archived a gate-pinned literal out of the live file, or a refusal still wrote"
@@ -786,18 +885,20 @@ done
 # archive are both examined. A ceiling refusal (exit 3) is a legitimate outcome
 # and is separated from a rotation rather than lumped with it: such a run writes
 # NOTHING, so it can archive nothing, and both halves of that are checked.
-CS_N_ROT=0; CS_N_REFUSED=0; CS_N_BAD=0; CS_N_LEAK=0; CS_N_DRIFT=0
+CS_N_ROT=0; CS_N_REFUSED=0; CS_N_SENT=0; CS_N_BAD=0; CS_N_LEAK=0; CS_N_DRIFT=0
 CS_N=1
 while [ "$CS_N" -le "${CS_TOT:-0}" ]; do
   CS_NR="$WORK/cs-keep-$CS_N"
   mkdir -p "$CS_NR/build-os/memory"
   cp "$CS_LIVE" "$CS_NR/build-os/memory/current_state.md"
+  sent_prereg "$WORK/cs-keep-$CS_N.prereg.json" current_state "$CS_N" "$CS_NR/build-os/memory/current_state.md"
   node "$SRC/build-os/maintenance/rotate-memory.mjs" \
        --root "$CS_NR" --file current_state --keep "$CS_N" --apply \
+       --pre-registration "$WORK/cs-keep-$CS_N.prereg.json" \
        > "$WORK/cs-keep-$CS_N.out" 2>&1
   CS_N_RC=$?
-  if [ "$CS_N_RC" -eq 3 ]; then
-    CS_N_REFUSED=$((CS_N_REFUSED+1))
+  if [ "$CS_N_RC" -eq 3 ] || [ "$CS_N_RC" -eq 7 ]; then
+    if [ "$CS_N_RC" -eq 3 ]; then CS_N_REFUSED=$((CS_N_REFUSED+1)); else CS_N_SENT=$((CS_N_SENT+1)); fi
     cmp -s "$CS_LIVE" "$CS_NR/build-os/memory/current_state.md" || CS_N_BAD=$((CS_N_BAD+1))
     [ -e "$CS_NR/build-os/memory/archive" ] && CS_N_BAD=$((CS_N_BAD+1))
   elif [ "$CS_N_RC" -ne 0 ]; then
@@ -821,9 +922,15 @@ if [ "${CS_TOT:-0}" -le 0 ]; then
 else
   ok "the current_state keep-sweep ran every legal N from 1 to $CS_TOT — the whole domain of the PARAMETER THAT DETERMINES ROUTING (--keep is validated >= 1 and routeSegments(segments, keepN) takes no other input), NOT the tool's whole legal domain: --max-bytes is equally user-settable and is not swept"
 fi
-[ $(( CS_N_ROT + CS_N_REFUSED )) -eq "${CS_TOT:-0}" ] \
-  && ok "every legal keep over current_state.md ended in one of exactly two ways: $CS_N_ROT rotated, $CS_N_REFUSED refused at the ceiling (exit 3) writing nothing" \
-  || no "a legal keep ended some third way — $CS_N_ROT rotated + $CS_N_REFUSED refused != ${CS_TOT:-0} sweeps"
+[ $(( CS_N_ROT + CS_N_REFUSED + CS_N_SENT )) -eq "${CS_TOT:-0}" ] \
+  && ok "every legal keep over current_state.md ended in one of exactly three ways: $CS_N_ROT rotated, $CS_N_REFUSED refused at the byte ceiling (exit 3), $CS_N_SENT refused by the rotation sentinel (exit 7) — and all three write nothing" \
+  || no "a legal keep ended some fourth way — $CS_N_ROT rotated + $CS_N_REFUSED ceiling + $CS_N_SENT sentinel != ${CS_TOT:-0} sweeps"
+# BOTH DIRECTIONS, because this file is the one the guard PERMITS: a sweep in
+# which the sentinel refused everything would prove nothing about rotation, and
+# one in which it refused nothing would prove nothing about the guard.
+[ "$CS_N_ROT" -gt 0 ] && [ "$CS_N_SENT" -gt 0 ] \
+  && ok "the current_state sweep separates in BOTH directions: $CS_N_SENT keep(s) refused by the sentinel and $CS_N_ROT permitted and executed — the guard is neither off nor total" \
+  || no "the current_state sweep did not separate: $CS_N_SENT sentinel refusals and $CS_N_ROT rotations, so either the guard refuses everything or it refuses nothing"
 [ "$CS_N_BAD" -eq 0 ] \
   && ok "at all $CS_N_ROT rotating keeps the live current_state.md still carries both gate-pinned literals, and every ceiling refusal wrote nothing at all" \
   || no "$CS_N_BAD failure(s): a legal --keep archived a gate-pinned literal out of the live file, or a refusal still wrote"
@@ -841,6 +948,400 @@ cmp -s "$CS_LIVE" "$CS_ROOT/build-os/memory/current_state.md" \
 [ -z "$(find "$SRC/build-os/memory/archive" -newer "$CS_ROOT/build-os/memory/current_state.md" 2>/dev/null)" ] \
   && ok "nothing under the real build-os/memory/archive is newer than the scratch copy taken at the top of this section, so this section wrote no archive into the real tree" \
   || no "a path under the real build-os/memory/archive is newer than this section's first write — a rotation reached the real tree"
+
+echo "== 10. THE ROTATION SENTINEL — a keep below the derived floor is REFUSED BEFORE MUTATION =="
+# WHY THIS SECTION EXISTS.
+#
+# Sections 8 and 9 prove a POSITIONAL fact: retention is a prefix, so block 1
+# survives every legal `--keep`. They prove nothing about block 25. The first
+# governed rotation of this repository was safe because a HUMAN read the
+# open-item markers, found the oldest, and hand-derived `--keep 25`; residue
+# `(iiiiii)` wrote that rule down as prose and said, in terms, "NOTHING ENFORCES
+# THIS AND NOTHING IS BUILT HERE", and `DEFECT-0014-retention-order-assumed-not-
+# verified` is the standing record of the gap. This section is the enforcement.
+#
+# THE RULE, EXACTLY:
+#   minimum_safe_keep = max( block position of every protected or still-open object )
+# and any requested `--keep` below it is refused before a byte moves.
+#
+# IT IS AN IDENTITY CHECK, NOT A POSITIONAL ONE, AND THE DIFFERENCE IS MEASURED
+# RATHER THAN ASSERTED. In this repository's live `residue.md` the marker
+# `IS NOT CONSUMED AND MUST NOT BE MARKED SO` for `(ddd)` sits in BLOCK 15 while
+# `(ddd)` is DECLARED in BLOCK 16. A scan that trusts where the marker sits
+# derives 15 and archives the object it was built to protect. That is this
+# tree's named recurring defect class — positional shift read as semantic
+# identity — and the fixture below pins the guard on the right side of it.
+SENT="$SRC/build-os/maintenance/rotate-memory.mjs"
+S10="$WORK/sentinel"
+mkdir -p "$S10"
+
+# ---------------------------------------------------------------- fixtures --
+# EVERY fixture is generated HERE, in $WORK. The two that read this repository's
+# own memory take a byte-identical scratch COPY and pass an explicit --root, so
+# the live tree is only ever READ.
+
+# (i) UNARMED: ordinary synthetic memory carrying no protected object at all.
+sent_unarmed(){
+  local root="$1"; mkdir -p "$root/build-os/memory"
+  node -e '
+const fs = require("fs");
+const out = ["# Residue\n", "\n> generated fixture preamble.\n", "\n"];
+for (let i = 1; i <= 30; i++) {
+  out.push(`## BLOCK ${i} — heading ${i}\n`, `body ${i}: ${"y".repeat(400)}\n\n`);
+}
+fs.writeFileSync(process.argv[1], out.join(""));
+' "$root/build-os/memory/residue.md"
+}
+
+# (ii) ARMED: a protected region at block 1, an object DECLARED in block 6 whose
+#      protection marker sits in block 5, and a still-open object in block 8.
+#      The correct minimum_safe_keep is 8, and a positional reading gives 5.
+sent_armed(){
+  local root="$1"; mkdir -p "$root/build-os/memory"
+  node -e '
+const fs = require("fs");
+const o = [];
+o.push("# Residue\n\n> generated fixture preamble.\n\n");
+o.push("## Standing open items — PROTECTED REGION (block 1; rotation cannot reach it)\n\n");
+o.push("- **(aaa) A STANDING ITEM.** " + "s".repeat(300) + "\n\n");
+for (let i = 2; i <= 4; i++) {
+  o.push(`## History — filler ${i}\n\n- **(f${i}) FILLER.** ${"f".repeat(600)}\n\n`);
+}
+o.push("## History — the block that MENTIONS the protected object\n\n");
+o.push("- **(nnn) A CLOSED ITEM THAT CITES ANOTHER.** `(qqq)` IS NOT CONSUMED AND MUST NOT BE MARKED SO.\n");
+o.push("  " + "m".repeat(600) + "\n\n");
+o.push("## History — the block that DECLARES the protected object\n\n");
+o.push("- **(qqq) THE NON-CONSUMABLE OBJECT ITSELF.** " + "q".repeat(600) + "\n\n");
+o.push("## History — filler 7\n\n- **(f7) FILLER.** " + "f".repeat(600) + "\n\n");
+o.push("## History — the oldest block still holding an open item\n\n");
+o.push("- **(zzz) AN UNREPRODUCED FLAKE.** [STILL OPEN AND STILL UNDIAGNOSABLE]\n");
+o.push("  " + "z".repeat(600) + "\n\n");
+for (let i = 9; i <= 14; i++) {
+  o.push(`## History — filler ${i}\n\n- **(g${i}) FILLER.** ${"g".repeat(600)}\n\n`);
+}
+fs.writeFileSync(process.argv[1], o.join(""));
+' "$root/build-os/memory/residue.md"
+}
+
+# (iii) UNRESOLVABLE: a protection marker naming an identity DECLARED NOWHERE in
+#       the file. The guard cannot prove which block holds that object, so it
+#       cannot prove any keep protects it.
+sent_unresolvable(){
+  local root="$1"; mkdir -p "$root/build-os/memory"
+  node -e '
+const fs = require("fs");
+const o = ["# Residue\n\n> generated fixture preamble.\n\n"];
+o.push("## Standing open items — PROTECTED REGION (block 1; rotation cannot reach it)\n\n");
+o.push("- **(aaa) A STANDING ITEM.** `DECISION-0099` STAYS OPEN and is declared in no block here.\n\n");
+for (let i = 2; i <= 12; i++) {
+  o.push(`## History — filler ${i}\n\n- **(h${i}) FILLER.** ${"h".repeat(600)}\n\n`);
+}
+fs.writeFileSync(process.argv[1], o.join(""));
+' "$root/build-os/memory/residue.md"
+}
+
+# read one field out of a --json report's sentinel block
+sent_field(){ # <json file> <expr over s>
+  node -e '
+const fs = require("fs");
+const s = JSON.parse(fs.readFileSync(process.argv[1], "utf8")).results[0].sentinel;
+const v = (0, eval)(process.argv[2]);
+process.stdout.write(Array.isArray(v) ? v.join(",") : String(v));
+' "$1" "$2" 2>/dev/null
+}
+
+# --------------------------------------------------- (a) arming is explicit --
+U10="$S10/unarmed"; sent_unarmed "$U10"
+node "$SENT" --root "$U10" --file residue --keep 10 --apply > "$S10/unarmed.out" 2>"$S10/unarmed.err"
+U10RC=$?
+[ "$U10RC" -eq 0 ] \
+  && ok "SENTINEL: a synthetic memory file carrying NO protected object rotates exactly as before (exit 0)" \
+  || no "SENTINEL: an unarmed file was refused (exit $U10RC): $(head -c 300 "$S10/unarmed.err")"
+grep -q 'SENTINEL NOT ARMED' "$S10/unarmed.err" \
+  && ok "SENTINEL: ...and says NOT ARMED on STDERR rather than passing silently — an unarmed guard that says nothing is the failure this repo has already paid for" \
+  || no "SENTINEL: an unarmed run printed no NOT-ARMED warning, so a file with zero resolved protected objects is indistinguishable from a protected one"
+
+# ------------------------------------- (b) THE RED-DRIVEN, OPERATOR-NAMED FIXTURE --
+# `--keep 10 --apply` sat QUEUED in this tree's own residue as a pending action.
+# Retention is a prefix and the live file carries 25 blocks, so it would have
+# archived blocks 11..25 — including block 16 (`(ddd)`) and block 25 (`(S1)` and
+# the flake). This is an executed, demonstrated failure, which is what the
+# governance ceiling requires before a new refusal may exist.
+RED="$S10/red"; mkdir -p "$RED/build-os/memory"
+cp "$SRC/build-os/memory/residue.md" "$RED/build-os/memory/residue.md"
+cmp -s "$SRC/build-os/memory/residue.md" "$RED/build-os/memory/residue.md" \
+  && ok "SENTINEL: the live residue.md is copied byte-identically into a scratch root (the live tree is only READ)" \
+  || no "SENTINEL: the scratch copy of residue.md is not byte-identical"
+sha256sum < "$RED/build-os/memory/residue.md" > "$S10/red.before"
+node "$SENT" --root "$RED" --file residue --keep 10 --apply > "$S10/red.out" 2>"$S10/red.err"
+REDRC=$?
+[ "$REDRC" -eq 7 ] \
+  && ok "SENTINEL: THE RED-DRIVEN FIXTURE — \`--keep 10 --apply\` over this repository's live residue.md REFUSES at exit 7" \
+  || no "SENTINEL: \`--keep 10 --apply\` over the live residue.md exited $REDRC, not 7 — the queued command that would archive (ddd), (S1) and the still-open flake is still permitted"
+[ "$(sha256sum < "$RED/build-os/memory/residue.md")" = "$(cat "$S10/red.before")" ] \
+  && ok "SENTINEL: ...and the refusal happened BEFORE MUTATION — the source file is byte-identical" \
+  || no "SENTINEL: the refused run still wrote to the source file"
+[ ! -e "$RED/build-os/memory/archive" ] \
+  && ok "SENTINEL: ...and no archive was created, so nothing was moved anywhere" \
+  || no "SENTINEL: the refused run created an archive"
+grep -qE 'requested_keep +10' "$S10/red.err" && grep -qE 'minimum_safe_keep +25' "$S10/red.err" \
+  && ok "SENTINEL: ...naming requested_keep 10 against minimum_safe_keep 25, so the operator is told the safe value instead of having to rediscover it" \
+  || no "SENTINEL: the refusal does not name both the requested and the minimum safe keep: $(head -c 400 "$S10/red.err")"
+grep -qF '(S1)' "$S10/red.err" && grep -qF '(ddd)' "$S10/red.err" \
+  && ok "SENTINEL: ...and names the protected identities (ddd) and (S1) that the run would have archived" \
+  || no "SENTINEL: the refusal does not name the protected identities: $(head -c 400 "$S10/red.err")"
+
+# THE IDENTITY CLAIM, MEASURED. `(ddd)`'s marker line and `(ddd)`'s declaration
+# are in DIFFERENT blocks in the live file. The guard must report the
+# DECLARATION's block. Both positions are re-derived here from the live file
+# rather than quoted, so this cannot pass by agreeing with a remembered digit.
+DDD_MARK="$(awk '/^## /{n++} /IS NOT CONSUMED AND MUST NOT BE MARKED SO/ && /\(ddd\)/{print n}' \
+             "$SRC/build-os/memory/residue.md" | sort -n | tail -1)"
+DDD_DECL="$(awk '/^## /{n++} /^- \*\*\(ddd\)/{print n}' "$SRC/build-os/memory/residue.md" | sort -n | tail -1)"
+if [ -n "$DDD_MARK" ] && [ -n "$DDD_DECL" ] && [ "$DDD_MARK" != "$DDD_DECL" ]; then
+  ok "SENTINEL: the fixture is non-vacuous — (ddd)'s protection marker sits in block $DDD_MARK and (ddd) is DECLARED in block $DDD_DECL, so position and identity give different answers"
+else
+  no "SENTINEL: (ddd)'s marker block ($DDD_MARK) and declaration block ($DDD_DECL) are not distinct in the live file, so the identity-vs-position proof below would be vacuous"
+fi
+node "$SENT" --root "$RED" --file residue --keep 10 --sentinel-report --json > "$S10/red.json" 2>"$S10/redjson.err"
+REDJRC=$?
+[ "$REDJRC" -eq 0 ] \
+  && ok "SENTINEL: --sentinel-report is a PURE QUERY — it reports the refusal at exit 0 instead of refusing to say what the safe value is" \
+  || no "SENTINEL: --sentinel-report exited $REDJRC: $(head -c 300 "$S10/redjson.err")"
+DDD_AT="$(sent_field "$S10/red.json" 's.protected_objects.filter(o=>o.id==="(ddd)").map(o=>o.block_position).join(",")')"
+[ "$DDD_AT" = "$DDD_DECL" ] \
+  && ok "SENTINEL: (ddd) resolves to block $DDD_AT — its DECLARATION — not to block $DDD_MARK where its marker sits. IDENTITY, not position." \
+  || no "SENTINEL: (ddd) resolved to block '$DDD_AT', expected the declaration block $DDD_DECL — the guard is reading position and calling it identity"
+[ "$(sent_field "$S10/red.json" 's.minimum_safe_keep')" = "25" ] \
+  && ok "SENTINEL: residue.md's derived minimum_safe_keep is 25 — the same value a human hand-derived for rotation #1, now derived by the tool" \
+  || no "SENTINEL: residue.md's minimum_safe_keep is $(sent_field "$S10/red.json" 's.minimum_safe_keep'), not 25"
+cmp -s "$SRC/build-os/memory/residue.md" "$RED/build-os/memory/residue.md" \
+  && ok "SENTINEL: --sentinel-report wrote nothing at all" || no "SENTINEL: --sentinel-report mutated the file"
+
+# ------------------------------------------- (c) the seven required fields --
+S7=0; S7MISS=""
+for f in requested_keep minimum_safe_keep protected_object_ids protected_block_positions \
+         blocks_to_archive bytes_to_reclaim post_rotation_headroom; do
+  if [ "$(sent_field "$S10/red.json" "JSON.stringify(s.$f) !== undefined && s.$f !== undefined")" = "true" ]; then
+    S7=$((S7+1))
+  else
+    S7MISS="$S7MISS $f"
+  fi
+done
+[ "$S7" -eq 7 ] \
+  && ok "SENTINEL: all seven required report fields are present for the proposed rotation" \
+  || no "SENTINEL: only $S7 of 7 report fields are present; missing:$S7MISS"
+
+# --------------------------------- (d) the seven refusal conditions, each fired --
+# Conditions 3, 4 and 6 are DELIBERATELY driven through MUTATED COPIES of the
+# tool. They are cross-checks: on the shipped tool condition 1 fires first and
+# they are never reached, so the only way to show they discriminate is to break
+# the check that shadows them and watch these catch it. That is the same device
+# section 6a and the node suite's mutation fixtures use.
+SC_BAD=0; SC_FIRED=0
+
+# C1 — requested_keep below minimum_safe_keep
+A1="$S10/c1"; sent_armed "$A1"
+sha256sum < "$A1/build-os/memory/residue.md" > "$S10/c1.before"
+node "$SENT" --root "$A1" --file residue --keep 4 --apply > "$S10/c1.out" 2>"$S10/c1.err"
+C1RC=$?
+if [ "$C1RC" -eq 7 ] && grep -q 'SENTINEL-C1' "$S10/c1.err" \
+   && [ "$(sha256sum < "$A1/build-os/memory/residue.md")" = "$(cat "$S10/c1.before")" ]; then
+  SC_FIRED=$((SC_FIRED+1)); ok "SENTINEL C1: --keep 4 under a minimum_safe_keep of 8 REFUSES at exit 7 and writes nothing"
+else
+  SC_BAD=$((SC_BAD+1)); no "SENTINEL C1 did not fire (exit $C1RC): $(head -c 300 "$S10/c1.err")"
+fi
+# ...and the floor it enforces is the DECLARATION's block, not the marker's
+A1J="$S10/c1.json"
+node "$SENT" --root "$A1" --file residue --keep 4 --sentinel-report --json > "$A1J" 2>/dev/null
+[ "$(sent_field "$A1J" 's.minimum_safe_keep')" = "8" ] \
+  && ok "SENTINEL C1: the fixture's minimum_safe_keep is 8 — the oldest block holding an open item — and not 5, where that object's marker sits" \
+  || no "SENTINEL C1: minimum_safe_keep is $(sent_field "$A1J" 's.minimum_safe_keep'), expected 8"
+[ "$(sent_field "$A1J" 's.protected_objects.filter(o=>o.id==="(qqq)").map(o=>o.block_position).join(",")')" = "6" ] \
+  && ok "SENTINEL C1: the non-consumable object (qqq) resolves to block 6, where it is DECLARED, though its marker sits in block 5" \
+  || no "SENTINEL C1: (qqq) resolved to block $(sent_field "$A1J" 's.protected_objects.filter(o=>o.id==="(qqq)").map(o=>o.block_position).join(",")'), expected 6"
+
+# C2 — a protected identity that cannot be resolved
+A2="$S10/c2"; sent_unresolvable "$A2"
+sha256sum < "$A2/build-os/memory/residue.md" > "$S10/c2.before"
+node "$SENT" --root "$A2" --file residue --keep 12 --apply > "$S10/c2.out" 2>"$S10/c2.err"
+C2RC=$?
+if [ "$C2RC" -eq 7 ] && grep -q 'SENTINEL-C2' "$S10/c2.err" && grep -q 'DECISION-0099' "$S10/c2.err" \
+   && [ "$(sha256sum < "$A2/build-os/memory/residue.md")" = "$(cat "$S10/c2.before")" ]; then
+  SC_FIRED=$((SC_FIRED+1)); ok "SENTINEL C2: an identity a protection marker names but no block DECLARES is a REFUSAL, not a skip — and it is named in the refusal"
+else
+  SC_BAD=$((SC_BAD+1)); no "SENTINEL C2 did not fire (exit $C2RC): $(head -c 300 "$S10/c2.err")"
+fi
+
+# C3 — an open object would move to the archive. Driven through a mutant whose
+#      derived floor is forced to 0, so C1 cannot fire and only the independent
+#      routing cross-check is left to catch it.
+M3="$S10/mutant-c3.mjs"; cp "$SENT" "$M3"
+perl -0pi -e 's/const sentinelFloor = derived\.minimumSafeKeep;/const sentinelFloor = 0;/' "$M3"
+if grep -q 'const sentinelFloor = 0;' "$M3"; then
+  ok "SENTINEL C3: the mutant was built — the derived floor is forced to 0, so condition 1 cannot fire"
+else
+  no "SENTINEL C3: the mutant could not be built, so this differential is vacuous"
+fi
+A3="$S10/c3"; sent_armed "$A3"
+sha256sum < "$A3/build-os/memory/residue.md" > "$S10/c3.before"
+node "$M3" --root "$A3" --file residue --keep 4 --apply > "$S10/c3.out" 2>"$S10/c3.err"
+C3RC=$?
+if [ "$C3RC" -eq 7 ] && grep -q 'SENTINEL-C3' "$S10/c3.err" \
+   && [ "$(sha256sum < "$A3/build-os/memory/residue.md")" = "$(cat "$S10/c3.before")" ]; then
+  SC_FIRED=$((SC_FIRED+1)); ok "SENTINEL C3: with the floor suppressed, the independent routing check still refuses — an open object landing in the archive is caught by a second instrument"
+else
+  SC_BAD=$((SC_BAD+1)); no "SENTINEL C3 did not fire (exit $C3RC): $(head -c 300 "$S10/c3.err")"
+fi
+
+# C4 — the block map and the live file disagree
+M4="$S10/mutant-c4.mjs"; cp "$SENT" "$M4"
+perl -0pi -e 's/const crossMap = sentinelBlockMap\(original, spec\);/const crossMap = sentinelBlockMap(original, spec).slice(1);/' "$M4"
+if grep -q 'sentinelBlockMap(original, spec).slice(1)' "$M4"; then
+  ok "SENTINEL C4: the mutant was built — the independently-derived block map is made to disagree with the file by one block"
+else
+  no "SENTINEL C4: the mutant could not be built, so this differential is vacuous"
+fi
+A4="$S10/c4"; sent_armed "$A4"
+sha256sum < "$A4/build-os/memory/residue.md" > "$S10/c4.before"
+sent_prereg "$S10/c4.json" residue 10 "$A4/build-os/memory/residue.md"
+node "$M4" --root "$A4" --file residue --keep 10 --apply \
+     --pre-registration "$S10/c4.json" > "$S10/c4.out" 2>"$S10/c4.err"
+C4RC=$?
+if [ "$C4RC" -eq 7 ] && grep -q 'SENTINEL-C4' "$S10/c4.err" \
+   && [ "$(sha256sum < "$A4/build-os/memory/residue.md")" = "$(cat "$S10/c4.before")" ]; then
+  SC_FIRED=$((SC_FIRED+1)); ok "SENTINEL C4: a block map that disagrees with the live file REFUSES — the guard never plans against a map it has not re-derived"
+else
+  SC_BAD=$((SC_BAD+1)); no "SENTINEL C4 did not fire (exit $C4RC): $(head -c 300 "$S10/c4.err")"
+fi
+
+# C5 — the apply was not pre-registered
+A5="$S10/c5"; sent_armed "$A5"
+sha256sum < "$A5/build-os/memory/residue.md" > "$S10/c5.before"
+node "$SENT" --root "$A5" --file residue --keep 8 --apply > "$S10/c5.out" 2>"$S10/c5.err"
+C5RC=$?
+if [ "$C5RC" -eq 7 ] && grep -q 'SENTINEL-C5' "$S10/c5.err" \
+   && [ "$(sha256sum < "$A5/build-os/memory/residue.md")" = "$(cat "$S10/c5.before")" ]; then
+  SC_FIRED=$((SC_FIRED+1)); ok "SENTINEL C5: an --apply at a SAFE keep still REFUSES when it was never pre-registered — ordering stops being builder testimony"
+else
+  SC_BAD=$((SC_BAD+1)); no "SENTINEL C5 did not fire (exit $C5RC): $(head -c 300 "$S10/c5.err")"
+fi
+# ...and a pre-registration that does not MATCH is no better than none
+sent_prereg "$S10/c5.wrongkeep.json" residue 9 "$A5/build-os/memory/residue.md"
+node "$SENT" --root "$A5" --file residue --keep 8 --apply \
+     --pre-registration "$S10/c5.wrongkeep.json" > "$S10/c5b.out" 2>"$S10/c5b.err"
+C5BRC=$?
+[ "$C5BRC" -eq 7 ] && grep -q 'SENTINEL-C5' "$S10/c5b.err" \
+  && ok "SENTINEL C5: a pre-registration naming a DIFFERENT keep is refused — the record must bind the run, not merely exist" \
+  || no "SENTINEL C5: a mismatched pre-registration was accepted (exit $C5BRC)"
+# ...and one taken against DIFFERENT SOURCE BYTES is refused, which is what makes
+#    the record an ordering anchor rather than a rubber stamp
+sent_prereg "$S10/c5.stale.json" residue 8 "$A5/build-os/memory/residue.md"
+printf '\n## History — a block appended AFTER the registration\n\nlate.\n' >> "$A5/build-os/memory/residue.md"
+node "$SENT" --root "$A5" --file residue --keep 8 --apply \
+     --pre-registration "$S10/c5.stale.json" > "$S10/c5c.out" 2>"$S10/c5c.err"
+C5CRC=$?
+[ "$C5CRC" -eq 7 ] && grep -q 'SENTINEL-C5' "$S10/c5c.err" \
+  && ok "SENTINEL C5: a pre-registration whose source sha256 no longer matches the file is refused — the registration is bound to the exact bytes it was taken over" \
+  || no "SENTINEL C5: a stale pre-registration was accepted (exit $C5CRC)"
+
+# C6 — deterministic restoration cannot be proved
+M6="$S10/mutant-c6.mjs"; cp "$SENT" "$M6"
+perl -0pi -e 's/const restorationSource = contentText \+ archivedText;/const restorationSource = contentText;/' "$M6"
+if grep -q 'const restorationSource = contentText;' "$M6"; then
+  ok "SENTINEL C6: the mutant was built — the restoration source is made to drop the archived half"
+else
+  no "SENTINEL C6: the mutant could not be built, so this differential is vacuous"
+fi
+A6="$S10/c6"; sent_armed "$A6"
+sha256sum < "$A6/build-os/memory/residue.md" > "$S10/c6.before"
+sent_prereg "$S10/c6.json" residue 8 "$A6/build-os/memory/residue.md"
+node "$M6" --root "$A6" --file residue --keep 8 --apply \
+     --pre-registration "$S10/c6.json" > "$S10/c6.out" 2>"$S10/c6.err"
+C6RC=$?
+if [ "$C6RC" -eq 7 ] && grep -q 'SENTINEL-C6' "$S10/c6.err" \
+   && [ "$(sha256sum < "$A6/build-os/memory/residue.md")" = "$(cat "$S10/c6.before")" ]; then
+  SC_FIRED=$((SC_FIRED+1)); ok "SENTINEL C6: a rotation whose retained-plus-archived bytes do not reconstruct the source REFUSES — restoration is proved before the move, not after"
+else
+  SC_BAD=$((SC_BAD+1)); no "SENTINEL C6 did not fire (exit $C6RC): $(head -c 300 "$S10/c6.err")"
+fi
+
+# C7 — the projected result cannot absorb the packet's own close
+A7="$S10/c7"; sent_armed "$A7"
+sha256sum < "$A7/build-os/memory/residue.md" > "$S10/c7.before"
+sent_prereg "$S10/c7.json" residue 8 "$A7/build-os/memory/residue.md"
+A7SIZE="$(wc -c < "$A7/build-os/memory/residue.md")"
+node "$SENT" --root "$A7" --file residue --keep 8 --apply --max-bytes "$A7SIZE" \
+     --close-budget "$A7SIZE" --pre-registration "$S10/c7.json" > "$S10/c7.out" 2>"$S10/c7.err"
+C7RC=$?
+if [ "$C7RC" -eq 7 ] && grep -q 'SENTINEL-C7' "$S10/c7.err" \
+   && [ "$(sha256sum < "$A7/build-os/memory/residue.md")" = "$(cat "$S10/c7.before")" ]; then
+  SC_FIRED=$((SC_FIRED+1)); ok "SENTINEL C7: a rotation whose projected headroom cannot cover the close budget REFUSES — the file is not allowed to be rotated into a state its own close will breach"
+else
+  SC_BAD=$((SC_BAD+1)); no "SENTINEL C7 did not fire (exit $C7RC): $(head -c 300 "$S10/c7.err")"
+fi
+[ "$SC_FIRED" -eq 7 ] && [ "$SC_BAD" -eq 0 ] \
+  && ok "SENTINEL: ALL SEVEN refusal conditions are driven by a fixture that fires them, and every one of the seven wrote nothing" \
+  || no "SENTINEL: $SC_FIRED of 7 conditions fired and $SC_BAD failed — a refusal condition with no fixture that fires it is a claim, not a guard"
+
+# ------------------------------------ (e) THE POSITIVE CONTROL: a governed apply --
+# A guard that only ever refuses proves nothing about the rotation it is supposed
+# to permit. The same fixture, at a keep the guard allows, with a matching
+# pre-registration, must ROTATE — and the protected objects must still be live
+# afterwards, checked BY IDENTITY.
+A8="$S10/ok"; sent_armed "$A8"
+cp "$A8/build-os/memory/residue.md" "$S10/ok.source"
+sent_prereg "$S10/ok.json" residue 8 "$A8/build-os/memory/residue.md"
+node "$SENT" --root "$A8" --file residue --keep 8 --apply \
+     --pre-registration "$S10/ok.json" --json > "$S10/ok.json.out" 2>"$S10/ok.err"
+OKRC=$?
+[ "$OKRC" -eq 0 ] \
+  && ok "SENTINEL: at the derived floor, with a matching pre-registration, the SAME fixture rotates (exit 0) — the guard permits as well as refuses" \
+  || no "SENTINEL: the governed apply was refused (exit $OKRC): $(head -c 300 "$S10/ok.err")"
+SOK_LIVE=0
+for id in '(aaa)' '(qqq)' '(zzz)'; do
+  grep -qF -- "- **$id" "$A8/build-os/memory/residue.md" || SOK_LIVE=$((SOK_LIVE+1))
+done
+[ "$SOK_LIVE" -eq 0 ] \
+  && ok "SENTINEL: after the permitted rotation all three protected objects are still LIVE, matched by their DECLARATION not by a substring anywhere in the file" \
+  || no "SENTINEL: $SOK_LIVE protected object declaration(s) left the live file"
+SOK_LEAK=0
+if [ -f "$A8/build-os/memory/archive/residue.archive.md" ]; then
+  for id in '(aaa)' '(qqq)' '(zzz)'; do
+    grep -qF -- "- **$id" "$A8/build-os/memory/archive/residue.archive.md" && SOK_LEAK=$((SOK_LEAK+1))
+  done
+fi
+[ "$SOK_LEAK" -eq 0 ] \
+  && ok "SENTINEL: ...and none of them reached the archive" \
+  || no "SENTINEL: $SOK_LEAK protected object declaration(s) reached the archive"
+# byte-exact round trip, reconstructed from the two outputs on disk
+node -e '
+const fs = require("fs"), path = require("path");
+const [orig, root] = process.argv.slice(1);
+const L = (p) => fs.readFileSync(p).toString("latin1");
+const original = L(orig);
+const live = L(path.join(root, "build-os/memory/residue.md"));
+const archive = L(path.join(root, "build-os/memory/archive/residue.archive.md"));
+const S = "<!-- rotate-memory:archive-pointer:start -->";
+const E = "<!-- rotate-memory:archive-pointer:end -->\n\n";
+const a = live.indexOf(S);
+if (a < 0) throw new Error("no banner in the rotated file");
+const b = live.indexOf(E, a) + E.length;
+const hdr = archive.lastIndexOf("## ARCHIVED BATCH ");
+const bodyAt = archive.indexOf("\n\n", hdr) + 2;
+const rebuilt = live.slice(0, a) + live.slice(b) + archive.slice(bodyAt);
+if (!rebuilt.startsWith(original)) {
+  let i = 0; while (i < original.length && rebuilt[i] === original[i]) i++;
+  throw new Error("NOT byte-exact: first divergence at byte " + i);
+}
+' "$S10/ok.source" "$A8" 2>"$S10/ok.cons.err" \
+  && ok "SENTINEL: ...and the permitted rotation is still byte-exact — live-minus-banner ++ archive reconstructs the source" \
+  || no "SENTINEL: the permitted rotation lost bytes: $(cat "$S10/ok.cons.err")"
+
+# ------------------------------- (f) the live tree was only ever read here --
+cmp -s "$SRC/build-os/memory/residue.md" "$RED/build-os/memory/residue.md" \
+  && ok "SENTINEL: this repository's live residue.md is byte-identical to the copy taken at the top of this section" \
+  || no "SENTINEL: the live residue.md changed during section 10"
 
 echo ""
 echo "==== RESULT: $PASS passed, $FAIL failed ===="
