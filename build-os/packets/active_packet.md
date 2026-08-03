@@ -1022,3 +1022,35 @@ which is inside **block 15** — while `(ddd)` is DECLARED at line 1711, inside 
 positional marker scan derives 15 and archives the object it was built to protect. Only identity
 resolution derives 16. That is this tree's named recurring defect class — *positional shift
 mistaken for semantic identity* — and the guard exists precisely to not commit it.
+
+## ROTATION #2 — EXECUTED, batch `2026-08-03T19:53:21Z`
+
+**Receipt:** `build-os/memory/archive/ROTATION-RECEIPT-2026-08-03T19-53-21Z.md`. The figures live
+there; what is recorded here is the reconciliation against the PRE-REGISTRATION above, because a
+prediction nobody checks afterwards is a narration.
+
+| pre-registered | measured | verdict |
+|---|---|---|
+| `blocks_to_archive` 5 | **5** (blocks 16..20) | exact |
+| `bytes_to_reclaim` 37548 B | **37548 B** | exact |
+| `minimum_safe_keep` 3 | **3** | exact |
+| `post_rotation_headroom` 38814 B | **38195 B** | **619 B LOW, and the cause is named** |
+| live size 203028 -> 165986 B | **203642 -> 166605 B** | same 619 B |
+
+**THE 619 B ARE ACCOUNTED FOR, NOT ROUNDED AWAY:** the prediction was taken at base `188472f`;
+commit 1 then added **614 B** to block 1 of `current_state.md` (the suite-total claim moving
+2140 -> 2179), and the rendered banner came out **511 B** rather than the 506 B the prediction
+assumed, because its interpolated decimals are wider. 614 + 5 = 619. The prediction was made
+against a file the packet itself then changed — which is `(cccccc)`'s standing rule about this
+tree's memory files happening once more, inside the packet that predicted it.
+
+**The three pre-registered EXPECTED REFUSALS all fired, on a scratch copy, before the apply:**
+`--keep 2` at `SENTINEL-C1` (below the floor of 3) and `SENTINEL-C3`; `--keep 18` at
+`SENTINEL-C7` (14779 B of projected headroom against the 18702 B close budget — the predicted
+figure was 15398 B, the same 619 B); `--keep 15 --apply` with no `--pre-registration` at
+`SENTINEL-C5`. Every one wrote nothing and left the copy byte-identical.
+
+**`build-os/memory/residue.md` WAS NOT ROTATED, AND THAT IS THE GUARD WORKING RATHER THAN
+FAILING.** `minimum_safe_keep` 25 against 25 blocks. It stays at **431 B** of headroom. The next
+writer of that file has no rotation path to more, and the remedy is an operator act — see the
+receipt.

@@ -30,3 +30,13 @@
 | `build-os/memory/residue.md:2403` | ## History — the speed-benchmark instrument and its carried limits | `residue.archive.md:173` |
 | `build-os/memory/residue.md:2491` | ## History — the earliest sessions (P-001..P-022) | `residue.archive.md:261` |
 
+## Batch 2026-08-03T19:53:21Z
+
+| source (original) | section header | archive location |
+| --- | --- | --- |
+| `build-os/memory/current_state.md:1916` | ## History — `gravito_mismatch_refuted_a` | `current_state.archive.md:5` |
+| `build-os/memory/current_state.md:2026` | ## History — `gravito_authority_envelope_a` | `current_state.archive.md:115` |
+| `build-os/memory/current_state.md:2111` | ## History — `gravito_evidence_policy_matrix_a` | `current_state.archive.md:200` |
+| `build-os/memory/current_state.md:2182` | ## History — `gravito_census_gaps_egress_bandwidth_a` through `gravito_productization_pa_maintenance_upstream_a` | `current_state.archive.md:271` |
+| `build-os/memory/current_state.md:2244` | ## History — the earliest sessions, P-022 back to P-015 | `current_state.archive.md:333` |
+
