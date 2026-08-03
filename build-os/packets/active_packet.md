@@ -1146,3 +1146,41 @@ very ordering evidence the pre-registration exists to provide, and `89b261b`'s o
 on `3a590ed` being a distinct ancestor commit. **The cap is breached; it is not excused.** It is
 the fifth close running to breach it (residue `(dddddd)` records four), and this one at least has a
 stated cause rather than a discovered one.
+
+
+## CLOSED — `gravito_rotation_sentinel_guard_a` — closed 2026-08-03 by the archivist. NOTHING IN FLIGHT.
+
+**APPENDED AT THE TAIL, NOT WRITTEN AT THE HEAD, for the reason this packet's own declaration
+gives above: line 89 is the content site `ANC-0003` resolves to and the kernel suite compares the
+committed projection with `cmp -s`. An append moves no line at or above 89.**
+
+- **Packet id:** `PACKET-0040-rotation-sentinel-guard`. **Lane:** `substantive`. **Depth 3** —
+  builder, then qa and reviewer CONCURRENTLY, then one bounded fix round. The declaration above
+  said Depth 2; **the third stage was spent and is recorded rather than back-dated.**
+- **Base `188472f`** (the pushed tip), verified by `git merge-base` before the first edit.
+  **HEAD at close `275ea3a`.** **Commits: `3a590ed`, `89b261b`, `275ea3a` — THREE, against a cap
+  of two; see C-4 above, which recorded the breach while the packet was still in flight.**
+- **Verdict: PASS-AS-FIXED.** qa **GREEN** (2179/0 twice at `89b261b`, vectors identical; base
+  `188472f` 2140/0; commit-1 `3a590ed` **green in isolation at 2179/0**; both archive batches
+  round-trip byte-exact; `SC_FIRED==7`, `SC_BAD==0`; live-suite gate 44/0). Reviewer
+  `fix-then-pass`, **4** items, all landed, plus qa's F1-F5. Fix round: **2190/0 twice solo,
+  vectors identical**, the whole +50 for the packet in one suite file (104 -> 143 -> 154).
+  **Second eyes: NONE — `codex` not on PATH, review was same-model. Nineteenth consecutive packet.**
+- **THE SUCCESS CONDITION IS MET.** Rotation is a governed runtime capability: the tool derives
+  `minimum_safe_keep` itself (25 / 30 / 3) and refuses any `--keep` below it, printing the floor on
+  every run. Rotation #2 executed under it: `current_state.md` 203642 -> 166605 B, 37037 B
+  reclaimed, 20 -> 15 blocks. Pre-registration is **tree-verifiable** — `3a590ed` is a proven
+  ancestor of `89b261b` and the declared `sourceSha256 91fa4548...` matches the file at `3a590ed`
+  exactly. Ceiling held: **0 new tools / stores / validators / suite files / primitives / controls
+  / mutators.**
+- **THE FULL CLOSE RECORD is `build-os/receipts/gravito_rotation_sentinel_guard_a.md`** — the
+  provenance chain on the overstated positional-scan claim, the M4/M5 mutation results, the
+  file-ownership manifest for the three commits, the two corrected receipt digits, and the two spec
+  revisions routed to the operator. The summary is the newest history block in
+  `build-os/memory/current_state.md`. **Neither of them is in `build-os/memory/residue.md`, which
+  is frozen at 431 B and provably unrotatable at every legal keep.**
+- **NOTHING IS STAGED NEXT.** The two spec revisions are the operator's to cut, and neither is
+  declared here. **NOTHING IS IN FLIGHT.**
+- **OPEN BOUNDARY:** all three commits and the close commit are **LOCAL AND UNPUSHED**. `188472f`
+  is the pushed tip and push was authorised only through it. No push, merge, PR, tag, deploy,
+  secret, `git config`, amend or rebase was performed, and no such go has been given.
