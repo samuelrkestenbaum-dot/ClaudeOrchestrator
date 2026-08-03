@@ -1159,7 +1159,7 @@ inputs: a cold install of the maintenance layer into a scratch repo, plus execut
 output: a RESULT line
 owning_module: tests/build_os_maintenance_tests.sh
 consuming_policies: chained from tests/build_os_tests.sh
-evidence_refs: tests/build_os_maintenance_tests.sh:295; tests/build_os_maintenance_tests.sh:639; tests/build_os_maintenance_tests.sh:640
+evidence_refs: tests/build_os_maintenance_tests.sh:295; tests/build_os_maintenance_tests.sh:846; tests/build_os_maintenance_tests.sh:847
 failure_behavior: exits non-zero when FAIL is non-zero
 rollback_behavior: read-only with respect to the real tree
 promotion_requirement: n/a

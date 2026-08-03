@@ -14,6 +14,66 @@ deprecation cycle. Pin a commit if you need stability.
 
 ### In flight (not landed at the released commit)
 
+- **`build-os/memory/current_state.md` was re-blocked BEFORE it ran out of
+  headroom — the same repair as `residue.md`, taken prospectively.** The file
+  measured **185,204 B** against the **204,800 B** ceiling
+  `rotate-memory.test.mjs` enforces — **19,596 B of headroom**, derived with
+  `wc -c` — while carrying exactly **three** `^## ` blocks, so
+  `rotate-memory.mjs`'s `routeSegments` retained `blocks.slice(0, 10)` = all
+  three at the shipped keep and archived **0 blocks / 0 bytes** at **exit 0**,
+  printing `already rotated (no-op)`.
+
+  **THE DIFFERENCE FROM THE `residue.md` CASE IS THE WHOLE POINT, AND IT IS
+  ARITHMETIC RATHER THAN JUDGEMENT.** `residue.md` was found at **142 B** of
+  headroom and the migration cost **+3,236 B**, so the repair had to breach the
+  ceiling to happen at all, and the file is still over it today. `rotate-memory`
+  **REFUSES at exit 3 (`EXIT.CEILING`) once a file is already over**, which is a
+  precondition the failure it prevents violates — so the last moment the tool can
+  act is strictly *before* the breach. Here the migration cost **+2,984 B**
+  (185,204 → **188,188 B**), leaving **16,612 B** still spare and the tool still
+  able to act. Doing it now cost nothing that doing it later would have cost.
+
+  **THE STRUCTURE, AND THE HAZARD IT REMOVED.** The old file's LAST block was
+  `## Stable facts (slow-changing)` — standing content, sitting in the region
+  rotation archives first. The new order is **standing truth (block 1), then
+  active state, then history newest-first**, cut at the file's own per-packet era
+  markers and never across one. Both literals
+  `tests/release_metadata_tests.sh` section 5 greps out of this file are read
+  with `head -n1`, i.e. the FIRST occurrence, so an archived first occurrence
+  would silently re-point that guard; both now live in block 1 and **nowhere
+  else**, which `tests/build_os_maintenance_tests.sh` section 9 asserts.
+
+  **THE PROTECTION IS POSITIONAL AND IS PROVEN BY EXECUTION, NOT ARGUED.**
+  `--keep` is validated `>= 1` and `routeSegments(segments, keepN)` takes no other
+  input, so the whole routing domain is `1..18`; section 9 rotates a scratch copy
+  at **every one of those 18 keeps with `--apply`** and finds **18 rotated, 0
+  refused, 0 gate-pinned literals reaching the archive, and block 1 byte-identical
+  at all 18**. **NO PATTERN OF PROTECTION WAS ADDED TO THE TOOL** and none is
+  claimed for it.
+
+  **ROTATION WAS NOT APPLIED.** `--dry-run` only, exit code captured directly off
+  the tool: **18 blocks → keep 10, archive 8**, reclaiming **66,332 B**, live
+  **188,188 → 122,367 B**, `conservation : OK (121,856 B live + 66,332 B archived
+  = 188,188 B original, byte-exact)`. Applying it is a separate operator packet;
+  `build-os/memory/archive/` still does not exist.
+
+  **CONSERVATION WAS PROVED IN THE OTHER DIRECTION TOO** — the original file is
+  reconstructed **byte-exact** from the new one by putting the migrated segments
+  back into their original order, with a delta that is enumerated rather than
+  summarised: three `^## ` headings demoted or renamed, one marker moved into
+  block 1 with its entry left whole where it was written, and 21 added lines.
+
+  Suite **2140 passed**, 0 failed (+19, all of it
+  `tests/build_os_maintenance_tests.sh` §9, which goes **85 → 104**; every other
+  chained suite +0). Census **held at 105**, declared mismatches **held at 22**,
+  gate-on-advise **14**, **no new control**. Two `evidence_refs` line numbers were
+  repointed — `suite.build_os_maintenance` and `OCCURRENCE-0016`, both citing this
+  suite's own trailing `RESULT`/exit lines, `:639/:640 → :846/:847` — recorded as
+  `OCCURRENCE-0018` of `DEFECT-0001-stale-line-reference`. The four other
+  citations into that file (`:88`, `:193`, `:295`, `:414`) were **prevented rather
+  than repaired**: the header note was rewritten line-count-neutral, 15 lines in
+  and 15 out, specifically so none of them moved.
+
 - **`build-os/memory/residue.md` was re-blocked so that rotation can reclaim
   space from it, and so that the part of it which must never rotate cannot.**
   The file had reached **204,658 B** against the **204,800 B** ceiling

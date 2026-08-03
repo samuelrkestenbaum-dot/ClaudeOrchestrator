@@ -2,8 +2,32 @@
 
 > The "where are we" snapshot. The orchestrator reads this first every session.
 > The archivist advances it when a packet closes. Keep it short and true.
+> **HOW THIS FILE IS ORDERED, AND WHY IT IS NOT CHRONOLOGICAL.**
+> `build-os/maintenance/rotate-memory.sh` retains a **PREFIX** of the `^## `
+> blocks — `routeSegments` keeps `blocks.slice(0, keepN)` and archives the tail,
+> measured rather than read off the header — so the sections below run
+> **standing truth first, then active state, then history newest-first**, and
+> the standing region is **block 1**. Sections are cut at this file's own era
+> markers (one per closed packet, in the order they were written) and never
+> across one; no section was split to make the pieces a convenient size.
+> Every byte of every entry is preserved; only the sectioning changed.
+>
+> The tool has no notion of protected content and none is claimed for it. What
+> protects the standing region is POSITION: it is block 1 and `--keep` is
+> validated `>= 1`, so no legal invocation can reach it.
+> `tests/build_os_maintenance_tests.sh` section 9 executes that at every legal
+> N, and also requires that neither literal
+> `tests/release_metadata_tests.sh` section 5 greps out of this file occurs
+> anywhere outside block 1 — both are read with `head -n1`, so an archived
+> first occurrence would silently re-point that guard.
+## Standing truth — PROTECTED REGION (block 1; rotation cannot reach it)
 
-## Project
+Identity, the current build claim, the last close, and the slow-changing facts
+the router depends on. This block is the file's FIRST `^## ` block, so every
+legal `--keep` retains it.
+
+### Project
+
 
 - **What this repo is:** Build OS — a native orchestrator for Claude Code (routing
   matrix + packet loop + markdown memory) that turns a repo into a
@@ -45,16 +69,19 @@
   `no tags` because `tests/release_metadata_tests.sh:322` requires it, so the residue item is
   annotated rather than rewritten. Whether the tag was created with an explicit go is not
   determinable from here and no claim is made.
-- **Build/test command:** `bash tests/build_os_tests.sh` (2121 checks; no network; temp dirs)
-  — **2121 as of `PACKET-0037-residue-reblock`.** The delta is **+18**, all of it
-  `tests/build_os_maintenance_tests.sh` §8 — the section that measures whether THIS
-  repository's own `residue.md` can be rotated at all, and whether its standing region
-  can be archived. That suite goes **67 -> 85**; every other chained suite is **+0**.
-  Derived from a SOLO full-capture run after an anchored `pgrep -fa '^bash tests/'`
+- **Build/test command:** `bash tests/build_os_tests.sh` (2140 checks; no network; temp dirs)
+  — **2140 as of `PACKET-0038-current-state-reblock`.** The delta is **+19**, all of it
+  `tests/build_os_maintenance_tests.sh` §9 — the section that measures whether THIS
+  repository's own `current_state.md` can be rotated at all, and whether its standing
+  region can be archived. That suite goes **85 -> 104**; every other chained suite is
+  **+0**. Derived from a SOLO full-capture run after an anchored `pgrep -fa '^bash tests/'`
   returned empty, and reconciled against `CHANGELOG.md`, which carries the matching
-  literal `**2121 passed**` (unsplit) under `## [Unreleased]` ->
+  literal `**2140 passed**` (unsplit) under `## [Unreleased]` ->
   `### In flight (not landed at the released commit)`. **CITED BY HEADING, NOT BY LINE.**
-  The prior figure and its provenance are preserved below:
+  The prior figures and their provenance are preserved below:
+  — **2121 as of `PACKET-0037-residue-reblock`.** The delta was **+18**, all of it
+  `tests/build_os_maintenance_tests.sh` §8, the same shape one file earlier: that suite
+  went **67 -> 85** and every other chained suite was **+0**.
   — **2103 as of `PACKET-0036-measurement-integrity`.** The delta was **+7**, all of it
   `tests/build_os_tests.sh` §28, the guard for `DEFECT-0013`; every other chained suite is
   **+0**, including `tests/speed_benchmark_tests.sh`, which held at **169** because that
@@ -168,7 +195,73 @@
   global-install tool shipping and P-016 Ferrari hardening (capability registry,
   inline routing, privacy log, atomic lock, surface inventory, enabled-vs-installed audit).
 
-## Where we are
+### Last close
+
+- **Last closed packet:** `gravito_residue_reblock_a`
+  (`PACKET-0037-residue-reblock`). The full close record — id derivation, base,
+  commits, verdict, and what it made true — is the newest history block below,
+  preserved verbatim where it was written.
+
+### Stable facts (slow-changing)
+
+- **Remote / org — claude.ai (2026-07; NOT the local CLI plugin registry):** 9 org plugins
+  (`design`, `data`, `productivity`, `brand-voice`, `marketing`, `sales`, `small-business`,
+  `legal`, `cowork-plugin-management`); 13 connectors (Apollo.io, Clay, Docusign, Gmail,
+  Higgsfield, HubSpot, Hugging Face, Netlify, Notion, Otter.ai, Slack, Supabase, Zapier) +
+  2 session MCPs (GitHub, Claude Code Remote). These are org-level (claude.ai app registry),
+  distinct from the locally-installed CLI plugins; verify live per surface before routing
+  (no-route-to-unverified). See `tool_router.md` → *Remote / org capabilities*.
+- **Installed but NOT live:** Stripe, Cloudflare Developer Platform (need auth);
+  Google Calendar, Google Drive, Microsoft 365 (toggled off in-chat).
+- **Source of truth for capabilities:** the live registries — `ListConnectors`,
+  `ListPlugins`, `ListSkills` — reconciled into `tool_router.md` (Installed
+  plugins / connectors) and `INTEGRATIONS.md`. Re-verify when the env changes.
+- **Build accelerators (P-012 live evidence):** Build OS routing, Serena, Repomix,
+  ccusage, and Context Mode are ACTIVE. Host — Serena is one user-scope MCP pinned to
+  official commit `68884f1`; Repomix 1.17.0 + ccusage 20.0.18
+  (`/Users/samsmac/.nvm/versions/node/v22.23.1/bin`). Enabled at host user scope via the
+  `claude plugin` CLI (`claude plugin list` confirms): `claude-hud` v0.6.0,
+  `context-mode` v1.0.169 (routing limited to non-secret pilot), and 8 focused Trail of
+  Bits plugins (`constant-time-analysis`, `supply-chain-risk-auditor`,
+  `agentic-actions-auditor`, `insecure-defaults`, `static-analysis`, `variant-analysis`,
+  `differential-review`, `seatbelt-sandboxer`). `zeroize-audit` and ECC are disabled;
+  the former prevents an unpinned duplicate Serena and the latter removes 363 redundant
+  skills. A fresh authenticated prompt completed with no skill-budget warning. Claude HUD remains enabled but its visual
+  statusline is not independently claimed. Node compatibility resolved: host default is
+  Node 22.23.1; Repomix, ccusage, and Context Mode run/connect under Node 22. GitHub
+  Actions = repo-scoped templates (uninstalled; no secrets). Gates in `tool_router.md` +
+  `INTEGRATIONS.md` §8. One orchestrator (Build OS) — no competing framework.
+- **Status-semantics rule:** never call npx/uvx success in an ephemeral container
+  "installed" unless persistent host state **and** a fresh-session activation test
+  are both verified. Installation · configuration · activation · authentication ·
+  repository rollout are five distinct states.
+- **Discovery-first rule:** every build discovers live capabilities, then selects
+  the smallest correct toolset; Serena is primary for symbol-level work in large/
+  unfamiliar repos before broad file reads.
+- **Zero-touch specialist handoff (P-014→P-017):** `build-os/tools/specialist-handoff.sh` + the
+  `prompt-router.sh` hook classify via a maintainable **capability registry** (precedence
+  zeroize > ecc > inline > focused). focused → no relaunch; ecc/zeroize → an automatic bounded
+  child under a **safe atomic lock** (path-validated `lock_path_safe`, non-recursive
+  unlink+`rmdir`, fail-closed BUSY, safe stale break; released + focused restored on
+  EXIT/INT/TERM, child killed). The task travels on **stdin** (never argv) and the child must end
+  with a terminal marker `[BUILD_OS_STATUS: COMPLETED|NEEDS_INPUT|BLOCKED|FAILED]`; the hook
+  suppresses parent work **only** on explicit COMPLETED — exit-0-without-marker is UNCONFIRMED
+  (exit 76), and the parent is told to continue/obtain input otherwise. Output is bounded +
+  visibly truncated. The audit log is **privacy-safe** (route/result/exit/event-id; `0600`; never
+  prompt/cwd). `install-global.sh` ships both tool scripts into `~/build-os/tools` (P-015).
+  **Inline routes** (`21st`, `agent-reach`, `claude-watch`, `ui-ux-pro-max`) emit a **conditional**
+  INLINE CANDIDATE (verify live on this surface, else built-in/local fallback + state the limit —
+  never claim use from install alone); no profile switch, no child. Surface-aware: 21st.dev is
+  verified live as cloud alias `21st` and Mac-local alias `21st-dev`; Anthropic's cloud
+  web-connector layer still requires per-call user approval and does not honor project
+  permission allowlists for this gate. Agent Reach = native skill;
+  UI UX Pro Max v2.11.0 + Claude Watch v0.4.1 = enabled Claude Code skills/plugins. No
+  cross-surface ACTIVE claim.
+- **Gates hold:** external mutation (push/merge/deploy/secret/send/SaaS-write),
+  plus DDL / remote-DB writes / payments / flags / canaries / telemetry / OAuth,
+  are each a separate STOP for explicit go. Repo-scoped GH Actions never go global.
+
+## Where we are — phase state and the ceiling in force
 
 - **PHASE CHANGE — RECORD THIS BEFORE THE PACKET LOG. THE GOVERNANCE-ONLY PHASE IS OVER.** The
   operator has ended it and issued **BUILD AUTHORITY** with an **ANTI-STALL RULE**: build around
@@ -239,7 +332,148 @@
   held at **169** because three assertions were CONVERTED rather than added, and no assertion was
   lost. This is the first ledger entry in the sequence whose assertion count is a **constant**
   rather than a sample.]**
-- **Last closed packet:** `gravito_residue_reblock_a`
+
+## Active decisions, open rulings, and the standing backlog
+
+- **Now:** none active. `gravito_ladder_semantics_a` is **closed** (2026-08-01); its two commits
+  `576751a` + `d0eff10` and this close commit are **local-only** and stay that way pending explicit
+  go. `build-os/packets/active_packet.md` is cleared, reads NO PACKET IN FLIGHT, **and carries 4
+  `^## ` blocks** — clearing it to 2 is exactly what made `2df61ae` ship red at 143/144.
+  **THE DECLARATION-ORDERING TENSION IS RESOLVED, AND IT NEEDED NEITHER A THIRD COMMIT NOR A HOOK.**
+  The previous packet's reviewer noted that a declaration landing in the SAME COMMIT as the build
+  leaves git unable to attest the ordering, and that attesting it appeared to need a third commit or
+  a pre-commit hook against a hard cap of two. **`gravito_ladder_semantics_a` spent Commit 1 on the
+  DECLARATION ALONE** (`576751a`): trivially green in isolation, cap still 2, **and git now
+  corroborates the ordering.** Nothing requires the docs to be the second commit. **This is the
+  standing pattern from here on.** Residue (ee) is closed by demonstration.
+  **The underlying control gap is NOT closed:** `bandwidth.active_packet_singleton` still refuses
+  **two** declared packets and permits **zero**, so pure omission passes clean. Residue (c)/(u).
+- **DECISION 2 IS CLOSED — the ladder's definitional bug is FIXED**, by
+  `gravito_ladder_semantics_a`, at seven semantic sites plus `scan-controls.sh`. **Decision 3 is
+  addressed**: `OBSERVE-LB` is off the gating path. **Decision 1 — the missing fifth outcome — is
+  now SPELLABLE but still UNTAKEN**: `observe` is a legal destination at last, and whether to move
+  any control onto it remains a governance act nobody has performed.
+  **THE NEW BLOCKING DECISION IS THE MUTATION CENSUS**, and the reviewer named it the next packet:
+  five modules durably mutate and **not one of those write actions is a registered control at any
+  authority**; `maint.managed_set_replacement` sits at `advise` while copying files over a user's
+  edits with **no rollback**. **Registering them is a RE-AUTHORISATION and therefore the operator's.**
+  Also open: **should Class A license `execute`** (today no class does, deliberately), and **should a
+  fifth deployment mode for mutation exist** (`README.md` §3b).
+- **THE THREE ORIGINAL DECISIONS, kept for the record — all from `gravito_mismatch_refuted_a`:**
+  (1) **the missing FIFTH OUTCOME** — demotion onto the rung the `refuted` cap prescribes is
+  unspellable for **67 of 81 controls**, so the framework's four outcomes cannot cover the census;
+  the reviewer's **accept-and-constrain** proposal needs an operator envelope and is **not adopted**.
+  (2) **the ladder's definitional bug** — both bottom rungs are defined by non-consumption, so no
+  rung means *"it is read, but may cause nothing"*; the fix is **six prose sites plus `OBSERVE-LB`**,
+  **not one line**. (3) **`OBSERVE-LB`'s placement** — correctly reasoned, but it gates (exit 2) on
+  behalf of an axis that deliberately only advises (exit 0), which removes the operator's ability to
+  apply the demotion **by hand**. **None is taken.**
+  **Still standing from `gravito_authority_envelope_a`:** step 3 **cannot be done by writing
+  envelopes** — an envelope only lowers `L_effective` and cannot promote. Do not cut a packet that
+  writes envelopes to fix mismatches.
+  **AND DO NOT EXTRAPOLATE the two refuted closures to the remaining twelve:** 11 of the 19 findings
+  are `unvalidated`, where the remedy is **improve the evidence** and that outcome is **wide open**.
+- **Next — THE OPERATOR'S FIVE-PHASE SEQUENCE COMES FIRST AND IS NOT A CANDIDATE LIST.** P1 is
+  **DONE** (`gravito_p1_mutators_ids_telemetry_a`). The remaining four, in order:
+  **P2. CLAIM-SCOPED EVIDENCE.** **AND IT CARRIES A HARD OBLIGATION FROM P1:** it **must keep
+     recording REJECTED candidates** in `signal_snapshots.tsv`. Today only `DECISION-0007` has a
+     non-degenerate candidate set — `DECISION-0001` selected all three, `DECISION-0002`..`-0006` are
+     `|C| = 1` — so **if P2 and P3 record only the selected arm, P4 starts at n = 1.**
+  **P3. `accept_and_constrain`** — the reviewer's missing-fifth-outcome proposal, still untaken by
+     the operator (see the three decisions above).
+  **P4. S1 SHADOW RANKER** — the consumer everything above is substrate for. Its two open
+     decisions are still the operator's: the evidence token (`untested` as a sixth, or S1 arrives
+     carrying `unvalidated`) and the `runtimeAuthority: observe` recommendation (advice, NOT
+     adopted).
+  **P5. OUTCOME / COUNTERFACTUAL TELEMETRY.**
+- **Candidates (the standing backlog, subordinate to the five phases) — from this and the previous
+  closes' residue.**
+  -2. **[CLOSED 2026-08-01 by `gravito_p1_mutators_ids_telemetry_a` — kept for the record, DO NOT
+     SCHEDULE.] THE MUTATION CENSUS COVERAGE GAP — THE REVIEWER RULED THIS THE NEXT PACKET.**
+     `MISMATCHES.md` §15. Five modules durably mutate and **not one of those write ACTIONS is a
+     registered control at any authority**: `rotate-memory.mjs` (renames onto the LIVE memory file —
+     the most consequential write in the system), `swarm-merge.sh`, `record-packet.sh`, the identity
+     hook, `specialist-handoff.sh`. And `maint.managed_set_replacement` sits at **`advise`** with an
+     output that *copies files over a user's edits*, *"none that stops anything"* on failure, and
+     **no rollback** — on the corrected ladder that is `execute`, **two rungs up**. **Registering
+     any of it is a RE-AUTHORISATION and needs the operator.** Residue (nn).
+     **WHAT ACTUALLY HAPPENED: the write ACTIONS were registered as SIX new controls at `execute`
+     (census 81 -> 90), and `maint.managed_set_replacement` was examined exactly as asked and
+     DELIBERATELY NOT MOVED** — it is `FINDING-0001` with the remedy **named and unapplied**,
+     because moving a pre-existing control is the operator's act. `FINDING-0002` holds the same
+     shape for `hooks.once_dedup`. **Applying either remedy is STILL OPEN and STILL THE OPERATOR'S.**
+  -1. **THE CITATION GUARD CHECKS RESOLVABILITY, NOT IDENTITY.** `scan-controls.sh:368-392` tests
+     existence, numeric, in-bounds and not-blank, and **never compares content** — **20 of 27
+     drifted refs passed every check while silently wrong**. **The durable fix is an anchor token or
+     a content hash instead of a line number**, and it also subsumes candidate 0 below. **And note
+     the retroactive discount: a content match at a SINGLE COMMIT tests resolvability; only a
+     CROSS-COMMIT comparison tests identity** — several earlier *"zero drift, 287/287"* claims were
+     the former reported as the latter. Residue (mm).
+  0a. **THE CLOSE CHECKLIST OMITTED A LIVE SUITE AND A PUSHED COMMIT SHIPPED RED.**
+     `./build-os/maintenance/run-tests.sh` is **still not chained into the suite** (1771 at
+     `c653508`; 1689 at `a75c25e`) and no close brief asked
+     for it, so `2df61ae` was pushed at **143/144**. Remedy: chain it, or name every live suite in
+     the close checklist. **Orchestrator defect.** Residue (oo).
+  0b. **THE LADDER'S SPELLING SWEEP** — deferred with all three grounds upheld. It needs an
+     enumeration-**CONTINUATION** test, because the five-rung string is a **PREFIX** of the six-rung
+     one and a containment test passes on the correct string. `MISMATCHES.md` §16. Residue (rr).
+  0. **Land the prose-citation sweep as a real script.** A working sweep exists **only as a
+     throwaway** from this packet and nothing re-runs it. Prose citations have **TWO known escape
+     forms**: bare `:NNN` refs, and **`MISMATCHES.md` §10's nonvacuity-table row form, which names a
+     file with NO line number at all** — the builder's own first sweep pass mis-resolved that table
+     and had to be redone. Residue (aa). Cheapest of the citation-class items and it is the only one
+     with a proven implementation already written. **UPDATED 2026-08-01: there are now FOUR known
+     escape forms, not two** — bare `:NNN`; §10's table rows with no line number at all;
+     **line-wrapped enumerations**, which no same-line grep can see and which hid a fifth stale
+     ladder in a file the packet had already edited; and **markdown table-row mappings**, which made
+     `evidence_policy_tests.sh` §21's new block **structurally vacuous over `README.md`, its own
+     first listed site**. Residue (pp). **UPDATED 2026-08-01 by
+     `gravito_p1_mutators_ids_telemetry_a`: there are now FIVE, not four — the fifth is the
+     FILE HEADER COMMENT, which reaches no field-scoped sweep** (`neurocosmology_crosswalk.txt`'s
+     header said *"1 binding out of 22"* against a live 23 and *"12 out of 25"* against a live
+     14 of 27). Residue (tt).
+  1. **Stop creating `CHANGELOG.md` line-citations, and re-cite the two live ones by release-block
+     heading** (`residue.md:280`, `receipts/gravito_evidence_policy_matrix_a.md:572-573`). The
+     changelog grows from the top, so **every** line-citation into it decays on **every** packet —
+     guaranteed, not occasional. Residue (r). Cheapest and it closes a whole class of future decay.
+  2. **A checker for prose that restates a machine-computed table** — four packets running.
+     §2a of `tests/authority_envelope_tests.sh` is now the strongest pattern (it pins an axis's
+     OWNER, not just its copy); §5a pins a copy. `MISMATCHES.md` has carried a stale line reference
+     in **six consecutive packets** and §10's table names its own decay mode in prose. Residue (m)/(s).
+  3. **`authority-envelope.sh`'s `--help` hand-maintained `sed -n '2,196p'` range, duplicated across
+     two handlers (`:235`, `:245`)** — when stale it **silently truncates rather than failing**, and
+     nothing tests it. It was live and broken until the fix round caught it. Residue (t).
+  4. **Enable the staleness check that actually works** — `RELEASE_METADATA_LIVE_SUITE=1` is still
+     opt-in and still not chained, and it is the ONLY check that compares memory against a live run.
+     It is the sole reason the 1485 → 1597 pair was caught. Residue (n)/(g).
+  5. **Assert a declared packet EXISTS while a packet is in flight** —
+     `bandwidth.active_packet_singleton` refuses two and permits zero, and an entire packet was just
+     built under zero with the control green. **Fires on omission, not on an affirmative act**, which
+     makes it strictly worse than the disclosed delete-the-file evasion. Residue (u)/(c).
+  6. **`tests/entitlement_tests.sh:296-305`'s hardcoded 12-file `PACKET_FILES` list** — decays
+     silently; this packet added two more files it does not cover. Residue (b).
+  7. **`swarm-merge.sh` glob-overlap false negatives** (`src/*.ts` vs `src/foo*`). Residue (a).
+  8. **Align `tests/evidence_policy_tests.sh:322`'s §5b non-vacuity floor** to §2a's stronger form.
+     **NON-BLOCKING — reviewer flagged and explicitly passed; do not treat as open.** §2a covers the
+     same axis with the stronger form, so it is not a live hole. Do it when that file is next open.
+     Residue (v).
+  **Blocked on the operator, not schedulable:** the **three decisions above** (the missing fifth
+  outcome; the ladder's definitional bug and its six-site-plus-`OBSERVE-LB` radius; `OBSERVE-LB`'s
+  placement on the gating path); **whether "declare before building" gets a third commit or a
+  pre-commit hook**, since the `<=2-commit` rule is in genuine tension with it; the S1
+  evidence-token decision (add `untested` as a sixth token, or have S1 carry `unvalidated`); the S1
+  `runtimeAuthority: observe` recommendation (reviewer's advice, **not adopted**); writing the first
+  authority envelope at all.
+  **NO LONGER OPEN — closed on measurement, do not re-open as scheduled work:** demoting
+  `maint.tripwire_coverage_scan`. `gravito_mismatch_refuted_a` was **authorised** to do it, **did
+  it**, **measured it destroying live memory at the same exit code**, and **refused**. Retirement is
+  worse. Both outcomes are closed with the measurement attached.
+  Carried, unrelated: decide Context Mode routing enablement (stays non-secret pilot); name a target
+  repo + approve a secret for the GH Actions; authorize/enable the deferred connectors.
+
+## History — `gravito_residue_reblock_a` — the last close
+
+- **Closed 2026-08-03:** `gravito_residue_reblock_a`
   (`PACKET-0037-residue-reblock` — **MINTED, not reused**; collision-checked BEFORE the mint and
   **RE-DERIVED AT CLOSE by the archivist**, because that check has caught a bad id at four prior
   closes: `git grep -lF 'PACKET-0037' 2a3c070` exits **1** (0 files at base) and
@@ -268,6 +502,9 @@
   reports this file as healthy right up until it is unfixable.** Re-blocking it is the staged next
   packet. **Sizes here are DERIVED, never quoted** (`wc -c`) — residue `(cccccc)` records why: the
   overage digit went stale inside a single packet.
+
+## History — `gravito_measurement_integrity_a`
+
 - **Previously closed:** `gravito_measurement_integrity_a`
   (`PACKET-0036-measurement-integrity` — **MINTED, not reused**, and the mint was
   **collision-checked BEFORE the mint by the builder and RE-DERIVED AT CLOSE by the archivist
@@ -465,6 +702,9 @@
   `0cdb3b7`, `53b92d4`, `aa0a7b3` and this close commit stay **local**, and **none of the three may
   be amended** — they are the commits the gates measured. `c2d97f8` remains the selection anchor
   of the still-intact prospective experiment.
+
+## History — `gravito_cross_surface_memory_kernel_v0`
+
 - **Previously closed:** `gravito_cross_surface_memory_kernel_v0`
   (`PACKET-0035-cross-surface-memory-kernel` — **MINTED, not reused**, and the mint was
   **collision-checked at close rather than accepted from the brief**: the live band runs
@@ -552,6 +792,9 @@
   **OPEN, AND NOT THE ARCHIVIST'S TO CLOSE: nothing is pushed, merged, tagged, PR'd or deployed.**
   `d2c09c6`, `8ba368a`, `727de75` and this close commit stay **local**. `c2d97f8` remains the
   **selection anchor** and **may not be amended**, and neither may the three execution commits.
+
+## History — `gravito_p5b_citation_anchor_tokens_a`
+
 - **Closed before that:** `gravito_p5b_citation_anchor_tokens_a`
   (`PACKET-0029-citation-anchor-tokens` — **REUSED, not minted:** it is the id `DECISION-0011`
   already carries for this candidate in its own `candidate_ids` column, and the id `DECISION-0010`
@@ -691,6 +934,9 @@
   **OPEN, AND NOT THE ARCHIVIST'S TO CLOSE: nothing is pushed, merged, tagged, PR'd or deployed.**
   `c2d97f8` is the **selection anchor** and `44b0fab` is the **seal anchor**; **neither may be
   amended**, and neither may `df9f740`, `c76b4d0` or `fbd746d`.
+
+## History — `gravito_p5_outcome_counterfactual_telemetry_a`
+
 - **Previously closed:** `gravito_p5_outcome_counterfactual_telemetry_a`
   (`PACKET-0032-p5-outcome-counterfactual-telemetry` — REUSED, not minted: it is the id
   `DECISION-0010` already carries for this work, collision-checked against every `PACKET-*` in
@@ -891,6 +1137,9 @@
   `prospective_decisions_with_a_recorded_selection` from 0 to 1 with no human having chosen —
   **the exact figure the reviewer's reproduction exploited** — and would destroy the thing the
   packet built.
+
+## History — `gravito_p4_s1_shadow_ranker_a`
+
 - **Earlier:** `gravito_p4_s1_shadow_ranker_a`
   (`PACKET-0034-gravito-p4-s1-shadow-ranker-a`) — **THE FIRST EXECUTIVE COMPONENT: A REAL CANDIDATE
   SET IN, AN IMMUTABLE EXPLAINED ORDERING OUT — AND THE FIRST ORDERING IT PRODUCED IS DEGENERATE**
@@ -1063,6 +1312,9 @@
   state plainly that this runtime has never had the capability and to REQUIRE the reviewer to say
   *"second eyes: NONE, single-model"* rather than silently omit it. **The reviewer complied.** Every
   verdict in this entire sequence is single-model.
+
+## History — `gravito_p3_accept_and_constrain_a`
+
 - **Prior:** `gravito_p3_accept_and_constrain_a`
   (`PACKET-0023-gravito-p3-accept-and-constrain-a`) — **A FIFTH DISPOSITION THAT CLEARS NOTHING,
   AND A LEASE WINDOW THAT WAS DECORATIVE AT BOTH ENDS AND WAS REACHING THE LICENCE MATRIX**
@@ -1156,6 +1408,9 @@
   reviewer's own two prescriptions (`:643 -> :644`, `:572-574`) were **overridden by the builder on
   evidence, in writing, and the builder was right both times.** Residue (zz)'s streak counter said
   **six** and was **itself stale**; corrected to **nine**.
+
+## History — `gravito_p2_claim_scoped_evidence_a`
+
 - **Prior:** `gravito_p2_claim_scoped_evidence_a`
   (`PACKET-0019-gravito-p2-claim-scoped-evidence-a`) — **ONE CONTROL MAY NOW CARRY MANY CLAIMS
   WITH MANY VERDICTS, and the packet found a LIVE OVER-GRANT INSIDE THE OVER-GRANT DETECTOR**
@@ -1274,6 +1529,9 @@
   `tool_router.md` routes reviewer second-eyes to it and nothing is installed. Residue (zz) already
   says *"Either install Codex or stop declaring the row."* **It is still declared and still
   unbacked.**
+
+## History — `gravito_p1_mutators_ids_telemetry_a`
+
 - **Prior:** `gravito_p1_mutators_ids_telemetry_a`
   (`PACKET-0006-gravito-p1-mutators-ids-telemetry-a`) — **`execute` got its FIRST SIX OCCUPANTS,
   identity stopped being a line number, and the packet recorded the feature vectors of the arms it
@@ -1372,6 +1630,9 @@
   **Both verdicts single-model — NO CODEX IN ANY PASS, for the SIXTH packet running.**
   `tool_router.md:368` routes to it and nothing is installed. It matters here specifically:
   **finding 6 is a REVIEWER error that only the BUILDER caught.**
+
+## History — `gravito_ladder_semantics_a`
+
 - **Prior:** `gravito_ladder_semantics_a` — **the ladder gained a rung, `observe`
   changed meaning, and NOT ONE CONTROL MOVED** (receipt
   `build-os/receipts/gravito_ladder_semantics_a.md`, commits `576751a` + `d0eff10`, base `2df61ae`).
@@ -1474,6 +1735,9 @@
   `tool_router.md:368` routes to it and nothing is installed. **The row is unbacked**, and it matters
   here specifically: the reviewer's resolvability-vs-identity corollary **retroactively discounts
   earlier claims**, which is exactly what an independent second model is for.
+
+## History — `gravito_mismatch_refuted_a`
+
 - **Prior:** `gravito_mismatch_refuted_a` — **it was AUTHORISED to re-authorise two
   controls and it changed NOTHING, because the prescribed demotion was MEASURED to destroy live
   memory** (receipt `build-os/receipts/gravito_mismatch_refuted_a.md`, commits `b25f3f7` +
@@ -1581,6 +1845,9 @@
   forbade it.
   **Both verdicts single-model** — **no Codex in either review or either re-review**;
   `tool_router.md:368` routes to it and nothing is installed. **The row is unbacked.**
+
+## History — `gravito_authority_envelope_a`
+
 - **Prior:** `gravito_authority_envelope_a` — **the operator has an artefact to grant
   authority in, and the licence model has a third MIN term** (receipt
   `build-os/receipts/gravito_authority_envelope_a.md`, commits `88052e7` + `a7ab841`, base
@@ -1663,6 +1930,9 @@
   See residue (u).
   **Both verdicts single-model** — no Codex second-eyes in the review OR the re-review;
   `tool_router.md:368` routes to it and nothing is installed. **The row is unbacked.**
+
+## History — `gravito_evidence_policy_matrix_a`
+
 - **Prior:** `gravito_evidence_policy_matrix_a` — **the licence table has a second
   axis** (receipt `build-os/receipts/gravito_evidence_policy_matrix_a.md`, commits `105cb75` +
   `0555717`, base `6b01173`). README §3 licensed authority on **class alone**, so a control
@@ -1731,6 +2001,9 @@
   (the field-parser off-by-one on `evidence-policy.sh`'s first run) that happened before the three
   new stanzas were appended, so 75 was the live count at the time. Correct as history; not a stale
   census claim. See residue (l).
+
+## History — `gravito_census_gaps_egress_bandwidth_a` through `gravito_productization_pa_maintenance_upstream_a`
+
 - **Prior:** `gravito_census_gaps_egress_bandwidth_a` — the two cheapest census gaps the crosswalk
   found are closed (receipt `build-os/receipts/gravito_census_gaps_egress_bandwidth_a.md`, commits
   `86c8f93` + `2a3c9b3`, base `321dced`). `entitlement.egress_scan` (Class A, gate, red_driven)
@@ -1790,6 +2063,9 @@
   zero-block parse of a file that HAS content now warns on stderr instead of printing the same
   `already rotated (no-op)` line it printed for two benign states. Reviewer verdict **pass**,
   after one **fix-then-pass** round (5 items). Suites at `641527f`: **281 / 144 / 61**, all 0 fail (the 281 is now 488).
+
+## History — the earliest sessions, P-022 back to P-015
+
 - **Prior:** P-022 — reconciliation of the post-settings-closure-audit branch
   (`claude/post-settings-closure-audit-y59p8t`) into canonical (receipt
   `build-os/receipts/P-022.md`). **Documentation-only; no behavior change; suite stays 216/216.**
@@ -1887,200 +2163,6 @@
   `tests/build_os_tests.sh` — 189/189 green (RED 148/38 → GREEN 186/0; +3 list-schema checks → 189/0).
 - **Prior:** P-015 — global install ships the specialist handoff tools (installed hook resolves
   + runs the handoff end-to-end). P-014 — zero-touch specialist orchestration.
-- **Now:** none active. `gravito_ladder_semantics_a` is **closed** (2026-08-01); its two commits
-  `576751a` + `d0eff10` and this close commit are **local-only** and stay that way pending explicit
-  go. `build-os/packets/active_packet.md` is cleared, reads NO PACKET IN FLIGHT, **and carries 4
-  `^## ` blocks** — clearing it to 2 is exactly what made `2df61ae` ship red at 143/144.
-  **THE DECLARATION-ORDERING TENSION IS RESOLVED, AND IT NEEDED NEITHER A THIRD COMMIT NOR A HOOK.**
-  The previous packet's reviewer noted that a declaration landing in the SAME COMMIT as the build
-  leaves git unable to attest the ordering, and that attesting it appeared to need a third commit or
-  a pre-commit hook against a hard cap of two. **`gravito_ladder_semantics_a` spent Commit 1 on the
-  DECLARATION ALONE** (`576751a`): trivially green in isolation, cap still 2, **and git now
-  corroborates the ordering.** Nothing requires the docs to be the second commit. **This is the
-  standing pattern from here on.** Residue (ee) is closed by demonstration.
-  **The underlying control gap is NOT closed:** `bandwidth.active_packet_singleton` still refuses
-  **two** declared packets and permits **zero**, so pure omission passes clean. Residue (c)/(u).
-- **DECISION 2 IS CLOSED — the ladder's definitional bug is FIXED**, by
-  `gravito_ladder_semantics_a`, at seven semantic sites plus `scan-controls.sh`. **Decision 3 is
-  addressed**: `OBSERVE-LB` is off the gating path. **Decision 1 — the missing fifth outcome — is
-  now SPELLABLE but still UNTAKEN**: `observe` is a legal destination at last, and whether to move
-  any control onto it remains a governance act nobody has performed.
-  **THE NEW BLOCKING DECISION IS THE MUTATION CENSUS**, and the reviewer named it the next packet:
-  five modules durably mutate and **not one of those write actions is a registered control at any
-  authority**; `maint.managed_set_replacement` sits at `advise` while copying files over a user's
-  edits with **no rollback**. **Registering them is a RE-AUTHORISATION and therefore the operator's.**
-  Also open: **should Class A license `execute`** (today no class does, deliberately), and **should a
-  fifth deployment mode for mutation exist** (`README.md` §3b).
-- **THE THREE ORIGINAL DECISIONS, kept for the record — all from `gravito_mismatch_refuted_a`:**
-  (1) **the missing FIFTH OUTCOME** — demotion onto the rung the `refuted` cap prescribes is
-  unspellable for **67 of 81 controls**, so the framework's four outcomes cannot cover the census;
-  the reviewer's **accept-and-constrain** proposal needs an operator envelope and is **not adopted**.
-  (2) **the ladder's definitional bug** — both bottom rungs are defined by non-consumption, so no
-  rung means *"it is read, but may cause nothing"*; the fix is **six prose sites plus `OBSERVE-LB`**,
-  **not one line**. (3) **`OBSERVE-LB`'s placement** — correctly reasoned, but it gates (exit 2) on
-  behalf of an axis that deliberately only advises (exit 0), which removes the operator's ability to
-  apply the demotion **by hand**. **None is taken.**
-  **Still standing from `gravito_authority_envelope_a`:** step 3 **cannot be done by writing
-  envelopes** — an envelope only lowers `L_effective` and cannot promote. Do not cut a packet that
-  writes envelopes to fix mismatches.
-  **AND DO NOT EXTRAPOLATE the two refuted closures to the remaining twelve:** 11 of the 19 findings
-  are `unvalidated`, where the remedy is **improve the evidence** and that outcome is **wide open**.
-- **Next — THE OPERATOR'S FIVE-PHASE SEQUENCE COMES FIRST AND IS NOT A CANDIDATE LIST.** P1 is
-  **DONE** (`gravito_p1_mutators_ids_telemetry_a`). The remaining four, in order:
-  **P2. CLAIM-SCOPED EVIDENCE.** **AND IT CARRIES A HARD OBLIGATION FROM P1:** it **must keep
-     recording REJECTED candidates** in `signal_snapshots.tsv`. Today only `DECISION-0007` has a
-     non-degenerate candidate set — `DECISION-0001` selected all three, `DECISION-0002`..`-0006` are
-     `|C| = 1` — so **if P2 and P3 record only the selected arm, P4 starts at n = 1.**
-  **P3. `accept_and_constrain`** — the reviewer's missing-fifth-outcome proposal, still untaken by
-     the operator (see the three decisions above).
-  **P4. S1 SHADOW RANKER** — the consumer everything above is substrate for. Its two open
-     decisions are still the operator's: the evidence token (`untested` as a sixth, or S1 arrives
-     carrying `unvalidated`) and the `runtimeAuthority: observe` recommendation (advice, NOT
-     adopted).
-  **P5. OUTCOME / COUNTERFACTUAL TELEMETRY.**
-- **Candidates (the standing backlog, subordinate to the five phases) — from this and the previous
-  closes' residue.**
-  -2. **[CLOSED 2026-08-01 by `gravito_p1_mutators_ids_telemetry_a` — kept for the record, DO NOT
-     SCHEDULE.] THE MUTATION CENSUS COVERAGE GAP — THE REVIEWER RULED THIS THE NEXT PACKET.**
-     `MISMATCHES.md` §15. Five modules durably mutate and **not one of those write ACTIONS is a
-     registered control at any authority**: `rotate-memory.mjs` (renames onto the LIVE memory file —
-     the most consequential write in the system), `swarm-merge.sh`, `record-packet.sh`, the identity
-     hook, `specialist-handoff.sh`. And `maint.managed_set_replacement` sits at **`advise`** with an
-     output that *copies files over a user's edits*, *"none that stops anything"* on failure, and
-     **no rollback** — on the corrected ladder that is `execute`, **two rungs up**. **Registering
-     any of it is a RE-AUTHORISATION and needs the operator.** Residue (nn).
-     **WHAT ACTUALLY HAPPENED: the write ACTIONS were registered as SIX new controls at `execute`
-     (census 81 -> 90), and `maint.managed_set_replacement` was examined exactly as asked and
-     DELIBERATELY NOT MOVED** — it is `FINDING-0001` with the remedy **named and unapplied**,
-     because moving a pre-existing control is the operator's act. `FINDING-0002` holds the same
-     shape for `hooks.once_dedup`. **Applying either remedy is STILL OPEN and STILL THE OPERATOR'S.**
-  -1. **THE CITATION GUARD CHECKS RESOLVABILITY, NOT IDENTITY.** `scan-controls.sh:368-392` tests
-     existence, numeric, in-bounds and not-blank, and **never compares content** — **20 of 27
-     drifted refs passed every check while silently wrong**. **The durable fix is an anchor token or
-     a content hash instead of a line number**, and it also subsumes candidate 0 below. **And note
-     the retroactive discount: a content match at a SINGLE COMMIT tests resolvability; only a
-     CROSS-COMMIT comparison tests identity** — several earlier *"zero drift, 287/287"* claims were
-     the former reported as the latter. Residue (mm).
-  0a. **THE CLOSE CHECKLIST OMITTED A LIVE SUITE AND A PUSHED COMMIT SHIPPED RED.**
-     `./build-os/maintenance/run-tests.sh` is **still not chained into the suite** (1771 at
-     `c653508`; 1689 at `a75c25e`) and no close brief asked
-     for it, so `2df61ae` was pushed at **143/144**. Remedy: chain it, or name every live suite in
-     the close checklist. **Orchestrator defect.** Residue (oo).
-  0b. **THE LADDER'S SPELLING SWEEP** — deferred with all three grounds upheld. It needs an
-     enumeration-**CONTINUATION** test, because the five-rung string is a **PREFIX** of the six-rung
-     one and a containment test passes on the correct string. `MISMATCHES.md` §16. Residue (rr).
-  0. **Land the prose-citation sweep as a real script.** A working sweep exists **only as a
-     throwaway** from this packet and nothing re-runs it. Prose citations have **TWO known escape
-     forms**: bare `:NNN` refs, and **`MISMATCHES.md` §10's nonvacuity-table row form, which names a
-     file with NO line number at all** — the builder's own first sweep pass mis-resolved that table
-     and had to be redone. Residue (aa). Cheapest of the citation-class items and it is the only one
-     with a proven implementation already written. **UPDATED 2026-08-01: there are now FOUR known
-     escape forms, not two** — bare `:NNN`; §10's table rows with no line number at all;
-     **line-wrapped enumerations**, which no same-line grep can see and which hid a fifth stale
-     ladder in a file the packet had already edited; and **markdown table-row mappings**, which made
-     `evidence_policy_tests.sh` §21's new block **structurally vacuous over `README.md`, its own
-     first listed site**. Residue (pp). **UPDATED 2026-08-01 by
-     `gravito_p1_mutators_ids_telemetry_a`: there are now FIVE, not four — the fifth is the
-     FILE HEADER COMMENT, which reaches no field-scoped sweep** (`neurocosmology_crosswalk.txt`'s
-     header said *"1 binding out of 22"* against a live 23 and *"12 out of 25"* against a live
-     14 of 27). Residue (tt).
-  1. **Stop creating `CHANGELOG.md` line-citations, and re-cite the two live ones by release-block
-     heading** (`residue.md:280`, `receipts/gravito_evidence_policy_matrix_a.md:572-573`). The
-     changelog grows from the top, so **every** line-citation into it decays on **every** packet —
-     guaranteed, not occasional. Residue (r). Cheapest and it closes a whole class of future decay.
-  2. **A checker for prose that restates a machine-computed table** — four packets running.
-     §2a of `tests/authority_envelope_tests.sh` is now the strongest pattern (it pins an axis's
-     OWNER, not just its copy); §5a pins a copy. `MISMATCHES.md` has carried a stale line reference
-     in **six consecutive packets** and §10's table names its own decay mode in prose. Residue (m)/(s).
-  3. **`authority-envelope.sh`'s `--help` hand-maintained `sed -n '2,196p'` range, duplicated across
-     two handlers (`:235`, `:245`)** — when stale it **silently truncates rather than failing**, and
-     nothing tests it. It was live and broken until the fix round caught it. Residue (t).
-  4. **Enable the staleness check that actually works** — `RELEASE_METADATA_LIVE_SUITE=1` is still
-     opt-in and still not chained, and it is the ONLY check that compares memory against a live run.
-     It is the sole reason the 1485 → 1597 pair was caught. Residue (n)/(g).
-  5. **Assert a declared packet EXISTS while a packet is in flight** —
-     `bandwidth.active_packet_singleton` refuses two and permits zero, and an entire packet was just
-     built under zero with the control green. **Fires on omission, not on an affirmative act**, which
-     makes it strictly worse than the disclosed delete-the-file evasion. Residue (u)/(c).
-  6. **`tests/entitlement_tests.sh:296-305`'s hardcoded 12-file `PACKET_FILES` list** — decays
-     silently; this packet added two more files it does not cover. Residue (b).
-  7. **`swarm-merge.sh` glob-overlap false negatives** (`src/*.ts` vs `src/foo*`). Residue (a).
-  8. **Align `tests/evidence_policy_tests.sh:322`'s §5b non-vacuity floor** to §2a's stronger form.
-     **NON-BLOCKING — reviewer flagged and explicitly passed; do not treat as open.** §2a covers the
-     same axis with the stronger form, so it is not a live hole. Do it when that file is next open.
-     Residue (v).
-  **Blocked on the operator, not schedulable:** the **three decisions above** (the missing fifth
-  outcome; the ladder's definitional bug and its six-site-plus-`OBSERVE-LB` radius; `OBSERVE-LB`'s
-  placement on the gating path); **whether "declare before building" gets a third commit or a
-  pre-commit hook**, since the `<=2-commit` rule is in genuine tension with it; the S1
-  evidence-token decision (add `untested` as a sixth token, or have S1 carry `unvalidated`); the S1
-  `runtimeAuthority: observe` recommendation (reviewer's advice, **not adopted**); writing the first
-  authority envelope at all.
-  **NO LONGER OPEN — closed on measurement, do not re-open as scheduled work:** demoting
-  `maint.tripwire_coverage_scan`. `gravito_mismatch_refuted_a` was **authorised** to do it, **did
-  it**, **measured it destroying live memory at the same exit code**, and **refused**. Retirement is
-  worse. Both outcomes are closed with the measurement attached.
-  Carried, unrelated: decide Context Mode routing enablement (stays non-secret pilot); name a target
-  repo + approve a secret for the GH Actions; authorize/enable the deferred connectors.
-
-## Stable facts (slow-changing)
-
-- **Remote / org — claude.ai (2026-07; NOT the local CLI plugin registry):** 9 org plugins
-  (`design`, `data`, `productivity`, `brand-voice`, `marketing`, `sales`, `small-business`,
-  `legal`, `cowork-plugin-management`); 13 connectors (Apollo.io, Clay, Docusign, Gmail,
-  Higgsfield, HubSpot, Hugging Face, Netlify, Notion, Otter.ai, Slack, Supabase, Zapier) +
-  2 session MCPs (GitHub, Claude Code Remote). These are org-level (claude.ai app registry),
-  distinct from the locally-installed CLI plugins; verify live per surface before routing
-  (no-route-to-unverified). See `tool_router.md` → *Remote / org capabilities*.
-- **Installed but NOT live:** Stripe, Cloudflare Developer Platform (need auth);
-  Google Calendar, Google Drive, Microsoft 365 (toggled off in-chat).
-- **Source of truth for capabilities:** the live registries — `ListConnectors`,
-  `ListPlugins`, `ListSkills` — reconciled into `tool_router.md` (Installed
-  plugins / connectors) and `INTEGRATIONS.md`. Re-verify when the env changes.
-- **Build accelerators (P-012 live evidence):** Build OS routing, Serena, Repomix,
-  ccusage, and Context Mode are ACTIVE. Host — Serena is one user-scope MCP pinned to
-  official commit `68884f1`; Repomix 1.17.0 + ccusage 20.0.18
-  (`/Users/samsmac/.nvm/versions/node/v22.23.1/bin`). Enabled at host user scope via the
-  `claude plugin` CLI (`claude plugin list` confirms): `claude-hud` v0.6.0,
-  `context-mode` v1.0.169 (routing limited to non-secret pilot), and 8 focused Trail of
-  Bits plugins (`constant-time-analysis`, `supply-chain-risk-auditor`,
-  `agentic-actions-auditor`, `insecure-defaults`, `static-analysis`, `variant-analysis`,
-  `differential-review`, `seatbelt-sandboxer`). `zeroize-audit` and ECC are disabled;
-  the former prevents an unpinned duplicate Serena and the latter removes 363 redundant
-  skills. A fresh authenticated prompt completed with no skill-budget warning. Claude HUD remains enabled but its visual
-  statusline is not independently claimed. Node compatibility resolved: host default is
-  Node 22.23.1; Repomix, ccusage, and Context Mode run/connect under Node 22. GitHub
-  Actions = repo-scoped templates (uninstalled; no secrets). Gates in `tool_router.md` +
-  `INTEGRATIONS.md` §8. One orchestrator (Build OS) — no competing framework.
-- **Status-semantics rule:** never call npx/uvx success in an ephemeral container
-  "installed" unless persistent host state **and** a fresh-session activation test
-  are both verified. Installation · configuration · activation · authentication ·
-  repository rollout are five distinct states.
-- **Discovery-first rule:** every build discovers live capabilities, then selects
-  the smallest correct toolset; Serena is primary for symbol-level work in large/
-  unfamiliar repos before broad file reads.
-- **Zero-touch specialist handoff (P-014→P-017):** `build-os/tools/specialist-handoff.sh` + the
-  `prompt-router.sh` hook classify via a maintainable **capability registry** (precedence
-  zeroize > ecc > inline > focused). focused → no relaunch; ecc/zeroize → an automatic bounded
-  child under a **safe atomic lock** (path-validated `lock_path_safe`, non-recursive
-  unlink+`rmdir`, fail-closed BUSY, safe stale break; released + focused restored on
-  EXIT/INT/TERM, child killed). The task travels on **stdin** (never argv) and the child must end
-  with a terminal marker `[BUILD_OS_STATUS: COMPLETED|NEEDS_INPUT|BLOCKED|FAILED]`; the hook
-  suppresses parent work **only** on explicit COMPLETED — exit-0-without-marker is UNCONFIRMED
-  (exit 76), and the parent is told to continue/obtain input otherwise. Output is bounded +
-  visibly truncated. The audit log is **privacy-safe** (route/result/exit/event-id; `0600`; never
-  prompt/cwd). `install-global.sh` ships both tool scripts into `~/build-os/tools` (P-015).
-  **Inline routes** (`21st`, `agent-reach`, `claude-watch`, `ui-ux-pro-max`) emit a **conditional**
-  INLINE CANDIDATE (verify live on this surface, else built-in/local fallback + state the limit —
-  never claim use from install alone); no profile switch, no child. Surface-aware: 21st.dev is
-  verified live as cloud alias `21st` and Mac-local alias `21st-dev`; Anthropic's cloud
-  web-connector layer still requires per-call user approval and does not honor project
-  permission allowlists for this gate. Agent Reach = native skill;
-  UI UX Pro Max v2.11.0 + Claude Watch v0.4.1 = enabled Claude Code skills/plugins. No
-  cross-surface ACTIVE claim.
-- **Gates hold:** external mutation (push/merge/deploy/secret/send/SaaS-write),
-  plus DDL / remote-DB writes / payments / flags / canaries / telemetry / OAuth,
-  are each a separate STOP for explicit go. Repo-scoped GH Actions never go global.
 
 ---
 _Updated by the archivist on close._

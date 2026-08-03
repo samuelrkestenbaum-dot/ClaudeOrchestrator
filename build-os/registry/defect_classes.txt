@@ -345,7 +345,7 @@ root_cause_class: reference_by_position
 symptom: inserting section 8 at the end of tests/build_os_maintenance_tests.sh moved the two lines suite.build_os_maintenance cited as evidence_refs. The refs :431 and :432 still RESOLVED inside the file and now pointed at comment-only lines, and scan-controls.sh check refused with 2 VACUOUS-REF violations, exit 2 captured directly off the command. Corrected to :639 and :640 — a line-number fix, no class change and no authority change
 prevented_by: nothing — scan-controls.sh checks that a ref resolves and that the line is not vacuous; it cannot check that the line is the SAME line, which is the whole of DEFECT-0001
 could_have_been_prevented_by: citing those two lines by ANCHOR rather than by position — the mechanism PACKET-0029 built and which still covers 13 of 355+ positional evidence_refs — or by any content-bearing identity such as the literal text of the assertion
-evidence_refs: build-os/registry/control_registry.txt; tests/build_os_maintenance_tests.sh:639; tests/build_os_maintenance_tests.sh:640
+evidence_refs: build-os/registry/control_registry.txt; tests/build_os_maintenance_tests.sh:846; tests/build_os_maintenance_tests.sh:847
 
 occurrence: OCCURRENCE-0017
 defect_class_id: DEFECT-0001-stale-line-reference
@@ -358,3 +358,15 @@ symptom: writing this packet's declaration added text ABOVE the ANC-0003 content
 prevented_by: nothing — every part behaved as designed, exactly as recorded at OCCURRENCE-0014, and the remedy that occurrence names was not built, so the class fired again by the same route
 could_have_been_prevented_by: rendering the citation WITHOUT the resolved line, or excluding the position from the byte-exact reconcile comparison, or regenerating projections as a pre-commit step. THE COST OF NOT DOING IT IS NOW MEASURED RATHER THAN PREDICTED: two consecutive packets have paid one forced regeneration each, purely for declaring themselves
 evidence_refs: build-os/packets/active_packet.md; build-os/kernel/exports/HANDOFF-0001-chatgpt-strategy.md; build-os/registry/defect_classes.txt
+
+occurrence: OCCURRENCE-0018
+defect_class_id: DEFECT-0001-stale-line-reference
+packet_id: PACKET-0038-current-state-reblock
+detected_stage: builder
+escaped_stage: builder
+affected_objects: build-os/registry/control_registry.txt; build-os/registry/defect_classes.txt; tests/build_os_maintenance_tests.sh
+root_cause_class: reference_by_position
+symptom: appending section 9 to tests/build_os_maintenance_tests.sh moved the two lines suite.build_os_maintenance and OCCURRENCE-0016 both cite as evidence_refs, :639 and :640, to :846 and :847. THIS IS THE SAME SITE AND THE SAME ROUTE AS OCCURRENCE-0016, ONE PACKET EARLIER, and it is unavoidable for any packet that appends a section: the two cited lines are the suite's own trailing RESULT and exit lines, so every insertion anywhere in the file moves them. Repointed by content in the same pass, before any commit, and verified with scan-controls.sh check rather than by re-reading the numbers. NO STALE CITATION WAS COMMITTED. THE OTHER FOUR CITATIONS INTO THIS FILE WERE PREVENTED RATHER THAN REPAIRED: :88, :193, :295 and :414 are cited by control_registry.txt, MISMATCHES.md, tests/control_registry_tests.sh, tests/build_os_tests.sh and tests/speed_benchmark_tests.sh, and the packet's header note was rewritten to be LINE-COUNT-NEUTRAL (15 lines in, 15 lines out) specifically so none of the four moved; all four re-verified as naming the same content after the edit
+prevented_by: partially — the four citations above the insertion point were prevented by refusing to add a line above them; the two below it could not be, because they are the last two lines of the file
+could_have_been_prevented_by: citing those two lines by ANCHOR rather than by position, which is the mechanism PACKET-0029 built and which still covers 13 of 355+ positional evidence_refs. THE COST IS NOW MEASURED ACROSS TWO CONSECUTIVE PACKETS AT ONE SITE: every packet that appends a section to a suite pays one forced evidence_refs repoint, and the repoint is only safe because a human noticed, not because anything detects it
+evidence_refs: build-os/registry/control_registry.txt:1162; build-os/registry/defect_classes.txt:348; tests/build_os_maintenance_tests.sh:846
