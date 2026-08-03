@@ -119,6 +119,21 @@
   eventually goes red if this item is never actioned**, and it is the 11th reader of this file
   and the only live-size one.
 
+- **(cccccc) THE OVERAGE DIGIT WENT STALE INSIDE ONE PACKET, AND THAT IS THE EVIDENCE FOR
+  `(bbbbbb)`'s DESIGN.** The close brief for `PACKET-0037-residue-reblock` carried
+  **"3,094 B over"**. Re-derived at the close: **3094 B is the overage at `d888766`**; at HEAD
+  `95e2c7b` it is **7767 B** (`212567 - 204800`), because the fix round's own two items added
+  **4673 B** to the file the items are about. **Three figures were already corrected in that
+  packet's fix round for not being re-derived; this would have been the fourth.** The file
+  measures itself, so writing about it changes it. **Any digit for this file's size, overage or
+  headroom is stale on write** — derive it (`wc -c`), never quote it. **OPEN as a standing
+  discipline, not a one-off correction.**
+- **(dddddd) THE `<=2` COMMITS-PER-PACKET CAP HAS NOW BEEN BREACHED FOUR CLOSES RUNNING**, most
+  recently at 3 commits (`bbdd85c` + `d888766` + `95e2c7b`). No earlier commit was squashed or
+  rewritten, correctly — amending is out of bounds at close. **Recorded, NOT normalised.** A cap
+  breached four consecutive times is either a cap nobody intends to hold or a packet-cutting
+  problem, and the distinction is an operator's to draw. **Nothing here proposes relaxing it.**
+
 ## Known risks / debt
 
 - **Ephemerality → solved via committed bootstrap (P-004):** the remote container is

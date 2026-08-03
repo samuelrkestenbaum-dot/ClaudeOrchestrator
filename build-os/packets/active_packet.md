@@ -4,9 +4,9 @@
 > the builder implements exactly this and nothing else; the archivist clears it
 > on close. One packet at a time.
 
-## Status: IN FLIGHT — `gravito_residue_reblock_a`, declared 2026-08-03 BEFORE the first build edit
+## Status: CLOSED, NOTHING IN FLIGHT — `gravito_residue_reblock_a` closed 2026-08-03
 
-- **Packet id:** `PACKET-0037-residue-reblock` — **MINTED, and collision-checked
+- **Packet id (CLOSED):** `PACKET-0037-residue-reblock` — **MINTED, collision-checked
   BEFORE the mint rather than after.** The live band is
   `PACKET-0001`..`PACKET-0036`; `PACKET-0036` is the highest allocation predating
   this packet; `git log -S'PACKET-0037' --all --oneline` returns **0 commits** and
@@ -657,3 +657,30 @@ ranker on demand** — because an outcome row carrying the ranker's score would 
 - **Second eyes: NONE — TWELFTH consecutive packet**, and the first whose verdict
   carries experimental weight: a single-model chain produced both the ranking rule
   and the verdict on the first candidate it ranked. Residue `(zz)`.
+
+## Close record — `gravito_residue_reblock_a` (`PACKET-0037-residue-reblock`), 2026-08-03
+
+- **Packet id (CLOSED):** `PACKET-0037-residue-reblock`. Re-checked at close, not
+  accepted from the brief: the token appears in **0 files at base `2a3c070`**
+  (`git grep -lF 'PACKET-0037' 2a3c070` exits 1), and `git log -S'PACKET-0037'
+  --all --oneline` returns **exactly the packet's own three commits**. The mint
+  preceded the build and the id was free.
+- **Base `2a3c070`; HEAD at close `95e2c7b`.** Commits `bbdd85c` (declaration),
+  `d888766` (migration), `95e2c7b` (fix round). **Nothing pushed, merged, tagged,
+  PR'd or deployed.**
+- **Verdict: PASS-AS-FIXED.** qa GREEN; reviewer `fix-then-pass`, all **7** items
+  fixed in `95e2c7b` and orchestrator-verified. No fourth gate stage.
+- **Receipt:** `build-os/receipts/gravito_residue_reblock_a.md`.
+- **The blocker is CONVERTED, NOT CLEARED.** `residue.md` is still over
+  `DEFAULT_MAX_BYTES` and **rotation has NOT been applied**; `(bbbbbb)` queues it
+  for an operator. `build-os/memory/archive/` does not exist.
+
+### Staged next — NOT DECLARED, NOT IN FLIGHT
+
+`build-os/memory/current_state.md` is in the **identical dead end** this packet
+just repaired for `residue.md`: **182,545 B in exactly 3 `^## ` blocks**, and
+`rotate-memory.mjs --file current_state --keep 10` reports `keep 3 newest, would
+archive 0` / `nothing — already rotated (no-op)` at **exit 0**. The instrument
+reports the file as **healthy right up until it is unfixable**. Re-blocking it is
+the obvious next packet; it is deliberately left **undeclared** here so this file
+keeps reading **0 in flight** until a builder is actually dispatched.

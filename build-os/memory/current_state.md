@@ -239,7 +239,36 @@
   held at **169** because three assertions were CONVERTED rather than added, and no assertion was
   lost. This is the first ledger entry in the sequence whose assertion count is a **constant**
   rather than a sample.]**
-- **Last closed packet:** `gravito_measurement_integrity_a`
+- **Last closed packet:** `gravito_residue_reblock_a`
+  (`PACKET-0037-residue-reblock` — **MINTED, not reused**; collision-checked BEFORE the mint and
+  **RE-DERIVED AT CLOSE by the archivist**, because that check has caught a bad id at four prior
+  closes: `git grep -lF 'PACKET-0037' 2a3c070` exits **1** (0 files at base) and
+  `git log -S'PACKET-0037' --all --oneline` returns **exactly this packet's own three commits**.
+  **The id was free.**) Base `2a3c070`; HEAD `95e2c7b`; commits `bbdd85c` + `d888766` + `95e2c7b`.
+  **Verdict PASS-AS-FIXED** — qa GREEN, reviewer `fix-then-pass`, all **7** items fixed and
+  orchestrator-verified, no stage 4. **Receipt:** `build-os/receipts/gravito_residue_reblock_a.md`.
+  **WHAT IT MADE TRUE:** `residue.md` went **3 -> 29** `^## ` blocks, so `rotate-memory` went from
+  reclaiming **0 blocks / 0 B** to **19 blocks / 127142 B** at the shipped `keep=10`
+  (post-rotation retained **85931 B** at the packet's HEAD). **THE BLOCKER IS CONVERTED, NOT
+  CLEARED:** the live file is still above `DEFAULT_MAX_BYTES` and **rotation was NOT applied**
+  (`build-os/memory/archive/` does not exist), because applying it relocates still-open items
+  `(ddd)` and `(uuuu)` into an archive — an operator act. Residue `(bbbbbb)` queues it.
+  **THE CRUX THE BRIEF GOT BACKWARDS, AND IT IS THE REASON THE PACKET MATTERED:** rotation retains
+  a **PREFIX** (`blocks.slice(0, keepN)`) and archives the **TAIL**. The brief said the opposite
+  and directed standing content to the bottom; **had it been followed, all three gate-pinned
+  literals would have been archived on the first rotation** — the exact failure the packet
+  existed to prevent. The builder DEMONSTRATED the correction on a fixture, did not touch the
+  tool, and reported it; qa reproduced it independently and the orchestrator confirmed it from
+  source. **Three readings, not two.** The protected region is block 1 and holds all three
+  literals (`license model`, `no tags`, `single-platform`) with **nothing outside it holding
+  them**, so it survives at every `keep >= 1` structurally rather than by exemption.
+  **THE NEXT FILE IS NAMED, AND IT IS THIS ONE:** `build-os/memory/current_state.md` is in the
+  identical dead end — **3 `^## ` blocks**, and `rotate-memory --file current_state --keep 10`
+  reports `would archive 0` / `nothing — already rotated (no-op)` at **exit 0**. **The instrument
+  reports this file as healthy right up until it is unfixable.** Re-blocking it is the staged next
+  packet. **Sizes here are DERIVED, never quoted** (`wc -c`) — residue `(cccccc)` records why: the
+  overage digit went stale inside a single packet.
+- **Previously closed:** `gravito_measurement_integrity_a`
   (`PACKET-0036-measurement-integrity` — **MINTED, not reused**, and the mint was
   **collision-checked BEFORE the mint by the builder and RE-DERIVED AT CLOSE by the archivist
   rather than accepted from the brief**, because that check has caught a bad id at three prior
