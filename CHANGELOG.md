@@ -68,7 +68,7 @@ deprecation cycle. Pin a commit if you need stability.
   Suite **2265 passed**, 0 failed (+37 from the packet's base: `tests/gate_depth_tests.sh`
   **79 → 113** and `tests/bandwidth_tests.sh` **41 → 44**; every other chained
   suite +0, confirmed by comparing the per-suite CHAINED vector across two solo
-  runs). Eight derived restatements of `≤2 commits` — the router, the agent
+  runs). Nine derived restatements of `≤2 commits` — the router, the agent
   definitions, ONBOARDING, the corpus, the crosswalks and the templates — remain
   **surfaced as a follow-up packet and deliberately not touched**; they are
   summaries of the contract, not the contract. They are now **enumerated by name

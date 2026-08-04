@@ -101,7 +101,7 @@ legal `--keep` retains it.
   five lengths for five audiences, so each must instead yield the same normalised
   tuple **(build ceiling, fix ceiling) = (2, 1)**, no surface may still ASSERT the
   withdrawn untyped cap (quoting it is legal only beside a withdrawal marker), and the
-  eight remaining derived restatements are enumerated by name as a declared register.
+  nine remaining derived restatements are enumerated by name as a declared register.
   — **THIS PAIR IS ITSELF INSTANCE 4 OF THE DEFECT `PACKET-0041` EXISTS AGAINST**, and it is
   the one instance that packet could NOT mechanise. Two copies of one truth, held in sync
   by a cross-check that only fires under `RELEASE_METADATA_LIVE_SUITE=1`. No static
@@ -143,6 +143,11 @@ legal `--keep` retains it.
      `build-os/receipts/gravito_p3b_count_derivation_a.md` made the derivation **twenty**, and
      exit **0** again after `tool_router.md:368` was advanced `nineteen` -> `twenty` **in the same
      commit as the receipt.** The mechanism works; it is not a theory about future closes.
+  5. **AND IT HAS NOW FIRED A SECOND TIME, AT EXACTLY THE BOUNDARY POINT 3 PREDICTED.** At the
+     `PACKET-0042-process-doctrine-correction` close the derivation moved to **21** and the site was
+     written **`**21**`, as a numeral**, because `twenty-one` is `COUNT-UNREADABLE` and refuses.
+     `counts` exits **0** after that close. **The prediction in point 3 was not theory; this is the
+     close where it fired, and it fired as documented.**
   5. **AND THIS OBLIGATION IS ITSELF SITTING IN A FILE THAT ROTATES — SAY SO RATHER THAN RELY ON
      IT.** `build-os/memory/current_state.md` is in `rotate-memory.mjs`'s `FILE_SPECS`, and has
      already been rotated twice. `build-os/memory/standing_gates.md:1` calls itself the
@@ -374,6 +379,16 @@ legal `--keep` retains it.
   are each a separate STOP for explicit go. Repo-scoped GH Actions never go global.
 
 ## Where we are — phase state and the ceiling in force
+
+- **AS OF 2026-08-04, LAST CLOSE `gravito_process_doctrine_correction_a`
+  (`PACKET-0042-process-doctrine-correction`), PASS-AS-FIXED.** Nothing is in flight;
+  `active_packet.md` declares **0** packet ids and stages `PACKET-0043-derived-restatement-sweep`
+  **undeclared**. Suite **2265/0**. **The working contract's commit budget is now typed —
+  (build ≤2, fix ≤1) — and the first packet to run under it landed at 3 of 3, inside it.**
+- **THIS FILE IS AT 4.4 KB OF HEADROOM AGAINST THE 204800 B CEILING AND THE NEXT CLOSE WILL LIKELY
+  NOT FIT. SAY IT HERE RATHER THAN DISCOVER IT MID-CLOSE.** `rotate-memory.mjs` governs it,
+  `--keep` is validated `>= 1` so block 1 (standing truth) is unreachable by any legal rotation, and
+  **no ceiling has been raised by any close.** The remedy is a rotation, not a bigger number.
 
 - **PHASE CHANGE — RECORD THIS BEFORE THE PACKET LOG. THE GOVERNANCE-ONLY PHASE IS OVER.** The
   operator has ended it and issued **BUILD AUTHORITY** with an **ANTI-STALL RULE**: build around
@@ -628,7 +643,67 @@ legal `--keep` retains it.
   close narrowly.** Recorded as a **contract gap**, not as a defect of the packet or the reviewer,
   and left for the operator/orchestrator.
 
-## History — `gravito_p3b_count_derivation_a` — the last close, and the first DERIVED count
+## History — `gravito_process_doctrine_correction_a` — THE LAST CLOSE, and the first packet to land INSIDE the budget it installed
+
+**The long form is `build-os/receipts/gravito_process_doctrine_correction_a.md`, which has no byte
+ceiling. This file has 10 KB of it and `residue.md` has 431 B, which is why this block is short and
+why the residue items are in the receipt and in `active_packet.md` rather than in `residue.md`.
+THAT PLACEMENT IS DISPLACEMENT FORCED BY A FROZEN FILE, NOT A CHOICE.**
+
+- **Closed 2026-08-04:** `gravito_process_doctrine_correction_a`
+  (`PACKET-0042-process-doctrine-correction`). **Lane `substantive`. Depth 3** — builder, then
+  qa ‖ reviewer CONCURRENTLY, then one bounded fix round; **no fourth serial stage**. Verdict
+  **PASS-AS-FIXED** — qa **GREEN**, reviewer **fix-then-pass (1 item)**, closed in the archivist's
+  commit. Base `5d96031` (the pushed tip); HEAD at the verdict `9a285e6`.
+- **THE COMMIT BUDGET, APPLIED TO ITSELF — AND THIS IS THE HEADLINE.** `820fd14` + `f15356e` = **2
+  BUILD commits**, `9a285e6` = **1 FIX commit**: **3 of 3, INSIDE the budget.** `bandwidth-check.sh`
+  reports `commits OK, 3 since 5d96031, ceiling 3`. **`9a285e6` IS THE PERMITTED FIX COMMIT AND IS
+  NOT LOGGED AS A BREACH** — the doctrine this packet installs forbids exactly that. For six
+  consecutive closes the record carried a *"three against a cap of two"* line; **its absence here is
+  the RESULT, not an omission.** The packet is the first beneficiary of its own rule.
+- **WHAT IT MADE TRUE.** `≤2 commits per packet` is **withdrawn as unsatisfiable** (a
+  `fix-then-pass` verdict must produce a third commit, and amending the measured commits is
+  forbidden) and replaced by the typed **(build ≤2, fix ≤1)**. The depth doctrine gains
+  `mandatory_full_regate` as the one named, conjunctive, announceable cause of a legitimate fourth
+  serial stage. `tests/gate_depth_tests.sh` §9 now compares the **RULE, not the prose**: five
+  governing surfaces must each yield the tuple **(2, 1)** from whatever words they use, no surface
+  may still ASSERT the withdrawn cap (quoting it is legal only beside a withdrawal marker), and the
+  **nine** derived restatements are a register enumerated **by name inside the test**.
+- **THE IRONY, RECORDED BECAUSE IT IS THE MOST INSTRUCTIVE RESULT.** The packet whose thesis is
+  *doctrine enforced by machinery, not by writing* shipped **four prose lines saying EIGHT** against
+  a shipped array of **NINE** (`${#BUDGET_DERIVED[@]}` = 9, derived at the close, not copied) —
+  `PACKET-0041`'s exact defect class. Corrected at the close in `CHANGELOG.md:71`, this file's
+  `:104`, and `active_packet.md:1647` and `:1597-1598`.
+- **THE HONEST LIMIT, AND IT IS THE PART TO CARRY FORWARD.** `UNTYPED_RE` matches **ONE lexical
+  spelling**. Executed reviewer probes: a **reworded** untyped cap on two governing surfaces →
+  **113/0, completely blind**; a **live assertion** on a line containing `no longer` → **113/0,
+  FAIL-OPEN**, because `no longer` is a withdrawal marker. **THE REPOSITORY IS NOT PROTECTED AGAINST
+  COMMIT-BUDGET DRIFT** — one guard, five hand-picked surfaces, an existence-only register over nine
+  restatements it did not fix, one spelling. **A genuine narrowing of the failure surface, not a
+  closure of it.** The comment at `tests/gate_depth_tests.sh:397` claiming two surfaces *"can
+  disagree about every word"* is **false** and oversells the abstraction.
+- **LIVE PRODUCT DEBT, OPEN.** `templates/build-os/memory/tool_router.md:28` and
+  `templates/build-os/packets/active_packet.md:35` **ship the withdrawn rule to every newly
+  scaffolded project.** Staged as the head of the follow-up packet in `active_packet.md`.
+- **THE ENFORCER IS NOT TOLD WHAT IT ENFORCES.** The census records the **reviewer** as enforcing
+  the build/fix split, `bandwidth-check.sh` defers the partition to it, and
+  **`.claude/agents/reviewer.md` never mentions the commit budget.** In the reviewer's words:
+  *"I was not told the rule I am recorded as enforcing."*
+- **PROOF.** Suite **2265/0**, twice solo, CHAINED vector byte-identical; **+37** (`gate_depth`
+  79→113, `bandwidth` 41→44, every other suite **+0**). **Commit-1 isolation `820fd14` → 2228/0.**
+  `RELEASE_METADATA_LIVE_SUITE=1` 44/0; `memory_kernel_tests.sh` 101/0 with `ANC-0003` at
+  `active_packet.md:89` byte-unchanged at all four commits. Ceiling **0/0/0/0/0** over 11 paths.
+  Census **105**, declared mismatches **22** (anchored), re-authorisations **0**. Citations: **zero
+  live breaks**. Metrics row appended, `--verify-git` VERIFIED at 11 files / 653 insertions / 63
+  deletions (per-commit sums; net union diff 11/640/50, the 13/13 gap fully accounted).
+- **`build-os/memory/residue.md` NOT WRITTEN** — FROZEN, blob `01517ad2c30d447949a98d0b6db9b8d6b538d5a9`,
+  unchanged at this close. **No byte ceiling was raised.**
+- **Second eyes NONE, TWENTY-FIRST consecutive packet** — derived, and `tool_router.md:368` advanced
+  `twenty` → **`21`** in the close commit, the first numeral (see the standing obligation, point 5).
+- **NOTHING PUSHED, MERGED, PR'D, TAGGED OR DEPLOYED.** `5d96031` is the pushed tip; the three
+  packet commits and the close commit are **local and unpushed**.
+
+## History — `gravito_p3b_count_derivation_a` — the first DERIVED count
 
 **Everything below is the summary. The long form — coverage instance by instance, the
 file-ownership manifest, the escapes, the two items routed to the operator undecided, and the
