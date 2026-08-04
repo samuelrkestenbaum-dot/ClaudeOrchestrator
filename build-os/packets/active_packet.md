@@ -4,34 +4,34 @@
 > the builder implements exactly this and nothing else; the archivist clears it
 > on close. One packet at a time.
 
-## CLOSED — `gravito_cross_file_sentinel_identity_a` (closed 2026-08-04) — NOTHING IN FLIGHT
+## IN FLIGHT — `gravito_truthful_name_cleanup_a` (declared 2026-08-04)
 
-- **Packet id (NONE — NEVER DECLARED): this packet has no id, and that is the
-  process finding of its close.** No id was minted, this file still read
-  `CLOSED — gravito_process_doctrine_correction_a … NOTHING IN FLIGHT` at all
-  three packet commits, and the builder was dispatched against it anyway.
-  Recorded as `DEFECT-0011-undeclared-active-packet` / `OCCURRENCE-0020`,
-  **attributed to the ORCHESTRATOR**: declaration is the orchestrator's commit.
-- **The builder flagged it and correctly REFUSED to fix it.** This head block is
-  line-count-pinned by `ANC-0003` at `:89`, and a builder rewriting it mid-packet
-  would have re-fired `DEFECT-0001-stale-line-reference` at the exact site that
-  class has fired at for three consecutive declarations. Refusing was correct.
-- **Lane `substantive`. Depth 4 — `mandatory_full_regate`**, announced and
-  legitimate. qa **GREEN**; reviewer **fix-then-pass (4 items)**. Commits
-  `905b69e` + `0d3a34f` (2 BUILD) + `1918fc3` (1 FIX) = **3 of 3, INSIDE the
-  typed budget**; the fix commit is **NOT** logged as a doctrine breach.
+- **Packet id:** `PACKET-0044-truthful-name-cleanup` — staged by the previous
+  close and **DECLARED HERE, IN ITS OWN COMMIT, BEFORE ANY IMPLEMENTATION EDIT.**
+- **This declaration is commit 1 because the last packet's did not exist.**
+  `DEFECT-0011-undeclared-active-packet` / `OCCURRENCE-0020` was recorded against
+  the ORCHESTRATOR for that omission, and the `1` that
+  `bandwidth.active_packet_singleton` now reads comes from the `**Packet id:**`
+  bullet above and from nothing else.
+- **Lane `substantive`. Depth 2** — builder, then qa ‖ reviewer CONCURRENTLY.
+  **Budget: ≤2 build commits (this one is the first) + at most 1 fix commit.**
+- **THREE ITEMS, AND NOTHING ELSE.** (A) rename the overclaiming
+  `protected_in_owner` field and its local to a name the predicate can pay for;
+  (B) add the missing fixture-C differential, executed on both sides; (C)
+  reconcile the two surviving *"exactly when the inbound protection fires"*
+  overclaims. **NO PREDICATE IS WIDENED** — that would re-open the fail-open.
 - **THIS EDIT IS LINE-COUNT-NEUTRAL ABOVE THE `ANC-0003` SITE ON PURPOSE** —
   `build-os/packets/active_packet.md:89#ANC-0003` is embedded as a RESOLVED line
   number in the committed kernel projection and `tests/memory_kernel_tests.sh`
-  §18 compares it with `cmp -s`. **21 lines replace 21 lines**; the full close
-  record is APPENDED AT THE END, below `:89`.
+  §18 compares it with `cmp -s`. **21 lines replace 21 lines**; the previous
+  close record stays where it is, below `:89`.
 
 ## Branch base
 
-Branched at `74575ee` on `claude/project-handoff-merge-ramhds`, verified with
-`git merge-base HEAD 74575ee` → `74575ee`, **before the first edit**. `5d96031`
+Branched at `6454220` on `claude/project-handoff-merge-ramhds`, verified with
+`git merge-base HEAD 6454220` → `6454220`, **before the first edit**. `6454220`
 is the PUSHED TIP; every commit of this packet is LOCAL and UNPUSHED, and no
-push/merge/PR/tag/deploy go has been given or asked for. (Previous base `5d96031`.)
+push/merge/PR/tag/deploy go has been given or asked for. (Previous base `74575ee`.)
 
 ## What `gravito_current_state_reblock_a` must make true
 
