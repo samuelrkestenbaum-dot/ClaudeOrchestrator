@@ -46,10 +46,28 @@ deprecation cycle. Pin a commit if you need stability.
   passing green and a reworded cap invisible entirely. This one reads fence
   state, blockquote depth, matched inline-code and quotation spans, the
   declaration form, and the `## ARCHIVED BATCH` heading the tool itself writes.
-  Its failure direction is stated where it lives: only the quoted demotion can
-  fail open, which is why it additionally requires every named identity to be
-  declared in another governed file — so the object stays protected where it
-  actually lives.
+
+  **THAT CLAIM IS ABOUT THE DEMOTION AND NOT ABOUT THE GUARD AS A WHOLE, and the
+  first draft of this entry did not say so.** It read "none of it consults a word
+  list, and none of it can be defeated by rewording", which is true of the
+  live-vs-quoted test and false of the surrounding guard: `SENTINEL_MARKERS` is
+  still **seven fixed phrases**, so a marker written in words that are not on
+  that list is invisible to the sentinel entirely. That limitation is
+  **pre-existing and untouched here**, and it is stated rather than left to be
+  inferred from a sentence that overstated its scope.
+
+  **AND THE DEMOTION FAILED OPEN ONCE, IN THIS PACKET, BEFORE THE FIX ROUND.** It
+  was first conditioned on every named identity being **declared** in another
+  governed file — but a declaration is not a marker, and the inbound half skips
+  quoted markers too, so a quoted live rule left the object protected in
+  **neither** file. Four ordinary prose forms of a genuinely live rule, one of
+  them a plain markdown blockquote, each ran to completion with a valid
+  pre-registration and **archived a live, canonically declared,
+  marked-non-consumable object at exit 0**; the pre-packet tool refused all four
+  at exit 7. The condition is now that the identity be declared in exactly one
+  other governed file **and independently protected there by a non-quoted
+  marker** — which is exactly when the inbound protection fires. Both sides read
+  one scan, so the two cannot drift. All four forms are driven as a red drive.
 
   **AND THE HONEST NEGATIVE RESULT.** `build-os/memory/residue.md` is still
   **not rotatable**, and cross-file resolution neither could nor did change
@@ -58,9 +76,10 @@ deprecation cycle. Pin a commit if you need stability.
   constraint there. Rotation #3 therefore relieves `current_state.md` instead,
   at `--keep 15` inside a window `[14, 16]` **executed at both bounds**.
 
-  Suite **2293 passed**, 0 failed (+28 from the base `74575ee`, all in
-  `tests/build_os_maintenance_tests.sh` **154 → 182**; every other chained suite
-  +0, confirmed by comparing the per-suite CHAINED vector across two solo runs).
+  Suite **2302 passed**, 0 failed (+37 from the base `74575ee`, all in
+  `tests/build_os_maintenance_tests.sh` **154 → 191** — +28 at the build commits
+  and **+9 at the fix commit**; every other chained suite +0, confirmed by
+  comparing the per-suite CHAINED vector across two solo runs).
 
 - **TWO PROCESS RULES WITHDRAWN AS BROKEN, AND THE MACHINERY MOVED WITH THEM.**
   The working contract's `≤2 commits per packet` was **unsatisfiable**: any

@@ -1023,6 +1023,8 @@ export function declarationsIn(text, spec, precomputedMap) {
  */
 export function buildIdentityIndex(root, readFile) {
   const index = new Map();
+  const namings = new Map();
+  const markedIn = new Map();
   const sources = [];
   const withheld = [];
   const missing = [];
@@ -1055,14 +1057,60 @@ export function buildIdentityIndex(root, readFile) {
           `the routing uses; inventing one here would create a second, drifting definition.`
       );
     }
-    const decls = declarationsIn(text, spec);
-    sources.push({ name: gov.name, path: gov.path, declarations: decls.size });
+    const map = structuralLineMap(text, spec);
+    const decls = declarationsIn(text, spec, map);
+    const mine = markerNamingsIn(text, spec, map);
+    sources.push({
+      name: gov.name,
+      path: gov.path,
+      declarations: decls.size,
+      marker_namings: mine.length,
+    });
     for (const [id, where] of decls) {
       if (!index.has(id)) index.set(id, []);
       index.get(id).push({ file: gov.name, path: gov.path, block: where.block, line: where.line });
     }
+    namings.set(gov.name, { path: gov.path, items: mine });
+    for (const n of mine) {
+      if (!markedIn.has(n.id)) markedIn.set(n.id, new Set());
+      markedIn.get(n.id).add(gov.name);
+    }
   }
-  return { index, sources, withheld, missing };
+  return { index, namings, markedIn, sources, withheld, missing };
+}
+
+/**
+ * Every NON-QUOTED protection marker in `text`, with the identities it names.
+ *
+ * ONE SCAN, TWO CONSUMERS, AND THAT IS THE POINT. `inboundProtections` uses it
+ * to decide what a sibling's marker protects, and the quoted-marker demotion in
+ * `scanProtectedObjects` uses it to decide whether an object is protected in the
+ * file that owns it. Those two must agree exactly: the demotion is only safe
+ * when the inbound protection really does fire. Deriving them from one function
+ * is what makes "safe iff" a property of the code rather than of a comment.
+ *
+ * QUOTED OCCURRENCES ARE EXCLUDED HERE. A quotation of a rule is not an
+ * assertion of one, in this file or in any other, so it neither protects across
+ * a file boundary nor licenses a demotion on the other side of one.
+ */
+export function markerNamingsIn(text, spec, precomputedMap) {
+  const map = precomputedMap ?? structuralLineMap(text, spec);
+  const out = [];
+  map.lines.forEach((line, i) => {
+    if (map.blockOfLine[i] < 1) return;
+    for (const marker of SENTINEL_MARKERS) {
+      const hit = marker.re.exec(line);
+      if (!hit) continue;
+      if (markerIsQuoted(line, hit.index, map, i)) continue;
+      const named = new Set();
+      for (const m of line.matchAll(SENTINEL_ID_RE)) named.add(m[0]);
+      for (const m of line.matchAll(SENTINEL_NAMED_TAG_RE)) named.add(`(${m[1]})`);
+      for (const id of named) {
+        out.push({ id, kind: marker.kind, line: i + 1, block: map.blockOfLine[i] });
+      }
+    }
+  });
+  return out;
 }
 
 /**
@@ -1079,48 +1127,24 @@ export function buildIdentityIndex(root, readFile) {
  * anchoring in their own file: a narrative about a past fixture is not a
  * liveness claim, and it must not become one by crossing a file boundary.
  */
-export function inboundProtections(root, spec, index, readFile) {
+export function inboundProtections(spec, resolution) {
   const found = [];
-  for (const gov of GOVERNED_IDENTITY_SET) {
-    if (!gov.read || gov.name === spec.name) continue;
-    const full = path.join(root, gov.path);
-    let text;
-    try {
-      text = readFile ? readFile(full) : fs.readFileSync(full).toString("latin1");
-    } catch {
-      continue;
+  const index = resolution?.index ?? new Map();
+  for (const [fileName, src] of resolution?.namings ?? new Map()) {
+    if (fileName === spec.name) continue;
+    for (const n of src.items) {
+      const owners = index.get(n.id) ?? [];
+      const here = owners.filter((o) => o.file === spec.name);
+      if (owners.length !== 1 || here.length !== 1) continue;
+      found.push({
+        id: n.id,
+        kind: n.kind,
+        block: here[0].block,
+        line: here[0].line,
+        named_in: src.path,
+        named_at_line: n.line,
+      });
     }
-    // Same rule as `buildIdentityIndex`: the segmentation is FILE_SPECS' or
-    // there is none. `buildIdentityIndex` has already refused a readable
-    // governed entry with no spec, so reaching this line without one is
-    // impossible; the guard is a skip rather than a second error path.
-    const otherSpec = FILE_SPECS[gov.name];
-    if (!otherSpec) continue;
-    const map = structuralLineMap(text, otherSpec);
-    map.lines.forEach((line, i) => {
-      if (map.blockOfLine[i] < 1) return;
-      for (const marker of SENTINEL_MARKERS) {
-        const hit = marker.re.exec(line);
-        if (!hit) continue;
-        if (markerIsQuoted(line, hit.index, map, i)) continue;
-        const named = new Set();
-        for (const m of line.matchAll(SENTINEL_ID_RE)) named.add(m[0]);
-        for (const m of line.matchAll(SENTINEL_NAMED_TAG_RE)) named.add(`(${m[1]})`);
-        for (const id of named) {
-          const owners = index.get(id) ?? [];
-          const here = owners.filter((o) => o.file === spec.name);
-          if (owners.length !== 1 || here.length !== 1) continue;
-          found.push({
-            id,
-            kind: marker.kind,
-            block: here[0].block,
-            line: here[0].line,
-            named_in: gov.path,
-            named_at_line: i + 1,
-          });
-        }
-      }
-    });
   }
   return found;
 }
@@ -1133,15 +1157,32 @@ export function inboundProtections(root, spec, index, readFile) {
  * inline-code span or a matched quotation span.
  *
  * THE FAILURE DIRECTION, NAMED. This predicate is the only thing here that can
- * LOWER a floor, so it is the only one that can fail OPEN, and it does so in
- * exactly one shape: a LIVE, floor-raising marker that a human wrote inside
- * backticks or inside quotation marks. That is why the demotion it feeds is
- * additionally conditioned (see `scanProtectedObjects`) on every identity the
- * marker names resolving to a canonical declaration in ANOTHER governed file —
- * so the object is still protected where it lives, and the only thing lost is
- * protection of the block doing the quoting. A quoted marker that names nothing,
- * or names something this file declares, or names something nothing declares,
- * anchors exactly as it always did.
+ * LOWER a floor, so it is the only one that can fail OPEN.
+ *
+ * IT DID FAIL OPEN, AND THE CONDITION THAT WAS SUPPOSED TO STOP IT WAS THE WRONG
+ * ONE. The demotion used to require only that every identity the marker names be
+ * DECLARED in another governed file, and this comment claimed that meant "the
+ * object is still protected where it lives". A DECLARATION IS NOT A MARKER.
+ * `inboundProtections` skips quoted markers too, so a quoted live marker
+ * protected the object in NEITHER file, and the object dropped out of
+ * `protected_object_ids` in the file that OWNS it. Executed, not argued: three
+ * ordinary prose forms of a genuinely live rule — including a plain markdown
+ * blockquote, the most conventional way anyone writes a standing rule — each
+ * dropped a floor from 5 to 0, and the rotation ran to completion at exit 0 with
+ * a valid pre-registration, ARCHIVING a live, canonically declared,
+ * marked-non-consumable object. The base tool refused all three at exit 7.
+ *
+ * THE CONDITION IS NOW THE RIGHT ONE: every identity the marker names must be
+ * declared in exactly one OTHER governed file AND that file must carry a
+ * NON-QUOTED marker naming it — which is exactly the condition under which
+ * `inboundProtections` really does protect it there. Both sides read the same
+ * `markerNamingsIn` scan, so "safe iff" is a property of the code and not of
+ * this paragraph. What remains lost on a demotion is only protection of the
+ * block doing the quoting, and now that is true rather than asserted.
+ *
+ * A quoted marker that names nothing, or names something this file declares, or
+ * names something nothing declares, or names something no other file
+ * independently protects, anchors exactly as it always did.
  */
 export function markerIsQuoted(line, at, map, i) {
   if (map.quoted[i]) return true;
@@ -1271,18 +1312,28 @@ export function scanProtectedObjects(text, spec, resolution) {
    *     mutation fixture depends on to be able to break it.
    */
   const declaredAt = declarationsIn(text, spec, map);
+  const markedIn = resolution?.markedIn ?? new Map();
 
   const objects = [];
   const unresolvable = [];
   const crossFileResolved = [];
   const quotedReferences = [];
+  const historicalReferences = [];
   const ambiguous = [];
   const seen = new Set();
-  const add = (id, kind, block, line, resolution) => {
+  /*
+   * `classification` IS THE FIVE-WAY CLASS OF THE OCCURRENCE, OR NULL — and null
+   * is a real answer rather than a gap. `PROTECTED-REGION:`, `GATE-PIN:` and
+   * `BLOCK:` are STRUCTURAL protections with synthetic ids; they are not
+   * occurrences of a stable identity at all, so labelling them with a member of
+   * an identity taxonomy would be a category error. Only the entries that ARE
+   * identity occurrences carry a class.
+   */
+  const add = (id, kind, block, line, resolution, classification = null) => {
     const key = `${id}|${kind}|${block}`;
     if (seen.has(key)) return;
     seen.add(key);
-    objects.push({ id, kind, block_position: block, evidence_line: line, resolution });
+    objects.push({ id, kind, block_position: block, evidence_line: line, resolution, classification });
   };
 
   // (2) STRUCTURAL: a block whose own heading declares it protected.
@@ -1326,6 +1377,27 @@ export function scanProtectedObjects(text, spec, resolution) {
     }
   }
 
+  /*
+   * (3b) HISTORICAL DECLARATIONS — declaration-FORM lines inside an
+   *      `## ARCHIVED BATCH` block. `declarationsIn` already refuses to index
+   *      them, so they cannot own an identity or become a C8 claimant; this
+   *      scan exists so the report SAYS the copy was seen and classified rather
+   *      than leaving "it did not appear" to stand for "it was excluded".
+   */
+  lines.forEach((line, i) => {
+    if (!map.archived[i]) return;
+    const m = SENTINEL_DECL_RE.exec(line);
+    if (!m) return;
+    historicalReferences.push({
+      form: "declaration",
+      id: m[1] ? `(${m[1]})` : m[2],
+      classification: IDENTITY_CLASS.HISTORICAL_REFERENCE,
+      line: i + 1,
+      block: blockOfLine[i],
+      anchoring: "excluded from the declaration index — an archived copy never owns an identity",
+    });
+  });
+
   // (4) MARKERS, resolved BY IDENTITY and, separately, by ownership.
   lines.forEach((line, i) => {
     const block = blockOfLine[i];
@@ -1335,23 +1407,62 @@ export function scanProtectedObjects(text, spec, resolution) {
       if (!hit) continue;
       const quoted = markerIsQuoted(line, hit.index, map, i);
 
+      /*
+       * HISTORICAL_REFERENCE IS LABELLED HERE AND CHANGES NOTHING ELSE.
+       *
+       * A marker occurrence inside an `## ARCHIVED BATCH` block — the heading
+       * THIS TOOL writes — is a copy of a protection, not an assertion of one.
+       * It is REPORTED as such and it still ANCHORS exactly as before: the
+       * class is descriptive, and demoting on it would be a second thing that
+       * can lower a floor, which this fix round exists to stop adding. The
+       * DECLARATION side of the same rule is already enforced rather than
+       * merely labelled — `declarationsIn` refuses to index a declaration in an
+       * archived block at all, so an archived copy can never own an identity.
+       */
+      if (map.archived[i]) {
+        historicalReferences.push({
+          form: "marker",
+          kind: marker.kind,
+          classification: IDENTITY_CLASS.HISTORICAL_REFERENCE,
+          line: i + 1,
+          block,
+          anchoring: "unchanged — labelled, never demoted",
+        });
+      }
+
       // (4a) identities this marker NAMES
       const named = new Set();
       for (const m of line.matchAll(SENTINEL_ID_RE)) named.add(m[0]);
       for (const m of line.matchAll(SENTINEL_NAMED_TAG_RE)) named.add(`(${m[1]})`);
-      // Every named identity that resolved to a single canonical declaration in
-      // ANOTHER governed file. This is the set the quoted demotion below is
-      // conditioned on, so it is computed whether or not the marker is quoted.
+      /*
+       * TWO SETS, AND CONFLATING THEM IS THE DEFECT THIS FIX ROUND REPAIRED.
+       *
+       *   resolvedElsewhere  — DECLARED in exactly one other governed file.
+       *                        This is an IDENTITY fact. It is what clears C2.
+       *   demotableElsewhere — declared there AND independently PROTECTED there
+       *                        by a NON-QUOTED marker. This is a PROTECTION
+       *                        fact, and it is the only one that may license
+       *                        dropping an anchor.
+       *
+       * The demotion used to be conditioned on the first. A declaration is not a
+       * marker, so an object could be resolvable everywhere and protected
+       * nowhere — and was archived at exit 0 for exactly that reason.
+       */
       const resolvedElsewhere = new Set();
+      const demotableElsewhere = new Set();
       for (const id of named) {
         const decl = declaredAt.get(id);
         if (decl) {
-          add(id, marker.kind, decl.block, decl.line, "declaration");
+          add(id, marker.kind, decl.block, decl.line, "declaration", IDENTITY_CLASS.DECLARATION);
           continue;
         }
         const owners = (crossIndex.get(id) ?? []).filter((o) => o.file !== spec.name);
         if (owners.length === 1) {
           resolvedElsewhere.add(id);
+          // Protected AT HOME? Same scan `inboundProtections` consumes, so this
+          // is true exactly when the inbound protection really fires.
+          const protectedAtHome = (markedIn.get(id) ?? new Set()).has(owners[0].file);
+          if (protectedAtHome) demotableElsewhere.add(id);
           crossFileResolved.push({
             id,
             kind: marker.kind,
@@ -1362,6 +1473,7 @@ export function scanProtectedObjects(text, spec, resolution) {
             declared_path: owners[0].path,
             declared_block: owners[0].block,
             declared_line: owners[0].line,
+            protected_in_owner: protectedAtHome,
           });
           continue;
         }
@@ -1402,17 +1514,26 @@ export function scanProtectedObjects(text, spec, resolution) {
       /*
        * (4b) THE MARKER'S OWN ANCHOR — with the ONE demotion this change adds.
        *
-       * A marker that is structurally QUOTED and whose every named identity is
-       * canonically declared in ANOTHER governed file does not anchor here: the
-       * object is protected where it lives, and the block doing the quoting is
-       * not where it lives. That is what stops a packet or history block from
-       * raising a floor solely because it CONTAINS the text.
+       * A marker that is structurally QUOTED, and whose every named identity is
+       * canonically declared in ANOTHER governed file AND independently
+       * PROTECTED there by a non-quoted marker, does not anchor here: the object
+       * is genuinely protected where it lives, so the quotation is redundant and
+       * the block doing the quoting is not where the object lives. That is what
+       * stops a packet or history block from raising a floor solely because it
+       * CONTAINS the text.
+       *
+       * `demotableElsewhere`, NOT `resolvedElsewhere`. That one word was the
+       * fail-open: an object declared elsewhere but protected nowhere satisfied
+       * the old condition, lost its anchor here, and — because
+       * `inboundProtections` skips quoted markers too — gained none at home. It
+       * was archived at exit 0.
        *
        * EVERY OTHER CASE ANCHORS EXACTLY AS BEFORE — a quoted marker that names
        * nothing, or names something THIS file declares, or names something no
-       * governed file declares. The tie breaks towards protecting.
+       * governed file declares, or names something no other file independently
+       * protects. The tie breaks towards protecting.
        */
-      if (quoted && named.size > 0 && [...named].every((id) => resolvedElsewhere.has(id))) {
+      if (quoted && named.size > 0 && [...named].every((id) => demotableElsewhere.has(id))) {
         quotedReferences.push({
           kind: marker.kind,
           classification: IDENTITY_CLASS.QUOTED_REFERENCE,
@@ -1421,12 +1542,25 @@ export function scanProtectedObjects(text, spec, resolution) {
           names: [...named],
           reason:
             "the marker phrase sits inside a matched code span, quotation, fence or blockquote, " +
-            "and every identity it names is canonically declared in another governed file, so " +
-            "this occurrence is a QUOTATION of a protection rather than an assertion of one",
+            "and every identity it names is canonically declared in another governed file AND " +
+            "independently PROTECTED there by a non-quoted marker, so this occurrence is a " +
+            "QUOTATION of a protection rather than an assertion of one, and dropping the anchor " +
+            "here leaves the object protected in the file that owns it",
         });
         continue;
       }
 
+      /*
+       * THE FALLBACK IS NOT UNIFORMLY FAIL-CLOSED, AND SAYING SO IS CHEAPER THAN
+       * OVERSTATING IT. If a marker's owning DECLARATION is missing from
+       * `declaredAt` — because it was tightened out, quoted, or archived — the
+       * anchor falls back to `{ block, line }`, the marker's OWN block, which
+       * can be SHALLOWER than the declaration it lost. So "narrowing the
+       * declaration recogniser only ever costs a refusal" is very slightly too
+       * clean as a general rule. It is immaterial on this tree (measured: the
+       * tightening lost no canonical declaration), and it is recorded here
+       * rather than left as an unqualified claim.
+       */
       let owner = null;
       for (let j = i; j >= 0 && blockOfLine[j] === block; j--) {
         const m = SENTINEL_DECL_RE.exec(lines[j]);
@@ -1434,7 +1568,7 @@ export function scanProtectedObjects(text, spec, resolution) {
       }
       if (owner) {
         const decl = declaredAt.get(owner) ?? { block, line: i + 1 };
-        add(owner, marker.kind, decl.block, decl.line, "owning-declaration");
+        add(owner, marker.kind, decl.block, decl.line, "owning-declaration", IDENTITY_CLASS.DECLARATION);
       } else {
         add(`BLOCK:${block}`, marker.kind, block, i + 1, "owning-block");
       }
@@ -1445,7 +1579,14 @@ export function scanProtectedObjects(text, spec, resolution) {
   //     declares. Protection follows the object, so it lands on the block that
   //     actually holds it rather than on the block that talks about it.
   for (const p of resolution?.inbound ?? []) {
-    add(p.id, p.kind, p.block, p.line, `cross-file (named in ${p.named_in}:${p.named_at_line})`);
+    add(
+      p.id,
+      p.kind,
+      p.block,
+      p.line,
+      `cross-file (named in ${p.named_in}:${p.named_at_line})`,
+      IDENTITY_CLASS.LIVE_REFERENCE
+    );
   }
 
   objects.sort((a, b) => a.block_position - b.block_position || a.id.localeCompare(b.id));
@@ -1455,6 +1596,7 @@ export function scanProtectedObjects(text, spec, resolution) {
     declaredAt,
     crossFileResolved,
     quotedReferences,
+    historicalReferences,
     ambiguous,
     identitySources: resolution?.sources ?? [],
     identityWithheld: resolution?.withheld ?? [],
@@ -1532,6 +1674,7 @@ export function evaluateSentinel(input) {
      */
     cross_file_resolutions: scan.crossFileResolved ?? [],
     quoted_references: scan.quotedReferences ?? [],
+    historical_references: scan.historicalReferences ?? [],
     ambiguous_identities: scan.ambiguous ?? [],
     identity_sources: scan.identitySources ?? [],
     identity_set_withheld: scan.identityWithheld ?? [],
@@ -1682,6 +1825,13 @@ export function evaluateSentinel(input) {
    * that would be wrong to impose on a blank scaffold; this is an inconsistency
    * in the identity graph, and an inconsistent graph is not less inconsistent
    * for sitting in a file that happens to resolve no protected object.
+   *
+   * WHAT THAT COSTS, STATED RATHER THAN LEFT TO BE DISCOVERED: a repo whose
+   * memory carries two declarations of one id now REFUSES where it previously
+   * rotated, and it does so even if nothing in it is armed. That is a real
+   * behaviour change for an existing caller, it follows from the reasoning above
+   * rather than from an oversight, and the refusal names both claimants and the
+   * remedy so it is actionable on first read.
    */
   if ((scan.ambiguous ?? []).length > 0) {
     refusals.push({
@@ -2036,7 +2186,7 @@ function planFile(root, spec, opts) {
   const resolution = opts.resolution ?? buildIdentityIndex(root);
   const scan = scanProtectedObjects(original, spec, {
     ...resolution,
-    inbound: inboundProtections(root, spec, resolution.index),
+    inbound: inboundProtections(spec, resolution),
   });
 
   // The INDEPENDENT cross-check behind refusal condition 4. `crossMap` is built
@@ -2584,6 +2734,12 @@ function renderHuman(reports, opts) {
         L.push(
           `  cross-file        : ${c.id} (${c.classification}) named at line ${c.named_at_line} ` +
             `-> declared in ${c.declared_path} block ${c.declared_block} line ${c.declared_line}`
+        );
+      }
+      for (const h of s.historical_references) {
+        L.push(
+          `  historical ref    : ${h.form} at line ${h.line} (block ${h.block}${h.id ? `, ${h.id}` : ""}) ` +
+            `— ${IDENTITY_CLASS.HISTORICAL_REFERENCE}: ${h.anchoring}`
         );
       }
       for (const q of s.quoted_references) {

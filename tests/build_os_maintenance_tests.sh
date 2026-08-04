@@ -24,7 +24,7 @@
 #      each rotatable, and neither's standing region is what rotation reclaims
 #   10. THE ROTATION SENTINEL: `--keep` below the derived minimum_safe_keep is
 #      REFUSED BEFORE MUTATION, protected objects are resolved BY IDENTITY rather
-#      than by position, and each of the seven refusal conditions is driven by a
+#      than by position, and each of the eight refusal conditions is driven by a
 #      fixture that fires it
 set -uo pipefail
 
@@ -549,7 +549,7 @@ fi
 
 # (b2) ...AND THE SENTINEL REFUSES IT, BEFORE MUTATION. This is the operator-named
 #      fixture, stated here as the fact about THIS FILE; section 10 drives the
-#      guard's seven conditions in general.
+#      guard's eight conditions in general.
 RES_REFUSE_ROOT="$WORK/residue-refuse"
 mkdir -p "$RES_REFUSE_ROOT/build-os/memory"
 cp "$RES_LIVE" "$RES_REFUSE_ROOT/build-os/memory/residue.md"
@@ -1188,7 +1188,10 @@ done
   && ok "SENTINEL: all seven required report fields are present for the proposed rotation" \
   || no "SENTINEL: only $S7 of 7 report fields are present; missing:$S7MISS"
 
-# --------------------------------- (d) the seven refusal conditions, each fired --
+# --------------------------- (d) the first seven refusal conditions, each fired --
+# C8 arrived with cross-file resolution and is driven in section 11 (fixture D),
+# beside the mechanism that creates it. The counter below stays at 7 on purpose:
+# it is the count of the conditions THIS subsection drives, not of the tool's.
 # Conditions 3, 4 and 6 are DELIBERATELY driven through MUTATED COPIES of the
 # tool. They are cross-checks: on the shipped tool condition 1 fires first and
 # they are never reached, so the only way to show they discriminate is to break
@@ -1361,8 +1364,14 @@ fi
 #   M5  `const hasStandingRegion = objects.some(o => o.kind === "protected-region")`
 #       -> `const hasStandingRegion = false`, which disarms SENTINEL_GATE_PINS
 #       entirely. Observable and unasserted: on this repository's residue.md the
-#       resolved-object count falls 18 -> 15 and the gate pins 3 -> 0; on
-#       current_state.md 4 -> 2 and 2 -> 0. Sections 8 and 9 grep the pinned
+#       resolved-object count falls 22 -> 19 and the gate pins 3 -> 0; on
+#       current_state.md 5 -> 3 and 2 -> 0. (The object counts previously read
+#       18 -> 15 and 4 -> 2. RE-DERIVED rather than adjusted: both were ALREADY
+#       stale at `74575ee`, measured by running this same mutant against that
+#       commit's own memory files, so the drift predates the cross-file packet
+#       and was not caused by rotation #3. The GATE-PIN figures — the ones the
+#       assertions below actually read — were exact then and are exact now.)
+#       Sections 8 and 9 grep the pinned
 #       LITERALS out of the files directly and never route through the sentinel,
 #       so no assertion anywhere noticed. The rotation-#2 receipt meanwhile
 #       claims those pins were "verified BY IDENTITY" — an unenforced claim in a
@@ -1585,6 +1594,16 @@ mkdir -p "$GOV"
 #   archived   — the second declaration sits in an `## ARCHIVED BATCH` block (F)
 #   unquoted   — active_packet's citing marker is written BARE, not quoted (B/2)
 #   shifted    — filler LINES are inserted inside existing blocks (property 8)
+#   orphan     — residue DECLARES (qqq) and protects it NOWHERE, while
+#                active_packet quotes a live rule about it. THE ADVERSARIAL CASE.
+#   inbound    — the same unprotected residue, cited by a BARE live marker, so
+#                the inbound protection is the only thing that can raise a floor
+#
+# NOTE ON `plain`: residue carries a NON-QUOTED marker of its own naming
+# `(qqq)`. That is not decoration — it is the precondition that makes quoting the
+# same rule in another file REDUNDANT, and therefore safe to demote. Without it
+# this fixture is the `orphan` case, and demoting there archives a live object.
+# The two are kept as separate roots so the difference is executable.
 gov_root(){ # <root> <flag>
   local root="$1" flag="${2:-plain}"
   mkdir -p "$root/build-os/memory" "$root/build-os/packets"
@@ -1601,13 +1620,21 @@ for (let i = 2; i <= 5; i++) {
   r.push(`## History — filler ${i}\n\n- **(f${i}) FILLER.** ${pad("f", 400)}\n\n`);
   if (flag === "shifted") r.push(pad("x", 80) + "\n" + pad("x", 80) + "\n\n");
 }
+/* (qqq) IS PROTECTED AT HOME in every root EXCEPT the two that exist to show
+   what happens when it is not. `orphan` and `inbound` omit this marker. */
+const ORPHANED = flag === "orphan" || flag === "inbound";
+if (!ORPHANED) {
+  r.push("- **(nnn) A CLOSED ITEM THAT CITES ANOTHER.** `(qqq)` IS NOT CONSUMED AND MUST NOT BE MARKED SO.\n\n");
+}
 r.push("## History — the block that DECLARES (qqq)\n\n");
 r.push("- **(qqq) THE NON-CONSUMABLE OBJECT ITSELF.** " + pad("q", 400) + "\n\n");
 for (let i = 7; i <= 9; i++) r.push(`## History — filler ${i}\n\n- **(g${i}) FILLER.** ${pad("g", 400)}\n\n`);
-r.push("## History — the oldest block still holding an open item\n\n");
-r.push("- **(zzz) AN UNREPRODUCED FLAKE.** [STILL OPEN AND STILL UNDIAGNOSABLE]\n");
-r.push("  " + pad("z", 400) + "\n\n");
-for (let i = 11; i <= 14; i++) r.push(`## History — filler ${i}\n\n- **(h${i}) FILLER.** ${pad("h", 400)}\n\n`);
+if (!ORPHANED) {
+  r.push("## History — the oldest block still holding an open item\n\n");
+  r.push("- **(zzz) AN UNREPRODUCED FLAKE.** [STILL OPEN AND STILL UNDIAGNOSABLE]\n");
+  r.push("  " + pad("z", 400) + "\n\n");
+  for (let i = 11; i <= 14; i++) r.push(`## History — filler ${i}\n\n- **(h${i}) FILLER.** ${pad("h", 400)}\n\n`);
+}
 fs.writeFileSync(resP, r.join(""));
 
 /* ---- current_state.md ---- */
@@ -1632,9 +1659,14 @@ a.push("## ACTIVE — a packet that CITES an object it does not own\n\n");
 a.push("- **(p1) THE PACKET ITEM.** " + pad("p", 200) + "\n\n");
 for (let i = 2; i <= 4; i++) a.push(`## History — ap filler ${i}\n\n- **(a${i}) FILLER.** ${pad("a", 300)}\n\n`);
 a.push("## The block that CITES the sibling-declared object\n\n");
-if (flag === "unquoted") {
+if (flag === "unquoted" || flag === "inbound") {
   /* BARE marker: not in a code span, not in a quotation, not fenced. */
   a.push(`- **(p5) A LIVE ASSERTION.** ${named} IS NOT CONSUMED AND MUST NOT BE MARKED SO.\n`);
+} else if (flag === "orphan") {
+  /* A PLAIN MARKDOWN BLOCKQUOTE stating a standing rule — the most conventional
+     way anyone writes one, and one of the three forms that were measured
+     archiving a live object at exit 0 before the demotion was corrected. */
+  a.push(`> ${named} IS NOT CONSUMED AND MUST NOT BE MARKED SO — standing, this cycle.\n`);
 } else {
   /* QUOTED marker: the marker phrase sits inside a quotation AND a code span. */
   a.push(`- **(p5) A NARRATIVE ABOUT A PAST FIXTURE.** it would have archived ${named}, marked "IS NOT CONSUMED AND MUST NOT BE MARKED SO", at exit 0.\n`);
@@ -1744,12 +1776,137 @@ done
 [ "$(sent_block_of "$GOV/cu.json" '(qqq)')" = "$GA_EXPECT_BLK" ] \
   && ok "XFILE C: a LIVE marker in active_packet.md naming (qqq) protects block $GA_EXPECT_BLK of residue.md, the file that DECLARES it — protection follows the object across files, which is the whole point of resolving identity rather than position" \
   || no "XFILE C: a live sibling reference put (qqq) at block '$(sent_block_of "$GOV/cu.json" '(qqq)')' in its owning file, expected $GA_EXPECT_BLK"
-# DIRECTION 2 — a QUOTED sibling reference does NOT, in either file. A narrative
-# about a past fixture is not a liveness claim, and it must not become one by
-# crossing a file boundary either.
-[ -z "$(sent_block_of "$GOV/c.json" '(qqq)')" ] \
-  && ok "XFILE C: ...and the QUOTED form of that same reference propagates nothing — the demotion is symmetric, so a quotation cannot raise a sibling's floor from the outside any more than it can raise its own" \
-  || no "XFILE C: a quoted reference still protected (qqq) at block '$(sent_block_of "$GOV/c.json" '(qqq)')' in the owning file — the demotion is one-sided"
+# DIRECTION 2 — RESTATED, because the first wording asserted the symmetry in
+# terms that read as endorsing the unsafe case. The symmetry is real and is kept:
+# a quotation contributes NO CROSS-FILE protection, in either direction. What it
+# must NOT be read as saying is that the object ends up unprotected — it does not,
+# and if it would, the demotion no longer happens at all (see the adversarial
+# drive below). So the assertion is now about the PROVENANCE of the protection,
+# which is the thing that is actually guaranteed: in the quoted root (qqq) is
+# still protected in residue.md, and NOT by anything the quoting file said.
+gov_cross_prov(){ # <json> <id> -> the resolution strings that protected <id>
+  node -e '
+const fs = require("fs");
+const s = JSON.parse(fs.readFileSync(process.argv[1], "utf8")).results[0].sentinel;
+process.stdout.write(s.protected_objects.filter((o) => o.id === process.argv[2])
+  .map((o) => (String(o.resolution).startsWith("cross-file") ? "cross-file" : "own-file")).sort().join(","));
+' "$1" "$2" 2>/dev/null
+}
+case "$(gov_cross_prov "$GOV/c.json" '(qqq)')" in
+  *own-file*) ok "XFILE C: ...and in the QUOTED root (qqq) is STILL PROTECTED in residue.md at block $(sent_block_of "$GOV/c.json" '(qqq)') — from residue.md's own marker. The demotion is symmetric, and what it guarantees is that the quotation added nothing, NOT that the object was left unprotected" ;;
+  *)          no "XFILE C: in the quoted root (qqq)'s protection provenance is '$(gov_cross_prov "$GOV/c.json" '(qqq)')' — the object is not protected in its owning file at all" ;;
+esac
+# The differential is taken on the CITING side, where the two forms are actually
+# distinguishable: a protected object resolved to the same id/kind/block from
+# two directions is ONE record by construction (`add` dedupes on that key), so
+# the owning file cannot show the difference. The classification can.
+gov_cross_class(){ # <json> <id>
+  node -e '
+const fs = require("fs");
+const s = JSON.parse(fs.readFileSync(process.argv[1], "utf8")).results[0].sentinel;
+process.stdout.write([...new Set((s.cross_file_resolutions ?? [])
+  .filter((c) => c.id === process.argv[2]).map((c) => c.classification))].sort().join(","));
+' "$1" "$2" 2>/dev/null
+}
+[ "$(gov_cross_class "$GOV/b.json" '(qqq)')" = "QUOTED_REFERENCE" ] \
+  && [ "$(gov_cross_class "$GOV/bu.json" '(qqq)')" = "LIVE_REFERENCE" ] \
+  && ok "XFILE C: ...and the two roots separate on the CLASSIFICATION of the same identity — QUOTED_REFERENCE where the rule is quoted, LIVE_REFERENCE where it is asserted — so the quotation is what the tool is reading and nothing else" \
+  || no "XFILE C: classifications are '$(gov_cross_class "$GOV/b.json" '(qqq)')' quoted / '$(gov_cross_class "$GOV/bu.json" '(qqq)')' unquoted, expected QUOTED_REFERENCE / LIVE_REFERENCE"
+# ...and the INBOUND-ONLY proof, where own-file protection cannot be the answer,
+# is section (c3) below: residue.md's floor moves 1 -> 6 on the sibling alone.
+
+# ---- (c2) THE ADVERSARIAL CASE — a quoted LIVE rule about an object that is
+#          protected NOWHERE ELSE must NOT be demoted -------------------------
+# THIS IS A RED DRIVE FOR A DEFECT THAT SHIPPED AND WAS EXECUTED. The demotion
+# was first conditioned on every named identity being DECLARED in another
+# governed file. A declaration is not a marker: `inboundProtections` skips quoted
+# markers too, so a quoted live rule protected the object in NEITHER file. Four
+# ordinary prose forms of a genuinely live rule were run to completion with a
+# valid pre-registration and each ARCHIVED a live, canonically declared,
+# marked-non-consumable object at exit 0. The base tool refused all four at
+# exit 7.
+#
+# THE CONDITION IS NOW `demotableElsewhere`: declared in exactly one other
+# governed file AND independently protected there by a NON-QUOTED marker — which
+# is exactly when the inbound protection fires. Both sides read the same
+# `markerNamingsIn` scan, so the two cannot drift apart.
+#
+# ALL FOUR FORMS ARE DRIVEN, not one representative. The third is a plain
+# markdown blockquote, which is how a standing rule is most conventionally
+# written and is the form that makes this a real hazard rather than a curiosity.
+gov_orphan_root(){ # <root> <citation line>
+  local root="$1" cite="$2"
+  gov_root "$root" orphan
+  CITE="$cite" node -e '
+const fs = require("fs");
+const p = process.argv[1];
+const t = fs.readFileSync(p, "utf8");
+const from = "> `(qqq)` IS NOT CONSUMED AND MUST NOT BE MARKED SO — standing, this cycle.";
+if (t.indexOf(from) < 0) { process.stderr.write("orphan citation line not found\n"); process.exit(1); }
+fs.writeFileSync(p, t.replace(from, process.env.CITE));
+' "$root/build-os/packets/active_packet.md"
+}
+ORPH_BAD=0; ORPH_N=0
+ORPH_CITE_BLK=""
+while IFS= read -r cite; do
+  [ -n "$cite" ] || continue
+  ORPH_N=$((ORPH_N+1))
+  GO="$GOV/orphan-$ORPH_N"
+  gov_orphan_root "$GO" "$cite" || { ORPH_BAD=$((ORPH_BAD+1)); continue; }
+  [ -n "$ORPH_CITE_BLK" ] || ORPH_CITE_BLK="$(awk '/^## /{n++} /\(qqq\)/{print n; exit}' "$GO/build-os/packets/active_packet.md")"
+  gov_report "$GO" active_packet 8 "$GOV/orphan-$ORPH_N.json"
+  OF="$(gov_json "$GOV/orphan-$ORPH_N.json" minimum_safe_keep)"
+  # ...and RUN IT TO COMPLETION at a keep below the citing block, with a VALID
+  # pre-registration, so nothing but the demotion is left standing between the
+  # command and the archive.
+  sent_prereg "$GOV/orphan-$ORPH_N.prereg.json" active_packet 1 "$GO/build-os/packets/active_packet.md"
+  node "$SENT" --root "$GO" --file active_packet --keep 1 --apply \
+       --pre-registration "$GOV/orphan-$ORPH_N.prereg.json" > "$GOV/orphan-$ORPH_N.out" 2>"$GOV/orphan-$ORPH_N.err"
+  ORC=$?
+  LEAKED=no
+  if [ -f "$GO/build-os/memory/archive/active_packet.archive.md" ]; then
+    grep -qF -- '(qqq)' "$GO/build-os/memory/archive/active_packet.archive.md" && LEAKED=yes
+  fi
+  if [ "${OF:-0}" != "${ORPH_CITE_BLK:-x}" ] || [ "$ORC" -ne 7 ] || [ "$LEAKED" = "yes" ]; then
+    ORPH_BAD=$((ORPH_BAD+1))
+    no "XFILE ADVERSARIAL form $ORPH_N: floor '$OF' (expected $ORPH_CITE_BLK), apply exited $ORC (expected 7), rule reached the archive: $LEAKED -- form: $cite"
+  fi
+done <<'FORMS'
+  The operator ruled that `(qqq)` "IS NOT CONSUMED AND MUST NOT BE MARKED SO" for this cycle.
+  Gate on `(qqq)`: `MUST NOT BE ARCHIVED` until cleared.
+  > `(qqq)` IS NOT CONSUMED AND MUST NOT BE MARKED SO — standing, this cycle.
+  it would have archived `(qqq)`, marked "IS NOT CONSUMED AND MUST NOT BE MARKED SO", at exit 0.
+FORMS
+[ "$ORPH_N" -eq 4 ] \
+  && ok "XFILE ADVERSARIAL: all 4 quoted-live-rule forms were built and driven (a quotation-and-code-span form, a bare-code-span form, a plain markdown BLOCKQUOTE, and a narrative form)" \
+  || no "XFILE ADVERSARIAL: only $ORPH_N of 4 forms were driven, so the sweep is not the sweep it claims to be"
+[ "$ORPH_BAD" -eq 0 ] \
+  && ok "XFILE ADVERSARIAL: every one of the 4 forms keeps the floor at block $ORPH_CITE_BLK, REFUSES the apply at exit 7, and leaves the live rule out of the archive -- an object DECLARED elsewhere but PROTECTED nowhere is never demoted" \
+  || no "XFILE ADVERSARIAL: $ORPH_BAD of $ORPH_N form(s) still fail open"
+# ...and the SAFE shape is still demoted, so the fix narrowed the demotion rather
+# than deleting it. Same quotation, same identity, the one difference being that
+# the owning file independently protects the object.
+[ "$(gov_json "$GOV/b.json" quoted_references)" != "0" ] && [ "$(gov_json "$GOV/b.json" minimum_safe_keep)" = "0" ] \
+  && ok "XFILE ADVERSARIAL: ...while the SAFE shape (same quotation, owner independently protects the object) is still demoted to floor 0 -- the demotion was narrowed, not removed" \
+  || no "XFILE ADVERSARIAL: the safe shape stopped demoting (floor $(gov_json "$GOV/b.json" minimum_safe_keep), $(gov_json "$GOV/b.json" quoted_references) quoted ref(s)) -- the fix deleted the feature instead of bounding it"
+
+# ---- (c3) C2'S WIDENING STILL HOLDS — the inbound floor moves 1 -> 6 ----------
+# The load-bearing half of cross-file resolution, in its own root so the number
+# is unambiguous: residue.md declares (qqq) at block 6 and protects NOTHING
+# itself, so ALONE its floor is 1 (the standing-region heading). Add the sibling
+# that asserts the rule and the floor must become 6.
+GI="$GOV/inbound"; gov_root "$GI" inbound
+GI_ALONE="$GOV/inbound-alone"; mkdir -p "$GI_ALONE/build-os/memory"
+cp "$GI/build-os/memory/residue.md" "$GI_ALONE/build-os/memory/residue.md"
+gov_report "$GI_ALONE" residue 9 "$GOV/i-alone.json"
+gov_report "$GI"       residue 9 "$GOV/i-with.json"
+GI_DECL="$(awk '/^## /{n++} /^- \*\*\(qqq\)/{print n; exit}' "$GI/build-os/memory/residue.md")"
+[ "$(gov_json "$GOV/i-alone.json" minimum_safe_keep)" = "1" ] \
+  && ok "XFILE C2-WIDENING: residue.md ALONE derives a floor of 1 — it declares (qqq) and asserts nothing about it, so only its standing region protects anything" \
+  || no "XFILE C2-WIDENING: residue.md alone derives floor $(gov_json "$GOV/i-alone.json" minimum_safe_keep), expected 1 — the baseline of this differential is wrong"
+[ "$(gov_json "$GOV/i-with.json" minimum_safe_keep)" = "$GI_DECL" ] \
+  && ok "XFILE C2-WIDENING: adding the sibling that ASSERTS the rule moves residue.md's floor 1 -> $GI_DECL, the block that DECLARES (qqq) — this is the protection the single-file scan gave to neither file" \
+  || no "XFILE C2-WIDENING: with the sibling present residue.md's floor is $(gov_json "$GOV/i-with.json" minimum_safe_keep), expected $GI_DECL"
 
 # ---- (d) FIXTURE D — two canonical declarations REFUSE -------------------------
 GD="$GOV/d"; gov_root "$GD" dup
@@ -1792,6 +1949,57 @@ node "$SENT" --root "$GF" --file active_packet --keep 8 --sentinel-report > "$GO
 grep -q 'SENTINEL-C8' "$GOV/f.txt" \
   && no "XFILE F: the archived copy raised the duplicate-ownership refusal — a historical copy is being counted as a declaration" \
   || ok "XFILE F: ...and C8 does not fire on it, which is the difference between a COPY and a rival OWNER"
+
+# ---- (f2) EVERY MEMBER OF THE FIVE-WAY ENUM IS ACTUALLY EMITTED --------------
+# A spec that claims five classes while the code emits three is a spec nobody can
+# rely on, and it is exactly the shape this file keeps deleting elsewhere: a
+# declaration that reads as coverage. `DECLARATION` and `HISTORICAL_REFERENCE`
+# were defined and assigned NOWHERE. Both are now emitted; this check is what
+# stops either from going inert again.
+#
+# HISTORICAL_REFERENCE IS DESCRIPTIVE, NOT A SECOND DEMOTION. A marker inside an
+# `## ARCHIVED BATCH` block is LABELLED and still anchors exactly as before —
+# adding a second predicate that can lower a floor is the thing the fix round
+# exists to avoid. The DECLARATION half of the same rule is enforced rather than
+# labelled: `declarationsIn` refuses to index an archived declaration at all.
+GOV_ENUM="$(RM_MJS="$SENT" node -e '
+import("file://" + process.env.RM_MJS).then((m) => {
+  process.stdout.write(Object.keys(m.IDENTITY_CLASS).sort().join(","));
+}).catch(() => process.stdout.write(""));
+' 2>/dev/null)"
+# every class observed across the roots this section already built
+gov_classes_seen(){
+  node -e '
+const fs = require("fs");
+const seen = new Set();
+for (const f of process.argv.slice(1)) {
+  let s; try { s = JSON.parse(fs.readFileSync(f, "utf8")).results[0].sentinel; } catch { continue; }
+  for (const k of ["cross_file_resolutions", "quoted_references", "historical_references",
+                   "unresolvable_identities"]) {
+    for (const r of s[k] ?? []) if (r.classification) seen.add(r.classification);
+  }
+  for (const o of s.protected_objects ?? []) if (o.classification) seen.add(o.classification);
+}
+process.stdout.write([...seen].sort().join(","));
+' "$@" 2>/dev/null
+}
+# FIXTURE F's root is the one that carries an archived block; report it as text
+# too so the human-readable rendering of the class is exercised, not only --json.
+gov_report "$GF" current_state 6 "$GOV/f-cs.json"
+gov_report "$GE" active_packet 8 "$GOV/e.json"
+GOV_SEEN="$(gov_classes_seen "$GOV/a2.json" "$GOV/b.json" "$GOV/bu.json" "$GOV/c.json" "$GOV/cu.json" \
+                             "$GOV/e.json" "$GOV/f.json" "$GOV/f-cs.json" "$GOV/i-with.json")"
+[ -n "$GOV_ENUM" ] && [ "$GOV_ENUM" = "$GOV_SEEN" ] \
+  && ok "XFILE ENUM: every one of the ${GOV_ENUM} classes the tool DECLARES is also EMITTED by it, observed across nine executed reports — the spec claims exactly what the code produces" \
+  || no "XFILE ENUM: the tool declares [$GOV_ENUM] but only emits [$GOV_SEEN] — a class that is never assigned is a spec claim with no code behind it"
+node "$SENT" --root "$GF" --file current_state --keep 6 --sentinel-report > "$GOV/f-cs.txt" 2>&1
+grep -q 'HISTORICAL_REFERENCE' "$GOV/f-cs.txt" \
+  && ok "XFILE ENUM: ...and the archived copy is named as a HISTORICAL_REFERENCE in the human report, so a reader sees the copy was CLASSIFIED rather than merely absent" \
+  || no "XFILE ENUM: the human report never names HISTORICAL_REFERENCE for a file carrying an archived batch block"
+GF_CS_FLOOR="$(gov_json "$GOV/f-cs.json" minimum_safe_keep)"
+[ -n "$GF_CS_FLOOR" ] && [ "$GF_CS_FLOOR" -ge 1 ] \
+  && ok "XFILE ENUM: ...and labelling it changed no floor — current_state.md's floor is $GF_CS_FLOOR, still set by its standing region, because HISTORICAL_REFERENCE never demotes" \
+  || no "XFILE ENUM: labelling the archived block moved the floor to '$GF_CS_FLOOR' — the label acquired an effect it must not have"
 
 # ---- (g) PROPERTY 7 — STABLE IDS, NOT LINE NUMBERS, DETERMINE IDENTITY --------
 # The declaration is moved to a different LINE inside the same block. Identity
