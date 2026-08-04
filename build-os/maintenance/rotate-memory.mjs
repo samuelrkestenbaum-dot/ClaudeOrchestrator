@@ -891,6 +891,30 @@ export const IDENTITY_CLASS = {
 };
 
 /**
+ * The version of the SENTINEL REPORT SHAPE, emitted on every report as
+ * `sentinel_report_schema`.
+ *
+ * IT EXISTS BECAUSE A FIELD HAD TO BE RENAMED AND AN ALIAS WOULD HAVE BEEN A
+ * LIE. Version 1 emitted `protected_in_owner` on every cross-file resolution.
+ * That name promised "this identity is protected in the file that owns it"; the
+ * value only ever answered "the owner carries a NON-QUOTED marker NAMING it",
+ * which is strictly narrower — owner-file protection also arrives through the
+ * owning-declaration path, and objects protected that way were reported `false`.
+ *
+ * VERSION 2 REPLACES IT WITH `named_by_nonquoted_marker_in_owner` AND REMOVES
+ * THE OLD KEY OUTRIGHT. Keeping `protected_in_owner` as a compatibility alias
+ * was rejected on the grounds that it would reproduce the exact defect the
+ * rename exists to remove — a consumer reading the alias would go on reading a
+ * false answer indefinitely, and nothing would ever fail. A consumer pinned to
+ * the old key now gets `undefined` and a schema numeral that says why, which is
+ * a loud break rather than a quiet wrong answer. THAT IS THE INTENDED COST.
+ *
+ * BUMP THIS whenever a field is renamed or removed. Additive fields do not
+ * require a bump; consumers must tolerate keys they do not know.
+ */
+export const SENTINEL_REPORT_SCHEMA = 2;
+
+/**
  * A block heading THIS TOOL writes into an archive file. A declaration sitting
  * under one is a COPY of a declaration, never the declaration itself.
  *
@@ -1086,8 +1110,10 @@ export function buildIdentityIndex(root, readFile) {
  * to decide what a SIBLING's marker protects, and the quoted-marker demotion in
  * `scanProtectedObjects` uses it to ask whether the OWNER of a cross-file
  * identity carries a non-quoted marker naming it. THAT IS NOT "safe iff": the
- * demotion condition is SUFFICIENT, NOT NECESSARY, and deliberately narrower
- * than "protected at home". The gap fails CLOSED — see `markerIsQuoted`.
+ * demotion condition is SUFFICIENT, NOT NECESSARY, and DELIBERATELY NARROWER
+ * than all possible owner-file protection. The gap fails CLOSED — see
+ * `markerIsQuoted`. What this scan answers is REPORTED under its own true name,
+ * `named_by_nonquoted_marker_in_owner`, and under no wider one.
  *
  * QUOTED OCCURRENCES ARE EXCLUDED HERE. A quotation of a rule is not an
  * assertion of one, in this file or in any other, so it neither protects across
@@ -1459,10 +1485,35 @@ export function scanProtectedObjects(text, spec, resolution) {
         const owners = (crossIndex.get(id) ?? []).filter((o) => o.file !== spec.name);
         if (owners.length === 1) {
           resolvedElsewhere.add(id);
-          // Marker-named in the OWNER — the same scan `inboundProtections` reads.
-          // SUFFICIENT for demotion, NOT NECESSARY: narrower on purpose, closed.
-          const protectedAtHome = (markedIn.get(id) ?? new Set()).has(owners[0].file);
-          if (protectedAtHome) demotableElsewhere.add(id);
+          /*
+           * THE NAME IS THE PREDICATE, AND IT USED TO PROMISE MORE THAN IT PAYS.
+           *
+           * This computes exactly one thing: whether the CANONICAL OWNER of `id`
+           * carries a NON-QUOTED protection marker that NAMES `id`. It was called
+           * `protectedAtHome` and reported as `protected_in_owner`, which is a
+           * WIDER claim and a FALSE one — owner-file protection also arrives
+           * through the owning-declaration path (4b), which `markerNamingsIn`
+           * cannot see. `(S1)` and `(o)` in this repository's own residue.md are
+           * anchored in its block 25 through exactly that path, and both were
+           * reported `protected_in_owner: false` while being protected in their
+           * owner. The name was the defect; the predicate was correct.
+           *
+           * SO IT IS RENAMED, NOT WIDENED. Teaching `markerNamingsIn` to see
+           * owning-declaration and structural protections would make the old name
+           * true and would widen the DEMOTION at the same time, re-opening the
+           * fail-open narrowed above. The predicate stays SUFFICIENT, NOT
+           * NECESSARY — deliberately narrower than all possible owner-file
+           * protection — and the gap FAILS CLOSED: an object protected at home in
+           * a way this cannot see keeps its anchor in the quoting file.
+           *
+           * AND NO ALIAS. `protected_in_owner` is GONE from the emitted record
+           * rather than kept pointing at the same value: an alias carrying the
+           * misleading name would reproduce the exact defect being fixed here.
+           * The break is declared through `SENTINEL_REPORT_SCHEMA` instead.
+           */
+          const namedByNonquotedMarkerInOwner =
+            (markedIn.get(id) ?? new Set()).has(owners[0].file);
+          if (namedByNonquotedMarkerInOwner) demotableElsewhere.add(id);
           crossFileResolved.push({
             id,
             kind: marker.kind,
@@ -1473,7 +1524,7 @@ export function scanProtectedObjects(text, spec, resolution) {
             declared_path: owners[0].path,
             declared_block: owners[0].block,
             declared_line: owners[0].line,
-            protected_in_owner: protectedAtHome,
+            named_by_nonquoted_marker_in_owner: namedByNonquotedMarkerInOwner,
           });
           continue;
         }
@@ -1654,6 +1705,11 @@ export function evaluateSentinel(input) {
 
   const refusals = [];
   const s = {
+    // The report SHAPE's version, so a renamed or removed field is a declared
+    // break a consumer can branch on rather than a silent one. See
+    // `SENTINEL_REPORT_SCHEMA` for why v2 carries no alias for v1's
+    // `protected_in_owner`.
+    sentinel_report_schema: SENTINEL_REPORT_SCHEMA,
     armed: derived.armed,
     requested_keep: requestedKeep,
     minimum_safe_keep: sentinelFloor,

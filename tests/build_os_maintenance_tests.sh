@@ -1599,6 +1599,23 @@ mkdir -p "$GOV"
 #   inbound    — the same unprotected residue, cited by a BARE live marker, so
 #                the inbound protection is the only thing that can raise a floor
 #
+# THREE FLAGS BELOW ARE `plain` MINUS OR PLUS EXACTLY ONE FACT, and they exist so
+# section (c4) can state the demotion predicate as a differential rather than as
+# a description. Everything else — the quoted citing form, the (zzz) block, the
+# filler — is identical to `plain`, so any floor delta is caused by the one fact.
+#
+#   owner-marker-removed — `plain` with residue's (nnn) marker line DELETED. The
+#                ONLY difference from `plain`. Demotion must stop.
+#   owner-decl-only — `owner-marker-removed` PLUS a marker inside (qqq)'s own
+#                declaration block that NAMES NOTHING, so (qqq) is protected at
+#                home through the OWNER-FILE (owning-declaration) path and NOT
+#                through any marker naming it. This is the live shape of (S1)
+#                and (o) in this repository's residue.md, and it is why the
+#                reported field may not be called `protected_in_owner`.
+#   third-file — `owner-marker-removed` PLUS a NON-QUOTED marker naming (qqq) in
+#                current_state.md, which does NOT own (qqq). Protection in an
+#                unrelated third file must not license the demotion.
+#
 # NOTE ON `plain`: residue carries a NON-QUOTED marker of its own naming
 # `(qqq)`. That is not decoration — it is the precondition that makes quoting the
 # same rule in another file REDUNDANT, and therefore safe to demote. Without it
@@ -1620,14 +1637,29 @@ for (let i = 2; i <= 5; i++) {
   r.push(`## History — filler ${i}\n\n- **(f${i}) FILLER.** ${pad("f", 400)}\n\n`);
   if (flag === "shifted") r.push(pad("x", 80) + "\n" + pad("x", 80) + "\n\n");
 }
-/* (qqq) IS PROTECTED AT HOME in every root EXCEPT the two that exist to show
-   what happens when it is not. `orphan` and `inbound` omit this marker. */
+/* (qqq) IS MARKER-NAMED AT HOME in every root EXCEPT the ones that exist to show
+   what happens when it is not. TWO INDEPENDENT FACTS, kept apart on purpose:
+   OWNER_MARKER is whether residue carries a non-quoted marker NAMING (qqq);
+   ORPHANED is whether the trailing (zzz) region exists at all. Conflating them
+   is what made the old `orphan` root a multi-fact root and therefore useless as
+   a differential for the demotion predicate. */
 const ORPHANED = flag === "orphan" || flag === "inbound";
-if (!ORPHANED) {
+const OWNER_MARKER = !(ORPHANED || flag === "owner-marker-removed" ||
+                       flag === "owner-decl-only" || flag === "third-file");
+if (OWNER_MARKER) {
   r.push("- **(nnn) A CLOSED ITEM THAT CITES ANOTHER.** `(qqq)` IS NOT CONSUMED AND MUST NOT BE MARKED SO.\n\n");
 }
 r.push("## History — the block that DECLARES (qqq)\n\n");
-r.push("- **(qqq) THE NON-CONSUMABLE OBJECT ITSELF.** " + pad("q", 400) + "\n\n");
+r.push("- **(qqq) THE NON-CONSUMABLE OBJECT ITSELF.** " + pad("q", 400) + "\n");
+if (flag === "owner-decl-only") {
+  /* A NON-QUOTED marker that NAMES NOTHING, continuing the declaration bullet of
+     (qqq) itself. `markerNamingsIn` yields no id for it, so `markedIn` is EMPTY
+     for (qqq) — while `scanProtectedObjects` still anchors (qqq) at its
+     declaration block through the owning-declaration path. Protected at home,
+     and invisible to the predicate that licenses the demotion. */
+  r.push("  MUST NOT BE ARCHIVED — protection carried by the declaration above, naming nothing.\n");
+}
+r.push("\n");
 for (let i = 7; i <= 9; i++) r.push(`## History — filler ${i}\n\n- **(g${i}) FILLER.** ${pad("g", 400)}\n\n`);
 if (!ORPHANED) {
   r.push("## History — the oldest block still holding an open item\n\n");
@@ -1648,6 +1680,12 @@ if (flag === "dup") {
 } else if (flag === "archived") {
   c.push("## ARCHIVED BATCH 1970-01-01T00:00:00Z — build-os/memory/residue.md — 1 blocks (block_1..block_1)\n\n");
   c.push("- **(qqq) AN ARCHIVED COPY OF THE DECLARATION.** " + pad("a", 200) + "\n\n");
+} else if (flag === "third-file") {
+  /* A NON-QUOTED marker NAMING (qqq) in a governed file that does NOT own it.
+     It is a real, live protection — it propagates INBOUND to residue — but it
+     is not protection IN THE OWNER, so it must not license the demotion. */
+  c.push("## A THIRD FILE THAT ASSERTS THE RULE WITHOUT OWNING THE OBJECT\n\n");
+  c.push("- **(t9) AN UNRELATED ITEM.** `(qqq)` IS NOT CONSUMED AND MUST NOT BE MARKED SO.\n\n");
 }
 for (let i = 2; i <= 6; i++) c.push(`## History — cs filler ${i}\n\n- **(c${i}) FILLER.** ${pad("c", 300)}\n\n`);
 fs.writeFileSync(csP, c.join(""));
@@ -1776,14 +1814,16 @@ done
 [ "$(sent_block_of "$GOV/cu.json" '(qqq)')" = "$GA_EXPECT_BLK" ] \
   && ok "XFILE C: a LIVE marker in active_packet.md naming (qqq) protects block $GA_EXPECT_BLK of residue.md, the file that DECLARES it — protection follows the object across files, which is the whole point of resolving identity rather than position" \
   || no "XFILE C: a live sibling reference put (qqq) at block '$(sent_block_of "$GOV/cu.json" '(qqq)')' in its owning file, expected $GA_EXPECT_BLK"
-# DIRECTION 2 — RESTATED, because the first wording asserted the symmetry in
-# terms that read as endorsing the unsafe case. The symmetry is real and is kept:
-# a quotation contributes NO CROSS-FILE protection, in either direction. What it
-# must NOT be read as saying is that the object ends up unprotected — it does not,
-# and if it would, the demotion no longer happens at all (see the adversarial
-# drive below). So the assertion is now about the PROVENANCE of the protection,
-# which is the thing that is actually guaranteed: in the quoted root (qqq) is
-# still protected in residue.md, and NOT by anything the quoting file said.
+# DIRECTION 2 — AND ITS `ok()` STRING IS NOW SOFTENED TO WHAT IT ESTABLISHES.
+#
+# THIS CHECK IS NOT A DIFFERENTIAL AND SAYING SO IS THE FIX. It reads ONE root,
+# and both roots yield `own-file` regardless: path (4) runs before path (5) and
+# `add` keys on `id|kind|block`, so an object resolved to the same block from
+# both directions is ONE record with the OWN-FILE resolution kept. The check can
+# therefore establish exactly one thing — that in the quoted root (qqq) is not
+# left unprotected in the file that owns it — and it may not claim the quotation
+# is what made the difference. THE REAL DIFFERENTIAL IS SECTION (c4) BELOW,
+# where the owner's marker is the only fact that moves.
 gov_cross_prov(){ # <json> <id> -> the resolution strings that protected <id>
   node -e '
 const fs = require("fs");
@@ -1793,7 +1833,7 @@ process.stdout.write(s.protected_objects.filter((o) => o.id === process.argv[2])
 ' "$1" "$2" 2>/dev/null
 }
 case "$(gov_cross_prov "$GOV/c.json" '(qqq)')" in
-  *own-file*) ok "XFILE C: ...and in the QUOTED root (qqq) is STILL PROTECTED in residue.md at block $(sent_block_of "$GOV/c.json" '(qqq)') — from residue.md's own marker. The demotion is symmetric, and what it guarantees is that the quotation added nothing, NOT that the object was left unprotected" ;;
+  *own-file*) ok "XFILE C: ...and in the QUOTED root (qqq) is NOT LEFT UNPROTECTED in residue.md — it is anchored at block $(sent_block_of "$GOV/c.json" '(qqq)') by residue.md's own marker. THAT IS ALL THIS ASSERTION ESTABLISHES: it reads one root, and own-file provenance would appear in either, so it is not evidence that the quotation changed anything. Section (c4) carries the differential" ;;
   *)          no "XFILE C: in the quoted root (qqq)'s protection provenance is '$(gov_cross_prov "$GOV/c.json" '(qqq)')' — the object is not protected in its owning file at all" ;;
 esac
 # The differential is taken on the CITING side, where the two forms are actually
@@ -1827,9 +1867,19 @@ process.stdout.write([...new Set((s.cross_file_resolutions ?? [])
 # exit 7.
 #
 # THE CONDITION IS NOW `demotableElsewhere`: declared in exactly one other
-# governed file AND independently protected there by a NON-QUOTED marker — which
-# is exactly when the inbound protection fires. Both sides read the same
+# governed file AND NAMED THERE BY A NON-QUOTED MARKER. Both sides read the same
 # `markerNamingsIn` scan, so the two cannot drift apart.
+#
+# IT IS NOT "exactly when the inbound protection fires", AND THAT WORDING IS
+# WITHDRAWN HERE. Two facts kill it. `inboundProtections` SKIPS
+# `fileName === spec.name`, so it can NEVER protect an object in its own file —
+# the own-file (4a/4b) path does that. And the condition is SUFFICIENT, NOT
+# NECESSARY: `(S1)` is protected in this repository's residue.md by a marker
+# while `markedIn` is empty for it, because `markerNamingsIn` skips quoted
+# markers and (4b) does not. THE ACCURATE CLAIM: the condition is sufficient but
+# DELIBERATELY NARROWER than all possible owner-file protection, and the gap
+# FAILS CLOSED — an object protected at home in a way the predicate cannot see
+# keeps its anchor here instead of losing it. Section (c4) executes both sides.
 #
 # ALL FOUR FORMS ARE DRIVEN, not one representative. The third is a plain
 # markdown blockquote, which is how a standing rule is most conventionally
@@ -1848,7 +1898,18 @@ fs.writeFileSync(p, t.replace(from, process.env.CITE));
 }
 ORPH_BAD=0; ORPH_N=0
 ORPH_CITE_BLK=""
-while IFS= read -r cite; do
+# THE FOUR FORMS LIVE IN ONE ARRAY so section (c4) drives THE SAME FOUR STRINGS
+# against the PRE-FIX implementation. A second hand-copied list would let the
+# "vulnerable under 0d3a34f" claim and the "refuses at HEAD" claim drift onto
+# different inputs, which is precisely the shape of overclaim this packet exists
+# to remove.
+ORPH_FORMS=(
+'  The operator ruled that `(qqq)` "IS NOT CONSUMED AND MUST NOT BE MARKED SO" for this cycle.'
+'  Gate on `(qqq)`: `MUST NOT BE ARCHIVED` until cleared.'
+'  > `(qqq)` IS NOT CONSUMED AND MUST NOT BE MARKED SO — standing, this cycle.'
+'  it would have archived `(qqq)`, marked "IS NOT CONSUMED AND MUST NOT BE MARKED SO", at exit 0.'
+)
+for cite in "${ORPH_FORMS[@]}"; do
   [ -n "$cite" ] || continue
   ORPH_N=$((ORPH_N+1))
   GO="$GOV/orphan-$ORPH_N"
@@ -1871,12 +1932,7 @@ while IFS= read -r cite; do
     ORPH_BAD=$((ORPH_BAD+1))
     no "XFILE ADVERSARIAL form $ORPH_N: floor '$OF' (expected $ORPH_CITE_BLK), apply exited $ORC (expected 7), rule reached the archive: $LEAKED -- form: $cite"
   fi
-done <<'FORMS'
-  The operator ruled that `(qqq)` "IS NOT CONSUMED AND MUST NOT BE MARKED SO" for this cycle.
-  Gate on `(qqq)`: `MUST NOT BE ARCHIVED` until cleared.
-  > `(qqq)` IS NOT CONSUMED AND MUST NOT BE MARKED SO — standing, this cycle.
-  it would have archived `(qqq)`, marked "IS NOT CONSUMED AND MUST NOT BE MARKED SO", at exit 0.
-FORMS
+done
 [ "$ORPH_N" -eq 4 ] \
   && ok "XFILE ADVERSARIAL: all 4 quoted-live-rule forms were built and driven (a quotation-and-code-span form, a bare-code-span form, a plain markdown BLOCKQUOTE, and a narrative form)" \
   || no "XFILE ADVERSARIAL: only $ORPH_N of 4 forms were driven, so the sweep is not the sweep it claims to be"
@@ -1907,6 +1963,247 @@ GI_DECL="$(awk '/^## /{n++} /^- \*\*\(qqq\)/{print n; exit}' "$GI/build-os/memor
 [ "$(gov_json "$GOV/i-with.json" minimum_safe_keep)" = "$GI_DECL" ] \
   && ok "XFILE C2-WIDENING: adding the sibling that ASSERTS the rule moves residue.md's floor 1 -> $GI_DECL, the block that DECLARES (qqq) — this is the protection the single-file scan gave to neither file" \
   || no "XFILE C2-WIDENING: with the sibling present residue.md's floor is $(gov_json "$GOV/i-with.json" minimum_safe_keep), expected $GI_DECL"
+
+# ---- (c4) THE DEMOTION PREDICATE, AS A DIFFERENTIAL AND UNDER ITS TRUE NAME ---
+#
+# WHAT WAS MISSING AND WHY IT MATTERED. Fixture C's `*own-file*` check above is
+# NOT a differential: it reads one root, path (4) runs before path (5) and `add`
+# keys on `id|kind|block`, so BOTH roots yield `own-file` whatever the quotation
+# does. Its `ok()` string has been softened to what it establishes. Everything
+# the demotion predicate actually promises is asserted HERE instead, on roots
+# that differ from `plain` in EXACTLY ONE FACT, and every claim below is
+# EXECUTED — no counterfactual is stated that was not run.
+#
+# THE PREDICATE, WRITTEN OUT: an identity may be demoted in a QUOTING file only
+# when it is declared in exactly one OTHER governed file AND that owner carries a
+# NON-QUOTED protection marker NAMING it. It is reported as
+# `named_by_nonquoted_marker_in_owner`, and that is the whole of what it says.
+# IT IS NOT "protected in the owner". Owner-file protection also arrives through
+# the owning-declaration path, which `markerNamingsIn` cannot see — so the field
+# reads FALSE for objects that ARE protected at home. `(S1)` and `(o)` in this
+# repository's own residue.md are exactly that shape. The old name promised the
+# wider fact; the gap between the two names is the demotion this guard REFUSES to
+# take, and it FAILS CLOSED. Widening the predicate to make the old name true
+# would re-open the fail-open (c2) drives.
+#
+# SIX THINGS ARE DEMONSTRATED, EACH BY EXECUTION:
+#   1. the four known vulnerable forms ARCHIVE under the PRE-FIX implementation;
+#   2. the same four REFUSE under the shipped one;
+#   3. the genuinely safe demotion STILL WORKS;
+#   4. REMOVING the owner's independent marker RESTORES the refusal;
+#   5. protection in an UNRELATED THIRD FILE does not qualify;
+#   6. the reported field matches the NARROWER semantics exactly.
+gov_cross_field(){ # <json> <id> <field> -> the distinct values, sorted
+  node -e '
+const fs = require("fs");
+const s = JSON.parse(fs.readFileSync(process.argv[1], "utf8")).results[0].sentinel;
+process.stdout.write([...new Set((s.cross_file_resolutions ?? [])
+  .filter((c) => c.id === process.argv[2]).map((c) => String(c[process.argv[3]])))].sort().join(","));
+' "$1" "$2" "$3" 2>/dev/null
+}
+gov_resolutions(){ # <json> <id> -> the resolution strings, sorted, comma-joined
+  node -e '
+const fs = require("fs");
+const s = JSON.parse(fs.readFileSync(process.argv[1], "utf8")).results[0].sentinel;
+process.stdout.write((s.protected_objects ?? []).filter((o) => o.id === process.argv[2])
+  .map((o) => `${o.resolution}@${o.block_position}`).sort().join(","));
+' "$1" "$2" 2>/dev/null
+}
+
+C4NM="$GOV/c4-owner-marker-removed"; gov_root "$C4NM" owner-marker-removed
+C4OD="$GOV/c4-owner-decl-only";      gov_root "$C4OD" owner-decl-only
+C4TF="$GOV/c4-third-file";           gov_root "$C4TF" third-file
+
+# --- NON-VACUITY FIRST: each root differs from `plain` in ONE fact, executed ---
+# A differential whose roots differ in two places attributes the delta to the
+# wrong cause, which is how the check this section replaces went wrong.
+C4_NM_DEL="$(diff "$GB/build-os/memory/residue.md" "$C4NM/build-os/memory/residue.md" | grep -c '^<')"
+C4_NM_ADD="$(diff "$GB/build-os/memory/residue.md" "$C4NM/build-os/memory/residue.md" | grep -c '^>')"
+if [ "$C4_NM_ADD" -eq 0 ] && [ "$C4_NM_DEL" -ge 1 ] \
+   && ! grep -qF '(nnn)' "$C4NM/build-os/memory/residue.md" \
+   && grep -qF -- '- **(qqq)' "$C4NM/build-os/memory/residue.md" \
+   && cmp -s "$GB/build-os/packets/active_packet.md" "$C4NM/build-os/packets/active_packet.md" \
+   && cmp -s "$GB/build-os/memory/current_state.md"  "$C4NM/build-os/memory/current_state.md"; then
+  ok "XFILE C4 NON-VACUITY: owner-marker-removed is the plain root MINUS residue's (nnn) marker line and nothing else — $C4_NM_DEL line(s) removed, $C4_NM_ADD added, (qqq)'s declaration still present, active_packet.md and current_state.md byte-identical. Any floor delta below is caused by the owner's marker and by nothing else"
+else
+  no "XFILE C4 NON-VACUITY: owner-marker-removed differs from plain by -$C4_NM_DEL/+$C4_NM_ADD residue lines and/or a sibling file also moved — this is not a one-fact differential"
+fi
+C4_OD_ADD="$(diff "$C4NM/build-os/memory/residue.md" "$C4OD/build-os/memory/residue.md" | grep -c '^>')"
+C4_OD_DEL="$(diff "$C4NM/build-os/memory/residue.md" "$C4OD/build-os/memory/residue.md" | grep -c '^<')"
+if [ "$C4_OD_ADD" -eq 1 ] && [ "$C4_OD_DEL" -eq 0 ] \
+   && grep -qF 'MUST NOT BE ARCHIVED — protection carried by the declaration above' "$C4OD/build-os/memory/residue.md"; then
+  ok "XFILE C4 NON-VACUITY: owner-decl-only adds EXACTLY ONE line to that root — a non-quoted marker inside (qqq)'s own declaration bullet that NAMES NO IDENTITY, which is the owning-declaration protection shape"
+else
+  no "XFILE C4 NON-VACUITY: owner-decl-only differs from owner-marker-removed by -$C4_OD_DEL/+$C4_OD_ADD lines, expected exactly +1"
+fi
+if cmp -s "$C4NM/build-os/memory/residue.md" "$C4TF/build-os/memory/residue.md" \
+   && ! cmp -s "$C4NM/build-os/memory/current_state.md" "$C4TF/build-os/memory/current_state.md" \
+   && grep -qF -- '- **(t9)' "$C4TF/build-os/memory/current_state.md"; then
+  ok "XFILE C4 NON-VACUITY: third-file leaves residue.md byte-identical and puts the non-quoted marker naming (qqq) in current_state.md — a governed file that does NOT own (qqq)"
+else
+  no "XFILE C4 NON-VACUITY: the third-file root moved residue.md, or never planted the third-file marker"
+fi
+
+gov_report "$C4NM" active_packet 8 "$GOV/c4-nm.json"
+gov_report "$C4OD" active_packet 8 "$GOV/c4-od.json"
+gov_report "$C4TF" active_packet 8 "$GOV/c4-tf.json"
+gov_report "$C4OD" residue       14 "$GOV/c4-od-res.json"
+gov_report "$C4TF" residue       14 "$GOV/c4-tf-res.json"
+C4_CITE="$(awk '/^## /{n++} /\(p5\)/{print n; exit}' "$C4NM/build-os/packets/active_packet.md")"
+C4_DECL="$(awk '/^## /{n++} /^- \*\*\(qqq\)/{print n; exit}' "$C4OD/build-os/memory/residue.md")"
+
+# --- 3 + 4: the safe demotion still works; removing the marker restores refusal -
+C4_B_FLOOR="$(gov_json "$GOV/b.json" minimum_safe_keep)"
+C4_NM_FLOOR="$(gov_json "$GOV/c4-nm.json" minimum_safe_keep)"
+if [ "$C4_B_FLOOR" = "0" ] && [ -n "$C4_CITE" ] && [ "$C4_NM_FLOOR" = "$C4_CITE" ] \
+   && [ "$(gov_json "$GOV/b.json" quoted_references)" != "0" ] \
+   && [ "$(gov_json "$GOV/c4-nm.json" quoted_references)" = "0" ]; then
+  ok "XFILE C4 (3+4): DELETING ONE LINE FLIPS THE OUTCOME. With residue's non-quoted marker naming (qqq) present the SAME quotation is demoted — floor 0, $(gov_json "$GOV/b.json" quoted_references) quoted reference(s). Remove that one line and the demotion REFUSES: floor $C4_NM_FLOOR (the citing block) and 0 quoted references. The demotion is licensed by the owner's marker and by nothing else"
+else
+  no "XFILE C4 (3+4): floors are '$C4_B_FLOOR' with the owner marker and '$C4_NM_FLOOR' without it (expected 0 and $C4_CITE), quoted refs '$(gov_json "$GOV/b.json" quoted_references)'/'$(gov_json "$GOV/c4-nm.json" quoted_references)' (expected non-zero and 0)"
+fi
+
+# --- 6 + side (2): the field says what the predicate computes, and no more -----
+# owner-decl-only is the (S1)/(o) shape: PROTECTED AT HOME through the
+# owning-declaration path, and INVISIBLE to `markerNamingsIn`. Both halves are
+# read out of the reports rather than asserted.
+C4_OD_RES="$(gov_resolutions "$GOV/c4-od-res.json" '(qqq)')"
+C4_OD_FIELD="$(gov_cross_field "$GOV/c4-od.json" '(qqq)' named_by_nonquoted_marker_in_owner)"
+C4_OD_FLOOR="$(gov_json "$GOV/c4-od.json" minimum_safe_keep)"
+if [ "$C4_OD_RES" = "owning-declaration@$C4_DECL" ] && [ "$C4_OD_FIELD" = "false" ] \
+   && [ "$C4_OD_FLOOR" = "$C4_CITE" ]; then
+  ok "XFILE C4 (6, side 2): (qqq) IS protected in its own file — residue.md anchors it at block $C4_DECL with resolution 'owning-declaration' — and the reported field named_by_nonquoted_marker_in_owner is nevertheless FALSE, because no marker NAMES it there. THIS IS WHY THE FIELD MAY NOT BE CALLED protected_in_owner. The quoting file therefore keeps its anchor (floor $C4_OD_FLOOR, the citing block): a live object protected ONLY through the owner-file path stays conservatively anchored and is NOT demoted"
+else
+  no "XFILE C4 (6, side 2): owner-decl-only gives resolutions '$C4_OD_RES' (expected owning-declaration@$C4_DECL), field '$C4_OD_FIELD' (expected false), floor '$C4_OD_FLOOR' (expected $C4_CITE)"
+fi
+
+# --- 5: protection in an unrelated THIRD file does not qualify ----------------
+C4_TF_RES="$(gov_resolutions "$GOV/c4-tf-res.json" '(qqq)')"
+C4_TF_FIELD="$(gov_cross_field "$GOV/c4-tf.json" '(qqq)' named_by_nonquoted_marker_in_owner)"
+C4_TF_FLOOR="$(gov_json "$GOV/c4-tf.json" minimum_safe_keep)"
+case "$C4_TF_RES" in
+  cross-file*"@$C4_DECL") C4_TF_INBOUND=yes ;;
+  *)                      C4_TF_INBOUND=no  ;;
+esac
+if [ "$C4_TF_INBOUND" = "yes" ] && [ "$C4_TF_FIELD" = "false" ] && [ "$C4_TF_FLOOR" = "$C4_CITE" ]; then
+  ok "XFILE C4 (5): a NON-QUOTED marker naming (qqq) in current_state.md — a governed file that does NOT own it — really does protect (qqq) inbound at residue.md block $C4_DECL ('$C4_TF_RES'), and STILL does not qualify: named_by_nonquoted_marker_in_owner is FALSE and the quoting file keeps its anchor at floor $C4_TF_FLOOR. The predicate reads the CANONICAL OWNER, not 'somewhere in the governed set'"
+else
+  no "XFILE C4 (5): third-file gives resolutions '$C4_TF_RES' (expected a cross-file anchor at block $C4_DECL), field '$C4_TF_FIELD' (expected false), floor '$C4_TF_FLOOR' (expected $C4_CITE)"
+fi
+
+# --- 6 (positive pole): the field is TRUE exactly where the demotion happened --
+C4_B_FIELD="$(gov_cross_field "$GOV/b.json" '(qqq)' named_by_nonquoted_marker_in_owner)"
+C4_NM_FIELD="$(gov_cross_field "$GOV/c4-nm.json" '(qqq)' named_by_nonquoted_marker_in_owner)"
+if [ "$C4_B_FIELD" = "true" ] && [ "$C4_NM_FIELD" = "false" ]; then
+  ok "XFILE C4 (6, both poles): named_by_nonquoted_marker_in_owner is TRUE in exactly the one root where a non-quoted marker names (qqq) in its canonical owner, and FALSE in all three roots where one does not (marker removed / owning-declaration only / third file) — the field tracks the predicate across all four roots, not a wider fact"
+else
+  no "XFILE C4 (6, both poles): the field reads '$C4_B_FIELD' with the owner marker and '$C4_NM_FIELD' without it, expected true and false"
+fi
+# ...and the OVERCLAIMING NAME IS GONE FROM THE LIVE SURFACE, not aliased. A
+# compatibility alias carrying the old name would reproduce the exact defect.
+# The names may still be NAMED IN COMMENTS — a break nobody documented is a worse
+# break — so what is forbidden is an occurrence in CODE position, and that is
+# what is counted: every surviving mention must sit on a comment line.
+C4_OLDNAME_CODE="$(grep -nE 'protected_in_owner|protectedAtHome' "$SENT" \
+                   | grep -vcE '^[0-9]+:[[:space:]]*(\*|//|/\*)')"
+C4_OLDNAME_DOC="$(grep -cE 'protected_in_owner|protectedAtHome' "$SENT")"
+C4_OLDNAME_RPT=0
+for j in "$GOV/b.json" "$GOV/c4-nm.json" "$GOV/c4-od.json" "$GOV/c4-tf.json" "$GOV/f.txt"; do
+  [ -f "$j" ] && grep -qF 'protected_in_owner' "$j" && C4_OLDNAME_RPT=$((C4_OLDNAME_RPT+1))
+done
+if [ "$C4_OLDNAME_CODE" -eq 0 ] && [ "$C4_OLDNAME_RPT" -eq 0 ] && [ "$C4_OLDNAME_DOC" -gt 0 ]; then
+  ok "XFILE C4 (6): protected_in_owner / protectedAtHome occur in ZERO code positions in the shipped tool and in ZERO of the 5 emitted reports checked, surviving only on $C4_OLDNAME_DOC comment line(s) that document the break. The rename is a rename, not an alias: a consumer keying on the old field now reads undefined and fails loudly instead of reading a false answer"
+else
+  no "XFILE C4 (6): $C4_OLDNAME_CODE code-position occurrence(s) of the old names remain in the tool and $C4_OLDNAME_RPT emitted report(s) still carry protected_in_owner ($C4_OLDNAME_DOC total mentions) — a misleading name was kept for compatibility, or the break was left undocumented"
+fi
+# ...and the incompatibility is DECLARED, not left for a consumer to discover.
+C4_SCHEMA="$(gov_json "$GOV/b.json" sentinel_report_schema)"
+if [ -n "$C4_SCHEMA" ] && [ "$C4_SCHEMA" -ge 2 ] 2>/dev/null \
+   && grep -q 'SENTINEL_REPORT_SCHEMA' "$SENT"; then
+  ok "XFILE C4 (6): every sentinel report carries sentinel_report_schema $C4_SCHEMA, so the field rename is a VERSIONED break a consumer can branch on — the honest handling of a backward incompatibility, as against an alias that would keep the misleading name readable"
+else
+  no "XFILE C4 (6): the report declares no usable sentinel_report_schema (got '$C4_SCHEMA'), so the field rename is a silent break"
+fi
+
+# --- side (2), the ORPHAN-root statement: residue's floor must STAY 1 ---------
+# THE MIRROR OF (c3)'s 1 -> 6. The `inbound` and `orphan` roots carry a
+# BYTE-IDENTICAL residue.md — asserted, not assumed — and differ only in whether
+# the sibling's citing marker is BARE or QUOTED. Bare moves the floor 1 -> 6.
+# Quoted must leave it at 1: a quotation contributes NO inbound protection, so
+# residue must not be credited with protection nobody asserted. It is measured in
+# the orphan root precisely because residue protects nothing itself there, so
+# own-file protection cannot mask the answer the way it does in `plain`.
+C4ORPH="$GOV/c4-orphan"; gov_root "$C4ORPH" orphan
+C4ORPH_ALONE="$GOV/c4-orphan-alone"; mkdir -p "$C4ORPH_ALONE/build-os/memory"
+cp "$C4ORPH/build-os/memory/residue.md" "$C4ORPH_ALONE/build-os/memory/residue.md"
+gov_report "$C4ORPH_ALONE" residue 9 "$GOV/c4-orph-alone.json"
+gov_report "$C4ORPH"       residue 9 "$GOV/c4-orph-with.json"
+C4_ORPH_ALONE="$(gov_json "$GOV/c4-orph-alone.json" minimum_safe_keep)"
+C4_ORPH_WITH="$(gov_json "$GOV/c4-orph-with.json" minimum_safe_keep)"
+C4_ORPH_DECL="$(awk '/^## /{n++} /^- \*\*\(qqq\)/{print n; exit}' "$C4ORPH/build-os/memory/residue.md")"
+if cmp -s "$GI/build-os/memory/residue.md" "$C4ORPH/build-os/memory/residue.md" \
+   && [ "$C4_ORPH_ALONE" = "1" ] && [ "$C4_ORPH_WITH" = "1" ] \
+   && [ -n "$C4_ORPH_DECL" ] && [ "$C4_ORPH_DECL" -gt 1 ]; then
+  ok "XFILE C4 (side 2, mirror of c3): the orphan and inbound roots carry a BYTE-IDENTICAL residue.md and differ only in whether the sibling's marker is quoted. Bare moved the floor 1 -> $GI_DECL; QUOTED leaves it at $C4_ORPH_WITH, alone and with the sibling present, even though (qqq)'s declaration sits at block $C4_ORPH_DECL. A quotation adds no inbound protection, and the floor is not inflated by one"
+else
+  no "XFILE C4 (side 2): orphan residue floor is '$C4_ORPH_ALONE' alone and '$C4_ORPH_WITH' with the quoting sibling (expected 1 and 1, declaration at block '$C4_ORPH_DECL'), or the orphan/inbound residues are not byte-identical"
+fi
+
+# --- 1 + 2: THE PRE-FIX IMPLEMENTATION, EXECUTED — not described --------------
+# The counterfactual is RUN. `0d3a34f` is the second build commit of the packet
+# that introduced the demotion, before `1918fc3` narrowed the condition from
+# `resolvedElsewhere` to `demotableElsewhere`. When that blob is reachable it is
+# executed verbatim; when it is not (a shallow clone, an exported tree) the same
+# one-predicate difference is applied to a COPY of the shipped source and the
+# provenance is stated in the assertion rather than glossed. EITHER WAY THE
+# VULNERABLE TOOL IS RUN, on THE SAME FOUR FORM STRINGS section (c2) drives.
+C4_PREFIX_REV="0d3a34f"
+C4_PREFIX="$GOV/c4-prefix-rotate-memory.mjs"
+C4_PREFIX_PROV=""
+if git -C "$SRC" show "$C4_PREFIX_REV:build-os/maintenance/rotate-memory.mjs" > "$C4_PREFIX" 2>/dev/null \
+   && [ -s "$C4_PREFIX" ]; then
+  C4_PREFIX_PROV="the committed $C4_PREFIX_REV blob, executed verbatim"
+else
+  sed 's/demotableElsewhere\.has(id)/resolvedElsewhere.has(id)/' "$SENT" > "$C4_PREFIX"
+  C4_PREFIX_PROV="a one-predicate revert of the shipped source ($C4_PREFIX_REV unreachable)"
+fi
+if grep -q 'every((id) => resolvedElsewhere.has(id))' "$C4_PREFIX" \
+   && ! grep -q 'every((id) => demotableElsewhere.has(id))' "$C4_PREFIX"; then
+  ok "XFILE C4 (1): the pre-fix implementation under test is non-vacuous — $C4_PREFIX_PROV — and its (4b) demotion is conditioned on resolvedElsewhere (merely DECLARED elsewhere), which is the fail-open, not on demotableElsewhere"
+else
+  no "XFILE C4 (1): the pre-fix implementation ($C4_PREFIX_PROV) does not carry the resolvedElsewhere condition, so nothing vulnerable is being driven"
+fi
+C4_PRE_ARCHIVED=0; C4_PRE_N=0; C4_FIXED_REFUSED=0
+for cite in "${ORPH_FORMS[@]}"; do
+  C4_PRE_N=$((C4_PRE_N+1))
+  C4GO="$GOV/c4-prefix-$C4_PRE_N"
+  gov_orphan_root "$C4GO" "$cite" || continue
+  sent_prereg "$GOV/c4-prefix-$C4_PRE_N.prereg.json" active_packet 1 "$C4GO/build-os/packets/active_packet.md"
+  node "$C4_PREFIX" --root "$C4GO" --file active_packet --keep 1 --apply \
+       --pre-registration "$GOV/c4-prefix-$C4_PRE_N.prereg.json" \
+       > "$GOV/c4-prefix-$C4_PRE_N.out" 2>"$GOV/c4-prefix-$C4_PRE_N.err"
+  C4PRC=$?
+  if [ "$C4PRC" -eq 0 ] && [ -f "$C4GO/build-os/memory/archive/active_packet.archive.md" ] \
+     && grep -qF -- '(qqq)' "$C4GO/build-os/memory/archive/active_packet.archive.md"; then
+    C4_PRE_ARCHIVED=$((C4_PRE_ARCHIVED+1))
+  fi
+  # THE SAME FORM, THE SAME KEEP, THE SAME PRE-REGISTRATION, against the SHIPPED
+  # tool, in a FRESH root so the pre-fix run cannot have disturbed it.
+  C4GF="$GOV/c4-fixed-$C4_PRE_N"
+  gov_orphan_root "$C4GF" "$cite" || continue
+  sent_prereg "$GOV/c4-fixed-$C4_PRE_N.prereg.json" active_packet 1 "$C4GF/build-os/packets/active_packet.md"
+  node "$SENT" --root "$C4GF" --file active_packet --keep 1 --apply \
+       --pre-registration "$GOV/c4-fixed-$C4_PRE_N.prereg.json" \
+       > "$GOV/c4-fixed-$C4_PRE_N.out" 2>"$GOV/c4-fixed-$C4_PRE_N.err"
+  C4FRC=$?
+  [ "$C4FRC" -eq 7 ] && [ ! -f "$C4GF/build-os/memory/archive/active_packet.archive.md" ] \
+    && C4_FIXED_REFUSED=$((C4_FIXED_REFUSED+1))
+done
+if [ "$C4_PRE_N" -eq 4 ] && [ "$C4_PRE_ARCHIVED" -eq 4 ] && [ "$C4_FIXED_REFUSED" -eq 4 ]; then
+  ok "XFILE C4 (1+2): all 4 of the known vulnerable forms ARCHIVE the live, canonically declared, marked-non-consumable (qqq) at EXIT 0 under the pre-fix implementation ($C4_PREFIX_PROV), and all 4 REFUSE at exit 7 under the shipped one with no archive written at all. The counterfactual was executed on both sides, not asserted"
+else
+  no "XFILE C4 (1+2): of $C4_PRE_N forms, $C4_PRE_ARCHIVED archived under the pre-fix implementation ($C4_PREFIX_PROV, expected 4) and $C4_FIXED_REFUSED refused under the shipped one (expected 4)"
+fi
 
 # ---- (d) FIXTURE D — two canonical declarations REFUSE -------------------------
 GD="$GOV/d"; gov_root "$GD" dup

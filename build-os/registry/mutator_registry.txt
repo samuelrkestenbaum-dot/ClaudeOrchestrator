@@ -102,9 +102,9 @@ runtime_authority: execute
 deployment_mode: human_confirmed
 implementation_status: load_bearing
 empirical_status: red_driven
-evidence_refs: build-os/maintenance/rotate-memory.mjs:2349; build-os/maintenance/rotate-memory.mjs:2373
+evidence_refs: build-os/maintenance/rotate-memory.mjs:2405; build-os/maintenance/rotate-memory.mjs:2429
 receipt_behavior: none of its own — it prints a plan and an applied summary to stdout, and the only durable proof it ran is the archive file it created plus git. THE MOST CONSEQUENTIAL WRITE IN THIS SYSTEM EMITS NO RECEIPT.
-notes: The rename at :2373 is the whole reason this census exists. A staging file is written at :2349, read back, verified byte-for-byte and checked against an append-only precondition, and only then renamed ONTO the live memory file — so the write is as careful as it could be while still being a replacement. `maint.rotation_conservation` already classified the PLAN's conservation property; nothing classified the rename. Note the asymmetry that makes this the sharpest entry here: the tool that rewrites Build OS memory is the tool whose own execution leaves the least evidence.
+notes: The rename at :2429 is the whole reason this census exists. A staging file is written at :2405, read back, verified byte-for-byte and checked against an append-only precondition, and only then renamed ONTO the live memory file — so the write is as careful as it could be while still being a replacement. `maint.rotation_conservation` already classified the PLAN's conservation property; nothing classified the rename. Note the asymmetry that makes this the sharpest entry here: the tool that rewrites Build OS memory is the tool whose own execution leaves the least evidence.
 
 mutator: MUT-0002-swarm-merge-commit
 control_id: swarm.merge_commit_execution

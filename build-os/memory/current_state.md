@@ -79,8 +79,22 @@ legal `--keep` retains it.
   `no tags` because `tests/release_metadata_tests.sh:322` requires it, so the residue item is
   annotated rather than rewritten. Whether the tag was created with an explicit go is not
   determinable from here and no claim is made.
-- **Build/test command:** `bash tests/build_os_tests.sh` (2302 checks; no network; temp dirs)
-  — **2302 as of `gravito_cross_file_sentinel_identity_a`.** The delta is **+37**, all of it
+- **Build/test command:** `bash tests/build_os_tests.sh` (2314 checks; no network; temp dirs)
+  — **2314 as of `gravito_truthful_name_cleanup_a` (`PACKET-0044`).** The delta is **+12**,
+  all of it in `tests/build_os_maintenance_tests.sh` **191 -> 203**, and all of it in one
+  new section (c4): the fixture-C differential that was missing. It renames the demotion
+  predicate's reported field from `protected_in_owner` — which was emitted **false** for
+  `(S1)` and `(o)`, both of which ARE protected in their owner — to
+  `named_by_nonquoted_marker_in_owner`, which is what the predicate computes. **No predicate
+  was widened**; widening would re-open the fail-open the previous packet closed. The break
+  is carried by `sentinel_report_schema: 2` and **no alias**. The four known vulnerable
+  forms are executed under the PRE-FIX implementation (`0d3a34f`) and **archive at exit 0**,
+  and under the shipped one and **refuse at exit 7**. Every other chained suite is **+0**,
+  confirmed by comparing the per-suite CHAINED **vector** across two solo runs after an
+  anchored `pgrep -fa '^bash tests/'` returned empty (`DEFECT-0013`). `CHANGELOG.md` carries
+  the matching literal `**2314 passed**` (unsplit) under `## [Unreleased]`.
+  — **THE PREVIOUS FIGURE, KEPT AS THE RECORD IT WAS:** 2302 as of
+  `gravito_cross_file_sentinel_identity_a`. That delta was **+37**, all of it
   in `tests/build_os_maintenance_tests.sh` **154 -> 191**, and it arrived in two parts.
   **+28 at the build commits** (section 11, CROSS-FILE IDENTITY RESOLUTION: six red-driven
   fixtures each executed in BOTH directions, plus the stable-id and floor-invariance
@@ -93,8 +107,8 @@ legal `--keep` retains it.
   five-way identity enum is proved to be EMITTED, not merely declared. Every other chained
   suite is **+0**, confirmed by comparing the per-suite CHAINED **vector** across two solo
   runs after an anchored `pgrep -fa '^bash tests/'` returned empty (`DEFECT-0013`).
-  `CHANGELOG.md` carries the matching literal `**2302 passed**` (unsplit) under
-  `## [Unreleased]`.
+  `CHANGELOG.md` still carries that entry's own literal `**2302 passed**` (unsplit), which
+  is the record of what THAT packet measured and is not the live total.
   — **THE PREVIOUS FIGURE, KEPT AS THE RECORD IT WAS:** 2265 as of
   `PACKET-0042-process-doctrine-correction`, whose delta was **+37**:
   `tests/gate_depth_tests.sh` **79 -> 113** (the fourth-stage exception

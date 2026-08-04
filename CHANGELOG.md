@@ -14,6 +14,60 @@ deprecation cycle. Pin a commit if you need stability.
 
 ### In flight (not landed at the released commit)
 
+- **A FIELD THAT PROMISED MORE THAN ITS PREDICATE DELIVERS IS RENAMED, NOT
+  WIDENED — AND THE BREAK IS VERSIONED RATHER THAN ALIASED.** The sentinel's
+  cross-file resolution reported `protected_in_owner`. That name claims the
+  identity is protected in the file that owns it; the value only ever answered
+  *"the owner carries a non-quoted marker naming it"*, which is strictly
+  narrower. Owner-file protection also arrives through the owning-declaration
+  path, which the marker scan cannot see — so `(S1)` and `(o)`, both anchored in
+  `residue.md`'s own block 25 and both genuinely protected there, were reported
+  `false`. The field is now `named_by_nonquoted_marker_in_owner` and the local is
+  `namedByNonquotedMarkerInOwner`.
+
+  **THE PREDICATE ITSELF IS UNCHANGED, DELIBERATELY.** Teaching the marker scan
+  to see owning-declaration and structural protections would have made the old
+  name true and **widened the demotion at the same time**, re-opening the
+  fail-open the previous packet closed. The condition stays **sufficient, not
+  necessary** — deliberately narrower than all possible owner-file protection —
+  and **the gap fails closed**: an object protected at home in a way the
+  predicate cannot see keeps its anchor in the quoting file instead of losing it.
+
+  **NO COMPATIBILITY ALIAS.** `protected_in_owner` is removed from the emitted
+  record rather than kept pointing at the same value, because an alias carrying
+  the misleading name would reproduce the exact defect the rename exists to
+  remove. Reports now carry `sentinel_report_schema` (**2**), so a consumer
+  pinned to the old key gets `undefined` and a version numeral that says why —
+  a loud break instead of a quiet wrong answer.
+
+  **AND THE FIXTURE-C DIFFERENTIAL THAT WAS MISSING IS BUILT AND EXECUTED.** The
+  old `*own-file*` check was not a differential at all: both roots yield
+  `own-file` because the own-file path runs first and the collector keys on
+  `id|kind|block`. Its message is softened to what it establishes, and a new
+  section drives the claim on roots that differ from the safe root in **exactly
+  one fact**, asserted by diff before anything is measured. Six things are
+  demonstrated by execution, none by description: the four known vulnerable forms
+  **archive a live, canonically declared, marked-non-consumable object at exit 0
+  under the pre-fix implementation (`0d3a34f`, run verbatim)** and **refuse at
+  exit 7 under the shipped one**; the genuinely safe demotion still works;
+  deleting the owner's one marker line **restores the refusal**; a non-quoted
+  marker naming the object in an **unrelated third governed file** really does
+  protect it inbound and **still does not qualify**; and the reported field is
+  **true in exactly the one root where the predicate holds and false in the other
+  three**. The mirror of the earlier `1 -> 6` inbound proof is added too: with a
+  byte-identical owner file, a **quoted** sibling marker leaves that file's floor
+  at **1** where a bare one moved it to 6.
+
+  **TWO SURVIVING OVERCLAIMS ARE RECONCILED.** *"which is exactly when the
+  inbound protection fires"* is withdrawn from this changelog and from the test
+  commentary; it was already corrected in the tool. It is false twice over: the
+  inbound scan skips `fileName === spec.name`, so it can never protect an object
+  in its own file, and the condition is sufficient rather than necessary.
+
+  Suite **2314 passed**, 0 failed (+12 from the base `6454220`, all in
+  `tests/build_os_maintenance_tests.sh` **191 → 203**; every other chained suite
+  +0, confirmed by comparing the per-suite CHAINED vector across two solo runs).
+
 - **THE ROTATION SENTINEL RESOLVES IDENTITY ACROSS THE GOVERNED MEMORY SET, AND
   THE REFUSAL IT WIDENS IS NOT THE ONE IT WEAKENS.** `SENTINEL-C2` treated every
   sibling-file reference as UNRESOLVED because resolution was single-file scoped
@@ -65,9 +119,19 @@ deprecation cycle. Pin a commit if you need stability.
   pre-registration and **archived a live, canonically declared,
   marked-non-consumable object at exit 0**; the pre-packet tool refused all four
   at exit 7. The condition is now that the identity be declared in exactly one
-  other governed file **and independently protected there by a non-quoted
-  marker** — which is exactly when the inbound protection fires. Both sides read
+  other governed file **and named there by a non-quoted marker**. Both sides read
   one scan, so the two cannot drift. All four forms are driven as a red drive.
+
+  **THAT CONDITION IS NOT *"exactly when the inbound protection fires"*, AND
+  THAT WORDING IS WITHDRAWN HERE** — it survived this entry after being
+  corrected in the tool, and it is false twice over. `inboundProtections` skips
+  `fileName === spec.name`, so it can **never** protect an object in its own
+  file; the own-file path does that. And the condition is **sufficient, not
+  necessary**: `(S1)` is protected in `residue.md` by a marker naming it while
+  the marker scan reports nothing for it, because that scan skips quoted markers
+  and the own-file path does not. **The accurate claim: the condition is
+  sufficient but deliberately narrower than all possible owner-file protection,
+  and the gap fails closed.**
 
   **AND THE HONEST NEGATIVE RESULT.** `build-os/memory/residue.md` is still
   **not rotatable**, and cross-file resolution neither could nor did change
