@@ -4,27 +4,27 @@
 > the builder implements exactly this and nothing else; the archivist clears it
 > on close. One packet at a time.
 
-## IN FLIGHT — `gravito_truthful_name_cleanup_a` (declared 2026-08-04)
+## CLOSED — NOTHING IN FLIGHT — `gravito_truthful_name_cleanup_a` closed 2026-08-04
 
-- **Packet id:** `PACKET-0044-truthful-name-cleanup` — staged by the previous
-  close and **DECLARED HERE, IN ITS OWN COMMIT, BEFORE ANY IMPLEMENTATION EDIT.**
-- **This declaration is commit 1 because the last packet's did not exist.**
-  `DEFECT-0011-undeclared-active-packet` / `OCCURRENCE-0020` was recorded against
-  the ORCHESTRATOR for that omission, and the `1` that
-  `bandwidth.active_packet_singleton` now reads comes from the `**Packet id:**`
-  bullet above and from nothing else.
-- **Lane `substantive`. Depth 2** — builder, then qa ‖ reviewer CONCURRENTLY.
-  **Budget: ≤2 build commits (this one is the first) + at most 1 fix commit.**
-- **THREE ITEMS, AND NOTHING ELSE.** (A) rename the overclaiming
-  `protected_in_owner` field and its local to a name the predicate can pay for;
-  (B) add the missing fixture-C differential, executed on both sides; (C)
-  reconcile the two surviving *"exactly when the inbound protection fires"*
-  overclaims. **NO PREDICATE IS WIDENED** — that would re-open the fail-open.
+- **Packet id (CLOSED):** `PACKET-0044-truthful-name-cleanup`. Receipt:
+  `build-os/receipts/gravito_truthful_name_cleanup_a.md`. **Verdict PASS** — qa
+  **GREEN**, reviewer **PASS**, **NO FIX ROUND.** Base `6454220`, HEAD `ab5d533`;
+  `61bee02` (declaration) + `ab5d533` (implementation) are **2 BUILD commits and
+  0 FIX commits** — inside the typed budget with the fix slot **UNSPENT**, which
+  is the first time in this sequence nothing was spent on correction.
+- **The bullet above deliberately does NOT match the declaration pattern**
+  `bandwidth.active_packet_singleton` counts, so the guard reads **0 in flight**
+  again — and **zero is still PERMITTED**. `OCCURRENCE-0005`'s lower bound remains
+  unbuilt, so a clean guard here is not evidence of anything.
 - **THIS EDIT IS LINE-COUNT-NEUTRAL ABOVE THE `ANC-0003` SITE ON PURPOSE** —
   `build-os/packets/active_packet.md:89#ANC-0003` is embedded as a RESOLVED line
   number in the committed kernel projection and `tests/memory_kernel_tests.sh`
-  §18 compares it with `cmp -s`. **21 lines replace 21 lines**; the previous
-  close record stays where it is, below `:89`.
+  §18 compares it with `cmp -s`. **21 lines replace 21 lines.**
+- **NEXT — NOTHING IS STAGED, AND THAT IS THE RULING.** Per the operator, this
+  was the **LAST GOVERNANCE PACKET**; work returns to **Repository Core and live
+  provider execution**. The standing backlog in `current_state.md` is a **RECORD,
+  NOT A QUEUE** — nothing on it is scheduled and the next packet is the
+  operator's to cut. **Do not stage a governance successor here by default.**
 
 ## Branch base
 

@@ -337,8 +337,8 @@ legal `--keep` retains it.
 
 ### Last close
 
-- **Last closed packet:** `gravito_p3b_count_derivation_a`
-  (`PACKET-0041-count-derivation`). The full close record — id derivation,
+- **Last closed packet:** `gravito_truthful_name_cleanup_a`
+  (`PACKET-0044-truthful-name-cleanup`). The full close record — id derivation,
   base, commits, verdict, and what it made true — is the newest history block
   below, preserved verbatim where it was written.
   **THIS LITERAL IS GATE-PINNED AND MUST STAY IN BLOCK 1.**
@@ -410,6 +410,50 @@ legal `--keep` retains it.
 
 ## Where we are — phase state and the ceiling in force
 
+- **AS OF 2026-08-04, LAST CLOSE `gravito_truthful_name_cleanup_a`
+  (`PACKET-0044-truthful-name-cleanup`) — DECLARED FIRST IN ITS OWN COMMIT, AND THE FIRST CLOSE OF
+  THIS SEQUENCE WITH THE FIX SLOT UNSPENT.** Verdict **PASS**: qa **GREEN**, reviewer **PASS**,
+  **no fix round and therefore no fix commit**. Base `6454220` (the PUSHED TIP), HEAD `ab5d533`;
+  `61bee02` (declaration) + `ab5d533` (implementation) = **2 BUILD + 0 FIX**, inside the typed
+  budget. Suite **2314 / 0**. **`DEFECT-0011` DID NOT RECUR** — `active_packet.md` declared **1**
+  in flight for the packet's whole life, which is the remedy the previous close named.
+- **THIS WAS THE LAST GOVERNANCE PACKET, BY THE OPERATOR'S RULING.** Work returns to **Repository
+  Core and live provider execution**. The standing backlog below is a **RECORD, NOT A QUEUE** —
+  nothing on it is scheduled, and cutting the next packet is the operator's act, not the
+  orchestrator's default.
+- **THE HEADLINE: THE RENAME IS HONEST AND NO PREDICATE WAS WIDENED — PROVEN BY STRIPPING THE
+  COMMENTS, NOT ARGUED.** qa removed every comment from `rotate-memory.mjs` at `6454220` and at
+  `ab5d533` and diffed the pure code: **the entire delta is 4 lines** — the
+  `SENTINEL_REPORT_SCHEMA = 2` export, the local rename, the field rename, the emission.
+  `markerNamingsIn`, `markerIsQuoted`, `buildIdentityIndex` and `inboundProtections` have **ZERO**
+  code changes. The reviewer confirmed independently by normalised extraction. **The fail-open
+  `1918fc3` closed STAYS CLOSED.**
+- **`protected_in_owner` -> `named_by_nonquoted_marker_in_owner`; the local `protectedAtHome` ->
+  `namedByNonquotedMarkerInOwner`. NO ALIAS.** The backward incompatibility is carried by
+  `sentinel_report_schema: 2` (`SENTINEL_REPORT_SCHEMA`), so a consumer pinned to the old key gets
+  `undefined` **plus a version numeral that says why**. **Zero code positions** for the old names;
+  they survive on **6 comment lines documenting the break**.
+- **WHY NO-ALIAS IS RIGHT, AND THE REVIEWER'S REASON IS BETTER THAN THE ONE IN THE BRIEF: THE BREAK
+  IS FAIL-CLOSED IN DIRECTION.** The field's `true` licensed the **riskier** action (demotion), so
+  an external consumer that branched on truthiness and now reads `undefined` **stops demoting — it
+  becomes more conservative, not less**. Relocating the problem would require the opposite polarity.
+- **THE TRAJECTORY JUDGEMENT, VERBATIM, BECAUSE IT IS THE SEQUENCE'S CLOSING FINDING.** Asked
+  whether this reversed *"safety claims about safety claims faster than enforcement"*, the reviewer
+  answered **"Locally reversed — modestly, and in the right currency."** The fix was a rename plus
+  the **DELETION** of a claim, not a new mechanism: enforcement surface unchanged, one false label
+  gone. The fixture-C differential converted a **described** property into executed assertions on
+  roots whose one-fact difference is itself proved by `diff`/`cmp` before measurement —
+  **"enforcement added, not claim added, and the first thing in this sequence that raised the
+  enforcement side of the ratio rather than the claim side."**
+- **AND WHAT IT DID NOT REVERSE, WHICH IS THE THING TO LEAVE BEHIND.** `rotate-memory.mjs` grew
+  **56 lines for a rename, roughly 50 of them comment**, and `CHANGELOG.md` grew **54** for the same
+  rename. **The narration-to-code ratio is unchanged and was out of scope.**
+  **"The sentinel is correct, and the remaining excess is prose, not predicates."**
+- **HEADROOM, RE-DERIVED AT THIS CLOSE AND NOT QUOTED FROM BELOW.** This file is **197226 B**
+  against the **204800 B** ceiling — **7,574 B of headroom**. **The `31,102 B` figure in the bullet
+  below was true at `6454220` and is STALE**: `ab5d533` and this close both wrote here. **DERIVE THE
+  SIZE BEFORE YOU WRITE; ROTATION #4 IS NEXT.** `residue.md` is unchanged at **204369 B / 431 B of
+  headroom** and is **STILL UNROTATABLE at floor 25 of 25 — DO NOT WRITE IT.**
 - **AS OF 2026-08-04, LAST CLOSE `gravito_cross_file_sentinel_identity_a` — NO PACKET ID, BECAUSE
   THE PACKET WAS NEVER DECLARED.** Verdict **PASS-AS-FIXED** (qa GREEN, reviewer fix-then-pass, 4
   items). Nothing is in flight; `active_packet.md` declares **0** packet ids and stages
@@ -688,6 +732,96 @@ legal `--keep` retains it.
   cause: a complete fix list whose contents are of a kind the re-review rules will not let you
   close narrowly.** Recorded as a **contract gap**, not as a defect of the packet or the reviewer,
   and left for the operator/orchestrator.
+
+## History — `gravito_truthful_name_cleanup_a` — THE LAST GOVERNANCE PACKET, and the first close with the FIX SLOT UNSPENT
+
+**The long form is `build-os/receipts/gravito_truthful_name_cleanup_a.md`, which has no byte
+ceiling. This block is short because this file has less headroom than it looks like it has and
+`residue.md` is FROZEN, so the detail lives in the receipt by necessity, not by choice.**
+
+- **Closed 2026-08-04:** `gravito_truthful_name_cleanup_a` (`PACKET-0044-truthful-name-cleanup`).
+  Lane `substantive`, **Depth 2** — builder, then qa ‖ reviewer **CONCURRENTLY**; **no third stage
+  and no fourth**. Verdict **PASS** (qa GREEN, reviewer PASS). Base `6454220`, HEAD `ab5d533`;
+  `61bee02` + `ab5d533` = **2 BUILD commits, 0 FIX commits**. **Second eyes: NONE — TWENTY-THIRD
+  consecutive single-model packet**, derived from `ls build-os/receipts/gravito_*.md | wc -l` = 23
+  with this receipt; `tool_router.md:368` advanced **22 -> 23** in this close commit because
+  `DC-0001` binds that numeral to the receipt store and `scan-controls counts` refuses at exit 2
+  the moment they disagree.
+- **CONDITION 1 — THE CORRECTION THIS CLOSE OWES THE PRIOR RECORD.** The block below states, as a
+  live outstanding item, that *"`tests/build_os_maintenance_tests.sh:1831` and `CHANGELOG.md:69`
+  are OUTSIDE the archivist's write boundary and still carry it — carried into `PACKET-0044`"*.
+  **THAT SENTENCE IS NOW FALSE AS A LIVE STATEMENT, AND THIS PACKET IS WHY: `ab5d533` DISCHARGED
+  BOTH.** The overclaim *"which is exactly when the inbound protection fires"* is **WITHDRAWN at
+  both sites** and replaced with the accurate claim — sufficient, **deliberately narrower** than
+  all possible owner-file protection, and **the gap FAILS CLOSED**. **The prior block is NOT
+  rewritten**: a close record corrects; it does not edit history. **The three citations in it are
+  repointed BY CONTENT, and checked for SEMANTICS, here:**
+  `tests/build_os_maintenance_tests.sh:1831 -> :1873` and `CHANGELOG.md:69 -> :125` — both now the
+  **WITHDRAWAL** rather than the overclaim, which is the semantically correct successor for a
+  record that cited them as *still carrying it* — and `rotate-memory.mjs:2617 -> :2673`
+  (`export function delimiterMatchedNothing`, byte-identical to its base content).
+- **CONDITION 2 — A PROVENANCE GAP IN WORDING, NOT A NUMERIC DISCREPANCY.** qa **could not
+  reproduce the builder's per-suite vector digest** (`c5b6fe58e8dcf9e3…`), because the builder
+  stated a digest **without stating the extraction recipe**; qa tried six normalisation variants
+  and got six different values. qa then verified the **substantive** property under its own stated
+  recipe — `grep -E '^  CHAINED: '` over the full capture -> **20 lines**, sha256
+  `0d5b87a84bd2fe42…`, **byte-identical across both runs**. **Reproduced again at this close under
+  the same recipe, same digest.** **STANDING RULE FROM HERE: state the recipe beside any digest.**
+- **CONDITION 3 — AN EVIDENCE-SCOPE NIT OF EXACTLY THE SPECIES THIS SEQUENCE EXISTS TO ELIMINATE,
+  RECORDED AND DELIBERATELY NOT FIXED.** `tests/build_os_maintenance_tests.sh:2120-2123` checks
+  **one** report (`b.json`) and then states the property **universally** (*"every sentinel report
+  carries `sentinel_report_schema`"*). **The claim is TRUE** — qa verified it across 3 live records
+  spanning ALLOW and REFUSE, and it is a single unconditional assignment in `evaluateSentinel` —
+  **but the assertion does not establish it.** Generalising from n=1 is the shape.
+- **CONDITION 4 — A MESSAGE COUPLED TO ASSERTIONS IT DOES NOT ITSELF GUARD. RECORDED, NOT FIXED.**
+  `XFILE C4 (6, both poles)`'s `ok()` string names **four** roots while its condition tests **two**
+  (`b.json`, `c4-nm.json`). **Nothing is unproven** — the other two roots are separately asserted
+  with real `no` branches immediately above — but the string outruns its own guard.
+- **THE CITATION TRAP, DEMONSTRATED RATHER THAN ASSERTED.** Left un-repointed, `:2617` would have
+  landed on `case "--max-bytes":` and `:2625` on the `--keep must be an integer >= 1` throw — **and
+  BOTH would still have RESOLVED and passed the vacuity check.** The drift was created by this
+  packet's own **+56 lines** and repaired before shipping. All five targets verified
+  **byte-identical to their base content AND semantically correct for the record citing them**.
+  `evidence_ref` total **374 -> 376 DERIVED** with the registry's own recipe; the delta is exactly
+  the two new fitted floors `:2121` / `:2146`, both **registered** to `tests.nonvacuity_minimums`
+  rather than excluded.
+- **THE DEMONSTRATIONS ARE EXECUTED, NOT DESCRIBED.** Demonstration 1 ran the **historical tool
+  verbatim** — the `git show 0d3a34f:…` branch fired, **not** the sed fallback, confirmed by the
+  emitted provenance string. The four form strings live in **one shared `ORPH_FORMS` array**
+  (`tests/build_os_maintenance_tests.sh:1906`) iterated by both (c2) and (c4), so demonstrations 1
+  and 2 **cannot land on different inputs**. Demonstration 5 is **not vacuous**: the inbound
+  protection genuinely fires — resolution
+  `cross-file (named in build-os/memory/current_state.md:12)@6`, a real anchor at residue block 6 —
+  while the field stays `false` and the floor stays 5.
+- **PRE-EXISTING AND NOT TO BE RE-DISCOVERED AS NEW: `MISMATCHES.md:81 -> rotate-memory.mjs:1006`
+  DRIFTED FURTHER.** Base content `declaredAt.set(...)`, HEAD content `archived[i] = …`. Already
+  recorded as **stale at base `74575ee`**; **not fixed under this close, by instruction.**
+- **`residue.md` STAYS FROZEN AND NOTHING IN THE NEW PROSE IMPLIES OTHERWISE.** The reviewer
+  grepped every added line: every residue mention is either the `(S1)`/`(o)` **owning-declaration**
+  shape used to justify the rename, or a **fixture path**. The CHANGELOG's *"HONEST NEGATIVE
+  RESULT — still not rotatable, floor 25 of 25"* paragraph survives **unmodified**. Blob
+  `01517ad2c30d447949a98d0b6db9b8d6b538d5a9` at `6454220`, `61bee02`, `ab5d533` and this close.
+- **PROOF.** Suite **2314 / 0**, **twice solo** in the foreground after an anchored
+  `pgrep -fa '^bash tests/'` returned empty, exit codes captured directly and **never piped through
+  `tail`**; per-suite CHAINED vector **byte-identical across runs** (`DEFECT-0013`). Attribution
+  **by execution** against base `6454220` (2302/0): `tests/build_os_maintenance_tests.sh`
+  **191 -> 203 (+12)**, **all 19 other chained suites +0**. **Commit-1 isolation `61bee02` ->
+  2302/0.** `RELEASE_METADATA_LIVE_SUITE=1` **44/0**, live total **2314** matching `CHANGELOG.md`
+  (one unsplit literal) and this file. `scan-controls check/counts/anchors/surfaces` all **exit 0**;
+  `ANC-0003` RESOLVED at `build-os/packets/active_packet.md:89`. `bandwidth-check` **exit 0**.
+  Census **105** (`grep -c '^control: '`), declared mismatches **22**
+  (`grep -c '^authority_mismatch: declared'` — ANCHOR THE PATTERN; unanchored returns 27 and is
+  **wrong**), re-authorisations **0**. Declaration-first confirmed by inspection: `61bee02` touches
+  **one file**, **21 lines for 21** in the head block and **4 for 4** in the branch-base prose, file
+  length **1887 -> 1887**.
+- **GIT FACTS THAT AGREE, FOR ONCE.** Per-commit `--numstat` sums over `61bee02`+`ab5d533` are
+  **8 distinct paths / 495 insertions / 64 deletions**, and the **net union diff
+  `6454220..ab5d533` is IDENTICAL** — 8 / 495 / 64 — because **no path was touched by both
+  commits** (8 path-visits over 8 paths). This is the first row in `packet_metrics.tsv` where the
+  two conventions do not have to be reconciled.
+- **NOTHING PUSHED, MERGED, PR'D, TAGGED OR DEPLOYED.** `6454220` is the pushed tip; `61bee02`,
+  `ab5d533` and this close commit are **local and unpushed**. No `git config`, no amend, no rebase,
+  no secrets. **No byte ceiling was raised anywhere, including `DEFAULT_MAX_BYTES`.**
 
 ## History — `gravito_cross_file_sentinel_identity_a` — THE LAST CLOSE, and an HONEST NEGATIVE RESULT
 
