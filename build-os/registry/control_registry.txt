@@ -688,7 +688,7 @@ inputs: a file's parsed block count and whether its original text has any non-wh
 output: a WARNING on stderr naming the file and the delimiter that matched nothing; totalBlocks and originalHasContent in --json
 owning_module: build-os/maintenance/rotate-memory.mjs
 consuming_policies: a human reading stderr, or a caller reading --json; deliberately consumed by no policy that changes the exit code
-evidence_refs: build-os/maintenance/rotate-memory.mjs:2569; build-os/maintenance/rotate-memory.mjs:2625
+evidence_refs: build-os/maintenance/rotate-memory.mjs:2617; build-os/maintenance/rotate-memory.mjs:2625
 failure_behavior: none — "the exit code is deliberately unchanged"
 rollback_behavior: n/a
 promotion_requirement: it should not be promoted: an empty or not-yet-written memory file parses to zero blocks legitimately, so failing a run on it would be wrong

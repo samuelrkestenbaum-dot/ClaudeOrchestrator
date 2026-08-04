@@ -396,15 +396,31 @@ legal `--keep` retains it.
 
 ## Where we are — phase state and the ceiling in force
 
-- **AS OF 2026-08-04, LAST CLOSE `gravito_process_doctrine_correction_a`
-  (`PACKET-0042-process-doctrine-correction`), PASS-AS-FIXED.** Nothing is in flight;
-  `active_packet.md` declares **0** packet ids and stages `PACKET-0043-derived-restatement-sweep`
-  **undeclared**. Suite **2265/0**. **The working contract's commit budget is now typed —
-  (build ≤2, fix ≤1) — and the first packet to run under it landed at 3 of 3, inside it.**
-- **THIS FILE IS AT 4.4 KB OF HEADROOM AGAINST THE 204800 B CEILING AND THE NEXT CLOSE WILL LIKELY
-  NOT FIT. SAY IT HERE RATHER THAN DISCOVER IT MID-CLOSE.** `rotate-memory.mjs` governs it,
-  `--keep` is validated `>= 1` so block 1 (standing truth) is unreachable by any legal rotation, and
-  **no ceiling has been raised by any close.** The remedy is a rotation, not a bigger number.
+- **AS OF 2026-08-04, LAST CLOSE `gravito_cross_file_sentinel_identity_a` — NO PACKET ID, BECAUSE
+  THE PACKET WAS NEVER DECLARED.** Verdict **PASS-AS-FIXED** (qa GREEN, reviewer fix-then-pass, 4
+  items). Nothing is in flight; `active_packet.md` declares **0** packet ids and stages
+  `PACKET-0043-derived-restatement-sweep` and `PACKET-0044` **undeclared**. Suite **2302/0**.
+  Base `74575ee`, HEAD `1918fc3`; commits `905b69e` + `0d3a34f` (2 BUILD) + `1918fc3` (1 FIX) =
+  **3 of 3, inside the typed budget**, and the fix commit is **NOT** a breach.
+- **THE UNDECLARED PACKET IS THE PROCESS FINDING, AND IT IS THE ORCHESTRATOR'S.**
+  `active_packet.md:7` read `CLOSED — … NOTHING IN FLIGHT` for the whole life of the packet.
+  Recorded as `DEFECT-0011-undeclared-active-packet` / `OCCURRENCE-0020`. The builder flagged it and
+  **correctly refused to fix it**: the head block is line-count-pinned by `ANC-0003` at `:89`, so a
+  builder writing the declaration would have re-fired `DEFECT-0001` at that exact site.
+  `bandwidth.active_packet_singleton` still **permits zero** — the lower bound named as the remedy
+  at `OCCURRENCE-0005` remains unbuilt, five occurrences later.
+- **THIS FILE HAS ROOM AGAIN: 31,102 B OF HEADROOM (173,698 B against the 204,800 B ceiling), UP
+  FROM 3,642 B.** Rotation #3 at `--keep 15` did it, under the new cross-file resolver, window
+  `[14, 16]` executed at both bounds. `rotate-memory.mjs` governs it, `--keep` is validated `>= 1`
+  so block 1 (standing truth) is unreachable by any legal rotation, and **no ceiling has been
+  raised by any close.** The remedy was a rotation, not a bigger number — and it worked.
+- **`build-os/memory/residue.md` IS STILL UNROTATABLE AND THAT IS THE PACKET'S HEADLINE.** Floor
+  **25 of 25**, blob `01517ad2c30d447949a98d0b6db9b8d6b538d5a9`, **204,369 B / 2,379 lines, 431 B
+  of headroom**. qa swept **every keep 1–25**: keeps 1–24 trip **C1**, keep 25 trips **C7** at 431 B
+  having archived **nothing**. **C2 was never the binding constraint** — `(o)` and `(S1)` are
+  declared in `residue.md`'s OWN block 25 and are live. **The diagnosis that motivated the packet
+  was wrong, and the packet proved that against its own interest.** DO NOT WRITE THIS FILE.
+- **`active_packet.md` is ALLOW, but KEEP-CONDITIONALLY:** floor **32**, so `--keep 15` REFUSES.
 
 - **PHASE CHANGE — RECORD THIS BEFORE THE PACKET LOG. THE GOVERNANCE-ONLY PHASE IS OVER.** The
   operator has ended it and issued **BUILD AUTHORITY** with an **ANTI-STALL RULE**: build around
@@ -659,7 +675,108 @@ legal `--keep` retains it.
   close narrowly.** Recorded as a **contract gap**, not as a defect of the packet or the reviewer,
   and left for the operator/orchestrator.
 
-## History — `gravito_process_doctrine_correction_a` — THE LAST CLOSE, and the first packet to land INSIDE the budget it installed
+## History — `gravito_cross_file_sentinel_identity_a` — THE LAST CLOSE, and an HONEST NEGATIVE RESULT
+
+**The long form is `build-os/receipts/gravito_cross_file_sentinel_identity_a.md`, which has no byte
+ceiling. `residue.md` is FROZEN at 431 B of headroom, so the residue items are in the receipt and in
+`active_packet.md` rather than in `residue.md`. THAT PLACEMENT IS DISPLACEMENT FORCED BY A FROZEN
+FILE, NOT A CHOICE.**
+
+- **Closed 2026-08-04:** `gravito_cross_file_sentinel_identity_a`. **NO PACKET ID — never declared.**
+  Lane `substantive`. **Depth 4 = `mandatory_full_regate`**, announced and legitimate: the fix list
+  arrived **complete in one installment**, the packet was **correctly scoped**, and the fixes altered
+  the **demotion predicate** — load-bearing logic the re-review rules forbid closing narrowly.
+  **Not a defect.** Verdict **PASS-AS-FIXED**: qa **GREEN**, reviewer **fix-then-pass (4 items)**,
+  all four discharged in the archivist's close commit. Base `74575ee`; HEAD at the verdict `1918fc3`.
+- **THE HEADLINE IS NEGATIVE AND THE PACKET PROVED IT AGAINST ITS OWN INTEREST.** `residue.md` is
+  **still unrotatable**: floor **25 of 25**, every keep **1–25** swept — keeps 1–24 trip **C1**, keep
+  25 trips **C7** at **431 B having archived nothing**. **C2 WAS NEVER THE BINDING CONSTRAINT.**
+  `(o)` and `(S1)` are declared in `residue.md`'s **own block 25** and are live, so cross-file
+  resolution could not move that floor. **The diagnosis that motivated the packet was wrong.** The
+  tool's C7 text now names the dead end and the operator remedies instead of leaving them to be
+  derived.
+- **WHAT IT DID ACHIEVE.** Cross-file identity resolution, a **two-sided win proven by execution**:
+  C2's inbound half verified **1 → 6** in a root where the owner protects nothing itself, so
+  own-file protection cannot be the answer. **`current_state.md` relieved by rotation #3** — headroom
+  **3,642 → 31,102 B**, at `--keep 15`, window `[14, 16]` executed at **both** bounds.
+  **`active_packet.md` went from permanently unrotatable to ALLOW** — keep-conditionally: floor
+  **32**, so `--keep 15` REFUSES.
+- **AND IT CAUGHT ITS OWN FAIL-OPEN BEFORE SHIPPING.** The demotion was first conditioned on the
+  identity being merely **DECLARED** elsewhere. A declaration is not a marker, and
+  `inboundProtections` skips quoted markers too, so a quoted live rule protected the object in
+  **NEITHER** file: **four** ordinary prose forms — one a plain markdown blockquote — each dropped a
+  floor 5 → 0 and **archived a live, canonically declared, marked-non-consumable object at exit 0**.
+  The base tool refused all four at exit 7. **Caught by a SINGLE-MODEL chain, and only because the
+  builder was pushed back on.**
+- **THE REVIEWER'S SUMMARY JUDGEMENT, VERBATIM, BECAUSE IT IS THE MOST USEFUL THING PRODUCED THIS
+  SESSION:** *"this codebase is accumulating safety claims about safety claims faster than it is
+  accumulating enforcement."* **Three instances in this packet alone** of a name promising more than
+  its predicate delivers. The `markerNamingsIn` **"one scan, two consumers"** pattern is the right
+  antidote — and it **shipped with a new overclaiming label attached** ("safe iff").
+- **THE FOUR CLOSE CONDITIONS, DISCHARGED IN THE CLOSE COMMIT.** (1) The **"safe iff" overclaim** is
+  false twice over — `inboundProtections` skips `fileName === spec.name` so it can NEVER protect an
+  object in its own file, and the condition is **sufficient, not necessary** ((S1) is protected in
+  `residue.md` by a marker naming it while `markedIn` is empty). Corrected at the **three sites
+  inside `build-os/`**; **`tests/build_os_maintenance_tests.sh:1831` and `CHANGELOG.md:69` are
+  OUTSIDE the archivist's write boundary and still carry it** — carried into `PACKET-0044`.
+  **No predicate was widened; widening would re-open the hole.** (2) `control_registry.txt:691`
+  cited `rotate-memory.mjs:2569` (`--keep must be an integer >= 1`) for
+  `maint.rotation_zero_block_warning` — **content-preserving but semantically WRONG**; repointed
+  **by content** to **`:2617`** (`export function delimiterMatchedNothing`). (3)
+  `rotate-memory.mjs:1168-1173` said **three** forms where **four** were built and driven —
+  corrected; it **understated**, which is the safe direction. (4) `1918fc3`'s message says
+  *"residue.md untouched at blob 01517ad2, 431 B"* — the blob is exact, but **431 B is the HEADROOM,
+  not the size**: the file is **204,369 B / 2,379 lines**. **Immutable commit message — recorded as
+  a later correction, history NOT rewritten.**
+- **THE TWO GATES APPEARED TO DISAGREE ON THE REPOINTING AND DID NOT.** qa verified every repoint was
+  **content-preserving** (old line bytes = new line bytes); the reviewer found all five `.mjs`
+  citations moved by exactly **+150** and the `.sh` pair by **+208**, faithfully carrying forward a
+  target that was **already wrong at `0d3a34f`**. **Both true. CONTENT-PRESERVING IS NOT SEMANTICALLY
+  CORRECT** — this session's recurring defect class appearing **inside the repointing method itself**.
+  `:673`'s `:2161` now lands on the `EXIT.CEILING` throw while its former content sits at `:2693`:
+  defensible, but **inherited from an offset rather than chosen**, and recorded as such.
+- **THE DEMOTION MOVES NO FLOOR ON THIS TREE.** The reviewer **disabled it entirely** and re-derived
+  every floor: **identical (25 / 5 / 32)**. It fires twice and is **not currently paying for its risk
+  surface**. Bounded and correct — but the fact is on the record.
+- **THREE LIMITATIONS RECORDED RATHER THAN BURIED.** `MISMATCHES.md:81` cites
+  `rotate-memory.mjs:1006`, which at base `74575ee` was a bare ` */` — **already stale at base**; the
+  **shallow-anchor fallback**; and **C8 not gated on `armed`**. Plus the CHANGELOG's narrowing of
+  *"cannot be defeated by rewording"* from the **guard** to the **demotion**: `SENTINEL_MARKERS` is
+  still **seven fixed phrases**, and the entry now says so.
+- **`HISTORICAL_REFERENCE` IS FIXTURE-ONLY.** No governed file carries `## ARCHIVED BATCH`; the tool
+  writes it only into `*.archive.md`, outside the governed set. The enum is *"five classes emitted"*
+  **in a test root**, not on the tree.
+- **REFUSAL-CODE SET, qa's CORRECTION:** HEAD fires **`C1 C3`** where base fires **`C1 C2 C3`**. C2
+  correctly no longer fires because the identity **resolves cross-file** — the widening working, not
+  a regression.
+- **THE ORCHESTRATOR WAS WRONG ABOUT THE M5 COUNTS, AND SAID SO.** It asserted they went stale after
+  rotation #3. Both gates measured them **identical at `74575ee`, `0d3a34f` and `1918fc3`**
+  (22→19 pins 3→0; 5→3 pins 2→0), and `residue.md` is **byte-identical across the whole range**
+  (blob `01517ad2…` at all four commits), so it **cannot** have drifted. **They were already stale at
+  base.** No on-tree store carries the label `M5`; it is the gates' shorthand, and that is recorded
+  rather than resolved into a citation the archivist would have had to invent.
+- **PROOF.** Suite **2302/0**, twice solo, per-suite vectors **byte-identical**. Attribution by
+  execution: `0d3a34f → 1918fc3` moves **exactly one vector line** (`build_os_maintenance_tests.sh`
+  **182 → 191**); `74575ee → 1918fc3` is **+37**, all of it in that suite (**154 → 191**), all 19
+  others **+0**, root-level **+0**. Section 11 counted directly = **37 PASS / 0 FAIL**. **Commit-1
+  isolation `905b69e` → 2293/0.** `RELEASE_METADATA_LIVE_SUITE=1` **44/0**, live total **2302**
+  matching. `scan-controls` ×4 and `bandwidth-check` all **exit 0**. Census **105**, declared
+  mismatches **22** (anchored; the unanchored grep returns 27 and is wrong), re-authorisations **0**.
+  Rotation #3 reconstruction **byte-exact at md5 `9f312f93…`**; `--keep 15` window executed at both
+  bounds. Archive append-only verified by `cmp` over the correct **37,829 B** prefix, **zero gap**;
+  the next **280 B** are exactly the batch banner (**37,829 + 280 = 38,109**).
+- **`build-os/memory/residue.md` NOT WRITTEN** — FROZEN, blob
+  `01517ad2c30d447949a98d0b6db9b8d6b538d5a9`, identical at `74575ee`, `905b69e`, `0d3a34f`, `1918fc3`
+  and the close. **No byte ceiling was raised anywhere.**
+- **Second eyes NONE — TWENTY-SECOND consecutive packet**, derived (`ls build-os/receipts/gravito_*.md
+  | wc -l` = 22 with this receipt); `tool_router.md:368` advanced **21 → 22** in the close commit,
+  because `DC-0001` binds that numeral to the receipt store and `scan-controls counts` refuses at
+  exit 2 the moment they disagree. **A packet whose central defect was a FAIL-OPEN was gated by one
+  model.**
+- **NOTHING PUSHED, MERGED, PR'D, TAGGED OR DEPLOYED.** `5d96031` is the pushed tip; the three packet
+  commits and the close commit are **local and unpushed**.
+
+## History — `gravito_process_doctrine_correction_a` — the first packet to land INSIDE the budget it installed
 
 **The long form is `build-os/receipts/gravito_process_doctrine_correction_a.md`, which has no byte
 ceiling. This file has 10 KB of it and `residue.md` has 431 B, which is why this block is short and

@@ -1083,11 +1083,11 @@ export function buildIdentityIndex(root, readFile) {
  * Every NON-QUOTED protection marker in `text`, with the identities it names.
  *
  * ONE SCAN, TWO CONSUMERS, AND THAT IS THE POINT. `inboundProtections` uses it
- * to decide what a sibling's marker protects, and the quoted-marker demotion in
- * `scanProtectedObjects` uses it to decide whether an object is protected in the
- * file that owns it. Those two must agree exactly: the demotion is only safe
- * when the inbound protection really does fire. Deriving them from one function
- * is what makes "safe iff" a property of the code rather than of a comment.
+ * to decide what a SIBLING's marker protects, and the quoted-marker demotion in
+ * `scanProtectedObjects` uses it to ask whether the OWNER of a cross-file
+ * identity carries a non-quoted marker naming it. THAT IS NOT "safe iff": the
+ * demotion condition is SUFFICIENT, NOT NECESSARY, and deliberately narrower
+ * than "protected at home". The gap fails CLOSED — see `markerIsQuoted`.
  *
  * QUOTED OCCURRENCES ARE EXCLUDED HERE. A quotation of a rule is not an
  * assertion of one, in this file or in any other, so it neither protects across
@@ -1165,20 +1165,20 @@ export function inboundProtections(spec, resolution) {
  * object is still protected where it lives". A DECLARATION IS NOT A MARKER.
  * `inboundProtections` skips quoted markers too, so a quoted live marker
  * protected the object in NEITHER file, and the object dropped out of
- * `protected_object_ids` in the file that OWNS it. Executed, not argued: three
+ * `protected_object_ids` in the file that OWNS it. Executed, not argued: FOUR
  * ordinary prose forms of a genuinely live rule — including a plain markdown
  * blockquote, the most conventional way anyone writes a standing rule — each
  * dropped a floor from 5 to 0, and the rotation ran to completion at exit 0 with
  * a valid pre-registration, ARCHIVING a live, canonically declared,
- * marked-non-consumable object. The base tool refused all three at exit 7.
+ * marked-non-consumable object. The base tool refused all four at exit 7.
  *
- * THE CONDITION IS NOW THE RIGHT ONE: every identity the marker names must be
- * declared in exactly one OTHER governed file AND that file must carry a
- * NON-QUOTED marker naming it — which is exactly the condition under which
- * `inboundProtections` really does protect it there. Both sides read the same
- * `markerNamingsIn` scan, so "safe iff" is a property of the code and not of
- * this paragraph. What remains lost on a demotion is only protection of the
- * block doing the quoting, and now that is true rather than asserted.
+ * THE CONDITION IS NOW NARROWER AND FAILS CLOSED: every identity the marker
+ * names must be declared in exactly one OTHER governed file AND that file must
+ * carry a NON-QUOTED marker naming it. Demotion therefore IMPLIES the owner
+ * carries a non-quoted marker naming the identity, which IMPLIES the identity
+ * is anchored at its declaration block there. SUFFICIENT, NOT NECESSARY, and
+ * NOT "safe iff": `inboundProtections` skips `fileName === spec.name`, so it
+ * can NEVER protect an object in its own file — the own-file path does that.
  *
  * A quoted marker that names nothing, or names something this file declares, or
  * names something nothing declares, or names something no other file
@@ -1459,8 +1459,8 @@ export function scanProtectedObjects(text, spec, resolution) {
         const owners = (crossIndex.get(id) ?? []).filter((o) => o.file !== spec.name);
         if (owners.length === 1) {
           resolvedElsewhere.add(id);
-          // Protected AT HOME? Same scan `inboundProtections` consumes, so this
-          // is true exactly when the inbound protection really fires.
+          // Marker-named in the OWNER — the same scan `inboundProtections` reads.
+          // SUFFICIENT for demotion, NOT NECESSARY: narrower on purpose, closed.
           const protectedAtHome = (markedIn.get(id) ?? new Set()).has(owners[0].file);
           if (protectedAtHome) demotableElsewhere.add(id);
           crossFileResolved.push({

@@ -4,34 +4,34 @@
 > the builder implements exactly this and nothing else; the archivist clears it
 > on close. One packet at a time.
 
-## CLOSED — `gravito_process_doctrine_correction_a` (closed 2026-08-04) — NOTHING IN FLIGHT
+## CLOSED — `gravito_cross_file_sentinel_identity_a` (closed 2026-08-04) — NOTHING IN FLIGHT
 
-- **Packet id (CLOSED):** `PACKET-0042-process-doctrine-correction` — **MINTED, and
-  collision-checked BEFORE the mint rather than after.** The live band is
-  `PACKET-0001`..`PACKET-0041`, `PACKET-0041` is the highest allocation
-  predating this packet, `git log -S'PACKET-0042' --all --oneline` returns **0
-  commits** and `grep -rlF 'PACKET-0042' . --exclude-dir=.git` **0 files**.
-- **Lane:** `substantive`. **Depth 2** — builder, then qa ‖ reviewer.
-- **This commit is the declaration, and it is commit 1**, so that
-  `bandwidth.active_packet_singleton` reads **1 in flight** for the whole life
-  of this packet: no measurement taken inside a packet ABOUT its own commit
-  budget may be taken against a packet file lying about what is in flight.
-  `DEFECT-0011-undeclared-active-packet` sits at `OCCURRENCE-0005` and the
-  remedy it names — a LOWER bound on the same cardinality check — does not exist.
-- **THIS EDIT IS LINE-COUNT-NEUTRAL ABOVE THE `ANC-0003` SITE ON PURPOSE.**
-  `DEFECT-0001-stale-line-reference` fired at this exact site at each of the
-  last two declarations: the committed kernel projection embeds
-  `build-os/packets/active_packet.md:89#ANC-0003` as a RESOLVED line number and
-  `tests/memory_kernel_tests.sh` §18 compares it with `cmp -s`. This
-  declaration replaces the previous one **in place, line for line**, so the
-  anchor site does not move; the full record is APPENDED AT THE END, below `:89`.
+- **Packet id (NONE — NEVER DECLARED): this packet has no id, and that is the
+  process finding of its close.** No id was minted, this file still read
+  `CLOSED — gravito_process_doctrine_correction_a … NOTHING IN FLIGHT` at all
+  three packet commits, and the builder was dispatched against it anyway.
+  Recorded as `DEFECT-0011-undeclared-active-packet` / `OCCURRENCE-0020`,
+  **attributed to the ORCHESTRATOR**: declaration is the orchestrator's commit.
+- **The builder flagged it and correctly REFUSED to fix it.** This head block is
+  line-count-pinned by `ANC-0003` at `:89`, and a builder rewriting it mid-packet
+  would have re-fired `DEFECT-0001-stale-line-reference` at the exact site that
+  class has fired at for three consecutive declarations. Refusing was correct.
+- **Lane `substantive`. Depth 4 — `mandatory_full_regate`**, announced and
+  legitimate. qa **GREEN**; reviewer **fix-then-pass (4 items)**. Commits
+  `905b69e` + `0d3a34f` (2 BUILD) + `1918fc3` (1 FIX) = **3 of 3, INSIDE the
+  typed budget**; the fix commit is **NOT** logged as a doctrine breach.
+- **THIS EDIT IS LINE-COUNT-NEUTRAL ABOVE THE `ANC-0003` SITE ON PURPOSE** —
+  `build-os/packets/active_packet.md:89#ANC-0003` is embedded as a RESOLVED line
+  number in the committed kernel projection and `tests/memory_kernel_tests.sh`
+  §18 compares it with `cmp -s`. **21 lines replace 21 lines**; the full close
+  record is APPENDED AT THE END, below `:89`.
 
 ## Branch base
 
-Branched at `5d96031` on `claude/project-handoff-merge-ramhds`, verified with
-`git merge-base HEAD 5d96031` → `5d96031`, **before the first edit**. `5d96031`
+Branched at `74575ee` on `claude/project-handoff-merge-ramhds`, verified with
+`git merge-base HEAD 74575ee` → `74575ee`, **before the first edit**. `5d96031`
 is the PUSHED TIP; every commit of this packet is LOCAL and UNPUSHED, and no
-push/merge/PR/tag/deploy go has been given or asked for. (Previous base `3ec519b`.)
+push/merge/PR/tag/deploy go has been given or asked for. (Previous base `5d96031`.)
 
 ## What `gravito_current_state_reblock_a` must make true
 
@@ -1819,3 +1819,69 @@ here rather than worked around by editing the declared base.
 - **Explicitly NOT in it:** installing `~/.claude/CLAUDE.md` (external mutation, operator go), and
   any change to `build-os/memory/residue.md` (FROZEN, blob `01517ad2c30d447949a98d0b6db9b8d6b538d5a9`,
   431 B headroom, unrotatable at every legal keep).
+
+---
+
+## CLOSE RECORD — `gravito_cross_file_sentinel_identity_a` (2026-08-04)
+
+**Appended BELOW `:89` so the `ANC-0003` content site does not move.** The long form is
+`build-os/receipts/gravito_cross_file_sentinel_identity_a.md`, which has no byte ceiling.
+
+- **Verdict PASS-AS-FIXED.** qa **GREEN**; reviewer **fix-then-pass (4 items)**, all four
+  discharged in the archivist's close commit rather than in a fourth packet commit — a decision
+  about **where the bytes land**, not a claim the findings were trivial.
+- **Base `74575ee`**, verified `git merge-base HEAD 74575ee` → `74575ee`. HEAD at the verdict
+  `1918fc3`. **`5d96031` is the pushed tip**; every commit from `820fd14` up is LOCAL and UNPUSHED.
+- **Commits: `905b69e` + `0d3a34f` (2 BUILD) + `1918fc3` (1 FIX) = 3 of 3, inside the typed budget
+  (build ≤2, fix ≤1).** `1918fc3` is the **permitted** fix commit and is deliberately **not** logged
+  as a breach — the doctrine installed by `PACKET-0042` forbids exactly that.
+- **Depth 4 = `mandatory_full_regate`**, announced and legitimate: the reviewer's fix list arrived
+  **complete in one installment**, the packet was **correctly scoped**, and the fixes altered the
+  **demotion predicate itself** — load-bearing logic the contract's own re-review rules forbid
+  closing by targeted confirmation. **Not recorded as a defect.**
+
+### THE HEADLINE IS A NEGATIVE RESULT, AND THE PACKET PROVED IT AGAINST ITS OWN INTEREST
+
+**`build-os/memory/residue.md` IS STILL UNROTATABLE.** Floor **25 of 25**. qa cleared C2 the tool's
+own way and then swept **every keep 1–25**: keeps 1–24 trip **C1**, keep 25 trips **C7** at **431 B**
+having archived **nothing**. **C2 WAS NEVER THE BINDING CONSTRAINT.** `(o)` and `(S1)` are declared
+in `residue.md`'s **own block 25** and are live, so cross-file resolution could not and did not move
+that floor. **The diagnosis that motivated this packet was wrong.** The tool's C7 text now names the
+dead end and the operator remedies rather than leaving the reader to derive them.
+
+### WHAT IT DID ACHIEVE
+
+- **Cross-file identity resolution, proven a two-sided win.** C2's inbound half verified **1 → 6** in
+  a root where the owner protects nothing itself, so own-file protection cannot be the answer.
+- **`current_state.md` relieved by rotation #3** — headroom **3,642 → 31,102 B** (size 201,158 →
+  173,075 B at `0d3a34f`), at `--keep 15`, window `[14, 16]` executed at **both** bounds.
+- **`active_packet.md` went from permanently unrotatable to ALLOW** — but **keep-conditional**:
+  floor **32**, so `--keep 15` REFUSES.
+- **The packet caught its own FAIL-OPEN before shipping.** A live, canonically declared,
+  non-consumable object was being **archived at exit 0** under **four** ordinary prose forms, one of
+  them a plain markdown blockquote. Caught by a **single-model chain**, and only because the builder
+  was pushed back on.
+
+### STAGED, NOT DECLARED — `PACKET-0044` (deferred by the doctrine's own re-cut remedy)
+
+Collision-checked **before** the mint: `grep -rlF 'PACKET-0044' . --exclude-dir=.git` → **0 files**,
+`git log -S'PACKET-0044' --all --oneline` → **0 commits**. A second fix round is a **re-cut** and
+stage 5 is closed, so both items below were **recorded, not built**.
+
+1. **`build-os/maintenance/rotate-memory.mjs:1476` — `protected_in_owner` is emitted `false` for
+   objects that ARE protected in their owner** (`(S1)` and `(o)`, both anchored in `residue.md`
+   block 25). The predicate actually computes *named by a non-quoted marker in the owner*.
+   **THE FIX IS TO RENAME the field and the local at `:1464` (`protectedAtHome`) — e.g.
+   `marker_named_in_owner`. IT IS NOT TO WIDEN `markerNamingsIn`**, which would widen the demotion
+   and re-open the hole. This is the packet's own disease — a name promising more than its predicate
+   delivers — and it deserves a gated fix, not bookkeeping.
+2. **`tests/build_os_maintenance_tests.sh:1795-1797` — the `*own-file*` check is not a
+   differential**, and its `ok()` string claims it is. Both roots yield `own-file` by
+   ordering/dedupe. The executable statement belongs in the **`orphan`** root: `residue.md`'s floor
+   must stay **1**, not rise to the `(qqq)` declaration block.
+3. **Carried in from this close (OUT OF THE ARCHIVIST'S WRITE BOUNDARY):** the "safe iff" overclaim
+   survives at **`tests/build_os_maintenance_tests.sh:1831`** and **`CHANGELOG.md:69`**, both
+   **outside `build-os/`**. The three in-boundary sites were corrected in the close commit; these
+   two were **not**, because the archivist may only write under `build-os/`. See receipt §8.
+
+`PACKET-0043-derived-restatement-sweep` remains **staged and undeclared** from the previous close.
