@@ -4,18 +4,18 @@
 > the builder implements exactly this and nothing else; the archivist clears it
 > on close. One packet at a time.
 
-## CLOSED — `gravito_current_state_reblock_a` (closed 2026-08-03) — SEE THE LATE DECLARATION BELOW
+## IN FLIGHT — `gravito_process_doctrine_correction_a` (declared 2026-08-04)
 
-- **Packet id (CLOSED):** `PACKET-0038-current-state-reblock` — **MINTED, and
+- **Packet id:** `PACKET-0042-process-doctrine-correction` — **MINTED, and
   collision-checked BEFORE the mint rather than after.** The live band is
-  `PACKET-0001`..`PACKET-0037`, `PACKET-0037` is the highest allocation
-  predating this packet, `git log -S'PACKET-0038' --all --oneline` returns **0
-  commits** and `grep -rlF 'PACKET-0038' . --exclude-dir=.git` **0 files**.
+  `PACKET-0001`..`PACKET-0041`, `PACKET-0041` is the highest allocation
+  predating this packet, `git log -S'PACKET-0042' --all --oneline` returns **0
+  commits** and `grep -rlF 'PACKET-0042' . --exclude-dir=.git` **0 files**.
 - **Lane:** `substantive`. **Depth 2** — builder, then qa ‖ reviewer.
 - **This commit is the declaration, and it is commit 1**, so that
   `bandwidth.active_packet_singleton` reads **1 in flight** for the whole life
-  of this packet: no measurement taken inside a packet ABOUT a memory file may
-  be taken against a packet file lying about what is in flight.
+  of this packet: no measurement taken inside a packet ABOUT its own commit
+  budget may be taken against a packet file lying about what is in flight.
   `DEFECT-0011-undeclared-active-packet` sits at `OCCURRENCE-0005` and the
   remedy it names — a LOWER bound on the same cardinality check — does not exist.
 - **THIS EDIT IS LINE-COUNT-NEUTRAL ABOVE THE `ANC-0003` SITE ON PURPOSE.**
@@ -24,14 +24,14 @@
   `build-os/packets/active_packet.md:89#ANC-0003` as a RESOLVED line number and
   `tests/memory_kernel_tests.sh` §18 compares it with `cmp -s`. This
   declaration replaces the previous one **in place, line for line**, so the
-  anchor site does not move and no projection needs regenerating.
+  anchor site does not move; the full record is APPENDED AT THE END, below `:89`.
 
 ## Branch base
 
-Branched at `3ec519b` on `claude/project-handoff-merge-ramhds`, verified with
-`git merge-base HEAD claude/project-handoff-merge-ramhds` → `3ec519b`, **before
-the first edit**. **Nothing is pushed, merged, tagged, PR'd or deployed by this
-packet, and no such go has been given.** (Previous base `9c740d7`; see the close.)
+Branched at `5d96031` on `claude/project-handoff-merge-ramhds`, verified with
+`git merge-base HEAD 5d96031` → `5d96031`, **before the first edit**. `5d96031`
+is the PUSHED TIP; every commit of this packet is LOCAL and UNPUSHED, and no
+push/merge/PR/tag/deploy go has been given or asked for. (Previous base `3ec519b`.)
 
 ## What `gravito_current_state_reblock_a` must make true
 
@@ -1446,3 +1446,89 @@ the orchestrator's, taken against `build-os/memory/current_state.md`, not inferr
 UNPUSHED.** `188472f` is the pushed tip and push was authorised **only through `188472f`**. **No
 push, merge, PR, tag, deploy, secret, `git config`, amend or rebase** was performed by this close,
 and no such go has been given or asked for.
+
+---
+
+# DECLARATION — `gravito_process_doctrine_correction_a` / `PACKET-0042-process-doctrine-correction`
+
+**Declared 2026-08-04.** Lane `substantive`, **depth 2** (builder, then qa ‖ reviewer).
+Base and HEAD at declaration: `5d96031`, verified `git merge-base HEAD 5d96031` → `5d96031`
+**before the first edit**. Baseline suite **2228 passed / 0 failed**, solo, after an anchored
+`pgrep -fa '^bash tests/'` returned empty.
+
+## Why this is a packet and not a text edit
+
+The operator has **withdrawn two process rules as broken** and dictated their replacements. The
+orchestrator attempted the withdrawal as a direct text edit and **broke 4 assertions across 3
+suites** — `tests/gate_depth_tests.sh` (depth-block drift), `tests/control_registry_tests.sh` (×2),
+`tests/bandwidth_tests.sh` (the commit-ceiling red drive inverted). That attempt was reverted. The
+warrant for cutting this as a packet is exactly that finding: **this doctrine is enforced by
+machinery, not merely written**, so withdrawing it means moving the machinery with it.
+
+## CHANGE 1 — the commit-budget doctrine
+
+**Withdrawn:** `- **≤2 commits** per packet.` (`CLAUDE.md`, `### Working contract`).
+**Replaced by:** **≤2 build commits, plus at most 1 fix commit** — the old rule is withdrawn as
+**unsatisfiable**, because any packet receiving `fix-then-pass` must produce a third commit (the
+first two are the tree the gates measured, and amending them is forbidden). A fix commit is
+produced only after the concurrent qa/reviewer stage, carries bounded corrections to defects that
+stage found, and may not introduce a new subsystem, expand the objective, add unrelated
+governance, rewrite the measured build commits, or conceal that correction was required. A packet
+with no fix round stays capped at two. More than one fix commit is a re-cut. **The permitted fix
+commit is not recorded as a doctrine breach.**
+
+Machinery moved with it: `CEILING_COMMITS` 2 → 3 in `build-os/tools/bandwidth-check.sh`, its
+header model, the `dimensions` prose, the `control_registry.txt` citations and notes for
+`bandwidth.packet_commit_ceiling`, and the `tests/bandwidth_tests.sh` red drive. **`CEILING_COMMITS=3`
+carries a comment stating plainly that the tool CANNOT distinguish a build commit from a fix
+commit** — it counts a range and does not partition it — so 3 is the permitted MAXIMUM, not a
+licence for three build commits, and the build/fix distinction is enforced by the reviewer.
+
+## CHANGE 2 — the depth doctrine
+
+The depth block said a fourth serial stage is a defect meaning installments or a mis-cut packet.
+A **third legitimate cause** is added: `mandatory_full_regate`, applying only when all five
+conditions hold (complete one-installment fix list; correctly scoped packet; fixes altering
+logic/derivation/authority/counts or another load-bearing behaviour; the contract's own re-review
+rules therefore forbidding targeted confirmation; a full concurrent re-gate required as a result).
+Announced as `Depth: 4 — reason: mandatory_full_regate`, depth 4 is **not** a defect and is not
+recorded as one. Depth 4 **remains** a defect for incomplete enumeration, fix-list installments,
+avoidable scope growth, or a packet that should have been split.
+
+**All three depth mirrors are updated in the same commit and proven byte-identical.**
+
+## Enforcement surfaces in scope
+
+1. `CLAUDE.md` — depth block (`BUILD-OS:DEPTH:START/END`) and `### Working contract`.
+2. `build-os/global-claude-md.md` — the same two, as the global mirror of the same contract.
+3. `.claude/agents/build-orchestrator.md` — the depth block mirror.
+4. `build-os/tools/bandwidth-check.sh` — header model, `CEILING_COMMITS`, `dimensions` prose.
+5. `build-os/registry/control_registry.txt` — `bandwidth.packet_commit_ceiling` refs + notes, and
+   `bandwidth.active_packet_singleton`'s refs into the same file, repointed **by content**.
+6. `tests/bandwidth_tests.sh` — the red drive re-pointed to the new boundary, not deleted.
+7. `tests/gate_depth_tests.sh` — new assertions pinning the fourth-stage doctrine.
+8. `CHANGELOG.md` + `build-os/memory/current_state.md` — the suite-total literal, if it moves.
+
+## Out of scope (surfaced, NOT built)
+
+`README.md:97,110`, `build-os/memory/tool_router.md:133`, `.claude/agents/builder.md:6,23,71`,
+`.claude/agents/build-orchestrator.md:80`, `docs/ONBOARDING.md:67`,
+`build-os/metrics/task_corpus.md:65`, `build-os/registry/CROSSWALK.md:147`,
+`build-os/registry/neurocosmology_crosswalk.txt:132`, `templates/build-os/**` — nine derived
+restatements of `≤2 commits`. They are **summaries of the contract, not the contract**, and
+rewriting them is scope growth this packet's ceiling forbids. **Follow-up packet, named here so it
+is not lost.**
+
+## Ceiling
+
+0 new tools · 0 new stores · 0 new suite files · 0 new governance primitives · 0 new controls.
+`build-os/memory/residue.md` (blob `01517ad2c30d447949a98d0b6db9b8d6b538d5a9`, **431 B headroom**)
+is **FROZEN and NOT WRITTEN**. `rank-candidates.sh`, `decision_telemetry.tsv`,
+`signal_snapshots.tsv`, `standing_gates.md`, `residue.archive.md`, `build-os/memory/archive/**`
+and `build-os/maintenance/rotate-memory.mjs` are untouched.
+
+## Security envelope
+
+**No push, merge, PR, tag, deploy, secrets, `git config`, amend, rebase or history rewrite.**
+`5d96031` is the pushed tip and every commit of this packet is new, local and **NOT authorised
+for push**. Repo default identity; no inline author.
