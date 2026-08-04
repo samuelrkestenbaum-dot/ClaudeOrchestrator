@@ -849,6 +849,21 @@ printf 'scan-controls: %s anchor(s) resolved, %s superseded, over %s record(s) i
 #     A COUNT THAT APPEARS IN THE RECORD IS CHECKED AGAINST ITS SOURCE.
 #     THE RECORD THAT BINDS THEM STORES NO NUMBER.
 #
+# AND THAT SECOND SENTENCE WAS FALSE IN THIS TABLE FOR ONE ROUND, WHICH IS WHY
+# IT IS NOW ASSERTED INSTEAD OF DECLARED. `DC-0003` shipped with the
+# stated_content `**14 of {N} entries carrying` — a persisted, underived count
+# sitting inside the store whose headline claim is that it holds none. It was
+# fail-closed (moving to fifteen would have produced COUNT-UNRESOLVED at exit 2,
+# never a wrong PASS) and it was still INSTANCE SIX of the defect this block
+# exists against, found by review rather than by the guard. The `14` was
+# gratuitous: `of {N} entries carrying` resolves to the same unique site. The
+# invariant is now driven from the LIVE table by
+# tests/control_registry_tests.sh section 29d — no digit in any record's
+# stated_content outside the `{N}` placeholder, and none in any note — so the
+# claim above is mechanical rather than a promise this header makes on the
+# table's behalf. THE HISTORY LIVES HERE, IN A COMMENT, AND NOT IN A RECORD:
+# that is the whole point of the distinction.
+#
 # A record says WHERE a count is stated and HOW it is derived. The stated value
 # is READ OUT of the live prose at every run; the derived value is COMPUTED from
 # the live source at every run; neither is stored here. That is not a stylistic
@@ -924,8 +939,8 @@ COUNT_KINDS="lines files"
 # COUNT-TABLE:START
 COUNT_TABLE=(
 'DC-0001|build-os/memory/tool_router.md|checked at each of the last **{N}** packets|files|build-os/receipts|gravito_*.md|2026-08-03|THE RED FIXTURE THAT JUSTIFIED THIS BLOCK. The second-eyes streak: one receipt per closed packet since the streak opened, and no packet in it has ever had a second-eyes provider, so the streak IS the receipt count. This site said "nine" against a live nineteen.'
-'DC-0002|build-os/registry/MISMATCHES.md|control_registry.txt` yields **{N}**|lines|build-os/registry/control_registry.txt|^authority_mismatch: declared|2026-08-03|Instance 3. The anchored form is the derivation; the unanchored one sweeps up five prose lines and reports 27.'
-'DC-0003|build-os/registry/MISMATCHES.md|**14 of {N} entries carrying|lines|build-os/registry/control_registry.txt|^authority_mismatch: declared|2026-08-03|The SECOND restatement of DC-0002s truth, four lines from the first. Duplicate semantic truth is not fixed by deleting one copy — both copies are bound to the one source that produces the number.'
+'DC-0002|build-os/registry/MISMATCHES.md|control_registry.txt` yields **{N}**|lines|build-os/registry/control_registry.txt|^authority_mismatch: declared|2026-08-03|Instance three. The anchored form is the derivation; the unanchored one also matches the field named mid-sentence in prose, and reports a larger figure.'
+'DC-0003|build-os/registry/MISMATCHES.md|of {N} entries carrying|lines|build-os/registry/control_registry.txt|^authority_mismatch: declared|2026-08-03|The SECOND restatement of DC-0002s truth, four lines above it in the same file. Duplicate semantic truth is not fixed by deleting one copy; both copies are bound to the one source that produces the number.'
 )
 # COUNT-TABLE:END
 
@@ -999,12 +1014,20 @@ count_resolve(){ # <artifact-rel-path> <literal-before-{N}> <literal-after-{N}>
 # legal for this kind"; exit 1 is "the source is not there"; exit 3 is "no such
 # kind". Every one of them is a refusal, and none of them is a zero.
 count_derive(){ # <kind> <source> <pattern> -> number on stdout, or reason + non-zero
-  local n=0 e
+  local n=0 e g grc
   case "$1" in
     lines)
       case "$3" in ^*) ;; *) printf '%s' "the pattern \"$3\" is not anchored"; return 2 ;; esac
       [ -f "$CNT_REPO/$2" ] || { printf '%s' "no file at $2"; return 1; }
-      printf '%s' "$(grep -cE -- "$3" "$CNT_REPO/$2" 2>/dev/null || true)" ;;
+      # THE EXIT CODE IS CAPTURED DIRECTLY, AND `|| true` IS NOT USED HERE. It
+      # would swallow the one case that matters: `grep -c` exits 0 with matches,
+      # 1 with none, and >=2 when the PATTERN ITSELF IS UNUSABLE. Under `|| true`
+      # a malformed ERE produced an EMPTY `derived`, and the resulting finding
+      # read "gives " with nothing after it — fail-closed, but mislabelled and
+      # unreadable, which is the shape of finding people stop trusting.
+      g="$(grep -cE -- "$3" "$CNT_REPO/$2" 2>/dev/null)"; grc=$?
+      [ "$grc" -le 1 ] || { printf '%s' "the pattern \"$3\" is not a usable ERE — grep exited $grc"; return 4; }
+      printf '%s' "${g:-0}" ;;
     files)
       case "$3" in */*) printf '%s' "the glob \"$3\" names a path, not a file name"; return 2 ;; esac
       [ -d "$CNT_REPO/$2" ] || { printf '%s' "no directory at $2"; return 1; }
@@ -1018,7 +1041,7 @@ count_derive(){ # <kind> <source> <pattern> -> number on stdout, or reason + non
 # Validate and reconcile the table. Every finding goes through `viol`, so the
 # same finding gates a `check` run and refuses a `counts` run.
 counts_check(){
-  local r seen_ids="" occ tmp pre post res line tok stated derived rc why
+  local r pair seen_ids="" occ tmp pre post res line tok stated derived rc why
   CNT_OK=0; CNT_N=0
   for r in "${CNT_RECS[@]}"; do
     CNT_N=$((CNT_N+1))
@@ -1065,8 +1088,16 @@ counts_check(){
            else
              viol "COUNT-SOURCE   $C1 derives a file count and $why. A name glob may not reach across directories."
            fi ;;
+        4) viol "COUNT-SOURCE   $C1 cannot derive anything from $C5: $why. An unusable pattern is REFUSED and NAMED. It used to be swallowed, leaving \"$C1\" reporting a comparison against an EMPTY derived value — a finding that is fail-closed and unreadable at the same time, which is the shape of finding a reader stops trusting." ;;
         *) viol "COUNT-SOURCE   $C1 names derivation_source \"$C5\", and $why. A derivation whose source is absent produces no evidence about anything." ;;
       esac
+      continue
+    fi
+    # BELT AND BRACES ON THE SAME HOLE. `count_derive` now names an unusable
+    # pattern itself, and this refuses anything non-numeric that reaches here by
+    # any other route. A derived value that is not a number is never compared.
+    if ! printf '%s' "$derived" | grep -qE '^[0-9]+$'; then
+      viol "COUNT-SOURCE   $C1 derived \"$derived\" from $C5 with \"$C6\", which is not a number. Nothing is compared against a non-number; the comparison is abandoned and reported rather than performed on a value the derivation could not produce."
       continue
     fi
     if [ "$derived" = "0" ]; then

@@ -1258,13 +1258,22 @@ of the existing `tests/control_registry_tests.sh`) · **0 new governance primiti
 new census controls** — census holds at **105**, `DEFAULT_MAX_BYTES` untouched, declared
 mismatches **22** anchored, re-authorisations **0**.
 
-### CONSEQUENCE THE ARCHIVIST MUST ACT ON, STATED BEFORE IT BITES
+### CONSEQUENCE THE ARCHIVIST MUST ACT ON — THE CLOSE IS SELF-BLOCKING
 
 Writing `build-os/receipts/gravito_p3b_count_derivation_a.md` makes the receipt store
-**twenty**, and `DC-0001` will then refuse at exit 2 until `tool_router.md` says **twenty**.
+**twenty**, and `DC-0001` then refuses at exit 2 until `tool_router.md:368` says **twenty**.
+Both gates verified the 0 → 2 → 0 transition by execution.
+
+**IT IS NOT ONLY THE SUBCOMMAND.** `scan-controls.sh counts` exits 2, **`scan-controls.sh
+check` exits 2** (the counts block gates the check path), and
+**`tests/control_registry_tests.sh` fails at `:183`, `:1248`, `:1255` and `:1267`.**
+**THE PROSE EDIT MUST BE IN THE SAME COMMIT AS THE RECEIPT OR THE TREE SHIPS RED.**
+
 **That is the mechanism working, not a defect:** the close can no longer leave the
 second-eyes streak stale in silence, which is exactly the failure this packet was cut for.
-`twenty` is inside the cardinal table, so the fix is a one-word prose edit.
+`twenty` is inside the cardinal table, so this close's fix is a one-word prose edit — **but
+see residue (h): the NEXT one is not, and the standing form of this obligation is recorded
+in `build-os/memory/current_state.md`, which outlives this file.**
 
 ### RESIDUE — HELD HERE BECAUSE `residue.md` IS FROZEN
 
@@ -1295,7 +1304,53 @@ legal `--keep` — all 25 of 25 blocks exit 7 under the sentinel — so unfreezi
 - **(f)** Carried forward, untouched by this packet: `residue.md` frozen at 431 B, spec
   revisions (i) and (ii) on the rotation sentinel, `3a590ed`'s permanently false commit
   message, and the five-consecutive-closes-at-3-commits cap question.
+- **(g)** **RECORDED, DELIBERATELY NOT FIXED — reviewer's explicit instruction.**
+  `count_derive`'s `files` arm expands `$3` unquoted, so a whitespace-bearing glob would
+  expand as two globs. **No `eval`, no injection path, and no live record does it.** Tighten
+  it only if a `mirror` kind or a wider record population lands.
+- **(h)** **THE CARDINAL TABLE STOPS AT TWENTY, AND RECEIPT TWENTY-ONE IS WHERE THAT BITES.**
+  `twenty` reads; `twenty-one` is `COUNT-UNREADABLE` and refuses, so from then on
+  `tool_router.md:368` must carry a NUMERAL. The standing form of this obligation now lives
+  in `build-os/memory/current_state.md`, not here, **because this file is superseded by the
+  next packet's declaration and the obligation is not.**
+- **(i)** **THE FIX ROUND FOUND INSTANCE SIX INSIDE THE FIX.** `DC-0003` shipped with
+  `**14 of {N} entries carrying` — a persisted, underived count inside the store that claims
+  to hold none. Fail-closed, and still the defect one level up, **found by review and not by
+  the guard**. The invariant is now asserted over the LIVE table in both directions. The
+  lesson is not "the record was wrong"; it is that **a claim stated in a header is not a
+  claim**, which is the same sentence this repository's registry header already carries.
 
-- **OPEN BOUNDARY:** both of this packet's commits are **LOCAL AND UNPUSHED**. `188472f` is
-  the pushed tip and push was authorised only through it. **NOTHING IS IN FLIGHT** once qa
-  and the reviewer report.
+### FIX ROUND — `Depth: 3`, reason: fix-then-pass (6 enumerated items)
+
+qa returned **GREEN** (2220/0 twice, vectors identical, commit-1 green in isolation, 10
+mutants with **zero zero-kill**). The reviewer returned **fix-then-pass, 6 items**, applied
+in **ONE pass** in a **third commit — the cap of 2 is BREACHED and it is recorded here, not
+excused.** The breach is structural: `a714d8a` and `f0e2fba` are the gated tree both gates
+measured, and amending or squashing them would destroy the artefact the verdict was about.
+
+1. **`DC-0003` stated_content `**14 of {N}` → `of {N}`** — instance six, removed. Executed:
+   the record still resolves uniquely to `MISMATCHES.md:30` with `tok="22"`, and
+   `grep -cF ' entries carrying' MISMATCHES.md` is **1**.
+2. **The standing close obligation moved into `current_state.md`** — all three points,
+   including that it reddens `check` and four suite assertions, that it recurs forever, and
+   that receipt twenty-one onward must be a NUMERAL.
+3. **The assertion that would have caught item 1**, over the **LIVE** table, executed in
+   BOTH directions: clean now, and flagging the `stated_content` on the table as it shipped.
+4. **Malformed-ERE fallthrough closed.** `|| true` removed, grep's exit captured directly,
+   an unusable pattern refused as `COUNT-SOURCE` **and named**, plus a non-numeric guard on
+   `derived`. Red-driven, with the premise (grep exit) measured rather than assumed.
+5. **`local pair`** added.
+6. **Suite-count restatements updated**, 2220 → **2228**, with the irony recorded in both
+   `CHANGELOG.md` and `current_state.md` rather than smoothed over.
+
+**ONE UNENUMERATED EDIT, FLAGGED RATHER THAN SLIPPED IN:** item 1's first draft moved the
+`14` into `DC-0003`'s **note**, which is the same defect one field over, and `DC-0002`'s note
+already carried a bare `27`. **Both notes are now digit-free and the item-3 predicate covers
+the note field as well as `stated_content`.** That is broader than the enumerated ask; it is
+named here so the re-review is not surprised by it. The historical figures live in the
+COUNT-BLOCK header comment, which is not a record.
+
+- **OPEN BOUNDARY:** all **three** of this packet's commits are **LOCAL AND UNPUSHED**.
+  `188472f` is the pushed tip and push was authorised only through it. No push, merge, PR,
+  tag, deploy, secret, `git config`, amend or rebase was performed. **NOTHING IS IN FLIGHT**
+  once the re-gate reports.

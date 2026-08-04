@@ -51,12 +51,36 @@ deprecation cycle. Pin a commit if you need stability.
   the one source. The router's "nine" was corrected to **nineteen** by
   derivation, not by hand.
 
-  Suite **2220 passed**, 0 failed (+30, all of it
-  `tests/control_registry_tests.sh`, which goes **130 → 160**; every other
-  chained suite +0). Three stale line-pinned citations into
-  `control_registry_tests.sh` were repointed **by content**; the one anchor
-  covering that file absorbed the same move with no edit at all, which is the
-  anchor scheme paying for itself.
+  **THE REVIEW ROUND FOUND INSTANCE SIX INSIDE THE FIX ITSELF, AND IT IS WORTH
+  MORE THAN THE FEATURE.** `DC-0003` shipped with the stated_content
+  `**14 of {N} entries carrying` — a persisted, underived count sitting inside
+  the store whose headline claim is that it holds none. It was fail-closed
+  (raising the `14` yields `COUNT-UNRESOLVED` at exit 2, never a wrong pass) and
+  it was still the very defect, one level up, found by review rather than by the
+  guard. The `14` was gratuitous; `of {N} entries carrying` names the same unique
+  site. The claim is now **asserted over the live table** rather than declared in
+  a header: no record persists a digit in its `stated_content` or its `note`,
+  driven in both directions — clean on the table as it stands, and biting on the
+  table as it shipped.
+
+  Also closed in that round: a malformed ERE was swallowed by `|| true` and
+  produced a finding that compared against an **empty** derived value —
+  fail-closed and unreadable at once — now refused as `COUNT-SOURCE` with the
+  pattern named; and a missing `local`.
+
+  Suite **2228 passed**, 0 failed (+38, all of it
+  `tests/control_registry_tests.sh`, which goes **130 → 168**; every other
+  chained suite +0). Six stale line-pinned citations into
+  `control_registry_tests.sh` were repointed **by content** across two rounds;
+  the one anchor covering that file absorbed every one of those moves with no
+  edit at all, which is the anchor scheme paying for itself.
+
+  **THE IRONY IS RECORDED RATHER THAN SMOOTHED OVER:** adding those assertions
+  moved the total off 2220, and updating it meant hand-editing the same literal
+  in `CHANGELOG.md` and `build-os/memory/current_state.md` — **instance 4,
+  performed by hand, in order to ship the guard against it.** That pair remains
+  the one instance this design cannot reach, because the number is produced by
+  running the suite and no static derivation reaches a process.
 
 - **ROTATION IS NOW A GOVERNED RUNTIME CAPABILITY RATHER THAN A GOVERNED ACT.**
   The first governed rotation of this repository's memory was safe because a

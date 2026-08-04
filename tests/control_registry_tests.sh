@@ -1371,7 +1371,62 @@ C_AFTER="$(sed -n 's/^count: DC-F001 .* at=doc\/router.md:\([0-9]*\) .*/\1/p' "$
 # ...and the record has no line number in it to go stale in the first place.
 grep -qE '\|[0-9]+\|' "$CNTF/counts.txt" \
   && no "a fixture count record carries a bare integer field — the scheme's whole claim is that it stores no number" \
-  || ok "no count record carries a bare integer field: not the stated value, and not a line number"
+  || ok "no FIXTURE count record carries a bare integer field: not the stated value, and not a line number"
+
+# THE SAME CLAIM, ASSERTED WHERE IT IS MADE — OVER THE **LIVE** TABLE.
+# The check above ran the predicate `\|[0-9]+\|` against the FIXTURE table, and
+# that regex could not have matched the defect it was named for even if it had
+# been pointed at the live one: `DC-0003` shipped with the stated_content
+# `**14 of {N} entries carrying`, whose `14` sits mid-field and never between
+# two pipes. The claim was universal and the assertion was not, so INSTANCE SIX
+# of this packet's own defect was found by review rather than by the guard.
+# What follows reads the LIVE COUNT_TABLE out of the scanner and drives the
+# predicate in BOTH DIRECTIONS: it must be clean now, and it must have BITTEN on
+# the table as it shipped. Neither direction is asserted; both are executed.
+sed -n '/^# COUNT-TABLE:START$/,/^# COUNT-TABLE:END$/p' "$SCAN" \
+  | sed -n "s/^'\\(DC-[^|]*|.*\\)'$/\\1/p" > "$WORK/live_counts.txt"
+NLIVEREC="$(grep -c . "$WORK/live_counts.txt" || true)"
+[ "${NLIVEREC:-0}" -ge 1 ] \
+  && ok "$NLIVEREC live count record(s) were read out of the scanner's own table (this check has something to bite on)" \
+  || no "no live count records could be parsed out of $SCAN — the assertions below would be vacuous"
+# field 3 with the {N} placeholder removed: a digit surviving that is a number
+# the record PERSISTED, which is the one thing this table promises never to do.
+# AN IDENTIFIER IS NOT A COUNT, and this distinction is not cosmetic: the first
+# version of this predicate flagged DC-0003's note for the digits inside the
+# token `DC-0002`, which is a NAME. Stable-id tokens (`DC-0002`, `ANC-0010`,
+# `PACKET-0041`) and ISO dates are stripped before the test; what survives and
+# still carries a digit is a QUANTITY the record persisted.
+barecounts(){ # <file of records> -> offending "id<TAB>field<TAB>value" lines
+  awk -F'|' '{
+    sc = $3; nt = $8
+    gsub(/\{N\}/, "", sc);                      gsub(/\{N\}/, "", nt)
+    gsub(/[0-9]{4}-[0-9]{2}-[0-9]{2}/, "", sc); gsub(/[0-9]{4}-[0-9]{2}-[0-9]{2}/, "", nt)
+    gsub(/[A-Za-z]+-[0-9]+[A-Za-z]*/, "", sc);  gsub(/[A-Za-z]+-[0-9]+[A-Za-z]*/, "", nt)
+    if (sc ~ /[0-9]/) print $1 "\tstated_content\t" $3
+    if (nt ~ /[0-9]/) print $1 "\tnote\t" $8
+  }' "$1"
+}
+barecounts "$WORK/live_counts.txt" > "$WORK/bare_live.txt"
+NBARE="$(grep -c . "$WORK/bare_live.txt" || true)"
+[ "${NBARE:-0}" = "0" ] \
+  && ok "NO live count record persists a digit in its stated_content or its note — the header's claim that the record stores no number is now MECHANICAL, asserted over the table it is a claim about" \
+  || { no "$NBARE live count field(s) persist a number the record was supposed to derive"; sed 's/^/      | /' "$WORK/bare_live.txt" | head -10; }
+# RED DRIVE on the predicate itself, reconstructing the table AS IT SHIPPED. A
+# check that has only ever been observed passing is a check nobody has tested.
+sed 's/|of {N} entries carrying|/|**14 of {N} entries carrying|/' "$WORK/live_counts.txt" > "$WORK/preFix_counts.txt"
+cmp -s "$WORK/live_counts.txt" "$WORK/preFix_counts.txt" \
+  && no "the pre-fix reconstruction is identical to the live table, so the red drive below proves nothing" \
+  || ok "the pre-fix table is reconstructed and DIFFERS from the live one — the red drive below is about a real prior state"
+barecounts "$WORK/preFix_counts.txt" > "$WORK/bare_pre.txt"
+NBAREPRE="$(grep -c . "$WORK/bare_pre.txt" || true)"
+{ [ "${NBAREPRE:-0}" -ge 1 ] && grep -q 'stated_content' "$WORK/bare_pre.txt"; } \
+  && ok "RED: the same predicate flags $NBAREPRE field(s) on the table AS IT SHIPPED — it would have caught instance six before review did" \
+  || { no "RED FAILED: the predicate does not bite on the pre-fix table, so it is not the assertion that would have caught the defect"; sed 's/^/      | /' "$WORK/bare_pre.txt" | head -5; }
+# And the fix must not have cost uniqueness: the shortened literal still names
+# exactly one line of the artifact it is a claim about.
+[ "$(grep -cF ' entries carrying' "$MISM" || true)" = "1" ] \
+  && ok "the shortened DC-0003 literal ' entries carrying' occurs exactly ONCE in MISMATCHES.md — dropping the 14 cost no uniqueness" \
+  || no "' entries carrying' does not occur exactly once in MISMATCHES.md, so DC-0003 no longer identifies one site"
 
 echo "== 29e. RED DRIVE — an UNRESOLVED or AMBIGUOUS stated site fails CLOSED =="
 # The blinded-scanner failure, in its two forms. A site that resolves to nothing
@@ -1404,6 +1459,33 @@ runcnt; RC=$?
 { [ "$RC" = "2" ] && grep -q 'COUNT-VACUOUS' "$WORK/out.txt"; } \
   && ok "RED: a derivation that produces ZERO is REFUSED as COUNT-VACUOUS even though the stated 0 'agrees' — a broken derivation and a genuinely empty one are indistinguishable, so this fails closed" \
   || { no "RED FAILED: a zero derivation certified itself by agreeing with a stated zero (exit $RC)"; dump; }
+# A MALFORMED ERE, which `grep -c` answers with exit >= 2 AND NO NUMBER. Under
+# `|| true` that emptiness reached the comparison and produced a finding reading
+# "gives " with nothing after it: fail-closed and unreadable at once. The pattern
+# must be NAMED. The counterfactual is executed first, so the premise is measured
+# rather than assumed.
+mkcnt "$CNTF"
+printf 'report\nthe store holds **2** records\n' > "$CNTF/doc/report.md"
+grep -cE -- '^[unclosed' "$CNTF/store/snapshots.tsv" >/dev/null 2>&1; GREPRC=$?
+# Written as a `case` and NOT as a numeric floor, ON PURPOSE: `grep -c` returns
+# 0 for matches and 1 for none, so anything else is an ERROR — this is an exact
+# membership test, not a coverage floor. Spelling it as a floor would enrol the
+# line in the `tests.nonvacuity_minimums` family it does not belong to. Section
+# 21 scans this file TEXTUALLY, so even naming the rejected form in this comment
+# enrols it — which it duly did on the first attempt, and is why the form is
+# described here in words instead of quoted.
+case "${GREPRC:-0}" in
+  0|1) no "grep -cE did not error on a malformed ERE (exit $GREPRC), so this red drive is about nothing" ;;
+  *)   ok "COUNTERFACTUAL: grep -cE on a malformed ERE exits $GREPRC and prints no number — the premise of this guard, measured not assumed" ;;
+esac
+cnttab 'DC-FERR|doc/report.md|the store holds **{N}** records|lines|store/snapshots.tsv|^[unclosed|2026-08-03|a malformed ERE'
+runcnt; RC=$?
+{ [ "$RC" = "2" ] && grep -q 'COUNT-SOURCE' "$WORK/out.txt" && grep -qF 'not a usable ERE' "$WORK/out.txt"; } \
+  && ok "RED: an unusable ERE is REFUSED as COUNT-SOURCE and the offending pattern is NAMED — not swallowed into an empty derived value" \
+  || { no "RED FAILED: a malformed ERE was not refused-and-named (exit $RC)"; dump; }
+grep -qE 'gives *$|derived= ' "$WORK/out.txt" \
+  && { no "the report still contains an empty derived value — the unreadable form survived"; dump; } \
+  || ok "and no finding reports an EMPTY derived value anywhere in the output"
 
 echo "== 29g. RED DRIVE — the schema refuses a malformed, colliding or unknown-kind record =="
 mkcnt "$CNTF"

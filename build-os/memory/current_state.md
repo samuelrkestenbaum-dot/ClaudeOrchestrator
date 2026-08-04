@@ -79,21 +79,50 @@ legal `--keep` retains it.
   `no tags` because `tests/release_metadata_tests.sh:322` requires it, so the residue item is
   annotated rather than rewritten. Whether the tag was created with an explicit go is not
   determinable from here and no claim is made.
-- **Build/test command:** `bash tests/build_os_tests.sh` (2220 checks; no network; temp dirs)
-  — **2220 as of `PACKET-0041-count-derivation`.** The delta is **+30**, all of it
-  `tests/control_registry_tests.sh`, which goes **130 -> 160**: a new §29 driving the
-  derived-count table — the live binding, seven red drives, and two executed
+- **Build/test command:** `bash tests/build_os_tests.sh` (2228 checks; no network; temp dirs)
+  — **2228 as of `PACKET-0041-count-derivation`.** The delta is **+38**, all of it
+  `tests/control_registry_tests.sh`, which goes **130 -> 168**: a new §29 driving the
+  derived-count table — the live binding, nine red drives, and four executed
   counterfactuals. Every other chained suite is **+0**, confirmed by comparing the
   per-suite CHAINED **vector** across two solo runs, not the total alone (`DEFECT-0013`).
   Derived from SOLO full-capture runs after an anchored `pgrep -fa '^bash tests/'` returned
   empty, and reconciled against `CHANGELOG.md`, which carries the matching literal
-  `**2220 passed**` (unsplit) under `## [Unreleased]`.
+  `**2228 passed**` (unsplit) under `## [Unreleased]`.
   — **THIS PAIR IS ITSELF INSTANCE 4 OF THE DEFECT `PACKET-0041` EXISTS AGAINST**, and it is
   the one instance that packet could NOT mechanise. Two copies of one truth, held in sync
   by a cross-check that only fires under `RELEASE_METADATA_LIVE_SUITE=1`. No static
   derivation reaches it: the number is produced by RUNNING the suite, and the count table
   derives from files, never from processes. Stated here rather than quietly left out of the
   coverage claim.
+  — **AND THE FIX ROUND PROVED IT THE HARD WAY.** Item 3 of the reviewer's list added
+  assertions, which moved the total **2220 -> 2228**, which required updating **this line,
+  the two below it, and `CHANGELOG.md`** — **by hand, in two files.** Fixing the guard for
+  instance 4 required PERFORMING instance 4 again. That is the honest measure of what this
+  packet did and did not achieve, and it is recorded rather than smoothed over.
+
+- **STANDING OBLIGATION ON EVERY ARCHIVIST CLOSE, FOREVER — `DC-0001` AND THE RECEIPT
+  COUNT.** `scan-controls.sh counts` record `DC-0001` binds
+  `build-os/memory/tool_router.md:368` to `build-os/receipts/gravito_*.md`. **Writing a
+  receipt is what closes a packet, so EVERY close increments the derivation and makes the
+  stated figure stale in the same commit.** This is not a one-off handover note for the next
+  packet; it recurs at every close for as long as `DC-0001` exists, which is why it is
+  recorded HERE and not only in `active_packet.md` — that file is superseded by the next
+  packet's declaration, and this obligation outlives it.
+  1. **IT REDDENS MORE THAN THE SUBCOMMAND.** `scan-controls.sh counts` exits 2, **and so
+     does `scan-controls.sh check`** (the counts block gates the check path), **and
+     `tests/control_registry_tests.sh` fails at `:183`** (check is GREEN against the live
+     tree) **and again at `:1248`, `:1255` and `:1267`** (the live count table agrees; no
+     live record is STALE; the router states what the store derives). A close that does not
+     advance the router ships a red tree and a red suite, not a red subcommand.
+  2. **THE REMEDY IS ALWAYS THE SAME ONE-LINE PROSE EDIT** to `tool_router.md:368` — set the
+     figure to whatever `ls build-os/receipts/gravito_*.md | wc -l` reports, **in the same
+     commit as the receipt.**
+  3. **AND FROM RECEIPT NUMBER TWENTY-ONE ONWARD IT MUST BE A NUMERAL.** The cardinal table
+     in the COUNT-BLOCK **stops at twenty**. `twenty` is readable; **`twenty-one` is
+     `COUNT-UNREADABLE` and REFUSES.** So the site is written `**21**`, `**22**`, and so on.
+     **THIS IS THE POINT AT WHICH SOMEONE CONCLUDES THE GUARD IS BROKEN AND DELETES
+     `DC-0001`.** It is not broken; it is fail-closed on a bounded word table, by design, and
+     widening that table is a one-line change to `cnt_num` if anyone prefers words.
   — **The last +11 are the packet's FIX ROUND**, and they exist because two mutants of the
   new guard each killed **ZERO** of 2179 tests: disarming `SENTINEL_GATE_PINS` (observable
   as 18 -> 15 resolved objects on `residue.md` and 4 -> 2 on this file, with the pins going
