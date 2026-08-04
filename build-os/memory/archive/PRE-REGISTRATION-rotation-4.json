@@ -1,0 +1,27 @@
+{
+  "tool": "build-os/maintenance/rotate-memory.sh",
+  "purpose": "MECHANICAL MEMORY MAINTENANCE, operator-authorized — rotation #4 of current_state.md, to restore close capacity. Not a governance packet.",
+  "written_at_commit": "5010544 (base) — this record lands in COMMIT 1; the apply it authorises lands in COMMIT 2, so the ordering is checkable from the tree (git merge-base --is-ancestor) and never from the builder's word. Rotations #2 and #3 established this shape.",
+  "file": "current_state",
+  "path": "build-os/memory/current_state.md",
+  "keep": 15,
+  "sourceSha256": "ec22e7e48a571687c24c60524b9680cac76c7c84b44f4acb113c85d5f09d2d11",
+  "sourceBytes": 197226,
+  "totalBlocks": 17,
+  "minimum_safe_keep": 7,
+  "protected_objects": "5, at blocks 1, 3, 7 — GATE-PIN:**Build/test command:** (block 1, line 82), GATE-PIN:**Last closed packet:** (block 1, line 340), PROTECTED-REGION:block_1 (heading, line 33), BLOCK:3 (still-open, line 647), BLOCK:7 (still-open, line 1029). All inside the retained prefix at keep 15; nothing the sentinel protects is archived.",
+  "window": "[15, 15] — EXECUTED AT BOTH BOUNDS OVER THESE EXACT BYTES, not argued. (1) Floor from the rotation sentinel: minimum_safe_keep 7. (2) Floor from tests/build_os_maintenance_tests.sh §9(a)/(b)/(c): the rotated file must keep MORE than 10 blocks and a subsequent --keep 10 must still reclaim >= 40960 B and leave >= 40960 B of headroom — measured by applying into a scratch root, keep 14 leaves a subsequent keep-10 reclaim of 40700 B and FAILS (by 260 B), keep 15 leaves 57991 B and PASSES. So keep >= 15. (3) Ceiling from refusal condition 7: the projected headroom must cover the 18702 B close budget — measured, keep 16 leaves 15950 B and REFUSES at SENTINEL-C7. So keep <= 15.",
+  "chosen": "15 — the window's only member, and therefore also the legal cut that maximizes margin. Projected: 2 blocks archived, 24011 B reclaimed, 31585 B of post-rotation headroom (12883 B over the 18702 B close budget), and a subsequent --keep 10 reclaim of 57991 B (17031 B over the §9 floor).",
+  "expected_retained_blocks": "block_1..block_15 (the PREFIX — routeSegments is blocks.slice(0, keepN); confirmed from source at rotate-memory.mjs lines 358-365)",
+  "expected_archived_blocks": "block_16..block_17 (the TAIL), 24011 B",
+  "expected_archive_destination": "build-os/memory/archive/current_state.archive.md — APPENDED as the third batch; the file must start byte-for-byte with the 66894 B it holds now (blob d323aa4f28bec614f3c3b17e8a0f991e51f41584 at 5010544). Index rows appended to build-os/memory/archive/INDEX.md.",
+  "expected_post_rotation_headroom": 31585,
+  "close_budget_bytes": 18702,
+  "expected_restoration_procedure": "live (173215 B) - new banner (511 B, in its anchored slot at the preamble tail) + prior banner (511 B, replaced in place — the one class of byte reproduced by neither output, per the tool's own report line) + archived body of this batch (24011 B) = 197226 B, sha256 ec22e7e48a571687c24c60524b9680cac76c7c84b44f4acb113c85d5f09d2d11. To be executed TWICE after the apply, byte-identical both times, and compared against this record's sourceSha256.",
+  "prior_anchors": {
+    "residue.archive.md": "f475d53e9a7b282437bc2bb4729de1274d9d7708 — frozen, must be unchanged after the apply",
+    "current_state.archive.md": "d323aa4f28bec614f3c3b17e8a0f991e51f41584 (66894 B) — prior batches, must be the byte-exact prefix of the new archive",
+    "residue.md": "01517ad2c30d447949a98d0b6db9b8d6b538d5a9 — frozen, not touched",
+    "prior_receipts": "ROTATION-RECEIPT-2026-08-03T16-09-49Z.md, ROTATION-RECEIPT-2026-08-03T19-53-21Z.md, ROTATION-RECEIPT-2026-08-04T13-28-50Z.md (+ its CORRECTION-1), PRE-REGISTRATION-rotation-2.json, PRE-REGISTRATION-rotation-3.json — all unchanged"
+  }
+}
