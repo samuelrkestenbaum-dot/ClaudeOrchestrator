@@ -40,3 +40,11 @@
 | `build-os/memory/current_state.md:2182` | ## History — `gravito_census_gaps_egress_bandwidth_a` through `gravito_productization_pa_maintenance_upstream_a` | `current_state.archive.md:271` |
 | `build-os/memory/current_state.md:2244` | ## History — the earliest sessions, P-022 back to P-015 | `current_state.archive.md:333` |
 
+## Batch 2026-08-04T13:28:50Z
+
+| source (original) | section header | archive location |
+| --- | --- | --- |
+| `build-os/memory/current_state.md:2005` | ## History — `gravito_p2_claim_scoped_evidence_a` | `current_state.archive.md:440` |
+| `build-os/memory/current_state.md:2126` | ## History — `gravito_p1_mutators_ids_telemetry_a` | `current_state.archive.md:561` |
+| `build-os/memory/current_state.md:2227` | ## History — `gravito_ladder_semantics_a` | `current_state.archive.md:662` |
+
