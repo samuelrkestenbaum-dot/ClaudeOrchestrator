@@ -29,13 +29,13 @@
 #                                 its own header as holding THE ONE packet in
 #                                 flight. Two ids in it is a malformed artefact,
 #                                 not a matter of degree, so this refuses.
-#   commits     ENFORCED, advise. "<=2 commits per packet" is a constant chosen
-#                                 by the working contract, not derived from any
-#                                 measurement. It is a class-C heuristic, and a
-#                                 heuristic does not become a gate by being
-#                                 useful — so a breach is REPORTED and the run
-#                                 continues. Raising this to a gate is a
-#                                 governance decision for the operator.
+#   commits     ENFORCED, advise. "<=2 BUILD commits plus at most 1 FIX commit"
+#                                 is a constant chosen by the working contract,
+#                                 not derived from any measurement, and this
+#                                 tool counts a RANGE: it cannot say which of
+#                                 the three is which. It is a class-C heuristic,
+#                                 so a breach is REPORTED and the run continues.
+#                                 Raising it to a gate is the operator's call.
 #   write_sets  DECLINED.         Observable — a fan-out manifest names each
 #                                 agent's writable set, and swarm-merge.sh
 #                                 already enforces the property that matters
@@ -77,7 +77,7 @@ PACKET=""
 # tests/bandwidth_tests.sh reads the cited line back and compares it against
 # what `dimensions` reports, so the census and the tool cannot drift apart.
 CEILING_PACKETS=1        # at most one packet in flight — the artefact's own definition
-CEILING_COMMITS=2        # at most two commits per packet — CLAUDE.md working contract
+CEILING_COMMITS=3        # <=2 build commits + at most 1 fix commit (CLAUDE.md working contract). THIS TOOL CANNOT DISTINGUISH a build commit from a fix commit — it counts a range and does not partition it — so 3 is the permitted MAXIMUM, never a licence for three build commits; the build/fix split is enforced by the reviewer, not by this count
 
 refuse(){ printf 'bandwidth-check: REFUSED — %s\n' "$*" >&2; exit 2; }
 say(){ printf 'bandwidth: %-11s %-13s %s\n' "$1" "$2" "$3"; }
@@ -106,7 +106,7 @@ if [ "$CMD" = "dimensions" ]; then
     "at most one packet in flight; the artefact is defined as holding exactly one, so more is a defect and this refuses"
   printf 'dimension: %-11s authority=%-7s ceiling=%s enforced — %s\n' \
     commits advise "$CEILING_COMMITS" \
-    "at most two commits per packet, counted against the packet's declared base; a chosen constant, so it advises and does not stop the run"
+    "at most two BUILD commits plus at most one FIX commit per packet, counted as a RANGE against the packet's declared base — this tool cannot tell the two kinds apart, so the ceiling is a maximum and not a licence; a chosen constant, so it advises and does not stop the run"
   printf 'dimension: %-11s authority=%-7s declined — %s\n' \
     write_sets none \
     "observable from a fan-out manifest, but no ceiling on concurrent write sets is declared in the working contract; enforcing one would mean inventing a constant"

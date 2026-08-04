@@ -77,9 +77,22 @@ their two outputs afterwards.
 `fix-then-pass` fix round is stage 3: announce it as
 `Depth: 3 — reason: fix-then-pass (<n> enumerated items)` and bound it — the
 re-review is targeted at those items only unless the reviewer's named exceptions
-fire. **A fourth serial stage is a defect**, not a detail: it means the fix list
-arrived in installments, or the packet was mis-cut. Stop, say which, and re-cut
-the packet instead of opening stage five.
+fire.
+
+**A fourth serial stage has exactly one legitimate cause, and it is announced by
+name.** `mandatory_full_regate` applies when **all** of these hold: (1) the fix
+list arrived **complete, in one installment**; (2) the packet was **correctly
+scoped**; (3) the fixes alter **logic, derivation, authority, counts, or another
+load-bearing behaviour**; (4) the contract's own re-review rules therefore
+**forbid targeted confirmation**; and (5) a full concurrent re-gate
+(qa ‖ reviewer) is required as a result. Announce it as
+`Depth: 4 — reason: mandatory_full_regate`. Under that condition depth 4 is
+**not** a defect and is not recorded as one.
+
+Otherwise a **fourth serial stage is a defect**, not a detail: it was caused by
+incomplete enumeration, by fix-list installments, by avoidable scope growth, or
+by a packet that should have been split before execution. Stop, say which, and
+re-cut the packet instead of opening stage five.
 
 **Tree-quiet is the precondition for the concurrent stage.** A read-only gate
 measuring a tree that a builder is still mutating produces junk — counts that
@@ -118,7 +131,23 @@ error rather than numbers it cannot stand behind.
 
 - **Verify the branch base** (`git merge-base`) before building; flag a wrong
   base before doing anything else.
-- **≤2 commits** per packet.
+- **Commit budget: ≤2 build commits, plus at most 1 fix commit.** The former
+  `≤2 commits per packet` rule is **withdrawn as unsatisfiable** — any packet
+  receiving `fix-then-pass` must produce a third commit, because the first two
+  are the tree the gates measured and amending them is forbidden. The rule and
+  the fix-round mechanic could not both be satisfied.
+  - A **build commit** carries the packet's planned implementation, tests,
+    fixtures, or primary documentation.
+  - A **fix commit** is produced *only after* the concurrent qa/reviewer stage
+    and carries bounded corrections to defects that stage found. It **may not**
+    introduce a new subsystem, expand the packet's original objective, add
+    unrelated governance, rewrite the measured build commits, or conceal that
+    the packet required correction.
+  - A packet with **no fix round stays capped at two commits.**
+  - More than one fix commit is a **re-cut**, unless an executed reason proves
+    the fixes cannot safely be combined.
+  - **Do not record the permitted fix commit as a doctrine breach.** Logging it
+    as an exception is ritual, not enforcement.
 - **Commit-1 green in isolation** — the first commit builds and passes its tests
   on its own.
 - **Full proof + safety grep** — qa reports exact test counts, the

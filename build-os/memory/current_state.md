@@ -79,15 +79,17 @@ legal `--keep` retains it.
   `no tags` because `tests/release_metadata_tests.sh:322` requires it, so the residue item is
   annotated rather than rewritten. Whether the tag was created with an explicit go is not
   determinable from here and no claim is made.
-- **Build/test command:** `bash tests/build_os_tests.sh` (2228 checks; no network; temp dirs)
-  — **2228 as of `PACKET-0041-count-derivation`.** The delta is **+38**, all of it
-  `tests/control_registry_tests.sh`, which goes **130 -> 168**: a new §29 driving the
-  derived-count table — the live binding, nine red drives, and four executed
-  counterfactuals. Every other chained suite is **+0**, confirmed by comparing the
-  per-suite CHAINED **vector** across two solo runs, not the total alone (`DEFECT-0013`).
+- **Build/test command:** `bash tests/build_os_tests.sh` (2242 checks; no network; temp dirs)
+  — **2242 as of `PACKET-0042-process-doctrine-correction`.** The delta is **+14**:
+  `tests/gate_depth_tests.sh` **79 -> 90** (the fourth-stage exception
+  `mandatory_full_regate` — named, announceable, conjunctive, and not recorded as a
+  defect) and `tests/bandwidth_tests.sh` **41 -> 44** (the commit-ceiling red drive
+  RE-POINTED to the new boundary, both sides driven, plus the disclaimer on the cited
+  constant). Every other chained suite is **+0**, confirmed by comparing the per-suite
+  CHAINED **vector** across two solo runs, not the total alone (`DEFECT-0013`).
   Derived from SOLO full-capture runs after an anchored `pgrep -fa '^bash tests/'` returned
   empty, and reconciled against `CHANGELOG.md`, which carries the matching literal
-  `**2228 passed**` (unsplit) under `## [Unreleased]`.
+  `**2242 passed**` (unsplit) under `## [Unreleased]`.
   — **THIS PAIR IS ITSELF INSTANCE 4 OF THE DEFECT `PACKET-0041` EXISTS AGAINST**, and it is
   the one instance that packet could NOT mechanise. Two copies of one truth, held in sync
   by a cross-check that only fires under `RELEASE_METADATA_LIVE_SUITE=1`. No static

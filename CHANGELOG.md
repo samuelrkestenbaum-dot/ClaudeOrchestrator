@@ -14,6 +14,50 @@ deprecation cycle. Pin a commit if you need stability.
 
 ### In flight (not landed at the released commit)
 
+- **TWO PROCESS RULES WITHDRAWN AS BROKEN, AND THE MACHINERY MOVED WITH THEM.**
+  The working contract's `≤2 commits per packet` was **unsatisfiable**: any
+  packet receiving `fix-then-pass` must produce a third commit, because the
+  first two are the tree the gates measured and amending them is forbidden. The
+  rule and the fix-round mechanic could not both be satisfied, and the breach
+  had been recorded six consecutive times as though it were a lapse of
+  discipline. It is replaced by **≤2 build commits plus at most 1 fix commit**,
+  with the fix commit defined by what it may NOT do — no new subsystem, no
+  expansion of the objective, no unrelated governance, no rewriting of the
+  measured build commits, no concealment that correction was required — and
+  **explicitly not recorded as a doctrine breach.**
+
+  The depth budget said a fourth serial stage meant installments or a mis-cut
+  packet. That left **no legal depth at all** for a fix list arriving complete,
+  in one installment, against a correctly scoped packet, whose contents the
+  contract's own re-review rules forbid confirming narrowly — so a packet that
+  had done everything right was pushed into recording a defect it had not
+  committed. A third legitimate cause is added, `mandatory_full_regate`,
+  **conjunctive over five stated conditions** and announced by name; depth 4
+  remains a defect for incomplete enumeration, installments, avoidable scope
+  growth, or a packet that should have been split.
+
+  **THIS IS WHY IT WAS A PACKET AND NOT A TEXT EDIT.** The first attempt was a
+  direct edit of the prose and it broke **4 assertions across 3 suites** — the
+  doctrine is enforced by machinery, not merely written. `CEILING_COMMITS` moves
+  2 → 3 in `build-os/tools/bandwidth-check.sh`, and **the cited constant now
+  states what the number does not mean**: this tool counts a RANGE and cannot
+  partition it, so 3 is a permitted MAXIMUM and never a licence for three build
+  commits — the build/fix split is enforced by the reviewer, not by any number
+  this tool can produce. The `bandwidth_tests.sh` red drive was **re-pointed to
+  the new boundary rather than deleted**, and both sides of it are now driven (3
+  inside, 4 over). The tool edit is **line-count-neutral**, so all ten registry
+  citations into it keep their positions — verified by content, not by offset
+  arithmetic; the five `suite.bandwidth` citations into the test file that DID
+  move were repointed by content.
+
+  Suite **2242 passed**, 0 failed (+14: `tests/gate_depth_tests.sh` **79 → 90**
+  and `tests/bandwidth_tests.sh` **41 → 44**; every other chained suite +0,
+  confirmed by comparing the per-suite CHAINED vector across two solo runs).
+  Nine derived restatements of `≤2 commits` in README, the router, the agent
+  definitions, ONBOARDING, the crosswalks and the templates are **surfaced as a
+  follow-up packet and deliberately not touched** — they are summaries of the
+  contract, not the contract.
+
 - **COUNT DERIVATION IS NOW MECHANICAL RATHER THAN DISCIPLINARY.** The doctrine
   "DERIVE every count; never restate one" was written in four artefacts and
   enforced by discipline alone, and discipline kept failing.

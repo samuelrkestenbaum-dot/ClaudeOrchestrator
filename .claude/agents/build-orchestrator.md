@@ -172,9 +172,22 @@ their two outputs afterwards.
 `fix-then-pass` fix round is stage 3: announce it as
 `Depth: 3 — reason: fix-then-pass (<n> enumerated items)` and bound it — the
 re-review is targeted at those items only unless the reviewer's named exceptions
-fire. **A fourth serial stage is a defect**, not a detail: it means the fix list
-arrived in installments, or the packet was mis-cut. Stop, say which, and re-cut
-the packet instead of opening stage five.
+fire.
+
+**A fourth serial stage has exactly one legitimate cause, and it is announced by
+name.** `mandatory_full_regate` applies when **all** of these hold: (1) the fix
+list arrived **complete, in one installment**; (2) the packet was **correctly
+scoped**; (3) the fixes alter **logic, derivation, authority, counts, or another
+load-bearing behaviour**; (4) the contract's own re-review rules therefore
+**forbid targeted confirmation**; and (5) a full concurrent re-gate
+(qa ‖ reviewer) is required as a result. Announce it as
+`Depth: 4 — reason: mandatory_full_regate`. Under that condition depth 4 is
+**not** a defect and is not recorded as one.
+
+Otherwise a **fourth serial stage is a defect**, not a detail: it was caused by
+incomplete enumeration, by fix-list installments, by avoidable scope growth, or
+by a packet that should have been split before execution. Stop, say which, and
+re-cut the packet instead of opening stage five.
 
 **Tree-quiet is the precondition for the concurrent stage.** A read-only gate
 measuring a tree that a builder is still mutating produces junk — counts that

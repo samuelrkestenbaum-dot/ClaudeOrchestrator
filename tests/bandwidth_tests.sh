@@ -161,14 +161,27 @@ out | grep -qE 'REFUSED.*packets' \
 
 echo "== 5. RED — the commit ceiling is EXCEEDED and it ADVISES; it does not gate =="
 # The most contestable claim in the census entry, executed rather than asserted:
-# 2 commits per packet is a constant chosen by the working contract, a class-C
+# the commit budget is a constant chosen by the working contract, a class-C
 # heuristic, and a heuristic does not become a gate by being useful.
-OVER="$WORK/over"; BASE3="$(mkrepo "$OVER" 3)"
-mkpacket "$OVER/packet.md" 1 "- \`main\` at \`$BASE3\`; verified before building."
+#
+# THE BOUNDARY MOVED, SO THIS RED DRIVE MOVED WITH IT — it was NOT deleted. The
+# working contract permits <=2 BUILD commits plus at most ONE FIX commit, so the
+# ceiling is 3 and the first breach is the FOURTH commit. Driving 3 would now
+# assert OK and prove nothing, so BOTH SIDES of the new boundary are driven: 3
+# is inside it and must report OK, 4 is over it and must report EXCEEDED. A red
+# drive that is re-pointed rather than removed keeps biting.
+AT3="$WORK/at3"; BASE3="$(mkrepo "$AT3" 3)"
+mkpacket "$AT3/packet.md" 1 "- \`main\` at \`$BASE3\`; verified before building."
+run check --repo "$AT3" --packet "$AT3/packet.md" >/dev/null
+[ "$(verdict commits)" = "OK" ] \
+  && ok "the boundary itself is INSIDE the ceiling: 3 commits (2 build + 1 fix) reports OK" \
+  || { no "3 commits reported '$(verdict commits)' — the permitted fix commit is being flagged as a breach"; dump; }
+OVER="$WORK/over"; BASE4="$(mkrepo "$OVER" 4)"
+mkpacket "$OVER/packet.md" 1 "- \`main\` at \`$BASE4\`; verified before building."
 RC="$(run check --repo "$OVER" --packet "$OVER/packet.md")"
 [ "$(verdict commits)" = "EXCEEDED" ] \
-  && ok "RED: 3 commits against a ceiling of 2 is reported EXCEEDED, by name" \
-  || { no "RED FAILED: commits verdict was '$(verdict commits)' at 3 commits"; dump; }
+  && ok "RED: 4 commits against a ceiling of 3 is reported EXCEEDED, by name" \
+  || { no "RED FAILED: commits verdict was '$(verdict commits)' at 4 commits"; dump; }
 [ "$RC" = "0" ] \
   && ok "the commit ceiling ADVISES: it reports the breach and exits 0, as its class-C licence allows" \
   || { no "the commit ceiling exited $RC — it is gating on a heuristic constant without declaring it"; dump; }
@@ -274,6 +287,19 @@ REPORTED="$(awk '$1=="dimension:" && $2=="commits"{for(i=1;i<=NF;i++) if($i ~ /^
 { [ -n "$CITED" ] && [ "$CITED" = "$REPORTED" ]; } \
   && ok "the cited constant ($CITED) equals the ceiling the tool reports ($REPORTED) — census and tool cannot drift" \
   || no "the cited constant '$CITED' and the reported ceiling '$REPORTED' disagree"
+
+# AND THE CITED LINE MUST SAY WHAT THE NUMBER DOES NOT MEAN. The ceiling is
+# <=2 BUILD commits PLUS at most one FIX commit, and this tool counts a RANGE:
+# `git rev-list --count base..HEAD` cannot say which of the three is which. A
+# bare `3` therefore reads as a licence for three build commits, which is the
+# opposite of the rule it encodes. The disclaimer is part of the constant, and
+# the constant is the line the census cites, so it is checked here.
+grep -qiE 'cannot distinguish|does not partition' <<<"$CLINE" \
+  && ok "the cited constant states this tool CANNOT distinguish a build commit from a fix commit" \
+  || no "the cited constant asserts a number without saying that the tool cannot partition the range it counts — 3 then reads as a licence for 3 build commits"
+grep -qi 'reviewer' <<<"$CLINE" \
+  && ok "the cited constant names WHO enforces the build/fix split (the reviewer, not this count)" \
+  || no "the cited constant does not say where the build/fix distinction is actually enforced"
 
 echo "== 10. Usage errors refuse rather than guessing =="
 RC="$(run)"

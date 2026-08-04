@@ -288,6 +288,60 @@ grep -qiE "fourth (serial )?stage is a defect|fourth.{0,30}defect" "$DEPTHTXT" \
 grep -qiE "Depth: *3 *(—|-|:)" "$DEPTHTXT" \
   && ok "the third-stage announcement has a concrete format" \
   || no "no concrete announcement format for spending a third stage"
+
+# THE FOURTH STAGE IS NOT UNCONDITIONALLY A DEFECT, AND THE ONE EXCEPTION IS
+# NAMED RATHER THAN IMPLIED. The withdrawn version of this rule said a fourth
+# stage meant only installments or a mis-cut packet. That left no legal depth at
+# all for a fix list that arrived COMPLETE, in ONE installment, against a
+# CORRECTLY SCOPED packet, whose contents the contract's own re-review rules
+# FORBID confirming narrowly — so a packet that had done everything right was
+# pushed into recording a defect it had not committed. The exception must be
+# (a) named, (b) announceable, (c) CONJUNCTIVE — every condition, not any one —
+# and (d) explicitly not recorded as a defect; and the defect reading must
+# survive intact for every cause that really is one.
+#
+# These greps run over a FLATTENED copy: the block is hard-wrapped prose, and a
+# line-based grep for a phrase that spans a wrap would report a cheerful miss.
+DEPTHFLAT="$WORK/depth.flat"
+tr '\n' ' ' < "$DEPTHTXT" | tr -s ' ' > "$DEPTHFLAT"
+[ -s "$DEPTHFLAT" ] \
+  && ok "the depth block flattens to a non-empty line (the phrase checks below are not vacuous)" \
+  || no "the flattened depth block is empty — every phrase check below would pass over nothing"
+grep -qF 'mandatory_full_regate' "$DEPTHFLAT" \
+  && ok "the fourth stage's one legitimate cause is NAMED: mandatory_full_regate" \
+  || no "the depth block names no legitimate cause for a fourth serial stage — a complete fix list the re-review rules forbid closing narrowly would have no legal depth"
+grep -qE 'Depth: *4 *(—|-|:) *reason: *`?mandatory_full_regate' "$DEPTHFLAT" \
+  && ok "the fourth-stage announcement has a concrete format naming the cause" \
+  || no "no concrete announcement format for spending a fourth stage"
+grep -qiE 'not\*{0,2} a defect and is not recorded as one' "$DEPTHFLAT" \
+  && ok "under mandatory_full_regate depth 4 is NOT a defect and is NOT recorded as one" \
+  || no "the exception never says depth 4 stops being a defect, so it exempts nothing"
+grep -qiE 'when \*\*all\*\* of these hold|all of these hold|all five' "$DEPTHFLAT" \
+  && ok "the exception is CONJUNCTIVE — every condition must hold, not any one" \
+  || no "the exception does not require ALL its conditions, so it is a licence rather than an exception"
+declare -a REG_LABEL=("complete, one-installment fix list" "correctly scoped packet" "load-bearing change" "targeted confirmation forbidden" "full concurrent re-gate required")
+declare -a REG_RE=(
+  "complete, in one installment|complete.{0,20}one installment"
+  "correctly scoped|correctly-scoped"
+  "logic, derivation, authority, counts|load-bearing behaviour"
+  "forbid targeted|forbids targeted"
+  "concurrent re-gate"
+)
+for i in 0 1 2 3 4; do
+  grep -qiE "${REG_RE[$i]}" "$DEPTHFLAT" \
+    && ok "mandatory_full_regate names its condition: ${REG_LABEL[$i]}" \
+    || no "mandatory_full_regate does not name its condition: ${REG_LABEL[$i]}"
+done
+# The exception must not swallow the rule: every cause that IS a defect is still
+# named as one, or "depth 4 is fine if you say the word" is what this becomes.
+DEFCAUSE=0
+for cause in "incomplete enumeration" "installments" "scope growth" "split before execution"; do
+  grep -qiF "$cause" "$DEPTHFLAT" || { DEFCAUSE=$((DEFCAUSE+1)); echo "      | illegitimate cause of a fourth stage not named: $cause"; }
+done
+[ "$DEFCAUSE" -eq 0 ] \
+  && ok "depth 4 REMAINS a defect for every illegitimate cause, each named" \
+  || no "$DEFCAUSE illegitimate cause(s) of a fourth stage are unnamed, so the exception swallows the rule"
+
 # Every lane gets a depth budget, as the lane table does for rounds.
 for lane in read-only diagnosis tiny substantive architecture; do
   grep -qE "^\| \`$lane\` *\|" "$DEPTHTXT" \
