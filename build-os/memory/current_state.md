@@ -733,6 +733,26 @@ legal `--keep` retains it.
   close narrowly.** Recorded as a **contract gap**, not as a defect of the packet or the reviewer,
   and left for the operator/orchestrator.
 
+## History — rotation #4 of this file — MECHANICAL MAINTENANCE, not a governance packet
+
+**Operator-authorized maintenance close, 2026-08-04. No receipt (the `DC-0001` receipt count is
+unmoved), no metrics row, no `active_packet.md` change, no residue item, no doctrine.** Prereg
+`9c609e6`, tree-verified ancestor of apply `00ef841`; source sha256 `ec22e7e4…` matches the
+pre-rotation blob at the prereg commit.
+
+- Keep **15**, window **[15,15]** executed at both bounds: keep 14 fails §9(c) by 260 B; keep 16
+  refused by SENTINEL-C7 at 15,950 < 18,702.
+- Blocks 16–17 archived; **24,011 B reclaimed**; live 197,226 -> **173,215 B**; headroom
+  **31,585 B**, clearing the 18,702 B close budget with 12,883 B margin.
+- Append-only proven: the prior 66,894 B archive is an exact prefix of the new 91,186 B archive;
+  reconstruction run twice, byte-identical, digest = prereg.
+- Suite **2314/0 twice** plus the pre-rotation baseline; CHAINED vector identical under the recipe
+  `grep -E '^  CHAINED: '`.
+- One stated near-miss: the recovery recipe's first formulation missed the batch's 1-byte trailer;
+  corrected by deriving the body from the batch heading — same class as rotation #3's banner
+  arithmetic, this time stated rather than latent.
+- Both gate-pinned literals verified in block 1 and absent from the archive.
+
 ## History — `gravito_truthful_name_cleanup_a` — THE LAST GOVERNANCE PACKET, and the first close with the FIX SLOT UNSPENT
 
 **The long form is `build-os/receipts/gravito_truthful_name_cleanup_a.md`, which has no byte
