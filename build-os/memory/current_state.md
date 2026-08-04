@@ -79,8 +79,17 @@ legal `--keep` retains it.
   `no tags` because `tests/release_metadata_tests.sh:322` requires it, so the residue item is
   annotated rather than rewritten. Whether the tag was created with an explicit go is not
   determinable from here and no claim is made.
-- **Build/test command:** `bash tests/build_os_tests.sh` (2265 checks; no network; temp dirs)
-  — **2265 as of `PACKET-0042-process-doctrine-correction`.** The delta is **+37**:
+- **Build/test command:** `bash tests/build_os_tests.sh` (2293 checks; no network; temp dirs)
+  — **2293 as of `gravito_cross_file_sentinel_identity_a`.** The delta is **+28**, all of it
+  in `tests/build_os_maintenance_tests.sh` **154 -> 182** (section 11, CROSS-FILE IDENTITY
+  RESOLUTION: six red-driven fixtures each executed in BOTH directions, plus the stable-id
+  and floor-invariance properties and the declared governed identity set). Every other
+  chained suite is **+0**, confirmed by comparing the per-suite CHAINED **vector** across two
+  solo runs after an anchored `pgrep -fa '^bash tests/'` returned empty (`DEFECT-0013`).
+  `CHANGELOG.md` carries the matching literal `**2293 passed**` (unsplit) under
+  `## [Unreleased]`.
+  — **THE PREVIOUS FIGURE, KEPT AS THE RECORD IT WAS:** 2265 as of
+  `PACKET-0042-process-doctrine-correction`, whose delta was **+37**:
   `tests/gate_depth_tests.sh` **79 -> 113** (the fourth-stage exception
   `mandatory_full_regate` — named, announceable, conjunctive, and not recorded as a
   defect — **+11 at the build commit**, then **+23 at the fix commit** for the

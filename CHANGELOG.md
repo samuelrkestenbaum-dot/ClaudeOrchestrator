@@ -14,6 +14,54 @@ deprecation cycle. Pin a commit if you need stability.
 
 ### In flight (not landed at the released commit)
 
+- **THE ROTATION SENTINEL RESOLVES IDENTITY ACROSS THE GOVERNED MEMORY SET, AND
+  THE REFUSAL IT WIDENS IS NOT THE ONE IT WEAKENS.** `SENTINEL-C2` treated every
+  sibling-file reference as UNRESOLVED because resolution was single-file scoped
+  and said so in terms: an object that lives elsewhere and is merely cited here
+  "is indistinguishable, to this scan, from an object that has gone missing.
+  Both refuse." C2 is keep-independent, so **no `--keep` cleared it** —
+  `build-os/packets/active_packet.md` refused at every legal N while nothing was
+  wrong with the record. Resolution is now cross-file over a **declared**
+  `GOVERNED_IDENTITY_SET` (the three rotating memory files, plus
+  `standing_gates.md` **declared and deliberately NOT read** — the tool's own
+  shipped claim that it "never reads, writes or creates" that path is asserted
+  verbatim in three places, so admitting it is an operator act, and the boundary
+  is printed on every run instead of being crossed quietly).
+
+  **THREE CONSEQUENCES, AND ONLY ONE OF THEM LOWERS ANYTHING.** A citation of a
+  sibling-declared object resolves; a sibling's LIVE marker now **protects the
+  declaring block in the owning file**, which the single-file scan did not do at
+  all; and a structurally QUOTED marker naming only sibling-declared objects no
+  longer anchors at the block doing the quoting. A new refusal `SENTINEL-C8`
+  arrives with the widening — one stable identity, two governed files claiming
+  it, refused rather than tie-broken — because that failure mode could not exist
+  before. The declaration form was **tightened**, not widened: a BARE tag
+  opening a bold bullet declares, a BACKTICKED tag cites, and the previously
+  optional backtick was itself creating a second "canonical" declaration of
+  `(ddd)`.
+
+  **THE LIVE-VS-QUOTED TEST IS STRUCTURAL, BECAUSE THE VOCABULARY VERSION WAS
+  MEASURED AND FAILED.** `PACKET-0042`'s guard keyed on six withdrawal-marker
+  words on one line; probes found a live assertion containing `no longer`
+  passing green and a reworded cap invisible entirely. This one reads fence
+  state, blockquote depth, matched inline-code and quotation spans, the
+  declaration form, and the `## ARCHIVED BATCH` heading the tool itself writes.
+  Its failure direction is stated where it lives: only the quoted demotion can
+  fail open, which is why it additionally requires every named identity to be
+  declared in another governed file — so the object stays protected where it
+  actually lives.
+
+  **AND THE HONEST NEGATIVE RESULT.** `build-os/memory/residue.md` is still
+  **not rotatable**, and cross-file resolution neither could nor did change
+  that: its `minimum_safe_keep` is 25 of 25 blocks because `(o)` and `(S1)` are
+  DECLARED in its own block 25 and are genuinely live. C2 was never the binding
+  constraint there. Rotation #3 therefore relieves `current_state.md` instead,
+  at `--keep 15` inside a window `[14, 16]` **executed at both bounds**.
+
+  Suite **2293 passed**, 0 failed (+28 from the base `74575ee`, all in
+  `tests/build_os_maintenance_tests.sh` **154 → 182**; every other chained suite
+  +0, confirmed by comparing the per-suite CHAINED vector across two solo runs).
+
 - **TWO PROCESS RULES WITHDRAWN AS BROKEN, AND THE MACHINERY MOVED WITH THEM.**
   The working contract's `≤2 commits per packet` was **unsatisfiable**: any
   packet receiving `fix-then-pass` must produce a third commit, because the

@@ -1,0 +1,14 @@
+{
+  "tool": "build-os/maintenance/rotate-memory.sh",
+  "packet": "gravito_cross_file_sentinel_identity_a",
+  "written_at_commit": "74575ee (base) — this record lands in COMMIT 1; the apply it authorises lands in COMMIT 2, so the ordering is checkable from the tree and never from the builder’s word. Rotation #2 established this shape.",
+  "file": "current_state",
+  "path": "build-os/memory/current_state.md",
+  "keep": 15,
+  "sourceSha256": "59ab80776e319fe01d374108079a50ad00e300d0dbc872393dba70e0c7cccd11",
+  "sourceBytes": 201859,
+  "window": "[14, 16] — EXECUTED AT BOTH BOUNDS OVER THESE EXACT BYTES, not argued. (1) Floor from the rotation sentinel: minimum_safe_keep 5. (2) Floor from tests/build_os_maintenance_tests.sh §9(a)/(b)/(c): the rotated file must keep MORE than 10 blocks and a subsequent --keep 10 must still reclaim >= 40960 B and leave >= 40960 B of headroom — measured by applying into a scratch root, keep 13 reclaims 37592 B and FAILS, keep 14 reclaims 53228 B and PASSES. (3) Ceiling from refusal condition 7: the projected headroom must cover the 18702 B close budget — measured, keep 17 leaves 12195 B and REFUSES at SENTINEL-C7, keep 16 leaves 21221 B and is ALLOWED.",
+  "chosen": "15 — the middle of the window, as rotation #2 took the middle of its own. Projected: 3 blocks archived, 28784 B reclaimed, 31725 B of post-rotation headroom (13023 B over the 18702 B close budget), and a subsequent --keep 10 reclaim of 61603 B (20643 B over the §9 floor).",
+  "residue_note": "build-os/memory/residue.md is DELIBERATELY NOT a record here, and the reason is now MEASURED UNDER THE CROSS-FILE RESOLVER rather than inherited. Its minimum_safe_keep is still 25 of 25 blocks, because (o) and (S1) are DECLARED in block 25 OF THAT FILE and are genuinely live. SENTINEL-C2 was never the binding constraint on its rotatability: even with C2 fully cleared, keep 25 archives nothing and SENTINEL-C7 refuses, while every keep below 25 trips SENTINEL-C1. Cross-file resolution could not move that floor and did not.",
+  "active_packet_note": "build-os/packets/active_packet.md is not a record here either. The resolver DID change its verdict — REFUSE (C1+C2+C3, 4 unresolvable identities) becomes ALLOW at keep 32 with 0 unresolvable — but it has 78105 B of headroom and needs no relief, and this packet does not rotate what it does not have to."
+}

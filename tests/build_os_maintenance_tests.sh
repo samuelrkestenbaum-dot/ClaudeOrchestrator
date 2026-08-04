@@ -1544,6 +1544,387 @@ cmp -s "$SRC/build-os/memory/residue.md" "$RED/build-os/memory/residue.md" \
   && ok "SENTINEL: this repository's live residue.md is byte-identical to the copy taken at the top of this section" \
   || no "SENTINEL: the live residue.md changed during section 10"
 
+echo "== 11. CROSS-FILE IDENTITY RESOLUTION — identity is resolved across the GOVERNED MEMORY SET =="
+# WHY THIS SECTION EXISTS.
+#
+# `SENTINEL-C2` treated EVERY sibling-file reference as UNRESOLVED, because
+# resolution was SINGLE-FILE SCOPED and said so: "an object that legitimately
+# LIVES ELSEWHERE and is merely CITED here is indistinguishable, to this scan,
+# from an object that has gone missing. Both refuse." C2 is keep-independent, so
+# no `--keep` clears it. That is why `build-os/packets/active_packet.md` refused
+# at every legal keep while nothing was wrong with the record.
+#
+# THE GOAL IS NOT TO WEAKEN C2. It is to make C2 resolve identity across the
+# governed memory set instead of treating a sibling-file reference as
+# unresolvable. Five outcomes are distinguished, and each is driven here:
+#
+#   DECLARATION          a live object declared in a governed memory file
+#   LIVE_REFERENCE       a reference to a live object declared elsewhere
+#   QUOTED_REFERENCE     a token inside a code span, a quotation, a fence or a
+#                        blockquote — structure, never vocabulary
+#   HISTORICAL_REFERENCE a token inside an `## ARCHIVED BATCH` block — a copy,
+#                        never an owner
+#   UNRESOLVED           a marker names an identity no governed file declares
+#
+# THE MECHANISM IS STRUCTURAL, NOT A WORD LIST, and the reason is executed
+# history: `PACKET-0042`'s live-vs-quoted guard keyed on six withdrawal-marker
+# words on the same line, and probes found a live assertion on a line containing
+# `no longer` passing GREEN (fail-open) while a reworded cap was invisible
+# entirely. Nothing below reads vocabulary. It reads fence state, blockquote
+# depth, inline-code-span and quotation spans, the declaration FORM, and the
+# block heading the tool itself writes.
+GOV="$WORK/gov"
+mkdir -p "$GOV"
+
+# A GOVERNED MULTI-FILE ROOT. residue.md DECLARES `(qqq)`; active_packet.md only
+# CITES it. Every variant below is a one-flag change to this same generator, so
+# the differentials are about the flag and nothing else.
+#
+#   dup        — current_state.md ALSO declares (qqq) canonically (fixture D)
+#   missing    — the marker names DECISION-0099, declared nowhere (fixture E)
+#   archived   — the second declaration sits in an `## ARCHIVED BATCH` block (F)
+#   unquoted   — active_packet's citing marker is written BARE, not quoted (B/2)
+#   shifted    — filler LINES are inserted inside existing blocks (property 8)
+gov_root(){ # <root> <flag>
+  local root="$1" flag="${2:-plain}"
+  mkdir -p "$root/build-os/memory" "$root/build-os/packets"
+  node -e '
+const fs = require("fs");
+const [resP, csP, apP, flag] = process.argv.slice(1);
+const pad = (c, n) => c.repeat(n);
+
+/* ---- residue.md: the OWNER of (qqq) and of (zzz) ---- */
+const r = ["# Residue\n\n> generated fixture preamble.\n\n"];
+r.push("## Standing open items — PROTECTED REGION (block 1; rotation cannot reach it)\n\n");
+r.push("- **(aaa) A STANDING ITEM.** " + pad("s", 200) + "\n\n");
+for (let i = 2; i <= 5; i++) {
+  r.push(`## History — filler ${i}\n\n- **(f${i}) FILLER.** ${pad("f", 400)}\n\n`);
+  if (flag === "shifted") r.push(pad("x", 80) + "\n" + pad("x", 80) + "\n\n");
+}
+r.push("## History — the block that DECLARES (qqq)\n\n");
+r.push("- **(qqq) THE NON-CONSUMABLE OBJECT ITSELF.** " + pad("q", 400) + "\n\n");
+for (let i = 7; i <= 9; i++) r.push(`## History — filler ${i}\n\n- **(g${i}) FILLER.** ${pad("g", 400)}\n\n`);
+r.push("## History — the oldest block still holding an open item\n\n");
+r.push("- **(zzz) AN UNREPRODUCED FLAKE.** [STILL OPEN AND STILL UNDIAGNOSABLE]\n");
+r.push("  " + pad("z", 400) + "\n\n");
+for (let i = 11; i <= 14; i++) r.push(`## History — filler ${i}\n\n- **(h${i}) FILLER.** ${pad("h", 400)}\n\n`);
+fs.writeFileSync(resP, r.join(""));
+
+/* ---- current_state.md ---- */
+const c = ["# Current state\n\n> generated fixture preamble.\n\n"];
+c.push("## Standing truth — PROTECTED REGION\n\n");
+c.push("- **Build/test command:** `bash tests/build_os_tests.sh`\n");
+c.push("- **Last closed packet:** none\n\n");
+if (flag === "dup") {
+  c.push("## A SECOND CANONICAL DECLARATION OF THE SAME IDENTITY\n\n");
+  c.push("- **(qqq) A RIVAL DECLARATION IN ANOTHER GOVERNED FILE.** " + pad("d", 200) + "\n\n");
+} else if (flag === "archived") {
+  c.push("## ARCHIVED BATCH 1970-01-01T00:00:00Z — build-os/memory/residue.md — 1 blocks (block_1..block_1)\n\n");
+  c.push("- **(qqq) AN ARCHIVED COPY OF THE DECLARATION.** " + pad("a", 200) + "\n\n");
+}
+for (let i = 2; i <= 6; i++) c.push(`## History — cs filler ${i}\n\n- **(c${i}) FILLER.** ${pad("c", 300)}\n\n`);
+fs.writeFileSync(csP, c.join(""));
+
+/* ---- active_packet.md: it CITES (qqq); it declares nothing ---- */
+const named = flag === "missing" ? "`DECISION-0099`" : "`(qqq)`";
+const a = ["# Active Packet\n\n> generated fixture preamble.\n\n"];
+a.push("## ACTIVE — a packet that CITES an object it does not own\n\n");
+a.push("- **(p1) THE PACKET ITEM.** " + pad("p", 200) + "\n\n");
+for (let i = 2; i <= 4; i++) a.push(`## History — ap filler ${i}\n\n- **(a${i}) FILLER.** ${pad("a", 300)}\n\n`);
+a.push("## The block that CITES the sibling-declared object\n\n");
+if (flag === "unquoted") {
+  /* BARE marker: not in a code span, not in a quotation, not fenced. */
+  a.push(`- **(p5) A LIVE ASSERTION.** ${named} IS NOT CONSUMED AND MUST NOT BE MARKED SO.\n`);
+} else {
+  /* QUOTED marker: the marker phrase sits inside a quotation AND a code span. */
+  a.push(`- **(p5) A NARRATIVE ABOUT A PAST FIXTURE.** it would have archived ${named}, marked "IS NOT CONSUMED AND MUST NOT BE MARKED SO", at exit 0.\n`);
+}
+a.push("  " + pad("n", 300) + "\n\n");
+for (let i = 6; i <= 8; i++) a.push(`## History — ap filler ${i}\n\n- **(b${i}) FILLER.** ${pad("b", 300)}\n\n`);
+fs.writeFileSync(apP, a.join(""));
+' "$root/build-os/memory/residue.md" "$root/build-os/memory/current_state.md" \
+  "$root/build-os/packets/active_packet.md" "$flag"
+}
+
+# Read a sentinel field out of a --json report for a NAMED file (the reports
+# above all read results[0]; this section plans one file at a time too, but it
+# names the file explicitly so a future multi-file run cannot silently re-point
+# these assertions at the wrong result.)
+gov_report(){ # <root> <file> <keep> <out.json>
+  node "$SENT" --root "$1" --file "$2" --keep "$3" --sentinel-report --json > "$4" 2>/dev/null
+}
+gov_json(){ # <json> <expr-field>
+  node -e '
+const fs = require("fs");
+const s = JSON.parse(fs.readFileSync(process.argv[1], "utf8")).results[0].sentinel;
+const v = s[process.argv[2]];
+process.stdout.write(v === undefined ? "" : Array.isArray(v) ? String(v.length) : String(v));
+' "$1" "$2" 2>/dev/null
+}
+# One cross-file resolution rendered as "id@file:block", so the assertion names
+# WHERE the declaration was found and not merely that something was found.
+gov_cross(){ # <json> <id>
+  node -e '
+const fs = require("fs");
+const s = JSON.parse(fs.readFileSync(process.argv[1], "utf8")).results[0].sentinel;
+const hit = (s.cross_file_resolutions ?? []).filter((c) => c.id === process.argv[2]);
+process.stdout.write(hit.map((c) => `${c.id}@${c.declared_in}:${c.declared_block}`).join(","));
+' "$1" "$2" 2>/dev/null
+}
+gov_codes(){ # <stderr file>
+  grep -oE 'SENTINEL-C[0-9]' "$1" 2>/dev/null | sort -u | tr '\n' ' ' | sed 's/ $//'
+}
+
+# ---- (a) FIXTURE A — a sibling-declared identity RESOLVES, in both directions --
+GA="$GOV/a"; gov_root "$GA" plain
+# DIRECTION 1 (the RED this section was written for): with the sibling files
+# REMOVED from the root, the same file, the same bytes, the same keep must still
+# refuse at C2 — because then there really is nowhere the object could live.
+GA1="$GOV/a-alone"; mkdir -p "$GA1/build-os/packets"
+cp "$GA/build-os/packets/active_packet.md" "$GA1/build-os/packets/active_packet.md"
+node "$SENT" --root "$GA1" --file active_packet --keep 8 --apply > "$GOV/a1.out" 2>"$GOV/a1.err"
+GA1RC=$?
+[ "$GA1RC" -eq 7 ] && grep -q 'SENTINEL-C2' "$GOV/a1.err" \
+  && ok "XFILE A: with the sibling governed files ABSENT, a marker naming (qqq) is still UNRESOLVED and still refuses at C2 — cross-file resolution did not weaken the condition, it gave it somewhere to look" \
+  || no "XFILE A: the same citation with no sibling files exited $GA1RC without C2 — C2 has been weakened rather than widened: $(gov_codes "$GOV/a1.err")"
+# DIRECTION 2: with the governed set present, the identity resolves to the file
+# and block that DECLARE it, and C2 does not fire.
+gov_report "$GA" active_packet 8 "$GOV/a2.json"
+GA_EXPECT_BLK="$(awk '/^## /{n++} /^- \*\*\(qqq\)/{print n; exit}' "$GA/build-os/memory/residue.md")"
+[ "$(gov_cross "$GOV/a2.json" '(qqq)')" = "(qqq)@residue:$GA_EXPECT_BLK" ] \
+  && ok "XFILE A: (qqq) cited in active_packet.md resolves to its canonical declaration in residue.md block $GA_EXPECT_BLK — re-derived from the fixture, not remembered" \
+  || no "XFILE A: (qqq) resolved to '$(gov_cross "$GOV/a2.json" '(qqq)')', expected (qqq)@residue:$GA_EXPECT_BLK"
+[ "$(gov_json "$GOV/a2.json" unresolvable_identities)" = "0" ] \
+  && ok "XFILE A: ...and active_packet.md now carries ZERO unresolvable identities, so the permanent C2 refusal that no --keep could clear is gone" \
+  || no "XFILE A: active_packet.md still reports $(gov_json "$GOV/a2.json" unresolvable_identities) unresolvable identity/identities"
+
+# ---- (b) FIXTURE B — a QUOTED marker does not raise the floor, both directions --
+# The two fixtures differ in ONE thing: whether the marker phrase sits inside a
+# quotation and a code span. Nothing else moves, so the floor delta is caused by
+# the structural fact and by nothing else.
+GB="$GOV/b-quoted";   gov_root "$GB" plain
+GBU="$GOV/b-unquoted"; gov_root "$GBU" unquoted
+gov_report "$GB"  active_packet 8 "$GOV/b.json"
+gov_report "$GBU" active_packet 8 "$GOV/bu.json"
+GB_FLOOR="$(gov_json "$GOV/b.json" minimum_safe_keep)"
+GBU_FLOOR="$(gov_json "$GOV/bu.json" minimum_safe_keep)"
+GB_CITE_BLK="$(awk '/^## /{n++} /\(p5\)/{print n; exit}' "$GB/build-os/packets/active_packet.md")"
+[ -n "$GB_CITE_BLK" ] && [ "$GBU_FLOOR" = "$GB_CITE_BLK" ] \
+  && ok "XFILE B: the BARE marker raises active_packet.md's floor to block $GBU_FLOOR, the block it is written in — the guard still protects a live assertion it cannot attribute elsewhere" \
+  || no "XFILE B: the bare marker gave floor '$GBU_FLOOR', expected the citing block '$GB_CITE_BLK' — direction 2 of this differential is dead"
+[ -n "$GB_FLOOR" ] && [ "$GB_FLOOR" -lt "$GBU_FLOOR" ] \
+  && ok "XFILE B: quoting the SAME marker drops the floor from $GBU_FLOOR to $GB_FLOOR — a block that merely QUOTES \`(qqq)\` and its marker no longer raises the floor solely because it contains the text" \
+  || no "XFILE B: the quoted and bare forms both give floor '$GB_FLOOR'/'$GBU_FLOOR' — the quotation is not being read structurally"
+[ "$(gov_json "$GOV/b.json" quoted_references)" != "0" ] && [ -n "$(gov_json "$GOV/b.json" quoted_references)" ] \
+  && ok "XFILE B: ...and the demotion is REPORTED as a quoted reference rather than silently dropped — $(gov_json "$GOV/b.json" quoted_references) of them" \
+  || no "XFILE B: the quoted marker was dropped without being reported; a demotion nobody can see is a hole, not a fix"
+
+# ---- (c) FIXTURE C — the REAL live declaration still raises the floor ----------
+# The object is referenced in active_packet.md and DECLARED in residue.md. Two
+# things are asserted, and the second is the one cross-file resolution ADDS:
+#
+#   1. residue.md's own floor is unchanged — the still-open (zzz) it declares
+#      itself still sets it. Cross-file resolution lowered a FALSE refusal in
+#      another file and did not lower this one below a live declaration.
+#   2. A LIVE (unquoted) reference in a SIBLING file now PROTECTS the declaring
+#      block in the owning file. Under the single-file scan that reference
+#      produced a C2 refusal on the citing file and NO protection at all here,
+#      so this is strictly more protection than before, not less.
+gov_report "$GB"  residue 14 "$GOV/c.json"
+gov_report "$GBU" residue 14 "$GOV/cu.json"
+GC_ZZZ="$(awk '/^## /{n++} /^- \*\*\(zzz\)/{print n; exit}' "$GB/build-os/memory/residue.md")"
+GC_OK=0
+for j in "$GOV/c.json" "$GOV/cu.json"; do
+  [ "$(gov_json "$j" minimum_safe_keep)" = "$GC_ZZZ" ] || GC_OK=$((GC_OK+1))
+done
+[ "$GC_OK" -eq 0 ] \
+  && ok "XFILE C: residue.md's floor is $GC_ZZZ in BOTH the quoted and the unquoted root — the block that DECLARES the still-open (zzz). Cross-file resolution never lowers the floor below a live declaration" \
+  || no "XFILE C: residue.md's floor is $(gov_json "$GOV/c.json" minimum_safe_keep)/$(gov_json "$GOV/cu.json" minimum_safe_keep), expected $GC_ZZZ in both — a live declaration lost its protection"
+# DIRECTION 1 — a LIVE sibling reference propagates protection INBOUND.
+[ "$(sent_block_of "$GOV/cu.json" '(qqq)')" = "$GA_EXPECT_BLK" ] \
+  && ok "XFILE C: a LIVE marker in active_packet.md naming (qqq) protects block $GA_EXPECT_BLK of residue.md, the file that DECLARES it — protection follows the object across files, which is the whole point of resolving identity rather than position" \
+  || no "XFILE C: a live sibling reference put (qqq) at block '$(sent_block_of "$GOV/cu.json" '(qqq)')' in its owning file, expected $GA_EXPECT_BLK"
+# DIRECTION 2 — a QUOTED sibling reference does NOT, in either file. A narrative
+# about a past fixture is not a liveness claim, and it must not become one by
+# crossing a file boundary either.
+[ -z "$(sent_block_of "$GOV/c.json" '(qqq)')" ] \
+  && ok "XFILE C: ...and the QUOTED form of that same reference propagates nothing — the demotion is symmetric, so a quotation cannot raise a sibling's floor from the outside any more than it can raise its own" \
+  || no "XFILE C: a quoted reference still protected (qqq) at block '$(sent_block_of "$GOV/c.json" '(qqq)')' in the owning file — the demotion is one-sided"
+
+# ---- (d) FIXTURE D — two canonical declarations REFUSE -------------------------
+GD="$GOV/d"; gov_root "$GD" dup
+sha256sum < "$GD/build-os/packets/active_packet.md" > "$GOV/d.before"
+node "$SENT" --root "$GD" --file active_packet --keep 8 --apply > "$GOV/d.out" 2>"$GOV/d.err"
+GDRC=$?
+if [ "$GDRC" -eq 7 ] && grep -q 'SENTINEL-C8' "$GOV/d.err" \
+   && [ "$(sha256sum < "$GD/build-os/packets/active_packet.md")" = "$(cat "$GOV/d.before")" ]; then
+  ok "XFILE D: an identity with TWO canonical declarations in two governed files REFUSES at C8, before mutation — ambiguous ownership is not resolved by picking one"
+else
+  no "XFILE D: a doubly-owned identity exited $GDRC with codes [$(gov_codes "$GOV/d.err")] — ambiguity was resolved silently"
+fi
+grep -qF '(qqq)' "$GOV/d.err" && grep -qF 'current_state' "$GOV/d.err" && grep -qF 'residue' "$GOV/d.err" \
+  && ok "XFILE D: ...and the refusal names the identity and BOTH files that claim it, so the operator can act without re-deriving the conflict" \
+  || no "XFILE D: the C8 refusal does not name the identity and both claimants: $(head -c 300 "$GOV/d.err")"
+
+# ---- (e) FIXTURE E — a missing declaration still REFUSES ----------------------
+GE="$GOV/e"; gov_root "$GE" missing
+sha256sum < "$GE/build-os/packets/active_packet.md" > "$GOV/e.before"
+node "$SENT" --root "$GE" --file active_packet --keep 8 --apply > "$GOV/e.out" 2>"$GOV/e.err"
+GERC=$?
+if [ "$GERC" -eq 7 ] && grep -q 'SENTINEL-C2' "$GOV/e.err" && grep -q 'DECISION-0099' "$GOV/e.err" \
+   && [ "$(sha256sum < "$GE/build-os/packets/active_packet.md")" = "$(cat "$GOV/e.before")" ]; then
+  ok "XFILE E: a governed live reference whose declaration is absent from EVERY governed file still refuses at C2 and is named — the widened search did not turn a refusal into a skip"
+else
+  no "XFILE E: a missing declaration exited $GERC with codes [$(gov_codes "$GOV/e.err")]"
+fi
+
+# ---- (f) FIXTURE F — an ARCHIVED copy never takes canonical ownership ---------
+GF="$GOV/f"; gov_root "$GF" archived
+gov_report "$GF" active_packet 8 "$GOV/f.json"
+GF_ARCH_N="$(grep -c '^## ARCHIVED BATCH ' "$GF/build-os/memory/current_state.md")"
+[ "${GF_ARCH_N:-0}" -eq 1 ] \
+  && ok "XFILE F: the fixture is non-vacuous — current_state.md carries an \`## ARCHIVED BATCH\` block holding a byte-plausible copy of (qqq)'s declaration" \
+  || no "XFILE F: the fixture has $GF_ARCH_N archived batch block(s), so nothing below is about an archived copy"
+[ "$(gov_cross "$GOV/f.json" '(qqq)')" = "(qqq)@residue:$GA_EXPECT_BLK" ] \
+  && ok "XFILE F: (qqq) still resolves to residue.md block $GA_EXPECT_BLK — the archived copy did NOT take canonical ownership, and did NOT make the identity ambiguous either" \
+  || no "XFILE F: (qqq) resolved to '$(gov_cross "$GOV/f.json" '(qqq)')' — an archived copy is competing for ownership"
+node "$SENT" --root "$GF" --file active_packet --keep 8 --sentinel-report > "$GOV/f.txt" 2>&1
+grep -q 'SENTINEL-C8' "$GOV/f.txt" \
+  && no "XFILE F: the archived copy raised the duplicate-ownership refusal — a historical copy is being counted as a declaration" \
+  || ok "XFILE F: ...and C8 does not fire on it, which is the difference between a COPY and a rival OWNER"
+
+# ---- (g) PROPERTY 7 — STABLE IDS, NOT LINE NUMBERS, DETERMINE IDENTITY --------
+# The declaration is moved to a different LINE inside the same block. Identity
+# resolution must not move with it.
+GG="$GOV/g"; gov_root "$GG" plain
+perl -0pi -e 's/(## History — the block that DECLARES \(qqq\)\n\n)/$1<!-- an inserted line that moves every line number below it -->\n<!-- and a second one -->\n\n/' \
+  "$GG/build-os/memory/residue.md"
+GG_MOVED="$(awk '/^- \*\*\(qqq\)/{print FNR; exit}' "$GG/build-os/memory/residue.md")"
+GG_ORIG="$(awk '/^- \*\*\(qqq\)/{print FNR; exit}' "$GA/build-os/memory/residue.md")"
+[ -n "$GG_MOVED" ] && [ "$GG_MOVED" != "$GG_ORIG" ] \
+  && ok "XFILE 7: the fixture is non-vacuous — (qqq)'s declaration moved from line $GG_ORIG to line $GG_MOVED inside the same block" \
+  || no "XFILE 7: the declaration did not move ($GG_ORIG -> $GG_MOVED), so the line-independence claim below is vacuous"
+gov_report "$GG" active_packet 8 "$GOV/g.json"
+[ "$(gov_cross "$GOV/g.json" '(qqq)')" = "(qqq)@residue:$GA_EXPECT_BLK" ] \
+  && ok "XFILE 7: (qqq) still resolves to residue block $GA_EXPECT_BLK after its declaration moved by $(( GG_MOVED - GG_ORIG )) line(s) — the STABLE ID determines identity, never the line" \
+  || no "XFILE 7: moving the declaration by lines changed the resolution to '$(gov_cross "$GOV/g.json" '(qqq)')'"
+
+# ---- (h) PROPERTY 8 — THE FLOOR IS INVARIANT UNDER UNRELATED LINE MOVEMENT ----
+GH="$GOV/h"; gov_root "$GH" shifted
+gov_report "$GH" residue 14 "$GOV/h.json"
+GH_BYTES="$(wc -c < "$GH/build-os/memory/residue.md")"
+GA_BYTES="$(wc -c < "$GA/build-os/memory/residue.md")"
+[ "$GH_BYTES" -ne "$GA_BYTES" ] \
+  && ok "XFILE 8: the fixture is non-vacuous — unrelated filler lines moved residue.md from $GA_BYTES B to $GH_BYTES B without adding or removing a block" \
+  || no "XFILE 8: the shifted fixture is byte-identical to the plain one, so the invariance claim below is vacuous"
+[ "$(grep -c '^## ' "$GH/build-os/memory/residue.md")" = "$(grep -c '^## ' "$GA/build-os/memory/residue.md")" ] \
+  && ok "XFILE 8: ...and the block COUNT is unchanged, so the two roots are comparable" \
+  || no "XFILE 8: the filler changed the block count; the comparison below would be measuring a re-block"
+[ "$(gov_json "$GOV/h.json" minimum_safe_keep)" = "$(gov_json "$GOV/c.json" minimum_safe_keep)" ] \
+  && ok "XFILE 8: residue.md's safe floor is $(gov_json "$GOV/h.json" minimum_safe_keep) in BOTH roots — the floor is invariant under line movement that does not move an object between blocks" \
+  || no "XFILE 8: the floor moved from $(gov_json "$GOV/c.json" minimum_safe_keep) to $(gov_json "$GOV/h.json" minimum_safe_keep) on filler lines alone"
+
+# ---- (i) THE GOVERNED IDENTITY SET IS DECLARED, AND ITS ONE WITHHELD MEMBER ----
+# `standing_gates.md` is in the SET and is NOT READ, and the reason is a pinned
+# contract rather than an oversight: `build-os/maintenance/rotate-memory.test.mjs`
+# asserts the exact phrase "never reads, writes or creates" in the tool, in the
+# wrapper and in `--help` output. Reading it would falsify a customer-visible
+# claim while every one of those assertions stayed green — the precise shape this
+# tree keeps paying for. So the boundary is DECLARED in the tool and reported,
+# not taken silently.
+# THE PATH GOES THROUGH THE ENVIRONMENT, NOT THROUGH `argv`, and that is not
+# style. `rotate-memory.mjs` ends with a `process.argv[1]`-based main-module
+# guard, so passing its own path as the first argument of `node -e` makes the
+# import RUN THE CLI and exit — the read would then report the tool's stdout
+# instead of the tool's exports, and the assertion would be measuring the wrong
+# thing while looking like it worked.
+GOV_SET="$(RM_MJS="$SENT" node -e '
+import("file://" + process.env.RM_MJS).then((m) => {
+  process.stdout.write(m.GOVERNED_IDENTITY_SET.map((g) => `${g.path}:${g.read ? "read" : "withheld"}`).join(" "));
+}).catch(() => process.stdout.write(""));
+' 2>/dev/null)"
+[ "$GOV_SET" = "build-os/memory/residue.md:read build-os/memory/current_state.md:read build-os/packets/active_packet.md:read build-os/memory/standing_gates.md:withheld" ] \
+  && ok "XFILE SET: the governed identity set is declared in the tool as exactly the four memory files, with standing_gates.md marked WITHHELD — the resolver's read scope is auditable from the source, not from a builder's word" \
+  || no "XFILE SET: the declared governed identity set is [$GOV_SET]"
+node "$SENT" --root "$GA" --file active_packet --keep 8 --sentinel-report > "$GOV/set.txt" 2>&1
+grep -q 'standing_gates.md' "$GOV/set.txt" \
+  && ok "XFILE SET: ...and the withheld member is named in the report, so a reader of a resolution can see what was NOT consulted" \
+  || no "XFILE SET: the report never names the withheld member; an unread governed file that nobody is told about is a silent scope hole"
+grep -qF 'never reads, writes or creates' "$SENT" \
+  && ok "XFILE SET: ...and the tool's own pinned no-read claim about standing_gates.md is still TRUE of the shipped resolver, which is why it may still be written" \
+  || no "XFILE SET: the pinned no-read claim has been removed from the tool"
+
+# ---- (j) PROPERTY 10 — this repository's live residue.md, honestly ------------
+# Rotatable, or refused with the reason named. Both are legitimate outcomes and
+# the assertion refuses to prefer one: what it forbids is silence.
+GJ="$GOV/live-residue"; mkdir -p "$GJ/build-os/memory" "$GJ/build-os/packets"
+cp "$SRC/build-os/memory/residue.md"        "$GJ/build-os/memory/residue.md"
+cp "$SRC/build-os/memory/current_state.md"  "$GJ/build-os/memory/current_state.md"
+cp "$SRC/build-os/packets/active_packet.md" "$GJ/build-os/packets/active_packet.md"
+GJ_TOT="$(grep -c '^## ' "$GJ/build-os/memory/residue.md")"
+gov_report "$GJ" residue "$GJ_TOT" "$GOV/j.json"
+GJ_FLOOR="$(gov_json "$GOV/j.json" minimum_safe_keep)"
+GJ_VERDICT="$(gov_json "$GOV/j.json" verdict)"
+if [ "$GJ_FLOOR" = "$GJ_TOT" ]; then
+  ok "XFILE 10: with the WHOLE governed set present, residue.md's floor is $GJ_FLOOR of $GJ_TOT blocks — it is NOT rotatable, and cross-file resolution did not and could not change that: the floor is set by objects DECLARED in its own last block. Verdict $GJ_VERDICT, reported rather than worked around"
+elif [ -n "$GJ_FLOOR" ] && [ "$GJ_FLOOR" -lt "$GJ_TOT" ]; then
+  ok "XFILE 10: with the whole governed set present, residue.md's floor is $GJ_FLOOR of $GJ_TOT blocks, so $(( GJ_TOT - GJ_FLOOR )) block(s) became legally reclaimable. Verdict $GJ_VERDICT"
+else
+  no "XFILE 10: residue.md's floor could not be derived against the full governed set (floor '$GJ_FLOOR', blocks '$GJ_TOT')"
+fi
+# ...and the live tree was only read.
+cmp -s "$SRC/build-os/memory/residue.md" "$GJ/build-os/memory/residue.md" \
+  && cmp -s "$SRC/build-os/memory/current_state.md" "$GJ/build-os/memory/current_state.md" \
+  && cmp -s "$SRC/build-os/packets/active_packet.md" "$GJ/build-os/packets/active_packet.md" \
+  && ok "XFILE: all three live governed files are byte-identical to the copies taken at the top of section 11 — this section only READ the real tree" \
+  || no "XFILE: a live governed file changed during section 11"
+
+# ---- (k) PROPERTIES 11 + 12 — no protected object leaks, restoration is exact --
+# The positive control, run against a MULTI-FILE governed root so the cross-file
+# resolver is live for it. A guard that only refuses proves nothing about the
+# rotation it is meant to permit.
+GK="$GOV/k"; gov_root "$GK" plain
+cp "$GK/build-os/packets/active_packet.md" "$GOV/k.source"
+GK_FLOOR="$(gov_json "$GOV/b.json" minimum_safe_keep)"
+[ -n "$GK_FLOOR" ] && [ "$GK_FLOOR" -ge 1 ] || GK_FLOOR=1
+sent_prereg "$GOV/k.prereg.json" active_packet "$GK_FLOOR" "$GK/build-os/packets/active_packet.md"
+node "$SENT" --root "$GK" --file active_packet --keep "$GK_FLOOR" --apply \
+     --pre-registration "$GOV/k.prereg.json" > "$GOV/k.out" 2>"$GOV/k.err"
+GKRC=$?
+[ "$GKRC" -eq 0 ] \
+  && ok "XFILE 11: at the cross-file-derived floor $GK_FLOOR, with a matching pre-registration, active_packet.md ROTATES (exit 0) — the file that could NEVER rotate under the single-file scan now can" \
+  || no "XFILE 11: the governed apply was refused (exit $GKRC): $(head -c 400 "$GOV/k.err")"
+GK_LEAK=0
+if [ -f "$GK/build-os/memory/archive/active_packet.archive.md" ]; then
+  grep -qF -- '- **(p1)' "$GK/build-os/memory/archive/active_packet.archive.md" && GK_LEAK=$((GK_LEAK+1))
+fi
+grep -qF -- '- **(p1)' "$GK/build-os/packets/active_packet.md" || GK_LEAK=$((GK_LEAK+1))
+[ "$GK_LEAK" -eq 0 ] \
+  && ok "XFILE 11: ...and no protected object leaked into the archive — the retained prefix still carries every one of them, matched by DECLARATION" \
+  || no "XFILE 11: $GK_LEAK protected-object leak(s) across the cut"
+node -e '
+const fs = require("fs"), path = require("path");
+const [orig, root] = process.argv.slice(1);
+const L = (p) => fs.readFileSync(p).toString("latin1");
+const original = L(orig);
+const live = L(path.join(root, "build-os/packets/active_packet.md"));
+const archive = L(path.join(root, "build-os/memory/archive/active_packet.archive.md"));
+const S = "<!-- rotate-memory:archive-pointer:start -->";
+const E = "<!-- rotate-memory:archive-pointer:end -->\n\n";
+const a = live.indexOf(S);
+if (a < 0) throw new Error("no banner in the rotated file");
+const b = live.indexOf(E, a) + E.length;
+const hdr = archive.lastIndexOf("## ARCHIVED BATCH ");
+const bodyAt = archive.indexOf("\n\n", hdr) + 2;
+const rebuilt = live.slice(0, a) + live.slice(b) + archive.slice(bodyAt);
+if (!rebuilt.startsWith(original)) {
+  let i = 0; while (i < original.length && rebuilt[i] === original[i]) i++;
+  throw new Error("NOT byte-exact: first divergence at byte " + i);
+}
+' "$GOV/k.source" "$GK" 2>"$GOV/k.cons.err" \
+  && ok "XFILE 12: ...and restoration is still BYTE-EXACT — live-minus-banner ++ archive reconstructs the source of the cross-file-permitted rotation" \
+  || no "XFILE 12: the cross-file-permitted rotation lost bytes: $(cat "$GOV/k.cons.err")"
+
 echo ""
 echo "==== RESULT: $PASS passed, $FAIL failed ===="
 [ "$FAIL" -eq 0 ]

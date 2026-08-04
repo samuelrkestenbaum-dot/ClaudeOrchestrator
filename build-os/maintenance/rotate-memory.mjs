@@ -703,27 +703,37 @@ export function composeRetained(retainedSegments, banner) {
  * widens the protected set, it never narrows it.
  *
  * -------------------------------------------------------------------------
- * RESOLUTION IS SINGLE-FILE SCOPED, AND THAT LIMITATION IS STATED HERE
- * BECAUSE IT IS WHERE THE RULE ABOVE IS STATED
+ * RESOLUTION IS CROSS-FILE OVER THE GOVERNED MEMORY SET — AND WAS NOT
  * -------------------------------------------------------------------------
- * "No block declares it" means NO BLOCK OF THE FILE CURRENTLY BEING PLANNED.
- * This scan reads one file. It does not consult the other memory files, the
- * registries, or the archive, so an object that legitimately LIVES ELSEWHERE
- * and is merely CITED here is indistinguishable, to this scan, from an object
- * that has gone missing. Both refuse.
+ * THIS PARAGRAPH USED TO SAY THE OPPOSITE, and the change is a SPEC REVISION
+ * rather than a fix, so the old text is described rather than merely replaced.
+ * It said: "No block declares it" means NO BLOCK OF THE FILE CURRENTLY BEING
+ * PLANNED... an object that legitimately LIVES ELSEWHERE and is merely CITED
+ * here is indistinguishable, to this scan, from an object that has gone
+ * missing. Both refuse. It then recorded the cost and routed the widening to
+ * the operator instead of taking it.
  *
- * THAT ASSUMPTION IS WHAT PRODUCES BOTH REFUSALS ON THIS TREE, and neither is
- * a missing object: `DEFECT-0014` is marked `STAYS OPEN` in `residue.md` while
- * its class record lives in `build-os/registry/defect_classes.txt`, and `(S1)`
- * is cited in `active_packet.md` while it is declared in `residue.md`.
+ * THE COST WAS REAL AND WAS PAID. `SENTINEL-C2` is keep-independent, so NO
+ * `--keep` clears it: `build-os/packets/active_packet.md` refused at every legal
+ * N because it cites `(S1)` and `(ddd)`, which `build-os/memory/residue.md`
+ * declares. Nothing was wrong with the record and the file could not rotate.
  *
- * THE TIE BREAKS TOWARDS REFUSING, and that is a choice rather than a
- * discovery: a cross-file resolver could tell the two apart, and building one
- * is a SPEC REVISION — it widens what "resolve" means — so it is recorded here
- * and routed to the operator rather than smuggled in under a fix. Until then
- * the cost is real and is named: a file that only CITES open objects it does
- * not own cannot be rotated, and the refusal names the identity and the line
- * so the reader can act on it.
+ * "No block declares it" NOW MEANS: no file in `GOVERNED_IDENTITY_SET` declares
+ * it. Section 4c holds the resolver. Three things follow, and only the third
+ * can lower a floor:
+ *
+ *   - a citation of a sibling-declared object RESOLVES instead of refusing;
+ *   - the sibling's LIVE marker PROTECTS the declaring block in the owning
+ *     file, which the single-file scan did not do at all;
+ *   - a structurally QUOTED marker whose every named identity is declared in
+ *     ANOTHER governed file no longer anchors at the block doing the quoting.
+ *
+ * WHAT STILL REFUSES, UNCHANGED: an identity NO governed file declares (C2),
+ * and — new with the widening — an identity TWO governed files both declare
+ * (C8). The set itself is deliberately narrow: it is not "the repository", so
+ * an object whose only record lives outside it, such as
+ * `build-os/registry/defect_classes.txt`, still refuses at C2. Admitting a new
+ * file to the set is the next spec revision and it is an operator decision.
  *
  * -------------------------------------------------------------------------
  * ARMING IS EXPLICIT, AND AN UNARMED SENTINEL SAYS SO
@@ -763,9 +773,380 @@ export const SENTINEL_ID_RE = new RegExp(`\\b(?:${SENTINEL_ID_FAMILIES})-\\d{4}\
  * declaration opens a bullet: `- **(ddd) ...`.
  */
 export const SENTINEL_NAMED_TAG_RE = /`\((S\d+|[a-z]{1,6})\)/g;
+/*
+ * THE DECLARATION FORM REQUIRES A **BARE** TAG, AND THE BACKTICK THAT USED TO BE
+ * OPTIONAL HERE WAS THE DEFECT.
+ *
+ * The comment above already states this tree's convention: a BACKTICKED tag is a
+ * CITATION of an object, a BARE tag opening a bold bullet is its DECLARATION.
+ * This pattern then wrote `\`?` and accepted both, which collapsed the very
+ * distinction the comment draws. Measured on the live tree, not argued:
+ * `build-os/packets/active_packet.md:558` reads ``- **`(ddd)` STAYS QUEUED**``
+ * — a citation — and was indexed as a DECLARATION of `(ddd)`, while `(ddd)` is
+ * really declared at `build-os/memory/residue.md:1711` as `- **(ddd) THE ...`.
+ * One object, two "canonical" declarations, in two files, purely because of an
+ * optional backtick.
+ *
+ * IT IS TIGHTENED RATHER THAN WIDENED, and the direction matters: a form this
+ * no longer accepts becomes an UNRESOLVED identity, which REFUSES. Narrowing a
+ * declaration recogniser can cost a refusal; widening one costs an archived
+ * object. The tie breaks the same way it does everywhere else in this file.
+ */
 export const SENTINEL_DECL_RE = new RegExp(
-  `^\\s*[-*]\\s+\\*\\*\`?(?:\\((S\\d+|[a-z]{1,6})\\)|((?:${SENTINEL_ID_FAMILIES})-\\d{4}))`
+  `^\\s*[-*]\\s+\\*\\*(?:\\((S\\d+|[a-z]{1,6})\\)|((?:${SENTINEL_ID_FAMILIES})-\\d{4}))`
 );
+
+/* ------------------------------------------------------------------ */
+/* 4c. CROSS-FILE IDENTITY RESOLUTION                                  */
+/* ------------------------------------------------------------------ */
+
+/*
+ * WHY THIS EXISTS, AND WHAT IT DELIBERATELY DOES NOT DO.
+ *
+ * Resolution used to be SINGLE-FILE SCOPED, and the section above states the
+ * cost in terms: "an object that legitimately LIVES ELSEWHERE and is merely
+ * CITED here is indistinguishable, to this scan, from an object that has gone
+ * missing. Both refuse." `SENTINEL-C2` is keep-independent, so NO `--keep`
+ * clears it — a file that only cites open objects it does not own could not
+ * rotate at all, at any N, forever.
+ *
+ * THIS IS NOT A WEAKENING OF C2. C2 still refuses an identity nothing declares;
+ * it now looks in the whole GOVERNED MEMORY SET before saying so. Two new things
+ * follow, and both INCREASE what is protected:
+ *
+ *   - a live reference in file A to an object declared in file B now PROTECTS
+ *     B's declaring block. Before, that reference produced a refusal on A and no
+ *     protection at all on B.
+ *   - an identity with canonical declarations in TWO governed files is
+ *     AMBIGUOUS and refuses at C8, rather than being resolved by picking one.
+ *
+ * THE ONE THING THAT LOWERS A FLOOR IS THE QUOTED-REFERENCE DEMOTION, AND ITS
+ * FAILURE DIRECTION IS STATED PLAINLY BELOW rather than left to be discovered.
+ *
+ * -------------------------------------------------------------------------
+ * STRUCTURE, NEVER VOCABULARY — AND THIS IS A MEASURED LESSON
+ * -------------------------------------------------------------------------
+ * `PACKET-0042` shipped a live-vs-quoted guard keyed on six withdrawal-marker
+ * WORDS occurring on the same line. Executed probes killed it in both
+ * directions: a LIVE assertion that happened to contain `no longer` passed
+ * GREEN (fail-OPEN), and a REWORDED cap was invisible to it entirely. A word
+ * list is a guess about how humans write; it is not a property of the text.
+ *
+ * Everything here reads STRUCTURE instead: fenced-code state, blockquote depth,
+ * matched inline-code spans, matched quotation spans, the declaration FORM, and
+ * the `## ARCHIVED BATCH` heading THIS TOOL ITSELF writes. None of it consults a
+ * word list, and none of it can be defeated by rewording.
+ */
+
+/**
+ * The GOVERNED MEMORY IDENTITY SET — the only files identity is resolved across.
+ *
+ * IT IS NOT "THE REPOSITORY". A whole-tree scan would make every receipt, every
+ * changelog entry and every test fixture a potential declaration, and the first
+ * false declaration silently lowers a floor. The set is the rotating memory
+ * files plus the never-rotated gates file, and nothing else.
+ *
+ * ONE MEMBER IS DECLARED AND WITHHELD, AND THE REASON IS A PINNED CONTRACT
+ * RATHER THAN AN OVERSIGHT. `build-os/memory/standing_gates.md` belongs in this
+ * set by design — it is where permanent obligations are supposed to live. It is
+ * NOT read, because this tool's own shipped documentation states, in the header,
+ * in `rotate-memory.sh` and in `--help`, that it "never reads, writes or
+ * creates" that path, and `rotate-memory.test.mjs` asserts that exact phrase in
+ * all three places. Reading it would falsify a customer-visible claim while
+ * every one of those assertions stayed green — which is precisely the shape this
+ * repository keeps paying for. Admitting it is an OPERATOR decision: retract the
+ * claim first, then flip `read`. Until then the boundary is declared here, is
+ * reported on every run, and is not taken silently.
+ */
+export const GOVERNED_IDENTITY_SET = [
+  { name: "residue", path: "build-os/memory/residue.md", read: true },
+  { name: "current_state", path: "build-os/memory/current_state.md", read: true },
+  { name: "active_packet", path: "build-os/packets/active_packet.md", read: true },
+  {
+    name: "standing_gates",
+    path: "build-os/memory/standing_gates.md",
+    read: false,
+    /*
+     * WORDED TO AVOID `retention` AND `pinned`, ON PURPOSE. This string is
+     * printed on EVERY run, and `rotate-memory.test.mjs` asserts that no output
+     * of this tool contains either word — because both are the vocabulary of a
+     * meaning guarantee this tool does not make. The constraint is real and the
+     * wording obeys it rather than arguing with it.
+     */
+    withheld:
+      "declared in the governed identity set and NOT read: this tool's own documentation " +
+      "states it never reads, writes or creates this path, and rotate-memory.test.mjs asserts " +
+      "that phrase in the tool, the wrapper and the --help text. Retracting the claim is an " +
+      "operator act, so the boundary is declared here instead of being crossed quietly.",
+  },
+];
+
+/** The five outcomes an identity occurrence can have. Reported verbatim. */
+export const IDENTITY_CLASS = {
+  DECLARATION: "DECLARATION",
+  LIVE_REFERENCE: "LIVE_REFERENCE",
+  QUOTED_REFERENCE: "QUOTED_REFERENCE",
+  HISTORICAL_REFERENCE: "HISTORICAL_REFERENCE",
+  UNRESOLVED: "UNRESOLVED",
+};
+
+/**
+ * A block heading THIS TOOL writes into an archive file. A declaration sitting
+ * under one is a COPY of a declaration, never the declaration itself.
+ *
+ * It is deliberately the tool's OWN generated heading and not a guess at what
+ * "historical" prose looks like. Measured on this tree, the guess would have
+ * been catastrophic: `build-os/memory/residue.md` blocks 4..25 are ALL headed
+ * `## History — ...`, and blocks 25 holds the still-open `(o)` and `(S1)`. A
+ * rule that demoted "History" headings would have archived both at exit 0.
+ */
+export const SENTINEL_ARCHIVED_BLOCK_RE = /^##\s+ARCHIVED BATCH\b/;
+
+/** A fenced-code opener/closer, at any indent. */
+const FENCE_RE = /^\s*(?:```|~~~)/;
+
+/**
+ * Per-line "is this line inside a MATCHED fenced code block?".
+ *
+ * ONLY A MATCHED PAIR OPENS A QUOTED REGION. An unterminated fence at EOF opens
+ * nothing, so a stray triple-backtick cannot silently demote the whole tail of a
+ * memory file. That is the fail-CLOSED direction and it is the reason for the
+ * two-pass shape below rather than a single running toggle.
+ */
+export function fencedLineFlags(lines) {
+  const flags = new Array(lines.length).fill(false);
+  let open = -1;
+  for (let i = 0; i < lines.length; i++) {
+    if (!FENCE_RE.test(lines[i])) continue;
+    if (open === -1) {
+      open = i;
+    } else {
+      for (let j = open; j <= i; j++) flags[j] = true;
+      open = -1;
+    }
+  }
+  return flags;
+}
+
+/**
+ * Matched inline-code spans and matched quotation spans on one line, as
+ * half-open `[start, end)` index ranges.
+ *
+ * MATCHED, NOT COUNTED: an ODD number of backticks (or of quotation marks)
+ * yields NO span of that kind for the line at all. An unbalanced delimiter is
+ * ambiguous, and the tie breaks towards treating the text as live.
+ */
+export function quotedSpans(line) {
+  const spans = [];
+  for (const ch of ["`", '"']) {
+    const at = [];
+    for (let i = 0; i < line.length; i++) if (line[i] === ch) at.push(i);
+    if (at.length % 2 !== 0) continue;
+    for (let k = 0; k + 1 < at.length; k += 2) spans.push([at[k], at[k + 1] + 1]);
+  }
+  return spans;
+}
+
+/** Is index `at` inside any of `spans`? */
+export function isInSpans(spans, at) {
+  for (const [s, e] of spans) if (at >= s && at < e) return true;
+  return false;
+}
+
+/**
+ * Classify every line of `text` structurally, once, so nothing downstream has to
+ * re-derive it: which block it is in, whether it is fenced, whether it is a
+ * blockquote, and whether its block is an archived batch.
+ */
+export function structuralLineMap(text, spec) {
+  const lines = text.split("\n");
+  const fenced = fencedLineFlags(lines);
+  const blockOfLine = [];
+  const archived = new Array(lines.length).fill(false);
+  let blockNo = 0;
+  let blockArchived = false;
+  for (let i = 0; i < lines.length; i++) {
+    /*
+     * BLOCK NUMBERING IS FENCE-INSENSITIVE, AND DELIBERATELY SO. It must agree
+     * with `segmentFile`, which is what ROUTING is built from and which counts a
+     * delimiter line wherever it appears. A fence-aware count here would produce
+     * block positions the routing does not share, and the floor would then name
+     * a block number that means something different to the two halves of the
+     * tool. Fence state is used for QUOTATION decisions only.
+     */
+    if (spec.blockDelimiter.test(lines[i])) {
+      blockNo++;
+      blockArchived = SENTINEL_ARCHIVED_BLOCK_RE.test(lines[i]);
+    }
+    blockOfLine.push(blockNo);
+    archived[i] = blockNo >= 1 && blockArchived;
+  }
+  const quoted = lines.map((l, i) => fenced[i] || /^\s*>/.test(l));
+  return { lines, fenced, quoted, archived, blockOfLine };
+}
+
+/**
+ * The canonical DECLARATIONS a single governed file makes.
+ *
+ * A line is a declaration only when it matches the (bare-tag) declaration form,
+ * sits inside a block, and is neither structurally quoted nor inside an archived
+ * batch. Within one file the DEEPEST declaration wins, unchanged: retention is a
+ * prefix, so the deepest anchor is the only one that retains every copy.
+ */
+export function declarationsIn(text, spec, precomputedMap) {
+  const map = precomputedMap ?? structuralLineMap(text, spec);
+  const declaredAt = new Map();
+  map.lines.forEach((line, i) => {
+    const m = SENTINEL_DECL_RE.exec(line);
+    if (!m) return;
+    if (map.quoted[i] || map.archived[i]) return;
+    const id = m[1] ? `(${m[1]})` : m[2];
+    const at = map.blockOfLine[i];
+    if (at >= 1 && (!declaredAt.has(id) || declaredAt.get(id).block < at)) {
+      declaredAt.set(id, { block: at, line: i + 1 });
+    }
+  });
+  return declaredAt;
+}
+
+/**
+ * Build the cross-file declaration index over the governed set.
+ *
+ * Returns `{ index, sources, withheld, missing }`. `index` maps a stable id to
+ * EVERY governed file that canonically declares it — a list rather than a single
+ * winner, because two entries is an ambiguity to be refused (C8), not a
+ * tie-break to be taken.
+ *
+ * A governed file that is absent from `root` is recorded and skipped: a
+ * scaffolded repo, a generated fixture and a scratch root all legitimately carry
+ * only one of them, and refusing there would break every honest caller.
+ */
+export function buildIdentityIndex(root, readFile) {
+  const index = new Map();
+  const sources = [];
+  const withheld = [];
+  const missing = [];
+  for (const gov of GOVERNED_IDENTITY_SET) {
+    if (!gov.read) {
+      withheld.push({ path: gov.path, reason: gov.withheld });
+      continue;
+    }
+    const full = path.join(root, gov.path);
+    let text;
+    try {
+      text = readFile ? readFile(full) : fs.readFileSync(full).toString("latin1");
+    } catch {
+      missing.push(gov.path);
+      continue;
+    }
+    /*
+     * THE SPEC COMES FROM `FILE_SPECS` AND IS NEVER INVENTED HERE. A fallback
+     * delimiter would be a SECOND definition of how a memory file is blocked,
+     * sitting outside the one list that is pinned from outside the tool, and the
+     * two would drift the first time a file's convention changed. A governed
+     * entry marked `read` with no spec is a CONFIG error, not a default.
+     */
+    const spec = FILE_SPECS[gov.name];
+    if (!spec) {
+      throw new RotateError(
+        EXIT.CONFIG,
+        `GOVERNED_IDENTITY_SET marks "${gov.name}" (${gov.path}) as readable but FILE_SPECS ` +
+          `declares no block delimiter for it. Identity resolution needs the SAME segmentation ` +
+          `the routing uses; inventing one here would create a second, drifting definition.`
+      );
+    }
+    const decls = declarationsIn(text, spec);
+    sources.push({ name: gov.name, path: gov.path, declarations: decls.size });
+    for (const [id, where] of decls) {
+      if (!index.has(id)) index.set(id, []);
+      index.get(id).push({ file: gov.name, path: gov.path, block: where.block, line: where.line });
+    }
+  }
+  return { index, sources, withheld, missing };
+}
+
+/**
+ * Every protection marker a governed file OTHER than `spec` carries that names
+ * an identity `spec` canonically declares.
+ *
+ * THIS IS THE INBOUND HALF, and it is what makes the resolution safe rather than
+ * merely permissive. Under the single-file scan, `file A says (qqq) must not be
+ * consumed` and `file B declares (qqq)` produced a REFUSAL on A and NO
+ * PROTECTION AT ALL on B — the object was unprotected in the only file that
+ * could archive it. Now the marker protects B's declaring block.
+ *
+ * QUOTED markers are excluded here for the same reason they are excluded from
+ * anchoring in their own file: a narrative about a past fixture is not a
+ * liveness claim, and it must not become one by crossing a file boundary.
+ */
+export function inboundProtections(root, spec, index, readFile) {
+  const found = [];
+  for (const gov of GOVERNED_IDENTITY_SET) {
+    if (!gov.read || gov.name === spec.name) continue;
+    const full = path.join(root, gov.path);
+    let text;
+    try {
+      text = readFile ? readFile(full) : fs.readFileSync(full).toString("latin1");
+    } catch {
+      continue;
+    }
+    // Same rule as `buildIdentityIndex`: the segmentation is FILE_SPECS' or
+    // there is none. `buildIdentityIndex` has already refused a readable
+    // governed entry with no spec, so reaching this line without one is
+    // impossible; the guard is a skip rather than a second error path.
+    const otherSpec = FILE_SPECS[gov.name];
+    if (!otherSpec) continue;
+    const map = structuralLineMap(text, otherSpec);
+    map.lines.forEach((line, i) => {
+      if (map.blockOfLine[i] < 1) return;
+      for (const marker of SENTINEL_MARKERS) {
+        const hit = marker.re.exec(line);
+        if (!hit) continue;
+        if (markerIsQuoted(line, hit.index, map, i)) continue;
+        const named = new Set();
+        for (const m of line.matchAll(SENTINEL_ID_RE)) named.add(m[0]);
+        for (const m of line.matchAll(SENTINEL_NAMED_TAG_RE)) named.add(`(${m[1]})`);
+        for (const id of named) {
+          const owners = index.get(id) ?? [];
+          const here = owners.filter((o) => o.file === spec.name);
+          if (owners.length !== 1 || here.length !== 1) continue;
+          found.push({
+            id,
+            kind: marker.kind,
+            block: here[0].block,
+            line: here[0].line,
+            named_in: gov.path,
+            named_at_line: i + 1,
+          });
+        }
+      }
+    });
+  }
+  return found;
+}
+
+/**
+ * Is the marker occurrence at `index` on this line structurally QUOTED?
+ *
+ * Three structural facts, no vocabulary: the line is inside a matched fence, the
+ * line is a blockquote, or the marker phrase itself falls inside a matched
+ * inline-code span or a matched quotation span.
+ *
+ * THE FAILURE DIRECTION, NAMED. This predicate is the only thing here that can
+ * LOWER a floor, so it is the only one that can fail OPEN, and it does so in
+ * exactly one shape: a LIVE, floor-raising marker that a human wrote inside
+ * backticks or inside quotation marks. That is why the demotion it feeds is
+ * additionally conditioned (see `scanProtectedObjects`) on every identity the
+ * marker names resolving to a canonical declaration in ANOTHER governed file —
+ * so the object is still protected where it lives, and the only thing lost is
+ * protection of the block doing the quoting. A quoted marker that names nothing,
+ * or names something this file declares, or names something nothing declares,
+ * anchors exactly as it always did.
+ */
+export function markerIsQuoted(line, at, map, i) {
+  if (map.quoted[i]) return true;
+  return isInSpans(quotedSpans(line), at);
+}
 
 /**
  * The protection vocabulary, as this repository actually writes it.
@@ -873,31 +1254,29 @@ export function sentinelBlockMap(text, spec) {
  * block declares. Both are reported in full — nothing is dropped silently,
  * which is what "a REFUSAL, not a skip" means in practice.
  */
-export function scanProtectedObjects(text, spec) {
-  const lines = text.split("\n");
-  const blockOfLine = [];
-  let blockNo = 0;
-  for (const line of lines) {
-    if (spec.blockDelimiter.test(line)) blockNo++;
-    blockOfLine.push(blockNo);
-  }
+export function scanProtectedObjects(text, spec, resolution) {
+  const map = structuralLineMap(text, spec);
+  const { lines, blockOfLine } = map;
+  const crossIndex = resolution?.index ?? new Map();
 
-  // (1) DECLARATION INDEX: id -> the DEEPEST block that declares it. Deepest,
-  //     not first: retention is a prefix, so protecting the deepest declaration
-  //     retains every copy. A shallower choice would strand a later duplicate.
-  const declaredAt = new Map();
-  lines.forEach((line, i) => {
-    const m = SENTINEL_DECL_RE.exec(line);
-    if (!m) return;
-    const id = m[1] ? `(${m[1]})` : m[2];
-    const at = blockOfLine[i];
-    if (at >= 1 && (!declaredAt.has(id) || declaredAt.get(id).block < at)) {
-      declaredAt.set(id, { block: at, line: i + 1 });
-    }
-  });
+  /*
+   * (1) THE DECLARATION INDEX FOR THIS FILE — derived by `declarationsIn`, the
+   *     SAME function the cross-file index is built from.
+   *
+   *     IT IS ONE FUNCTION AND NOT TWO COPIES, deliberately. An inlined second
+   *     copy of the deepest-declaration rule would let this file's own view of
+   *     who declares what drift from the view every OTHER file gets of it, and
+   *     the two would then disagree about ownership without anything failing.
+   *     It also keeps the rule at exactly one site, which is what the suite's M4
+   *     mutation fixture depends on to be able to break it.
+   */
+  const declaredAt = declarationsIn(text, spec, map);
 
   const objects = [];
   const unresolvable = [];
+  const crossFileResolved = [];
+  const quotedReferences = [];
+  const ambiguous = [];
   const seen = new Set();
   const add = (id, kind, block, line, resolution) => {
     const key = `${id}|${kind}|${block}`;
@@ -952,36 +1331,102 @@ export function scanProtectedObjects(text, spec) {
     const block = blockOfLine[i];
     if (block < 1) return;
     for (const marker of SENTINEL_MARKERS) {
-      if (!marker.re.test(line)) continue;
+      const hit = marker.re.exec(line);
+      if (!hit) continue;
+      const quoted = markerIsQuoted(line, hit.index, map, i);
 
       // (4a) identities this marker NAMES
       const named = new Set();
       for (const m of line.matchAll(SENTINEL_ID_RE)) named.add(m[0]);
       for (const m of line.matchAll(SENTINEL_NAMED_TAG_RE)) named.add(`(${m[1]})`);
+      // Every named identity that resolved to a single canonical declaration in
+      // ANOTHER governed file. This is the set the quoted demotion below is
+      // conditioned on, so it is computed whether or not the marker is quoted.
+      const resolvedElsewhere = new Set();
       for (const id of named) {
         const decl = declaredAt.get(id);
         if (decl) {
           add(id, marker.kind, decl.block, decl.line, "declaration");
-        } else {
-          unresolvable.push({
+          continue;
+        }
+        const owners = (crossIndex.get(id) ?? []).filter((o) => o.file !== spec.name);
+        if (owners.length === 1) {
+          resolvedElsewhere.add(id);
+          crossFileResolved.push({
+            id,
+            kind: marker.kind,
+            classification: IDENTITY_CLASS[quoted ? "QUOTED_REFERENCE" : "LIVE_REFERENCE"],
+            named_at_line: i + 1,
+            named_in_block: block,
+            declared_in: owners[0].file,
+            declared_path: owners[0].path,
+            declared_block: owners[0].block,
+            declared_line: owners[0].line,
+          });
+          continue;
+        }
+        if (owners.length > 1) {
+          ambiguous.push({
             id,
             kind: marker.kind,
             named_at_line: i + 1,
             named_in_block: block,
+            claimants: owners.map((o) => `${o.file} (${o.path}) block ${o.block} line ${o.line}`),
             reason:
-              "a protection marker names this identity and no block in this file DECLARES it, " +
-              "so the block that holds the object cannot be established from this file alone. " +
-              "THIS SCAN IS SINGLE-FILE SCOPED: it cannot tell a MISSING object from one that " +
-              "legitimately lives in another memory file or a registry and is only CITED here, " +
-              "so it refuses both. Three things resolve it: declare the object in this file, " +
-              "stop marking it protected here, or — if it is declared in another file — leave " +
-              "it and accept that this file will not rotate until a cross-file resolver exists",
+              "this identity is canonically DECLARED in more than one governed memory file, so " +
+              "no single block owns it and the guard cannot say which one retention must reach. " +
+              "Ambiguous ownership is refused rather than tie-broken: picking one claimant is " +
+              "how a guard silently strands the other",
           });
+          continue;
         }
+        unresolvable.push({
+          id,
+          kind: marker.kind,
+          named_at_line: i + 1,
+          named_in_block: block,
+          classification: IDENTITY_CLASS.UNRESOLVED,
+          reason:
+            "a protection marker names this identity and NO FILE IN THE GOVERNED MEMORY SET " +
+            "declares it, so the block that holds the object cannot be established at all. " +
+            "Resolution is CROSS-FILE over the governed set and this identity was not found in " +
+            "any of it, so this is not the old single-file blind spot: it is a genuinely " +
+            "missing declaration. Two things resolve it — declare the object in a governed " +
+            "memory file, or stop marking it protected here. (A third case is possible and is " +
+            "NOT silently covered: an object whose record lives OUTSIDE the governed set, such " +
+            "as a registry file. Admitting a new file to the set is a spec revision and an " +
+            "operator decision, not something this tool takes on its own.)",
+        });
       }
 
-      // (4b) the marker's OWN anchor: the declaration it sits under, without
-      //      crossing a block boundary, or failing that its own block.
+      /*
+       * (4b) THE MARKER'S OWN ANCHOR — with the ONE demotion this change adds.
+       *
+       * A marker that is structurally QUOTED and whose every named identity is
+       * canonically declared in ANOTHER governed file does not anchor here: the
+       * object is protected where it lives, and the block doing the quoting is
+       * not where it lives. That is what stops a packet or history block from
+       * raising a floor solely because it CONTAINS the text.
+       *
+       * EVERY OTHER CASE ANCHORS EXACTLY AS BEFORE — a quoted marker that names
+       * nothing, or names something THIS file declares, or names something no
+       * governed file declares. The tie breaks towards protecting.
+       */
+      if (quoted && named.size > 0 && [...named].every((id) => resolvedElsewhere.has(id))) {
+        quotedReferences.push({
+          kind: marker.kind,
+          classification: IDENTITY_CLASS.QUOTED_REFERENCE,
+          line: i + 1,
+          block,
+          names: [...named],
+          reason:
+            "the marker phrase sits inside a matched code span, quotation, fence or blockquote, " +
+            "and every identity it names is canonically declared in another governed file, so " +
+            "this occurrence is a QUOTATION of a protection rather than an assertion of one",
+        });
+        continue;
+      }
+
       let owner = null;
       for (let j = i; j >= 0 && blockOfLine[j] === block; j--) {
         const m = SENTINEL_DECL_RE.exec(lines[j]);
@@ -996,8 +1441,25 @@ export function scanProtectedObjects(text, spec) {
     }
   });
 
+  // (5) INBOUND: markers in OTHER governed files naming identities THIS file
+  //     declares. Protection follows the object, so it lands on the block that
+  //     actually holds it rather than on the block that talks about it.
+  for (const p of resolution?.inbound ?? []) {
+    add(p.id, p.kind, p.block, p.line, `cross-file (named in ${p.named_in}:${p.named_at_line})`);
+  }
+
   objects.sort((a, b) => a.block_position - b.block_position || a.id.localeCompare(b.id));
-  return { objects, unresolvable, declaredAt };
+  return {
+    objects,
+    unresolvable,
+    declaredAt,
+    crossFileResolved,
+    quotedReferences,
+    ambiguous,
+    identitySources: resolution?.sources ?? [],
+    identityWithheld: resolution?.withheld ?? [],
+    identityMissing: resolution?.missing ?? [],
+  };
 }
 
 /**
@@ -1025,7 +1487,11 @@ function sentinelRefusalLines(path, s) {
 }
 
 /**
- * Evaluate all seven refusal conditions and return the sentinel report.
+ * Evaluate all eight refusal conditions and return the sentinel report.
+ *
+ * IT WAS SEVEN. C8 arrived with cross-file resolution and could not have existed
+ * before it: an identity two governed files both declare is a failure mode a
+ * single-file scan had no way to see.
  *
  * EVERY violated condition is reported, not just the first. Reporting only the
  * first turns a fix round into a queue: the operator repairs one thing, re-runs,
@@ -1057,6 +1523,19 @@ export function evaluateSentinel(input) {
     close_budget_bytes: closeBudget,
     protected_objects: scan.objects,
     unresolvable_identities: scan.unresolvable,
+    /*
+     * THE CROSS-FILE HALF OF THE REPORT. It is printed and carried in `--json`
+     * for the same reason the floor is printed on an allowed run: a resolution
+     * nobody can see is indistinguishable from a resolution that did not happen,
+     * and this one LOWERS refusals, so it is the half most in need of an audit
+     * trail. `identity_set_withheld` names the governed file that was NOT read.
+     */
+    cross_file_resolutions: scan.crossFileResolved ?? [],
+    quoted_references: scan.quotedReferences ?? [],
+    ambiguous_identities: scan.ambiguous ?? [],
+    identity_sources: scan.identitySources ?? [],
+    identity_set_withheld: scan.identityWithheld ?? [],
+    identity_set_missing: scan.identityMissing ?? [],
     refusals,
     verdict: "ALLOW",
   };
@@ -1082,13 +1561,16 @@ export function evaluateSentinel(input) {
       detail:
         `${scan.unresolvable.length} protected identity/identities cannot be resolved to a block in ` +
         `${spec.path}: ${scan.unresolvable.map((u) => `${u.id} (named at line ${u.named_at_line})`).join(", ")}. ` +
-        `An unresolvable identity is a REFUSAL, not a skip. THE SCAN IS SINGLE-FILE SCOPED, so ` +
-        `an object that lives in ANOTHER memory file or a registry and is only CITED here looks ` +
-        `identical to one that has gone missing, and both refuse. Three remedies, and the right ` +
-        `one depends on where the object actually lives: (a) declare it in this file; (b) stop ` +
-        `marking it protected here; or (c) if it is declared in another file, nothing is wrong ` +
-        `with the record — this file simply cannot rotate until a cross-file resolver exists, ` +
-        `which is a spec revision and not something this tool decides on its own.`,
+        `An unresolvable identity is a REFUSAL, not a skip. THE SCAN IS CROSS-FILE over the ` +
+        `governed memory set (${(scan.identitySources ?? []).map((x) => x.path).join(", ") || "none readable"}` +
+        `${(scan.identityWithheld ?? []).length ? `; WITHHELD: ${scan.identityWithheld.map((w) => w.path).join(", ")}` : ""}` +
+        `), and the identity was found in NONE of it — so this is a genuinely missing ` +
+        `declaration, not the old single-file blind spot. Two remedies: (a) declare the object ` +
+        `in a governed memory file; or (b) stop marking it protected here. A third case exists ` +
+        `and is NOT covered silently: an object whose only record lives OUTSIDE the governed ` +
+        `set, such as a registry file. Admitting a file to that set widens what "resolve" ` +
+        `means, which is a spec revision and an operator decision, not something this tool ` +
+        `takes on its own.`,
     });
   }
 
@@ -1182,6 +1664,40 @@ export function evaluateSentinel(input) {
           : `Set --close-budget deliberately if the real close is smaller than ${closeBudget} B, ` +
             `or lower --keep — but not below minimum_safe_keep ${sentinelFloor}, which leaves ` +
             `${requestedKeep - sentinelFloor} step(s) of room.`),
+    });
+  }
+
+  /*
+   * C8 — ONE STABLE IDENTITY, TWO CANONICAL DECLARATIONS, TWO GOVERNED FILES.
+   *
+   * This condition exists BECAUSE cross-file resolution exists: widening the
+   * search from one file to four creates a failure mode one file could not have
+   * — an identity two files both claim to own. There is no safe tie-break.
+   * Choosing the deeper block is meaningless across files (block 6 of one file
+   * and block 6 of another are unrelated positions), and choosing either
+   * claimant silently strands the other, which is the exact harm the deepest-
+   * declaration rule exists to prevent WITHIN a file.
+   *
+   * IT IS NOT GATED ON `armed`. Conditions 5 and 7 are governance obligations
+   * that would be wrong to impose on a blank scaffold; this is an inconsistency
+   * in the identity graph, and an inconsistent graph is not less inconsistent
+   * for sitting in a file that happens to resolve no protected object.
+   */
+  if ((scan.ambiguous ?? []).length > 0) {
+    refusals.push({
+      condition: 8,
+      code: "SENTINEL-C8",
+      detail:
+        `${scan.ambiguous.length} identity/identities are canonically DECLARED in more than one ` +
+        `governed memory file, so ownership is ambiguous: ` +
+        `${scan.ambiguous
+          .map((a) => `${a.id} (named at line ${a.named_at_line}) claimed by ${a.claimants.join(" AND ")}`)
+          .join("; ")}. ` +
+        `Cross-file resolution requires exactly ONE canonical declaration per stable identity. ` +
+        `This is NOT tie-broken: picking a claimant would strand the other, which is the same ` +
+        `harm the deepest-declaration rule prevents inside a single file. Remedy: keep one ` +
+        `declaration and turn the other into a citation (this tree's convention is that a ` +
+        `BACKTICKED tag cites an object and a BARE tag opening a bold bullet declares it).`,
     });
   }
 
@@ -1512,7 +2028,16 @@ function planFile(root, spec, opts) {
    * sentinel refusal on one file stops the whole run, exactly as a conservation
    * failure does.
    */
-  const scan = scanProtectedObjects(original, spec);
+  /*
+   * THE CROSS-FILE RESOLUTION IS BUILT ONCE PER RUN AND PASSED IN, never rebuilt
+   * per file: it is a property of the ROOT, and rebuilding it per file would let
+   * two files in the same run disagree about who owns an identity.
+   */
+  const resolution = opts.resolution ?? buildIdentityIndex(root);
+  const scan = scanProtectedObjects(original, spec, {
+    ...resolution,
+    inbound: inboundProtections(root, spec, resolution.index),
+  });
 
   // The INDEPENDENT cross-check behind refusal condition 4. `crossMap` is built
   // by its own line scan; `segments` came from `segmentFile`. Comparing them is
@@ -1836,6 +2361,13 @@ and REFUSES a rotation below that floor at exit ${EXIT.SENTINEL}, before anythin
 N is never auto-raised. A file in which it resolves zero protected objects is
 UNARMED and says so on stderr.
 
+Identity is resolved ACROSS THE GOVERNED MEMORY SET, not within one file, so a
+citation of an object a sibling memory file declares resolves instead of
+refusing, and that sibling's live marker protects the block that really holds
+the object. An identity NO governed file declares still refuses; one that TWO
+governed files declare refuses as ambiguous. The set, and the one member that is
+declared but deliberately not read, are printed on every run.
+
   --sentinel-report       report the floor and the verdict and EXIT 0 without
                           writing. This is how you ask what the safe --keep is;
                           it implies a dry run and never refuses.
@@ -2035,8 +2567,36 @@ function renderHuman(reports, opts) {
           `${s.bytes_to_reclaim}, post_rotation_headroom ${s.post_rotation_headroom} B ` +
           `(close budget ${s.close_budget_bytes} B)`
       );
+      /*
+       * THE RESOLUTION IS PRINTED ON EVERY RUN, ALLOWED OR REFUSED, for the same
+       * reason the floor is: this is the half that LOWERS refusals, so leaving
+       * it out would make a widened search indistinguishable from a weakened
+       * guard. The withheld member is named too — an unread governed file nobody
+       * is told about is a silent scope hole.
+       */
+      L.push(
+        `  identity set      : ${s.identity_sources.map((x) => `${x.path} (${x.declarations} decl)`).join(", ") || "-"}`
+      );
+      for (const w of s.identity_set_withheld) {
+        L.push(`  WITHHELD FROM THE RESOLVER: ${w.path} — ${w.reason}`);
+      }
+      for (const c of s.cross_file_resolutions) {
+        L.push(
+          `  cross-file        : ${c.id} (${c.classification}) named at line ${c.named_at_line} ` +
+            `-> declared in ${c.declared_path} block ${c.declared_block} line ${c.declared_line}`
+        );
+      }
+      for (const q of s.quoted_references) {
+        L.push(
+          `  quoted reference  : line ${q.line} (block ${q.block}) names ${q.names.join(", ")} — ` +
+            `does NOT raise the floor: ${q.reason}`
+        );
+      }
       for (const u of s.unresolvable_identities) {
         L.push(`  UNRESOLVED IDENTITY: ${u.id} named at line ${u.named_at_line} — ${u.reason}`);
+      }
+      for (const a of s.ambiguous_identities) {
+        L.push(`  AMBIGUOUS IDENTITY: ${a.id} claimed by ${a.claimants.join(" AND ")}`);
       }
       for (const ref of s.refusals) L.push(`  ${ref.code}: ${ref.detail}`);
     }
@@ -2094,7 +2654,8 @@ export function main(argv, io = { out: process.stdout, err: process.stderr }) {
   // for ANY file.
   const plans = [];
   try {
-    for (const spec of specs) plans.push(planFile(root, spec, { ...opts, batchId }));
+    const resolution = buildIdentityIndex(root);
+    for (const spec of specs) plans.push(planFile(root, spec, { ...opts, batchId, resolution }));
   } catch (e) {
     io.err.write(`${e.message}\n`);
     return e.code ?? EXIT.RETENTION;
