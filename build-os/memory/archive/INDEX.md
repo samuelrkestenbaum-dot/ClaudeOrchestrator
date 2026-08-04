@@ -48,3 +48,10 @@
 | `build-os/memory/current_state.md:2126` | ## History — `gravito_p1_mutators_ids_telemetry_a` | `current_state.archive.md:561` |
 | `build-os/memory/current_state.md:2227` | ## History — `gravito_ladder_semantics_a` | `current_state.archive.md:662` |
 
+## Batch 2026-08-04T21:17:59Z
+
+| source (original) | section header | archive location |
+| --- | --- | --- |
+| `build-os/memory/current_state.md:2006` | ## History — `gravito_p4_s1_shadow_ranker_a` | `current_state.archive.md:772` |
+| `build-os/memory/current_state.md:2181` | ## History — `gravito_p3_accept_and_constrain_a` | `current_state.archive.md:947` |
+
