@@ -368,6 +368,165 @@ done
 # The command must still refuse to close on a RED qa, concurrency or not.
 grep -qiE "RED" "$REVCMD" && ok "/review-packet still blocks the close on a RED qa" || no "/review-packet no longer blocks on RED"
 
+echo "== 9. The COMMIT BUDGET is the same RULE on every surface that governs it =="
+# WHY THIS SECTION EXISTS. The depth budget has the three-way mirror above; the
+# COMMIT budget had NOTHING. `<=2 commits per packet` was withdrawn as
+# unsatisfiable in CLAUDE.md and its global mirror, and README.md — under a
+# heading reading "Safety gates (non-negotiable)" — went on asserting it. A
+# green suite of well over two thousand assertions said nothing, because not one
+# of them looked. Doctrine enforced by writing rather than by machinery is the
+# exact failure the withdrawal was written to fix, so the guard lives in the
+# file that already owns cross-file doctrine consistency rather than in a new
+# suite nobody chains.
+#
+# WHY NOT BYTE-IDENTITY, THE MECHANISM SECTION 7 USES. The depth block is ONE
+# canonical text carried verbatim between sentinels, so `diff` is exactly right
+# there. The commit budget is not that shape and cannot be made into it without
+# damage: CLAUDE.md states it in a paragraph plus a five-item sub-list because
+# the fix commit is defined by what it may NOT do; global-claude-md.md
+# compresses the same rule to one paragraph for a reader who has no packet in
+# flight; README.md gives an operator a single line under the safety gates;
+# bandwidth-check.sh states it as a shell constant that must also disclaim what
+# the number does not mean; control_registry.txt states it inside a census note
+# arguing its own class. Byte-identity across those five is not achievable, and
+# forcing it would mean making four audiences read the contract's wording — the
+# very thing derived restatements exist to avoid. So this compares the RULE, not
+# the PROSE: each surface must yield the same normalised tuple
+# (build ceiling, fix ceiling) = (2, 1), extracted from whatever words it uses,
+# and no surface may still ASSERT the withdrawn untyped total cap. Two surfaces
+# can disagree about every word here and still pass; they cannot disagree about
+# the rule.
+README_MD="$SRC/README.md"
+BWCHECK="$SRC/build-os/tools/bandwidth-check.sh"
+REGISTRY="$SRC/build-os/registry/control_registry.txt"
+# The GOVERNING surfaces: files that state the commit budget as a rule this
+# system is bound by, rather than summarising it for one audience.
+BUDGET_FILES=("$PROJ_CLAUDE" "$GUIDANCE" "$README_MD" "$BWCHECK" "$REGISTRY")
+# The DERIVED restatements, declared BY NAME so the hole is visible instead of
+# silent. They summarise the contract for a single audience and are handled by
+# the follow-up packet named in build-os/packets/active_packet.md; this list
+# exists so that debt is enumerated and so a rename cannot quietly lose it.
+BUDGET_DERIVED=(
+  "$SRC/.claude/agents/builder.md"
+  "$SRC/.claude/agents/build-orchestrator.md"
+  "$SRC/build-os/memory/tool_router.md"
+  "$SRC/docs/ONBOARDING.md"
+  "$SRC/build-os/metrics/task_corpus.md"
+  "$SRC/build-os/registry/CROSSWALK.md"
+  "$SRC/build-os/registry/neurocosmology_crosswalk.txt"
+  "$SRC/templates/build-os/memory/tool_router.md"
+  "$SRC/templates/build-os/packets/active_packet.md"
+)
+
+# VACUITY GUARD, and it is the same lesson section 7 already learned: two empty
+# files are byte-identical, and an extraction that matches nothing agrees with
+# every other extraction that matches nothing. The manifest must be the set this
+# section CLAIMS to scan, and every member of it must resolve, before a single
+# comparison below is worth reading.
+#
+# This is an IDENTITY check against a named set, deliberately not a `-ge N`
+# floor on the array's length. A length floor would be a fitted constant — a
+# snapshot of the manifest on the day it was written, the family
+# tests.nonvacuity_minimums exists to register — and it would still pass if a
+# surface were SUBSTITUTED rather than removed. Naming the set costs the same
+# line and catches both.
+BUD_EXPECT="CLAUDE.md README.md bandwidth-check.sh control_registry.txt global-claude-md.md"
+BUD_ACTUAL="$(for f in "${BUDGET_FILES[@]}"; do basename "$f"; done | sort | tr '\n' ' ' | sed 's/ $//')"
+BUD_MISSING=0
+for f in "${BUDGET_FILES[@]}"; do
+  [ -s "$f" ] || { BUD_MISSING=$((BUD_MISSING+1)); echo "      | commit-budget surface does not resolve: $f"; }
+done
+{ [ "$BUD_ACTUAL" = "$BUD_EXPECT" ] && [ "$BUD_MISSING" -eq 0 ]; } \
+  && ok "the commit-budget manifest is exactly the governing surfaces it names, and all ${#BUDGET_FILES[@]} resolve non-empty (the scan below is not vacuous)" \
+  || no "the commit-budget manifest is not what this section claims to scan — expected [$BUD_EXPECT], got [$BUD_ACTUAL], with $BUD_MISSING unresolvable; every check below would pass over nothing"
+
+# Extract the RULE from each surface, in whatever words that surface uses.
+#
+# EVERY statement in the file, never just the first. A surface may state the
+# budget more than once — README.md states it twice, once in the agent table and
+# once under the safety gates — and a `head -1` extraction would take the first
+# and be structurally blind to the second disagreeing with it. That is not a
+# hypothetical: it is a zero-kill this guard was caught by under mutation, with
+# README's second statement moved to 3 while the first still read 2. So each
+# file collapses to the SET of values it states, and a file that disagrees with
+# ITSELF fails here before any cross-file comparison is attempted.
+BUILD_MATCHED=0; BUILD_NUMS=""
+FIX_MATCHED=0;   FIX_NUMS=""
+for f in "${BUDGET_FILES[@]}"; do
+  b="$(basename "$f")"
+  nset="$(grep -oiE '(≤|<=) ?[0-9]+ build commits' "$f" | grep -oE '[0-9]+' | sort -u | tr '\n' ',' | sed 's/,$//')"
+  if [ -z "$nset" ]; then
+    no "$b states no BUILD-commit ceiling, so it is not carrying the typed budget at all"
+  elif [ "${nset#*,}" != "$nset" ]; then
+    no "$b states MORE THAN ONE build-commit ceiling — [$nset] — the surface disagrees with ITSELF"
+  else
+    BUILD_MATCHED=$((BUILD_MATCHED+1)); BUILD_NUMS="$BUILD_NUMS $b=$nset"
+    ok "$b states the BUILD-commit ceiling numerically ($nset), the same value everywhere it states it"
+  fi
+  mset="$(grep -oiE 'at most (one|[0-9]+) fix commit' "$f" | tr 'A-Z' 'a-z' | awk '{print $3}' | sed 's/^one$/1/' | sort -u | tr '\n' ',' | sed 's/,$//')"
+  if [ -z "$mset" ]; then
+    no "$b states no FIX-commit allowance — the half of the rule that made the old cap satisfiable is missing"
+  elif [ "${mset#*,}" != "$mset" ]; then
+    no "$b states MORE THAN ONE fix-commit allowance — [$mset] — the surface disagrees with ITSELF"
+  else
+    FIX_MATCHED=$((FIX_MATCHED+1)); FIX_NUMS="$FIX_NUMS $b=$mset"
+    ok "$b states the FIX-commit allowance numerically ($mset), the same value everywhere it states it"
+  fi
+done
+[ "$BUILD_MATCHED" -eq "${#BUDGET_FILES[@]}" ] \
+  && ok "build-ceiling scanner matched all ${#BUDGET_FILES[@]} surfaces (not vacuous)" \
+  || no "build-ceiling scanner matched only $BUILD_MATCHED of ${#BUDGET_FILES[@]} — an agreement check over $BUILD_MATCHED numbers is meaningless"
+[ "$FIX_MATCHED" -eq "${#BUDGET_FILES[@]}" ] \
+  && ok "fix-allowance scanner matched all ${#BUDGET_FILES[@]} surfaces (not vacuous)" \
+  || no "fix-allowance scanner matched only $FIX_MATCHED of ${#BUDGET_FILES[@]} — an agreement check over $FIX_MATCHED numbers is meaningless"
+UNIQ_BUILD="$(tr ' ' '\n' <<<"$BUILD_NUMS" | sed '/^$/d' | cut -d= -f2 | sort -u | tr '\n' ',' | sed 's/,$//')"
+UNIQ_FIX="$(tr ' ' '\n' <<<"$FIX_NUMS" | sed '/^$/d' | cut -d= -f2 | sort -u | tr '\n' ',' | sed 's/,$//')"
+{ [ "$BUILD_MATCHED" -gt 0 ] && [ "$UNIQ_BUILD" = "2" ]; } \
+  && ok "every governing surface states the SAME build-commit ceiling: 2" \
+  || no "build-commit ceiling DRIFTED across surfaces — distinct values seen: [${UNIQ_BUILD:-none}]; per file:$BUILD_NUMS"
+{ [ "$FIX_MATCHED" -gt 0 ] && [ "$UNIQ_FIX" = "1" ]; } \
+  && ok "every governing surface states the SAME fix-commit allowance: 1" \
+  || no "fix-commit allowance DRIFTED across surfaces — distinct values seen: [${UNIQ_FIX:-none}]; per file:$FIX_NUMS"
+
+# THE REGRESSION ITSELF. An untyped total cap — `<=2 commits` with no BUILD in
+# it — is the WITHDRAWN rule. It may still be QUOTED, because a withdrawal that
+# cannot name what it withdrew is unreadable; it may not still be ASSERTED. The
+# discriminator is on the same line: a quotation carries its withdrawal marker,
+# a live rule does not.
+UNTYPED_RE='(≤|<=) ?2 +commits'
+WITHDRAWN_RE='withdrawn|former|no longer|superseded|unsatisfiable|replaced by'
+for f in "${BUDGET_FILES[@]}"; do
+  b="$(basename "$f")"
+  BAD="$(grep -nE "$UNTYPED_RE" "$f" | grep -viE "$WITHDRAWN_RE" || true)"
+  if [ -z "$BAD" ]; then
+    ok "$b asserts no untyped '<=2 commits per packet' cap (the withdrawn rule is quoted, never restated as live)"
+  else
+    no "$b still ASSERTS the WITHDRAWN untyped commit cap on $(grep -c . <<<"$BAD") line(s) — the rule CLAUDE.md withdrew as unsatisfiable is alive on another surface"
+    cut -c1-160 <<<"$BAD" | sed 's/^/      | /'
+  fi
+done
+
+# And the withdrawal must be RECORDED on the contract surfaces, not silently
+# dropped. Deleting the old sentence would satisfy the check above while leaving
+# every reader of a derived restatement unable to tell the rule ever changed.
+for pair in "CLAUDE.md:$PROJ_CLAUDE" "global-claude-md.md:$GUIDANCE"; do
+  b="${pair%%:*}"; p="${pair#*:}"
+  if grep -E "$UNTYPED_RE" "$p" | grep -qiE "$WITHDRAWN_RE"; then
+    ok "$b RECORDS the withdrawal of the untyped cap rather than dropping it silently"
+  else
+    no "$b does not record that '<=2 commits per packet' was withdrawn — a reader cannot tell the rule changed"
+  fi
+done
+
+# The declared debt must stay resolvable, or the register is decoration.
+BUD_DMISS=0
+for f in "${BUDGET_DERIVED[@]}"; do
+  [ -e "$f" ] || { BUD_DMISS=$((BUD_DMISS+1)); echo "      | declared derived restatement no longer resolves: $f"; }
+done
+{ [ "${#BUDGET_DERIVED[@]}" -gt 0 ] && [ "$BUD_DMISS" -eq 0 ]; } \
+  && ok "the ${#BUDGET_DERIVED[@]} DERIVED restatements outside this manifest are declared by name and all resolve (a named debt, not a silent hole)" \
+  || no "$BUD_DMISS of ${#BUDGET_DERIVED[@]} declared derived restatements no longer resolve — the register is stale and the debt is untracked"
+
 echo
 echo "==== RESULT: $PASS passed, $FAIL failed ===="
 [ "$FAIL" -eq 0 ]

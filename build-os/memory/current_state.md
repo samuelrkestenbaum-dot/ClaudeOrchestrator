@@ -79,17 +79,29 @@ legal `--keep` retains it.
   `no tags` because `tests/release_metadata_tests.sh:322` requires it, so the residue item is
   annotated rather than rewritten. Whether the tag was created with an explicit go is not
   determinable from here and no claim is made.
-- **Build/test command:** `bash tests/build_os_tests.sh` (2242 checks; no network; temp dirs)
-  — **2242 as of `PACKET-0042-process-doctrine-correction`.** The delta is **+14**:
-  `tests/gate_depth_tests.sh` **79 -> 90** (the fourth-stage exception
+- **Build/test command:** `bash tests/build_os_tests.sh` (2265 checks; no network; temp dirs)
+  — **2265 as of `PACKET-0042-process-doctrine-correction`.** The delta is **+37**:
+  `tests/gate_depth_tests.sh` **79 -> 113** (the fourth-stage exception
   `mandatory_full_regate` — named, announceable, conjunctive, and not recorded as a
-  defect) and `tests/bandwidth_tests.sh` **41 -> 44** (the commit-ceiling red drive
-  RE-POINTED to the new boundary, both sides driven, plus the disclaimer on the cited
+  defect — **+11 at the build commit**, then **+23 at the fix commit** for the
+  cross-surface COMMIT-BUDGET guard, section 9) and `tests/bandwidth_tests.sh`
+  **41 -> 44** (the commit-ceiling red drive RE-POINTED to the new boundary, both
+  sides driven, plus the disclaimer on the cited
   constant). Every other chained suite is **+0**, confirmed by comparing the per-suite
   CHAINED **vector** across two solo runs, not the total alone (`DEFECT-0013`).
   Derived from SOLO full-capture runs after an anchored `pgrep -fa '^bash tests/'` returned
   empty, and reconciled against `CHANGELOG.md`, which carries the matching literal
-  `**2242 passed**` (unsplit) under `## [Unreleased]`.
+  `**2265 passed**` (unsplit) under `## [Unreleased]`.
+  — **THE GUARD EXISTS BECAUSE THE PACKET'S OWN THESIS FAILED ON THE PACKET.** The
+  build commit withdrew `≤2 commits per packet` in `CLAUDE.md` and its global mirror
+  and left `README.md:110` — under `## Safety gates (non-negotiable)` — still
+  asserting it, and **2242 green assertions were silent**, because nothing guarded the
+  commit-budget rule across files. Section 9 compares the RULE, not the prose:
+  byte-identity is wrong here because the five governing surfaces state the budget at
+  five lengths for five audiences, so each must instead yield the same normalised
+  tuple **(build ceiling, fix ceiling) = (2, 1)**, no surface may still ASSERT the
+  withdrawn untyped cap (quoting it is legal only beside a withdrawal marker), and the
+  eight remaining derived restatements are enumerated by name as a declared register.
   — **THIS PAIR IS ITSELF INSTANCE 4 OF THE DEFECT `PACKET-0041` EXISTS AGAINST**, and it is
   the one instance that packet could NOT mechanise. Two copies of one truth, held in sync
   by a cross-check that only fires under `RELEASE_METADATA_LIVE_SUITE=1`. No static

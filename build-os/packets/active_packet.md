@@ -1532,3 +1532,128 @@ and `build-os/maintenance/rotate-memory.mjs` are untouched.
 **No push, merge, PR, tag, deploy, secrets, `git config`, amend, rebase or history rewrite.**
 `5d96031` is the pushed tip and every commit of this packet is new, local and **NOT authorised
 for push**. Repo default identity; no inline author.
+
+---
+
+# FIX ROUND — `PACKET-0042`, one fix commit, on top of `820fd14` + `f15356e`
+
+**Depth: 4 — reason: `mandatory_full_regate`**, announced by the orchestrator under the clause
+this packet installs. **The fix commit is the PERMITTED third commit** under `CLAUDE.md`'s new
+working contract: `≤2 build commits, plus at most 1 fix commit`. **It is not a doctrine breach and
+is deliberately NOT recorded as one** — logging it as an exception is the ritual the withdrawal
+exists to end. `820fd14` and `f15356e` are untouched: no amend, no rebase, no squash.
+
+## Item 1 — qa's RED: the packet caused a governance self-contradiction
+
+`README.md:110`, under `## Safety gates (non-negotiable)`, still read
+`- **≤2 commits per packet**; **Commit-1 green in isolation**.` — the exact rule `CLAUDE.md:135`
+withdraws as unsatisfiable. At base `5d96031` `CLAUDE.md` and `README.md` agreed, so **this packet
+caused the drift**, and the surviving copy was the operator-facing one marked non-negotiable.
+Both lines now read the typed budget. **`README.md:97` moved with it**: the new guard is
+content-based, `:97` asserted the same untyped cap, and a guard that passed with `:97` alive would
+be a guard tuned to its own answer rather than to the rule. One file, one rule, two lines, both
+line-count-neutral.
+
+## Item 2 — the drifted registry record
+
+`build-os/registry/control_registry.txt:1132` (`suite.bandwidth`, `notes:`) still described the
+OLD fixture — *"a third commit must exit 0"* — after the diff moved the exit-0 breach to the
+**four-commit** case (`tests/bandwidth_tests.sh:181-188`); the three-commit case now asserts only
+that the verdict is `OK` (`:175-178`) and asserts no exit code at all. The clause's whole purpose
+is showing that a **breach** only advises, so it now names the four-commit breach. The sibling
+`consuming_policies` at `:977` was already correct, which is what made this an oversight rather
+than a decision.
+
+## Item 3 — the ROOT CAUSE: the guard that would have caught item 1
+
+Item 1 drifted through a **2242-assertion green suite** because **nothing guarded the
+commit-budget rule across files**. The depth block has a three-way byte-identity mirror; the
+commit budget had nothing at all. That is this packet's own thesis — *doctrine enforced by
+machinery, not by writing* — failing on the packet that installs it.
+
+`tests/gate_depth_tests.sh` **section 9** (existing suite file; **0 new suite files**).
+
+**MECHANISM, AND WHY BYTE-IDENTITY WAS THE WRONG TOOL.** The depth block is ONE canonical text
+carried verbatim between sentinels, so `diff` is exactly right for it. The commit budget is not
+that shape and cannot be forced into it: `CLAUDE.md` needs a paragraph plus a five-item sub-list
+because the fix commit is defined by what it may NOT do; `global-claude-md.md` compresses the same
+rule to one paragraph; `README.md` gives an operator one line; `bandwidth-check.sh` states it as a
+shell constant that must also disclaim what the number does not mean; `control_registry.txt`
+states it inside a census note arguing its own class. Byte-identity across those five is
+unachievable, and forcing it would mean making five audiences read the contract's wording — the
+very thing derived restatements exist to avoid. So the guard compares **the RULE, not the PROSE**:
+each surface must yield the same normalised tuple **(build ceiling, fix ceiling) = (2, 1)**,
+extracted from whatever words it uses. Two surfaces may disagree about every word and still pass;
+they may not disagree about the rule.
+
+**Surface list, derived rather than accepted.** GOVERNING (in the manifest, all five must carry
+the typed rule): `CLAUDE.md`, `build-os/global-claude-md.md`, `README.md`,
+`build-os/tools/bandwidth-check.sh`, `build-os/registry/control_registry.txt`. DERIVED (out of the
+manifest, **enumerated by name inside the test** so the debt is a declared register rather than a
+silent hole, and failing if a member stops resolving): `.claude/agents/builder.md`,
+`.claude/agents/build-orchestrator.md`, `build-os/memory/tool_router.md`, `docs/ONBOARDING.md`,
+`build-os/metrics/task_corpus.md`, `build-os/registry/CROSSWALK.md`,
+`build-os/registry/neurocosmology_crosswalk.txt`, `templates/build-os/memory/tool_router.md`,
+`templates/build-os/packets/active_packet.md`. The nine surfaced restatements are now **eight**:
+`README.md` left the list because it is a governing surface, not a summary.
+
+**What it asserts.** (a) the manifest is exactly the named set and every member resolves non-empty
+— an IDENTITY check, deliberately not a `-ge N` length floor, because a length floor is a fitted
+constant belonging to `tests.nonvacuity_minimums` and would still pass a SUBSTITUTED surface;
+(b) every surface states a build ceiling and a fix allowance, **as a SET over all its statements,
+never `head -1`** — a surface that disagrees with ITSELF fails before any cross-file comparison;
+(c) the sets agree across surfaces at 2 and 1; (d) no surface still **asserts** the withdrawn
+untyped cap — it may be QUOTED, since a withdrawal that cannot name what it withdrew is
+unreadable, but only beside a withdrawal marker on the same line; (e) the two contract surfaces
+must **record** the withdrawal, so deleting the old sentence cannot satisfy (d) silently.
+
+**Red-driven in BOTH directions, executed, never asserted.** Against the pre-fix `README.md` blob
+`e11d25e295c041e3cc064e63949d40ebfcc5c514` restored from `HEAD`: **108 passed, 5 failed**, the
+failure naming `README.md:97` and `:110` by content. Against the fixed file: **113 passed, 0
+failed**. Then validated by **mutation, 8 mutations**: the first battery exposed a **ZERO-KILL** —
+`head -1` extraction let `README.md`'s second statement move to 3 while the first still read 2 —
+and the guard was **hardened to set-extraction** rather than softened; the re-run kills all eight
+(self-disagreement, cross-file drift both directions, a dropped fix-allowance, a re-asserted
+withdrawn cap, a renamed register member, an emptied manifest surface, a shrunk manifest, a
+substituted manifest). **Zero zero-kills after the hardening.**
+
+**The census bit, and it was obeyed rather than dodged.** The first draft's `-ge 5` manifest floor
+turned `tests/control_registry_tests.sh` section 21 RED as an unregistered member of
+`tests.nonvacuity_minimums`. It was replaced by the identity check above — which is *stronger*, not
+a workaround: `-eq 5` would have been a dodge, a named-set equality is a better assertion.
+
+## Counts
+
+Suite **2265 passed, 0 failed** (`tests/gate_depth_tests.sh` **90 -> 113**, +23; every other
+chained suite **+0** by per-suite CHAINED VECTOR across two solo runs, `DEFECT-0013`). Packet
+total from `5d96031`'s 2228: **+37** — `gate_depth` 79 -> 113, `bandwidth` 41 -> 44.
+`CHANGELOG.md` and `build-os/memory/current_state.md` carry the matching `**2265 passed**` /
+`2265 checks` literals; `RELEASE_METADATA_LIVE_SUITE=1` green.
+
+## RECORDED, NOT BUILT — follow-ups this fix round deliberately did not touch
+
+1. **`build-os/global-claude-md.md:146` drops `CLAUDE.md`'s "unless an executed reason proves the
+   fixes cannot safely be combined."** A NARROWING of the rule in the safe direction — the global
+   mirror is stricter than the contract, never looser — so it is recorded and left. Note the new
+   guard would NOT catch this: it compares the ceiling tuple, not the escape clause.
+2. **The installed user-scope `~/.claude/CLAUDE.md` still carries the withdrawn rule.** Installing
+   it is **external mutation and needs an operator go**. NOT TOUCHED.
+3. **`.claude/agents/reviewer.md` never mentions the commit budget**, yet the census asserts the
+   reviewer enforces the build/fix split — the very split `bandwidth-check.sh` says it cannot
+   partition and defers to the reviewer for. The enforcer is not told what it enforces.
+4. **Depth-4 legitimacy rests on a self-assessed honour claim with no attestation in git**, and
+   `bandwidth-check.sh` declines the depth dimension as transcript-only. `mandatory_full_regate`
+   is therefore unfalsifiable from the repository, exactly as `active_packet_singleton`'s base is.
+5. **The eight remaining derived restatements** are now a machine-checked register rather than a
+   sentence, but they still state the withdrawn rule to their readers. Follow-up packet.
+
+## Ceiling — held
+
+0 new tools · 0 new stores · **0 new suite files** · 0 new governance primitives · 0 new controls.
+Census **105**, declared mismatches **22**, re-authorisations **0**.
+`build-os/memory/residue.md` **FROZEN and NOT WRITTEN** — blob
+`01517ad2c30d447949a98d0b6db9b8d6b538d5a9`, unchanged. `rank-candidates.sh`,
+`decision_telemetry.tsv`, `signal_snapshots.tsv`, `standing_gates.md`, `residue.archive.md`,
+`build-os/memory/archive/**` and `build-os/maintenance/rotate-memory.mjs` untouched.
+**No push, merge, PR, tag, deploy, secrets, `git config`, amend or rebase.** `5d96031` is the
+pushed tip.

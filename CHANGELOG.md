@@ -50,13 +50,30 @@ deprecation cycle. Pin a commit if you need stability.
   arithmetic; the five `suite.bandwidth` citations into the test file that DID
   move were repointed by content.
 
-  Suite **2242 passed**, 0 failed (+14: `tests/gate_depth_tests.sh` **79 → 90**
-  and `tests/bandwidth_tests.sh` **41 → 44**; every other chained suite +0,
-  confirmed by comparing the per-suite CHAINED vector across two solo runs).
-  Nine derived restatements of `≤2 commits` in README, the router, the agent
-  definitions, ONBOARDING, the crosswalks and the templates are **surfaced as a
-  follow-up packet and deliberately not touched** — they are summaries of the
-  contract, not the contract.
+  **AND THE PACKET'S OWN THESIS CAUGHT IT OUT.** The withdrawal moved the
+  contract and its global mirror but left `README.md` — under a heading reading
+  "Safety gates (non-negotiable)" — still asserting `≤2 commits per packet`, and
+  a green suite of 2242 assertions said nothing, because **nothing guarded the
+  commit-budget rule across files at all**. The depth block had a three-way
+  mirror; the commit budget had none. The fix round closes that with a
+  cross-surface guard in `tests/gate_depth_tests.sh`, and it compares the RULE
+  rather than the prose: the five governing surfaces (`CLAUDE.md`,
+  `build-os/global-claude-md.md`, `README.md`, `build-os/tools/bandwidth-check.sh`,
+  `build-os/registry/control_registry.txt`) must each yield the same normalised
+  tuple **(build ceiling, fix ceiling) = (2, 1)** — extracted from whatever
+  wording each uses, since they state it at five different lengths for five
+  audiences — and none may still ASSERT the withdrawn untyped cap, which may be
+  quoted only alongside its withdrawal marker.
+
+  Suite **2265 passed**, 0 failed (+37 from the packet's base: `tests/gate_depth_tests.sh`
+  **79 → 113** and `tests/bandwidth_tests.sh` **41 → 44**; every other chained
+  suite +0, confirmed by comparing the per-suite CHAINED vector across two solo
+  runs). Eight derived restatements of `≤2 commits` — the router, the agent
+  definitions, ONBOARDING, the corpus, the crosswalks and the templates — remain
+  **surfaced as a follow-up packet and deliberately not touched**; they are
+  summaries of the contract, not the contract. They are now **enumerated by name
+  inside the guard itself**, so the debt is a declared register that fails when a
+  member stops resolving, rather than a sentence in a changelog.
 
 - **COUNT DERIVATION IS NOW MECHANICAL RATHER THAN DISCIPLINARY.** The doctrine
   "DERIVE every count; never restate one" was written in four artefacts and

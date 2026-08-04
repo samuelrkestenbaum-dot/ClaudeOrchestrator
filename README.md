@@ -94,7 +94,7 @@ bash <root>/.claude/hooks/build-os-identity.sh verify <root>   # 0 = OK, 1 = DRI
 | Agent | Role |
 |---|---|
 | `build-orchestrator` | **Routes** (never implements): loads memory, verifies branch base, classifies authority, declares a Tool Budget, delegates. |
-| `builder` | Implements a confirmed packet **test-first**, ≤2 commits, Commit-1 green in isolation, in-scope only. |
+| `builder` | Implements a confirmed packet **test-first**, ≤2 build commits + at most 1 fix commit, Commit-1 green in isolation, in-scope only. |
 | `qa` | Full suite + regression (**exact counts**), Commit-1-isolation check, safety grep, UI smoke. |
 | `reviewer` | Reviews diff + tests + Codex second-eyes + Product Trajectory Check → **pass / fix-then-pass / fail**. No edits. |
 | `archivist` | Writes `build-os/receipts/<id>.md` and updates memory. Touches `build-os/` only. |
@@ -107,7 +107,7 @@ Commands: `/next-packet` (route), `/review-packet` (qa + reviewer),
 - **No external mutation without explicit go** — never push, merge, deploy,
   publish, or touch secrets unprompted.
 - **Verify branch base** (`git merge-base`) before building.
-- **≤2 commits per packet**; **Commit-1 green in isolation**.
+- **≤2 build commits + at most 1 fix commit**; **Commit-1 green in isolation**.
 - **Full proof + safety grep** before a packet closes.
 - **Close with a receipt.**
 
