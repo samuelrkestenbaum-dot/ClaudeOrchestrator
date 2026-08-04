@@ -904,7 +904,7 @@ Also open and untouched by boundary: `(ddd)`, `(uuuu)`, `(ppppp)`. Still NONE: s
 
 ## DECLARED AND IN FLIGHT — `gravito_rotation_sentinel_guard_a`
 
-- **Packet id:** `PACKET-0040-rotation-sentinel-guard` — **MINTED, collision-checked BEFORE the
+- **Packet id (CLOSED):** `PACKET-0040-rotation-sentinel-guard` — **MINTED, collision-checked BEFORE the
   mint.** The live band is `PACKET-0001`..`PACKET-0039`; `git log -S'PACKET-0040' --all --oneline`
   returns **0** commits and `grep -rlF 'PACKET-0040' . --exclude-dir=.git` **0** files.
 - **Lane:** `substantive`. **Depth 2** — builder, then qa ‖ reviewer.
@@ -1154,7 +1154,7 @@ stated cause rather than a discovered one.
 gives above: line 89 is the content site `ANC-0003` resolves to and the kernel suite compares the
 committed projection with `cmp -s`. An append moves no line at or above 89.**
 
-- **Packet id:** `PACKET-0040-rotation-sentinel-guard`. **Lane:** `substantive`. **Depth 3** —
+- **Packet id (CLOSED):** `PACKET-0040-rotation-sentinel-guard`. **Lane:** `substantive`. **Depth 3** —
   builder, then qa and reviewer CONCURRENTLY, then one bounded fix round. The declaration above
   said Depth 2; **the third stage was spent and is recorded rather than back-dated.**
 - **Base `188472f`** (the pushed tip), verified by `git merge-base` before the first edit.
@@ -1187,7 +1187,7 @@ committed projection with `cmp -s`. An append moves no line at or above 89.**
 
 ## DECLARED AND BUILT — `gravito_p3b_count_derivation_a` (`PACKET-0041-count-derivation`), 2026-08-03
 
-- **Packet id:** `PACKET-0041-count-derivation` — **MINTED, collision-checked BEFORE the mint.**
+- **Packet id (CLOSED):** `PACKET-0041-count-derivation` — **MINTED, collision-checked BEFORE the mint.**
   The live band is `PACKET-0001`..`PACKET-0040`; at the base commit `099d7bf`,
   `git grep -lF 'PACKET-0041' 099d7bf` returns **0 files** and the only commit in
   `git log -S'PACKET-0041' --all` is this packet's own `a714d8a`. **Re-derived after commit 1,
@@ -1354,3 +1354,95 @@ COUNT-BLOCK header comment, which is not a record.
   `188472f` is the pushed tip and push was authorised only through it. No push, merge, PR,
   tag, deploy, secret, `git config`, amend or rebase was performed. **NOTHING IS IN FLIGHT**
   once the re-gate reports.
+
+## CLOSED — `gravito_p3b_count_derivation_a` (`PACKET-0041-count-derivation`) — closed 2026-08-04 by the archivist. NOTHING IN FLIGHT.
+
+**Verdict PASS-AS-FIXED.** qa **GREEN**, reviewer **fix-then-pass (6 enumerated items)**,
+re-gated. Base `099d7bf`; commits `a714d8a`, `f0e2fba`, `f785056` — **three against a cap of two,
+the sixth consecutive close at three, and it is now ROUTED rather than logged again.** Receipt:
+`build-os/receipts/gravito_p3b_count_derivation_a.md`. Metrics row appended and `--verify-git`
+**VERIFIED**; `check-adoption.sh` exit **0**. Full close record — coverage instance by instance,
+the file-ownership manifest, the escapes, the routed items — is in the receipt, which has no byte
+ceiling; the durable summary is `build-os/memory/current_state.md`, newest history block.
+
+### THE SINGLETON GATE WAS RED WHEN THIS CLOSE STARTED, AND THIS CLOSE FIXED IT
+
+`build-os/tools/bandwidth-check.sh check` reported **`packets EXCEEDED — 3 packet ids declared,
+ceiling 1`** and refused at exit 2. **That was not this packet's doing alone.** Derived from git,
+not remembered:
+
+| commit | live `- **Packet id:**` bullets |
+|---|---|
+| `188472f` (close of `gravito_governed_rotation_a`) | **0** — that archivist RENAMED the marker to `**Packet id (CLOSED):**`, which is the convention |
+| `099d7bf` (close of `gravito_rotation_sentinel_guard_a`) | **2** — that close **ADDED** a live marker in its own close record and renamed nothing |
+| `f785056` (this packet's fix round) | **3** |
+
+**The convention is a RENAME, not a deletion**, and it is what keeps the count at exactly one
+while a packet is in flight and zero when none is. All three markers are now
+`**Packet id (CLOSED):**`; **the rename is line-for-line in place, so nothing above `:89` moved and
+`ANC-0003` did not need repointing** (`DEFECT-0001-stale-line-reference` did not fire at this
+close). The count is **0**, and `bandwidth-check.sh check` no longer refuses on the packets
+dimension.
+
+**THIS IS A FOURTH FACE OF `DEFECT-0011-undeclared-active-packet`'s ROOT CAUSE** —
+`gate_permits_the_null_case`. The gate refuses two and permits zero, so nothing ever objected to a
+close leaving a stale live marker behind; the count only became visible when a *third* accumulated.
+Recorded in `OCCURRENCE-0019`.
+
+### RESIDUE — HELD HERE AND IN `current_state.md` BECAUSE `residue.md` IS FROZEN
+
+**This placement is DISPLACEMENT FORCED BY A FROZEN FILE, NOT A CHOICE.**
+`build-os/memory/residue.md` has **431 B** of headroom, is provably unrotatable at every legal
+`--keep`, and its blob is **`01517ad2c30d447949a98d0b6db9b8d6b538d5a9`** — byte-identical at base,
+at HEAD and after this close. **Not one byte was written to it.** Unfreezing it is an operator act.
+
+**Still open after this close, each with its owner:**
+
+1. **INSTANCE SEVEN — word-cardinals persisted in `note` fields.** `DC-0001`'s note carries
+   `"nine"` and `nineteen`; `cnt_num` parses cardinals **to twenty as numbers**, so they are
+   numbers by the module's own definition. **Section 29d cannot see them: its predicate is
+   DIGIT-ONLY, by the reviewer's own round-1 specification** — not a builder omission. Design
+   question (a `note` is prose; prose contains cardinals). **Operator/orchestrator.**
+2. **INSTANCE 4 is unmechanisable by this design** — the suite total lives in two files and is
+   produced by *running* the suite. A `mirror` kind would bind it and was **deliberately not
+   built**: no executed fixture in instances 1–3 justifies the kind. **And fixing instance 4's own
+   guard required PERFORMING instance 4 by hand** — 2190 -> 2220 -> 2228 restated in two files.
+3. **The counts block has no census entry of its own** — a gating control inside an
+   already-registered file, `README.md` section 4's hole #1. Registering it moves the census off
+   **105**. One-entry follow-up packet. **Operator's call.**
+4. **Receipt twenty-one must carry a NUMERAL.** The cardinal table stops at twenty;
+   `twenty-one` is `COUNT-UNREADABLE` and **refuses**. **This is where someone concludes the guard
+   is broken and deletes `DC-0001`.** It is fail-closed by design.
+5. **The standing `DC-0001` obligation lives in a ROTATING file.** `current_state.md` is in
+   `rotate-memory.mjs`'s `FILE_SPECS`; `standing_gates.md` protects only lines carrying the literal
+   `HARD STOP`, of which `current_state.md` has zero. Protected today by **position, not policy**.
+   **The orchestrator's brief pinned `standing_gates.md` frozen, so the builder had no legal path
+   to the right file** — this is the orchestrator's constraint, not a builder defect.
+6. **The section 21 textual-enrolment hazard** — `tests/control_registry_tests.sh:477-478` scans
+   `tests/*.sh` as TEXT including comments, so a comment explaining an avoided numeric floor
+   enrols itself. Now recorded in `current_state.md` block 1; previously only in a local comment
+   at `tests/control_registry_tests.sh:1470-1476`.
+7. **`count_derive`'s `files` arm expands `$3` unquoted** — RECORDED AND DELIBERATELY NOT FIXED on
+   the reviewer's explicit instruction. No `eval`, no injection path, no live record does it.
+8. **The `<=2 commits` cap** (sixth consecutive breach; structurally unsatisfiable alongside a
+   fix-round mechanic) and **the depth-4 contract gap** (a complete fix list whose contents the
+   re-review rules forbid closing narrowly). Both are **rulings routed to the operator/orchestrator
+   in `current_state.md`**, and the archivist did not decide either.
+9. **Twentieth consecutive packet with NO second eyes** (`codex` not on `PATH`).
+   `tool_router.md:368` now states **twenty**, by derivation, advanced in this close commit.
+
+### NOT STAGED, AND DELIBERATELY NOT DECLARED
+
+**Nothing is in flight.** The candidates above are candidates, not a queue: (1) the census entry
+for the counts block, (2) a `mirror` derivation kind, (3) narrowing or widening the section 29d
+predicate past digits, (4) copying the `DC-0001` obligation into `standing_gates.md` under a
+`HARD STOP` line, (5) unfreezing `residue.md`. **Items (3), (4) and (5) are operator acts or
+design rulings and must not be handed to a builder as a build task.** Cutting the next packet is
+the orchestrator's, taken against `build-os/memory/current_state.md`, not inferred from this list.
+
+### OPEN BOUNDARY
+
+**All three packet commits (`a714d8a`, `f0e2fba`, `f785056`) and this close commit are LOCAL AND
+UNPUSHED.** `188472f` is the pushed tip and push was authorised **only through `188472f`**. **No
+push, merge, PR, tag, deploy, secret, `git config`, amend or rebase** was performed by this close,
+and no such go has been given or asked for.

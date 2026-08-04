@@ -370,3 +370,15 @@ symptom: appending section 9 to tests/build_os_maintenance_tests.sh moved the tw
 prevented_by: partially — the four citations above the insertion point were prevented by refusing to add a line above them; the two below it could not be, because they are the last two lines of the file
 could_have_been_prevented_by: citing those two lines by ANCHOR rather than by position, which is the mechanism PACKET-0029 built and which still covers 13 of 355+ positional evidence_refs. THE COST IS NOW MEASURED ACROSS TWO CONSECUTIVE PACKETS AT ONE SITE: every packet that appends a section to a suite pays one forced evidence_refs repoint, and the repoint is only safe because a human noticed, not because anything detects it
 evidence_refs: build-os/registry/control_registry.txt:1162; build-os/registry/defect_classes.txt:348; tests/build_os_maintenance_tests.sh:846
+
+occurrence: OCCURRENCE-0019
+defect_class_id: DEFECT-0011-undeclared-active-packet
+packet_id: PACKET-0041-count-derivation
+detected_stage: archivist
+escaped_stage: builder
+affected_objects: build-os/packets/active_packet.md; build-os/registry/defect_classes.txt; build-os/tools/bandwidth-check.sh
+root_cause_class: gate_permits_the_null_case
+symptom: the implementation commit a714d8a landed at 22:29:38 and the declaration commit f0e2fba at 22:36:46 — the packet was BUILT SEVEN MINUTES BEFORE IT WAS DECLARED, and bandwidth.active_packet_singleton passed throughout because it refuses two declarations and permits zero. The builder recorded the recurrence in its own declaration rather than excusing it. AND THE LEDGER ITSELF WAS THE LARGER FINDING: this store carried exactly ONE occurrence of the class, OCCURRENCE-0005, while build-os/packets/active_packet.md documents further recurrences at :758, :847 and :1202 — a defect ledger UNDERCOUNTING ITS OWN RECURRENCES BY THREE, discovered inside the packet whose entire thesis is that a stated count must be derived from the source that produces it. This record is appended at the close so the ledger reports 19 occurrences rather than 18, and the undercount is corrected as a LATER RECORD rather than by rewriting OCCURRENCE-0005
+prevented_by: nothing — the guard's lower bound still does not exist, four occurrences after OCCURRENCE-0005 named it as the remedy, and no instrument anywhere reads the recurrence count of a defect class and compares it with the recurrences documented in the memory files
+could_have_been_prevented_by: a lower bound on the same cardinality check, refusing zero declared packets while a build is in flight — the remedy OCCURRENCE-0005 named and which remains unbuilt; and, for the undercount specifically, a scan-controls.sh COUNT-TABLE record binding this store's occurrence count to the recurrences documented in build-os/packets/active_packet.md, which is the mechanism PACKET-0041 built and did not point at its own defect ledger
+evidence_refs: build-os/packets/active_packet.md; build-os/registry/defect_classes.txt; build-os/receipts/gravito_p3b_count_derivation_a.md

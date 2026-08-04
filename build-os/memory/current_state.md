@@ -123,6 +123,37 @@ legal `--keep` retains it.
      **THIS IS THE POINT AT WHICH SOMEONE CONCLUDES THE GUARD IS BROKEN AND DELETES
      `DC-0001`.** It is not broken; it is fail-closed on a bounded word table, by design, and
      widening that table is a one-line change to `cnt_num` if anyone prefers words.
+  4. **IT HAS NOW BEEN DISCHARGED ONCE, BY EXECUTION AND NOT BY READING.** At the
+     `PACKET-0041-count-derivation` close the archivist ran the transition rather than assuming
+     it: `counts` exit **0** before the receipt, exit **2** the moment
+     `build-os/receipts/gravito_p3b_count_derivation_a.md` made the derivation **twenty**, and
+     exit **0** again after `tool_router.md:368` was advanced `nineteen` -> `twenty` **in the same
+     commit as the receipt.** The mechanism works; it is not a theory about future closes.
+  5. **AND THIS OBLIGATION IS ITSELF SITTING IN A FILE THAT ROTATES — SAY SO RATHER THAN RELY ON
+     IT.** `build-os/memory/current_state.md` is in `rotate-memory.mjs`'s `FILE_SPECS`, and has
+     already been rotated twice. `build-os/memory/standing_gates.md:1` calls itself the
+     never-rotated home of hard stops and states, in its own words, that **a gate written into a
+     rotating file and not copied there is a gate with an expiry date** — a rule enforced ONLY for
+     lines carrying the literal `HARD STOP`, of which this file has **zero**. What protects this
+     obligation today is **POSITION, NOT POLICY**: it sits in block 1, and `--keep` is validated
+     `>= 1`, so no legal rotation can reach it. That is a weaker guarantee than the one
+     `standing_gates.md` offers. **ATTRIBUTION: THIS IS THE ORCHESTRATOR'S CONSTRAINT, NOT A
+     BUILDER DEFECT** — the brief pinned `standing_gates.md` FROZEN, so the builder had no legal
+     path to the correct file, put the obligation in the best file it was permitted to write, and
+     said so. The remedy — copy it into `standing_gates.md` under a `HARD STOP` line — is an
+     **operator act**.
+
+- **STANDING TRAP FOR ANY PACKET THAT EDITS A SUITE FILE — SECTION 21 SCANS `tests/*.sh` AS TEXT,
+  INCLUDING COMMENTS.** `tests/control_registry_tests.sh:477-478` greps `-ge N|-gt N` across
+  `tests/*.sh` and requires every match to be registered to `tests.nonvacuity_minimums`. **It
+  cannot tell an assertion from a comment**, so a comment written to explain WHY a numeric floor
+  was deliberately avoided **enrols the comment itself** and turns the check red. It did exactly
+  that on the first attempt inside `PACKET-0041`, which is why the rejected form is now described
+  in words at `tests/control_registry_tests.sh:1470-1476` instead of being quoted.
+  **RECORDED HERE BECAUSE UNTIL THIS CLOSE IT EXISTED ONLY AS A LOCAL COMMENT AT THE SITE THAT HAD
+  ALREADY HIT IT, AND IN NO MEMORY FILE** — a trap documented for the one person who no longer
+  needs it. Write `-ge 0` / `-ge 1` / `-gt 0` (excluded by rule), assert an EXACT count, or spell
+  the membership test as a `case`; and if you must name the rejected form, name it in prose.
   — **The last +11 are the packet's FIX ROUND**, and they exist because two mutants of the
   new guard each killed **ZERO** of 2179 tests: disarming `SENTINEL_GATE_PINS` (observable
   as 18 -> 15 resolved objects on `residue.md` and 4 -> 2 on this file, with the pins going
@@ -257,8 +288,8 @@ legal `--keep` retains it.
 
 ### Last close
 
-- **Last closed packet:** `gravito_rotation_sentinel_guard_a`
-  (`PACKET-0040-rotation-sentinel-guard`). The full close record — id derivation,
+- **Last closed packet:** `gravito_p3b_count_derivation_a`
+  (`PACKET-0041-count-derivation`). The full close record — id derivation,
   base, commits, verdict, and what it made true — is the newest history block
   below, preserved verbatim where it was written.
   **THIS LITERAL IS GATE-PINNED AND MUST STAY IN BLOCK 1.**
@@ -563,6 +594,131 @@ legal `--keep` retains it.
   worse. Both outcomes are closed with the measurement attached.
   Carried, unrelated: decide Context Mode routing enablement (stays non-secret pilot); name a target
   repo + approve a secret for the GH Actions; authorize/enable the deferred connectors.
+- **OPEN RULING, AND IT IS NOW STRUCTURAL RATHER THAN INCIDENTAL — THE `<=2 COMMITS` CAP.**
+  `PACKET-0041-count-derivation` is the **SIXTH CONSECUTIVE CLOSE AT THREE COMMITS.** The
+  reviewer's generalisation is what turns this from an incident into a rule conflict: **any packet
+  receiving a `fix-then-pass` verdict MUST produce a third commit**, because the earlier commits
+  are the gated tree both gates measured and amending or squashing them destroys the artefact the
+  verdict was about. **So `<=2 commits` and a fix-round mechanic cannot both be satisfied.**
+  Recording it a sixth time is **ritual replacing a rule**. The decision is the operator's or the
+  orchestrator's and is one of exactly two: **(1) re-cut the cap** — e.g. *"<=2 build commits plus
+  at most one fix commit"* — **or (2) delete the cap and stop logging it.** **The archivist did
+  not decide it and must not.**
+- **OPEN RULING — A THIRD CAUSE OF A FOURTH SERIAL STAGE THAT THE CONTRACT DOES NOT ANTICIPATE.**
+  The working contract enumerates two causes for depth 4: the fix list arrived **in installments**,
+  or the packet was **mis-cut**. `PACKET-0041` was **neither** — the reviewer's six-item list
+  arrived **complete, in one round**, and the fixes were **logic and count changes** that the
+  contract's own re-review rules **forbid closing by targeted confirmation** (a re-review that only
+  re-checks enumerated items cannot certify a change that moves the suite total). **That is a third
+  cause: a complete fix list whose contents are of a kind the re-review rules will not let you
+  close narrowly.** Recorded as a **contract gap**, not as a defect of the packet or the reviewer,
+  and left for the operator/orchestrator.
+
+## History — `gravito_p3b_count_derivation_a` — the last close, and the first DERIVED count
+
+**Everything below is the summary. The long form — coverage instance by instance, the
+file-ownership manifest, the escapes, the two items routed to the operator undecided, and the
+contract gap — is `build-os/receipts/gravito_p3b_count_derivation_a.md`, which has no byte
+ceiling. This file has one, and the residue file next door has 431 B; that is why this block is
+short and why the residue items are HERE rather than in `residue.md`. THAT PLACEMENT IS
+DISPLACEMENT FORCED BY A FROZEN FILE, NOT A CHOICE.**
+
+- **Closed 2026-08-04:** `gravito_p3b_count_derivation_a` (`PACKET-0041-count-derivation`).
+  **Lane `substantive`. Depth 4.** Verdict **PASS-AS-FIXED** — qa **GREEN**, reviewer
+  **fix-then-pass (6 enumerated items)**, re-gated. Base `099d7bf`; commits `a714d8a`, `f0e2fba`,
+  `f785056` — **three, against a cap of two.** Metrics row appended and `--verify-git` VERIFIED at
+  7 files / 967 insertions / 46 deletions (per-commit sums); `check-adoption.sh` exit **0**.
+- **WHAT IT MADE TRUE.** `scan-controls.sh counts` binds a stated count to a live derivation. The
+  record stores **no number and no line number**: the stated value is read out of live prose at
+  every run, the derived value computed from the live source at every run, the position computed
+  as a hint and stored nowhere. Two kinds only — `lines` (ERE that must begin `^`) and `files` (a
+  name glob); **no line-count kind** and **no shell-command field**. It gates the `check` path too.
+- **IT CAUGHT THE REAL DEFECT ON THE LIVE TREE, NOT ON A FIXTURE.** `tool_router.md:368` said
+  **"nine"** against a derived **nineteen**; `counts` refused at exit 2 and the correction was made
+  **by the derivation**, with the count table **byte-identical** across the fix.
+- **THE CATEGORY CHANGE:** the packet's own claim moved from **declared in a header** to
+  **asserted over the live table and red-driven in both directions.** qa's `M-NEW` mutant —
+  restore `DC-0003`'s `14` — produces **2 failed**, so the assertion bites.
+  **The reviewer's trajectory sentence, unsoftened:** *"still a scheme with a token population, but
+  the scheme is now self-asserting rather than self-declaring."* Three records over two distinct
+  counts. **It becomes infrastructure when the population grows past the counts its own author
+  happened to notice**, and not before.
+- **COVERAGE IS 3 OF 5 KNOWN INSTANCES, STATED HONESTLY.** (1) the router's stale streak — **CAUGHT
+  LIVE**; (2) `wc -l` for a record count and (3) unanchored-vs-anchored grep — **caught
+  structurally and on fixtures**, the `wc -l` answer being *inexpressible* rather than discouraged;
+  **(4) the suite-total pair and (5) the transient-prose slips — NOT CAUGHT AND NOT TESTED.**
+  **AND FIXING INSTANCE 4's GUARD REQUIRED PERFORMING INSTANCE 4 BY HAND** — 2190 -> 2220 -> 2228
+  restated by hand in two files. Recorded above at the `Build/test command` bullet and carried
+  here deliberately.
+- **DERIVED AT THIS CLOSE, NOT REMEMBERED:** census **105** at base and HEAD; declared mismatches
+  **22 anchored** (the unanchored grep gives **27** and is **wrong** — that is what `DC-0002`
+  exists for); `gate` 81 / `execute` 8 / `advise` 15 / `observe` 1, identical at both ends;
+  **re-authorisations 0**, by diffing every `(control, runtime_authority)` pair base-to-HEAD;
+  anchors **12 resolved / 1 superseded / 0 violations**; derived counts **3 of 3 agree**.
+- **TWO DEFECTS ESCAPED qa AND THE REVIEWER AND WERE CAUGHT AT THE CLOSE.** **(a) INSTANCE SEVEN,
+  STILL OPEN:** word-cardinals persisted in `note` fields — `DC-0001`'s note carries `"nine"` and
+  `nineteen`, and the tool's own `cnt_num` parses cardinals **to twenty as numbers**, so those
+  words are numbers by the module's own definition. **The section 29d predicate cannot see them
+  because its predicate is DIGIT-ONLY** — and that is **the reviewer's own round-1 list specifying
+  a digit predicate, not the builder omitting work.** The builder implemented it broader than
+  asked, extending it from `stated_content` to `note`. The gap is in the specification.
+  **(b) FIXED IN THE CLOSE COMMIT:** `DC-0003`'s note stored a hand-written, underived line
+  distance — *"four lines above it"* — which was also **FALSE and had never been true**: the sites
+  are `MISMATCHES.md:30` and `:32`, **two** apart, traced back six revisions. **The distance was
+  DROPPED, not corrected to "two"** — a corrected distance is still a stored position and `"two"`
+  would persist another cardinal, which is the residual class (a) is about. The reasoning went
+  into the `COUNT-BLOCK` header comment, where this module's history belongs: **in a comment, and
+  not in a record.**
+- **`DEFECT-0011-undeclared-active-packet` RECURRED, AND ITS LEDGER WAS UNDERCOUNTING BY THREE.**
+  `f0e2fba` (declaration) landed at 22:36:46, **seven minutes after** `a714d8a` (implementation) at
+  22:29:38; `bandwidth.active_packet_singleton` passed throughout because it refuses two
+  declarations and permits zero. **And `build-os/registry/defect_classes.txt` carried exactly ONE
+  occurrence of the class (`OCCURRENCE-0005`) while `build-os/packets/active_packet.md` documents
+  further ones at `:758`, `:847` and `:1202` — a defect ledger undercounting its own recurrences by
+  three, inside the packet whose thesis that is.** `OCCURRENCE-0019` is appended by this close; the
+  ledger now reports **19 occurrences** and **4 classes recur**. The undercount is corrected as a
+  LATER RECORD; `OCCURRENCE-0005` was not rewritten.
+- **THE ANCHOR ARGUMENT, MADE BY EXECUTION.** Three line-pinned citations into
+  `tests/control_registry_tests.sh` were repointed **by content** twice each — six repoint
+  operations across two rounds (`:1189 -> :1444 -> :1526` and its two siblings) — while
+  **`ANC-0012`, which covers the SAME FILE, absorbed every one of those moves with ZERO edits.**
+  All resolve at close: `ANC-0012` at `:1526`, `ANC-0009` at `packet_metrics.tsv:17`, and the
+  `evidence_refs` entry at `:1526` under `scan-controls.sh check` exit 0.
+- **ONE ZERO-KILL MUTANT, DISPOSED OF AS UNOBSERVABLE BY CONSTRUCTION AND NOT AS UNTESTED.**
+  `local pair` killed zero tests because `pair` is read **only inside the loop that assigns it**
+  and **both call sites are top-level** — there is no reachable state in which its scope is
+  observable. Deliberately distinguished from `PACKET-0040`'s two zero-kill mutants, which WERE
+  observable and WERE unenforced; conflating the two categories is how a mutation score becomes
+  decoration.
+- **SECOND EYES: NONE.** `codex` not on `PATH`; review was same-model, single-provider.
+  **TWENTIETH consecutive packet.** `tool_router.md:368` now states **twenty**, by derivation.
+- **AND THE CLOSE ITSELF WAS CAUGHT BY A LIVE-TREE ASSERTION — RECORD IT, IT IS THE SAME LESSON.**
+  The archivist first wrote the metrics row with `defects_escaped=2`, counting the two close-stage
+  catches above as escapes. The suite refused at **2227 / 1**:
+  `tests/speed_benchmark_tests.sh:319` asserts against the **LIVE store** that the rendered
+  `defects_escaped` total is `-`, because **that column means a POST-CLOSE AUDIT found the defect**
+  and no such audit has ever run here (`build-os/metrics/README.md`, in terms). **A close-stage
+  catch is not a post-close escape**, and writing `2` there would have published a measurement for
+  an audit nobody ran — the exact `0`-versus-`-` confusion the store exists to prevent, committed
+  by the agent whose job is preventing it. The row had **not been committed**; it was removed from
+  the uncommitted working copy (verified by `git status --porcelain` reporting the store
+  byte-identical to `HEAD`) and re-recorded with the flag omitted. **No committed row was
+  rewritten.** Had it been committed, the rule stands: a correction is a NEW row referencing the
+  old one, never an edit.
+- **RESIDUE, HELD HERE BECAUSE `residue.md` IS FROZEN AT 431 B AND UNROTATABLE AT EVERY LEGAL
+  KEEP:** (a) instance 4 is unmechanisable by this design — a `mirror` kind would bind it and was
+  deliberately NOT built, because no executed fixture justifies the kind; (b) the counts block is a
+  gating control inside an already-registered file (`README.md` section 4's hole #1) with no census
+  entry of its own — registering it moves the census off 105, so it is a one-entry follow-up packet
+  and the operator's call; (c) instance seven is open; (d) the cardinal table stops at twenty and
+  **receipt twenty-one must be a numeral**; (e) `count_derive`'s `files` arm expands `$3` unquoted —
+  RECORDED AND DELIBERATELY NOT FIXED on the reviewer's explicit instruction; no `eval`, no
+  injection path, no live record does it; (f) two defects were found by the packet's own tests
+  rather than by review — an id regex too tight for fixture ids, and `rc=$?` read back after
+  `if ! cmd`, which reports the status of the **negation**, **the exact trap the brief warns about,
+  made in the same packet that quotes the warning**; (g) carried untouched: `residue.md` frozen,
+  the rotation-sentinel spec revisions (i) and (ii), and `3a590ed`'s permanently false commit
+  message.
 
 ## History — `gravito_rotation_sentinel_guard_a` — the last close, and the first GOVERNED rotation
 

@@ -872,6 +872,17 @@ printf 'scan-controls: %s anchor(s) resolved, %s superseded, over %s record(s) i
 # It is the same discipline the anchor table above applies to positions: an
 # anchor stores no line number, and a count record stores no count.
 #
+# AND THAT RULE HAS A RESIDUAL CLASS THE FIRST DRAFT MISSED. `DC-0003`'s note
+# shipped reading "four lines above it" — a hand-written, underived DISTANCE
+# between two positions, stored in a record thirty lines under the sentence
+# above. It was also WRONG, and had never been right: the two sites are
+# MISMATCHES.md:30 and :32. The distance is now DROPPED rather than corrected,
+# because a corrected distance is still a stored position and a spelled-out
+# cardinal is still a persisted number. Nothing derives it, so nothing states
+# it. The §29d predicate does not catch this shape — it is digit-only, by its
+# own specification — and that limit is named in the receipt for
+# PACKET-0041-count-derivation rather than implied away here.
+#
 # THE RECORD. Eight fields, `|`-delimited, one per line, between the COUNT-TABLE
 # markers below:
 #
@@ -940,7 +951,7 @@ COUNT_KINDS="lines files"
 COUNT_TABLE=(
 'DC-0001|build-os/memory/tool_router.md|checked at each of the last **{N}** packets|files|build-os/receipts|gravito_*.md|2026-08-03|THE RED FIXTURE THAT JUSTIFIED THIS BLOCK. The second-eyes streak: one receipt per closed packet since the streak opened, and no packet in it has ever had a second-eyes provider, so the streak IS the receipt count. This site said "nine" against a live nineteen.'
 'DC-0002|build-os/registry/MISMATCHES.md|control_registry.txt` yields **{N}**|lines|build-os/registry/control_registry.txt|^authority_mismatch: declared|2026-08-03|Instance three. The anchored form is the derivation; the unanchored one also matches the field named mid-sentence in prose, and reports a larger figure.'
-'DC-0003|build-os/registry/MISMATCHES.md|of {N} entries carrying|lines|build-os/registry/control_registry.txt|^authority_mismatch: declared|2026-08-03|The SECOND restatement of DC-0002s truth, four lines above it in the same file. Duplicate semantic truth is not fixed by deleting one copy; both copies are bound to the one source that produces the number.'
+'DC-0003|build-os/registry/MISMATCHES.md|of {N} entries carrying|lines|build-os/registry/control_registry.txt|^authority_mismatch: declared|2026-08-03|The SECOND restatement of DC-0002s truth, in the same file. Duplicate semantic truth is not fixed by deleting one copy; both copies are bound to the one source that produces the number.'
 )
 # COUNT-TABLE:END
 
