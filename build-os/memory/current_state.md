@@ -2333,3 +2333,20 @@ byte ceiling. This file does, and it is nearly out; that is why this block is sh
 - **Where we are:** NOTHING IN FLIGHT, nothing staged. All five outputs in ancestry:
   `9cf0f87`→`916e1ae`→`23983ba`→`46809e6`→`ca65b98`/`ce7588c`. NOTHING PUSHED — those
   four + close commit local pending explicit go; none amendable. `residue.md` frozen.
+
+## 2026-08-05 — `gravito_routing_enforcement_a` (`PACKET-0050`) CLOSED — verdicts BINDING
+
+- **Post-EXP-0002 routing correction shipped:** binding selector (`mode-select.mjs`,
+  complexity alone earns light); receipts with derived budgets (`route-task.sh`);
+  close gate `routing-check.sh` — exact T5 replay REFUSED, SILENT-ESCALATION named;
+  T3's sealed descriptor now routes light, frozen selector still full.
+  `routing_contract.md`: THREE honest bounds (counters not bash-visible; false
+  consumption uncaught; receipt ISSUANCE unchecked). Sweep in suite §26.
+- **Commits:** `ac1581c`+`c49258e` (census 114→118 same-commit) +`4443360` (fix).
+  Depth 3. qa GREEN **2482/0** solo (+104); commit-1 iso 2378/0; reviewer
+  fix-then-pass 2 items → **PASS-AS-FIXED**. Second eyes NONE. DC-0001 **29→30**.
+  Routing receipt closed: executed=selected=full, sweep 0.
+- **Open (recorded):** the gate chain brushes `max_subagents: 3` — EXP-0003-adjacent.
+  Staged NOT declared: EXP-0003, three neutral conditions, rule NOT asymmetric.
+- **Where we are:** NOTHING IN FLIGHT; NOTHING PUSHED — three + close commit local
+  pending explicit go; none amendable. `residue.md` frozen.

@@ -19,9 +19,19 @@ budget_max_wall_clock_s: 900
 budget_max_cost_usd: 1.50
 # --- empty at issue; filled at close. AN UNKNOWN IS NOT A ZERO: "-" is an honest
 # --- admission and is never refused; refusal is for CONTRADICTION, not absence.
-executed_mode: -
+executed_mode: gravito_full
 escalation: -
 escalation_evidence: -
+# --- close-time record (archivist, 2026-08-05, at close of PACKET-0050): executed
+# --- mode matches the selected mode — no escalation occurred, so escalation stays
+# --- '-'. Consumption fields stay '-' FOR THE DOCTRINAL REASON, not from neglect:
+# --- serial agent passes and live token/call/cost counters are transcript-only —
+# --- nothing in git attests to them, and a transcript figure is not written into
+# --- a measured cell. '-' is the admission this gate accepts (an unknown is not a
+# --- zero). Open calibration question, recorded not resolved: a full-mode packet's
+# --- own gate chain (builder+qa+reviewer+archivist) brushes the max_subagents 3
+# --- default — whether process agents count against task budgets is an
+# --- EXP-0003-adjacent operator question.
 consumed_subagents: -
 consumed_total_tokens: -
 consumed_uncached_tokens: -

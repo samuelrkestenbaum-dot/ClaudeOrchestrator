@@ -2217,9 +2217,9 @@ surface the T2–T4 refusals and per-arm acceptance explicitly.
   staged** — the router candidate is a routing decision for the orchestrator, not the
   archivist's to declare.
 
-## IN FLIGHT — `routing-enforcement-and-budgets` (declared 2026-08-05)
+## CLOSED — `routing-enforcement-and-budgets` (declared 2026-08-05; closed 2026-08-05 by the archivist)
 
-- **Packet id:** `PACKET-0050-routing-enforcement` — minted; 0 commits, 0 files carried the token
+- **Packet id (CLOSED):** `PACKET-0050-routing-enforcement` — minted; 0 commits, 0 files carried the token
   before this edit.
 - **Lane:** `substantive`. **Depth 2** — builder, then qa ‖ reviewer concurrently.
 - **Branch base:** at `0239737` — the pushed tip (EXP-0002 published; remote = local, 0/0).
@@ -2248,3 +2248,50 @@ surface the T2–T4 refusals and per-arm acceptance explicitly.
   checkbox that looks enforced and is not.
 - **Out of scope:** EXP-0003 (next packet, after this correction); memory-control packets
   (not authorized); bench/ and both experiment trees (frozen, published); empathiq-website.
+
+## CLOSE RECORD — `gravito_routing_enforcement_a` (`PACKET-0050-routing-enforcement`) — closed 2026-08-05 by the archivist. NOTHING IN FLIGHT.
+
+- **Packet id (CLOSED):** `PACKET-0050-routing-enforcement`. Receipt:
+  `build-os/receipts/gravito_routing_enforcement_a.md`. **Lane:** `substantive`.
+  **Depth 3, announced** — build; qa ‖ reviewer concurrently; one bounded fix round.
+  Base `0239737` (the pushed tip), tree quiet at declaration.
+- **Commits:** `ac1581c` (declaration, docs-only) + `c49258e` (build, with same-commit
+  RULING-4 registration — census **114 → 118**, NO contract-gap replay; the builder's
+  `1fb1cc0`→`c49258e` amend was message-only pre-gate, disclosed and verified) +
+  `4443360` (the one permitted fix commit — 2 build + 1 fix, within budget).
+- **What it closes, proven by execution at the gates:** DEFECT 1 (T5 silent
+  escalation) — the reviewer rebuilt T5's receipt from its sealed descriptor and
+  `routing-check.sh` REFUSED it with 5 named violations; DEFECT 2 (T3 calibration) —
+  T3's sealed complexity-only descriptor now routes `gravito_light` under the product
+  selector while the frozen experiment selector still returns `gravito_full`, proving
+  both the recalibration and the non-mutation of the frozen copy.
+- **Shipped:** `mode-select.mjs` (7 value factors; complexity alone earns light);
+  `route-task.sh` (routing receipts, DERIVED-DEFAULT budgets from the sealed EXP-0002
+  bands, raw T4's 526,461 a named exceedance); `routing-check.sh` (close-time gate,
+  '-' is admission, refusal is for contradiction; live sweep chained into
+  `build_os_tests.sh` §26); `routing_contract.md` (binding-verdict rule + five-step
+  circuit breaker as labeled PROTOCOL; THREE named honest bounds, including receipt
+  ISSUANCE itself unchecked — a packet that never routes is invisible to the gate);
+  CLAUDE.md step 7; `tests/routing_enforcement_tests.sh` (104/0, red-driven).
+- **Gates:** qa GREEN — suite **2482/0 solo** (+104, all the new routing suite,
+  per-suite deltas from logs), commit-1 iso 2378/0 at the docs-only declaration, the
+  exact T5 replay refused with SILENT-ESCALATION named, census 118 reconciled, frozen
+  surfaces intact, mirrors byte-identical, amend transparency verified. Reviewer
+  fix-then-pass, 2 items, both fixed in `4443360` exactly as prescribed (qa had
+  independently flagged the same citation) → **PASS-AS-FIXED**. Second eyes NONE
+  (Codex 403 at proxy, attempted and stated by both gates). `DC-0001` numeral moved
+  **29 → 30** in this close commit, derived from the receipt store.
+- **Live routing receipt closed:** `executed_mode: gravito_full` (matches selected;
+  no escalation); consumption fields stay '-' with the doctrinal reason on the
+  receipt; post-fill sweep `routing-check.sh check` = 1 receipt, 0 violations, exit 0.
+  **Open calibration question, recorded not resolved:** a full-mode packet's own gate
+  chain (builder+qa+reviewer+archivist) brushes the `max_subagents: 3` default —
+  whether process agents count against task budgets is an EXP-0003-adjacent operator
+  question.
+- **Boundaries:** NOTHING PUSHED — `ac1581c`, `c49258e`, `4443360`, and this close
+  commit all local pending explicit operator go; none may be amended. No merge,
+  deploy, or secrets. `residue.md` stays frozen. **NOTHING IS IN FLIGHT.** Staged next
+  but NOT DECLARED (a routing act, not the archivist's): **EXP-0003** — three NEUTRAL
+  preregistered conditions (direct / gravito_light / gravito_full-with-enforced-budgets)
+  on T3/T4/T5-style tasks; output = the routing frontier; the conclusion rule must NOT
+  be direction-asymmetric this time (the operator's explicit instruction).
