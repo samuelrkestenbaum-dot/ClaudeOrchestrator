@@ -1,0 +1,61 @@
+# EXP-0003 routing-frontier — single task record
+experiment: EXP-0003
+harness_version: 1.0.0
+task: T4
+condition: C  (installed surface + gravito_full receipt with derived budgets (binding, pointed to from tool_router.md))
+receipt: build-os/packets/routing/routing-EXP-0003-sequence.md (in the work tree; filled + gated at condition close)
+tree_state: persistent evolving work tree at /tmp/claude-0/-home-user/5489b495-ae3d-5612-a4e1-61b4b5c6b6e4/scratchpad/exp0003/C/repo — seeded once before T3, NEVER reseeded; this record is task T4 of the condition's T3->T5 sequence; setup: pre-existing work tree (task T4 of the condition sequence)
+starting_tree_digest: 6b7c294b7f74e823af303234594aa3317cdb200f7af155d29df0fcf156357021
+ending_tree_digest: 6b7c294b7f74e823af303234594aa3317cdb200f7af155d29df0fcf156357021
+pinned_seed_digest: 128485c6082bdf7305168001212b1e2aa7005815be9c00735185eecfdb8cc06f (verified at seed)
+pinned_post_setup_digest: 6c77b5a4bda46ba4730ccf1b2a08725a76523e87ac7402096744659d0c47b6aa (verified after scripted T1/T2)
+regression_t4_injection: injected_by_this_run (see inject-t4.log)
+task_prompt_sha256: 39638bc19253701d624915b5e9c651335e9f1193cf7da9b1a7f49c552fad29f1   (extracted from EXP-0002's frozen tasks.md; VERIFIED equal to the preregistered pin — the runner refuses on drift)
+model_requested: -(CLI default)
+model_used: claude-haiku-4-5-20251001+claude-sonnet-5
+models_in_usage: 2
+cli_version: 2.1.222 (Claude Code)
+weekly_usage_meter: unobservable_from_this_environment
+bash_allowlist_note: scoped allowlist observed non-binding in CLI 2.1.222; permissions identical across conditions
+cli_exit: 0
+is_error: false
+stop_reason: end_turn
+--- machine-derived, MODELUSAGE-NATIVE primaries (the EXP-0002 usage-block defect, fixed in this runner) ---
+wall_clock_s: 47.01
+wall_clock_min: 0.78
+duration_api_ms: 42627
+num_turns: 12
+mu_input_tokens: 560
+mu_output_tokens: 2893
+mu_cache_read_tokens: 261204
+mu_cache_creation_tokens: 23711
+mu_total_tokens: 288368   (PRIMARY: input+output+cache_read+cache_creation, summed across modelUsage entries)
+mu_uncached_tokens: 27164   (PRIMARY variant: total minus cache_read)
+mu_cost_usd: 0.264466   (sum of per-model costUSD)
+total_cost_usd: 0.2644662   (provider top-level, recorded for reconciliation)
+cost_reconciliation_delta: 0.000000200   (|mu_cost_usd - total_cost_usd|; >1e-6 REFUSES the record)
+cost_reconciliation_agrees: yes
+--- the parent-loop usage.* block, recorded BESIDE the primaries, never merged ---
+usage_input_tokens: 12
+usage_output_tokens: 2879
+usage_cache_creation_tokens: 23711
+usage_cache_read_tokens: 261204
+usage_block_disagrees: yes   (yes iff any of the four differs from its modelUsage-summed counterpart; the EXP-0002 undercount signature)
+--- two-witness counts (structural JSON parse, never a grep alone) ---
+tool_calls: 11
+tool_use_events: 11   (WITNESS 1 — distinct tool_use ids in ASSISTANT events)
+tool_result_events: 11   (WITNESS 2 — distinct tool_use_ids answered in USER events)
+tool_failures: 0
+stream_invalid_lines: 0 of 51
+subagent_dispatches: 0   (naive=0 structural=0)
+subagent_dispatches_structural: 0   (what close mode sums into consumed_subagents)
+--- outcome ---
+accepted: yes
+oracle_verdict: ACCEPT T4 — regression test byte-identical to the injected original, discovered, and the suite is green at 51 passed
+seeded_suite: -   ('-' after T3: seeding happens once)
+post_setup_suite: -   ('-' after T3: scripted setup happens once)
+final_suite: TOTAL: 51 passed, 0 failed
+--- NOT machine-derivable, recorded as '-' (an unknown is not a zero) ---
+human_interventions: -
+rework: -
+defects_escaped: -

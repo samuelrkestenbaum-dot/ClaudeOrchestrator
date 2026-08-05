@@ -1,0 +1,15 @@
+# EXP-0003 close-time routing gate — condition B
+receipt: /tmp/claude-0/-home-user/5489b495-ae3d-5612-a4e1-61b4b5c6b6e4/scratchpad/exp0003/B/repo/build-os/packets/routing/routing-EXP-0003-sequence.md
+filled_from: /tmp/claude-0/-home-user/5489b495-ae3d-5612-a4e1-61b4b5c6b6e4/scratchpad/exp0003/B-runs/{T3,T4,T5}/run_record.txt (summed measured telemetry; '-' = not all three machine-derived)
+executed_mode_proxy: >=1 structural subagent dispatch across the sequence -> gravito_full; 0 -> selected_mode; unknown -> '-' (a dispatch-free Full ceremony is invisible to this proxy — named bound)
+--- routing-check.sh check --receipt (verbatim) ---
+  BUDGET-BREACH /tmp/claude-0/-home-user/5489b495-ae3d-5612-a4e1-61b4b5c6b6e4/scratchpad/exp0003/B/repo/build-os/packets/routing/routing-EXP-0003-sequence.md consumed_total_tokens 4293173 exceeds budget_max_total_tokens 500000 with degradation_note '-'. A breach is survivable; concealing one is not — declare the degradation or the receipt is refused.
+  BUDGET-BREACH /tmp/claude-0/-home-user/5489b495-ae3d-5612-a4e1-61b4b5c6b6e4/scratchpad/exp0003/B/repo/build-os/packets/routing/routing-EXP-0003-sequence.md consumed_uncached_tokens 171723 exceeds budget_max_uncached_tokens 60000 with degradation_note '-'. A breach is survivable; concealing one is not — declare the degradation or the receipt is refused.
+  BUDGET-BREACH /tmp/claude-0/-home-user/5489b495-ae3d-5612-a4e1-61b4b5c6b6e4/scratchpad/exp0003/B/repo/build-os/packets/routing/routing-EXP-0003-sequence.md consumed_model_calls 81 exceeds budget_max_model_calls 25 with degradation_note '-'. A breach is survivable; concealing one is not — declare the degradation or the receipt is refused.
+  BUDGET-BREACH /tmp/claude-0/-home-user/5489b495-ae3d-5612-a4e1-61b4b5c6b6e4/scratchpad/exp0003/B/repo/build-os/packets/routing/routing-EXP-0003-sequence.md consumed_cost_usd 2.598891 exceeds budget_max_cost_usd 0.75 with degradation_note '-'. A breach is survivable; concealing one is not — declare the degradation or the receipt is refused.
+routing-check: /tmp/claude-0/-home-user/5489b495-ae3d-5612-a4e1-61b4b5c6b6e4/scratchpad/exp0003/B/repo/build-os/packets/routing/routing-EXP-0003-sequence.md selected=gravito_light executed=gravito_light admissions=0(admission fields, not zeros)
+routing-check: 1 receipt(s) checked, 4 violation(s)
+routing-check: REFUSED — 4 violation(s). The recorded verdict is binding; a contradiction between what was selected and what ran is a defect, not a detail.
+--- end verbatim ---
+gate_exit: 2
+disposition: REFUSED — retained as data, labeled, not edited to pass

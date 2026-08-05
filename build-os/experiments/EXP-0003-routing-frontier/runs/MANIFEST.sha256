@@ -1,0 +1,36 @@
+7c6eeaba77f36086ae6c03e25fd5492a1679dc68e9b0ff5ca2ad86885bb07746  ./A_T3/result.json
+b61ed86be5e20e3d3f56142277c0145be04934e790e6279cdfd5220a419af7fd  ./A_T3/run_record.txt
+a3e548f3b06f6575535b17dec579549b13108cfb75cfa358b1607564a980053a  ./A_T4/result.json
+4e569adba90c7f5942f7789e6cb1c86734b330d64a5490893d885d745976b228  ./A_T4/run_record.txt
+bcf4c23bd8202e79a984ad1a85b11c4a9a825cdbb174ee8fc4b1615b11417601  ./A_T5/result.json
+19d1dd0728137cb4fba8e19d9d8f673a2512f2256d98301a1aa2c66303db8d8a  ./A_T5/run_record.txt
+d302e1dc9763a87f9b9babd7f61395986c1c4b8358c444684d802d98f99a0a96  ./B_T3/result.json
+deca03b80b7505c2671687bee024d84139e72bcd857382faeaf91da96e96cac0  ./B_T3/run_record.txt
+4ec427baae288b087ce2c6af292463af2b5cd51cfb8546066ddec4b713e6fbe2  ./B_T4/result.json
+a66f850857729145d19e3b374174bd99b68a83a6ee6b252d484dd115b11fc1e7  ./B_T4/run_record.txt
+176643cd33c5986d154b4eca957bd3c22f293d4e441037419f750ff3a62236c7  ./B_T5/result.json
+0ad8552eae801d83cef35af092a194efa0f4d89ab914c01dbb87a0b7cc742f44  ./B_T5/run_record.txt
+df4427763dbf7bbfb2e7adcc55739c59064542f4ea1adf3d7d4b685be3d3ba0b  ./B_close/gate_result.txt
+35ab2efa1e953d3755ec9794024bee24cc3287ab838c8b7e9923f4e74932a4e5  ./B_close/receipt-final.md
+35ab2efa1e953d3755ec9794024bee24cc3287ab838c8b7e9923f4e74932a4e5  ./B_close/receipt_final.md
+375f17990addceb3677e8fa15e39d6862d98d7a2e49022d86ba1c77af34e7680  ./C_T3/result.json
+31e4de6e1a868c7a920c4e4ada0840827e5b3dd864df94e61a4b836203baf052  ./C_T3/run_record.txt
+65c55bb78b324f22b3171195267fbba144e91865c42b788ca4a1eaa9a8c35e51  ./C_T4/result.json
+30b3b70e076389a3dbf65fb69db49c095b59be2b2c99b06deea9a3e817fab3ad  ./C_T4/run_record.txt
+53552d7598da676aa99a0a41111f3f9727b7902d8c51a7cad245c95a7f78d405  ./C_T5/result.json
+ce7724b28e5a853e1861e3ac3ac0e50311a4391e7bea18b364b73a45a95d7042  ./C_T5/run_record.txt
+a6b4423cb0ff3504487549dbec613e157f8b1ef6ee98d469c26887ed44cf2f94  ./C_close/gate_result.txt
+da2dc14a570dd49adb6e4e3b3702d7bfe94a2a22e9b3308af964c396639e2317  ./C_close/receipt-final.md
+da2dc14a570dd49adb6e4e3b3702d7bfe94a2a22e9b3308af964c396639e2317  ./C_close/receipt_final.md
+# stream transcripts, scratchpad-resident (EXP-0002 sealed form), hashed in place
+4f443e64c4458de72b9b98623c75d2a8474b006a475a0603e64cdc4313c74f9b  /tmp/claude-0/-home-user/5489b495-ae3d-5612-a4e1-61b4b5c6b6e4/scratchpad/exp0003/A-runs/T3/stream.jsonl
+265ef0839ded884105ea7a331c3934d58b66dc4eef5b4e7d8b4ebd6a518ebe24  /tmp/claude-0/-home-user/5489b495-ae3d-5612-a4e1-61b4b5c6b6e4/scratchpad/exp0003/A-runs/T4/stream.jsonl
+abe86189b28d2d7fc8ac64311fea1fdf4a37fdb736b76fd83e8a28851b556ea6  /tmp/claude-0/-home-user/5489b495-ae3d-5612-a4e1-61b4b5c6b6e4/scratchpad/exp0003/A-runs/T5/stream.jsonl
+fbbc4487549d35684c5be05e9b6c845c3b5257cb217e0e052b6c3f7c6caad909  /tmp/claude-0/-home-user/5489b495-ae3d-5612-a4e1-61b4b5c6b6e4/scratchpad/exp0003/B-runs/T3/stream.jsonl
+28c5e1a7dd9d5f0a887d16472da501193606fd8d29932a97140bf7e27f607ffd  /tmp/claude-0/-home-user/5489b495-ae3d-5612-a4e1-61b4b5c6b6e4/scratchpad/exp0003/B-runs/T4/stream.jsonl
+c58c4de2916a3642438adba990dd8c895174b3d8c87ce487024f5df2da4c2ee8  /tmp/claude-0/-home-user/5489b495-ae3d-5612-a4e1-61b4b5c6b6e4/scratchpad/exp0003/B-runs/T5/stream.jsonl
+8144fc912b86de6c3686e1c7752b46e073822dbc979c36695ef7fc6a65dc33e6  /tmp/claude-0/-home-user/5489b495-ae3d-5612-a4e1-61b4b5c6b6e4/scratchpad/exp0003/C-runs/T3/stream.jsonl
+493aeb3073f1dd11fa1be5511022f1e8e3962c533c5d10d3314df2a9fde5be19  /tmp/claude-0/-home-user/5489b495-ae3d-5612-a4e1-61b4b5c6b6e4/scratchpad/exp0003/C-runs/T4/stream.jsonl
+85f83862521893a8bf827d533df7dd441d4872d4106a4cf5afacb7f70c5d33de  /tmp/claude-0/-home-user/5489b495-ae3d-5612-a4e1-61b4b5c6b6e4/scratchpad/exp0003/C-runs/T5/stream.jsonl
+# blind mapping, withheld until reveal
+8a063552d59d5b542cffd7ca85f1599f344087c40a38bbd7c83e7e5a5fd6c00b  /tmp/claude-0/-home-user/5489b495-ae3d-5612-a4e1-61b4b5c6b6e4/scratchpad/exp0003_mapping.txt

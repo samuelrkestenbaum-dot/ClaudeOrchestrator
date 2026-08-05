@@ -1,0 +1,16 @@
+# EXP-0003 close-time routing gate — condition C
+receipt: /tmp/claude-0/-home-user/5489b495-ae3d-5612-a4e1-61b4b5c6b6e4/scratchpad/exp0003/C/repo/build-os/packets/routing/routing-EXP-0003-sequence.md
+filled_from: /tmp/claude-0/-home-user/5489b495-ae3d-5612-a4e1-61b4b5c6b6e4/scratchpad/exp0003/C-runs/{T3,T4,T5}/run_record.txt (summed measured telemetry; '-' = not all three machine-derived)
+executed_mode_proxy: >=1 structural subagent dispatch across the sequence -> gravito_full; 0 -> selected_mode; unknown -> '-' (a dispatch-free Full ceremony is invisible to this proxy — named bound)
+--- routing-check.sh check --receipt (verbatim) ---
+  BUDGET-BREACH /tmp/claude-0/-home-user/5489b495-ae3d-5612-a4e1-61b4b5c6b6e4/scratchpad/exp0003/C/repo/build-os/packets/routing/routing-EXP-0003-sequence.md consumed_subagents 7 exceeds budget_max_subagents 3 with degradation_note '-'. A breach is survivable; concealing one is not — declare the degradation or the receipt is refused.
+  BUDGET-BREACH /tmp/claude-0/-home-user/5489b495-ae3d-5612-a4e1-61b4b5c6b6e4/scratchpad/exp0003/C/repo/build-os/packets/routing/routing-EXP-0003-sequence.md consumed_total_tokens 7500206 exceeds budget_max_total_tokens 2000000 with degradation_note '-'. A breach is survivable; concealing one is not — declare the degradation or the receipt is refused.
+  BUDGET-BREACH /tmp/claude-0/-home-user/5489b495-ae3d-5612-a4e1-61b4b5c6b6e4/scratchpad/exp0003/C/repo/build-os/packets/routing/routing-EXP-0003-sequence.md consumed_uncached_tokens 558240 exceeds budget_max_uncached_tokens 120000 with degradation_note '-'. A breach is survivable; concealing one is not — declare the degradation or the receipt is refused.
+  BUDGET-BREACH /tmp/claude-0/-home-user/5489b495-ae3d-5612-a4e1-61b4b5c6b6e4/scratchpad/exp0003/C/repo/build-os/packets/routing/routing-EXP-0003-sequence.md consumed_wall_clock_s 1241.83 exceeds budget_max_wall_clock_s 900 with degradation_note '-'. A breach is survivable; concealing one is not — declare the degradation or the receipt is refused.
+  BUDGET-BREACH /tmp/claude-0/-home-user/5489b495-ae3d-5612-a4e1-61b4b5c6b6e4/scratchpad/exp0003/C/repo/build-os/packets/routing/routing-EXP-0003-sequence.md consumed_cost_usd 5.930542 exceeds budget_max_cost_usd 1.50 with degradation_note '-'. A breach is survivable; concealing one is not — declare the degradation or the receipt is refused.
+routing-check: /tmp/claude-0/-home-user/5489b495-ae3d-5612-a4e1-61b4b5c6b6e4/scratchpad/exp0003/C/repo/build-os/packets/routing/routing-EXP-0003-sequence.md selected=gravito_full executed=gravito_full admissions=0(admission fields, not zeros)
+routing-check: 1 receipt(s) checked, 5 violation(s)
+routing-check: REFUSED — 5 violation(s). The recorded verdict is binding; a contradiction between what was selected and what ran is a defect, not a detail.
+--- end verbatim ---
+gate_exit: 2
+disposition: REFUSED — retained as data, labeled, not edited to pass
