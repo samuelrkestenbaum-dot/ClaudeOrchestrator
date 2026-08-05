@@ -2296,7 +2296,7 @@ surface the T2–T4 refusals and per-arm acceptance explicitly.
   on T3/T4/T5-style tasks; output = the routing frontier; the conclusion rule must NOT
   be direction-asymmetric this time (the operator's explicit instruction).
 
-## IN FLIGHT — `EXP-0003a-routing-frontier-execution` (declared 2026-08-05)
+## CLOSED — `EXP-0003a-routing-frontier-execution` (declared 2026-08-05; closed 2026-08-05 by the archivist)
 
 - **Packet id:** `PACKET-0051-exp0003-routing-frontier` — minted; 0 commits/0 files before this edit.
 - **Lane:** `substantive`. **Depth 2.** Routing receipt issued BEFORE building (the new step 7,
@@ -2322,3 +2322,53 @@ surface the T2–T4 refusals and per-arm acceptance explicitly.
   blinded dataset (P/Q/R labels, mapping withheld by hash). Analysis/reveal = next packet.
 - **Frozen:** bench/, both prior experiment trees, routing tools (PACKET-0050 shipped surface —
   the experiment RUNS it, never edits it). No push without go.
+
+## CLOSE RECORD — `gravito_exp0003_execution_a` (`PACKET-0051-exp0003-routing-frontier`) — closed 2026-08-05 by the archivist. NOTHING IN FLIGHT.
+
+- **Packet id (CLOSED):** `PACKET-0051-exp0003-routing-frontier`. Receipt:
+  `build-os/receipts/gravito_exp0003_execution_a.md`. **Lane:** `substantive`.
+  **Depth 3, announced** — build; qa ‖ reviewer concurrently; one bounded fix round
+  (`fix-then-pass`, 1 enumerated item). Base `94c5187` (PACKET-0050's close), tree quiet.
+- **Commits:** `acfa1be` (declaration + the packet's OWN routing receipt — FIRST LIVE
+  USE of PACKET-0050's step 7; gravito_full via the honest high_rework_history factor) +
+  `18f82f6` (preregistration + harness + same-commit RULING-4 registration, census
+  **118 → 121**) + `cdfe1a3` (sealed records + blinded P/Q/R dataset + SEAL-TIME
+  evaluator rule text closing the EXP-0002 audit gap in advance + mapping sha256
+  `8a063552…`) + `9beb73f` (the one permitted fix commit).
+- **What was executed:** nine runs (3 conditions × T3/T4/T5 shapes), deterministic
+  scripted T1/T2 setup digest-pinned and harness-verified on every run, EXP-0002's
+  frozen prompts byte-pinned, modelUsage-native telemetry with exact cost
+  reconciliation on all nine, 9/9 durable accepted outcomes, identical model string.
+- **THE HEADLINE THE ANALYSIS PACKET INHERITS (not this record's verdict to draw):**
+  both condition receipts REFUSED by the mechanical budget gate at close — B (light):
+  4 budget breaches, ZERO silent escalation, 0 dispatches (the binding-verdict half
+  held; budgets did not); C (full): 5 breaches incl. 7 subagents vs 3 and 7.5M tokens
+  vs 2M; NO degradation notes written by either condition's sessions — the protocol
+  half of the circuit breaker did not execute live. Verdicts sealed as data; per-run
+  decomposition in `analysis/GATE_CALIBRATION_NOTE.md`; two operator calibration
+  questions (per-task vs per-sequence granularity; band re-derivation).
+- **Gates:** qa GREEN — suite **2545/0 solo**, commit-1 iso **2482/0** at `acfa1be`
+  and **2545/0** at `18f82f6`, manifest 34/34, all 9 blinded rows re-derived 1:1,
+  ordering proven (incl. the two records lacking time_origin_ms, via artifact mtimes),
+  frozen surfaces zero-diff, census 121, harness re-driven — digests, refusals, prompt
+  pins exact. Reviewer fix-then-pass on ONE item (budget-granularity consideration
+  silently unnamed), fixed in `9beb73f` — content matches the reviewer's own
+  derivation, neither REFUSED verdict softened, nothing sealed edited →
+  **PASS-AS-FIXED**. Second eyes NONE (Codex 403 at proxy, attempted and stated by
+  both gates). `DC-0001` numeral moved **30 → 31** in this close commit, derived from
+  the receipt store.
+- **Live routing receipt closed:** `executed_mode: gravito_full` (matches selected;
+  no escalation); consumption fields stay '-' with the transcript-only admission on
+  the receipt (the nine experiment runs' measured consumption belongs to the sealed
+  condition receipts, not this packet's own). Post-fill sweep `routing-check.sh check`
+  = 2 receipts, 0 violations, exit 0.
+- **Cosmetic twin (both gates):** `receipt-final.md`/`receipt_final.md` byte-identical
+  pairs in both close dirs, both manifested — treated as one receipt by the analysis,
+  never deleted (manifest integrity).
+- **Boundaries:** NOTHING PUSHED — `acfa1be`, `18f82f6`, `cdfe1a3`, `9beb73f`, and
+  this close commit local pending explicit operator go (9 commits ahead of origin
+  after this close, derived from git); none may be amended. No merge, deploy, or
+  secrets. `residue.md` stays frozen. **NOTHING IS IN FLIGHT.** Blinded evaluation
+  ALREADY EXISTS (independent session, dataset + sealed rule text only; label not
+  named here — reveal ordering kept clean). Staged next but NOT DECLARED (a routing
+  act, not the archivist's): **EXP-0003b — analysis/reveal.**

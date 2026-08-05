@@ -2350,3 +2350,19 @@ byte ceiling. This file does, and it is nearly out; that is why this block is sh
   Staged NOT declared: EXP-0003, three neutral conditions, rule NOT asymmetric.
 - **Where we are:** NOTHING IN FLIGHT; NOTHING PUSHED — three + close commit local
   pending explicit go; none amendable. `residue.md` frozen.
+
+## 2026-08-05 — `gravito_exp0003_execution_a` (`PACKET-0051`) CLOSED
+
+- Nine runs (A direct · B light · C full-enforced × T3/T4/T5), T1/T2 digest-pinned,
+  prompts byte-pinned, modelUsage-native telemetry, costs exact, 9/9 accepted, model
+  identical. HEADLINE FOR EXP-0003b (not drawn here): BOTH condition receipts
+  REFUSED by the budget gate — B 4 breaches, 0 silent escalation, 0 dispatches; C 5
+  (7 subagents vs 3, 7.5M vs 2M tokens); NO degradation notes — the breaker's
+  protocol half did not run live. See `GATE_CALIBRATION_NOTE.md`.
+- **Commits:** `acfa1be`+`18f82f6` (census 118→121)+`cdfe1a3` (seal; mapping sha256
+  8a063552)+`9beb73f` (fix). Depth 3. qa 2545/0 solo; iso 2482/0, 2545/0; manifest
+  34/34; 9 rows re-derived. Fix-then-pass 1 item → PASS-AS-FIXED. Second eyes NONE.
+  DC-0001 30→31. Step-7 receipt (FIRST LIVE USE) closed full=full; sweep 0.
+- **Where we are:** NOTHING IN FLIGHT. Blinded evaluation EXISTS; EXP-0003b (NOT
+  declared) commits it; reveal promptly. NOTHING PUSHED — 9 ahead of origin
+  incl. close; none amendable. `residue.md` frozen.
