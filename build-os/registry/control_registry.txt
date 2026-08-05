@@ -2231,13 +2231,13 @@ inputs: a task id, a task description (hashed, never stored), and the 13-field d
 output: exactly one routing-receipt file under build-os/packets/routing/ carrying the descriptor, the selected mode, per-mode DERIVED-DEFAULT budgets, and empty-at-issue executed/escalation/consumption fields — or a refusal that writes nothing
 owning_module: build-os/tools/route-task.sh
 consuming_policies: routing-check.sh reconciles every receipt it issues at close; CLAUDE.md's per-task protocol requires one per substantive packet; tests/routing_enforcement_tests.sh executes the green path and three refusal paths on every suite run
-evidence_refs: build-os/tools/route-task.sh:64; build-os/tools/route-task.sh:77; build-os/tools/route-task.sh:100
+evidence_refs: build-os/tools/route-task.sh:67; build-os/tools/route-task.sh:80; build-os/tools/route-task.sh:103
 failure_behavior: prints the reason on stderr and exits 2 (missing or path-shaped task id, missing description or descriptor, selector refusal propagated, pre-existing receipt) without writing anything
 rollback_behavior: writes exactly one new file per decision into the caller-named directory and never overwrites an existing receipt
 promotion_requirement: n/a
 demotion_requirement: n/a
 authority_mismatch: none
-notes: REGISTERED UNDER RULING 4, in the SAME COMMIT as the module. The budgets are DERIVED DEFAULTS from EXP-0002's sealed records — light tasks measured 170k-370k total tokens at 0 dispatches, the blowouts 4.9M/7.4M at 4-5 dispatches — stated as operator-tunable defaults in the module header and in every receipt, never as laws. The description is stored as a sha256 so the receipt cannot become a second copy of the task prompt.
+notes: REGISTERED UNDER RULING 4, in the SAME COMMIT as the module. The budgets are DERIVED DEFAULTS from EXP-0002's sealed records — the ON surface's light runs measured 172,261/368,831/229,190 total tokens at 0 dispatches (named exceedance: raw T4 at 526,461 - the light budget governs the ON surface), the blowouts 4.9M/7.4M at 4-5 dispatches — stated as operator-tunable defaults in the module header and in every receipt, never as laws. The description is stored as a sha256 so the receipt cannot become a second copy of the task prompt.
 
 control: routing.close_time_gate
 class: A

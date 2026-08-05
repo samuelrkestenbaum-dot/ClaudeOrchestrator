@@ -45,4 +45,8 @@ circuit-breaker sequence above is followed by the agent, not enforced by a
 tool while it runs. It is **verified at close**, and only then, by the
 receipt's consumption-vs-budget comparison. No checkbox here claims
 enforcement it does not have; a session that records false consumption is
-caught by nothing in this contract.
+caught by nothing in this contract. **Receipt ISSUANCE is itself protocol**:
+no machine cross-checks that a substantive packet issued a routing receipt —
+`routing-check.sh` gates only receipts that exist, and its empty-sweep
+refusal catches only a wholly empty store. A packet that never routes is
+invisible to the gate; that gap is open and named here, not silently.

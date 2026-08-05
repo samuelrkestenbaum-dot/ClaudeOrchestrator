@@ -14,8 +14,11 @@
 #
 # THE BUDGETS ARE DERIVED DEFAULTS, NOT LAWS — operator-tunable, derived from
 # EXP-0002's sealed run records and stated with their derivation:
-#   * Light-appropriate tasks measured ~170k-370k TOTAL tokens and 0 subagent
-#     dispatches (both arms' T1/T2/T4; raw arm throughout).
+#   * Light band: the ON surface's light runs measured 172,261/368,831/229,190
+#     TOTAL tokens (buildos T1/T2/T4, 0 dispatches) — max 368,831, so the 500k
+#     light default has headroom. NAMED EXCEEDANCE: raw-arm T4 measured 526,461
+#     at 0 dispatches; the light budget governs the ON surface, whose measured
+#     max is the basis; raw figures are context, not the band.
 #   * The two blowouts measured 4.9M (T3) and 7.4M (T5) total tokens, 5 and 4
 #     dispatches, $3.63 and $4.80, ~849s and ~1013s wall clock.
 #   Full defaults sit between the two bands — generous against the light band,
@@ -113,7 +116,8 @@ DESCRIPTOR_ONELINE="$(printf '%s' "$DESCRIPTOR" | tr '\n' ' ')"
   printf 'selector_note: %s\n' "$SELECTOR_NOTE"
   printf 'issued_at: %s\n' "$ISSUED_AT"
   printf '# --- budgets: DERIVED DEFAULTS from EXP-0002 sealed records, operator-tunable, not laws.\n'
-  printf '# --- Derivation: light tasks measured 170k-370k total tokens / 0 dispatches; the\n'
+  printf '# --- Derivation: ON-surface light runs measured 172k-369k total tokens / 0 dispatches\n'
+  printf '# --- (named exceedance: raw T4 at 526,461 - context, not the band); the\n'
   printf '# --- blowouts measured 4.9M/7.4M tokens, 4-5 dispatches, $3.63/$4.80. See route-task.sh.\n'
   printf 'budget_max_subagents: %s\n' "$B_SUB"
   printf 'budget_max_total_tokens: %s\n' "$B_TOT"
