@@ -29,6 +29,11 @@ For every task, in order:
    writing `build-os/receipts/<id>.md` and updating `build-os/memory/`. The
    `read-only`, `diagnosis`, and `tiny` lanes close with the answer or the edit —
    no packet, no receipt, no qa/reviewer/archivist.
+7. **Routing receipt (substantive lane).** Issue one with
+   `build-os/tools/route-task.sh` before building; the recorded mode is binding
+   per `build-os/memory/routing_contract.md`, and
+   `build-os/tools/routing-check.sh` refuses silent escalation and undeclared
+   budget breach at close.
 
 ### Lanes
 

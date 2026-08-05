@@ -1005,3 +1005,31 @@ class: A
 runtime_authority: gate
 binding_kind: proxies
 rationale: Classifies task weight against the direct/light/full lane ladder — a descriptive proxy for the work-in-flight budgeting the lane system governs. It gates only its own descriptor input and routes nothing; promotion to routing authority is an operator act.
+
+control: routing.mode_select
+binds_to: integration_bandwidth
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Decides how much orchestration ceremony a task may absorb — the binding allocation EXP-0002 showed being over-granted (T3 at 3.9x on complexity alone). It proxies rather than instantiates: the descriptor it reads is self-declared by the task's author, not a measured capacity, and the gap between declared and true shape is exactly where a wrong mode still gets selected.
+
+control: routing.receipt_issuer
+binds_to: epistemic_quality
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Creates the durable record that makes selected-vs-executed reconcilable at all — T5's silent escalation was possible because no artefact recorded what had been selected. It proxies: it validates the descriptor's shape and derives the hash and mode, but nothing in it verifies that the descriptor or the later-filled consumption fields are TRUE of the session that ran.
+
+control: routing.close_time_gate
+binds_to: boundary
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Refuses the impermissible movement — executing above the recorded mode with no evidence-bearing escalation record — at close. Like every boundary binding in this census it is detective, not preventive: the escalated session has already spent its tokens by the time the receipt is checked; what the gate prevents is the contradiction LANDING unrefused, at close granularity rather than mid-flight, because live counters are not machine-visible to bash.
+
+control: suite.routing_enforcement
+binds_to: homeostasis
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Test state over the routing-enforcement layer: the recalibrated selector, the receipt schema, all four close-time refusal classes red-driven against fixtures the real issuer wrote, and the live receipt store swept on every run. It binds here rather than to epistemic_quality for the same reason the other suites do — a suite's function is property preservation.

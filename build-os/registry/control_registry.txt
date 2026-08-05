@@ -2201,4 +2201,76 @@ rollback_behavior: pure function of its input; writes nothing
 promotion_requirement: promotion to routing authority is an OPERATOR act requiring EXP-0002 hindsight evidence that its selections were correct
 demotion_requirement: delete it if EXP-0002 closes without the hindsight column ever being analysed
 authority_mismatch: none
-notes: REGISTERED UNDER RULING 4. Descriptive only, per the operator's do-not-let-the-selector-optimize-its-own-promotion rule; the hindsight correctness column in EXP-0002's analysis is the evidence a promotion decision would read.
+notes: REGISTERED UNDER RULING 4. Descriptive only, per the operator's do-not-let-the-selector-optimize-its-own-promotion rule; the hindsight correctness column in EXP-0002's analysis is the evidence a promotion decision would read. LATER RECORD (PACKET-0050): that promotion decision has now been taken — the operator's post-EXP-0002 routing directive IS the decision this entry's promotion_requirement named, taken by the operator on the sealed hindsight evidence and not by the selector about itself. The PRODUCT selector build-os/tools/mode-select.mjs (routing.mode_select) now carries binding routing authority, with the value-factor recalibration the T3 calibration finding demanded; THIS experiment copy remains descriptive, frozen with its experiment tree, and routes nothing.
+
+control: routing.mode_select
+class: A
+implementation_status: implemented
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: sensor
+inputs: a 13-field task-descriptor JSON — the six task-shape fields of the EXP-0002 selector plus the seven boolean VALUE factors (irreversible_or_external_mutation, high_blast_radius, unclear_acceptance_criteria, security_or_compliance_consequence, parallel_workstreams_benefit, high_rework_history, nondeterministic_verification)
+output: exactly one of direct | gravito_light | gravito_full on stdout, a withheld-full note on stderr when complexity fires with no value factor, or a refusal of a partial descriptor
+owning_module: build-os/tools/mode-select.mjs
+consuming_policies: route-task.sh derives every routing receipt's selected_mode from it and never re-derives the rule; tests/routing_enforcement_tests.sh red-drives the value-factor withholding and the partial-descriptor refusal on every suite run (chained via tests/build_os_tests.sh)
+evidence_refs: build-os/tools/mode-select.mjs:111; build-os/tools/mode-select.mjs:124; build-os/tools/mode-select.mjs:126
+failure_behavior: exits 2 on a malformed or partial descriptor rather than guessing a mode (an unknown is not a zero)
+rollback_behavior: pure function of its input; writes nothing
+promotion_requirement: n/a — already carries the binding routing authority the operator's post-EXP-0002 directive granted
+demotion_requirement: the operator withdraws the routing directive, at which point receipts stop being issued from its verdicts
+authority_mismatch: none
+notes: REGISTERED UNDER RULING 4, in the SAME COMMIT as the module (the PACKET-0048 lesson). The PRODUCT selector, generalized from the frozen experiment copy exp2.mode_selector_descriptor owns; the recalibration is EXP-0002's calibration defect executed as a rule — buildos T3 was scored gravito_full on complexity alone and the correctly-selected Full ceremony cost 3.9x, so gravito_full now additionally requires at least one value factor, and the withholding is printed rather than silent.
+
+control: routing.receipt_issuer
+class: A
+implementation_status: implemented
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: memory
+inputs: a task id, a task description (hashed, never stored), and the 13-field descriptor; optionally --out for the receipt directory
+output: exactly one routing-receipt file under build-os/packets/routing/ carrying the descriptor, the selected mode, per-mode DERIVED-DEFAULT budgets, and empty-at-issue executed/escalation/consumption fields — or a refusal that writes nothing
+owning_module: build-os/tools/route-task.sh
+consuming_policies: routing-check.sh reconciles every receipt it issues at close; CLAUDE.md's per-task protocol requires one per substantive packet; tests/routing_enforcement_tests.sh executes the green path and three refusal paths on every suite run
+evidence_refs: build-os/tools/route-task.sh:64; build-os/tools/route-task.sh:77; build-os/tools/route-task.sh:100
+failure_behavior: prints the reason on stderr and exits 2 (missing or path-shaped task id, missing description or descriptor, selector refusal propagated, pre-existing receipt) without writing anything
+rollback_behavior: writes exactly one new file per decision into the caller-named directory and never overwrites an existing receipt
+promotion_requirement: n/a
+demotion_requirement: n/a
+authority_mismatch: none
+notes: REGISTERED UNDER RULING 4, in the SAME COMMIT as the module. The budgets are DERIVED DEFAULTS from EXP-0002's sealed records — light tasks measured 170k-370k total tokens at 0 dispatches, the blowouts 4.9M/7.4M at 4-5 dispatches — stated as operator-tunable defaults in the module header and in every receipt, never as laws. The description is stored as a sha256 so the receipt cannot become a second copy of the task prompt.
+
+control: routing.close_time_gate
+class: A
+implementation_status: implemented
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: immune
+inputs: one routing receipt (--receipt) or the receipt store (--dir, default build-os/packets/routing/)
+output: a per-receipt reconciliation with '-' fields counted as admissions, or a refusal naming the contradiction
+owning_module: build-os/tools/routing-check.sh
+consuming_policies: tests/routing_enforcement_tests.sh sweeps the LIVE receipt store on every suite run (chained via tests/build_os_tests.sh) and red-drives all four refusal classes against fixtures built by the real issuer; routing_contract.md names it as the mechanical half of the escalation protocol
+evidence_refs: build-os/tools/routing-check.sh:109; build-os/tools/routing-check.sh:113; build-os/tools/routing-check.sh:119; build-os/tools/routing-check.sh:136; build-os/tools/routing-check.sh:155
+failure_behavior: exits 2 on silent escalation (executed_mode above selected_mode with no escalation record), evidence-free escalation, a filled consumption field over budget with no degradation note, a Full claim with no budgets, a malformed receipt, or an empty sweep; '-' consumption is an admission and never refused — refusal is for contradiction, not absence
+rollback_behavior: none needed — reads only, writes nothing
+promotion_requirement: n/a
+demotion_requirement: n/a
+authority_mismatch: none
+notes: REGISTERED UNDER RULING 4, in the SAME COMMIT as the module. The mechanical fix for EXP-0002's enforcement defect: buildos T5 executed Full ceremony (4 dispatches, $4.80, 7.4M tokens) over its own recorded gravito_light verdict and nothing refused. Chained through the test suite rather than scan-controls.sh check because that path's prior checks (anchors_check, counts_check) are internal functions — scan-controls launches no external script, and the repo pattern for external refusal tools is the chained suite. Its honest bound is stated in its header: live-session counters are not machine-visible to bash, so mid-flight breaker behaviour is PROTOCOL (routing_contract.md), verified here only at close via the consumption-vs-budget comparison.
+
+control: suite.routing_enforcement
+class: A
+implementation_status: load_bearing
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: immune
+inputs: the three routing tools, the routing contract, CLAUDE.md's per-task protocol, fixture receipts built by the real issuer in mktemp dirs, and the LIVE receipt store under build-os/packets/routing/
+output: a pass/fail verdict over the recalibrated selector, the receipt schema, all four close-time refusal classes, the honest-admission passes, and the live-store sweep
+owning_module: tests/routing_enforcement_tests.sh
+consuming_policies: chained from tests/build_os_tests.sh section 26, which exits non-zero on its failure — this is where routing.close_time_gate executes on every suite run
+evidence_refs: tests/routing_enforcement_tests.sh:80; tests/routing_enforcement_tests.sh:214; tests/routing_enforcement_tests.sh:284; tests/routing_enforcement_tests.sh:333
+failure_behavior: prints each failing assertion and exits 1 via the house-style verdict, failing the whole chained run
+rollback_behavior: none needed — fixtures live in mktemp directories; the live receipt store is read and never written
+promotion_requirement: already load_bearing; nothing above this status exists
+demotion_requirement: it stops being load_bearing the day it is unchained from the repo suite
+authority_mismatch: none
+notes: REGISTERED IN THE SAME COMMIT AS THE TOOLS IT DRIVES (the PACKET-0048 lesson). Every refusal fixture is a copy of a receipt the REAL issuer wrote, damaged one field at a time, so a receipt shape the live tool would never emit cannot smuggle a pass. The two EXP-0002 defects are replayed literally: T5 as the silent-escalation red drive, T3 as the complexity-without-value withholding drive.
