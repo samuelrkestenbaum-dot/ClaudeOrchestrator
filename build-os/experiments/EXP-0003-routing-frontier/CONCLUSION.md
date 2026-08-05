@@ -13,10 +13,11 @@ rankings; T5's winner (direct) is stable on both.
    in a sharper form: the right mode is per-shape, and the total-vs-uncached
    lens choice changes the answer, which is itself a finding about how cache
    accounting should enter routing decisions.
-2. **Light's context amortization keeps showing up** — third consecutive
-   experiment (EXP-0002 T1/T4; here T3/T4 uncached) where the installed
-   surface reduces genuinely-new-token work on mid-sequence tasks while
-   staying behaviorally light (0 dispatches, no silent escalation).
+2. **Light's context amortization keeps showing up** — the third and fourth
+   consecutive data points, after EXP-0002's T1/T4 (EXP-0001 contributes none:
+   its memory hypothesis was untested there), where the installed surface
+   reduces genuinely-new-token work on mid-sequence tasks while staying
+   behaviorally light (0 dispatches, no silent escalation).
 3. **The PACKET-0050 enforcement held; the protocol did not.** No session
    escalated above its recorded mode — the binding-verdict rule worked live.
    But no session wrote a degradation note while running through budgets: the
@@ -36,8 +37,9 @@ rankings; T5's winner (direct) is stable on both.
   included) or uncached tokens — the two disagree on 2 of 3 shapes.
 
 ## Continuity with EXP-0001/0002 (mandated reconciliation style, carried)
-Consistent, not contradictory: trivial isolated work punishes any surface
-(EXP-0001); unrouted full ceremony destroys sequence economics (EXP-0002);
+Consistent, not contradictory: trivial isolated work punishes the full surface
+tested (EXP-0001 measured one surface at ~2×); unrouted full ceremony destroys
+sequence economics (EXP-0002);
 routed light preserves the context gains at near-direct cost and full-with-
 budgets stays expensive on generative shapes even when correctly selected
 (here). The weekly-usage drop remains unexplained by any of the three —

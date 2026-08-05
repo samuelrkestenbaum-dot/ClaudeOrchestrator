@@ -16,13 +16,19 @@ flip on uncached`**.
 | T4 regression | 728,612 \| 31,886 | 831,404 \| **26,494** | **288,368** \| 27,164 | **full** | **light** — FLIP |
 | T5 follow-up | **499,887** \| **39,897** | 1,402,352 \| 59,567 | 4,096,490 \| 262,264 | **direct** | **direct** — stable |
 
-Cost and wall clock track the totals ordering in every shape (evaluator §e).
-Full is the most expensive condition on T3 ($2.67) and T5 ($3.00) and the
-cheapest on T4 ($0.26, zero dispatches — it behaved light there); full never
-wins an uncached ranking anywhere.
+Cost and wall clock track the totals ordering on T3 and T5; **on T4 they do
+not** — totals rank full < direct < light while cost and wall clock rank
+full < light < direct (direct and light swap on both secondaries: $0.4318 vs
+$0.4262; 70.87 s vs 69.45 s). The sealed evaluator report is internally
+inconsistent here — its §e asserts T4 "P < Q < R" while its own §b secondaries
+table correctly lists P, R, Q; the sealed file stays verbatim and the corrected
+fact is stated here (both gates' verification class, applied to the evaluator
+too). Full is the most expensive condition on T3 ($2.67) and T5 ($3.00) and
+the cheapest on T4 ($0.26, zero dispatches — it behaved light there); full
+never wins an uncached ranking anywhere.
 
 ## Reading the instability honestly (n=1; patterns, not conclusions)
-- Totals are 90.6–94.4% cache_read in every cell, and the fixed A→B→C order
+- Totals are 90.6–96.8% cache_read in every cell, and the fixed A→B→C order
   means cache warmth favors later conditions (named confound C2). Direct's
   totals wins on T3/T5 run AGAINST that gradient; full's totals losses on
   T3/T5 run against its own warmth advantage.
