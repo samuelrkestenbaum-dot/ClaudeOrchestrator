@@ -977,3 +977,31 @@ class: A
 runtime_authority: gate
 binding_kind: proxies
 rationale: Refuses to seed customer memory from this repository's live files when a template is absent — the same install-time write boundary as init-build-os.sh, registered under RULING 4's identity rule.
+
+control: exp2.seed_determinism
+binds_to: epistemic_quality
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: A byte-reproducible workload seed is what makes an EXP-0002 measurement attributable to a pinned starting state — the same epistemic role as bench.seed_determinism, for the sustained-workload instrument.
+
+control: exp2.regression_injector
+binds_to: epistemic_quality
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Deterministic, byte-identical-across-arms injection is what keeps T4 a spec-compliance measurement instead of a moving target; it guards the comparability of the two arms' fourth task.
+
+control: exp2.run_task_gate
+binds_to: epistemic_quality
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Refuses to produce numbers it cannot stand behind (bad arm/task, missing tree, empty prompt extraction) and records unknowns as admissions — the EXP-0002 analogue of bench.run_corpus_gate.
+
+control: exp2.mode_selector_descriptor
+binds_to: integration_bandwidth
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Classifies task weight against the direct/light/full lane ladder — a descriptive proxy for the work-in-flight budgeting the lane system governs. It gates only its own descriptor input and routes nothing; promotion to routing authority is an operator act.

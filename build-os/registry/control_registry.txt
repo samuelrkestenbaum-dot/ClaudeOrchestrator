@@ -2130,3 +2130,75 @@ promotion_requirement: n/a
 demotion_requirement: n/a
 authority_mismatch: none
 notes: REGISTERED UNDER RULING 4's identity rule (see installer.connect_project_selfguard). field_observed for the module: executed by tests/scaffold_seeding_tests.sh on every suite run and by the bench harness's arm-B install during the frozen T1 baseline; the missing-template refusal itself is exercised by no test, and that bound is stated rather than implied away.
+
+control: exp2.seed_determinism
+class: A
+implementation_status: implemented
+empirical_status: field_observed
+runtime_authority: gate
+nervous_system_role: immune
+inputs: a target directory for the seeded parcel-billing workload tree, or --digest DIR to re-derive a tree digest
+output: a byte-reproducible seeded tree plus its tree_digest_sha256 on stdout, or a refusal
+owning_module: build-os/experiments/EXP-0002-sustained-workload/harness/seed-workload-repo.sh
+consuming_policies: run-exp2-task.sh seeds each arm's T1 through it and records starting/ending tree digests via --digest
+evidence_refs: build-os/experiments/EXP-0002-sustained-workload/harness/seed-workload-repo.sh:53
+failure_behavior: prints the reason on stderr and exits 2 (usage, non-empty target, missing directory)
+rollback_behavior: writes only into the caller-named target directory; generated trees are never committed
+promotion_requirement: n/a
+demotion_requirement: n/a
+authority_mismatch: none
+notes: REGISTERED UNDER RULING 4 — coverage follows IDENTITY, not geography or the executable bit; the identity scanner surfaced it on the commit that added it and it is registered rather than re-homed. Deliberately non-executable (invoked via bash) so the +x census does not move; the refusal-capable census does, by exactly this entry. Digest 128485c6… is pinned in EXP-0002's preregistration before run 1.
+
+control: exp2.regression_injector
+class: A
+implementation_status: implemented
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: immune
+inputs: the arm work tree to receive test/regression-t4.js after T3 closes
+output: the deterministic regression test file plus its sha256 on stdout, or a refusal
+owning_module: build-os/experiments/EXP-0002-sustained-workload/harness/inject-t4.sh
+consuming_policies: run-exp2-task.sh injects it before T4 in both arms; oracle-exp2.js T4 byte-compares the file against this injector's regenerated output
+evidence_refs: build-os/experiments/EXP-0002-sustained-workload/harness/inject-t4.sh:44
+failure_behavior: prints the reason on stderr and exits 2 (usage, missing tree, pre-existing regression file)
+rollback_behavior: writes exactly one test file into the caller-named tree; nothing else
+promotion_requirement: n/a
+demotion_requirement: n/a
+authority_mismatch: none
+notes: REGISTERED UNDER RULING 4. The injected test is derived from SPEC-T3.md's own cap sentence, byte-identical across arms and across injections (builder-verified, two injections sha256-identical), so T4 is spec compliance and not a moving target.
+
+control: exp2.run_task_gate
+class: A
+implementation_status: implemented
+empirical_status: field_observed
+runtime_authority: gate
+nervous_system_role: immune
+inputs: the requested arm/task/workdir/outdir; the frozen prompt extracted mechanically from tasks.md
+output: a refusal (exit 2), or a run_record.txt carrying provider-native telemetry, two-witness tool counts, tree digests, oracle verdict, and the unobservable-weekly-meter admission
+failure_behavior: prints the reason on stderr and exits 2 on precondition failure (bad arm/task, missing work tree for a non-T1 start, empty prompt extraction)
+owning_module: build-os/experiments/EXP-0002-sustained-workload/harness/run-exp2-task.sh
+consuming_policies: none chained — its refusals gate EXP-0002 runs, not packets; the sealed records it emits are the experiment's evidence
+evidence_refs: build-os/experiments/EXP-0002-sustained-workload/harness/run-exp2-task.sh:65
+rollback_behavior: writes only into the caller-named workdir and outdir, which it creates and owns
+promotion_requirement: n/a
+demotion_requirement: n/a
+authority_mismatch: none
+notes: REGISTERED UNDER RULING 4. The runner is the EXP-0002 analogue of bench.run_corpus_gate: it refuses to produce a number it cannot stand behind (an unknown is not a zero; '-' for unmeasured; weekly meter recorded unobservable, never estimated). It invokes the frozen prompt text mechanically from tasks.md so committed text and sent text cannot drift.
+
+control: exp2.mode_selector_descriptor
+class: A
+implementation_status: implemented
+empirical_status: field_observed
+runtime_authority: gate
+nervous_system_role: sensor
+inputs: a task-descriptor JSON (expected_files_changed, requires_tests, expected_session_count, prior_context_required, handoff_required, consequence_level)
+output: exactly one of direct | gravito_light | gravito_full on stdout, or a refusal of a partial descriptor
+owning_module: build-os/experiments/EXP-0002-sustained-workload/harness/mode-selector.mjs
+consuming_policies: run-exp2-task.sh records its verdict per task and IGNORES it — it routes nothing and gates nothing
+evidence_refs: build-os/experiments/EXP-0002-sustained-workload/harness/mode-selector.mjs:40
+failure_behavior: exits 2 on a partial or malformed descriptor rather than guessing a mode
+rollback_behavior: pure function of its input; writes nothing
+promotion_requirement: promotion to routing authority is an OPERATOR act requiring EXP-0002 hindsight evidence that its selections were correct
+demotion_requirement: delete it if EXP-0002 closes without the hindsight column ever being analysed
+authority_mismatch: none
+notes: REGISTERED UNDER RULING 4. Descriptive only, per the operator's do-not-let-the-selector-optimize-its-own-promotion rule; the hindsight correctness column in EXP-0002's analysis is the evidence a promotion decision would read.
