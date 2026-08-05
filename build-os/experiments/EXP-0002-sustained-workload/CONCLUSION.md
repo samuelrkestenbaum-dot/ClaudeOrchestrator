@@ -1,13 +1,23 @@
 # EXP-0002 — Conclusion
 
-**`promising but underpowered`** — direction: at sequence level on this task
-mix, **Gravito OFF used 74.8% fewer total tokens per durable accepted outcome**
-(uncached agreeing at 78.8%), but per-task agreement was 3/5 against the
-preregistered 4/5 bar, and the aggregate is dominated by the two tasks where
-the installed surface invoked the full multi-agent protocol. The label comes
-from the preregistered four-option vocabulary, assigned by a blinded
-independent evaluator applying the mechanical rule, revealed only after the
-analysis was committed.
+**`no sustained-workload savings detected`** — with the magnitude and direction
+stated as the registered rule requires: at sequence level on this task mix,
+**Gravito ON used 74.8% MORE total tokens per durable accepted outcome than
+Gravito OFF** (2,631,154 vs 663,924; uncached agreeing at 78.8%; 10/10
+acceptance both arms; ON cumulatively cheaper only through T2, the crossover
+against it at T3 on totals and already at T2 on uncached tokens and cost).
+
+Label provenance, stated for the record: the blinded evaluator, working from
+the X/Y-neutral symmetrization of the rule (committed for audit at
+`analysis/EVALUATOR_RULE_TEXT.md`), mechanically produced step-4 wording
+("promising but underpowered, direction X"). The REGISTERED rule
+(`PREREGISTRATION.md` §6) is direction-specific — steps 2 and 4 require the
+≥25% difference to be **in B's favor**, and §6 pre-assigned this exact outcome:
+"The symmetric possibility (B worse, as in EXP-0001) is reported under rule 3
+with its magnitude." B was worse. The translation stage applies the registered
+rule; both gates caught the mistranslation independently and this document
+carries the corrected label. The blinded analysis file is verbatim evidence
+and is untouched.
 
 ## Reconciliation 1 — with EXP-0001's trivial-task overhead (mandated)
 
@@ -36,13 +46,19 @@ real one.
 
 ## The productizable finding
 
-The operator's direct / gravito_light / gravito_full routing hypothesis now has
-measured support: the descriptive mode selector's own verdicts, recorded before
-any outcome, would have avoided both blowouts (T3 disproportion, T5 overshoot)
-while keeping the tasks Gravito won. A router that enforces those verdicts —
-promotion being an operator act, per the selector's registry entry — is the
-smallest change this data supports. It is recorded here as the next candidate,
-not built: the experiment stays frozen and acting on findings is the operator's
+The operator's direct / gravito_light / gravito_full routing hypothesis has
+measured support of a precise, narrower shape. The selector's recorded verdicts
+(T1→direct, T2/T4/T5→gravito_light, T3→gravito_full): a router ENFORCING them
+would have prevented **only the T5 blowout** (selector said light; the surface
+went full, 4 dispatches, $4.80 vs $0.55). **T3 is different and harder**: the
+selector itself said `gravito_full`, the surface complied, and full ceremony on
+a bounded feature cost 3.9× — so T3 is evidence about selector calibration
+and/or full-mode cost even when correctly selected, and it weakens rather than
+supports plain enforcement. What the data supports: routing that keeps the
+light path where Gravito won (T1 −31.5%, T4 −56.5%), enforces light where the
+selector already says light (T5), and re-examines when full ceremony is worth
+its measured 4× on bounded work. Recorded here as the next candidate, not
+built: the experiment stays frozen and acting on findings is the operator's
 decision.
 
 ## Defects recorded for later (freeze rule honored; harness untouched)

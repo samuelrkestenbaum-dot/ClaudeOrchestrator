@@ -10,13 +10,19 @@
 
 ## The blinded verdict, translated
 
-The evaluator concluded **promising but underpowered, direction X** — under the
-mapping: **at sequence level, Gravito OFF used 74.8% fewer total tokens per
-durable accepted outcome than Gravito ON** (663,924 vs 2,631,154; uncached
-agreeing at 78.8%; cost $2.25 vs $9.12; wall clock 451 s vs 1,977 s), with
-10/10 acceptance and no confound clause fired — but only 3 of 5 per-task
-differences agreed, below the preregistered 4/5 bar. The label is the honest
-one: the aggregate is dominated by two tasks.
+The evaluator's blinded wording was "promising but underpowered, direction X" —
+mechanically correct under the X/Y-neutral symmetrization it was handed
+(committed for audit at `analysis/EVALUATOR_RULE_TEXT.md`). **The registered
+rule is direction-specific, and the translation stage must apply it**:
+PREREGISTRATION.md §6 gates the two favorable labels on a ≥25% difference **in
+B's (Gravito ON's) favor**, and pre-assigned the B-worse case to rule 3. B was
+worse. **The registered label is therefore `no sustained-workload savings
+detected`**, with the magnitude the rule demands stated plainly: **at sequence
+level, Gravito ON used 74.8% MORE total tokens per durable accepted outcome
+than Gravito OFF** (2,631,154 vs 663,924; uncached agreeing at 78.8%; cost
+$9.12 vs $2.25; wall clock 1,977 s vs 451 s), with 10/10 acceptance and no
+confound clause fired. Both gates caught the mistranslation independently;
+the blinded analysis file is verbatim evidence and is untouched.
 
 ## The finding inside the heterogeneity — the substantive result
 
@@ -40,17 +46,22 @@ run, routed nothing): T1→direct, T2/T4/T5→gravito_light, T3→gravito_full.
 Arm B's actual behavior matched on T1/T2/T4 (and won or tied there), matched
 the selector's `full` on T3 (and lost — full ceremony on a bounded feature was
 disproportionate), and **overshot on T5** (selector said light; the surface
-went full, 4 dispatches, $4.80 against OFF's $0.55). A router that enforced
-the selector's own verdicts would have avoided the two blowouts. That is
-direct experimental support for the operator's direct/light/full routing
-requirement — measured, not argued.
+went full, 4 dispatches, $4.80 against OFF's $0.55). Stated precisely: a
+router enforcing the selector's own verdicts **would have prevented only the
+T5 blowout** — T3's verdict was `gravito_full`, so enforcement changes nothing
+there, and T3 stands as evidence about selector calibration and full-mode cost
+even when correctly selected. The routing requirement gains measured support
+of that narrower shape: enforce light where light is selected; recalibrate
+what earns full.
 
 ## Cumulative curves and the crossover (from the blinded analysis, unchanged)
 
-Gravito ON was cumulatively cheaper after T1 and T2; the crossover ran the
-OTHER way at T3 (the first full-ceremony invocation) and OFF stayed cheaper
-through T5. On this task mix the fixed-overhead story inverts: ON wins the
-early bounded tasks and loses the moment the ceremony fires.
+Gravito ON was cumulatively cheaper after T1 and T2 on total tokens; the
+crossover ran the OTHER way at T3 (the first full-ceremony invocation) and OFF
+stayed cheaper through T5 — and on the **uncached-token and cost curves the
+crossover was already at T2**. On this task mix the fixed-overhead story
+inverts: ON wins the early bounded tasks and loses the moment the ceremony
+fires.
 
 ## Obligations from the reviewer, discharged here
 
