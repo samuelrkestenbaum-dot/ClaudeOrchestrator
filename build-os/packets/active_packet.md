@@ -1972,3 +1972,29 @@ tasking is corrected here rather than propagated.
 operator, explicitly not an agent**. This packet is **one arm, one run per task — a snapshot, not
 the A/B**, and it must never be quoted as the pre-registered experiment. The primary endpoint
 (median `T3` wall-clock, arm B vs arm A) is **not** addressed here, because there is no second arm.
+
+## IN FLIGHT — `EXP-0001a-token-efficiency-execution` (declared 2026-08-05)
+
+- **Packet id:** `PACKET-0046-exp0001-token-efficiency` — minted; `git log -S'PACKET-0046' --all`
+  returns no commit and a full-tree grep for the token returned nothing before this edit.
+- **Lane:** `substantive`. **Depth 2** — build stage (preregistration + instrument runs), then
+  qa ‖ reviewer concurrently. Archivist close after the verdict.
+- **Branch base:** at `0ddf0b6` — the pushed tip of `claude/project-handoff-merge-ramhds`,
+  verified `git merge-base HEAD origin/claude/project-handoff-merge-ramhds` = HEAD = `0ddf0b6`.
+- **Objective:** execute the operator's controlled experiment (2026-08-05): Gravito OFF vs ON on
+  the frozen corpus, token-denominated. This packet carries outputs 1–2 of 5: the preregistered
+  protocol (`build-os/experiments/EXP-0001-token-efficiency/PREREGISTRATION.md`, committed BEFORE
+  run 1) and the sealed immutable run records (10 canonical T1 runs, 5 pairs alternating order,
+  plus 6 T2–T4 refusal records) with sha256 manifest and the blinded X/Y dataset whose mapping
+  hash is committed while the mapping stays outside the tree. Blinded analysis, reveal, and
+  conclusion are the NEXT packet (`EXP-0001b`), so the evaluator's independence is a commit
+  boundary, not a promise.
+- **Commit plan:** commit 1 = preregistration + this declaration (docs only, green in isolation);
+  commit 2 = sealed records + manifest + blinded dataset + mapping sha256. ≤2 build commits;
+  fix commit only if the gates demand one.
+- **Frozen-during-experiment rule (operator):** no edit to `bench/`, the corpus, oracles, prompts,
+  or acceptance criteria; a defect discovered mid-run is recorded, the run labeled, machinery
+  untouched. No push without explicit go. `residue.md` stays frozen at blob `01517ad2…`.
+- **Out of scope:** any Gravito optimization, any benchmark change, any new control or governance
+  primitive, any append to `packet_metrics.tsv` outside the archivist's normal close row. All new
+  experiment files are NON-EXECUTABLE data (census must hold at 110).
