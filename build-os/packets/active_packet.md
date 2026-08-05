@@ -2295,3 +2295,30 @@ surface the T2–T4 refusals and per-arm acceptance explicitly.
   preregistered conditions (direct / gravito_light / gravito_full-with-enforced-budgets)
   on T3/T4/T5-style tasks; output = the routing frontier; the conclusion rule must NOT
   be direction-asymmetric this time (the operator's explicit instruction).
+
+## IN FLIGHT — `EXP-0003a-routing-frontier-execution` (declared 2026-08-05)
+
+- **Packet id:** `PACKET-0051-exp0003-routing-frontier` — minted; 0 commits/0 files before this edit.
+- **Lane:** `substantive`. **Depth 2.** Routing receipt issued BEFORE building (the new step 7,
+  first live use): `routing-PACKET-0051-exp0003-routing-frontier-20260805T190501Z.md`,
+  selected_mode gravito_full via the honest value factor high_rework_history (three consecutive
+  experiment packets required fix rounds); budgets attached and binding.
+- **Branch base:** at `94c5187` — PACKET-0050's close, tree quiet.
+- **Objective (operator directive §4):** the bounded three-condition experiment. Conditions:
+  A direct/raw · B gravito_light (installed surface + binding light receipt) · C gravito_full
+  WITH ENFORCED BUDGETS (installed surface + full receipt + circuit-breaker protocol). Task
+  shapes: T3-style feature, T4-style regression, T5-style follow-up, on the frozen
+  parcel-billing seed with DETERMINISTIC SCRIPTED T1/T2 SETUP identical across conditions.
+  NEUTRAL preregistered rule (operator's explicit instruction — no direction asymmetry;
+  the EXP-0002 mistranslation class structurally cannot recur): per-shape ranking, output =
+  the ROUTING FRONTIER; vocabulary: frontier observed | frontier unstable | result confounded.
+  The harness fills receipt consumption fields from its own telemetry, making the close-time
+  budget gate MECHANICAL in this experiment — its first exercise on measured numbers; a
+  refused receipt is data, retained. Telemetry modelUsage-native (the EXP-0002
+  defect-for-later, fixed in the NEW runner, not by editing frozen machinery). EXP-0002
+  harness pieces reused by INVOCATION only (seeder/oracles/injector — read-only, disclosed).
+- **Commit plan:** commit 1 = preregistration + EXP-0003 harness + this declaration (before
+  run 1, same-commit registration of any refusal-capable scripts); commit 2 = sealed records +
+  blinded dataset (P/Q/R labels, mapping withheld by hash). Analysis/reveal = next packet.
+- **Frozen:** bench/, both prior experiment trees, routing tools (PACKET-0050 shipped surface —
+  the experiment RUNS it, never edits it). No push without go.
