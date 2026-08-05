@@ -22,6 +22,30 @@
 #                       value is not a number. A partially declared receipt is
 #                       an undeclared one.
 #
+# PACKET-0053 EXTENSIONS — by EXTENSION, never a fork: every new field is
+# OPTIONAL and an ABSENT field reads as '-', so every receipt issued before
+# these fields existed stays valid (absence is an admission, not a defect).
+#   BUDGET-BREACH (process)  consumed_process_dispatches exceeds
+#                       process_dispatch_allowance with degradation_note '-'.
+#                       The gate chain is governance ceremony with its own
+#                       allowance, separate from budget_max_subagents.
+#   CONTRIBUTION-MISSING  a gravito_full receipt (selected or executed) closed
+#                       with consumed_subagents > 0 and ZERO `contribution:`
+#                       rows. Contribution accounting is MANDATORY for Full;
+#                       an all-'-' row passes as an admission and is REPORTED
+#                       as non-contributing — counted, never hidden.
+#   STATE-DISAGREE      the live gate's append-only state file
+#                       (live_state/<receipt-id>.tsv, EXACT hook counts) and a
+#                       FILLED consumption count contradict each other. The
+#                       disagreement is REPORTED, never reconciled: no side is
+#                       auto-corrected, because auto-correcting either side is
+#                       how one record silently rewrites the other.
+#   MALFORMED (attr)    an attr_* field outside the seven declared attribution
+#                       layers (task_execution, context_retrieval,
+#                       subagent_execution, verification, review,
+#                       governance_process, experiment_audit), or an unreadable
+#                       contribution row.
+#
 # WHAT IT PASSES: executed_mode at or below selected_mode (de-escalation is
 # free); every '-' consumption field (AN UNKNOWN IS NOT A ZERO — '-' is an
 # honest admission, reported as such); an escalation WITH evidence; a breach
@@ -87,6 +111,14 @@ gt(){ awk -v a="$1" -v b="$2" 'BEGIN{exit !(a+0 > b+0)}'; }
 fval(){ # <file> <field> — first value of "field: value", or empty
   awk -v k="$2" 'index($0, k": ")==1 { print substr($0, length(k)+3); exit }' "$1"
 }
+oval(){ # <file> <field> — OPTIONAL field: absent reads as '-' (PACKET-0053
+        # fields are extensions; a receipt issued before they existed is valid
+        # and its absence is the same admission a written '-' is)
+  local v; v="$(fval "$1" "$2")"; [ -n "$v" ] && printf '%s' "$v" || printf '%s' "-"
+}
+
+# The seven attribution layers — the close-fill cost-attribution schema.
+ATTR_LAYERS="task_execution context_retrieval subagent_execution verification review governance_process experiment_audit"
 
 check_receipt(){ # <file> — increments VIOL per finding; prints one status line
   local f="$1" v miss="" sel exe esc esc_ev deg admissions=0 name bud con
@@ -136,8 +168,65 @@ check_receipt(){ # <file> — increments VIOL per finding; prints one status lin
       viol "BUDGET-BREACH $f consumed_$name $con exceeds budget_max_$name $bud with degradation_note '-'. A breach is survivable; concealing one is not — declare the degradation or the receipt is refused."
     fi
   done
-  printf 'routing-check: %s selected=%s executed=%s admissions=%s(admission fields, not zeros)\n' \
-    "$f" "$sel" "$exe" "$admissions"
+
+  # ---- PACKET-0053 extensions. Absent fields read '-' (old receipts valid). --
+  local allow conp aline aname nrows nnoncontrib sf n_state_task n_state_proc
+  # Process-dispatch allowance: the gate chain's own budget, separate from
+  # budget_max_subagents (the 0050/0051 calibration question, resolved).
+  allow="$(oval "$f" process_dispatch_allowance)"
+  conp="$(oval "$f" consumed_process_dispatches)"
+  if [ "$conp" = "-" ]; then
+    admissions=$((admissions+1))
+  elif ! is_num "$conp"; then
+    viol "MALFORMED    $f consumed_process_dispatches is \"$conp\", neither '-' nor a number."
+  elif is_num "$allow" && gt "$conp" "$allow" && [ "$deg" = "-" ]; then
+    viol "BUDGET-BREACH $f consumed_process_dispatches $conp exceeds process_dispatch_allowance $allow with degradation_note '-'. Governance ceremony is budgeted too; declare the degradation or the receipt is refused."
+  fi
+  # Attribution layers: only the seven declared ones may appear. An invented
+  # layer is how attribution stops being comparable across receipts.
+  while IFS= read -r aline; do
+    [ -n "$aline" ] || continue
+    aname="${aline#attr_}"; aname="${aname%%:*}"
+    case " $ATTR_LAYERS " in *" $aname "*) ;; *)
+      viol "MALFORMED    $f declares attr_$aname, which is not one of the seven attribution layers: $ATTR_LAYERS" ;;
+    esac
+  done < <(grep -oE '^attr_[a-z_]+:' "$f" 2>/dev/null | sort -u)
+  # Contribution rows: MANDATORY for a Full close with dispatches. Format:
+  # contribution: agent | question | output_ref | 4 flag=y/n/- fields | tokens= | cost= | time=
+  nrows=0; nnoncontrib=0
+  while IFS= read -r aline; do
+    [ -n "$aline" ] || continue
+    nrows=$((nrows+1))
+    if ! printf '%s\n' "$aline" | grep -qE '^contribution: [^|]+\| [^|]* \| [^|]* \| changed_implementation=(y|n|-) \| changed_conclusion=(y|n|-) \| caught_defect=(y|n|-) \| duplicated_work=(y|n|-) \| tokens=[^|]* \| cost=[^|]* \| time=[^|]*$'; then
+      viol "MALFORMED    $f contribution row is unreadable: \"$aline\". An unreadable measurement is refused, never treated as agreement."
+      continue
+    fi
+    printf '%s\n' "$aline" | grep -qE 'changed_implementation=- \| changed_conclusion=- \| caught_defect=- \| duplicated_work=-' \
+      && nnoncontrib=$((nnoncontrib+1))
+  done < <(grep -E '^contribution: ' "$f" 2>/dev/null)
+  con="$(fval "$f" consumed_subagents)"
+  if { [ "$sel" = "gravito_full" ] || [ "$exe" = "gravito_full" ]; } \
+     && is_num "$con" && gt "$con" 0 && [ "$nrows" -eq 0 ]; then
+    viol "CONTRIBUTION-MISSING $f is a gravito_full receipt closed with consumed_subagents $con and ZERO contribution rows. Contribution accounting is mandatory for Full: every dispatched agent answers what unique question it carried, or admits '-' per field — an admission passes; silence does not."
+  fi
+  # Close-consistency: the live gate's EXACT counts vs the filled fill. The
+  # disagreement is REPORTED, never reconciled — neither record is corrected.
+  sf="$(dirname "$f")/live_state/$(basename "$f" .md).tsv"
+  if [ -f "$sf" ]; then
+    n_state_task="$(awk -F'\t' '$2=="task_dispatch"{n++} END{print n+0}' "$sf")"
+    n_state_proc="$(awk -F'\t' '$2=="process_dispatch"{n++} END{print n+0}' "$sf")"
+    if is_num "$con" && [ "$con" != "$n_state_task" ]; then
+      viol "STATE-DISAGREE $f claims consumed_subagents $con but its live state file counts $n_state_task task dispatch(es) (EXACT, hook-counted). Reported, never reconciled: no side is auto-corrected — find which record is wrong and fix THAT one."
+    fi
+    if is_num "$conp" && [ "$conp" != "$n_state_proc" ]; then
+      viol "STATE-DISAGREE $f claims consumed_process_dispatches $conp but its live state file counts $n_state_proc process dispatch(es) (EXACT, hook-counted). Reported, never reconciled: no side is auto-corrected."
+    fi
+    if [ "$con" = "-" ] || [ "$conp" = "-" ]; then
+      printf '  state_says   %s task=%s process=%s (live state beside an admission — information, not a refusal)\n' "$f" "$n_state_task" "$n_state_proc"
+    fi
+  fi
+  printf 'routing-check: %s selected=%s executed=%s admissions=%s(admission fields, not zeros) contributions=%s(%s non-contributing)\n' \
+    "$f" "$sel" "$exe" "$admissions" "$nrows" "$nnoncontrib"
 }
 
 N=0

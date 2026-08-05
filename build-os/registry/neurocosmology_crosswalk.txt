@@ -1054,3 +1054,38 @@ class: A
 runtime_authority: gate
 binding_kind: proxies
 rationale: Test state over the EXP-0003 harness layer: setup determinism against the preregistered digest pin, every runner refusal red-driven, and the mechanical close loop proven with the real issuer and the real gate. It binds here rather than to epistemic_quality for the same reason the other suites do — a suite's function is property preservation.
+
+control: routing.live_dispatch_gate
+binds_to: boundary
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Refuses the impermissible movement — an unrouted, silently-escalated, over-budget or over-allowance dispatch — BEFORE execution rather than at close, which is the preventive posture routing.close_time_gate's own rationale concedes it lacks. It still proxies rather than instantiates, and the gaps are structural: it FAILS OPEN on its own errors by design, it governs only sessions started after its wiring loads, and it sees only dispatch-shaped calls — non-dispatch work crosses no boundary it can refuse.
+
+control: routing.live_gate_ledger_append
+binds_to: agency
+class: A
+runtime_authority: execute
+binding_kind: instantiates
+rationale: Appends the decision log, the per-receipt live state rows, and the stub contribution rows — the writes themselves, not a judgement about them. It is agency for the same reason metrics.record.store_append is: the gate decides whether a dispatch may happen, and this action writes the durable record that it did.
+
+control: routing.degradation_stamp
+binds_to: agency
+class: A
+runtime_authority: execute
+binding_kind: instantiates
+rationale: Performs the one in-place receipt write of the live-enforcement layer: '-' becomes the filled degradation note, once, verified. The homeostatic RESPONSE (stop spawning, collapse to parent, continue Light) is the agent's behaviour under protocol; what this control performs is the write that records it, so it binds to agency like the other censused writers rather than to the primitive its payload serves.
+
+control: suite.routing_live_gate
+binds_to: homeostasis
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Test state over the live-enforcement layer: every gate branch driven in both directions with fabricated hook JSON, the counter's overhead measured against a stated bound, the degradation round-trip proven against the real close-time gate, and the close-consistency check red-driven. A suite's function is property preservation, same as its siblings.
+
+control: routing.degradation_preconditions
+binds_to: epistemic_quality
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Validates that a degradation record CAN be honest before it is written — a receipt that exists, a reason that is non-empty, a note that has never been filled, a staged stamp that verifiably landed. Shape is a proxy for soundness: a well-formed degradation note can still describe a degradation that did not happen.

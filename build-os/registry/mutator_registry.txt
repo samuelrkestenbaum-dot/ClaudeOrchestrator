@@ -277,3 +277,37 @@ empirical_status: red_driven
 evidence_refs: build-os/tools/memory-kernel.sh:573; build-os/tools/memory-kernel.sh:673
 receipt_behavior: prints a RECEIPT naming the actor, the execution surface, the namespace, the object and version written, the expected version it was compared against, the content hash, the event id and its integrity digest, and the store it appended to. The appended rows ARE the receipt and `validate` re-reads every one of them, which is the standard FINDING-0003 says the census is weakest against — this entry meets it rather than restating the gap.
 notes: THE SURFACE IS PLACED IN build-os/tools/ ON PURPOSE. The independent durable-write scan in tests/mutator_registry_tests.sh searches build-os/maintenance, build-os/tools, build-os/metrics and .claude/hooks; a kernel writer living beside its own stores under build-os/kernel/ would have escaped that scan entirely and been censused only on the author's goodwill. Putting the writer where writers live means the census DISCOVERS it. WHAT IS NOT CENSUSED HERE, said plainly: the eight stores can be opened in an editor like any other file, and this entry classifies the governed path, not the filesystem. That is why `validate` re-derives every object's content hash and re-walks the event chain — an edit made around the writer is caught on the next read rather than assumed impossible.
+
+mutator: MUT-0011-live-gate-ledger-append
+control_id: routing.live_gate_ledger_append
+actor_or_tool: .claude/hooks/routing-gate.sh
+trigger: every PreToolUse/PostToolUse hook invocation in a session started after the wiring commit — a gate decision always appends to the decision log; an admitted dispatch, counted tool event, visible tool failure, FAIL-OPEN, or DISABLED-BY-OPERATOR event appends its row; an admitted Full task dispatch also appends one stub contribution row to the open receipt
+read_scope: the hook's stdin JSON, the receipt store build-os/packets/routing/ (to resolve the open receipt), the open receipt's fields, and the existing live state file's rows
+write_scope: build-os/packets/routing/live_gate_log.tsv and build-os/packets/routing/live_state/<receipt-id>.tsv (both append-only; the state file's label block is written once at creation via noclobber), plus stub `contribution:` rows appended to the open receipt. It edits no existing line anywhere — the degradation stamp is MUT-0012's, invoked as a separate tool.
+mutation_type: append
+rollback_behavior: none needed for correctness — every write is an append to a governance ledger; a wrong row is superseded by a later row or reconciled at close (STATE-DISAGREE), never rewritten. Prior bytes exist in git once committed.
+required_authority: execute
+runtime_authority: execute
+deployment_mode: bounded_autonomous
+implementation_status: implemented
+empirical_status: red_driven
+evidence_refs: .claude/hooks/routing-gate.sh:82; .claude/hooks/routing-gate.sh:106; .claude/hooks/routing-gate.sh:230
+receipt_behavior: the ledger IS the receipt: every decision row carries timestamp, task identity, selected depth, decision and detail; counts are derived by counting rows and stored nowhere, so the ledger cannot disagree with a stored counter
+notes: CENSUSED IN THE COMMIT THAT CREATED IT (the MUT-0009 discipline). deployment_mode is bounded_autonomous, and the bound is structural: append-only, three fixed targets, and the writer FAILS OPEN rather than blocking work when its own writes fail. This is the first censused mutator that runs inside the tool-call path itself; its overhead is measured and bounded by tests/routing_live_gate_tests.sh section 3.
+
+mutator: MUT-0012-degradation-note-stamp
+control_id: routing.degradation_stamp
+actor_or_tool: build-os/tools/record-degradation.sh
+trigger: routing-gate.sh when the fan-out throttle first fires on an undegraded receipt (automatic Full->Light degradation), or a model/operator degrading deliberately
+read_scope: one routing receipt's degradation_note line and its directory (to locate live_state/)
+write_scope: exactly one line of one routing receipt — `degradation_note: -` becomes the filled note via a staged temporary file that is verified (line count preserved, note landed) and copied over — plus one append-only DEGRADATION row in build-os/packets/routing/live_state/<receipt-id>.tsv (creating the state file with the shared label block if the gate has not)
+mutation_type: replace
+rollback_behavior: bounded by the refusal set — only a '-' note is ever replaced (an already-filled note refuses before staging), so no measurement can be destroyed; prior receipt bytes exist in git
+required_authority: execute
+runtime_authority: execute
+deployment_mode: bounded_autonomous
+implementation_status: implemented
+empirical_status: red_driven
+evidence_refs: build-os/tools/record-degradation.sh:71; build-os/tools/record-degradation.sh:92
+receipt_behavior: the stamped degradation_note is itself the durable record (degraded_at, downgraded_to, reason, preserved_evidence), duplicated as an append-only DEGRADATION state row; stdout names both writes
+notes: CENSUSED IN THE COMMIT THAT CREATED IT. The one in-place receipt edit this packet ships, and it is deliberately the narrowest possible: one field, one direction ('-' to filled), once per receipt. It exists so that routing-check.sh's breach-with-degradation-note path — which EXP-0003 proved was never exercised live because writing the note was pure protocol — is written by a machine at the moment the throttle fires.

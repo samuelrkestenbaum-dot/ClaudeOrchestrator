@@ -1,5 +1,12 @@
 # Routing contract — binding mode selection, escalation, circuit breakers
 
+**LIVE half (PACKET-0053): `routing_contract_live.md`** — the PreToolUse
+dispatch gate that enforces this contract BEFORE execution, the four
+enforcement layers named exactly (machine-before-execution / machine-at-close
+/ protocol-during / not-yet-enforced), live state files, the process-dispatch
+allowance, degradation stamping, and contribution accounting. This file stays
+authoritative for the rules below; that file is where they become live.
+
 Driven by two executed defects in EXP-0002's sealed records: T5 ran Full
 ceremony over its own recorded `gravito_light` verdict (silent escalation);
 T3's correctly-selected Full cost 3.9x on a bounded feature (miscalibration).

@@ -125,6 +125,12 @@ DESCRIPTOR_ONELINE="$(printf '%s' "$DESCRIPTOR" | tr '\n' ' ')"
   printf 'budget_max_model_calls: %s\n' "$B_CALLS"
   printf 'budget_max_wall_clock_s: %s\n' "$B_WALL"
   printf 'budget_max_cost_usd: %s\n' "$B_COST"
+  printf '# --- process allowance (PACKET-0053): the packet'\''s OWN gate chain (builder/qa/\n'
+  printf '# --- reviewer/archivist) is governance ceremony, counted SEPARATELY from task\n'
+  printf '# --- work by the live gate and attributed to governance_process. This resolves\n'
+  printf '# --- the PACKET-0050/0051 open calibration question mechanically: process-role\n'
+  printf '# --- dispatches never eat budget_max_subagents. Default 4 = the standard chain.\n'
+  printf 'process_dispatch_allowance: 4\n'
   printf '# --- empty at issue; filled at close. AN UNKNOWN IS NOT A ZERO: "-" is an honest\n'
   printf '# --- admission and is never refused; refusal is for CONTRADICTION, not absence.\n'
   printf 'executed_mode: -\n'
@@ -137,6 +143,25 @@ DESCRIPTOR_ONELINE="$(printf '%s' "$DESCRIPTOR" | tr '\n' ' ')"
   printf 'consumed_wall_clock_s: -\n'
   printf 'consumed_cost_usd: -\n'
   printf 'degradation_note: -\n'
+  printf '# --- close-fill EXTENSIONS (PACKET-0053). consumed_subagents above counts TASK\n'
+  printf '# --- dispatches (vs budget_max_subagents); consumed_process_dispatches counts the\n'
+  printf '# --- gate chain (vs process_dispatch_allowance). The attr_* layers attribute\n'
+  printf '# --- consumption where derivable at close — tokens or cost with provenance, or\n'
+  printf '# --- "-" as an admission, NEVER a zero nobody measured. Receipts predating these\n'
+  printf '# --- fields stay valid: routing-check.sh reads an absent field as "-".\n'
+  printf 'consumed_process_dispatches: -\n'
+  printf 'attr_task_execution: -\n'
+  printf 'attr_context_retrieval: -\n'
+  printf 'attr_subagent_execution: -\n'
+  printf 'attr_verification: -\n'
+  printf 'attr_review: -\n'
+  printf 'attr_governance_process: -\n'
+  printf 'attr_experiment_audit: -\n'
+  printf '# --- contribution rows (PACKET-0053): marginal-contribution accounting, MANDATORY\n'
+  printf '# --- for a Full close with dispatches>0 (routing-check.sh refuses otherwise). The\n'
+  printf '# --- live gate seeds one stub row per admitted Full task dispatch; fill at close:\n'
+  printf '# --- contribution: <subagent_type> | <unique_question> | <output_ref> | changed_implementation=y/n/- | changed_conclusion=y/n/- | caught_defect=y/n/- | duplicated_work=y/n/- | tokens=<v|-> | cost=<v|-> | time=<v|->\n'
+  printf '# --- An all-"-" row passes as an admission and is REPORTED as non-contributing.\n'
 } > "$RECEIPT"
 
 printf 'route-task: receipt %s\n' "$RECEIPT"

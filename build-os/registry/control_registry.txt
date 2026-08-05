@@ -2249,7 +2249,7 @@ inputs: one routing receipt (--receipt) or the receipt store (--dir, default bui
 output: a per-receipt reconciliation with '-' fields counted as admissions, or a refusal naming the contradiction
 owning_module: build-os/tools/routing-check.sh
 consuming_policies: tests/routing_enforcement_tests.sh sweeps the LIVE receipt store on every suite run (chained via tests/build_os_tests.sh) and red-drives all four refusal classes against fixtures built by the real issuer; routing_contract.md names it as the mechanical half of the escalation protocol
-evidence_refs: build-os/tools/routing-check.sh:109; build-os/tools/routing-check.sh:113; build-os/tools/routing-check.sh:119; build-os/tools/routing-check.sh:136; build-os/tools/routing-check.sh:155
+evidence_refs: build-os/tools/routing-check.sh:141; build-os/tools/routing-check.sh:145; build-os/tools/routing-check.sh:151; build-os/tools/routing-check.sh:168; build-os/tools/routing-check.sh:210; build-os/tools/routing-check.sh:219; build-os/tools/routing-check.sh:244
 failure_behavior: exits 2 on silent escalation (executed_mode above selected_mode with no escalation record), evidence-free escalation, a filled consumption field over budget with no degradation note, a Full claim with no budgets, a malformed receipt, or an empty sweep; '-' consumption is an admission and never refused — refusal is for contradiction, not absence
 rollback_behavior: none needed — reads only, writes nothing
 promotion_requirement: n/a
@@ -2328,3 +2328,93 @@ promotion_requirement: already load_bearing; nothing above this status exists
 demotion_requirement: it stops being load_bearing the day it is unchained from the repo suite
 authority_mismatch: none
 notes: REGISTERED IN THE SAME COMMIT AS THE MODULES IT DRIVES (the PACKET-0048 lesson). The close-loop fixtures use a receipt the REAL issuer wrote and the REAL close-time gate, so a receipt shape the live tools would never emit cannot smuggle a pass; the fabricated over-budget fixture proves a refused receipt is retained with its numbers intact rather than edited to pass, and the unmeasured-field fixture proves an unknown is never summed as zero.
+
+control: routing.live_dispatch_gate
+class: A
+implementation_status: implemented
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: reflex
+inputs: the pending tool call as PreToolUse JSON on stdin (tool_name, tool_input.subagent_type), the receipt store build-os/packets/routing/ (open = newest receipt whose executed_mode is '-'), the open receipt's mode/escalation/degradation/budget fields, and the live state file's EXACT hook-counted dispatch rows
+output: exit 0 admitting the pending call, or exit 2 with a model-visible stderr refusal that always carries continue-the-task language; every decision (task identity, selected depth, decision, timestamp) is appended to live_gate_log.tsv
+owning_module: .claude/hooks/routing-gate.sh
+consuming_policies: .claude/settings.json wires it as PreToolUse (matcher Task|Agent) so every subagent dispatch in sessions started after the wiring runs through it; the tool-event counter (matcher *) and PostToolUse observer are the same module; tests/routing_live_gate_tests.sh drives every branch in BOTH directions with fabricated stdin JSON on every suite run
+evidence_refs: .claude/hooks/routing-gate.sh:148; .claude/hooks/routing-gate.sh:182; .claude/hooks/routing-gate.sh:193; .claude/hooks/routing-gate.sh:213; .claude/hooks/routing-gate.sh:322
+failure_behavior: BLOCKS the pending dispatch (exit 2, stderr instructs how to CONTINUE) on no-open-receipt, dispatch under direct/gravito_light without an evidence-bearing escalation record, a degraded receipt, task dispatches at budget_max_subagents (stamping the degradation via record-degradation.sh first), and process-role dispatches at process_dispatch_allowance; FAILS OPEN (exit 0, FAIL-OPEN row logged) on its own errors — a gate that fails closed on a bug is a denial of service against the operator
+rollback_behavior: the decision itself is not a write; the ledger writes it triggers are classified separately as routing.live_gate_ledger_append and routing.degradation_stamp
+promotion_requirement: becomes load_bearing at the first session start after the wiring commit, when hooks load and the Claude Code runtime acts on its exit code — hooks do NOT govern the session that ships them
+demotion_requirement: unwiring it from .claude/settings.json, at which point routing enforcement falls back to close-time only (PACKET-0050's posture)
+authority_mismatch: none
+notes: REGISTERED UNDER RULING 4, in the SAME COMMIT as the module (the PACKET-0048 lesson). The machine-before-execution layer of routing_contract_live.md: PreToolUse exit-2 blocks the call and stderr becomes the model-visible refusal, converting the PACKET-0050 close-time contract into pre-execution enforcement for everything dispatch-shaped. It resolves the PACKET-0050/0051 open max_subagents calibration question mechanically: process-role dispatches (builder|qa|reviewer|archivist|build-orchestrator) count against process_dispatch_allowance (default 4), attributed governance_process, never against the task budget. ROUTING_GATE_DISABLE=1 is the operator-only escape and is ALWAYS logged (DISABLED-BY-OPERATOR) — an escape that leaves no trace is a bypass. Honest bounds, named: it sees only sessions where it is loaded; it gates only dispatch-shaped calls; live tokens/cost are not hook-visible and are never faked.
+
+control: routing.live_gate_ledger_append
+class: A
+implementation_status: implemented
+empirical_status: red_driven
+runtime_authority: execute
+nervous_system_role: motor
+inputs: an admitted or refused gate decision, a counted PreToolUse tool event, or a PostToolUse-visible tool failure, plus the open receipt's identity
+output: append-only rows in build-os/packets/routing/live_gate_log.tsv (every decision) and live_state/<receipt-id>.tsv (EXACT dispatch/tool/failure counts under per-field EXACT-vs-unavailable labels), and one stub contribution row per admitted Full task dispatch appended to the open receipt
+owning_module: .claude/hooks/routing-gate.sh
+consuming_policies: routing-check.sh's STATE-DISAGREE close-consistency check reads the state file's EXACT counts against the filled receipt; routing_contract_live.md's live-visibility layer is these files; tests/routing_live_gate_tests.sh derives every count from them on every suite run
+evidence_refs: .claude/hooks/routing-gate.sh:82; .claude/hooks/routing-gate.sh:106; .claude/hooks/routing-gate.sh:230
+failure_behavior: a logging failure never blocks a tool call (the ledger serves the gate, not the reverse); a state-row failure on an ALLOW path fails open and is logged FAIL-OPEN
+rollback_behavior: append-only stores — a wrong row is corrected by a later row or reconciled at close, never rewritten in place (the EVENT-APPEND-ONLY doctrine)
+promotion_requirement: becomes load_bearing with routing.live_dispatch_gate at the first post-wiring session start
+demotion_requirement: unwired with the gate
+authority_mismatch: declared
+notes: REGISTERED UNDER RULING 4, in the SAME COMMIT as the module, at the authority the behaviour actually requires: these ARE durable writes (censused as MUT-0011), and NO CLASS LICENSES execute, so the mismatch is declared here and anchored in MISMATCHES.md — a record of over-authorisation, not a grant. The write set is exactly three append targets: the decision log, the per-receipt state file, and stub contribution rows into the open receipt (close-fill tooling for the mandatory Full contribution table). Counts are DERIVED by counting rows and stored nowhere, so there is no counter copy to disagree with the ledger.
+
+control: routing.degradation_stamp
+class: A
+implementation_status: implemented
+empirical_status: red_driven
+runtime_authority: execute
+nervous_system_role: motor
+inputs: one open routing receipt, a non-empty reason, and an optional preserved-evidence pointer
+output: the receipt's degradation_note line filled exactly once (degraded_at, downgraded_to=gravito_light, reason, preserved_evidence) via a staged, verified, line-count-preserving replacement, plus an append-only DEGRADATION row in the receipt's live state file; or a refusal that writes nothing
+owning_module: build-os/tools/record-degradation.sh
+consuming_policies: routing.live_dispatch_gate invokes it when the fan-out throttle fires (automatic Full->Light degradation); a model or operator invokes it deliberately; routing-check.sh's existing breach-with-degradation-note path is what the stamp makes PASS for an honestly-degraded run; tests/routing_live_gate_tests.sh drives both invocation paths and all refusals on every suite run
+evidence_refs: build-os/tools/record-degradation.sh:71; build-os/tools/record-degradation.sh:92
+failure_behavior: refuses (exit 2, nothing written) a missing receipt, a file without a degradation_note field, an EMPTY reason (a degradation nobody can audit is a bypass wearing a label), an already-degraded receipt (one degradation record per receipt, never overwritten), and any staging verification failure
+rollback_behavior: the previous degradation_note value is only ever '-' (an already-filled note is refused before staging), so the stamp destroys no measurement; the prior receipt bytes exist in git
+promotion_requirement: becomes load_bearing with the gate that invokes it
+demotion_requirement: n/a
+authority_mismatch: declared
+notes: REGISTERED UNDER RULING 4, in the SAME COMMIT as the module, at execute with the mismatch declared and anchored in MISMATCHES.md (censused as MUT-0012) — no class licenses execute. This is the mechanical writer for capability 5 of PACKET-0053: EXP-0003 measured ZERO degradation notes written live because writing one was pure protocol; the throttle now stamps the note the moment it fires, so stopping the expensive mode (never the task) leaves the record that lets an honest close pass the budget gate.
+
+control: suite.routing_live_gate
+class: A
+implementation_status: load_bearing
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: immune
+inputs: the live gate, record-degradation.sh, the extended route-task.sh/routing-check.sh, .claude/settings.json's wiring, routing_contract_live.md, fixture receipts issued by the REAL issuer in mktemp roots, and fabricated PreToolUse/PostToolUse stdin JSON for every branch in both directions
+output: a pass/fail verdict over the packet's eleven required behaviours: receipt-presence gating, near-zero counter overhead (measured and bounded), silent-escalation blocking, the live fan-out brake, degradation recording and its close-time pass, continue-the-task block language, evidence preservation, EXACT-vs-unavailable labels, task-vs-process count reconciliation, mandatory Full contribution accounting, and receipt/state close consistency
+owning_module: tests/routing_live_gate_tests.sh
+consuming_policies: chained from tests/build_os_tests.sh section 26, which exits non-zero on its failure
+evidence_refs: tests/routing_live_gate_tests.sh:142; tests/routing_live_gate_tests.sh:181; tests/routing_live_gate_tests.sh:204; tests/routing_live_gate_tests.sh:416; tests/routing_live_gate_tests.sh:461
+failure_behavior: prints each failing assertion and exits 1 via the house-style verdict, failing the whole chained run
+rollback_behavior: none needed — every fixture lives in mktemp; the live receipt store and live settings are read and never written; no model invocation occurs
+promotion_requirement: already load_bearing; nothing above this status exists
+demotion_requirement: it stops being load_bearing the day it is unchained from the repo suite
+authority_mismatch: none
+notes: REGISTERED IN THE SAME COMMIT AS THE MODULES IT DRIVES (the PACKET-0048 lesson). Every fixture receipt is issued by the REAL route-task.sh and damaged one field at a time, so a receipt shape the live tools would never emit cannot smuggle a pass. The hook is driven DIRECTLY with fabricated stdin JSON because hooks load at session start — the session that ships the gate is not governed by it, and this suite is what proves the gate's behaviour without waiting a session.
+
+control: routing.degradation_preconditions
+class: A
+implementation_status: implemented
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: reflex
+inputs: the --receipt/--reason/--evidence arguments and the named receipt's degradation_note line
+output: permission for the stamp to proceed, or a refusal (exit 2) that writes nothing
+owning_module: build-os/tools/record-degradation.sh
+consuming_policies: routing.degradation_stamp performs its write only after every precondition here has passed; tests/routing_live_gate_tests.sh red-drives each refusal on every suite run
+evidence_refs: build-os/tools/record-degradation.sh:49; build-os/tools/record-degradation.sh:50; build-os/tools/record-degradation.sh:54; build-os/tools/record-degradation.sh:65
+failure_behavior: refuses (exit 2, nothing written) a missing or absent receipt, a file with no degradation_note field, an EMPTY reason, an already-degraded receipt, and a staged stamp that fails verification (line count moved, or the note did not land)
+rollback_behavior: pure validation — nothing to roll back; refusal happens before the temporary file is copied over the receipt
+promotion_requirement: becomes load_bearing with the gate chain that invokes the stamp
+demotion_requirement: n/a
+authority_mismatch: none
+notes: REGISTERED UNDER RULING 4, in the SAME COMMIT as the module — the census pattern the mutator census itself established: the check that judges whether the write may happen (this entry, gate) and the write itself (routing.degradation_stamp, execute, MUT-0012) are classified separately, because registering only the write would leave the module's refusal surface at an authority nobody granted.

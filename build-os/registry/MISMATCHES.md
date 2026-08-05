@@ -27,9 +27,9 @@ control is a governance action and belongs to the operator.
    `tests.nonvacuity_minimums`. Four of the eleven are Class A — an invariant on
    `unvalidated` evidence is *legal* under the licence table and still means
    nobody has watched it fire.
-2. **14 of 22 entries carrying `authority_mismatch: declared` exercise `gate` on
+2. **14 of 24 entries carrying `authority_mismatch: declared` exercise `gate` on
    a class that does not license it.** The bare
-   `grep -c '^authority_mismatch: declared' control_registry.txt` yields **22**,
+   `grep -c '^authority_mismatch: declared' control_registry.txt` yields **24**,
    because that flag now marks BOTH kinds of mismatch (see the table note below);
    the `gate`-exercising subset — the subject of this file — needs the authority
    filter too:
@@ -86,6 +86,8 @@ the control as `UNREPORTED`.
 | `metrics.decision.store_append` | A | execute | gate | `build-os/metrics/record-decision.sh:479` | 1 |
 | `metrics.decision.outcome_update` | A | execute | gate | `build-os/metrics/record-decision.sh:744` | 1 |
 | `memory.kernel_store_append` | A | execute | gate | `build-os/tools/memory-kernel.sh:573` | 1 |
+| `routing.live_gate_ledger_append` | A | execute | gate | `.claude/hooks/routing-gate.sh:82` | 3 |
+| `routing.degradation_stamp` | A | execute | gate | `build-os/tools/record-degradation.sh:71` | 2 |
 
 <!-- MISMATCH-TABLE:END -->
 

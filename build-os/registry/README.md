@@ -816,7 +816,7 @@ in `scan-controls.sh`, with its reason beside it, where `grep` finds it;
 `scan-controls.sh patterns` prints the list and its size, so an allowance
 quietly growing is visible without reading the file. **It is empty today.**
 
-The registry carries **419** `evidence_refs`. That number is not remembered: the
+The registry carries **440** `evidence_refs`. That number is not remembered: the
 same total was previously written down in three artefacts as 218, 184 and 184
 against a live 224, because each was a hand count frozen at a different moment.
 `tests/control_registry_tests.sh` §25 recomputes it from the registry and fails
