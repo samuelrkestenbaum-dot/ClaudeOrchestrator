@@ -2083,9 +2083,9 @@ surface the T2–T4 refusals and per-arm acceptance explicitly.
   **NOTHING IS IN FLIGHT; nothing is staged** — any follow-up to the finding is the
   operator's routing act, not the archivist's.
 
-## IN FLIGHT — `EXP-0002a-sustained-workload-execution` (declared 2026-08-05)
+## CLOSED — `EXP-0002a-sustained-workload-execution` (declared 2026-08-05; closed 2026-08-05 by the archivist)
 
-- **Packet id:** `PACKET-0048-exp0002-sustained-workload` — minted; `git log -S'PACKET-0048' --all`
+- **Packet id (CLOSED):** `PACKET-0048-exp0002-sustained-workload` — minted; `git log -S'PACKET-0048' --all`
   0 commits, full-tree grep 0 files before this edit.
 - **Lane:** `substantive`. **Depth 2** — build stage (preregistration + harness + sequence runs),
   then qa ‖ reviewer concurrently; archivist close after the verdict.
@@ -2103,3 +2103,55 @@ surface the T2–T4 refusals and per-arm acceptance explicitly.
   evaluator-independence commit boundary.
 - **Frozen:** bench/ and all EXP-0001 artifacts untouched; no mid-run optimization; failed runs
   retained; `residue.md` frozen; no push without go (the EXP-0001 go does not extend here).
+
+## CLOSE RECORD — `gravito_exp0002_execution_a` (`PACKET-0048-exp0002-sustained-workload`) — closed 2026-08-05 by the archivist. NOTHING IN FLIGHT.
+
+- **Packet id (CLOSED):** `PACKET-0048-exp0002-sustained-workload`. Receipt:
+  `build-os/receipts/gravito_exp0002_execution_a.md`. **Lane:** `substantive`.
+  **Depth 3 — fix-then-pass (1 enumerated item), announced** — build stage; qa ‖ reviewer
+  concurrently; one bounded fix round. Base `982054a` — the pushed tip, merge-base
+  re-verified at close.
+- **Commits:** `9cf0f87` (preregistration + harness, BEFORE run 1 — all 10 run timestamps
+  postdate it, qa-verified) + `2d0696a` (RULING-4 registration of the four refusal-capable
+  harness surfaces; census 110→114; crosswalk + derived totals same commit) + `916e1ae`
+  (sealed records + blinded dataset + mapping sha256 `45734767…`) + `38ee0df` (the ONE
+  permitted fix commit). **THREE build commits = the RECORDED CONTRACT-GAP shape** — the
+  identity scanner forced the registration mid-packet, same class as PACKET-0045's third
+  commit; NOT a builder breach. Commit-1 isolation RED at `9cf0f87` BY that same gap;
+  commits 1+2 at `2d0696a` GREEN 2378/0 — qa verified both directions.
+- **Executed:** two five-task sequences (T1 diagnose → T2 tested fix → T3 multi-file
+  feature → T4 injected regression → T5 context-dependent follow-up) on one evolving
+  parcel-billing tree per arm (seed `128485c6…`, suite 19/0), fresh headless session per
+  task, byte-identical prompts (`task_prompt_sha256` equal across arms,
+  reviewer-verified), arms differing only by `install-project.sh`; Bash-capable path
+  (scoped allowlist; non-binding in CLI 2.1.222, disclosed, identical both arms).
+  **10/10 durable accepted outcomes by external oracles; model identical across all 10.**
+- **Gates:** qa RED 2376/2 — ONE attributed item (sealed buildos T3/T5 stream transcripts
+  carried workload-repo citations the tree-wide range-citation sweep bit on); fixed in
+  `38ee0df` restoring EXP-0001's sealed form (all ten transcripts scratchpad-resident,
+  hash-pinned in the manifest; records/result.json byte-untouched; no sweep modified).
+  Re-check: control_registry_tests 180/0, **FULL SUITE 2378/0 exit 0 solo at `38ee0df`**,
+  manifest 31/31 OK. Reviewer **PASS, ZERO items** → **PASS-AS-FIXED**; 3 obligations
+  routed to the NEXT packet (define the `usage_block_disagrees` criterion; state the
+  arm-B seed derivation in the revealed report; run the reveal promptly). Second eyes
+  NONE (Codex 403 at proxy, reproduced live by both gates); `DC-0001` numeral moved
+  **27 → 28** in this close commit, derived from the receipt store.
+- **Recorded for later, harness untouched (freeze rule):** the result-event `usage.*`
+  block undercounts dispatch-heavy sessions (buildos T3 dispatched 5 subagents, T5
+  dispatched 4); the sealing layer uses the provider `modelUsage` aggregate uniformly
+  (reconciles exactly with `total_cost_usd`; qa re-derived all 10 rows), affected rows
+  labeled `usage_block_disagrees=yes`. Reviewer's integrity finding: the uncorrected
+  block would have FLATTERED arm B (~70x undercount on its T3) — the correction moved
+  the data AGAINST the convenient direction, the opposite signature of result-driven
+  adjustment.
+- **Blinding at close:** dataset X/Y only, zero arm strings (qa grep 0); dispatch counts
+  deliberately EXCLUDED (they would de-blind); mapping withheld in scratchpad, sha256
+  pre-committed. The blinded analysis ALREADY EXISTS (independent evaluator, completed
+  before this close) and is committed by the NEXT packet.
+- **Boundaries:** NOTHING PUSHED — `9cf0f87`, `2d0696a`, `916e1ae`, `38ee0df`, and this
+  close commit all local pending explicit operator go; none may be amended. No merge,
+  deploy, or secrets. `residue.md` stays frozen. **NOTHING IS IN FLIGHT.** Staged next
+  but NOT DECLARED (a routing act, not the archivist's): **EXP-0002b** — blinded
+  analysis committed verbatim, reveal against the pre-committed hash, conclusion with
+  the two mandated reconciliations (EXP-0001's trivial-task overhead; the historical
+  weekly-usage drop).

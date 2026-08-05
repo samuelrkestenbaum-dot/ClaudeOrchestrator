@@ -2286,3 +2286,29 @@ byte ceiling. This file does, and it is nearly out; that is why this block is sh
 - **Where we are:** NOTHING IN FLIGHT, nothing staged. NOTHING PUSHED — `b3a3b7f`,
   `d2373e6`, `92c7276`, `7d56cbc`, `698e3c3`, `d0a2231`, close commit all local
   pending explicit go; none may be amended. `residue.md` stays frozen.
+
+## 2026-08-05 — `gravito_exp0002_execution_a` (`PACKET-0048-exp0002-sustained-workload`) CLOSED — EXP-0002a SEALED
+
+- **Executed:** two five-task sequences (T1→T5) on one evolving parcel-billing tree per
+  arm (seed `128485c6…`, suite 19/0), fresh headless session per task, byte-identical
+  prompts, arms differ only by `install-project.sh`; Bash-capable path (allowlist
+  non-binding in CLI 2.1.222, disclosed, identical both arms). **10/10 accepted by
+  external oracles; model identical across all 10.** Base `982054a`. Commits `9cf0f87`
+  (prereg BEFORE run 1) + `2d0696a` (RULING-4: four harness surfaces, census 110→114) +
+  `916e1ae` (sealed records, blinded X/Y dataset, mapping sha256 `45734767…`) + `38ee0df`
+  (the ONE fix commit). 3 build commits = the recorded contract-gap shape (scanner-forced
+  registration), not a breach. Depth 3, announced.
+- **Gates:** qa RED 2376/2, ONE attributed item (buildos T3/T5 transcripts carried
+  workload-repo citations the range-citation sweep bit on) → `38ee0df` restored
+  EXP-0001's sealed form (transcripts scratchpad-resident, hash-pinned; records
+  byte-untouched; no sweep modified); re-check FULL SUITE **2378/0** solo, manifest
+  31/31. Reviewer PASS 0 items → **PASS-AS-FIXED**; DC-0001 **27 → 28**. Second eyes
+  NONE (Codex 403, both gates).
+- **Recorded, harness frozen:** result-event `usage.*` undercounts dispatch-heavy
+  sessions; sealing uses the provider `modelUsage` aggregate uniformly (reconciles with
+  `total_cost_usd`); rows labeled `usage_block_disagrees=yes`. Uncorrected, arm B was
+  FLATTERED (~70x on T3) — the correction moved AGAINST the convenient direction.
+- **Where we are:** NOTHING IN FLIGHT. Blinded analysis ALREADY EXISTS (independent
+  evaluator, pre-close); EXP-0002b (NOT declared) commits it verbatim, reveals against
+  the hash, concludes with the two mandated reconciliations. Reveal promptly;
+  mapping/transcripts are scratchpad-only. NOTHING PUSHED; no commit may be amended.
