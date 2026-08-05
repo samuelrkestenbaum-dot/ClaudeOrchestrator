@@ -2216,3 +2216,35 @@ surface the T2–T4 refusals and per-arm acceptance explicitly.
   deploy, or secrets. `residue.md` stays frozen. **NOTHING IS IN FLIGHT; nothing is
   staged** — the router candidate is a routing decision for the orchestrator, not the
   archivist's to declare.
+
+## IN FLIGHT — `routing-enforcement-and-budgets` (declared 2026-08-05)
+
+- **Packet id:** `PACKET-0050-routing-enforcement` — minted; 0 commits, 0 files carried the token
+  before this edit.
+- **Lane:** `substantive`. **Depth 2** — builder, then qa ‖ reviewer concurrently.
+- **Branch base:** at `0239737` — the pushed tip (EXP-0002 published; remote = local, 0/0).
+- **Objective (operator directive, post-EXP-0002):** the bounded routing-and-budget
+  correction. TWO EXECUTED PRODUCT DEFECTS drive it, from EXP-0002's sealed records:
+  (1) ENFORCEMENT — buildos T5 executed Full ceremony (4 dispatches, $4.80) despite the
+  selector's recorded `gravito_light` verdict; (2) CALIBRATION — T3 was classified `full`
+  and the resulting ceremony was economically disproportionate (5 dispatches, 3.9× tokens).
+  The finding being productized: "Gravito Light showed evidence of useful context
+  amortization, while uncontrolled escalation into Gravito Full destroyed the economics."
+- **Scope:** (A) selector verdicts become operationally binding (direct = no workflow
+  machinery; light = repository context + bounded checks, no Full ceremony; full = only
+  within explicit budgets); escalation above the recorded mode requires a new
+  evidence-bearing escalation decision — silent escalation prohibited and refused at close.
+  Routing receipts: selected mode, executed mode, escalation + evidence, budgets
+  (calls/subagents/tokens/uncached/time/cost), final consumption. (B) hard economic
+  circuit breakers for Full with graceful degradation (stop spawning → collapse to parent →
+  preserve state → continue Light where safe → report degradation), never bare termination
+  while a safe productive path remains. (C) Full-mode recalibration: complexity alone is
+  insufficient; Full requires value-over-cost evidence (irreversible/external mutation,
+  blast radius, unclear acceptance, security consequence, genuinely parallel workstreams,
+  high rework history, non-deterministic verification).
+- **Honest-scoping rule:** mechanical enforcement where a check can execute (receipt
+  schema + close-time refusal on unrecorded escalation or budget breach), protocol text
+  where live-session counters are not machine-visible — each labeled as what it is; no
+  checkbox that looks enforced and is not.
+- **Out of scope:** EXP-0003 (next packet, after this correction); memory-control packets
+  (not authorized); bench/ and both experiment trees (frozen, published); empathiq-website.
