@@ -2298,7 +2298,7 @@ surface the T2–T4 refusals and per-arm acceptance explicitly.
 
 ## CLOSED — `EXP-0003a-routing-frontier-execution` (declared 2026-08-05; closed 2026-08-05 by the archivist)
 
-- **Packet id:** `PACKET-0051-exp0003-routing-frontier` — minted; 0 commits/0 files before this edit.
+- **Packet id (CLOSED):** `PACKET-0051-exp0003-routing-frontier` — minted; 0 commits/0 files before this edit.
 - **Lane:** `substantive`. **Depth 2.** Routing receipt issued BEFORE building (the new step 7,
   first live use): `routing-PACKET-0051-exp0003-routing-frontier-20260805T190501Z.md`,
   selected_mode gravito_full via the honest value factor high_rework_history (three consecutive
@@ -2373,9 +2373,9 @@ surface the T2–T4 refusals and per-arm acceptance explicitly.
   named here — reveal ordering kept clean). Staged next but NOT DECLARED (a routing
   act, not the archivist's): **EXP-0003b — analysis/reveal.**
 
-## IN FLIGHT — `EXP-0003b-analysis-reveal` (declared 2026-08-05)
+## CLOSED — `EXP-0003b-analysis-reveal` (declared 2026-08-05; closed 2026-08-05 by the archivist)
 
-- **Packet id:** `PACKET-0052-exp0003-analysis-reveal` — minted; 0 commits/0 files before this edit.
+- **Packet id (CLOSED):** `PACKET-0052-exp0003-analysis-reveal` — minted; 0 commits/0 files before this edit.
 - **Lane:** `substantive`. **Depth 2.** Routing receipt issued before building:
   `routing-PACKET-0052-…-20260805T210607Z.md`, selected gravito_full (value factor
   high_rework_history — the EXP-0002 reveal needed two fix rounds; this is the same
@@ -2388,3 +2388,52 @@ surface the T2–T4 refusals and per-arm acceptance explicitly.
   exactly one §8 label with translation applying NO directional rule (none exists).
 - **Frozen:** sealed runs/, blinded_dataset.tsv, EVALUATOR_RULE_TEXT.md, GATE_CALIBRATION_NOTE.md,
   PREREGISTRATION.md, both prior experiment trees, bench/, routing tools. No push without go.
+
+## CLOSE RECORD — `gravito_exp0003_analysis_reveal_a` (`PACKET-0052-exp0003-analysis-reveal`) — closed 2026-08-05 by the archivist. NOTHING IN FLIGHT.
+
+- **Packet id (CLOSED):** `PACKET-0052-exp0003-analysis-reveal`. Receipt:
+  `build-os/receipts/gravito_exp0003_analysis_reveal_a.md`. **Lane:** `substantive`.
+  **Depth 3, announced** — build; qa ‖ reviewer concurrently; one bounded fix round
+  (`fix-then-pass`, 4 enumerated items). Base `e276b88` (PACKET-0051's close), tree quiet.
+- **Commits:** `9d78999` (declaration + routing receipt, gravito_full via
+  high_rework_history) + `1cb31f6` (blinded analysis VERBATIM + sibling provenance,
+  mapping absent — ancestry-provable) + `f2a2b3a` (reveal: mapping `A=Q·B=R·C=P`
+  byte-exact vs pre-committed `8a063552…`; REVEALED_COMPARISON.md; CONCLUSION.md) +
+  `a3b0ba7` (the one permitted fix commit).
+- **THE RESULT:** **`frontier unstable — winners flip on uncached`** — the evaluator's
+  own label, carried unchanged; NO directional rule exists to translate through.
+  Frontier at n=1: **direct** wins T3/T5 totals and T5 outright; **light** wins the
+  uncached lens on T3/T4 (third and fourth consecutive amortization data points after
+  EXP-0002's T1/T4) and is never worse than second on uncached; **full** wins T4
+  totals only and never wins uncached. Totals 90.6–96.8% cache_read in every cell
+  (confound C2). Gate verdicts beside the frontier: both condition receipts REFUSED
+  (per-run decomposition committed pre-reveal in GATE_CALIBRATION_NOTE.md); ZERO
+  silent escalation (the PACKET-0050 binding-verdict rule held live); ZERO degradation
+  notes (the breaker's protocol half did not execute unattended). Four operator
+  questions handed over — budget granularity; band re-derivation; mid-flight budget
+  awareness; the totals-vs-uncached lens. Nothing acted on.
+- **Gates:** qa GREEN — suite **2545/0 solo** with the 3-receipt routing sweep clean;
+  commit-1 iso green; ordering/hash/ancestry exact; all arithmetic recomputed
+  independently and matching; frozen surfaces zero-diff; census 121 — with ONE
+  attributed BASE finding: PACKET-0051's close left a bare `**Packet id:**` marker at
+  `:2301`, so the bandwidth singleton read 2-in-flight (pre-existing at `e276b88`).
+  FIXED AT THIS CLOSE: both markers normalized to `**Packet id (CLOSED):**` in place
+  (nothing above `:89` moved); post-fix `bandwidth-check.sh check` = **0 in flight,
+  exit 0**. Reviewer fix-then-pass on FOUR prose/number items (the
+  repeated-evaluator-claims-without-verification class, incl. the genuine §e/§b
+  inconsistency in the sealed evaluator report — stated, sealed file verbatim), all
+  four fixed in `a3b0ba7` exactly as enumerated → **PASS-AS-FIXED**. Second eyes NONE
+  (Codex 403 at proxy, attempted and stated). `DC-0001` numeral moved **31 → 32** in
+  this close commit, derived from the receipt store.
+- **Live routing receipt closed:** `executed_mode: gravito_full` (matches selected; no
+  escalation); consumption fields stay '-' with the transcript-only admission on the
+  receipt. Post-fill sweep `routing-check.sh check` = 3 receipts, 0 violations, exit 0.
+- **Boundaries:** NOTHING PUSHED — `9d78999`, `1cb31f6`, `f2a2b3a`, `a3b0ba7`, and
+  this close commit local pending explicit operator go (**14 commits ahead of origin
+  after this close**, derived from git); none may be amended. No merge, deploy, or
+  secrets. `residue.md` stays frozen. **NOTHING IS IN FLIGHT; NOTHING IS STAGED** —
+  the operator's three-part directive (publish EXP-0002 → routing correction →
+  EXP-0003) is **COMPLETE**; EXP-0003's five outputs stand in ancestry order
+  (`18f82f6` → `cdfe1a3` → `1cb31f6` → `f2a2b3a` → `a3b0ba7`). NOTE: after this
+  close's append, `current_state.md` is within ~1.7 KB of its 204,800 B ceiling —
+  the NEXT close cannot proceed without the operator authorizing the re-block.

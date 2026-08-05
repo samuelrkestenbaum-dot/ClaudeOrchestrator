@@ -2366,3 +2366,18 @@ byte ceiling. This file does, and it is nearly out; that is why this block is sh
 - **Where we are:** NOTHING IN FLIGHT. Blinded evaluation EXISTS; EXP-0003b (NOT
   declared) commits it; reveal promptly. NOTHING PUSHED — 9 ahead of origin
   incl. close; none amendable. `residue.md` frozen.
+
+## 2026-08-05 — `gravito_exp0003_analysis_reveal_a` (`PACKET-0052`) CLOSED — EXP-0003 COMPLETE
+
+- **RESULT: `frontier unstable — winners flip on uncached`** — evaluator's own label;
+  no directional rule. n=1: direct wins T3/T5 totals + T5 outright; light wins
+  uncached T3/T4 (3rd+4th amortization points, after EXP-0002 T1/T4), never worse
+  than 2nd uncached; full wins T4 totals only, never uncached. Totals 90.6–96.8%
+  cache_read (C2). Both receipts REFUSED; 0 silent escalation; 0 degradation notes.
+  4 operator questions handed over; none acted on.
+- **Commits:** `9d78999`+`1cb31f6`+`f2a2b3a`+`a3b0ba7` (fix). Depth 3. qa 2545/0;
+  fix-then-pass 4 items → PASS-AS-FIXED. Base marker defect `:2301` fixed;
+  singleton 0 in flight. DC-0001 31→32. Receipt full=full; sweep 3/0 exit 0.
+- **Where we are:** directive COMPLETE; NOTHING IN FLIGHT/STAGED/PUSHED — 14 ahead.
+  `residue.md` frozen. THIS FILE ~1.7 KB from ceiling: NEXT close needs
+  operator-authorized re-block.
