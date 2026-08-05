@@ -2372,3 +2372,19 @@ surface the T2–T4 refusals and per-arm acceptance explicitly.
   ALREADY EXISTS (independent session, dataset + sealed rule text only; label not
   named here — reveal ordering kept clean). Staged next but NOT DECLARED (a routing
   act, not the archivist's): **EXP-0003b — analysis/reveal.**
+
+## IN FLIGHT — `EXP-0003b-analysis-reveal` (declared 2026-08-05)
+
+- **Packet id:** `PACKET-0052-exp0003-analysis-reveal` — minted; 0 commits/0 files before this edit.
+- **Lane:** `substantive`. **Depth 2.** Routing receipt issued before building:
+  `routing-PACKET-0052-…-20260805T210607Z.md`, selected gravito_full (value factor
+  high_rework_history — the EXP-0002 reveal needed two fix rounds; this is the same
+  reveal-translation task class), budgets binding.
+- **Branch base:** at `e276b88` — PACKET-0051's close, tree quiet.
+- **Objective:** EXP-0003 outputs 3–5. Commit 1 = this declaration + the evaluator's
+  BLINDED_ANALYSIS.md verbatim + sibling provenance. Commit 2 = the reveal (mapping must hash
+  to the pre-committed `8a063552…`), REVEALED_COMPARISON.md (the routing frontier, gate
+  verdicts beside it per §10.5 with the committed calibration note), CONCLUSION.md drawing
+  exactly one §8 label with translation applying NO directional rule (none exists).
+- **Frozen:** sealed runs/, blinded_dataset.tsv, EVALUATOR_RULE_TEXT.md, GATE_CALIBRATION_NOTE.md,
+  PREREGISTRATION.md, both prior experiment trees, bench/, routing tools. No push without go.
