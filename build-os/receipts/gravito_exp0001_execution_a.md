@@ -98,3 +98,27 @@ committed in `analysis/MAPPING_SHA256.txt` and in the sealed manifest.
 - No merge, no deploy, no secrets touched.
 - **Staged next but NOT DECLARED** (declaring is a routing act, not the
   archivist's): **EXP-0001b** — blinded evaluation, reveal, conclusion.
+
+---
+
+## LATER RECORD (2026-08-05, same session) — the disjoint file-ownership manifest the close omitted
+
+The original receipt body above is NOT edited; this addendum completes it. Discovered by
+PACKET-0047's qa as the suite-red `UNATTRIBUTED` finding: the metrics row names two commits
+and this receipt recorded no file-ownership manifest. The omission was the archivist's at
+close time; the manifest is reconstructed here from the two commits' own diffs, which is
+exactly the "attribution recoverable by path" the guard demands.
+
+### Disjoint file-ownership manifest — SINGLE-WRITER, sequential commits, no fan-out
+
+One writer (the orchestrating session) produced both build commits in sequence; qa and the
+reviewer held no mutating tools. No two agents could contend, so disjointness holds
+trivially; the manifest is recorded anyway because a missing manifest has broken closes
+before (the P2 precedent this store already cites).
+
+- `b3a3b7f` — `build-os/experiments/EXP-0001-token-efficiency/PREREGISTRATION.md` (new);
+  `build-os/packets/active_packet.md` (append-only declaration).
+- `d2373e6` — `build-os/experiments/EXP-0001-token-efficiency/runs/**` (36 sealed files,
+  all new); `analysis/blinded_dataset.tsv` (new); `analysis/MAPPING_SHA256.txt` (new).
+- Writable sets of the two commits are disjoint except for no path at all (no file appears
+  in both diffs); every path is attributable to exactly one commit by `git show --numstat`.
