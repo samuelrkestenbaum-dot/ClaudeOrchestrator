@@ -2156,9 +2156,9 @@ surface the T2–T4 refusals and per-arm acceptance explicitly.
   the two mandated reconciliations (EXP-0001's trivial-task overhead; the historical
   weekly-usage drop).
 
-## IN FLIGHT — `EXP-0002b-analysis-reveal` (declared 2026-08-05)
+## CLOSED — `EXP-0002b-analysis-reveal` (declared 2026-08-05; closed 2026-08-05 by the archivist)
 
-- **Packet id:** `PACKET-0049-exp0002-analysis-reveal` — minted; 0 commits, 0 files carried the
+- **Packet id (CLOSED):** `PACKET-0049-exp0002-analysis-reveal` — minted; 0 commits, 0 files carried the
   token before this edit.
 - **Lane:** `substantive`. **Depth 2** — build (analysis commit, then reveal commit), then
   qa ‖ reviewer concurrently; archivist close after the verdict.
@@ -2173,3 +2173,46 @@ surface the T2–T4 refusals and per-arm acceptance explicitly.
 - **Frozen:** sealed runs/, blinded_dataset.tsv, PREREGISTRATION.md, bench/, EXP-0001 —
   untouched. No push without go. Acting on findings is the operator's decision, not this
   packet's.
+
+## CLOSE RECORD — `gravito_exp0002_analysis_reveal_a` (`PACKET-0049-exp0002-analysis-reveal`) — closed 2026-08-05 by the archivist. NOTHING IN FLIGHT.
+
+- **Packet id (CLOSED):** `PACKET-0049-exp0002-analysis-reveal`. Receipt:
+  `build-os/receipts/gravito_exp0002_analysis_reveal_a.md`. **Lane:** `substantive`.
+  **Total depth 5, each stage announced** — build; qa ‖ reviewer; fix; **Depth 4 =
+  `mandatory_full_regate`** (the fixes altered the load-bearing conclusion — NOT a
+  defect); stage 5 = the bounded second fix under the contract's executed-reason
+  exception. Base `5c04755`, tree quiet at declaration.
+- **Commits:** `23983ba` (blinded analysis VERBATIM + sibling provenance + declaration)
+  + `46809e6` (reveal: mapping `raw=X`/`buildos=Y` hash-verified byte-exact against
+  `916e1ae`'s pre-commitment `45734767…`; revealed comparison; conclusion) + `ca65b98`
+  (fix 1: all 4 first-round items, one installment) + `ce7588c` (fix 2: the two-line
+  flipped-percentage correction — the defect was CREATED by fix 1, could not have been
+  enumerated before it existed; reviewer's exact prescribed form; qa had independently
+  flagged the same wording).
+- **THE REGISTERED RESULT:** **`no sustained-workload savings detected`** — OFF used
+  **74.8% fewer** total tokens per durable accepted outcome than ON (ON at **3.96×**,
+  +296%; 2,631,154 vs 663,924; uncached agreeing 78.8%; 10/10 acceptance both arms;
+  crossover against ON at T3 on totals, T2 on uncached/cost). Evaluator's symmetric
+  wording preserved verbatim; the translation stage applies the registered directional
+  rule (§6 pre-assigned B-worse to rule 3); the mistranslation was caught by BOTH gates
+  independently; the neutral rule text committed (`analysis/EVALUATOR_RULE_TEXT.md`).
+  **The finding:** overhead is protocol-invocation-dependent, not fixed — ON cheaper on
+  T1 (−31.5%) and T4 (−56.5%), 3.9×/7.8× costlier on T3/T5; a router enforcing the
+  selector's verdicts prevents ONLY T5 (T3's verdict was `gravito_full`). Router =
+  next CANDIDATE, not built. Both mandated reconciliations carried.
+- **Gates:** first round on `46809e6` — reviewer fix-then-pass (4 items) + qa RED on
+  the same label-rule defect. Full re-gate on `ca65b98` — qa GREEN **2378/0 solo**,
+  commit-1 iso 2378/0, label mechanically re-derived, hash byte-exact, frozen surfaces
+  intact, all gates 0; reviewer fix-then-pass on the ONE item fix 1 introduced.
+  Targeted confirmation after `ce7588c`: 0 remaining occurrences,
+  control_registry_tests 180/0, tree clean → **PASS-AS-FIXED**. Second eyes NONE across
+  all four gate passes (Codex 403 at proxy each time, attempted and stated). `DC-0001`
+  numeral moved **28 → 29** in this close commit, derived from the receipt store.
+- **EXP-0002 is COMPLETE with this close:** all five outputs in ancestry order —
+  prereg `9cf0f87` → sealed records `916e1ae` → blinded
+  analysis `23983ba` → reveal `46809e6` → registered conclusion `ca65b98`/`ce7588c`.
+- **Boundaries:** NOTHING PUSHED — `23983ba`, `46809e6`, `ca65b98`, `ce7588c`, and this
+  close commit all local pending explicit operator go; none may be amended. No merge,
+  deploy, or secrets. `residue.md` stays frozen. **NOTHING IS IN FLIGHT; nothing is
+  staged** — the router candidate is a routing decision for the orchestrator, not the
+  archivist's to declare.

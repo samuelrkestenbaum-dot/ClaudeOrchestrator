@@ -2312,3 +2312,24 @@ byte ceiling. This file does, and it is nearly out; that is why this block is sh
   evaluator, pre-close); EXP-0002b (NOT declared) commits it verbatim, reveals against
   the hash, concludes with the two mandated reconciliations. Reveal promptly;
   mapping/transcripts are scratchpad-only. NOTHING PUSHED; no commit may be amended.
+
+## 2026-08-05 — `gravito_exp0002_analysis_reveal_a` (`PACKET-0049`) CLOSED — EXP-0002 COMPLETE
+
+- **REGISTERED RESULT: `no sustained-workload savings detected`** — OFF used **74.8%
+  fewer** total tokens per durable accepted outcome than ON (ON **3.96×**, +296%;
+  2,631,154 vs 663,924; uncached 78.8% agreeing; 10/10 accepted both arms; crossover
+  against ON at T3 totals, T2 uncached/cost). Evaluator wording verbatim;
+  translation applies the registered rule (§6→rule 3); neutral rule text committed
+  (`analysis/EVALUATOR_RULE_TEXT.md`). **Finding:** overhead is invocation-dependent —
+  ON cheaper on T1 (−31.5%)/T4 (−56.5%), 3.9×/7.8× costlier on T3/T5; a router enforcing
+  the selector prevents ONLY T5 (T3's verdict was `gravito_full`). **Router = next
+  CANDIDATE, not built.** Both mandated reconciliations carried; weekly drop
+  prior evidence.
+- **Commits:** `23983ba`+`46809e6` (build) +`ca65b98`+`ce7588c` (fixes). Depth 5:
+  gates fix-then-pass 4 items + qa RED (same label defect); Depth 4
+  mandatory_full_regate ran — qa GREEN 2378/0 solo; second fix under the
+  executed-reason exception (defect minted BY fix 1); PASS-AS-FIXED. Second eyes
+  NONE ×4 (Codex 403). DC-0001 **28→29**.
+- **Where we are:** NOTHING IN FLIGHT, nothing staged. All five outputs in ancestry:
+  `9cf0f87`→`916e1ae`→`23983ba`→`46809e6`→`ca65b98`/`ce7588c`. NOTHING PUSHED — those
+  four + close commit local pending explicit go; none amendable. `residue.md` frozen.
