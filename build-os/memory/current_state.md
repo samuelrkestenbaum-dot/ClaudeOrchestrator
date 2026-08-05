@@ -337,8 +337,8 @@ legal `--keep` retains it.
 
 ### Last close
 
-- **Last closed packet:** `gravito_truthful_name_cleanup_a`
-  (`PACKET-0044-truthful-name-cleanup`). The full close record — id derivation,
+- **Last closed packet:** `gravito_preintegration_baseline_a`
+  (`PACKET-0045-preintegration-baseline`). The full close record — id derivation,
   base, commits, verdict, and what it made true — is the newest history block
   below, preserved verbatim where it was written.
   **THIS LITERAL IS GATE-PINNED AND MUST STAY IN BLOCK 1.**
@@ -409,6 +409,76 @@ legal `--keep` retains it.
   are each a separate STOP for explicit go. Repo-scoped GH Actions never go global.
 
 ## Where we are — phase state and the ceiling in force
+
+- **AS OF 2026-08-05, LAST CLOSE `gravito_preintegration_baseline_a`
+  (`PACKET-0045-preintegration-baseline`) — VERDICT PASS-AS-FIXED.** qa **GREEN**, reviewer
+  **fix-then-pass (4 items)**, reconciled to **6** with qa's two and landed in ONE fix commit.
+  Base `7fb7f41` (the PUSHED TIP), HEAD `fff967e`; `c7433c5` + `945a140` + `014afb1` = **3 BUILD**,
+  `fff967e` = **1 FIX**. Suite **2314 / 0**. Receipt:
+  `build-os/receipts/gravito_preintegration_baseline_a.md`.
+- **THE HEADLINE IS A PARTIAL RESULT AND MUST NEVER BE RESTATED AS A WHOLE ONE.** This packet
+  delivers a **re-runnable pre-integration baseline for ONE of four corpus tasks**, plus
+  **validated-but-dormant apparatus for the other three**. It is **NOT "the pre-integration
+  baseline."** One quarter produced numbers; three quarters produced a proof of impossibility.
+- **T1 RAN AND IS GENUINELY COMPARABLE TO A FUTURE RUN** — instance byte-pinned at
+  `bb52f7b5ebbfc918b005a17a594279557a6249f8a94ba9163dcd70d9462614c2`, acceptance by a **hidden
+  oracle frozen before the run**, metrics from the CLI's own result object. Wall **29.87 s**,
+  **10** model calls, **$0.2130072**, tokens 14 in / 1544 out / 17,037 cache-create /
+  289,864 cache-read. **`time_to_first_correct_change` 20.37 s at 5 s poll resolution, stated as an
+  UPPER BOUND, derived by polling a hidden oracle, NEVER self-reported.** Row
+  `t1_run1_buildos_preintegration`, evidence `transcript`.
+- **T2/T3/T4 ARE IMPOSSIBLE HERE AND PRODUCED NO NUMBERS.** The headless `claude -p` agent is
+  **denied `Bash`**; all three corpus clauses require **the agent** to execute the suite. qa
+  reproduced the boundary independently (`permission_denials` on `node test/run.js`) and confirmed
+  **no honest path preserves the frozen corpus** — a harness running the suite *for* the agent
+  changes the task shape, which the corpus forbids. **`T3` IS THE PROTOCOL'S PRE-REGISTERED PRIMARY
+  ENDPOINT, AND IT IS PRECISELY THE TASK THAT CANNOT RUN.**
+- **THE APPARATUS IS DORMANT, NOT STRANDED.** Oracles were validated against known-good references
+  **without needing an agent run**, so T2/T3/T4 acceptance is proven and waiting. The moment a
+  Bash-permitted environment exists, **three tasks become runnable against a byte-pinned instance
+  set**, with no redesign.
+- **FOUR OPERATOR DECISIONS ARE OPEN AND ARE NOT THE ORCHESTRATOR'S TO TAKE** (receipt §7):
+  (1) the **root-shelf precedent** — `bench/` is the first refusal-capable script at the repo root,
+  outside `SCAN_DIRS`, so *"if a tool trips the scanner, move it outside the scan scope"* now makes
+  **scanner coverage shrinkable by geography, detected by nothing in the suite**; the rejected
+  alternative (rewriting `exit 2` to evade the regex) is named as **disguise rather than
+  architecture**. (2) The **`<=2 build commits` CONTRACT GAP** — see below. (3) **Phase D's
+  key-AND-network gate** — see below. (4) **2 bench gate registrations**, correctly declined
+  unilaterally under a 0-new-controls ceiling.
+- **THE 3 BUILD COMMITS ARE A CONTRACT GAP, NOT A BUILDER BREACH — DO NOT LOG IT AS ONE.**
+  Tree-quiet forbids handing a RED tree to the gates and amending is forbidden, so **"<=2 build
+  commits" and "hand back green" are JOINTLY UNSATISFIABLE whenever a build commit trips a
+  scanner.** Same shape as the flat `<=2 commits` rule the operator already withdrew. The RED at
+  `945a140` was real: **2312/2**, `scan-controls check` **exit 2**, **48 surfaces vs 46 gate-owned**,
+  both bench scripts UNREGISTERED. The relocation was **necessary, not precautionary**.
+- **SECOND EYES: THE CONCLUSION HOLDS BUT ITS EVIDENCE CHANGED, AND THE ROUTER WAS UPDATED.**
+  `which codex` now exits **0** (`/opt/node22/bin/codex`, `codex-cli 0.146.0`) — the old
+  *"exits 1"* claim in `tool_router.md` was **live-FALSE** and is corrected at this close. What
+  blocks Codex is no longer absence but **reachability**: `OPENAI_API_KEY` UNSET **and** the agent
+  proxy returns **`403` CONNECT / `connect_rejected — policy denial`** for `api.openai.com:443` on
+  both HTTPS and websocket transports. **Provisioning the key is NECESSARY BUT NOT SUFFICIENT — the
+  network policy must also allow the host. Two changes, not one. This gates Phase D.**
+- **THE FIX ROUND'S LOAD-BEARING DEFECT, FOUND INDEPENDENTLY BY BOTH GATES.** A `FORCE_DEGRADED=1`
+  run emitted a record **byte-indistinguishable from a legitimate one** — the exact *"number that
+  looks good and isn't"* the gate existed to prevent, **manufactured by the gate's own escape
+  hatch**. Every run now emits `suite_execution_gate:` on **both** exit paths, proven head-to-head
+  on T3 (`enforced` vs `BYPASSED_via_FORCE_DEGRADED — ... These numbers are NOT corpus results.`).
+- **THE NEAR-MISS IS WORTH MORE THAN THE NUMBER IT PROTECTED.** The first harness counted dispatches
+  by grepping `"Task"`; the tool is named **`Agent`** in CLI 2.1.222, so it reported **0 dispatches
+  for a run that made one** — and would have "confirmed" a stale document **by measuring the wrong
+  string**. qa reproduced the mechanism on its own stream. **A false zero reads as "no tool use"
+  rather than as an error**, which is the worst failure a witness can have.
+- **BOTH `COMPARISON_PROTOCOL.md` BLOCKERS ARE FALSE, VERIFIED BY EXECUTION** — `claude -p` works,
+  and a headless run **dispatched `build-orchestrator`** (1 `tool_use` named `Agent`, 0 named
+  `Task`, `subagent_type: build-orchestrator`).
+- **THE RETROSPECTIVE ARM CAN SUPPORT SHAPE CLAIMS AND NEVER A SPEED CLAIM.** 27 rows unmodified:
+  rounds median 4 (1-11), files 11.5 (1-32), insertions 1349.5, tests_added 45, defects_gated 7.
+  **`wall_min` is present in 1 of 27 rows.** `defects_escaped` is the literal `-` in **27/27, with
+  zero literal `0`s** — "nobody kept looking", never "nobody found anything".
+- **CAPACITY, DERIVED AT THIS CLOSE AND NOT QUOTED FROM BELOW.** `residue.md` is **FROZEN and was
+  NOT WRITTEN**: blob `01517ad2c30d447949a98d0b6db9b8d6b538d5a9`, **204,369 B, headroom 431 B**,
+  still UNROTATABLE at floor 25 of 25. **SIZE AND HEADROOM ARE DIFFERENT NUMBERS and were conflated
+  twice this session — 431 B is the HEADROOM.** **DERIVE THE SIZE BEFORE YOU WRITE.**
 
 - **AS OF 2026-08-04, LAST CLOSE `gravito_truthful_name_cleanup_a`
   (`PACKET-0044-truthful-name-cleanup`) — DECLARED FIRST IN ITS OWN COMMIT, AND THE FIRST CLOSE OF
@@ -732,6 +802,55 @@ legal `--keep` retains it.
   cause: a complete fix list whose contents are of a kind the re-review rules will not let you
   close narrowly.** Recorded as a **contract gap**, not as a defect of the packet or the reviewer,
   and left for the operator/orchestrator.
+
+## History — `gravito_preintegration_baseline_a` — ONE OF FOUR TASKS, AND AN HONEST IMPOSSIBILITY FOR THE OTHER THREE
+
+- **Closed 2026-08-05:** `PACKET-0045-preintegration-baseline`, verdict **PASS-AS-FIXED**. Receipt
+  `build-os/receipts/gravito_preintegration_baseline_a.md`. Lane `substantive`, **depth 3**
+  (builder; qa ‖ reviewer; one bounded fix round). Base `7fb7f41`, HEAD `fff967e`.
+- **WHAT IT DELIVERED:** byte-pinned task **instances** for a corpus that previously defined only
+  task **shapes**; **hidden acceptance oracles frozen before any run**; a harness; a retrospective
+  arm over the existing 27 rows; and an explicit record of what could not be measured.
+- **WHAT IT COULD NOT DELIVER, AND SAID SO:** T2/T3/T4, **including T3, the pre-registered PRIMARY
+  ENDPOINT**. The headless agent is denied `Bash` and all three clauses require the agent itself to
+  run the suite. **The apparatus for them is validated and dormant, not stranded.**
+- **WHY THE T1 NUMBER IS WORTH KEEPING — the gates, not the harness's own say-so.** Seed
+  determinism was **executed**: three seeds into three fresh dirs, the third ~30 min later,
+  `diff -r` empty across all pairs, all `bb52f7b5...`; no `$RANDOM`/`$$`/hostname/`date`/network,
+  and grepping the seeded tree for hostname, date and absolute path returns nothing.
+- **THE ORACLES ARE NON-VACUOUS, AND THE STRONG CASE IS THE ONE THAT COUNTS.** Pristine rejected
+  **4/4**, known-good accepted **4/4**. Then qa authored **`gameT2b`** — *a genuine, correct median
+  fix with a green 15-passed suite, indistinguishable from a legitimate candidate by every surface
+  signal* — and the executed differential **still rejected it**, because the added test passed
+  against unfixed source. An oracle that accepts a correct-looking fix which does not demonstrate
+  the defect is an oracle that will certify noise; this one does not.
+- **THE FIX ROUND (6 items, 1 commit, no test changes, suite held at 2314).** Beyond the
+  `suite_execution_gate:` defect: the phantom `--i-accept-a-degraded-run` flag is now named **only
+  as never having existed**, with the `--help` `sed` range re-pinned **`2,60` -> `2,65`** because a
+  stale range **would have silently truncated the very text being added**; `TOOL_CALLS` gained a
+  **structural JSON witness** that prints `DISAGREE` rather than silently preferring one; the
+  witness class widened **`[a-z-]` -> `[A-Za-z0-9_-]`** and whitespace-tolerant, **tested 0/0/0
+  pre-fix vs 2/1/`build_QA2-orchestrator` post-fix**; and qa's find that the **T1 oracle accepts a
+  DIFFERENT false claim** (`returns 10` -> ACCEPT) was surfaced in §5's non-vacuity table **with the
+  regex deliberately NOT widened** — a pinned string is right for a frozen instance, the defect was
+  visibility.
+- **TWO CAVEATS RECORDED WITH THEIR DIRECTION, WHICH IS WHAT MAKES THEM USABLE.**
+  `permission_denials` **can undercount** (3 denied blocks yielded 2 entries), but undercounting
+  denials makes the environment look **more permissive**, so it **cannot manufacture a false
+  IMPOSSIBLE**; and dispatch counters' residual error **inflates**, so **"0 dispatches" cannot be a
+  false zero from that mechanism**.
+- **THE PATH CORRECTION WENT INTO A FILE, NOT A COMMIT MESSAGE.** `bench/` is at the repo root;
+  the `t1_run1_buildos_preintegration` row and the `c7433c5` declaration both name
+  `build-os/bench/` and are immutable (append-only store; amending forbidden). The correction lives
+  in `bench/BASELINE_LIMITS.md` §5b, **because a commit message is not reachable from
+  `packet_metrics.tsv`** — someone re-seeding from that row would follow a dead path and never see
+  the explanation.
+- **A PROCESS NOTE THE GUARD CANNOT SEE.** `bandwidth.active_packet_singleton` read **0 in flight**
+  for this packet's whole declared life, because the declaration reads `**canonical packet id:**`
+  and the guard counts `**Packet id:**`. **`DEFECT-0011` did NOT recur in substance** — the packet
+  was declared before dispatch, in its own commit (`c7433c5`), as a pure APPEND below `:89` so
+  `ANC-0003` never moved. The guard simply supplies no evidence either way; `OCCURRENCE-0005`'s
+  lower bound is still unbuilt, six occurrences later.
 
 ## History — rotation #4 of this file — MECHANICAL MAINTENANCE, not a governance packet
 

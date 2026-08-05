@@ -4,34 +4,34 @@
 > the builder implements exactly this and nothing else; the archivist clears it
 > on close. One packet at a time.
 
-## CLOSED — NOTHING IN FLIGHT — `gravito_truthful_name_cleanup_a` closed 2026-08-04
+## CLOSED — NOTHING IN FLIGHT — `gravito_preintegration_baseline_a` closed 2026-08-05
 
-- **Packet id (CLOSED):** `PACKET-0044-truthful-name-cleanup`. Receipt:
-  `build-os/receipts/gravito_truthful_name_cleanup_a.md`. **Verdict PASS** — qa
-  **GREEN**, reviewer **PASS**, **NO FIX ROUND.** Base `6454220`, HEAD `ab5d533`;
-  `61bee02` (declaration) + `ab5d533` (implementation) are **2 BUILD commits and
-  0 FIX commits** — inside the typed budget with the fix slot **UNSPENT**, which
-  is the first time in this sequence nothing was spent on correction.
-- **The bullet above deliberately does NOT match the declaration pattern**
-  `bandwidth.active_packet_singleton` counts, so the guard reads **0 in flight**
-  again — and **zero is still PERMITTED**. `OCCURRENCE-0005`'s lower bound remains
-  unbuilt, so a clean guard here is not evidence of anything.
+- **Packet id (CLOSED):** `PACKET-0045-preintegration-baseline`. Receipt:
+  `build-os/receipts/gravito_preintegration_baseline_a.md`. **Verdict PASS-AS-FIXED**
+  — qa **GREEN**, reviewer **fix-then-pass (4 items)**, reconciled to **6** with
+  qa's two, all landed in ONE fix commit. Base `7fb7f41` (the PUSHED TIP), HEAD
+  `fff967e`; `c7433c5` + `945a140` + `014afb1` = **3 BUILD** and `fff967e` = **1
+  FIX**. The third build commit is a CONTRACT GAP, not a breach — receipt §7.2.
+- **A PARTIAL RESULT, AND IT MUST BE READ AS ONE.** A re-runnable baseline for **ONE
+  of four** corpus tasks (T1), and validated-but-dormant apparatus for the other
+  three. **T2/T3/T4 are IMPOSSIBLE here** — the headless agent is denied `Bash`,
+  which their corpus clauses require. **T3 is the PRE-REGISTERED PRIMARY ENDPOINT.**
 - **THIS EDIT IS LINE-COUNT-NEUTRAL ABOVE THE `ANC-0003` SITE ON PURPOSE** —
   `build-os/packets/active_packet.md:89#ANC-0003` is embedded as a RESOLVED line
   number in the committed kernel projection and `tests/memory_kernel_tests.sh`
-  §18 compares it with `cmp -s`. **21 lines replace 21 lines.**
-- **NEXT — NOTHING IS STAGED, AND THAT IS THE RULING.** Per the operator, this
-  was the **LAST GOVERNANCE PACKET**; work returns to **Repository Core and live
-  provider execution**. The standing backlog in `current_state.md` is a **RECORD,
-  NOT A QUEUE** — nothing on it is scheduled and the next packet is the
-  operator's to cut. **Do not stage a governance successor here by default.**
+  §18 compares it with `cmp -s`. **21 lines replace 21 lines, then 4 replace 4.**
+- **NEXT — NOTHING IS STAGED.** Work is at **Repository Core and live provider
+  execution**. FOUR OPERATOR DECISIONS are open and are NOT the orchestrator's to
+  take: the root-shelf precedent, the `<=2 build commits` contract gap, Phase D's
+  key-AND-network-policy gate, and 2 bench gate registrations. The backlog in
+  `current_state.md` is a **RECORD, NOT A QUEUE**. Receipt §7 carries all four.
 
 ## Branch base
 
-Branched at `6454220` on `claude/project-handoff-merge-ramhds`, verified with
-`git merge-base HEAD 6454220` → `6454220`, **before the first edit**. `6454220`
+Branched at `7fb7f41` on `claude/project-handoff-merge-ramhds`, verified with
+`git merge-base HEAD 7fb7f41` -> `7fb7f41`, **before the first edit**. `7fb7f41`
 is the PUSHED TIP; every commit of this packet is LOCAL and UNPUSHED, and no
-push/merge/PR/tag/deploy go has been given or asked for. (Previous base `74575ee`.)
+push/merge/PR/tag/deploy go has been given or asked for. (Previous base `6454220`.)
 
 ## What `gravito_current_state_reblock_a` must make true
 
@@ -1888,7 +1888,17 @@ stage 5 is closed, so both items below were **recorded, not built**.
 
 ---
 
-## PACKET-0045-preintegration-baseline — DECLARED
+## PACKET-0045-preintegration-baseline — CLOSED 2026-08-05 (declaration preserved below)
+
+> **CLOSED PASS-AS-FIXED.** Receipt: `build-os/receipts/gravito_preintegration_baseline_a.md`.
+> Base `7fb7f41`, HEAD `fff967e`; `c7433c5` + `945a140` + `014afb1` (3 BUILD) + `fff967e` (1 FIX).
+> **The declaration below is preserved VERBATIM as written before dispatch** — it is the evidence
+> that this packet was declared first, and rewriting it would destroy exactly that. Read it as
+> history. Its `build-os/bench/` paths are superseded by `bench/` (receipt §6.5).
+> **NOTE, for the guard's sake:** the declared-id line below reads `**canonical packet id:**`,
+> which does NOT match the `**Packet id:**` pattern `bandwidth.active_packet_singleton` counts,
+> so that guard read **0 in flight** for this packet's whole declared life. `DEFECT-0011` did NOT
+> recur in substance; the guard simply cannot see the difference. Receipt §9 item 10.
 
 - **THIS DECLARATION IS APPENDED BELOW THE `ANC-0003` SITE AT `:89`, AND NOTHING ABOVE `:89` IS
   TOUCHED.** `tests/memory_kernel_tests.sh` §18 embeds
