@@ -18,8 +18,9 @@ PREREGISTRATION.md §6 gates the two favorable labels on a ≥25% difference **i
 B's (Gravito ON's) favor**, and pre-assigned the B-worse case to rule 3. B was
 worse. **The registered label is therefore `no sustained-workload savings
 detected`**, with the magnitude the rule demands stated plainly: **at sequence
-level, Gravito ON used 74.8% MORE total tokens per durable accepted outcome
-than Gravito OFF** (2,631,154 vs 663,924; uncached agreeing at 78.8%; cost
+level, Gravito OFF used 74.8% fewer total tokens per durable accepted outcome
+than Gravito ON — equivalently, ON ran at 3.96× (+296%)**
+(2,631,154 vs 663,924; uncached agreeing at 78.8%; cost
 $9.12 vs $2.25; wall clock 1,977 s vs 451 s), with 10/10 acceptance and no
 confound clause fired. Both gates caught the mistranslation independently;
 the blinded analysis file is verbatim evidence and is untouched.

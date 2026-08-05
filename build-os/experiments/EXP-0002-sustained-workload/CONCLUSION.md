@@ -2,8 +2,9 @@
 
 **`no sustained-workload savings detected`** — with the magnitude and direction
 stated as the registered rule requires: at sequence level on this task mix,
-**Gravito ON used 74.8% MORE total tokens per durable accepted outcome than
-Gravito OFF** (2,631,154 vs 663,924; uncached agreeing at 78.8%; 10/10
+**Gravito OFF used 74.8% fewer total tokens per durable accepted outcome than
+Gravito ON — equivalently, ON ran at 3.96× (+296%)**
+(2,631,154 vs 663,924; uncached agreeing at 78.8%; 10/10
 acceptance both arms; ON cumulatively cheaper only through T2, the crossover
 against it at T3 on totals and already at T2 on uncached tokens and cost).
 
