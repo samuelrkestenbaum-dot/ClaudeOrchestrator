@@ -2259,3 +2259,30 @@ byte ceiling. This file does, and it is nearly out; that is why this block is sh
   evaluation, reveal, conclusion. Reveal must come promptly: the mapping and stream logs
   live only in the session scratchpad. NOTHING PUSHED — `b3a3b7f`, `d2373e6`, close
   commit local pending explicit go.
+
+## 2026-08-05 — `gravito_exp0001_analysis_reveal_a` (`PACKET-0047-exp0001-analysis-reveal`) CLOSED — EXP-0001 COMPLETE
+
+- **EXP-0001b executed:** blinded analysis committed VERBATIM at `7d56cbc` (mapping
+  absent from the tree — ls-tree proof), reveal + conclusion at `698e3c3`. Base
+  `92c7276`. 2 build commits, NO fix commit, depth 2.
+- **THE RESULT:** blinded evaluator (X/Y dataset + rule only) — "causal
+  effect supported, condition Y lower": 50.8% median total-token reduction, ranges
+  fully disjoint (Y max 227,089 < X min 311,164), 5/5 acceptance both arms, no
+  confound fired. Mapping raw=Y / buildos=X, byte-exact to the pre-committed sha256
+  `0a4b66a1…`, verified by qa AND reviewer. **Gravito OFF used 50.8% FEWER tokens on
+  T1 (OFF median 153,611 vs ON 312,444) — the supported effect is Gravito INCREASING
+  tokens, direction OPPOSITE the hypothesis.** Scope: T1-class only, N=5 pairs, one
+  repo, one model config; T2–T4 no numeric data; the substantive-work claim untested,
+  not contradicted. **EXP-0001 COMPLETE** — all five outputs in ancestry order
+  (`b3a3b7f` → `d2373e6` → `7d56cbc` → `698e3c3`); experiment frozen; acting on the
+  finding is the OPERATOR'S.
+- **Gates:** qa initially RED 2375/3 — all three failures pre-existed at BASE
+  `92c7276` (PACKET-0046's close bookkeeping, written AFTER its gates measured
+  `d2373e6`); repaired OUTSIDE this packet by tiny-lane `d0a2231`; after it FULL SUITE
+  **2378/0** solo, affected suites 70/0, check-adoption exit 0. Reviewer **PASS, ZERO
+  items**. Second eyes NONE; `DC-0001` numeral **26 → 27**, derived. Defect class
+  named: **"close bookkeeping written after the gates"** — the next archivist runs
+  `check-adoption.sh` BEFORE committing a close.
+- **Where we are:** NOTHING IN FLIGHT, nothing staged. NOTHING PUSHED — `b3a3b7f`,
+  `d2373e6`, `92c7276`, `7d56cbc`, `698e3c3`, `d0a2231`, close commit all local
+  pending explicit go; none may be amended. `residue.md` stays frozen.

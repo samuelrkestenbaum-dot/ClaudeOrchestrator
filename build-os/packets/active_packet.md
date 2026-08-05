@@ -2027,9 +2027,9 @@ archivist's. Advisories carried there (receipt §7): execute the reveal promptly
 mapping and the 10 stream logs exist only in the session scratchpad; and the analysis must
 surface the T2–T4 refusals and per-arm acceptance explicitly.
 
-## IN FLIGHT — `EXP-0001b-token-efficiency-analysis` (declared 2026-08-05)
+## CLOSED — `EXP-0001b-token-efficiency-analysis` (declared 2026-08-05; closed 2026-08-05 by the archivist)
 
-- **Packet id:** `PACKET-0047-exp0001-analysis-reveal` — minted; `git log -S'PACKET-0047' --all`
+- **Packet id (CLOSED):** `PACKET-0047-exp0001-analysis-reveal` — minted; `git log -S'PACKET-0047' --all`
   returned 0 commits and a full-tree grep 0 files before this edit.
 - **Lane:** `substantive`. **Depth 2** — build stage (blinded analysis committed, then reveal),
   then qa ‖ reviewer concurrently. Archivist close after the verdict.
@@ -2047,3 +2047,38 @@ surface the T2–T4 refusals and per-arm acceptance explicitly.
   `PREREGISTRATION.md`, or any frozen surface. `residue.md` stays frozen. No push without go.
 - **Out of scope:** any Gravito optimization or response to the result — acting on the
   finding is the operator's decision, not this packet's.
+
+## CLOSE RECORD — `gravito_exp0001_analysis_reveal_a` (`PACKET-0047-exp0001-analysis-reveal`) — closed 2026-08-05 by the archivist. NOTHING IN FLIGHT.
+
+- **Packet id (CLOSED):** `PACKET-0047-exp0001-analysis-reveal`. Receipt:
+  `build-os/receipts/gravito_exp0001_analysis_reveal_a.md`. **Lane:** `substantive`.
+  **Depth 2** — build stage, then qa ‖ reviewer concurrently. Base `92c7276`.
+- **Commits:** `7d56cbc` (blinded analysis VERBATIM + declaration; mapping absent from the
+  tree — ls-tree proof) + `698e3c3` (mapping reveal + `REVEALED_COMPARISON.md` +
+  `CONCLUSION.md`). **2 build commits, NO fix commit belongs to this packet.**
+- **THE RESULT:** blinded evaluator — "causal effect supported, condition Y lower", 50.8%
+  median total-token reduction, ranges fully disjoint. Mapping raw=Y / buildos=X,
+  byte-exact to the pre-committed sha256 `0a4b66a1…`, verified by qa AND reviewer.
+  **Gravito OFF used 50.8% FEWER tokens on T1 (OFF median 153,611 vs ON 312,444) —
+  direction OPPOSITE the hypothesis.** Scope: T1-class only, N=5 pairs, one repo, one
+  model config; T2–T4 no numeric data; the substantive-work claim untested, not
+  contradicted. **EXP-0001 is COMPLETE** — all five outputs in ancestry order
+  (`b3a3b7f` → `d2373e6` → `7d56cbc` → `698e3c3`); the experiment stays frozen; acting
+  on the finding is the operator's decision.
+- **Gates:** qa initially RED 2375/3 — all three failures pre-existed at BASE `92c7276`
+  (PACKET-0046's close bookkeeping, written AFTER its gates measured `d2373e6`); this
+  packet's commits proved empty diffs on those surfaces. Repaired OUTSIDE this packet by
+  tiny-lane `d0a2231` (2 rounds, not a fix commit of this packet, not a doctrine breach);
+  after it FULL SUITE **2378/0** solo at `d0a2231`, both affected suites 70/0,
+  `check-adoption` exit 0. Reviewer **PASS, ZERO items**; no result-driven mutation —
+  frozen surfaces byte-untouched despite the unflattering result. Second eyes NONE
+  (Codex 403 CONNECT policy-denied, reproduced live by both gates); `DC-0001` numeral
+  moved **26 → 27** in this close commit, derived from the receipt store.
+- **Defect class named:** "close bookkeeping written after the gates" — the next
+  archivist runs `check-adoption.sh` BEFORE committing a close. This close ran it before
+  (exit 0 at `d0a2231`) and after writing its row and receipt (exit 0).
+- **Boundaries:** NOTHING PUSHED — `b3a3b7f`, `d2373e6`, `92c7276`, `7d56cbc`,
+  `698e3c3`, `d0a2231`, and this close commit all local pending explicit operator go;
+  none may be amended. No merge, deploy, or secrets. `residue.md` stays frozen.
+  **NOTHING IS IN FLIGHT; nothing is staged** — any follow-up to the finding is the
+  operator's routing act, not the archivist's.
