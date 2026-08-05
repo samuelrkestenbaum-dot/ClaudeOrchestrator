@@ -71,15 +71,20 @@ LOGF="$RDIR/live_gate_log.tsv"
 SDIR="$RDIR/live_state"
 RECDEG="$CODE_ROOT/build-os/tools/record-degradation.sh"
 PROCESS_ROLES="builder qa reviewer archivist build-orchestrator"
-DEFAULT_PROCESS_ALLOWANCE=4
+DEFAULT_PROCESS_ALLOWANCE=7
 
 now(){ date -u +%Y-%m-%dT%H:%M:%SZ; }
 
 # Append one decision row: timestamp, task identity, selected depth, decision, detail.
 # Best-effort on purpose: logging must never turn a decision into a crash.
 logrow(){ # <task_id> <depth> <decision> <detail>
-  { mkdir -p "$RDIR" 2>/dev/null && \
-    printf '%s\t%s\t%s\t%s\t%s\n' "$(now)" "${1:--}" "${2:--}" "${3:--}" "${4:--}" >> "$LOGF"; } 2>/dev/null || true
+  # Best-effort log append; when the routing store is unwritable the row goes
+  # to STDERR instead, so the trace survives the one vector that silences the
+  # file (named in routing_contract_live.md layer 4). Never fails the caller.
+  if ! { mkdir -p "$RDIR" 2>/dev/null && \
+    printf '%s\t%s\t%s\t%s\t%s\n' "$(now)" "${1:--}" "${2:--}" "${3:--}" "${4:--}" >> "$LOGF"; } 2>/dev/null; then
+    printf 'routing-gate UNLOGGED(store unwritable): %s %s %s %s\n' "${1:--}" "${2:--}" "${3:--}" "${4:--}" >&2 || true
+  fi
 }
 
 # The ONE label block, shared verbatim with record-degradation.sh (the suite

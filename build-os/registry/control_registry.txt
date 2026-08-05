@@ -2339,7 +2339,7 @@ inputs: the pending tool call as PreToolUse JSON on stdin (tool_name, tool_input
 output: exit 0 admitting the pending call, or exit 2 with a model-visible stderr refusal that always carries continue-the-task language; every decision (task identity, selected depth, decision, timestamp) is appended to live_gate_log.tsv
 owning_module: .claude/hooks/routing-gate.sh
 consuming_policies: .claude/settings.json wires it as PreToolUse (matcher Task|Agent) so every subagent dispatch in sessions started after the wiring runs through it; the tool-event counter (matcher *) and PostToolUse observer are the same module; tests/routing_live_gate_tests.sh drives every branch in BOTH directions with fabricated stdin JSON on every suite run
-evidence_refs: .claude/hooks/routing-gate.sh:148; .claude/hooks/routing-gate.sh:182; .claude/hooks/routing-gate.sh:193; .claude/hooks/routing-gate.sh:213; .claude/hooks/routing-gate.sh:322
+evidence_refs: .claude/hooks/routing-gate.sh:153; .claude/hooks/routing-gate.sh:187; .claude/hooks/routing-gate.sh:198; .claude/hooks/routing-gate.sh:218; .claude/hooks/routing-gate.sh:327
 failure_behavior: BLOCKS the pending dispatch (exit 2, stderr instructs how to CONTINUE) on no-open-receipt, dispatch under direct/gravito_light without an evidence-bearing escalation record, a degraded receipt, task dispatches at budget_max_subagents (stamping the degradation via record-degradation.sh first), and process-role dispatches at process_dispatch_allowance; FAILS OPEN (exit 0, FAIL-OPEN row logged) on its own errors — a gate that fails closed on a bug is a denial of service against the operator
 rollback_behavior: the decision itself is not a write; the ledger writes it triggers are classified separately as routing.live_gate_ledger_append and routing.degradation_stamp
 promotion_requirement: becomes load_bearing at the first session start after the wiring commit, when hooks load and the Claude Code runtime acts on its exit code — hooks do NOT govern the session that ships them
@@ -2357,7 +2357,7 @@ inputs: an admitted or refused gate decision, a counted PreToolUse tool event, o
 output: append-only rows in build-os/packets/routing/live_gate_log.tsv (every decision) and live_state/<receipt-id>.tsv (EXACT dispatch/tool/failure counts under per-field EXACT-vs-unavailable labels), and one stub contribution row per admitted Full task dispatch appended to the open receipt
 owning_module: .claude/hooks/routing-gate.sh
 consuming_policies: routing-check.sh's STATE-DISAGREE close-consistency check reads the state file's EXACT counts against the filled receipt; routing_contract_live.md's live-visibility layer is these files; tests/routing_live_gate_tests.sh derives every count from them on every suite run
-evidence_refs: .claude/hooks/routing-gate.sh:82; .claude/hooks/routing-gate.sh:106; .claude/hooks/routing-gate.sh:230
+evidence_refs: .claude/hooks/routing-gate.sh:85; .claude/hooks/routing-gate.sh:111; .claude/hooks/routing-gate.sh:235
 failure_behavior: a logging failure never blocks a tool call (the ledger serves the gate, not the reverse); a state-row failure on an ALLOW path fails open and is logged FAIL-OPEN
 rollback_behavior: append-only stores — a wrong row is corrected by a later row or reconciled at close, never rewritten in place (the EVENT-APPEND-ONLY doctrine)
 promotion_requirement: becomes load_bearing with routing.live_dispatch_gate at the first post-wiring session start

@@ -367,9 +367,9 @@ echo "== 10. REQUIRED TEST 9 — task vs process dispatch counts reconcile over 
 R10="$(mkroot r10)"
 REC10="$(issue "$R10" T-FULL-05 "$D_FULL")"
 A10="$(awk -F': ' '/^process_dispatch_allowance: /{print $2}' "$REC10")"
-[ "$A10" = "4" ] \
-  && ok "the receipt carries process_dispatch_allowance: 4 — the builder/qa/reviewer/archivist chain, SEPARATE from budget_max_subagents (the 0050/0051 calibration question resolved mechanically)" \
-  || no "process_dispatch_allowance is '$A10', not the default 4"
+[ "$A10" = "7" ] \
+  && ok "the receipt carries process_dispatch_allowance: 7 — the doctrine's largest legal chain (mandatory_full_regate: builder,qa,reviewer,fix-builder,qa,reviewer,archivist), SEPARATE from budget_max_subagents" \
+  || no "process_dispatch_allowance is '$A10', not the default 7"
 for t in builder qa; do
   RC="$(rungate "$R10" gate "$(dispatch_json $t)" "$WORK/t9-$t)")"
   [ "$RC" = "0" ] && ok "process-role dispatch ($t) admitted against the allowance, not the task budget" \
@@ -379,21 +379,22 @@ for i in 1 2; do
   RC="$(rungate "$R10" gate "$(dispatch_json general-purpose)" "$WORK/t9-task$i")"
   [ "$RC" = "0" ] || no "task dispatch $i blocked unexpectedly (exit $RC)"
 done
-for t in reviewer archivist; do
-  RC="$(rungate "$R10" gate "$(dispatch_json $t)" "$WORK/t9-$t)")"
-  [ "$RC" = "0" ] || no "process dispatch $t blocked (exit $RC)"
+for t in reviewer builder qa reviewer2 archivist; do
+  role="${t%2}"
+  RC="$(rungate "$R10" gate "$(dispatch_json $role)" "$WORK/t9-$t)")"
+  [ "$RC" = "0" ] || no "process dispatch $t blocked (exit $RC) — the full mandatory_full_regate chain must fit the allowance"
 done
 SF10="$(statefile "$R10" "$REC10")"
 NT="$(awk -F'\t' '$2=="task_dispatch"' "$SF10" | grep -c . || true)"
 NP="$(awk -F'\t' '$2=="process_dispatch"' "$SF10" | grep -c . || true)"
 [ "${NT:-0}" = "2" ] && ok "EXACT: 2 task dispatches counted as task work (against budget_max_subagents)" || no "task count ${NT:-0}, expected 2"
-[ "${NP:-0}" = "4" ] && ok "EXACT: 4 process-role dispatches counted separately (attributed governance_process)" || no "process count ${NP:-0}, expected 4"
+[ "${NP:-0}" = "7" ] && ok "EXACT: 7 process-role dispatches counted separately (attributed governance_process) — the mandatory_full_regate shape fits" || no "process count ${NP:-0}, expected 7"
 awk -F'\t' '$2=="process_dispatch" && $3 !~ /governance_process/' "$SF10" | grep -q . \
   && no "a process_dispatch row lacks its governance_process attribution" \
   || ok "every process_dispatch row is attributed to governance_process"
-# The FIFTH process dispatch is at the allowance: blocked, attributed, continue-language.
+# The EIGHTH process dispatch is at the allowance: blocked, attributed, continue-language.
 RC="$(rungate "$R10" gate "$(dispatch_json build-orchestrator)" "$WORK/t9-over")"
-[ "$RC" = "2" ] && ok "RED: process dispatch 5 at allowance 4 is BLOCKED (governance ceremony is budgeted too)" \
+[ "$RC" = "2" ] && ok "RED: process dispatch 8 at allowance 7 is BLOCKED (governance ceremony is budgeted too, above the largest legal chain)" \
                || no "RED FAILED: process dispatch over allowance passed (exit $RC)"
 grep -qi "governance_process" "$WORK/t9-over.err" \
   && ok "the process block names its attribution layer (governance_process)" || no "process block unattributed"

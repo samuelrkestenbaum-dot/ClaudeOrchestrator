@@ -86,7 +86,7 @@ the control as `UNREPORTED`.
 | `metrics.decision.store_append` | A | execute | gate | `build-os/metrics/record-decision.sh:479` | 1 |
 | `metrics.decision.outcome_update` | A | execute | gate | `build-os/metrics/record-decision.sh:744` | 1 |
 | `memory.kernel_store_append` | A | execute | gate | `build-os/tools/memory-kernel.sh:573` | 1 |
-| `routing.live_gate_ledger_append` | A | execute | gate | `.claude/hooks/routing-gate.sh:82` | 3 |
+| `routing.live_gate_ledger_append` | A | execute | gate | `.claude/hooks/routing-gate.sh:85` | 3 |
 | `routing.degradation_stamp` | A | execute | gate | `build-os/tools/record-degradation.sh:71` | 2 |
 
 <!-- MISMATCH-TABLE:END -->

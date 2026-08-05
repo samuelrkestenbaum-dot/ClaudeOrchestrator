@@ -125,12 +125,13 @@ DESCRIPTOR_ONELINE="$(printf '%s' "$DESCRIPTOR" | tr '\n' ' ')"
   printf 'budget_max_model_calls: %s\n' "$B_CALLS"
   printf 'budget_max_wall_clock_s: %s\n' "$B_WALL"
   printf 'budget_max_cost_usd: %s\n' "$B_COST"
-  printf '# --- process allowance (PACKET-0053): the packet'\''s OWN gate chain (builder/qa/\n'
-  printf '# --- reviewer/archivist) is governance ceremony, counted SEPARATELY from task\n'
-  printf '# --- work by the live gate and attributed to governance_process. This resolves\n'
-  printf '# --- the PACKET-0050/0051 open calibration question mechanically: process-role\n'
-  printf '# --- dispatches never eat budget_max_subagents. Default 4 = the standard chain.\n'
-  printf 'process_dispatch_allowance: 4\n'
+  printf '# --- process allowance (PACKET-0053): the packet'\''s OWN gate chain is governance\n'
+  printf '# --- ceremony, counted SEPARATELY from task work by the live gate and attributed\n'
+  printf '# --- to governance_process (the 0050/0051 calibration question, resolved). Default\n'
+  printf '# --- 7 = the LARGEST LEGAL chain in the doctrine: mandatory_full_regate runs\n'
+  printf '# --- builder, qa, reviewer, fix-builder, qa, reviewer, archivist. (No-fix chain\n'
+  printf '# --- is 4; fix-then-pass is 6.) Process dispatches never eat budget_max_subagents.\n'
+  printf 'process_dispatch_allowance: 7\n'
   printf '# --- empty at issue; filled at close. AN UNKNOWN IS NOT A ZERO: "-" is an honest\n'
   printf '# --- admission and is never refused; refusal is for CONTRADICTION, not absence.\n'
   printf 'executed_mode: -\n'

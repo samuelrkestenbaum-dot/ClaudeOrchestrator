@@ -291,7 +291,7 @@ runtime_authority: execute
 deployment_mode: bounded_autonomous
 implementation_status: implemented
 empirical_status: red_driven
-evidence_refs: .claude/hooks/routing-gate.sh:82; .claude/hooks/routing-gate.sh:106; .claude/hooks/routing-gate.sh:230
+evidence_refs: .claude/hooks/routing-gate.sh:85; .claude/hooks/routing-gate.sh:111; .claude/hooks/routing-gate.sh:235
 receipt_behavior: the ledger IS the receipt: every decision row carries timestamp, task identity, selected depth, decision and detail; counts are derived by counting rows and stored nowhere, so the ledger cannot disagree with a stored counter
 notes: CENSUSED IN THE COMMIT THAT CREATED IT (the MUT-0009 discipline). deployment_mode is bounded_autonomous, and the bound is structural: append-only, three fixed targets, and the writer FAILS OPEN rather than blocking work when its own writes fail. This is the first censused mutator that runs inside the tool-call path itself; its overhead is measured and bounded by tests/routing_live_gate_tests.sh section 3.
 

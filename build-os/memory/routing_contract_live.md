@@ -65,8 +65,10 @@ read time from `issued_at`; tokens/cost are `unavailable_live` — never faked.
   stamped note is exactly what lets routing-check.sh PASS the honest breach.
 - **Process-role dispatches** (`subagent_type` in builder | qa | reviewer |
   archivist | build-orchestrator) count against
-  `process_dispatch_allowance` (receipt field, default 4 — the standard
-  chain), attributed to `governance_process`. This RESOLVES the
+  `process_dispatch_allowance` (receipt field, default 7 — DERIVED from the
+  doctrine's largest LEGAL chain shape: `mandatory_full_regate` runs builder,
+  qa, reviewer, fix-builder, qa, reviewer, archivist = 7; the no-fix chain is
+  4 and fix-then-pass is 6), attributed to `governance_process`. This RESOLVES the
   PACKET-0050/0051 open calibration question: a Full packet's own gate chain
   no longer brushes `max_subagents: 3`, and neither ledger bleeds into the
   other. Both counts appear in the state file and the close fill
@@ -95,4 +97,9 @@ fails closed on a bug is a denial of service against the operator.
 `ROUTING_GATE_DISABLE=1` is the **operator-only** escape — refused-by-default
 posture: agents do not set it, its use is always logged to
 `live_gate_log.tsv` (`DISABLED-BY-OPERATOR`), and an escape that leaves no
-trace would be a bypass, which is why the trace is unconditional.
+trace would be a bypass. The trace has ONE named gap: an unwritable
+routing store silences the log file — in that case the gate emits the row to
+stderr instead (`UNLOGGED(store unwritable)`), so the trace survives as a
+model-visible line rather than a file row; a session that both makes the
+store unwritable and discards stderr leaves no durable trace, and that
+residual vector is named here, in layer 4, not lacquered.
