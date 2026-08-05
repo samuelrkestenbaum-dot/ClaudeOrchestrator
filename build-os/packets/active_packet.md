@@ -2082,3 +2082,24 @@ surface the T2–T4 refusals and per-arm acceptance explicitly.
   none may be amended. No merge, deploy, or secrets. `residue.md` stays frozen.
   **NOTHING IS IN FLIGHT; nothing is staged** — any follow-up to the finding is the
   operator's routing act, not the archivist's.
+
+## IN FLIGHT — `EXP-0002a-sustained-workload-execution` (declared 2026-08-05)
+
+- **Packet id:** `PACKET-0048-exp0002-sustained-workload` — minted; `git log -S'PACKET-0048' --all`
+  0 commits, full-tree grep 0 files before this edit.
+- **Lane:** `substantive`. **Depth 2** — build stage (preregistration + harness + sequence runs),
+  then qa ‖ reviewer concurrently; archivist close after the verdict.
+- **Branch base:** at `982054a` — the pushed tip (EXP-0001 published; remote = local, 0/0).
+- **Objective (operator, 2026-08-05):** Track B of the two-track directive — the sustained-workload
+  token-efficiency experiment, Claude alone, Codex not a prerequisite. Five related tasks
+  (diagnose → tested fix → multi-file feature → injected regression → fresh-session follow-up)
+  on one evolving parcel-billing tree per arm, fresh session per task, byte-identical prompts;
+  arm raw vs arm buildos; Bash-capable path proven (`BASH_PROBE_OK_42`, scoped allowlist,
+  0 denials — the EXP-0001 invalidity condition resolved). Cumulative curves + crossover point.
+  Weekly meter: unobservable here, recorded as such, never estimated.
+- **Commit plan:** commit 1 = preregistration + harness + this declaration (BEFORE run 1;
+  seed digest 128485c6… pinned in the prereg); commit 2 = sealed run records + manifest +
+  blinded dataset + mapping sha256. Analysis/reveal = the NEXT packet, preserving the
+  evaluator-independence commit boundary.
+- **Frozen:** bench/ and all EXP-0001 artifacts untouched; no mid-run optimization; failed runs
+  retained; `residue.md` frozen; no push without go (the EXP-0001 go does not extend here).
