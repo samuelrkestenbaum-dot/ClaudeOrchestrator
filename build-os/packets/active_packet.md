@@ -1885,3 +1885,80 @@ stage 5 is closed, so both items below were **recorded, not built**.
    two were **not**, because the archivist may only write under `build-os/`. See receipt §8.
 
 `PACKET-0043-derived-restatement-sweep` remains **staged and undeclared** from the previous close.
+
+---
+
+## PACKET-0045-preintegration-baseline — DECLARED
+
+- **THIS DECLARATION IS APPENDED BELOW THE `ANC-0003` SITE AT `:89`, AND NOTHING ABOVE `:89` IS
+  TOUCHED.** `tests/memory_kernel_tests.sh` §18 embeds
+  `build-os/packets/active_packet.md:89#ANC-0003` as a **resolved line number**; a pure append at the
+  end of the file is line-count-neutral above the site by construction. `ANC-0003` re-verified
+  resolving at `:89` after this edit, literal occurring **exactly once**.
+
+**Declared BEFORE any dispatch.** Dispatching this packet undeclared is what earned
+`OCCURRENCE-0020` on the prior attempt; the declaration is therefore build commit 1 and the run
+happens only after it exists.
+
+- **canonical packet id:** `PACKET-0045-preintegration-baseline`
+- **lane:** `substantive` · **depth:** 2 (builder, then qa ‖ reviewer)
+- **base / HEAD:** `7fb7f41` — verified: `git merge-base HEAD origin/claude/project-handoff-merge-ramhds`
+  = `7fb7f41` = HEAD = the pushed tip. Base is correct.
+- **baseline suite:** **2314 passed, 0 failed**, executed solo/foreground at `7fb7f41` before any edit.
+
+### WHY THIS PACKET EXISTS
+
+The operator is about to integrate Repository Core and authenticate a second provider. The
+**single-provider, pre-Repository-Core state is about to disappear permanently.** This packet
+captures it while it still exists. The output is **EVIDENCE, NOT PERFORMANCE**: nothing is tuned, no
+task is retried for a better number, and no instance is swapped when the first goes badly. **A
+flattering baseline is worse than no baseline**, because it manufactures a fake improvement later.
+
+### THE CORRECTION IT IMPLEMENTS
+
+`build-os/metrics/task_corpus.md` (v1.0.0, FROZEN) defines four task **shapes** and no task
+**instances**. "A repository with at least one code comment containing a factual error" does not say
+*which* comment, so a run against instances chosen today cannot be reproduced in six months — the
+comment will have been fixed and the defect will be gone. This packet builds the **frozen instances**
+the corpus lacks, then runs them.
+
+**`task_corpus.md` IS NOT EDITED.** It is frozen and its own freezing rule forbids in-place edits.
+Instances are *added* that satisfy the existing shapes; the shapes are not changed. Corpus version
+stays **1.0.0**. Likewise `COMPARISON_PROTOCOL.md` is not edited; the corrections this packet makes
+to its stated blockers are recorded here and in the receipt as **later records**, not as edits.
+
+### IN SCOPE
+
+1. `build-os/bench/seed-bench-repo.sh` — deterministic, byte-identical seed of an intentionally
+   ordinary Node project carrying four frozen task instances (`T1`–`T4`), proven by seeding twice
+   into different dirs with `diff -r` empty.
+2. `build-os/bench/run-corpus.sh` — runs one task, one arm, capturing **machine-derived** metrics
+   only via `claude -p --output-format json`; `time_to_first_correct_change` derived by running the
+   task's test after each change, never model-self-reported; `human_interventions`, `rework`,
+   `defects` recorded **operator-observed or `-`**, never model-asserted. **An unknown is not a zero.**
+3. The executed snapshot: one run per task, recorded through `record-packet.sh` with `--note` naming
+   corpus version, task id, run number and arm.
+4. `build-os/bench/RETROSPECTIVE_ARM.md` — the 27 existing `packet_metrics.tsv` rows summarised as
+   the pre-integration retrospective state. **No existing row is modified.**
+5. `build-os/bench/BASELINE_LIMITS.md` — exactly what remains impossible and why.
+
+### OUT OF SCOPE / CEILING
+
+**0 new controls, 0 new governance primitives, 0 new suite files.** Scripts under `build-os/bench/`
+are measurement infrastructure, not governance. The generated project is **never committed** — it is
+seeded to `/tmp` at runtime; only the script is committed.
+
+**DO NOT TOUCH:** `build-os/metrics/task_corpus.md`, `build-os/metrics/COMPARISON_PROTOCOL.md`,
+`rank-candidates.sh`, `decision_telemetry.tsv`, `signal_snapshots.tsv`, `standing_gates.md`,
+`residue.archive.md`, `DEFAULT_MAX_BYTES`. **`residue.md` is FROZEN** — verified at declaration time
+as blob `01517ad2c30d447949a98d0b6db9b8d6b538d5a9`; **its true size is 204,369 B, not the 431 B the
+tasking stated** (`git cat-file -s` and `stat` agree at 204,369). The blob hash is the binding
+identity and it matches, so the freeze holds and the file is not written; the byte figure in the
+tasking is corrected here rather than propagated.
+
+### WHAT THIS PACKET IS NOT
+
+`COMPARISON_PROTOCOL.md` pre-registers a **16-run two-arm A/B** whose clock is held by a **human
+operator, explicitly not an agent**. This packet is **one arm, one run per task — a snapshot, not
+the A/B**, and it must never be quoted as the pre-registered experiment. The primary endpoint
+(median `T3` wall-clock, arm B vs arm A) is **not** addressed here, because there is no second arm.
