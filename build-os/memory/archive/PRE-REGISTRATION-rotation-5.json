@@ -1,0 +1,26 @@
+{
+  "tool": "build-os/maintenance/rotate-memory.mjs",
+  "purpose": "MECHANICAL MEMORY MAINTENANCE, operator-authorized (post-EXP-0003 directive: 'Authorize the current_state.md re-block separately so future substantive work can close safely') — rotation #5 of current_state.md, restoring close capacity after four experiment-arc closes consumed headroom to 1,664 B.",
+  "written_at_commit": "27ef3a3 (pushed tip) — this record lands in COMMIT 1 (amending the premature minimal record 58e9237, unmeasured and unpushed, before any apply); the apply lands in COMMIT 2, ordering checkable from the tree per the rotation-#2/#3/#4 shape.",
+  "file": "current_state",
+  "path": "build-os/memory/current_state.md",
+  "keep": 15,
+  "sourceSha256": "f637d711f26081b94a42c477e61026bb2f2b5101abade5787114faddf6c691fa",
+  "sourceBytes": 203136,
+  "totalBlocks": 24,
+  "minimum_safe_keep": 9,
+  "protected_objects": "5 at blocks 1, 3, 9 — GATE-PIN:**Build/test command:**, GATE-PIN:**Last closed packet:**, PROTECTED-REGION:block_1, BLOCK:3, BLOCK:9. All inside the retained prefix at keep 15; nothing the sentinel protects is archived.",
+  "window": "[15, 15+] with 15 chosen — EXECUTED OVER THESE EXACT BYTES: (1) sentinel floor: minimum_safe_keep 9 (ALLOW at every candidate). (2) Floor from tests/build_os_maintenance_tests.sh CS_MIN_RECLAIM=40960 (line 796) and the >10-blocks condition: applied keeps 11-15 into scratch roots and measured the subsequent --keep 10 reclaim — keep 11: 8,537 B FAIL; keep 12: 13,484 FAIL; keep 13: 16,207 FAIL; keep 14: 33,883 FAIL; keep 15: 41,719 B PASS (headroom 83,516 B, also over the 40,960 floor). So keep >= 15. (3) C7 close-budget ceiling: keep 15 leaves 41,797 B of headroom against the 18,702 B close budget — no refusal; 15 is the minimal legal keep and maximizes this rotation's reclaim.",
+  "chosen": "15 — projected: 9 blocks archived (block_16..block_24), 40,133 B reclaimed net of banner, live 203,136 -> 163,003 B, post-rotation headroom 41,797 B (2.2x the 18,702 B close budget), and a subsequent --keep 10 reclaim of 41,719 B (759 B over the section-9 floor).",
+  "expected_retained_blocks": "block_1..block_15 (the PREFIX — routeSegments is blocks.slice(0, keepN))",
+  "expected_archived_blocks": "block_16..block_24 (the TAIL)",
+  "expected_archive_destination": "build-os/memory/archive/current_state.archive.md — APPENDED; the file must start byte-for-byte with the 91186 B it holds now (blob e21daddfccea3a1fb72470a4b0408c9e4d5e6701 at 27ef3a3). Index rows appended to build-os/memory/archive/INDEX.md.",
+  "close_budget_bytes": 18702,
+  "expected_restoration_procedure": "live - new banner (in its anchored slot) + prior banner (replaced in place, the one non-reproduced byte class) + archived body of this batch = 203,136 B, sha256 f637d711f26081b94a42c477e61026bb2f2b5101abade5787114faddf6c691fa. Executed TWICE after the apply, byte-identical both times, compared against this record's sourceSha256.",
+  "prior_anchors": {
+    "residue.archive.md": "unchanged after the apply (frozen)",
+    "current_state.archive.md": "e21daddfccea3a1fb72470a4b0408c9e4d5e6701 (91186 B) — prior batches, must be the byte-exact prefix of the new archive",
+    "residue.md": "01517ad2c30d447949a98d0b6db9b8d6b538d5a9 — frozen, not touched",
+    "prior_receipts_and_preregs": "rotations 2-4 records all unchanged"
+  }
+}
