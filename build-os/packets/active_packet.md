@@ -2155,3 +2155,21 @@ surface the T2–T4 refusals and per-arm acceptance explicitly.
   analysis committed verbatim, reveal against the pre-committed hash, conclusion with
   the two mandated reconciliations (EXP-0001's trivial-task overhead; the historical
   weekly-usage drop).
+
+## IN FLIGHT — `EXP-0002b-analysis-reveal` (declared 2026-08-05)
+
+- **Packet id:** `PACKET-0049-exp0002-analysis-reveal` — minted; 0 commits, 0 files carried the
+  token before this edit.
+- **Lane:** `substantive`. **Depth 2** — build (analysis commit, then reveal commit), then
+  qa ‖ reviewer concurrently; archivist close after the verdict.
+- **Branch base:** at `5c04755` — PACKET-0048's close commit, tree quiet at declaration.
+- **Objective:** outputs 3–5 of EXP-0002. Commit 1 = this declaration + the evaluator's
+  BLINDED_ANALYSIS.md verbatim + its sibling provenance note. Commit 2 = the reveal: the
+  withheld mapping (must hash to the pre-committed `45734767…`), REVEALED_COMPARISON.md
+  (discharging the reviewer's three obligations: the usage_block_disagrees criterion, the
+  arm-B seed derivation, prompt reveal), and CONCLUSION.md carrying the two operator-mandated
+  reconciliations (EXP-0001's trivial-task overhead; the historical weekly-usage drop) and
+  exactly one label from the preregistered four-option vocabulary.
+- **Frozen:** sealed runs/, blinded_dataset.tsv, PREREGISTRATION.md, bench/, EXP-0001 —
+  untouched. No push without go. Acting on findings is the operator's decision, not this
+  packet's.
