@@ -14,6 +14,39 @@ deprecation cycle. Pin a commit if you need stability.
 
 ### In flight (not landed at the released commit)
 
+- **THE OPERATOR-RULED BENCHMARK-INTEGRITY CORRECTION FOR `PACKET-0045`, LANDED
+  IN THE PACKET'S ONE PERMITTED POST-GATE FIX COMMIT (RULINGS 2, 3, 4, 5, 6).**
+  A degraded bench run is now unmistakably degraded, semantically AND byte-wise:
+  every `bench/run-corpus.sh` result carries `benchmark_mode:`
+  (canonical|degraded — **absence is INVALID, never canonical**) and
+  `canonical_comparison_eligible:`; the undocumented `FORCE_DEGRADED=1` bypass
+  is REMOVED and the one supported interface is `--i-accept-a-degraded-run`,
+  which refuses without an explicit `--degraded-reason`, warns, titles the
+  record `DEGRADED, NOT A CORPUS RESULT`, and drops a `DEGRADED` marker file;
+  `record-packet.sh` refuses a degraded row at the store door, so it can neither
+  enter a canonical A/B comparison nor aggregate into `report-speed.sh` totals.
+  `TOOL_CALLS` gains two genuinely independent witnesses — `tool_use_events`
+  (structural parse of assistant events: model REQUESTS) and
+  `tool_result_events` (executor-emitted user events: COMPLETED executions) —
+  plus `tool_failures`; unestablishable fields read `unavailable`, never 0, and
+  disagreement keeps the visible `DISAGREE` shape. Coverage follows IDENTITY,
+  not geography: `scan-controls.sh` declares a named allowlist of executable
+  roots including `bench/` and discovers EXECUTABLE top-level tools; the census
+  moves **105 → 110** (both bench scripts plus the three refusal-capable
+  top-level installers, operator-authorized), surfaces **46 → 51**, declared
+  mismatches **unmoved at 22**. The frozen T1 baseline row is annotated by a
+  LATER RECORD (`status=historical_preintegration_capture`,
+  `harness_version=945a140`, `canonical_comparison_eligible=false` — derived,
+  never edited in place). The `≤2-build+1-fix` / tree-quiet / no-amend contract
+  gap is recorded in `current_state.md` precisely and changes no doctrine.
+
+  Suite **2378 passed**, 0 failed (+64 from the base `a9f44ad`, derived by
+  running the full suite at a base worktree and at HEAD:
+  `tests/speed_benchmark_tests.sh` **169 → 221**,
+  `tests/control_registry_tests.sh` **168 → 180**; every other chained suite
+  +0, confirmed by comparing the per-suite CHAINED vector across two solo
+  runs).
+
 - **A FIELD THAT PROMISED MORE THAN ITS PREDICATE DELIVERS IS RENAMED, NOT
   WIDENED — AND THE BREAK IS VERSIONED RATHER THAN ALIASED.** The sentinel's
   cross-file resolution reported `protected_in_owner`. That name claims the

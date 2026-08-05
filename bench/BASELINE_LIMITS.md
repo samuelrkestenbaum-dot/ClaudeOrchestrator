@@ -420,3 +420,62 @@ property a contract can rely on. This is the same shape as the `≤2 commits per
 packet` rule the operator already withdrew as unsatisfiable once the fix-round
 mechanic existed. The fix commit that lands these six items is the packet's
 **first** fix commit; the count is 3 build + 1 fix.
+
+---
+
+## 8. LATER RECORD — THE OPERATOR RULED (2026-08-05), AND §7'S OPEN ITEMS ARE NOW CLOSED
+
+Everything above is a frozen record of the packet as gated. This section is the
+**later record** of the operator's rulings, landed in the packet's one permitted
+post-gate fix commit. Read §2b's witness description, §7a and §7b **as
+superseded by the following**:
+
+**RULING 2 — degraded runs are unmistakably degraded.** Every full record from
+`run-corpus.sh` now carries `benchmark_mode:` (`canonical` or `degraded` — no
+third state, no absence; **absence is INVALID, never canonical**) and
+`canonical_comparison_eligible:` explicitly. The **undocumented
+`FORCE_DEGRADED=1` bypass is REMOVED** — setting it does nothing. The one
+supported degraded interface is the flag the §3-era comments once falsely
+promised, now real: **`--i-accept-a-degraded-run`**, which refuses without an
+explicit `--degraded-reason`, warns loudly, records `degraded_reason` and
+`degraded_authorization`, titles the record `DEGRADED, NOT A CORPUS RESULT`,
+and drops a `DEGRADED` marker file beside the artifacts. A degraded row is
+refused **at the store door** by `record-packet.sh`, so it can neither enter a
+canonical A/B comparison nor aggregate into `report-speed.sh` totals — the
+recording path is the real consumer, because no A/B comparator exists in this
+tree and the store is the only aggregation surface.
+
+**RULING 3 — `TOOL_CALLS` has two genuinely independent witnesses.** The naive
+lexical grep is gone. Witness 1, `tool_use_events`, is a structural JSON parse:
+distinct `tool_use` block ids in **assistant** events — tool **requests** the
+model made. Witness 2, `tool_result_events`, is independently derived from
+**user** events emitted by the CLI's tool executor: distinct `tool_use_id`s
+answered by a `tool_result` — **completed executions reported back**. They
+measure different concepts and are not forced equal; `tool_failures` is its own
+field; a field the stream cannot establish is **`unavailable`, never 0**;
+malformed lines are reported; duplicates are counted once by id with the raw
+count printed beside them; disagreement renders in the `DISAGREE` shape, never
+silently reconciled. Driven both directions in
+`tests/speed_benchmark_tests.sh` §§18–19.
+
+**RULING 4 — §7a and §7b are RESOLVED, in §7b's direction, generalised.**
+Coverage follows **identity, not geography**: `scan-controls.sh` now declares a
+named allowlist of executable roots (`build-os tests .claude/hooks bench`) and
+additionally discovers **executable** `.sh`/`.mjs` files at the repo top level,
+so root-shelving a refusal-capable tool no longer removes it from coverage.
+Both bench scripts are registered (`bench.run_corpus_gate`,
+`bench.seed_determinism`), and the three refusal-capable top-level installers
+entered the census with them under the same identity rule. The operator
+explicitly overrode the 0-new-controls posture for exactly this; census
+movement is derived: **105 → 110** controls, surfaces **46 → 51**, declared
+mismatches **unmoved at 22**.
+
+**RULING 6 — the T1 baseline row is history, not a slot.**
+`t1_run1_buildos_preintegration` is untouched and remains attributable to
+harness `945a140`. A later record row
+(`t1_run1_buildos_preintegration_later_record`) marks it
+`status=historical_preintegration_capture` with
+`canonical_comparison_eligible=false`, **derived** against the new schema: the
+original record carries no `benchmark_mode` field, and absence is invalid. A
+future run under the fixed harness is a distinct result under the same frozen
+corpus v1.0.0.

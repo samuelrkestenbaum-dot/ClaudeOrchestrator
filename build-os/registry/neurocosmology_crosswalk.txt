@@ -942,3 +942,38 @@ class: A
 runtime_authority: gate
 binding_kind: proxies
 rationale: Test state over the cross-surface memory kernel: the end-to-end property rebuilt from empty stores on every run, and every refusal class the kernel declares driven red on its own — a stale expected version, an edited event, a deleted event, a cross-namespace write, a cross-namespace edge, a handoff naming an object that does not exist, a budget below the mandatory set, a hand-edited projection, a stale package read as current. It binds here rather than to epistemic_quality for the same reason the other twenty suites do: a suite's function is property preservation, and its own empirical status is red_driven.
+
+control: bench.run_corpus_gate
+binds_to: epistemic_quality
+class: A
+runtime_authority: gate
+binding_kind: instantiates
+rationale: The harness refuses to produce a number it cannot stand behind — T2/T3/T4 refuse without suite execution, degraded runs exist only behind an explicit reasoned flag, and every record carries benchmark_mode and canonical_comparison_eligible so absence can never be read as canonical (RULING 2/4 registration).
+
+control: bench.seed_determinism
+binds_to: epistemic_quality
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: A byte-reproducible seed with a recorded tree digest is the stand-in for measurement validity: it pins the state a corpus result claims to be about. The gap is that determinism is verified by the digest recipe, not recomputed here.
+
+control: installer.connect_project_selfguard
+binds_to: boundary
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Refuses to wire the Build OS source repo to itself — a placement guard on where the governed surface may be installed, registered under RULING 4's identity rule for top-level executables.
+
+control: installer.init_build_os_seedguard
+binds_to: boundary
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Refuses self-runs and refuses to seed a customer scaffold from live memory when a template is missing — a write-boundary guard at install time, registered under RULING 4's identity rule.
+
+control: installer.install_project_seedguard
+binds_to: boundary
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Refuses to seed customer memory from this repository's live files when a template is absent — the same install-time write boundary as init-build-os.sh, registered under RULING 4's identity rule.

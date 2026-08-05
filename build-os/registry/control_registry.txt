@@ -1051,7 +1051,7 @@ inputs: how many artefacts, files, links, scripts, blocks, rows, receipts or quo
 output: pass, or a FAIL declaring the scan vacuous
 owning_module: tests/entitlement_tests.sh
 consuming_policies: the FAIL count of twelve suites (pilot_kit, entitlement, control_registry, release_metadata, speed_benchmark, lane_declaration, metrics_adoption, build_os_maintenance, lane_enforcement, swarm_merge, scaffold_seeding, gate_depth), every one chained into tests/build_os_tests.sh
-evidence_refs: tests/pilot_kit_tests.sh:97; tests/pilot_kit_tests.sh:115; tests/pilot_kit_tests.sh:117; tests/pilot_kit_tests.sh:176; tests/pilot_kit_tests.sh:255; tests/pilot_kit_tests.sh:304; tests/pilot_kit_tests.sh:316; tests/pilot_kit_tests.sh:327; tests/pilot_kit_tests.sh:334; tests/pilot_kit_tests.sh:367; tests/pilot_kit_tests.sh:458; tests/entitlement_tests.sh:126; tests/entitlement_tests.sh:136; tests/entitlement_tests.sh:345; tests/entitlement_tests.sh:481; tests/control_registry_tests.sh:81; tests/control_registry_tests.sh:186; tests/control_registry_tests.sh:442; tests/control_registry_tests.sh:1526; tests/release_metadata_tests.sh:121; tests/release_metadata_tests.sh:200; tests/release_metadata_tests.sh:315; tests/speed_benchmark_tests.sh:421; tests/speed_benchmark_tests.sh:570; tests/speed_benchmark_tests.sh:581; tests/lane_declaration_tests.sh:493; tests/lane_declaration_tests.sh:496; tests/metrics_adoption_tests.sh:418; tests/metrics_adoption_tests.sh:421; tests/build_os_maintenance_tests.sh:92; tests/build_os_maintenance_tests.sh:2121; tests/build_os_maintenance_tests.sh:2146; tests/lane_enforcement_tests.sh:56; tests/swarm_merge_tests.sh:404; tests/scaffold_seeding_tests.sh:241; tests/gate_depth_tests.sh:73; tests/control_registry_tests.sh:828; tests/build_os_tests.sh:1077; tests/build_os_tests.sh:1146
+evidence_refs: tests/pilot_kit_tests.sh:97; tests/pilot_kit_tests.sh:115; tests/pilot_kit_tests.sh:117; tests/pilot_kit_tests.sh:176; tests/pilot_kit_tests.sh:255; tests/pilot_kit_tests.sh:304; tests/pilot_kit_tests.sh:316; tests/pilot_kit_tests.sh:327; tests/pilot_kit_tests.sh:334; tests/pilot_kit_tests.sh:367; tests/pilot_kit_tests.sh:458; tests/entitlement_tests.sh:126; tests/entitlement_tests.sh:136; tests/entitlement_tests.sh:345; tests/entitlement_tests.sh:481; tests/control_registry_tests.sh:81; tests/control_registry_tests.sh:186; tests/control_registry_tests.sh:442; tests/control_registry_tests.sh:1633; tests/release_metadata_tests.sh:121; tests/release_metadata_tests.sh:200; tests/release_metadata_tests.sh:315; tests/speed_benchmark_tests.sh:421; tests/speed_benchmark_tests.sh:570; tests/speed_benchmark_tests.sh:581; tests/lane_declaration_tests.sh:493; tests/lane_declaration_tests.sh:496; tests/metrics_adoption_tests.sh:418; tests/metrics_adoption_tests.sh:421; tests/build_os_maintenance_tests.sh:92; tests/build_os_maintenance_tests.sh:2121; tests/build_os_maintenance_tests.sh:2146; tests/lane_enforcement_tests.sh:56; tests/swarm_merge_tests.sh:404; tests/scaffold_seeding_tests.sh:241; tests/gate_depth_tests.sh:73; tests/control_registry_tests.sh:828; tests/build_os_tests.sh:1077; tests/build_os_tests.sh:1146
 failure_behavior: a FAIL per blind scanner; the run exits non-zero
 rollback_behavior: read-only
 promotion_requirement: n/a
@@ -1397,7 +1397,7 @@ inputs: the live registry, the live tree, and eleven fixture registries built to
 output: a RESULT line
 owning_module: tests/control_registry_tests.sh
 consuming_policies: chained from tests/build_os_tests.sh
-evidence_refs: tests/control_registry_tests.sh:1530; tests/control_registry_tests.sh:1531
+evidence_refs: tests/control_registry_tests.sh:1637; tests/control_registry_tests.sh:1638
 failure_behavior: exits non-zero when FAIL is non-zero
 rollback_behavior: read-only outside its mktemp dir
 promotion_requirement: n/a
@@ -2040,3 +2040,93 @@ promotion_requirement: already load_bearing; nothing above this status exists
 demotion_requirement: it stops being load_bearing the day it is unchained from the repo suite
 authority_mismatch: none
 notes: ITS SECTION 0 IS THE PACKET. The end-to-end property — Claude records typed state, hands off, the ledger records it, the compiler binds a package, the export renders, and a consumer answers six questions with no transcript on disk — is REBUILT FROM EMPTY STORES ON EVERY RUN rather than asserted against a seeded fixture, so the proof is re-earned and not remembered. Its section 18 additionally validates and reconciles the LIVE committed stores, which is what makes "this suite writes nothing outside its own mktemp directory" a checked claim rather than a promise.
+
+control: bench.run_corpus_gate
+class: A
+implementation_status: implemented
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: immune
+inputs: the requested task/arm/run, the BENCH_BASH_TOOL assertion, and the --i-accept-a-degraded-run flag with its mandatory --degraded-reason
+output: a refusal (exit 2), an IMPOSSIBLE non-run record, or a run record carrying benchmark_mode and canonical_comparison_eligible explicitly
+owning_module: bench/run-corpus.sh
+consuming_policies: none yet chained — its refusals gate bench runs, not packets; tests/speed_benchmark_tests.sh sections 18-19 drive it in both directions
+evidence_refs: bench/run-corpus.sh:101; bench/run-corpus.sh:124; bench/run-corpus.sh:271; bench/run-corpus.sh:297
+failure_behavior: prints the reason on stderr and exits 2 on precondition failure; emits an IMPOSSIBLE record and no numbers when the suite-execution gate is enforced
+rollback_behavior: read-only outside its own --outdir work tree, which it creates and owns
+promotion_requirement: n/a
+demotion_requirement: n/a
+authority_mismatch: none
+notes: REGISTERED UNDER RULING 4 — coverage follows IDENTITY, not geography. This is one of the two bench gate registrations the operator explicitly authorized, overriding the packet-0045 0-new-controls posture for exactly this; the 014afb1 root-shelf precedent (move the file to escape the scanner) is closed by registering the moved tool instead of re-homing it. The gate is the harness refusing to produce a number it cannot stand behind: T2/T3/T4 refuse while the agent cannot execute the suite, the ONE supported degraded interface is --i-accept-a-degraded-run (which refuses without an explicit --degraded-reason and marks every record and artifact benchmark_mode: degraded / canonical_comparison_eligible: false), and the old FORCE_DEGRADED=1 silent bypass is REMOVED.
+
+control: bench.seed_determinism
+class: A
+implementation_status: implemented
+empirical_status: field_observed
+runtime_authority: gate
+nervous_system_role: immune
+inputs: a target directory for the seeded corpus-instance tree
+output: a byte-reproducible seeded tree plus its tree_digest_sha256 on stdout, or a refusal
+owning_module: bench/seed-bench-repo.sh
+consuming_policies: bench/run-corpus.sh seeds every run through it and refuses when the seeded suite is not at its expected state
+evidence_refs: bench/seed-bench-repo.sh:43; bench/seed-bench-repo.sh:71
+failure_behavior: prints the reason on stderr and exits 2 (usage, non-empty target, missing directory)
+rollback_behavior: writes only into the caller-named target directory; the generated project is never committed
+promotion_requirement: n/a
+demotion_requirement: n/a
+authority_mismatch: none
+notes: REGISTERED UNDER RULING 4 — the second of the two operator-authorized bench gate registrations. field_observed: it produced the frozen pre-integration T1 seed (tree_digest_sha256 bb52f7b5...) and is executed on every harness invocation, including the red drives in tests/speed_benchmark_tests.sh sections 18-19. Its refusal branches (non-empty target, usage) are not themselves red-driven; the determinism claim is checked by the recorded digest, not by this census.
+
+control: installer.connect_project_selfguard
+class: A
+implementation_status: implemented
+empirical_status: untested
+runtime_authority: gate
+nervous_system_role: immune
+inputs: the resolved source and destination paths of a connect run
+output: a refusal when asked to connect the Build OS source repo to itself, else the bootstrap hook wiring
+owning_module: connect-project.sh
+consuming_policies: none — the guard protects the operator's own invocation; nothing chains it
+evidence_refs: connect-project.sh:22; connect-project.sh:25
+failure_behavior: prints the refusal and exits 1 before writing anything
+rollback_behavior: refusal path writes nothing; the connect path writes only into the destination project
+promotion_requirement: n/a
+demotion_requirement: n/a
+authority_mismatch: none
+notes: REGISTERED UNDER RULING 4's identity rule: an EXECUTABLE, refusal-capable tool at the repo top level is a surface regardless of directory, so the top-level installers enter the census with the bench scripts rather than remaining covered by geography alone. empirical_status is untested honestly: no test or recorded run has ever driven this refusal.
+
+control: installer.init_build_os_seedguard
+class: A
+implementation_status: implemented
+empirical_status: field_observed
+runtime_authority: gate
+nervous_system_role: immune
+inputs: the resolved source and destination paths, and the template tree the scaffold must seed from
+output: a refusal (self-run, or a missing template that would otherwise be silently seeded from live memory), else the scaffolded build-os/ tree
+owning_module: init-build-os.sh
+consuming_policies: tests/scaffold_seeding_tests.sh executes the green path on every suite run and pins that the scaffold seeds from templates/ only
+evidence_refs: init-build-os.sh:30; init-build-os.sh:46
+failure_behavior: prints the refusal and exits 1; the missing-template branch refuses rather than seeding from live memory
+rollback_behavior: never-clobber seeding — existing destination files are skipped, so a re-run cannot overwrite customer state
+promotion_requirement: n/a
+demotion_requirement: n/a
+authority_mismatch: none
+notes: REGISTERED UNDER RULING 4's identity rule (see installer.connect_project_selfguard). field_observed for the module: tests/scaffold_seeding_tests.sh runs it on every suite run, including from a poisoned copy; the two refusal branches cited here are exercised by no test and that bound is stated rather than implied away.
+
+control: installer.install_project_seedguard
+class: A
+implementation_status: implemented
+empirical_status: field_observed
+runtime_authority: gate
+nervous_system_role: immune
+inputs: the destination project path and the template tree the memory scaffold must seed from
+output: a refusal when a required template is missing (never seeding from live memory), else the installed project surface
+owning_module: install-project.sh
+consuming_policies: tests/scaffold_seeding_tests.sh executes the green path on every suite run; bench/run-corpus.sh installs arm B through it
+evidence_refs: install-project.sh:57
+failure_behavior: prints the refusal and exits 1 rather than seeding a customer scaffold from this repository's live memory
+rollback_behavior: never-clobber seeding — existing destination files are kept
+promotion_requirement: n/a
+demotion_requirement: n/a
+authority_mismatch: none
+notes: REGISTERED UNDER RULING 4's identity rule (see installer.connect_project_selfguard). field_observed for the module: executed by tests/scaffold_seeding_tests.sh on every suite run and by the bench harness's arm-B install during the frozen T1 baseline; the missing-template refusal itself is exercised by no test, and that bound is stated rather than implied away.

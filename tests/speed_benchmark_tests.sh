@@ -707,6 +707,272 @@ done
 grep -qiE 'wall.?clock' "$DOC" && ok "README explains the wall-clock column's provenance" \
   || no "README does not explain wall-clock provenance"
 
+# ===========================================================================
+# RULINGS 2, 3 and 6 (operator-ruled 2026-08-05, PACKET-0045 fix round).
+# Sections 18-20 drive bench/run-corpus.sh through a STUB claude CLI so every
+# path executes for real — no network, no live model, deterministic streams.
+# ===========================================================================
+BENCH="$SRC/bench/run-corpus.sh"
+BSEED="$SRC/bench/seed-bench-repo.sh"
+
+echo "== 18. RULING 2 — degraded runs are unmistakably degraded, driven both directions =="
+[ -f "$BENCH" ] && [ -x "$BENCH" ] && ok "bench/run-corpus.sh exists and is executable" \
+  || no "bench/run-corpus.sh is missing or not executable — every drive below is meaningless"
+[ -f "$BSEED" ] && ok "bench/seed-bench-repo.sh exists (the harness can seed)" \
+  || no "bench/seed-bench-repo.sh is missing"
+
+# The stub CLI: answers --version, and for a run emits the stream named by
+# BENCH_FAKE_STREAM. It exercises the REAL harness end to end — seeding, the
+# gate, the poller, the oracle, the witnesses — with only the model call faked.
+BIN="$WORK/stubbin"; mkdir -p "$BIN"
+cat > "$BIN/claude" <<'STUB'
+#!/usr/bin/env bash
+if [ "${1:-}" = "--version" ]; then echo "stub-claude 0.0.0 (bench test fixture)"; exit 0; fi
+[ -n "${BENCH_FAKE_STREAM:-}" ] && [ -f "$BENCH_FAKE_STREAM" ] && cat "$BENCH_FAKE_STREAM"
+exit 0
+STUB
+chmod +x "$BIN/claude"
+
+# DRIVE 1 — the canonical T2 refusal still fires when prerequisites are absent.
+D1="$WORK/bench_d1"
+PATH="$BIN:$PATH" bash "$BENCH" --task T2 --arm raw --run 1 --outdir "$D1" > "$WORK/d1.out" 2>&1
+RC=$?
+R1F="$D1/run_record.txt"
+{ [ "$RC" = "0" ] && grep -qF 'status: IMPOSSIBLE' "$R1F" 2>/dev/null; } \
+  && ok "DRIVE 1: T2 without Bash and without the flag refuses to run — status IMPOSSIBLE, no numbers" \
+  || { no "DRIVE 1 FAILED: the canonical T2 refusal did not fire (exit $RC)"; tail -5 "$WORK/d1.out" | sed 's/^/      | /'; }
+[ ! -f "$D1/stream.jsonl" ] \
+  && ok "DRIVE 1: no model invocation happened behind the refusal (no stream artifact)" \
+  || no "DRIVE 1: the refusal path still invoked the CLI"
+grep -qF 'canonical_comparison_eligible: false' "$R1F" 2>/dev/null \
+  && ok "DRIVE 1: the refusal record is explicitly ineligible for canonical comparison" \
+  || no "DRIVE 1: the refusal record does not state canonical_comparison_eligible: false"
+grep -qE '^benchmark_mode:' "$R1F" 2>/dev/null \
+  && no "DRIVE 1: a NON-RUN carries a benchmark_mode — a refusal is neither canonical nor degraded" \
+  || ok "DRIVE 1: the non-run record carries no benchmark_mode, and absence is INVALID for any comparison by rule"
+
+# The degraded stream fixture — it deliberately carries every hostile shape at
+# once: a valid tool_use (id A), a byte-identical DUPLICATE of it (same id), an
+# assistant block whose raw bytes contain "type":"tool_use" without being a
+# tool_use block, one line that is not JSON, one tool_result answering A, a
+# second tool_use (id B) that nothing answers, and the final result object.
+FAKE2="$WORK/stream_degraded.jsonl"
+cat > "$FAKE2" <<'JSONL'
+{"type":"assistant","message":{"content":[{"type":"tool_use","id":"toolu_A","name":"Read","input":{}}]}}
+{"type":"assistant","message":{"content":[{"type":"tool_use","id":"toolu_A","name":"Read","input":{}}]}}
+{"type":"assistant","message":{"content":[{"type":"text","text":"prose block","meta":{"type":"tool_use"}}]}}
+this line is deliberately not JSON
+{"type":"user","message":{"content":[{"type":"tool_result","tool_use_id":"toolu_A","content":"ok"}]}}
+{"type":"assistant","message":{"content":[{"type":"tool_use","id":"toolu_B","name":"Bash","input":{}}]}}
+{"type":"result","duration_api_ms":1234,"num_turns":3,"total_cost_usd":0.01,"is_error":false,"stop_reason":"end_turn","usage":{"input_tokens":10,"output_tokens":20,"cache_creation_input_tokens":0,"cache_read_input_tokens":0},"modelUsage":{"stub-model":{"contextWindow":200000}},"permission_denials":[]}
+JSONL
+
+# DRIVE 2 — the supported flag permits execution.
+D2="$WORK/bench_d2"
+PATH="$BIN:$PATH" BENCH_FAKE_STREAM="$FAKE2" bash "$BENCH" --task T2 --arm raw --run 1 \
+  --outdir "$D2" --i-accept-a-degraded-run --degraded-reason "test drive: headless agent denied Bash" \
+  > "$WORK/d2.out" 2> "$WORK/d2.err"
+RC=$?
+R2F="$D2/run_record.txt"
+{ [ "$RC" = "0" ] && [ -f "$D2/stream.jsonl" ] && grep -qF 'wall_clock_s:' "$R2F" 2>/dev/null; } \
+  && ok "DRIVE 2: --i-accept-a-degraded-run permits the T2 run to execute (exit 0, full record produced)" \
+  || { no "DRIVE 2 FAILED: the supported degraded flag did not permit execution (exit $RC)"; tail -5 "$WORK/d2.err" | sed 's/^/      | /'; }
+grep -qiF 'WARNING' "$WORK/d2.err" \
+  && ok "DRIVE 2: the degraded run displays a clear warning" \
+  || no "DRIVE 2: no warning was displayed for a degraded run"
+
+# DRIVE 3 — a degraded result carries ALL required provenance fields.
+for fld in 'benchmark_mode: degraded' 'degraded_reason: test drive: headless agent denied Bash' 'degraded_authorization: --i-accept-a-degraded-run' 'canonical_comparison_eligible: false'; do
+  grep -qF "$fld" "$R2F" 2>/dev/null \
+    && ok "DRIVE 3: degraded record carries \"$fld\"" \
+    || no "DRIVE 3 FAILED: degraded record lacks \"$fld\""
+done
+[ -f "$D2/DEGRADED" ] \
+  && ok "DRIVE 3: the artifact directory itself carries a DEGRADED marker file" \
+  || no "DRIVE 3: no DEGRADED marker — the artifacts are not unmistakably degraded"
+head -n1 "$R2F" 2>/dev/null | grep -qF 'DEGRADED, NOT A CORPUS RESULT' \
+  && ok "DRIVE 3: the record's TITLE LINE is byte-visibly degraded" \
+  || no "DRIVE 3: the degraded record's title is indistinguishable from a canonical one"
+
+# DRIVES 4 and 5 — the kill-switches, asserted as absences that would go red the
+# moment the emission is removed or flipped.
+grep -cE '^benchmark_mode: degraded$' "$R2F" 2>/dev/null | grep -qx '1' \
+  && ok "DRIVE 4: benchmark_mode: degraded is present exactly once — removing it kills this test" \
+  || no "DRIVE 4 FAILED: benchmark_mode: degraded is absent or duplicated in the degraded record"
+grep -qF 'canonical_comparison_eligible: true' "$R2F" 2>/dev/null \
+  && no "DRIVE 5 FAILED: a degraded result claims canonical_comparison_eligible: true" \
+  || ok "DRIVE 5: the degraded result nowhere claims canonical eligibility — setting it true kills this test"
+
+# DRIVE 6 — a degraded row cannot enter canonical comparison or aggregate.
+# THE REFUSAL LIVES IN record-packet.sh, THE RECORDING PATH, AND HERE IS WHY IT
+# IS THE REAL CONSUMER: no canonical A/B comparator exists in this tree (the
+# protocol has never run), so the only aggregation surface is
+# packet_metrics.tsv, whose totals report-speed.sh renders into benchmark
+# claims — and that store's single governed entry is record-packet.sh. Refusing
+# at the door keeps the poisoned row out of EVERY downstream consumer, present
+# and future, where a render-time filter would protect only one.
+DSTORE="$WORK/degraded_store.tsv"
+bash "$REC" --store "$DSTORE" --packet deg_try --lane tiny --evidence transcript \
+  --note "T2 degraded bench run; benchmark_mode=degraded; canonical_comparison_eligible=false" \
+  > "$WORK/d6.out" 2>&1
+{ [ $? != "0" ] && [ ! -f "$DSTORE" ]; } \
+  && ok "DRIVE 6: the recording path REFUSES a benchmark_mode=degraded row (nothing appended)" \
+  || { no "DRIVE 6 FAILED: a degraded row entered the aggregation store"; sed 's/^/      | /' "$WORK/d6.out" | head -3; }
+bash "$REC" --store "$DSTORE" --packet deg_spoof --lane tiny --evidence transcript \
+  --note "bench run; benchmark_mode: degraded; canonical_comparison_eligible=true — spoofed eligibility" \
+  > "$WORK/d6b.out" 2>&1
+{ [ $? != "0" ] && [ ! -f "$DSTORE" ]; } \
+  && ok "DRIVE 6/5: spoofing canonical_comparison_eligible=true on a degraded row is STILL refused — the mode wins" \
+  || no "DRIVE 6/5 FAILED: a degraded row claiming eligibility entered the store"
+bash "$REC" --store "$DSTORE" --packet canon_ok --lane tiny --evidence transcript \
+  --note "T1 canonical bench run; benchmark_mode=canonical; canonical_comparison_eligible=true" \
+  > "$WORK/d6c.out" 2>&1
+[ $? = "0" ] \
+  && ok "DRIVE 6 (other direction): a canonical-marked row is still accepted — the refusal is not a blanket ban" \
+  || { no "DRIVE 6 FAILED: the canonical control row was refused"; sed 's/^/      | /' "$WORK/d6c.out" | head -3; }
+# ...and --validate applies the SAME refusal, so a hand-typed degraded row
+# cannot enter around the recorder.
+cp "$DSTORE" "$WORK/degraded_hand.tsv"
+printf 'deg_hand\t2026-08-05\ttiny\t-\t-\t-\t-\t-\t-\t-\t-\t-\t-\t-\ttranscript\thand-typed degraded row; benchmark_mode=degraded; kept out of aggregation\n' >> "$WORK/degraded_hand.tsv"
+bash "$REC" --store "$WORK/degraded_hand.tsv" --validate > "$WORK/d6d.out" 2>&1
+[ $? != "0" ] \
+  && ok "DRIVE 6: --validate refuses a store carrying a hand-typed degraded row (no path around the door)" \
+  || no "DRIVE 6 FAILED: --validate passed a store containing a degraded row"
+
+# DRIVE 7 — the old FORCE_DEGRADED=1 silent path is GONE.
+D7="$WORK/bench_d7"
+PATH="$BIN:$PATH" FORCE_DEGRADED=1 bash "$BENCH" --task T2 --arm raw --run 1 --outdir "$D7" > "$WORK/d7.out" 2>&1
+RC=$?
+{ [ "$RC" = "0" ] && grep -qF 'status: IMPOSSIBLE' "$D7/run_record.txt" 2>/dev/null && [ ! -f "$D7/stream.jsonl" ]; } \
+  && ok "DRIVE 7: FORCE_DEGRADED=1 no longer runs anything — the refusal fires as if it were unset" \
+  || no "DRIVE 7 FAILED: FORCE_DEGRADED=1 still changes behaviour (exit $RC)"
+grep -qiF 'BYPASSED_via_FORCE_DEGRADED' "$D7/run_record.txt" 2>/dev/null \
+  && no "DRIVE 7: the record still names the removed FORCE_DEGRADED disposition" \
+  || ok "DRIVE 7: no record names the removed FORCE_DEGRADED disposition"
+
+# DRIVE 8 — an unknown degraded mechanism refuses.
+PATH="$BIN:$PATH" bash "$BENCH" --task T2 --arm raw --run 1 --force-degraded > "$WORK/d8.out" 2>&1
+{ [ $? = "2" ] && grep -qiF 'unknown argument' "$WORK/d8.out"; } \
+  && ok "DRIVE 8: an invented --force-degraded flag is refused as an unknown argument (exit 2)" \
+  || no "DRIVE 8 FAILED: an unknown degraded mechanism was not refused"
+D8="$WORK/bench_d8"
+PATH="$BIN:$PATH" bash "$BENCH" --task T2 --arm raw --run 1 --outdir "$D8" --i-accept-a-degraded-run > "$WORK/d8b.out" 2>&1
+{ [ $? = "2" ] && grep -qiF 'REQUIRES --degraded-reason' "$WORK/d8b.out"; } \
+  && ok "DRIVE 8/flag: --i-accept-a-degraded-run WITHOUT an explicit reason is refused (exit 2)" \
+  || no "DRIVE 8/flag FAILED: the flag ran without a recorded reason"
+
+echo "== 19. RULING 3 — TOOL_CALLS has two genuinely independent witnesses =="
+# The canonical control run: ONE valid tool_use, answered by ONE tool_result.
+FAKE1="$WORK/stream_canonical.jsonl"
+cat > "$FAKE1" <<'JSONL'
+{"type":"assistant","message":{"content":[{"type":"tool_use","id":"toolu_X","name":"Edit","input":{}}]}}
+{"type":"user","message":{"content":[{"type":"tool_result","tool_use_id":"toolu_X","content":"ok"}]}}
+{"type":"result","duration_api_ms":900,"num_turns":2,"total_cost_usd":0.005,"is_error":false,"stop_reason":"end_turn","usage":{"input_tokens":5,"output_tokens":9,"cache_creation_input_tokens":0,"cache_read_input_tokens":0},"modelUsage":{"stub-model":{"contextWindow":200000}},"permission_denials":[]}
+JSONL
+D9="$WORK/bench_canonical"
+PATH="$BIN:$PATH" BENCH_FAKE_STREAM="$FAKE1" bash "$BENCH" --task T1 --arm raw --run 1 --outdir "$D9" \
+  > "$WORK/d9.out" 2>&1
+RC=$?
+R9F="$D9/run_record.txt"
+[ "$RC" = "0" ] && [ -f "$R9F" ] \
+  && ok "the canonical T1 control run executes against the stub stream (exit 0)" \
+  || { no "the canonical control run failed (exit $RC) — the witness checks below are meaningless"; tail -5 "$WORK/d9.out" | sed 's/^/      | /'; }
+grep -qF 'benchmark_mode: canonical' "$R9F" 2>/dev/null \
+  && ok "RULING 2 (other direction): a canonical run says benchmark_mode: canonical explicitly" \
+  || no "the canonical record does not carry benchmark_mode: canonical"
+grep -qF 'canonical_comparison_eligible: true' "$R9F" 2>/dev/null \
+  && ok "a canonical run states canonical_comparison_eligible: true explicitly, never by absence" \
+  || no "the canonical record does not state its eligibility explicitly"
+head -n1 "$R9F" 2>/dev/null | grep -qF 'DEGRADED' \
+  && no "the canonical record's title claims degradation" \
+  || ok "canonical vs degraded records differ from the TITLE LINE down (byte-wise unmistakable)"
+[ ! -f "$D9/DEGRADED" ] \
+  && ok "no DEGRADED marker appears beside a canonical run's artifacts" \
+  || no "a canonical run's artifact directory carries a DEGRADED marker"
+# One valid event -> one parsed event, in agreement across both witnesses.
+grep -qE '^tool_use_events: 1 ' "$R9F" 2>/dev/null \
+  && ok "one valid tool_use event parses as exactly one tool_use_events (witness 1)" \
+  || no "witness 1 did not count exactly 1 for a single valid event"
+grep -qE '^tool_result_events: 1 ' "$R9F" 2>/dev/null \
+  && ok "its answering tool_result parses as exactly one tool_result_events (witness 2)" \
+  || no "witness 2 did not count exactly 1 for a single answered call"
+grep -qE '^tool_calls: 1$' "$R9F" 2>/dev/null \
+  && ok "agreeing witnesses render tool_calls: 1 with no DISAGREE marker" \
+  || no "agreeing witnesses did not render a clean tool_calls value"
+
+# The hostile degraded stream from section 18, re-read for the witness claims.
+grep -qE '^tool_use_events: 2 ' "$R2F" 2>/dev/null \
+  && ok "prose whose raw bytes contain \"type\":\"tool_use\" does NOT increment — 2 events counted, not 3 (nothing greps)" \
+  || { no "witness 1 miscounted the hostile stream (wanted 2 distinct tool_use ids)"; grep '^tool_use_events' "$R2F" 2>/dev/null | sed 's/^/      | /'; }
+grep -qF 'raw blocks=3' "$R2F" 2>/dev/null \
+  && ok "the duplicated tool_use id is handled deterministically — counted once, raw block count reported beside it" \
+  || no "duplicate handling is not visible (no raw block count in the record)"
+grep -qE '^stream_invalid_lines: 1 of 7' "$R2F" 2>/dev/null \
+  && ok "the malformed line is REPORTED as invalid (1 of 7), never silently skipped" \
+  || { no "the malformed stream line was not reported"; grep '^stream_invalid_lines' "$R2F" 2>/dev/null | sed 's/^/      | /'; }
+grep -qE '^tool_result_events: 1 ' "$R2F" 2>/dev/null \
+  && ok "witness 2 counts 1 completed execution — independently derived from executor-emitted user events" \
+  || no "witness 2 miscounted the hostile stream"
+grep -qF 'DISAGREE tool_use_events=2 tool_result_events=1' "$R2F" 2>/dev/null \
+  && ok "the 2-vs-1 disagreement is VISIBLE in the DISAGREE shape, not silently reconciled" \
+  || { no "the witness disagreement was hidden"; grep '^tool_calls' "$R2F" 2>/dev/null | sed 's/^/      | /'; }
+grep -qF 'WITNESS 1' "$R2F" 2>/dev/null && grep -qF 'WITNESS 2' "$R2F" 2>/dev/null \
+  && ok "the record NAMES exactly what each witness measures, beside its number" \
+  || no "the record does not name what its witnesses measure"
+grep -qF 'tool_failures:' "$R2F" 2>/dev/null \
+  && ok "requests, executions and failures are not collapsed — tool_failures is its own field" \
+  || no "tool_failures is not emitted as a separate field"
+grep -qE '^tool_failures: 0 ' "$R2F" 2>/dev/null \
+  && ok "zero observed failures over a parsed tool_result channel is a measured 0, not a guess" \
+  || no "tool_failures did not read 0 over a stream whose one result carried no error"
+# unavailable-not-zero: a stream with NO user events cannot establish the
+# executor-side fields, and the harness must say so rather than print 0.
+FAKE3="$WORK/stream_nouser.jsonl"
+cat > "$FAKE3" <<'JSONL'
+{"type":"assistant","message":{"content":[{"type":"tool_use","id":"toolu_Y","name":"Read","input":{}}]}}
+{"type":"result","duration_api_ms":1,"num_turns":1,"total_cost_usd":0.001,"is_error":false,"stop_reason":"end_turn","usage":{"input_tokens":1,"output_tokens":1,"cache_creation_input_tokens":0,"cache_read_input_tokens":0},"modelUsage":{"stub-model":{"contextWindow":200000}},"permission_denials":[]}
+JSONL
+D10="$WORK/bench_nouser"
+PATH="$BIN:$PATH" BENCH_FAKE_STREAM="$FAKE3" bash "$BENCH" --task T1 --arm raw --run 2 --outdir "$D10" \
+  > "$WORK/d10.out" 2>&1
+R10F="$D10/run_record.txt"
+grep -qE '^tool_result_events: unavailable ' "$R10F" 2>/dev/null \
+  && ok "a stream with no tool_result channel yields tool_result_events: unavailable — NEVER zero" \
+  || { no "an unestablishable field was not reported unavailable"; grep '^tool_result_events' "$R10F" 2>/dev/null | sed 's/^/      | /'; }
+grep -qE '^tool_failures: unavailable ' "$R10F" 2>/dev/null \
+  && ok "tool_failures is likewise unavailable when the provider output cannot establish it" \
+  || no "tool_failures printed a number the stream cannot support"
+
+echo "== 20. RULING 6 — the baseline row is preserved; the later record derives, never edits =="
+NORIG="$(datarows "$STORE" | awk -F'\t' '$1=="t1_run1_buildos_preintegration"' | wc -l | tr -d ' ')"
+[ "$NORIG" = "1" ] \
+  && ok "the original t1_run1_buildos_preintegration row exists exactly once — never replaced" \
+  || no "the original baseline row is missing or duplicated ($NORIG occurrences)"
+ORIG="$(datarows "$STORE" | awk -F'\t' '$1=="t1_run1_buildos_preintegration"')"
+printf '%s' "$ORIG" | grep -qF 'PRE-INTEGRATION SNAPSHOT' \
+  && ok "the original row still carries its own frozen wording (not rewritten)" \
+  || no "the original row's wording changed — a landed row was edited"
+printf '%s' "$ORIG" | grep -qF 'benchmark_mode' \
+  && no "the original row was retrofitted with new-schema fields — that is an edit, not a later record" \
+  || ok "the original row carries NO new-schema field — the schema verdict lives in the later record only"
+LATER="$(datarows "$STORE" | awk -F'\t' '$1=="t1_run1_buildos_preintegration_later_record"')"
+[ -n "$LATER" ] \
+  && ok "a LATER RECORD row exists for the baseline (append, not edit)" \
+  || no "no later record row found for the baseline"
+for fld in 'status=historical_preintegration_capture' 'canonical_comparison_eligible=false' 'harness_version=945a140' 'known_limitations='; do
+  printf '%s' "$LATER" | grep -qF "$fld" \
+    && ok "the later record carries $fld" \
+    || no "the later record lacks $fld"
+done
+printf '%s' "$LATER" | grep -qF 'absence is INVALID' \
+  && ok "the eligibility verdict is DERIVED in the record's own words: the original carries no benchmark_mode, and absence is INVALID, not canonical" \
+  || no "the later record asserts eligibility without deriving it"
+OPOS="$(datarows "$STORE" | awk -F'\t' '$1=="t1_run1_buildos_preintegration"{print NR}')"
+LPOS="$(datarows "$STORE" | awk -F'\t' '$1=="t1_run1_buildos_preintegration_later_record"{print NR}')"
+{ [ -n "$OPOS" ] && [ -n "$LPOS" ] && [ "$LPOS" -gt "$OPOS" ]; } \
+  && ok "the later record is appended AFTER the row it annotates (row $OPOS -> row $LPOS)" \
+  || no "the later record does not follow the original row (orig=$OPOS later=$LPOS)"
+
 echo
 echo "==== RESULT: $PASS passed, $FAIL failed ===="
 [ "$FAIL" -eq 0 ]

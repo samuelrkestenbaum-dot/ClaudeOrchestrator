@@ -79,8 +79,21 @@ legal `--keep` retains it.
   `no tags` because `tests/release_metadata_tests.sh:322` requires it, so the residue item is
   annotated rather than rewritten. Whether the tag was created with an explicit go is not
   determinable from here and no claim is made.
-- **Build/test command:** `bash tests/build_os_tests.sh` (2314 checks; no network; temp dirs)
-  — **2314 as of `gravito_truthful_name_cleanup_a` (`PACKET-0044`).** The delta is **+12**,
+- **Build/test command:** `bash tests/build_os_tests.sh` (2378 checks; no network; temp dirs)
+  — **2378 as of the `PACKET-0045` operator-ruled fix commit (benchmark-integrity correction).**
+  The delta is **+64**, in exactly two chained suites, derived by running the FULL suite at the
+  base worktree (`a9f44ad`: **2314/0**) and at HEAD and comparing the per-suite CHAINED
+  **vector**, twice solo at HEAD after an anchored `pgrep -fa '^bash tests/'` returned empty:
+  `tests/speed_benchmark_tests.sh` **169 -> 221** (+52: RULING 2's eight degraded-run drives,
+  RULING 3's witness tests, RULING 6's later-record checks) and
+  `tests/control_registry_tests.sh` **168 -> 180** (+12: RULING 4's five identity-coverage
+  proofs). Every other chained suite is **+0**, including
+  `tests/neurocosmology_crosswalk_tests.sh` at 65 — its floors are derived, so the five new
+  census bindings moved its counts, not its assertion total.
+  `CHANGELOG.md` carries the matching literal `**2378 passed**` (unsplit) under
+  `## [Unreleased]`.
+  — **THE PREVIOUS FIGURE, KEPT AS THE RECORD IT WAS:** 2314 as of
+  `gravito_truthful_name_cleanup_a` (`PACKET-0044`). That delta was **+12**,
   all of it in `tests/build_os_maintenance_tests.sh` **191 -> 203**, and all of it in one
   new section (c4): the fixture-C differential that was missing. It renames the demotion
   predicate's reported field from `protected_in_owner` — which was emitted **false** for
@@ -410,6 +423,46 @@ legal `--keep` retains it.
 
 ## Where we are — phase state and the ceiling in force
 
+- **AS OF 2026-08-05 (LATER THE SAME DAY), THE OPERATOR RULED ON `PACKET-0045`'s FOUR OPEN
+  DECISIONS, AND THE RULINGS LANDED IN THE PACKET'S ONE CONTRACTUALLY PERMITTED POST-GATE FIX
+  COMMIT** on top of `a9f44ad` (the pushed tip; `git merge-base` verified). ONE commit; nothing
+  squashed, amended or rebased; the three pre-gate commits stay classified as BUILD commits and
+  `014afb1` is NOT retroactively relabelled. A full re-gate follows
+  (`Depth: 4 — reason: mandatory_full_regate`). What the commit makes true:
+  **(RULING 2)** every `bench/run-corpus.sh` result carries `benchmark_mode:`
+  (canonical|degraded — no third state, no absence; **absence is INVALID, not canonical**) and
+  `canonical_comparison_eligible:`; the undocumented `FORCE_DEGRADED=1` bypass is REMOVED and the
+  one supported degraded interface is `--i-accept-a-degraded-run`, which refuses without an
+  explicit `--degraded-reason`, warns, and marks every record and artifact; a degraded row is
+  refused at the store door by `record-packet.sh` (the recording path is the real consumer — no
+  A/B comparator exists and the store is the only aggregation surface). Eight drives, both
+  directions, `tests/speed_benchmark_tests.sh` §18.
+  **(RULING 3)** `TOOL_CALLS` has two independent witnesses — `tool_use_events` (structural
+  parse: distinct tool_use ids in assistant events = model REQUESTS) and `tool_result_events`
+  (executor-emitted user events: distinct answered ids = COMPLETED executions) — plus
+  `tool_failures`; unestablishable fields read `unavailable`, never 0; disagreement keeps the
+  `DISAGREE` print. Six tests, §19.
+  **(RULING 4 — the root-shelf precedent and the 2 bench registrations, both closed.)**
+  Coverage follows IDENTITY, not geography: `scan-controls.sh` declares approved executable
+  roots (`build-os tests .claude/hooks bench`) and discovers EXECUTABLE top-level `.sh`/`.mjs`
+  tools; census **105 -> 110** (bench.run_corpus_gate, bench.seed_determinism, plus the three
+  refusal-capable top-level installers under the same identity rule — operator-authorized,
+  derived, not restated); surfaces **46 -> 51**; declared mismatches **UNMOVED at 22**;
+  `scan-controls check|anchors|counts|surfaces` all exit 0. Five proofs,
+  `tests/control_registry_tests.sh` §19b.
+  **(RULING 6)** `t1_run1_buildos_preintegration` is NEVER edited; a later record row marks
+  `status=historical_preintegration_capture`, `harness_version=945a140`,
+  `canonical_comparison_eligible=false` — DERIVED: the original carries no `benchmark_mode`
+  field and absence is invalid — with machine-readable `known_limitations=` refs into
+  `bench/BASELINE_LIMITS.md`.
+- **(RULING 5 — THE CONTRACT GAP, RECORDED PRECISELY AND CHANGING NO DOCTRINE.)** The
+  ≤2-build+1-fix rule, tree-quiet, and no-amend can become **jointly unsatisfiable** when a
+  build commit trips an existing scanner: a RED tree cannot be handed to the gates and cannot be
+  amended, **forcing a third build commit even when the packet is correctly scoped**. The three
+  pre-gate commits of `PACKET-0045` (`c7433c5`, `945a140`, `014afb1`) are classified honestly as
+  BUILD commits. **File for doctrine review only if it recurs during product execution. No
+  doctrine packet is opened, and CLAUDE.md is untouched.**
+
 - **AS OF 2026-08-05, LAST CLOSE `gravito_preintegration_baseline_a`
   (`PACKET-0045-preintegration-baseline`) — VERDICT PASS-AS-FIXED.** qa **GREEN**, reviewer
   **fix-then-pass (4 items)**, reconciled to **6** with qa's two and landed in ONE fix commit.
@@ -444,7 +497,9 @@ legal `--keep` retains it.
   alternative (rewriting `exit 2` to evade the regex) is named as **disguise rather than
   architecture**. (2) The **`<=2 build commits` CONTRACT GAP** — see below. (3) **Phase D's
   key-AND-network gate** — see below. (4) **2 bench gate registrations**, correctly declined
-  unilaterally under a 0-new-controls ceiling.
+  unilaterally under a 0-new-controls ceiling. **LATER RECORD, SAME DAY: (1), (2) and (4) were
+  RULED AND EXECUTED in the packet's one permitted fix commit — see the RULINGS block above.
+  (3) remains open.**
 - **THE 3 BUILD COMMITS ARE A CONTRACT GAP, NOT A BUILDER BREACH — DO NOT LOG IT AS ONE.**
   Tree-quiet forbids handing a RED tree to the gates and amending is forbidden, so **"<=2 build
   commits" and "hand back green" are JOINTLY UNSATISFIABLE whenever a build commit trips a

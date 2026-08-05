@@ -48,19 +48,40 @@
 #   --outdir DIR       where to write artifacts (default: a mktemp dir)
 #   --model NAME       passed through to the CLI; recorded in the result
 #   --keep             do not delete the working tree on exit
+#   --i-accept-a-degraded-run
+#                      the ONE supported degraded interface (RULING 2). Permits
+#                      a T2/T3/T4 run the suite-execution gate would refuse,
+#                      prints a warning, and marks EVERY resulting record and
+#                      artifact `benchmark_mode: degraded` with
+#                      `canonical_comparison_eligible: false`. REFUSES unless
+#                      --degraded-reason is also supplied.
+#   --degraded-reason TEXT
+#                      the explicit, operator-supplied reason a degraded run is
+#                      being taken; recorded verbatim in the run record.
 #
-# Environment (THE ONLY TWO BYPASSES — there is no flag form; an earlier comment
-# named a `--i-accept-a-degraded-run` flag that never existed):
+# Degraded-run provenance (RULING 2, operator-ruled 2026-08-05):
+#   - Every FULL run record carries `benchmark_mode:` (canonical|degraded) and
+#     `canonical_comparison_eligible:` (true|false). There is no third mode and
+#     no legal absence: a record without `benchmark_mode:` is INVALID, never
+#     canonical — no consumer may infer canonical eligibility from a missing
+#     field.
+#   - The old undocumented FORCE_DEGRADED=1 bypass is GONE. Setting it does
+#     nothing; the only degraded path is the flag above, which cannot run
+#     without a recorded reason and cannot produce an unlabelled record.
+#
+# Environment:
 #   BENCH_BASH_TOOL=yes  assert the agent HAS the Bash tool, disabling the
 #                        suite-execution gate for T2/T3/T4. THIS IS AN UNVERIFIED
 #                        OPERATOR ASSERTION, NOT A CAPABILITY CHECK — the harness
 #                        never confirms Bash was granted, it believes the
-#                        variable. Set it wrongly and you get a degraded run.
-#   FORCE_DEGRADED=1     run T2/T3/T4 anyway, gate acknowledged and overridden.
+#                        variable. Set it wrongly and you get a degraded run
+#                        wearing a canonical label; the record names the
+#                        assertion so a reader can discount it.
 #
-# EVERY run record carries `suite_execution_gate:` naming which of these was in
-# force (enforced / asserted / BYPASSED / not_applicable). A bypassed run is
-# therefore never byte-indistinguishable from a legitimate one.
+# EVERY run record carries `suite_execution_gate:` naming the disposition in
+# force (enforced / asserted / DEGRADED / not_applicable). A degraded run is
+# therefore never byte-indistinguishable from a legitimate one — semantically
+# (fields) and byte-wise (title line, warning, marker file).
 #
 # Exit: 0 the run completed (accepted or not), 2 harness/precondition failure.
 set -uo pipefail
@@ -75,6 +96,7 @@ CORPUS_VERSION="1.0.0"
 INSTANCE_VERSION="1.0.0"
 
 TASK=""; ARM=""; RUNNO=""; POLL=10; TIMEOUT=3600; OUTDIR=""; MODEL=""; KEEP=0
+DEGRADED_OK=0; DEGRADED_REASON=""
 
 die(){ printf 'run-corpus: %s\n' "$*" >&2; exit 2; }
 
@@ -88,11 +110,13 @@ while [ "$#" -gt 0 ]; do
     --outdir)  OUTDIR="$2"; shift 2 ;;
     --model)   MODEL="$2"; shift 2 ;;
     --keep)    KEEP=1; shift ;;
-    # The window ends at the "Exit:" line (65). It is derived rather than
+    --i-accept-a-degraded-run) DEGRADED_OK=1; shift ;;
+    --degraded-reason) DEGRADED_REASON="$2"; shift 2 ;;
+    # The window ends at the "Exit:" line (86). It is derived rather than
     # hard-guessed: `grep -n 'Exit: 0 the run completed' run-corpus.sh`. A stale
-    # range silently truncates the documented bypasses, which is the class of
+    # range silently truncates the documented interfaces, which is the class of
     # defect that let a non-existent flag be documented for a whole packet.
-    -h|--help) sed -n '2,65p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    -h|--help) sed -n '2,86p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) die "unknown argument: $1" ;;
   esac
 done
@@ -214,43 +238,63 @@ poller(){
 # This gate is in the script rather than in a runbook because a rule that has to
 # be REMEMBERED is a rule that gets skipped on the day someone wants a number.
 #
-# THE TWO BYPASSES ARE ENVIRONMENT VARIABLES, NOT FLAGS. An earlier version of
-# this comment named a `--i-accept-a-degraded-run` flag that DOES NOT EXIST —
-# the argument parser would have rejected it with "unknown argument". The real
-# mechanisms are:
+# THE ONE SUPPORTED DEGRADED INTERFACE IS THE FLAG (RULING 2). The old
+# FORCE_DEGRADED=1 environment bypass is REMOVED — setting it does nothing, and
+# any other invented mechanism falls through to the refusal below. The flag:
 #
-#   BENCH_BASH_TOOL=yes   asserts the agent HAS the Bash tool, so the gate does
-#                         not apply. THIS IS AN UNVERIFIED OPERATOR ASSERTION,
-#                         NOT A CAPABILITY CHECK. The harness never confirms
-#                         Bash was actually granted; it believes the variable.
-#                         Setting it wrongly produces exactly the degraded run
-#                         the gate exists to prevent, which is why the run
-#                         record now says which disposition was in force.
-#   FORCE_DEGRADED=1      runs the task ANYWAY, with the gate acknowledged and
-#                         overridden.
+#   --i-accept-a-degraded-run   permits the run, REFUSES without an explicit
+#                               --degraded-reason, warns loudly, and marks the
+#                               record and every artifact benchmark_mode:
+#                               degraded / canonical_comparison_eligible: false,
+#                               so the result can neither enter a canonical A/B
+#                               comparison nor aggregate into ordinary benchmark
+#                               claims (record-packet.sh refuses the row at the
+#                               store door).
+#   BENCH_BASH_TOOL=yes         asserts the agent HAS the Bash tool, so the gate
+#                               does not apply. AN UNVERIFIED OPERATOR
+#                               ASSERTION, NOT A CAPABILITY CHECK; the record
+#                               names the assertion.
 #
 # EVERY RUN RECORDS ITS DISPOSITION IN `suite_execution_gate`, not just the
-# bypassed ones. A field that appears only on bypass is a field whose ABSENCE is
-# the interesting case, and absence is exactly what a reader does not notice.
-# Emitting it always means a record without it is visibly malformed rather than
-# quietly ordinary.
+# degraded ones, and every FULL record carries `benchmark_mode:` explicitly. A
+# field that appears only on bypass is a field whose ABSENCE is the interesting
+# case, and absence is exactly what a reader does not notice. ABSENCE OF
+# `benchmark_mode:` IS INVALID, NEVER CANONICAL.
 BASH_TOOL_AVAILABLE="${BENCH_BASH_TOOL:-no}"
 NEEDS_SUITE=0
 case "$TASK" in T2|T3|T4) NEEDS_SUITE=1 ;; esac
 
+# The flag refuses without an explicit reason, BEFORE any branch reads it: a
+# degraded run whose reason nobody recorded is exactly the unlabelled number
+# RULING 2 exists to forbid.
+if [ "$DEGRADED_OK" -eq 1 ] && [ -z "$DEGRADED_REASON" ]; then
+  die "--i-accept-a-degraded-run REQUIRES --degraded-reason \"<why this degraded run is being taken>\" — refused without one"
+fi
+
 # Resolved BEFORE any branch, so every exit path reports the same computed value
 # rather than re-deriving it (or forgetting to).
+BENCHMARK_MODE="canonical"; CANON_ELIGIBLE="true"
 if [ "$NEEDS_SUITE" -eq 0 ]; then
   GATE_DISPOSITION="not_applicable_task_needs_no_suite_execution"
 elif [ "$BASH_TOOL_AVAILABLE" = "yes" ]; then
   GATE_DISPOSITION="asserted_via_BENCH_BASH_TOOL (UNVERIFIED operator assertion, not a capability check)"
-elif [ "${FORCE_DEGRADED:-0}" = "1" ]; then
-  GATE_DISPOSITION="BYPASSED_via_FORCE_DEGRADED — THIS RUN IS DEGRADED; the agent could not execute the suite, so the task performed is NOT the task the corpus specifies. These numbers are NOT corpus results."
+elif [ "$DEGRADED_OK" -eq 1 ]; then
+  BENCHMARK_MODE="degraded"; CANON_ELIGIBLE="false"
+  GATE_DISPOSITION="DEGRADED_via_--i-accept-a-degraded-run — THIS RUN IS DEGRADED; the agent cannot execute the suite, so the task performed is NOT the task the corpus specifies. These numbers are NOT corpus results, may NOT enter a canonical A/B comparison, and may NOT be aggregated into benchmark claims."
+  {
+    echo "run-corpus: ============================ DEGRADED RUN ============================"
+    echo "run-corpus: WARNING — the operator accepted a DEGRADED run of $TASK."
+    echo "run-corpus: The agent under test cannot execute the project's suite, so $TASK's"
+    echo "run-corpus: corpus clauses CANNOT be met. Every record and artifact of this run is"
+    echo "run-corpus: marked benchmark_mode: degraded / canonical_comparison_eligible: false."
+    echo "run-corpus: reason (operator-supplied): $DEGRADED_REASON"
+    echo "run-corpus: ======================================================================"
+  } >&2
 else
   GATE_DISPOSITION="enforced"
 fi
 
-if [ "$NEEDS_SUITE" -eq 1 ] && [ "$BASH_TOOL_AVAILABLE" != "yes" ] && [ "${FORCE_DEGRADED:-0}" != "1" ]; then
+if [ "$NEEDS_SUITE" -eq 1 ] && [ "$BASH_TOOL_AVAILABLE" != "yes" ] && [ "$DEGRADED_OK" -ne 1 ]; then
   {
     echo "# Build OS bench — single run record"
     echo "corpus_version: $CORPUS_VERSION"
@@ -261,6 +305,10 @@ if [ "$NEEDS_SUITE" -eq 1 ] && [ "$BASH_TOOL_AVAILABLE" != "yes" ] && [ "${FORCE
     echo "run: $RUNNO"
     echo "cli_version: $(claude --version 2>/dev/null | head -1)"
     echo "suite_execution_gate: $GATE_DISPOSITION"
+    echo "canonical_comparison_eligible: false"
+    echo "# no benchmark_mode: field on purpose — this is a REFUSAL, not a run"
+    echo "# result. Under RULING 2 a record without benchmark_mode: is INVALID for"
+    echo "# any comparison, which is exactly what a non-run must be."
     echo "status: IMPOSSIBLE — NOT RUN, NO NUMBERS PRODUCED"
     echo "reason: $TASK requires the agent to execute the project's test command."
     echo "        The CLI denies the Bash tool under --permission-mode acceptEdits,"
@@ -289,6 +337,18 @@ fi
 RESULT_JSON="$OUTDIR/result.json"
 STREAM_LOG="$OUTDIR/stream.jsonl"
 RUN_ERR="$OUTDIR/run.stderr"
+
+# A degraded run marks EVERY artifact, not only the record: a standalone marker
+# file makes the artifact directory itself unmistakable even to a reader who
+# never opens run_record.txt.
+if [ "$BENCHMARK_MODE" = "degraded" ]; then
+  {
+    echo "benchmark_mode: degraded"
+    echo "canonical_comparison_eligible: false"
+    echo "degraded_reason: $DEGRADED_REASON"
+    echo "degraded_authorization: --i-accept-a-degraded-run (operator flag; refused without an explicit reason)"
+  } > "$OUTDIR/DEGRADED"
+fi
 
 # PERMISSION MODE, AND THE CAPABILITY THIS HARNESS CANNOT GRANT.
 #
@@ -394,37 +454,103 @@ PERM_DENIALS="$(node -e '
   process.stdout.write(d.length?d.length+" ("+[...new Set(d.map(x=>x.tool_name))].join(",")+")":"0");
 ' "$RESULT_JSON")"
 
-# ALL THREE COUNTERS TOLERATE OPTIONAL WHITESPACE AFTER JSON COLONS. The CLI
-# currently emits compact JSON (`"name":"Agent"`), but a pretty-printing change
-# would turn every one of these into a SILENT ZERO — not an error, just a count
-# that quietly becomes 0 and reads as "no tool use". `[[:space:]]*` after each
-# colon costs nothing and removes that failure mode.
+# THE DISPATCH COUNTERS BELOW TOLERATE OPTIONAL WHITESPACE AFTER JSON COLONS.
+# The CLI currently emits compact JSON (`"name":"Agent"`), but a pretty-printing
+# change would turn a lexical counter into a SILENT ZERO — not an error, just a
+# count that quietly becomes 0 and reads as "no tool use". `[[:space:]]*` after
+# each colon costs nothing and removes that failure mode.
 #
 # THE SUBAGENT-TYPE CLASS WAS `[a-z-]`, WHICH IS NOT NAME-AGNOSTIC. It excluded
 # digits, underscores and uppercase, so an agent named `qa2` or `build_os` would
 # have been invisible to the witness whose entire job is to be independent of
 # the tool's NAME. Widened to `[A-Za-z0-9_-]`.
 #
-# TOOL_CALLS NOW HAS A SECOND WITNESS, for the same reason the dispatch counter
-# got one: a lone grep for one fixed fragment is the exact fragility that made
-# `"name":"Task"` report 0 for a run that had dispatched a subagent. The
-# structural witness parses the stream as JSON and counts `tool_use` blocks in
-# `message.content`; the naive one greps. They are reported together, and a
-# disagreement is printed rather than silently resolved in favour of either.
-TOOL_CALLS_NAIVE="$(grep -oE '"type":[[:space:]]*"tool_use"' "$STREAM_LOG" 2>/dev/null | wc -l | tr -d ' ')"
-TOOL_CALLS_STRUCT="$(node -e '
-  const fs=require("fs");let n=0;
-  let lines=[];try{lines=fs.readFileSync(process.argv[1],"utf8").trim().split("\n");}catch(e){}
-  for(const l of lines){let j;try{j=JSON.parse(l)}catch(e){continue}
-    const c=j.message&&j.message.content;
-    if(Array.isArray(c)) for(const b of c) if(b&&b.type==="tool_use") n++;}
-  process.stdout.write(String(n));
+# TOOL COUNTING (RULING 3) — TWO GENUINELY INDEPENDENT WITNESSES, AND WHAT EACH
+# ONE MEASURES, NAMED EXACTLY:
+#
+#   WITNESS 1  tool_use_events    a STRUCTURAL JSON PARSE of the stream (never a
+#                                 grep): distinct `tool_use` block ids inside
+#                                 ASSISTANT events. It measures TOOL REQUESTS —
+#                                 invocations the MODEL asked for.
+#   WITNESS 2  tool_result_events independently derived from the OTHER side of
+#                                 the protocol: distinct `tool_use_id`s answered
+#                                 by a `tool_result` block inside USER events,
+#                                 which are emitted by the CLI's tool executor,
+#                                 not by the model. It measures COMPLETED
+#                                 EXECUTIONS REPORTED BACK.
+#
+# The two measure DIFFERENT CONCEPTS and are NOT required to be equal: a request
+# can be denied, fail, or go unanswered. Requests, executions, results, retries
+# and failures are NOT collapsed into one number — `tool_failures` counts
+# tool_result blocks carrying is_error=true. A duplicated stream line repeating
+# a tool_use block is counted ONCE, by id (deterministic); the raw block count
+# is reported beside it when they differ. A line that is not valid JSON is
+# REPORTED as invalid, never silently skipped into a smaller count. Where the
+# provider output cannot establish a field — a stream carrying NO user events
+# has no tool_result channel at all — the field is `unavailable`, NEVER zero.
+# A disagreement is PRINTED (the DISAGREE shape below), never silently
+# reconciled in favour of either witness. Prose that merely contains the
+# characters "type":"tool_use" inside a text block increments nothing, because
+# nothing here greps.
+TOOL_TSV="$(node -e '
+  const fs=require("fs");
+  let raw=null; try{raw=fs.readFileSync(process.argv[1],"utf8");}catch(e){}
+  if(raw===null){ process.stdout.write("NOSTREAM"); process.exit(0); }
+  const lines=raw.split("\n").filter(l=>l.trim()!=="");
+  let invalid=0, useRaw=0, resRaw=0, userEvents=0;
+  const useIds=new Set(); const resIds=new Map();
+  for(const l of lines){
+    let j; try{ j=JSON.parse(l) }catch(e){ invalid++; continue }
+    if(j&&j.type==="user") userEvents++;
+    const c=j&&j.message&&j.message.content;
+    if(!Array.isArray(c)) continue;
+    for(const b of c){
+      if(!b) continue;
+      if(j.type==="assistant"&&b.type==="tool_use"){
+        useRaw++; useIds.add(b.id?String(b.id):("noid#"+useRaw));
+      }
+      if(j.type==="user"&&b.type==="tool_result"){
+        resRaw++;
+        const id=b.tool_use_id?String(b.tool_use_id):("noid#"+resRaw);
+        const err=(b.is_error===true);
+        resIds.set(id,(resIds.get(id)===true)||err);
+      }
+    }
+  }
+  let fails=0; for(const v of resIds.values()) if(v) fails++;
+  process.stdout.write([lines.length,invalid,useRaw,useIds.size,resRaw,resIds.size,fails,userEvents].join("\t"));
 ' "$STREAM_LOG" 2>/dev/null)"
-[ -n "$TOOL_CALLS_STRUCT" ] || TOOL_CALLS_STRUCT="-"
-if [ "$TOOL_CALLS_NAIVE" = "$TOOL_CALLS_STRUCT" ]; then
-  TOOL_CALLS="$TOOL_CALLS_NAIVE"
+if [ -z "$TOOL_TSV" ] || [ "$TOOL_TSV" = "NOSTREAM" ]; then
+  STREAM_LINES="unavailable"; STREAM_INVALID="unavailable"
+  TOOL_USE_RAW="unavailable"; TOOL_USE_EVENTS="unavailable"
+  TOOL_RESULT_RAW="unavailable"; TOOL_RESULT_EVENTS="unavailable"
+  TOOL_FAILURES="unavailable"; USER_EVENTS=0
 else
-  TOOL_CALLS="DISAGREE naive=$TOOL_CALLS_NAIVE structural=$TOOL_CALLS_STRUCT"
+  STREAM_LINES="$(printf '%s' "$TOOL_TSV" | cut -f1)"
+  STREAM_INVALID="$(printf '%s' "$TOOL_TSV" | cut -f2)"
+  TOOL_USE_RAW="$(printf '%s' "$TOOL_TSV" | cut -f3)"
+  TOOL_USE_EVENTS="$(printf '%s' "$TOOL_TSV" | cut -f4)"
+  TOOL_RESULT_RAW="$(printf '%s' "$TOOL_TSV" | cut -f5)"
+  TOOL_RESULT_EVENTS="$(printf '%s' "$TOOL_TSV" | cut -f6)"
+  TOOL_FAILURES="$(printf '%s' "$TOOL_TSV" | cut -f7)"
+  USER_EVENTS="$(printf '%s' "$TOOL_TSV" | cut -f8)"
+  # A stream in which EVERY line failed to parse establishes nothing: refuse the
+  # counts rather than report a confident zero derived from garbage.
+  if [ "$STREAM_LINES" != "0" ] && [ "$STREAM_INVALID" = "$STREAM_LINES" ]; then
+    TOOL_USE_RAW="unavailable"; TOOL_USE_EVENTS="unavailable"
+    TOOL_RESULT_RAW="unavailable"; TOOL_RESULT_EVENTS="unavailable"
+    TOOL_FAILURES="unavailable"
+  elif [ "$USER_EVENTS" = "0" ]; then
+    # No user events at all: this stream carries no tool_result channel, so the
+    # executor-side witness CANNOT be established from it. unavailable, not 0.
+    TOOL_RESULT_RAW="unavailable"; TOOL_RESULT_EVENTS="unavailable"
+    TOOL_FAILURES="unavailable"
+  fi
+fi
+if [ "$TOOL_USE_EVENTS" = "$TOOL_RESULT_EVENTS" ]; then
+  TOOL_CALLS="$TOOL_USE_EVENTS"
+else
+  TOOL_CALLS="DISAGREE tool_use_events=$TOOL_USE_EVENTS tool_result_events=$TOOL_RESULT_EVENTS — requests and completed executions differ; the gap is denied/failed/unreported calls and is REPORTED, not reconciled"
 fi
 
 TASK_DISPATCHES_NAIVE="$(grep -oE '"name":[[:space:]]*"(Agent|Task)"' "$STREAM_LOG" 2>/dev/null | wc -l | tr -d ' ')"
@@ -477,7 +603,11 @@ FILES_CHANGED="$(node -e '
 # ------------------------------------------------------------------ report --
 REPORT="$OUTDIR/run_record.txt"
 {
-  echo "# Build OS bench — single run record"
+  if [ "$BENCHMARK_MODE" = "degraded" ]; then
+    echo "# Build OS bench — single run record — DEGRADED, NOT A CORPUS RESULT"
+  else
+    echo "# Build OS bench — single run record"
+  fi
   echo "corpus_version: $CORPUS_VERSION"
   echo "instance_version: $INSTANCE_VERSION"
   echo "tree_digest_sha256: $TREE_DIGEST"
@@ -486,6 +616,12 @@ REPORT="$OUTDIR/run_record.txt"
   echo "run: $RUNNO"
   echo "cli_version: $(claude --version 2>/dev/null | head -1)"
   echo "suite_execution_gate: $GATE_DISPOSITION"
+  echo "benchmark_mode: $BENCHMARK_MODE"
+  echo "canonical_comparison_eligible: $CANON_ELIGIBLE"
+  if [ "$BENCHMARK_MODE" = "degraded" ]; then
+    echo "degraded_reason: $DEGRADED_REASON"
+    echo "degraded_authorization: --i-accept-a-degraded-run (operator flag; refused without an explicit reason)"
+  fi
   echo "model_requested: ${MODEL:--(CLI default)}"
   echo "model_used: $MODEL_USED"
   echo "context_window: $CONTEXT_WINDOW"
@@ -503,7 +639,11 @@ REPORT="$OUTDIR/run_record.txt"
   echo "cache_creation_input_tokens: $CC_TOK"
   echo "cache_read_input_tokens: $CR_TOK"
   echo "permission_denials: $PERM_DENIALS   (A FLOOR, NOT A COUNT — the array can undercount denied tool_use blocks)"
-  echo "tool_calls: $TOOL_CALLS   (naive=$TOOL_CALLS_NAIVE structural=$TOOL_CALLS_STRUCT)"
+  echo "tool_calls: $TOOL_CALLS"
+  echo "tool_use_events: $TOOL_USE_EVENTS   (WITNESS 1 — structural JSON parse: distinct tool_use block ids in ASSISTANT events; measures tool REQUESTS the model made; raw blocks=$TOOL_USE_RAW, duplicates counted once by id)"
+  echo "tool_result_events: $TOOL_RESULT_EVENTS   (WITNESS 2 — independently derived from USER events emitted by the tool executor: distinct tool_use_ids answered by a tool_result; measures COMPLETED executions reported back; raw blocks=$TOOL_RESULT_RAW)"
+  echo "tool_failures: $TOOL_FAILURES   (tool_result blocks with is_error=true, by id; 'unavailable' when the stream carries no tool_result channel)"
+  echo "stream_invalid_lines: $STREAM_INVALID of $STREAM_LINES   (lines that failed JSON parse — REPORTED, never silently skipped; if all lines are invalid the counts above are refused as unavailable)"
   echo "subagent_dispatches (Agent|Task): $TASK_DISPATCHES   (naive=$TASK_DISPATCHES_NAIVE structural=$TASK_DISPATCHES_STRUCT)"
   echo "subagent_types_seen: $SUBAGENT_TYPES"
   echo "files_changed (task files only): $FILES_CHANGED"

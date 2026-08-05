@@ -70,7 +70,7 @@ SELF_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO="$(cd "$SELF_DIR/../.." && pwd)"
 REGISTRY=""
 MISMATCHES=""
-TAB=$'\t'; VIOL=0; ADVISORY=0; ANCHORS_FILE=""; AREF=""; APROJECT=0; COUNTS_FILE=""
+TAB=$'\t'; VIOL=0; ADVISORY=0; ANCHORS_FILE=""; AREF=""; APROJECT=0; COUNTS_FILE=""; EXEC_ROOTS_OVERRIDE=""
 
 CMD="${1:-}"
 [ $# -gt 0 ] && shift
@@ -100,7 +100,7 @@ while [ $# -gt 0 ]; do
     --repo)       [ $# -ge 2 ] || refuse "--repo needs a value";       REPO="$2"; shift 2 ;;
     --registry)   [ $# -ge 2 ] || refuse "--registry needs a value";   REGISTRY="$2"; shift 2 ;;
     --mismatches) [ $# -ge 2 ] || refuse "--mismatches needs a value"; MISMATCHES="$2"; shift 2 ;;
-    --anchors)    [ $# -ge 2 ] || refuse "--anchors needs a value";    ANCHORS_FILE="$2"; shift 2 ;;  --ref) [ $# -ge 2 ] || refuse "--ref needs a value"; AREF="$2"; shift 2 ;;  --project) APROJECT=1; shift ;;  --counts) [ $# -ge 2 ] || refuse "--counts needs a value"; COUNTS_FILE="$2"; shift 2 ;;
+    --anchors)    [ $# -ge 2 ] || refuse "--anchors needs a value";    ANCHORS_FILE="$2"; shift 2 ;;  --ref) [ $# -ge 2 ] || refuse "--ref needs a value"; AREF="$2"; shift 2 ;;  --project) APROJECT=1; shift ;;  --counts) [ $# -ge 2 ] || refuse "--counts needs a value"; COUNTS_FILE="$2"; shift 2 ;;  --exec-roots) [ $# -ge 2 ] || refuse "--exec-roots needs a value"; EXEC_ROOTS_OVERRIDE="$2"; shift 2 ;;
     -h|--help)    sed -n '2,66p' "${BASH_SOURCE[0]}"; exit 0 ;;  *) refuse "unknown option \"$1\"" ;;
   esac
 done
@@ -136,9 +136,9 @@ rank_of(){ case "$1" in none) echo 0 ;; observe) echo 1 ;; advise) echo 2 ;; ran
 lic_of(){  case "$1" in A) echo 4 ;; B) echo 3 ;; C) echo 2 ;; D) echo 1 ;; R) echo 1 ;; *) echo -1 ;; esac; }
 
 # --- the discovery rule ------------------------------------------------------
-# Directories searched, and the two extensions. Anything outside these is not
-# scanned; that is a bound on the guard, not a claim that nothing else gates.
-SCAN_DIRS="build-os tests .claude/hooks"
+# COVERAGE FOLLOWS IDENTITY, NOT GEOGRAPHY (RULING 4). The named allowlist of EXECUTABLE ROOTS, scanned recursively for the two extensions (.sh/.mjs) — NOT every file indiscriminately. `bench` is a member because executable tools capable of refusing, mutating, measuring, or producing evidence must be registered REGARDLESS OF DIRECTORY; otherwise the easiest way around enforcement is moving the file (the `014afb1` root-shelf precedent, now closed). ADDITIONALLY, an EXECUTABLE .sh/.mjs at the repo TOP LEVEL (outside every root) is discovered by surfaces() below, so shelving a refusal-capable tool at the root no longer removes it from coverage; a NON-executable top-level file is a fixture or a document, not a tool, and is deliberately not treated as one.
+# `--exec-roots` exists FOR FIXTURES, may only SELECT AMONG the approved roots, and refuses any unapproved substitute. This line packs its statements deliberately: the two lines below are cited BY NUMBER in evidence_refs.
+APPROVED_EXEC_ROOTS="build-os tests .claude/hooks bench"; SCAN_DIRS="${EXEC_ROOTS_OVERRIDE:-$APPROVED_EXEC_ROOTS}"; for _xr in $SCAN_DIRS; do in_list "$_xr" "$APPROVED_EXEC_ROOTS" || refuse "\"$_xr\" is not an approved executable root (approved: $APPROVED_EXEC_ROOTS). Substituting an undeclared root is how coverage shrinks by geography, and it is refused rather than scanned."; done
 # EVERY refusal construct this scan recognises, in one place so the uncovered
 # set is readable. Each is an extended regular expression matched per line.
 REFUSAL_PATTERNS=(
@@ -206,7 +206,7 @@ vacuity_allowed(){ # <path:line>
 }
 
 if [ "$CMD" = "patterns" ]; then
-  printf 'scan dirs: %s\n' "$SCAN_DIRS"
+  printf 'approved exec roots: %s\nscan dirs: %s\nroot-level rule: EXECUTABLE *.sh/*.mjs at the repo top level are surfaces (identity, not geography — RULING 4)\n' "$APPROVED_EXEC_ROOTS" "$SCAN_DIRS"
   printf 'extensions: .sh .mjs\n'
   for p in "${REFUSAL_PATTERNS[@]}"; do printf 'refusal: %s\n' "$p"; done
   printf 'vacuous-ref: %s\n' \
@@ -225,7 +225,7 @@ fi
 
 surfaces(){
   local d f rel
-  for d in $SCAN_DIRS; do
+  { for d in $SCAN_DIRS; do
     [ -d "$REPO/$d" ] || continue
     while IFS= read -r f; do
       [ -n "$f" ] || continue
@@ -233,7 +233,7 @@ surfaces(){
       rel="${f#"$REPO/"}"
       printf '%s\n' "$rel"
     done < <(find "$REPO/$d" -type f \( -name '*.sh' -o -name '*.mjs' \) 2>/dev/null | sort)
-  done | sort -u
+  done; while IFS= read -r f; do [ -n "$f" ] || continue; grep -qE "$REFUSAL_RE" "$f" 2>/dev/null || continue; printf '%s\n' "${f#"$REPO/"}"; done < <(find "$REPO" -maxdepth 1 -type f -perm -u+x \( -name '*.sh' -o -name '*.mjs' \) 2>/dev/null | sort); } | sort -u   # RULING 4, the identity half: an EXECUTABLE tool shelved at the repo TOP LEVEL is a surface too; -perm -u+x is the tool/fixture discriminator, so a non-executable fixture is never accidentally a tool
 }
 
 if [ "$CMD" = "surfaces" ]; then

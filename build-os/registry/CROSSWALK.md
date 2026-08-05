@@ -74,9 +74,9 @@ the concept without performing the function and **is not coverage**.
 | energy | 3 | 0 | 3 | 0 | C | advise, gate |
 | homeostasis | 26 | 1 | 25 | 0 | A | advise, gate |
 | integration_bandwidth | 2 | 1 | 1 | 0 | C | advise, gate |
-| boundary | 4 | 0 | 4 | 0 | A | advise, gate |
+| boundary | 7 | 0 | 7 | 0 | A | advise, gate |
 | ethical_admissibility | 2 | 1 | 0 | 1 | A | gate |
-| epistemic_quality | 35 | 18 | 16 | 1 | A, B, C | advise, gate |
+| epistemic_quality | 37 | 19 | 17 | 1 | A, B, C | advise, gate |
 | latent_state | 5 | 4 | 1 | 0 | A, C | advise, gate |
 | durability | 1 | 0 | 1 | 0 | A | gate |
 | gated_plasticity | 4 | 4 | 0 | 0 | A, B, C | advise, gate |

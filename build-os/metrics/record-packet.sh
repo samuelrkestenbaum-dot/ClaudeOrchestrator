@@ -116,7 +116,7 @@ validate_fields(){
   done
   is_commits_or_dash "$cm"  || e="$e; commits \"$cm\" is not a comma-separated list of hex object names or -"
   in_list "$ev" "$EVIDENCE_CLASSES" || e="$e; evidence \"$ev\" is not one of: $EVIDENCE_CLASSES"
-  [ "${#nt}" -ge "$NOTE_MIN" ] || e="$e; note is shorter than $NOTE_MIN chars — a row with no attribution is decoration, not evidence"
+  [ "${#nt}" -ge "$NOTE_MIN" ] || e="$e; note is shorter than $NOTE_MIN chars — a row with no attribution is decoration, not evidence"; case "$nt" in *benchmark_mode=degraded*|*"benchmark_mode: degraded"*) e="$e; the note marks this row benchmark_mode=degraded — REFUSED AT THE STORE DOOR (RULING 2): this store is the aggregation surface report-speed.sh totals into ordinary benchmark claims, and the only canonical-comparison consumer in this tree reads it, so a degraded bench result may not enter it AT ALL, whatever canonical_comparison_eligible it claims. Keep degraded artifacts in their run --outdir, marked, where nothing aggregates them" ;; esac
   case "$ev" in
     git|mixed) [ "$cm" = "-" ] && e="$e; evidence=$ev but no commit is named — the claim is not checkable" ;;
   esac

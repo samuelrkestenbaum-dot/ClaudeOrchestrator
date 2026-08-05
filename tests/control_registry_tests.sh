@@ -1519,6 +1519,113 @@ runcnt; RC=$?
   && ok "RED: an EMPTY count table is REFUSED — a table that declares nothing validates everything at once, which is the blinded-scanner failure this module already refuses three times" \
   || { no "RED FAILED: an empty count table was accepted (exit $RC)"; dump; }
 
+echo "== 19b. RULING 4 — coverage follows IDENTITY, not geography (executable roots + top-level tools) =="
+# The operator's ruling, verbatim in spirit: executable tools capable of
+# refusing, mutating, measuring, or producing evidence must be registered
+# regardless of directory — otherwise the easiest way around enforcement is
+# moving the file. The mechanism: a NAMED ALLOWLIST of executable roots
+# (including bench/), plus discovery of EXECUTABLE .sh/.mjs files at the repo
+# top level. Scanning was NOT broadened to every file indiscriminately: inside
+# roots the rule is unchanged, and at the top level only the executable bit
+# makes a file a tool.
+mkbench(){ # <dir> <relpath> — mkfix plus one registered, EXECUTABLE benchmark tool at <relpath>
+  local d="$1" rel="$2"
+  mkfix "$d"
+  mkdir -p "$d/$(dirname "$rel")" 2>/dev/null
+  printf '#!/usr/bin/env bash\n[ -f ok ] || { echo "bench refusal" >&2; exit 2; }\n' > "$d/$rel"
+  chmod +x "$d/$rel"
+  cat >> "$d/registry.txt" <<EOF2
+
+control: fixture.bench_tool
+class: A
+implementation_status: load_bearing
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: reflex
+inputs: the fixture tree
+output: a refusal
+owning_module: $rel
+consuming_policies: the tool's own exit code
+evidence_refs: $rel:2
+failure_behavior: exits 2
+rollback_behavior: read-only
+promotion_requirement: n/a
+demotion_requirement: n/a
+authority_mismatch: none
+notes: fixture benchmark tool for the RULING 4 proofs
+EOF2
+}
+
+# PROOF 1 — moving a registered tool between approved roots preserves coverage.
+FIX="$WORK/fix"
+mkbench "$FIX" "bench/bench-tool.sh"
+runfix "$FIX"; RCA=$?
+bash "$SCAN" surfaces --repo "$FIX" > "$WORK/surf_a.txt" 2>&1
+mkbench "$FIX" "tests/bench-tool.sh"
+runfix "$FIX"; RCB=$?
+bash "$SCAN" surfaces --repo "$FIX" > "$WORK/surf_b.txt" 2>&1
+{ [ "$RCA" = "0" ] && grep -qxF 'bench/bench-tool.sh' "$WORK/surf_a.txt"; } \
+  && ok "PROOF 1a: a registered tool under the bench/ root is discovered and reconciles (exit 0)" \
+  || { no "PROOF 1a FAILED: the bench-root tool did not reconcile (exit $RCA)"; dump; }
+{ [ "$RCB" = "0" ] && grep -qxF 'tests/bench-tool.sh' "$WORK/surf_b.txt"; } \
+  && ok "PROOF 1b: the SAME tool moved to another approved root is still discovered and reconciles — coverage travels with the identity, not the directory" \
+  || { no "PROOF 1b FAILED: the moved tool lost coverage (exit $RCB)"; dump; }
+
+# PROOF 2 — an UNREGISTERED executable benchmark tool at the repo top level REFUSES.
+mkfix "$FIX"
+printf '#!/usr/bin/env bash\n[ -f ok ] || { echo "rogue refusal" >&2; exit 2; }\n' > "$FIX/rogue-bench.sh"
+chmod +x "$FIX/rogue-bench.sh"
+runfix "$FIX"; RC=$?
+{ [ "$RC" = "2" ] && saw 'UNREGISTERED rogue-bench.sh'; } \
+  && ok "PROOF 2: an unregistered EXECUTABLE benchmark tool shelved at the repo root is REFUSED (exit 2, named) — the 014afb1 root-shelf precedent is closed" \
+  || { no "PROOF 2 FAILED: a root-shelved executable tool escaped the census (exit $RC)"; dump; }
+# ...and the same file, REGISTERED at the top level, reconciles: registration
+# regardless of directory is the remedy, not relocation.
+mkbench "$FIX" "rogue-bench.sh"
+runfix "$FIX"; RC=$?
+[ "$RC" = "0" ] \
+  && ok "PROOF 2 (other direction): the same top-level tool, registered, reconciles at exit 0 — the demand is registration, not geography" \
+  || { no "PROOF 2 other-direction FAILED: a registered top-level tool still refuses (exit $RC)"; dump; }
+
+# PROOF 3 — substituting an unapproved root refuses.
+bash "$SCAN" surfaces --repo "$FIX" --exec-roots "bench evil" > "$WORK/out.txt" 2>&1
+RC=$?
+{ [ "$RC" = "2" ] && saw 'not an approved executable root'; } \
+  && ok "PROOF 3: an undeclared root substituted via --exec-roots is REFUSED, not scanned (exit 2)" \
+  || { no "PROOF 3 FAILED: an unapproved root was accepted (exit $RC)"; dump; }
+bash "$SCAN" surfaces --repo "$FIX" --exec-roots "tests" > "$WORK/out.txt" 2>&1
+[ $? = "0" ] \
+  && ok "PROOF 3 (other direction): selecting AMONG the approved roots still works — the override is for fixtures, not for widening" \
+  || { no "PROOF 3 other-direction FAILED: a legal subset of approved roots was refused"; dump; }
+
+# PROOF 4 — deleting bench/ from the declared root set kills this test.
+bash "$SCAN" patterns > "$WORK/pat.txt" 2>&1
+grep -E '^approved exec roots: ' "$WORK/pat.txt" | grep -qE '(^| )bench( |$)' \
+  && ok "PROOF 4a: bench is a member of the machine-readable approved-root list (patterns output)" \
+  || no "PROOF 4a FAILED: bench is not in the declared executable roots — removing it reopened the geography hole"
+bash "$SCAN" surfaces > "$WORK/livesurf.txt" 2>&1
+grep -qxF 'bench/run-corpus.sh' "$WORK/livesurf.txt" && grep -qxF 'bench/seed-bench-repo.sh' "$WORK/livesurf.txt" \
+  && ok "PROOF 4b: both live bench scripts are DISCOVERED as surfaces — deleting bench from the root set turns this red" \
+  || no "PROOF 4b FAILED: the live bench scripts are not discovered"
+for bc in bench.run_corpus_gate bench.seed_determinism; do
+  [ -n "$(fval "$REG" "$bc" runtime_authority)" ] && [ "$(fval "$REG" "$bc" runtime_authority)" = "gate" ] \
+    && ok "PROOF 4c: $bc is registered at authority gate (the two operator-authorized bench registrations)" \
+    || no "PROOF 4c FAILED: $bc is not registered at gate"
+done
+
+# PROOF 5 — a NON-executable fixture is not accidentally treated as a tool.
+mkfix "$FIX"
+printf '#!/usr/bin/env bash\n[ -f ok ] || { echo "fixture text" >&2; exit 2; }\n' > "$FIX/sample-fixture.sh"
+chmod -x "$FIX/sample-fixture.sh"
+runfix "$FIX"; RC=$?
+[ "$RC" = "0" ] \
+  && ok "PROOF 5: the same refusal-capable bytes WITHOUT the executable bit are a fixture, not a tool — no refusal (exit 0)" \
+  || { no "PROOF 5 FAILED: a non-executable top-level fixture was treated as a tool (exit $RC)"; dump; }
+bash "$SCAN" surfaces --repo "$FIX" > "$WORK/surf_c.txt" 2>&1
+grep -qxF 'sample-fixture.sh' "$WORK/surf_c.txt" \
+  && no "PROOF 5: the non-executable fixture appears in the surface list" \
+  || ok "PROOF 5: the non-executable fixture is absent from the surface list (the executable bit is the discriminator)"
+
 echo "== 20. This suite is chained, and is not vacuous about itself =="
 grep -qF 'chain_suite "tests/control_registry_tests.sh"' "$SRC/tests/build_os_tests.sh" \
   && ok "this suite is chained from tests/build_os_tests.sh (not discoverable-only)" \
