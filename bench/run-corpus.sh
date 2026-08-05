@@ -48,6 +48,20 @@
 #   --outdir DIR       where to write artifacts (default: a mktemp dir)
 #   --model NAME       passed through to the CLI; recorded in the result
 #   --keep             do not delete the working tree on exit
+#
+# Environment (THE ONLY TWO BYPASSES — there is no flag form; an earlier comment
+# named a `--i-accept-a-degraded-run` flag that never existed):
+#   BENCH_BASH_TOOL=yes  assert the agent HAS the Bash tool, disabling the
+#                        suite-execution gate for T2/T3/T4. THIS IS AN UNVERIFIED
+#                        OPERATOR ASSERTION, NOT A CAPABILITY CHECK — the harness
+#                        never confirms Bash was granted, it believes the
+#                        variable. Set it wrongly and you get a degraded run.
+#   FORCE_DEGRADED=1     run T2/T3/T4 anyway, gate acknowledged and overridden.
+#
+# EVERY run record carries `suite_execution_gate:` naming which of these was in
+# force (enforced / asserted / BYPASSED / not_applicable). A bypassed run is
+# therefore never byte-indistinguishable from a legitimate one.
+#
 # Exit: 0 the run completed (accepted or not), 2 harness/precondition failure.
 set -uo pipefail
 
@@ -74,7 +88,11 @@ while [ "$#" -gt 0 ]; do
     --outdir)  OUTDIR="$2"; shift 2 ;;
     --model)   MODEL="$2"; shift 2 ;;
     --keep)    KEEP=1; shift ;;
-    -h|--help) sed -n '2,60p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    # The window ends at the "Exit:" line (65). It is derived rather than
+    # hard-guessed: `grep -n 'Exit: 0 the run completed' run-corpus.sh`. A stale
+    # range silently truncates the documented bypasses, which is the class of
+    # defect that let a non-existent flag be documented for a whole packet.
+    -h|--help) sed -n '2,65p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) die "unknown argument: $1" ;;
   esac
 done
@@ -195,11 +213,42 @@ poller(){
 #
 # This gate is in the script rather than in a runbook because a rule that has to
 # be REMEMBERED is a rule that gets skipped on the day someone wants a number.
-# --i-accept-a-degraded-run exists only so that a future environment that does
-# grant Bash can proceed; it prints what it is doing.
+#
+# THE TWO BYPASSES ARE ENVIRONMENT VARIABLES, NOT FLAGS. An earlier version of
+# this comment named a `--i-accept-a-degraded-run` flag that DOES NOT EXIST —
+# the argument parser would have rejected it with "unknown argument". The real
+# mechanisms are:
+#
+#   BENCH_BASH_TOOL=yes   asserts the agent HAS the Bash tool, so the gate does
+#                         not apply. THIS IS AN UNVERIFIED OPERATOR ASSERTION,
+#                         NOT A CAPABILITY CHECK. The harness never confirms
+#                         Bash was actually granted; it believes the variable.
+#                         Setting it wrongly produces exactly the degraded run
+#                         the gate exists to prevent, which is why the run
+#                         record now says which disposition was in force.
+#   FORCE_DEGRADED=1      runs the task ANYWAY, with the gate acknowledged and
+#                         overridden.
+#
+# EVERY RUN RECORDS ITS DISPOSITION IN `suite_execution_gate`, not just the
+# bypassed ones. A field that appears only on bypass is a field whose ABSENCE is
+# the interesting case, and absence is exactly what a reader does not notice.
+# Emitting it always means a record without it is visibly malformed rather than
+# quietly ordinary.
 BASH_TOOL_AVAILABLE="${BENCH_BASH_TOOL:-no}"
 NEEDS_SUITE=0
 case "$TASK" in T2|T3|T4) NEEDS_SUITE=1 ;; esac
+
+# Resolved BEFORE any branch, so every exit path reports the same computed value
+# rather than re-deriving it (or forgetting to).
+if [ "$NEEDS_SUITE" -eq 0 ]; then
+  GATE_DISPOSITION="not_applicable_task_needs_no_suite_execution"
+elif [ "$BASH_TOOL_AVAILABLE" = "yes" ]; then
+  GATE_DISPOSITION="asserted_via_BENCH_BASH_TOOL (UNVERIFIED operator assertion, not a capability check)"
+elif [ "${FORCE_DEGRADED:-0}" = "1" ]; then
+  GATE_DISPOSITION="BYPASSED_via_FORCE_DEGRADED — THIS RUN IS DEGRADED; the agent could not execute the suite, so the task performed is NOT the task the corpus specifies. These numbers are NOT corpus results."
+else
+  GATE_DISPOSITION="enforced"
+fi
 
 if [ "$NEEDS_SUITE" -eq 1 ] && [ "$BASH_TOOL_AVAILABLE" != "yes" ] && [ "${FORCE_DEGRADED:-0}" != "1" ]; then
   {
@@ -211,6 +260,7 @@ if [ "$NEEDS_SUITE" -eq 1 ] && [ "$BASH_TOOL_AVAILABLE" != "yes" ] && [ "${FORCE
     echo "arm: $ARM  ($ARM_NOTE)"
     echo "run: $RUNNO"
     echo "cli_version: $(claude --version 2>/dev/null | head -1)"
+    echo "suite_execution_gate: $GATE_DISPOSITION"
     echo "status: IMPOSSIBLE — NOT RUN, NO NUMBERS PRODUCED"
     echo "reason: $TASK requires the agent to execute the project's test command."
     echo "        The CLI denies the Bash tool under --permission-mode acceptEdits,"
@@ -344,9 +394,57 @@ PERM_DENIALS="$(node -e '
   process.stdout.write(d.length?d.length+" ("+[...new Set(d.map(x=>x.tool_name))].join(",")+")":"0");
 ' "$RESULT_JSON")"
 
-TOOL_CALLS="$(grep -o '"type":"tool_use"' "$STREAM_LOG" 2>/dev/null | wc -l | tr -d ' ')"
-TASK_DISPATCHES="$(grep -oE '"name":"(Agent|Task)"' "$STREAM_LOG" 2>/dev/null | wc -l | tr -d ' ')"
-SUBAGENT_TYPES="$(grep -o '"subagent_type":"[a-z-]*"' "$STREAM_LOG" 2>/dev/null | sort -u | tr '\n' ',' | sed 's/,$//')"
+# ALL THREE COUNTERS TOLERATE OPTIONAL WHITESPACE AFTER JSON COLONS. The CLI
+# currently emits compact JSON (`"name":"Agent"`), but a pretty-printing change
+# would turn every one of these into a SILENT ZERO — not an error, just a count
+# that quietly becomes 0 and reads as "no tool use". `[[:space:]]*` after each
+# colon costs nothing and removes that failure mode.
+#
+# THE SUBAGENT-TYPE CLASS WAS `[a-z-]`, WHICH IS NOT NAME-AGNOSTIC. It excluded
+# digits, underscores and uppercase, so an agent named `qa2` or `build_os` would
+# have been invisible to the witness whose entire job is to be independent of
+# the tool's NAME. Widened to `[A-Za-z0-9_-]`.
+#
+# TOOL_CALLS NOW HAS A SECOND WITNESS, for the same reason the dispatch counter
+# got one: a lone grep for one fixed fragment is the exact fragility that made
+# `"name":"Task"` report 0 for a run that had dispatched a subagent. The
+# structural witness parses the stream as JSON and counts `tool_use` blocks in
+# `message.content`; the naive one greps. They are reported together, and a
+# disagreement is printed rather than silently resolved in favour of either.
+TOOL_CALLS_NAIVE="$(grep -oE '"type":[[:space:]]*"tool_use"' "$STREAM_LOG" 2>/dev/null | wc -l | tr -d ' ')"
+TOOL_CALLS_STRUCT="$(node -e '
+  const fs=require("fs");let n=0;
+  let lines=[];try{lines=fs.readFileSync(process.argv[1],"utf8").trim().split("\n");}catch(e){}
+  for(const l of lines){let j;try{j=JSON.parse(l)}catch(e){continue}
+    const c=j.message&&j.message.content;
+    if(Array.isArray(c)) for(const b of c) if(b&&b.type==="tool_use") n++;}
+  process.stdout.write(String(n));
+' "$STREAM_LOG" 2>/dev/null)"
+[ -n "$TOOL_CALLS_STRUCT" ] || TOOL_CALLS_STRUCT="-"
+if [ "$TOOL_CALLS_NAIVE" = "$TOOL_CALLS_STRUCT" ]; then
+  TOOL_CALLS="$TOOL_CALLS_NAIVE"
+else
+  TOOL_CALLS="DISAGREE naive=$TOOL_CALLS_NAIVE structural=$TOOL_CALLS_STRUCT"
+fi
+
+TASK_DISPATCHES_NAIVE="$(grep -oE '"name":[[:space:]]*"(Agent|Task)"' "$STREAM_LOG" 2>/dev/null | wc -l | tr -d ' ')"
+TASK_DISPATCHES_STRUCT="$(node -e '
+  const fs=require("fs");let n=0;
+  let lines=[];try{lines=fs.readFileSync(process.argv[1],"utf8").trim().split("\n");}catch(e){}
+  for(const l of lines){let j;try{j=JSON.parse(l)}catch(e){continue}
+    const c=j.message&&j.message.content;
+    if(Array.isArray(c)) for(const b of c)
+      if(b&&b.type==="tool_use"&&(b.name==="Agent"||b.name==="Task")) n++;}
+  process.stdout.write(String(n));
+' "$STREAM_LOG" 2>/dev/null)"
+[ -n "$TASK_DISPATCHES_STRUCT" ] || TASK_DISPATCHES_STRUCT="-"
+if [ "$TASK_DISPATCHES_NAIVE" = "$TASK_DISPATCHES_STRUCT" ]; then
+  TASK_DISPATCHES="$TASK_DISPATCHES_NAIVE"
+else
+  TASK_DISPATCHES="DISAGREE naive=$TASK_DISPATCHES_NAIVE structural=$TASK_DISPATCHES_STRUCT"
+fi
+
+SUBAGENT_TYPES="$(grep -oE '"subagent_type":[[:space:]]*"[A-Za-z0-9_-]*"' "$STREAM_LOG" 2>/dev/null | sort -u | tr '\n' ',' | sed 's/,$//')"
 [ -n "$SUBAGENT_TYPES" ] || SUBAGENT_TYPES="-"
 
 # Line-level diffstat against the arm baseline. Captured BEFORE the working tree
@@ -387,6 +485,7 @@ REPORT="$OUTDIR/run_record.txt"
   echo "arm: $ARM  ($ARM_NOTE)"
   echo "run: $RUNNO"
   echo "cli_version: $(claude --version 2>/dev/null | head -1)"
+  echo "suite_execution_gate: $GATE_DISPOSITION"
   echo "model_requested: ${MODEL:--(CLI default)}"
   echo "model_used: $MODEL_USED"
   echo "context_window: $CONTEXT_WINDOW"
@@ -403,9 +502,9 @@ REPORT="$OUTDIR/run_record.txt"
   echo "output_tokens: $OUT_TOK"
   echo "cache_creation_input_tokens: $CC_TOK"
   echo "cache_read_input_tokens: $CR_TOK"
-  echo "permission_denials: $PERM_DENIALS"
-  echo "tool_calls: $TOOL_CALLS"
-  echo "subagent_dispatches (Agent|Task): $TASK_DISPATCHES"
+  echo "permission_denials: $PERM_DENIALS   (A FLOOR, NOT A COUNT — the array can undercount denied tool_use blocks)"
+  echo "tool_calls: $TOOL_CALLS   (naive=$TOOL_CALLS_NAIVE structural=$TOOL_CALLS_STRUCT)"
+  echo "subagent_dispatches (Agent|Task): $TASK_DISPATCHES   (naive=$TASK_DISPATCHES_NAIVE structural=$TASK_DISPATCHES_STRUCT)"
   echo "subagent_types_seen: $SUBAGENT_TYPES"
   echo "files_changed (task files only): $FILES_CHANGED"
   echo "insertions: $INSERTIONS"
