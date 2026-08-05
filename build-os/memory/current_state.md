@@ -423,6 +423,45 @@ legal `--keep` retains it.
 
 ## Where we are — phase state and the ceiling in force
 
+- **AS OF 2026-08-05 (THE LATEST EVENT): THE OPERATOR-RULED FIX ROUND OF `PACKET-0045` IS
+  RE-GATED AND CLOSED — qa GREEN, reviewer PASS with ZERO fix items — AND THE BENCHMARK
+  MACHINERY IS NOW FROZEN BY OPERATOR RULING.** The rulings block below records what the one
+  permitted fix commit (`9f8630c`, on the pushed tip `a9f44ad`) made true; this bullet records
+  the re-gate's outcome. **Depth 4 was `mandatory_full_regate`, announced by name and
+  satisfied** — the rulings alter logic, derivation, authority and counts, so the contract's
+  re-review rules forbade targeted confirmation and a full concurrent qa ‖ reviewer re-gate ran
+  instead. **This close is a LATER RECORD, not a reopening:** the original receipt body is
+  immutable and untouched; the addendum receipt is
+  `build-os/receipts/gravito_preintegration_baseline_fix_a.md`, and a later-record metrics row
+  attributes `9f8630c` to the packet while the original row (commits
+  `c7433c5,945a140,014afb1,fff967e`) stays byte-identical — the store precedent: a correction
+  creates a later record, never edits an earlier one.
+- **THE FREEZE IS THE OPERATIVE STATE, AND IT IS THE HEADLINE.** Per operator ruling: no new
+  guards, no corpus redesign, no prompt tuning, no new measurement fields without an actual run
+  proving necessity, no derived-restatement or scanner-doctrine packet. **The benchmark is an
+  instrument to run, not a subsystem to perfect.** The next legitimate benchmark activity is
+  RUNNING it, or Repository Core integration events.
+- **THE REVIEWER'S TWO NAMED BOUNDS, VERBATIM, DELIBERATELY LEFT INSIDE THE FREEZE.**
+  (1) **Weakest remaining link: `BENCH_BASH_TOOL=yes`** — an unverified operator assertion
+  producing a degraded run wearing `benchmark_mode: canonical`, discountable only by reading
+  the `suite_execution_gate` prose. Named in-band; the freeze rightly leaves it.
+  (2) **Nested-unapproved-directory bound:** a refusal-capable executable in a NEW nested
+  unapproved directory (e.g. `scripts/x.sh`) is invisible to the scan — detectable only at
+  review of the commit creating it; expanding the sweep would breach the freeze. **A bound to
+  know, not a defect.** And the trajectory verdict, verbatim: *"a number it produces later can
+  be believed without re-auditing the harness provided the record is read, not just the
+  number."*
+- **PROOF AT THIS CLOSE, RE-DERIVED BY THE ARCHIVIST AFTER ITS OWN EDITS, NOT QUOTED:** full
+  solo suite **2378 / 0**; `scan-controls counts` exit **0** with **`DC-0001` stated=25
+  derived=25** — this close's new receipt file moved the store **24 → 25** and the router
+  numeral (`tool_router.md`, second-eyes row) moved with it **in the same commit**, which is
+  what `DC-0001` exists to force. `residue.md` FROZEN and NOT WRITTEN, blob
+  `01517ad2c30d447949a98d0b6db9b8d6b538d5a9` re-verified at close. **Second eyes: NONE,
+  single-model re-gate** — the streak IS the 25-receipt store; still reachability-blocked
+  (key AND network policy — the one still-open operator decision, gating Phase D).
+- **Local and unpushed: `9f8630c` + this close commit, and nothing else.** Nothing pushed,
+  merged, tagged, PR'd or deployed; no such go given or asked for. **`9f8630c` may not be
+  amended** — it is the tree both gates measured.
 - **AS OF 2026-08-05 (LATER THE SAME DAY), THE OPERATOR RULED ON `PACKET-0045`'s FOUR OPEN
   DECISIONS, AND THE RULINGS LANDED IN THE PACKET'S ONE CONTRACTUALLY PERMITTED POST-GATE FIX
   COMMIT** on top of `a9f44ad` (the pushed tip; `git merge-base` verified). ONE commit; nothing

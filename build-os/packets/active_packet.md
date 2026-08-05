@@ -4,34 +4,34 @@
 > the builder implements exactly this and nothing else; the archivist clears it
 > on close. One packet at a time.
 
-## CLOSED — NOTHING IN FLIGHT — `gravito_preintegration_baseline_a` closed 2026-08-05
+## CLOSED — NOTHING IN FLIGHT — later record: `PACKET-0045`'s fix round re-gated, closed 2026-08-05
 
-- **Packet id (CLOSED):** `PACKET-0045-preintegration-baseline`. Receipt:
-  `build-os/receipts/gravito_preintegration_baseline_a.md`. **Verdict PASS-AS-FIXED**
-  — qa **GREEN**, reviewer **fix-then-pass (4 items)**, reconciled to **6** with
-  qa's two, all landed in ONE fix commit. Base `7fb7f41` (the PUSHED TIP), HEAD
-  `fff967e`; `c7433c5` + `945a140` + `014afb1` = **3 BUILD** and `fff967e` = **1
-  FIX**. The third build commit is a CONTRACT GAP, not a breach — receipt §7.2.
-- **A PARTIAL RESULT, AND IT MUST BE READ AS ONE.** A re-runnable baseline for **ONE
-  of four** corpus tasks (T1), and validated-but-dormant apparatus for the other
-  three. **T2/T3/T4 are IMPOSSIBLE here** — the headless agent is denied `Bash`,
-  which their corpus clauses require. **T3 is the PRE-REGISTERED PRIMARY ENDPOINT.**
-- **THIS EDIT IS LINE-COUNT-NEUTRAL ABOVE THE `ANC-0003` SITE ON PURPOSE** —
-  `build-os/packets/active_packet.md:89#ANC-0003` is embedded as a RESOLVED line
-  number in the committed kernel projection and `tests/memory_kernel_tests.sh`
-  §18 compares it with `cmp -s`. **21 lines replace 21 lines, then 4 replace 4.**
+- **Packet id (CLOSED):** `PACKET-0045-preintegration-baseline`. **LATER RECORD:** the
+  operator-ruled post-close fix round — ONE permitted fix commit `9f8630c` on the pushed
+  tip `a9f44ad` — received a FULL re-gate: **Depth 4 = `mandatory_full_regate`, announced
+  and satisfied; qa GREEN, reviewer PASS, ZERO fix items.** Addendum receipt:
+  `build-os/receipts/gravito_preintegration_baseline_fix_a.md` — the original receipt
+  body is immutable and is NOT edited; a correction creates a later record.
+- **THE BENCHMARK MACHINERY IS FROZEN BY OPERATOR RULING.** No new guards, no corpus
+  redesign, no prompt tuning, no new measurement fields without an actual run proving
+  necessity, no derived-restatement or scanner-doctrine packet. **An instrument to run,
+  not a subsystem to perfect.** Next benchmark activity = running it, or Repository Core
+  integration events. The reviewer's two named bounds (`BENCH_BASH_TOOL=yes`; the
+  nested-unapproved-directory blind spot) are known and left inside the freeze (§6).
+- **Suite 2378 / 0** (+64 over `a9f44ad`, derived by execution, vectors identical across
+  two solo runs); census **110** (forced, not padded); declared mismatches **22**;
+  `DC-0001` **25 = the receipt store**, numeral moved in the same commit as the receipt.
+  `residue.md` FROZEN, NOT WRITTEN (blob `01517ad2…` re-verified).
 - **NEXT — NOTHING IS STAGED.** Work is at **Repository Core and live provider
-  execution**. FOUR OPERATOR DECISIONS are open and are NOT the orchestrator's to
-  take: the root-shelf precedent, the `<=2 build commits` contract gap, Phase D's
-  key-AND-network-policy gate, and 2 bench gate registrations. The backlog in
-  `current_state.md` is a **RECORD, NOT A QUEUE**. Receipt §7 carries all four.
+  execution**. ONE operator decision remains open: Phase D's key-AND-network-policy
+  gate. The backlog in `current_state.md` is a **RECORD, NOT A QUEUE**.
 
 ## Branch base
 
-Branched at `7fb7f41` on `claude/project-handoff-merge-ramhds`, verified with
-`git merge-base HEAD 7fb7f41` -> `7fb7f41`, **before the first edit**. `7fb7f41`
-is the PUSHED TIP; every commit of this packet is LOCAL and UNPUSHED, and no
-push/merge/PR/tag/deploy go has been given or asked for. (Previous base `6454220`.)
+Fix-round base re-verified at this close: `git merge-base 9f8630c a9f44ad` ->
+`a9f44ad`, the PUSHED TIP of `claude/project-handoff-merge-ramhds`. `9f8630c` and this
+close commit are the ONLY local commits; neither may be amended, and no push/merge/PR/
+tag/deploy go has been given or asked for. (Original packet base: `7fb7f41`.)
 
 ## What `gravito_current_state_reblock_a` must make true
 
