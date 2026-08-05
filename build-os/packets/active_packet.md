@@ -2026,3 +2026,24 @@ the A/B**, and it must never be quoted as the pre-registered experiment. The pri
 archivist's. Advisories carried there (receipt §7): execute the reveal promptly — the withheld
 mapping and the 10 stream logs exist only in the session scratchpad; and the analysis must
 surface the T2–T4 refusals and per-arm acceptance explicitly.
+
+## IN FLIGHT — `EXP-0001b-token-efficiency-analysis` (declared 2026-08-05)
+
+- **Packet id:** `PACKET-0047-exp0001-analysis-reveal` — minted; `git log -S'PACKET-0047' --all`
+  returned 0 commits and a full-tree grep 0 files before this edit.
+- **Lane:** `substantive`. **Depth 2** — build stage (blinded analysis committed, then reveal),
+  then qa ‖ reviewer concurrently. Archivist close after the verdict.
+- **Branch base:** at `92c7276` — PACKET-0046's close commit, tree quiet at declaration.
+- **Objective:** outputs 3–5 of the operator's controlled experiment. Commit 1 = this
+  declaration + `analysis/BLINDED_ANALYSIS.md`, the independent evaluator's report VERBATIM
+  (evaluator saw only the X/Y dataset + the §5 rule in neutral form — never §3's schedule,
+  per the reviewer's binding hand-off condition; its blinding affirmation is in the report).
+  Commit 2 = the reveal: the withheld mapping file (must hash to the pre-committed
+  `0a4b66a1…` in `MAPPING_SHA256.txt`), `REVEALED_COMPARISON.md`, and `CONCLUSION.md`
+  drawing exactly one of the four preregistered labels with direction and scope.
+- **Ordering is the evidence:** blinded analysis is committed BEFORE the mapping enters the
+  tree; ancestry proves the evaluator could not have seen the mapping.
+- **Frozen rule unchanged:** no edit to `bench/`, sealed `runs/`, `blinded_dataset.tsv`,
+  `PREREGISTRATION.md`, or any frozen surface. `residue.md` stays frozen. No push without go.
+- **Out of scope:** any Gravito optimization or response to the result — acting on the
+  finding is the operator's decision, not this packet's.
