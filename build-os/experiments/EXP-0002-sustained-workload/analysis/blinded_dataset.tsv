@@ -1,0 +1,11 @@
+blind_run_id	task	seq_in_arm	accepted	input_tokens	output_tokens	cache_creation_tokens	cache_read_tokens	total_tokens	tokens_uncached	usage_block_total	usage_block_disagrees	model_calls_parent	total_cost_usd	wall_clock_s	ttfcc_s	tool_use_events	tool_result_events	tool_failures	model_used	seed_verified
+T1_X	T1	1	yes	591	2926	18003	229955	251475	21520	250881	no	8	0.2213595	44.55	40.20	7	7	0	claude-haiku-4-5-20251001+claude-sonnet-5	yes
+T2_X	T2	2	yes	578	1643	16484	313122	331827	18705	331249	no	10	0.21793559999999998	33.45	30.52	9	9	0	claude-haiku-4-5-20251001+claude-sonnet-5	-
+T3_X	T3	3	yes	582	19001	43663	1197468	1260714	63246	1260154	no	33	0.9066994	203.78	151.47	32	32	2	claude-haiku-4-5-20251001+claude-sonnet-5	-
+T4_X	T4	4	yes	572	2865	25897	497127	526461	29334	525899	no	15	0.3479750999999999	59.05	10.33	13	13	3	claude-haiku-4-5-20251001+claude-sonnet-5	-
+T5_X	T5	5	yes	576	7809	27136	913622	949143	35521	948587	no	20	0.5544935999999999	110.37	102.32	19	19	5	claude-haiku-4-5-20251001+claude-sonnet-5	-
+T1_Y	T1	1	yes	587	2008	15571	154095	172261	18166	171667	no	4	0.1702275	32.11	30.15	3	3	0	claude-haiku-4-5-20251001+claude-sonnet-5	yes
+T2_Y	T2	2	yes	578	2274	31504	334475	368831	34356	368252	no	9	0.3239165	40.43	<=40.43	8	8	0	claude-haiku-4-5-20251001+claude-sonnet-5	-
+T3_Y	T3	3	yes	790	83871	239099	4620309	4944069	323760	68812	yes	1	3.6263731999999997	849.03	222.02	111	111	24	claude-haiku-4-5-20251001+claude-sonnet-5	-
+T4_Y	T4	4	yes	558	1627	18708	208297	229190	20893	228627	no	9	0.1995701	42.07	10.33	8	8	0	claude-haiku-4-5-20251001+claude-sonnet-5	-
+T5_Y	T5	5	yes	846	95877	300357	7044339	7441419	397080	86642	yes	1	4.804160449999998	1012.98	192.37	104	104	23	claude-haiku-4-5-20251001+claude-sonnet-5	-

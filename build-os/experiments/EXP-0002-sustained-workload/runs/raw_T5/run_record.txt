@@ -1,0 +1,52 @@
+# EXP-0002 sustained-workload — single task record
+experiment: EXP-0002
+harness_version: 1.0.0
+task: T5
+arm: raw  (no Build OS surface present (control))
+tree_state: persistent evolving work tree at /tmp/claude-0/-home-user/5489b495-ae3d-5612-a4e1-61b4b5c6b6e4/scratchpad/exp0002/raw/work/repo — seeded once before T1, NEVER reseeded between tasks; this record is task T5 of the arm's T1->T5 sequence; setup: pre-existing work tree (task T5 of the arm sequence)
+tree_identity: content digests (the work tree is not a git repo; no commit SHA exists)
+starting_tree_digest: 7e2306ae0bb0738c34e09f3107b80cffcb30aec2b86301d3543d735c7bdfad08
+ending_tree_digest: b6b523a0b869f0b8b11cb655f913334db83cda205fcb5dcc23be414b2031b25c
+pristine_baseline: /tmp/claude-0/-home-user/5489b495-ae3d-5612-a4e1-61b4b5c6b6e4/scratchpad/exp0002/raw/work/pristine (captured once, after arm setup, before T1's session)
+regression_t4_injection: not_applicable
+mode_selector_says: gravito_light   (DESCRIPTIVE ONLY — recorded, routed nothing; both arms ran this task identically)
+task_prompt_sha256: f2dd4ce545ffd523a564ed9139d9f3b86725a0b1b48c98eabd3fd7ef53031d5c   (extracted from tasks.md; identical across arms by construction)
+model_requested: -(CLI default)
+model_used: claude-haiku-4-5-20251001+claude-sonnet-5
+context_window: 1000000
+cli_version: 2.1.222 (Claude Code)
+weekly_usage_meter: unobservable_from_this_environment
+bash_allowlist_note: scoped allowlist observed non-binding in CLI 2.1.222 (git executed under Bash(node:*)); permissions identical across arms
+cli_exit: 0
+is_error: false
+stop_reason: end_turn
+--- machine-derived ---
+wall_clock_s: 110.37
+wall_clock_min: 1.84
+duration_api_ms: 103315
+num_turns (model calls): 20
+total_cost_usd: 0.5544935999999999
+input_tokens: 40
+output_tokens: 7789
+cache_creation_input_tokens: 27136
+cache_read_input_tokens: 913622
+permission_denials: 2 (Bash)   (A FLOOR, NOT A COUNT — the array can undercount denied tool_use blocks)
+tool_calls: 19
+tool_use_events: 19   (WITNESS 1 — structural JSON parse: distinct tool_use block ids in ASSISTANT events; measures tool REQUESTS the model made; raw blocks=19, duplicates counted once by id)
+tool_result_events: 19   (WITNESS 2 — independently derived from USER events emitted by the tool executor: distinct tool_use_ids answered by a tool_result; measures COMPLETED executions reported back; raw blocks=19)
+tool_failures: 5   (tool_result blocks with is_error=true, by id; 'unavailable' when the stream carries no tool_result channel)
+stream_invalid_lines: 0 of 80   (lines that failed JSON parse — REPORTED, never silently skipped; if all lines are invalid the counts above are refused as unavailable)
+subagent_dispatches (Agent|Task): 0   (naive=0 structural=0)
+subagent_types_seen: -
+files_changed_vs_arm_baseline (task files only, cumulative across the sequence so far): 14
+insertions_vs_arm_baseline: 208
+deletions_vs_arm_baseline: 13
+time_to_first_correct_change_s: 102.32   (poll resolution 10s)
+accepted: yes
+oracle_verdict: ACCEPT T5 — summary totals and net match the oracle computation (cap order included), error path exact, suite green at 68 passed
+seeded_suite: -   ('-' after T1: seeding happens once, before T1 only)
+final_suite: TOTAL: 68 passed, 0 failed
+--- NOT machine-derivable, recorded as '-' (an unknown is not a zero) ---
+human_interventions: -   (unattended by construction; no operator was present to observe any)
+rework: -                (not decidable from the final tree; a model's own account of its rework is a self-report)
+defects_escaped: -       (counted only while someone keeps looking; nobody did after this run)
