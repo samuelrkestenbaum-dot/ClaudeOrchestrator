@@ -2437,3 +2437,27 @@ surface the T2–T4 refusals and per-arm acceptance explicitly.
   (`18f82f6` → `cdfe1a3` → `1cb31f6` → `f2a2b3a` → `a3b0ba7`). NOTE: after this
   close's append, `current_state.md` is within ~1.7 KB of its 204,800 B ceiling —
   the NEXT close cannot proceed without the operator authorizing the re-block.
+
+## IN FLIGHT — `live-routing-and-economic-enforcement` (declared 2026-08-05)
+
+- **Packet id:** `PACKET-0053-live-enforcement` — minted; 0 commits/0 files before this edit.
+- **Lane:** `substantive`. **Depth 2.** Routing receipt issued before building:
+  `routing-PACKET-0053-live-enforcement-20260805T222530Z.md`, gravito_full via honest value
+  factors high_blast_radius (the hook touches how every session executes) + high_rework_history.
+- **Branch base:** at `89d67df` — the pushed tip (rotation #5 applied; headroom 41,797 B).
+- **Objective (operator directive):** turn the post-run routing/budget audit into an
+  always-present execution control plane that can intervene WHILE work happens. Seven required
+  capabilities: (1) mandatory routing entry — a substantive task cannot execute without routing;
+  (2) an automatic routing hook replacing file-only instruction; (3) live resource visibility
+  (exact telemetry vs estimates labeled separately); (4) fan-out throttling at budget threshold;
+  (5) automatic Full→Light degradation that stops the expensive mode, not the task;
+  (6) cost attribution by layer (task/context/subagent/verification/review/governance/audit);
+  (7) marginal-contribution tracking per Full agent. Eleven required tests, red-driven.
+- **Honest-scoping rule (standing):** mechanical where a check can execute — the .claude/hooks
+  layer CAN observe and BLOCK tool calls live (PreToolUse exit-nonzero refuses the call), so
+  dispatch counting, receipt-presence gating, and fan-out throttling are genuinely live-
+  enforceable; token/cost live values are NOT hook-visible in interactive sessions and are
+  labeled estimates-or-close-time wherever that is true. No checkbox that looks enforced and
+  is not. Direct stays near-zero overhead — always observing, not always ceremonious.
+- **Out of scope:** benchmarks, EXP re-runs, broad governance, memory files beyond the packet's
+  own receipts. No push without go.
