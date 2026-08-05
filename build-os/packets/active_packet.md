@@ -1973,9 +1973,9 @@ operator, explicitly not an agent**. This packet is **one arm, one run per task 
 the A/B**, and it must never be quoted as the pre-registered experiment. The primary endpoint
 (median `T3` wall-clock, arm B vs arm A) is **not** addressed here, because there is no second arm.
 
-## IN FLIGHT — `EXP-0001a-token-efficiency-execution` (declared 2026-08-05)
+## CLOSED — `EXP-0001a-token-efficiency-execution` (declared 2026-08-05; closed 2026-08-05 by the archivist)
 
-- **Packet id:** `PACKET-0046-exp0001-token-efficiency` — minted; `git log -S'PACKET-0046' --all`
+- **Packet id (CLOSED):** `PACKET-0046-exp0001-token-efficiency` — minted; `git log -S'PACKET-0046' --all`
   returns no commit and a full-tree grep for the token returned nothing before this edit.
 - **Lane:** `substantive`. **Depth 2** — build stage (preregistration + instrument runs), then
   qa ‖ reviewer concurrently. Archivist close after the verdict.
@@ -1998,3 +1998,31 @@ the A/B**, and it must never be quoted as the pre-registered experiment. The pri
 - **Out of scope:** any Gravito optimization, any benchmark change, any new control or governance
   primitive, any append to `packet_metrics.tsv` outside the archivist's normal close row. All new
   experiment files are NON-EXECUTABLE data (census must hold at 110).
+
+## CLOSE RECORD — `gravito_exp0001_execution_a` (`PACKET-0046-exp0001-token-efficiency`) — closed 2026-08-05 by the archivist. NOTHING IN FLIGHT.
+
+- **Packet id (CLOSED):** `PACKET-0046-exp0001-token-efficiency`. Receipt:
+  `build-os/receipts/gravito_exp0001_execution_a.md`. Renames above were made **in place, one for
+  one** (heading and marker), so nothing above `:89` moved and `bandwidth.active_packet_singleton`
+  reads **0 in flight** — re-verified at close by running `bandwidth-check.sh check`.
+- **Verdict:** qa **GREEN** (suite **2378/0** solo foreground at `d2373e6`, exit 0; commit-1
+  isolation at `b3a3b7f` in a detached worktree **2378/0**; census 110, 0 executables under
+  `build-os/experiments/`; manifest 47/47 sha256 OK; blinding leak grep 0; `residue.md` blob
+  `01517ad2…` unchanged; safety grep clean, 41 files / +1080 / −0). Reviewer **PASS — ZERO fix
+  items**. Second eyes: **NONE, single-model** (Codex host unreachable — the known four-state
+  blocker). **Depth 2. 2 build commits (`b3a3b7f`, `d2373e6`), NO fix commit.** Base `0ddf0b6`.
+- **Blinding at close:** arms X/Y in `analysis/blinded_dataset.tsv`; mapping WITHHELD from the
+  tree (scratchpad only), sha256 `0a4b66a1…` committed in `analysis/MAPPING_SHA256.txt` and in
+  the sealed manifest. **Reviewer's binding hand-off condition:** the EXP-0001b evaluator receives
+  ONLY the blinded dataset + preregistration §5 rule text — NEVER §3's schedule.
+- **DC-0001:** the router's second-eyes streak numeral moved **25 → 26** in this close commit,
+  derived from the receipt store (`ls build-os/receipts/gravito_*.md | wc -l` = 26).
+- **Boundaries:** NOTHING PUSHED — `b3a3b7f`, `d2373e6` and the close commit are local pending
+  explicit operator go; none may be amended. No merge, no deploy, no secrets.
+
+### Staged next — NOT DECLARED, NOT IN FLIGHT, NO ID MINTED
+
+**EXP-0001b — blinded evaluation, reveal, conclusion.** Declaring it is a routing act, not the
+archivist's. Advisories carried there (receipt §7): execute the reveal promptly — the withheld
+mapping and the 10 stream logs exist only in the session scratchpad; and the analysis must
+surface the T2–T4 refusals and per-arm acceptance explicitly.

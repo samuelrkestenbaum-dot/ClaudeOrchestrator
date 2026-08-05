@@ -2236,3 +2236,26 @@ byte ceiling. This file does, and it is nearly out; that is why this block is sh
   **the exact figure the reviewer's reproduction exploited** — and would destroy the thing the
   packet built.
 
+
+## 2026-08-05 — `gravito_exp0001_execution_a` (`PACKET-0046-exp0001-token-efficiency`) CLOSED
+
+- **EXP-0001a executed and sealed** — the execution half of the operator's controlled
+  experiment (Gravito OFF vs ON, total model tokens per durable accepted outcome).
+  Preregistration committed BEFORE run 1 (`b3a3b7f` — ancestry is the ordering proof);
+  sealed records + manifest + blinded dataset at `d2373e6`. Base `0ddf0b6`. 2 build
+  commits, NO fix commit, depth 2.
+- **The data:** 10 canonical T1 runs by the FROZEN `bench/run-corpus.sh` (zero edits to
+  `bench/`), 5 pairs alternating order, all 10 accepted=yes, models and tree_digest
+  identical across all 10; 6 T2–T4 refusal records retained.
+- **Gates:** qa GREEN — 2378/0 at `d2373e6`, commit-1 isolation 2378/0, census 110 / 0
+  executables, manifest 47/47, blinding leak grep 0, `residue.md` blob `01517ad2…`
+  unchanged, safety grep clean (41 files / +1080 / −0). Reviewer PASS, ZERO items.
+  Second eyes NONE — single-model; DC-0001 numeral moved **25 → 26**, derived from the
+  store.
+- **Blinding:** arms X/Y; mapping WITHHELD (scratchpad only), sha256 `0a4b66a1…`
+  committed. **Hand-off condition:** EXP-0001b's evaluator gets ONLY the blinded dataset
+  + preregistration §5 rule text, NEVER §3's schedule.
+- **Where we are:** NOTHING IN FLIGHT. Staged next (NOT declared): EXP-0001b — blinded
+  evaluation, reveal, conclusion. Reveal must come promptly: the mapping and stream logs
+  live only in the session scratchpad. NOTHING PUSHED — `b3a3b7f`, `d2373e6`, close
+  commit local pending explicit go.
