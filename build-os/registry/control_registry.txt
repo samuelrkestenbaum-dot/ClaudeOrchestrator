@@ -2274,3 +2274,57 @@ promotion_requirement: already load_bearing; nothing above this status exists
 demotion_requirement: it stops being load_bearing the day it is unchained from the repo suite
 authority_mismatch: none
 notes: REGISTERED IN THE SAME COMMIT AS THE TOOLS IT DRIVES (the PACKET-0048 lesson). Every refusal fixture is a copy of a receipt the REAL issuer wrote, damaged one field at a time, so a receipt shape the live tool would never emit cannot smuggle a pass. The two EXP-0002 defects are replayed literally: T5 as the silent-escalation red drive, T3 as the complexity-without-value withholding drive.
+
+control: exp3.setup_t1t2
+class: A
+implementation_status: implemented
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: immune
+inputs: a freshly seeded, unfixed parcel-billing tree (suite exactly 'TOTAL: 19 passed, 0 failed', the buggy small-tier line present exactly once)
+output: the deterministic scripted T1/T2 reference state (DIAGNOSIS.md, the one-line tierFor fix, the boundary test; suite exactly 'TOTAL: 23 passed, 0 failed') with both frozen-oracle verdicts and the post-setup tree digest on stdout, or a refusal
+owning_module: build-os/experiments/EXP-0003-routing-frontier/harness/setup-t1t2.sh
+consuming_policies: run-exp3-task.sh applies it before any measured EXP-0003 run and refuses if the resulting digest differs from the preregistered pin; tests/exp3_harness_tests.sh drives its determinism and refusals on every suite run
+evidence_refs: build-os/experiments/EXP-0003-routing-frontier/harness/setup-t1t2.sh:75; build-os/experiments/EXP-0003-routing-frontier/harness/setup-t1t2.sh:108; build-os/experiments/EXP-0003-routing-frontier/harness/setup-t1t2.sh:143; build-os/experiments/EXP-0003-routing-frontier/harness/setup-t1t2.sh:148
+failure_behavior: prints the reason on stderr and exits 2 (non-seeded tree, already-set-up tree, defect line not exactly once, either frozen-oracle rejection, post-setup total off the pin)
+rollback_behavior: writes only into the caller-named tree; its oracle reference snapshot lives in mktemp and is removed on exit
+promotion_requirement: n/a
+demotion_requirement: frozen with the EXP-0003 experiment tree once run 1 starts
+authority_mismatch: none
+notes: REGISTERED UNDER RULING 4, IN THE SAME COMMIT as the module (the PACKET-0048 lesson). It exists so the three EXP-0003 conditions share an IDENTICAL, digest-pinned T1/T2 starting state with zero unmeasured model runs; both halves are PROVEN against the frozen EXP-0002 oracle (T1 accepted; T2 accepted including the executed transplant differential) rather than asserted. Deliberately non-executable (invoked via bash) so the +x census does not move; the refusal-capable census moves by exactly this entry. Post-setup digest 6c77b5a4… is pinned in EXP-0003's preregistration before run 1.
+
+control: exp3.run_task_gate
+class: A
+implementation_status: implemented
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: immune
+inputs: run mode: the requested condition/task/workdir/outdir and EXP-0002's frozen prompt text extracted mechanically; close mode: a condition workdir carrying a receipt the real issuer wrote plus the condition's three sealed run records
+output: a refusal (exit 2); or a run_record.txt with modelUsage-NATIVE primaries, the cost-reconciliation verdict, the parent usage block beside it, and two-witness counts; or (close mode) the filled receipt plus gate_result.txt carrying routing-check.sh's verdict verbatim with its exit code
+owning_module: build-os/experiments/EXP-0003-routing-frontier/harness/run-exp3-task.sh
+consuming_policies: none chained — its refusals gate EXP-0003 runs, not packets; tests/exp3_harness_tests.sh red-drives its refusal paths and the mechanical close loop on every suite run; the sealed records it emits are the experiment's evidence
+evidence_refs: build-os/experiments/EXP-0003-routing-frontier/harness/run-exp3-task.sh:131; build-os/experiments/EXP-0003-routing-frontier/harness/run-exp3-task.sh:253; build-os/experiments/EXP-0003-routing-frontier/harness/run-exp3-task.sh:262; build-os/experiments/EXP-0003-routing-frontier/harness/run-exp3-task.sh:268; build-os/experiments/EXP-0003-routing-frontier/harness/run-exp3-task.sh:600
+failure_behavior: prints the reason on stderr and exits 2 on precondition failure (bad condition/task, T1/T2 requested, missing work tree or baseline or receipt, pinned seed/setup-digest or pinned prompt-sha mismatch, close over condition A, missing run records, re-fill of a filled receipt) and on a cost-reconciliation contradiction, in which case the full record is RETAINED as run_record.REFUSED.txt
+rollback_behavior: writes only into the caller-named workdir and outdir; the close mode's only other write is filling the condition receipt inside that workdir, exactly once
+promotion_requirement: n/a
+demotion_requirement: frozen with the EXP-0003 experiment tree once run 1 starts
+authority_mismatch: none
+notes: REGISTERED UNDER RULING 4, IN THE SAME COMMIT as the module (the PACKET-0048 lesson). The EXP-0003 analogue of exp2.run_task_gate with the recorded EXP-0002 telemetry defect fixed HERE rather than by editing frozen machinery: primaries are summed across modelUsage entries, reconciled against total_cost_usd to 1e-6 on pain of refusal, with the parent usage block recorded beside and flagged. Its close mode is the first exercise of routing.close_time_gate on measured numbers; a refused receipt is data, retained and labeled, never edited to pass.
+
+control: suite.exp3_harness
+class: A
+implementation_status: load_bearing
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: immune
+inputs: the two EXP-0003 harness modules, the frozen EXP-0002 seeder/tasks/oracle invoked read-only, the real route-task.sh issuer and mode-select.mjs, and fixture receipts/records in mktemp dirs
+output: a pass/fail verdict over setup determinism (two seeds, two setups, identical digests equal to the preregistered pin), the oracle-driven T1/T2 proof, every runner refusal path, the frozen-prompt pins, and the mechanical close loop including the fabricated over-budget refusal
+owning_module: tests/exp3_harness_tests.sh
+consuming_policies: chained from tests/build_os_tests.sh section 26, which exits non-zero on its failure
+evidence_refs: tests/exp3_harness_tests.sh:101; tests/exp3_harness_tests.sh:104; tests/exp3_harness_tests.sh:123; tests/exp3_harness_tests.sh:194
+failure_behavior: prints each failing assertion and exits 1 via the house-style verdict, failing the whole chained run
+rollback_behavior: none needed — every fixture lives in mktemp; nothing under build-os/experiments/ is written; no claude invocation occurs, so the suite spends zero model tokens
+promotion_requirement: already load_bearing; nothing above this status exists
+demotion_requirement: it stops being load_bearing the day it is unchained from the repo suite
+authority_mismatch: none
+notes: REGISTERED IN THE SAME COMMIT AS THE MODULES IT DRIVES (the PACKET-0048 lesson). The close-loop fixtures use a receipt the REAL issuer wrote and the REAL close-time gate, so a receipt shape the live tools would never emit cannot smuggle a pass; the fabricated over-budget fixture proves a refused receipt is retained with its numbers intact rather than edited to pass, and the unmeasured-field fixture proves an unknown is never summed as zero.

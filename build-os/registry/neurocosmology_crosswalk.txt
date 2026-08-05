@@ -1033,3 +1033,24 @@ class: A
 runtime_authority: gate
 binding_kind: proxies
 rationale: Test state over the routing-enforcement layer: the recalibrated selector, the receipt schema, all four close-time refusal classes red-driven against fixtures the real issuer wrote, and the live receipt store swept on every run. It binds here rather than to epistemic_quality for the same reason the other suites do — a suite's function is property preservation.
+
+control: exp3.setup_t1t2
+binds_to: epistemic_quality
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: A byte-reproducible, oracle-proven scripted T1/T2 state is what makes the three EXP-0003 conditions' measurements attributable to one pinned starting context with zero unmeasured model runs — the same epistemic role as exp2.seed_determinism, one layer later in the sequence.
+
+control: exp3.run_task_gate
+binds_to: epistemic_quality
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Refuses to produce numbers it cannot stand behind (pinned-digest and pinned-prompt drift, cost witnesses disagreeing past 1e-6, preconditions unmet) and records unknowns as admissions — the EXP-0003 analogue of exp2.run_task_gate, carrying the modelUsage-native fix for the recorded EXP-0002 undercount defect.
+
+control: suite.exp3_harness
+binds_to: homeostasis
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Test state over the EXP-0003 harness layer: setup determinism against the preregistered digest pin, every runner refusal red-driven, and the mechanical close loop proven with the real issuer and the real gate. It binds here rather than to epistemic_quality for the same reason the other suites do — a suite's function is property preservation.
