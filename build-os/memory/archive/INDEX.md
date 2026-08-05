@@ -55,3 +55,17 @@
 | `build-os/memory/current_state.md:2006` | ## History — `gravito_p4_s1_shadow_ranker_a` | `current_state.archive.md:772` |
 | `build-os/memory/current_state.md:2181` | ## History — `gravito_p3_accept_and_constrain_a` | `current_state.archive.md:947` |
 
+## Batch 2026-08-05T22:01:24Z
+
+| source (original) | section header | archive location |
+| --- | --- | --- |
+| `build-os/memory/current_state.md:1894` | ## History — `gravito_p5b_citation_anchor_tokens_a` | `current_state.archive.md:1048` |
+| `build-os/memory/current_state.md:2036` | ## History — `gravito_p5_outcome_counterfactual_telemetry_a` | `current_state.archive.md:1190` |
+| `build-os/memory/current_state.md:2240` | ## 2026-08-05 — `gravito_exp0001_execution_a` (`PACKET-0046-exp0001-token-efficiency`) CLOSED | `current_state.archive.md:1394` |
+| `build-os/memory/current_state.md:2263` | ## 2026-08-05 — `gravito_exp0001_analysis_reveal_a` (`PACKET-0047-exp0001-analysis-reveal`) CLOSED — EXP-0001 COMPLETE | `current_state.archive.md:1417` |
+| `build-os/memory/current_state.md:2290` | ## 2026-08-05 — `gravito_exp0002_execution_a` (`PACKET-0048-exp0002-sustained-workload`) CLOSED — EXP-0002a SEALED | `current_state.archive.md:1444` |
+| `build-os/memory/current_state.md:2316` | ## 2026-08-05 — `gravito_exp0002_analysis_reveal_a` (`PACKET-0049`) CLOSED — EXP-0002 COMPLETE | `current_state.archive.md:1470` |
+| `build-os/memory/current_state.md:2337` | ## 2026-08-05 — `gravito_routing_enforcement_a` (`PACKET-0050`) CLOSED — verdicts BINDING | `current_state.archive.md:1491` |
+| `build-os/memory/current_state.md:2354` | ## 2026-08-05 — `gravito_exp0003_execution_a` (`PACKET-0051`) CLOSED | `current_state.archive.md:1508` |
+| `build-os/memory/current_state.md:2370` | ## 2026-08-05 — `gravito_exp0003_analysis_reveal_a` (`PACKET-0052`) CLOSED — EXP-0003 COMPLETE | `current_state.archive.md:1524` |
+
