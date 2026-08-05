@@ -1,0 +1,30 @@
+# Build OS bench — single run record
+corpus_version: 1.0.0
+instance_version: 1.0.0
+tree_digest_sha256: bb52f7b5ebbfc918b005a17a594279557a6249f8a94ba9163dcd70d9462614c2
+task: T4
+arm: raw  (no Build OS surface present (control))
+run: exp0001_T4_refusal_raw
+cli_version: 2.1.222 (Claude Code)
+suite_execution_gate: enforced
+canonical_comparison_eligible: false
+# no benchmark_mode: field on purpose — this is a REFUSAL, not a run
+# result. Under RULING 2 a record without benchmark_mode: is INVALID for
+# any comparison, which is exactly what a non-run must be.
+status: IMPOSSIBLE — NOT RUN, NO NUMBERS PRODUCED
+reason: T4 requires the agent to execute the project's test command.
+        The CLI denies the Bash tool under --permission-mode acceptEdits,
+        and --permission-mode bypassPermissions is refused outright when the
+        CLI runs as root. The agent therefore cannot run the suite, so the
+        corpus's own 'Do'/'Done when' clauses for this task cannot be met.
+wall_clock_s: -
+num_turns: -
+total_cost_usd: -
+input_tokens: -
+output_tokens: -
+cache_creation_input_tokens: -
+cache_read_input_tokens: -
+time_to_first_correct_change_s: -
+accepted: -
+note: a degraded run would produce numbers that look comparable to a real
+      corpus run and are not. No row is recorded for this task.

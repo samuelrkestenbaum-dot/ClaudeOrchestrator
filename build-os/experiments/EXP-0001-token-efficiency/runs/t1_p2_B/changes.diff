@@ -1,0 +1,12 @@
+diff -ru '--exclude=.git' '--exclude=node_modules' '--exclude=.claude' '--exclude=build-os' '--exclude=CLAUDE.md' '--exclude=.gitignore' /tmp/claude-0/-home-user/5489b495-ae3d-5612-a4e1-61b4b5c6b6e4/scratchpad/exp0001/t1_p2_B/work/pristine/src/temperature.js /tmp/claude-0/-home-user/5489b495-ae3d-5612-a4e1-61b4b5c6b6e4/scratchpad/exp0001/t1_p2_B/work/repo/src/temperature.js
+--- /tmp/claude-0/-home-user/5489b495-ae3d-5612-a4e1-61b4b5c6b6e4/scratchpad/exp0001/t1_p2_B/work/pristine/src/temperature.js	2026-08-05 12:43:01.546100828 +0000
++++ /tmp/claude-0/-home-user/5489b495-ae3d-5612-a4e1-61b4b5c6b6e4/scratchpad/exp0001/t1_p2_B/work/repo/src/temperature.js	2026-08-05 12:43:21.662599301 +0000
+@@ -3,7 +3,7 @@
+ /**
+  * Convert a Fahrenheit reading to Celsius.
+  *
+- * Worked example: toCelsius(32) returns 100.
++ * Worked example: toCelsius(32) returns 0.
+  */
+ function toCelsius(fahrenheit) {
+   return ((fahrenheit - 32) * 5) / 9;

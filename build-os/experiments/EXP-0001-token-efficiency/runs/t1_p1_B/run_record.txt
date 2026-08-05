@@ -1,0 +1,47 @@
+# Build OS bench — single run record
+corpus_version: 1.0.0
+instance_version: 1.0.0
+tree_digest_sha256: bb52f7b5ebbfc918b005a17a594279557a6249f8a94ba9163dcd70d9462614c2
+task: T1
+arm: buildos  (Build OS installed via install-project.sh --no-session-hook)
+run: exp0001_t1_p1_B
+cli_version: 2.1.222 (Claude Code)
+suite_execution_gate: not_applicable_task_needs_no_suite_execution
+benchmark_mode: canonical
+canonical_comparison_eligible: true
+model_requested: -(CLI default)
+model_used: claude-haiku-4-5-20251001+claude-sonnet-5
+context_window: 1000000
+cli_exit: 0
+is_error: false
+stop_reason: end_turn
+--- machine-derived ---
+wall_clock_s: 42.02
+wall_clock_min: 0.70
+duration_api_ms: 36649
+num_turns (model calls): 10
+total_cost_usd: 0.2304652
+input_tokens: 14
+output_tokens: 2245
+cache_creation_input_tokens: 18088
+cache_read_input_tokens: 291954
+permission_denials: 2 (Bash)   (A FLOOR, NOT A COUNT — the array can undercount denied tool_use blocks)
+tool_calls: 9
+tool_use_events: 9   (WITNESS 1 — structural JSON parse: distinct tool_use block ids in ASSISTANT events; measures tool REQUESTS the model made; raw blocks=9, duplicates counted once by id)
+tool_result_events: 9   (WITNESS 2 — independently derived from USER events emitted by the tool executor: distinct tool_use_ids answered by a tool_result; measures COMPLETED executions reported back; raw blocks=9)
+tool_failures: 2   (tool_result blocks with is_error=true, by id; 'unavailable' when the stream carries no tool_result channel)
+stream_invalid_lines: 0 of 48   (lines that failed JSON parse — REPORTED, never silently skipped; if all lines are invalid the counts above are refused as unavailable)
+subagent_dispatches (Agent|Task): 0   (naive=0 structural=0)
+subagent_types_seen: -
+files_changed (task files only): 1
+insertions: 1
+deletions: 1
+time_to_first_correct_change_s: 25.41   (poll resolution 5s)
+accepted: yes
+oracle_verdict: ACCEPT T1 — false claim removed, behaviour identical, suite still 14 passed
+seeded_suite: TOTAL: 14 passed, 0 failed
+final_suite: TOTAL: 14 passed, 0 failed
+--- NOT machine-derivable, recorded as '-' (an unknown is not a zero) ---
+human_interventions: -   (no operator was present to observe any)
+rework: -                (not decidable from the final tree; a model's own account of its rework is a self-report)
+defects_escaped: -       (counted only while someone keeps looking; nobody did after this run)
