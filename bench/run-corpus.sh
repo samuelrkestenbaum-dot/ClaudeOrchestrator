@@ -4,7 +4,7 @@
 # WHAT THIS IS NOT. It is not the pre-registered A/B in
 # build-os/metrics/COMPARISON_PROTOCOL.md. That design is 16 runs across two
 # arms with a HUMAN OPERATOR holding the clock, explicitly not an agent. This
-# script runs one task, one arm, once. See build-os/bench/BASELINE_LIMITS.md.
+# script runs one task, one arm, once. See bench/BASELINE_LIMITS.md.
 #
 # THE RULE THAT GOVERNS EVERY FIELD BELOW: an unknown is not a zero. Anything
 # this script cannot derive by executing something is written "-", never 0 and
@@ -52,7 +52,7 @@
 set -uo pipefail
 
 SELF_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "$SELF_DIR/../.." && pwd)"
+REPO_ROOT="$(cd "$SELF_DIR/.." && pwd)"
 SEEDER="$SELF_DIR/seed-bench-repo.sh"
 ORACLE="$SELF_DIR/oracles/oracle.js"
 INSTALLER="$REPO_ROOT/install-project.sh"

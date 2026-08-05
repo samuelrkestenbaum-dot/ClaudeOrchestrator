@@ -45,7 +45,7 @@ The protocol says plainly that "an agent measuring its own speedup is not
 evidence". This baseline was produced by an agent, unattended. The mitigation
 applied here is not blinding — blinding remains impossible — it is **mechanical
 acceptance**: every accept/reject verdict came from a hidden oracle
-(`build-os/bench/oracles/oracle.js`) that the agent under test never saw, whose
+(`bench/oracles/oracle.js`) that the agent under test never saw, whose
 criteria were frozen into the seeded tree **before** the run, and which was
 proven non-vacuous before use (see §5). That removes the agent's judgement from
 the scoring. It does **not** make the agent a disinterested observer of its own

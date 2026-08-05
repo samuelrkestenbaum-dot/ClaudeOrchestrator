@@ -10,7 +10,7 @@ shapes; they do not change them. Corpus version stays **1.0.0**.
 ## The pinned state
 
 ```sh
-build-os/bench/seed-bench-repo.sh /tmp/bench-repo
+bench/seed-bench-repo.sh /tmp/bench-repo
 # tree_digest_sha256: bb52f7b5ebbfc918b005a17a594279557a6249f8a94ba9163dcd70d9462614c2
 ```
 
@@ -119,7 +119,7 @@ no file outside the manifest was written.
 
 ## What the oracles are, and where they live
 
-`build-os/bench/oracles/oracle.js` — **never copied into the seeded tree and
+`bench/oracles/oracle.js` — **never copied into the seeded tree and
 never named in a task prompt.** An acceptance criterion the agent can read is a
 criterion it can satisfy literally. Every verdict is decidable by executing
 code: no prose grading, no judgement call, no model self-report.
@@ -132,8 +132,8 @@ pre-fix). See `BASELINE_LIMITS.md` §5 for the full table.
 ## Re-seeding in a future run
 
 ```sh
-build-os/bench/seed-bench-repo.sh /tmp/bench-repo
-build-os/bench/seed-bench-repo.sh --digest /tmp/bench-repo   # must print bb52f7b5...
+bench/seed-bench-repo.sh /tmp/bench-repo
+bench/seed-bench-repo.sh --digest /tmp/bench-repo   # must print bb52f7b5...
 ```
 
 **If the digest differs, the instances have drifted and the run is not comparable
