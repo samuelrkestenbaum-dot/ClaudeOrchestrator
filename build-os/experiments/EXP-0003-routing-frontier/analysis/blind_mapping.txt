@@ -1,0 +1,4 @@
+EXP-0003 blind mapping (sealed 2026-08-05T20:25:06Z)
+A=Q
+B=R
+C=P
