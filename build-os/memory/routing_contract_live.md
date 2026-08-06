@@ -63,7 +63,22 @@ archivist's close-fill — then the next session re-routes).
   tool basename, not canonical path, so a hostile file NAMED like a routing
   tool at another path still passes ungated — within the not-a-sandbox
   bound; (4) `sh -c` evasion of the MUTATION gate itself remains exactly as
-  named below, unchanged. **Store-unavailable is not a brick:** when the
+  named below, unchanged; (5) a passed invocation's ARGUMENTS may contain
+  parameter expansions (`$VAR`, `${…}`, `$'…'`) — expansion output undergoes
+  word splitting but is never re-parsed for shell operators, so it can alter
+  the routing tool's *arguments* at execution, never chain a second command;
+  the corollary is that the sha256 fingerprints the PRE-EXPANSION LITERAL
+  text, so one fingerprint can execute with different arguments under
+  different environments; (6) the store-availability probe runs at the
+  hook's OWN privilege — as root it cannot observe the permission-denials
+  that would bite non-root, and the block/fail-open split's invariant
+  ("block only where recovery is viable") holds precisely because the
+  recovery command runs at that same privilege; (7) the fingerprint's sha
+  component is BEST-EFFORT — on a host without `sha256sum` the row records
+  `sha256=-` (the excerpt still present), so the ledger's distinguishing
+  power rests on the label's exactness (only exact invocations reach
+  `ROUTING-TOOL-PASS` at all) plus the excerpt, not on the hash being
+  unconditionally available. **Store-unavailable is not a brick:** when the
   receipt store can neither be read nor created, the mutation gate FAILS
   OPEN with a `FAIL-OPEN-STORE-UNAVAILABLE` row — itself riding the layer-4
   stderr fallback — because a block whose own recovery command cannot
