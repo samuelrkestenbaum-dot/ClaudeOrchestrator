@@ -1,0 +1,63 @@
+# PRIOR-PILOT EXCLUSIONS — tasks that MUST NOT enter an EXP-0004 candidate backlog.
+#
+# WHY THIS FILE EXISTS. AB_PREREGISTRATION says EXP-0004's task set "MUST NOT
+# overlap PILOT-0002" and that using those tasks "would contaminate a frozen
+# pilot". PILOT-0002 is frozen and has NOT yet run, so the contamination is not
+# hypothetical: a task measured under EXP-0004 and then measured again as a
+# frozen pilot task is no longer a clean observation of either. PILOT-0001 is
+# already executed, so its tasks are excluded for the opposite reason — they are
+# spent: a repeat measurement of work already done under a different protocol
+# measures familiarity, not the compiler.
+#
+# THIS IS AN INPUT, NOT A CONSTANT. emit-backlog.mjs takes the path to this file
+# as an argument and hardcodes none of it. Point it at a different list and the
+# filter changes; delete a line and the exclusion stops firing. That is
+# deliberate: an exclusion list embedded in code cannot be reviewed by the
+# operator who owns the freeze.
+#
+# PROVENANCE — every entry below was read out of this repository, not supplied
+# from memory:
+#   PILOT-0001's five tasks: the task_id lines of the six routing receipts in
+#     build-os/packets/routing/routing-PILOT-0001-*.md (five tasks T1-T5, plus a
+#     setup receipt that is not a task).
+#   PILOT-0002's five frozen tasks: build-os/pilots/PILOT-0002/FREEZE.md,
+#     section "The five frozen tasks".
+#
+# FORMAT — one exclusion per line, three fields separated by " | ":
+#   <pilot-id> | <task name> | <extended regex, matched case-insensitively>
+# Lines beginning with # and blank lines are ignored.
+#
+# WHAT THE REGEX IS MATCHED AGAINST: the candidate's error-cluster signature
+# followed by each of its file paths, one per line. The `m` flag is set, so `^`
+# and `$` anchor to path boundaries.
+#
+# TWO LIMITATIONS, STATED RATHER THAN DISCOVERED LATER:
+#
+#   1. CLUSTER SIGNATURES ARE OPERAND-BLIND. errors.mjs normalizes quoted
+#      operands to '<S>', so the signature of PILOT-0002 T1 reads
+#      "TS2339: Property '<S>' does not exist on type '<S>'. Did you mean '<S>'?"
+#      — the words "bridge" and "bridges" are GONE from it. Path patterns, not
+#      message patterns, are therefore the load-bearing half of every entry
+#      below. A frozen task whose files this list names wrongly will not be
+#      caught by its message.
+#
+#   2. THESE PATTERNS ARE DELIBERATELY BROAD. The two error directions are not
+#      symmetric: a false exclusion costs one candidate out of a backlog that
+#      has many, while a false inclusion contaminates a frozen pilot that cannot
+#      be un-run. Over-exclusion is the cheap mistake and is preferred on
+#      purpose. Expect this list to remove more than the ten tasks named.
+#
+# The backlog this filter produces is CANDIDATES, never a selection. An operator
+# still reads it before anything is frozen, and that review is where a wrongly
+# excluded or wrongly surviving candidate is caught.
+
+PILOT-0001 | T1 diagnose the red baseline | red baseline|baseline diagnosis|T1_DIAGNOSIS
+PILOT-0001 | T2 hermetic notification test | notification
+PILOT-0001 | T3 four_eyes_state_change audit kind | four_eyes_state_change|four-eyes|audit[_-]?kind
+PILOT-0001 | T4 executeFixLayer dry-run timeout | executeFixLayer|execute-fix-layer|dry-?run.*timeout
+PILOT-0001 | T5 stripe SDK-drift cluster | stripe
+PILOT-0002 | T1 trpc client bridge->bridges drift cluster | trpc|\bbridges?\b
+PILOT-0002 | T2 CoverageReportData drift | CoverageReportData|coverage-?report|(^|/)coverage(/|\.)
+PILOT-0002 | T3 agents hermetic and live-LLM tests | agents[._-]test|(^|/)agents(/|\.)|live-?llm
+PILOT-0002 | T4 training/router interface conflict | AutoRetrainingPipeline|auto-?retraining|(^|/)training/
+PILOT-0002 | T5 voice-stream LogDomain and webhooks narrowing | LogDomain|voice-?stream|webhooks?
