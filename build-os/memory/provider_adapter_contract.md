@@ -44,3 +44,19 @@ An adapter row may claim a capability only with an executed demonstration in
 this repository's suite (the pattern: `tests/routing_task_entry_tests.sh`
 drives adapter #1 with fabricated host JSON). A row without evidence is
 written UNVERIFIED — an unverified adapter is information, not coverage.
+
+## v0 formalization (LANE-4) — build-os/adapters/
+
+The interface above is now a NAMED CONTRACT with a conformance driver; this
+section points, it does not replace — every row and bound above stays binding.
+- `build-os/adapters/ADAPTER_CONTRACT.md` — ten lifecycle operations
+  (task_start … capability_declaration), MUST/MAY/MUST-NOT per operation,
+  tier honesty baked in (never a tier above what is measured).
+- `build-os/adapters/capability-schema.json` — machine-checkable declarations;
+  illegal combinations refused BY NAME by `build-os/adapters/conformance.sh`
+  (schema + behavioral levels). Suite: `tests/adapter_contract_tests.sh`.
+- Declarations: `claude-hooks.capability.json` (adapter #1, executed);
+  `codex.capability.json` (adapter #2, four-state honest stub: binary present,
+  auth absent, host unreachable/000, no successful call — 0 of 10 supported);
+  `mock-adapter.capability.json` + `mock-adapter.sh` (local contract proof —
+  mock proves the contract, never a provider).

@@ -1,0 +1,71 @@
+{
+  "schema": "adapter-capability/v0",
+  "adapter_id": "claude-hooks",
+  "provider": "anthropic-claude-code",
+  "verification": {
+    "state": "executed",
+    "evidence": "tests/routing_task_entry_tests.sh, tests/routing_live_gate_tests.sh, tests/routing_structured_action_tests.sh, and tests/adapter_contract_tests.sh drive .claude/hooks/routing-gate.sh directly with fabricated host JSON; native-proof pilot receipts under build-os/packets/routing/ record it governing live sessions."
+  },
+  "lifecycle": {
+    "task_start": {
+      "supported": true,
+      "tier": "EXACT",
+      "enforcement": "pre",
+      "notes": "The universal task-entry boundary (mutgate): a mutation-capable call with no open routing receipt is blocked exit 2 BEFORE execution; route-task.sh issues the receipt that starts the governed task. Only sessions started after the hook wiring loads are governed."
+    },
+    "context_delivery": {
+      "supported": false,
+      "tier": "UNAVAILABLE",
+      "enforcement": "none",
+      "notes": "The host delivers prompts/context; the hook surface sees tool calls, not prompt content. Not claimed, not guessed."
+    },
+    "authority_grant": {
+      "supported": true,
+      "tier": "EXACT",
+      "enforcement": "pre",
+      "notes": "The open receipt's recorded mode and budgets ARE the authority envelope: dispatch above the recorded mode with no evidence-bearing escalation record is blocked pre-execution (the silent-escalation refusal); budgets (budget_max_subagents, process_dispatch_allowance) enforced live."
+    },
+    "mutation_event": {
+      "supported": true,
+      "tier": "EXACT",
+      "enforcement": "pre",
+      "notes": "PreToolUse mutgate on Edit|Write|NotebookEdit|Bash; exit 2 blocks with a model-visible stderr refusal; admitted events land as mutation_event rows (EXACT, attempts not completions). NAMED HEURISTIC bound: the Bash classification is evadable by sh -c — discipline for honest agents plus audit trail, NOT a sandbox."
+    },
+    "telemetry_report": {
+      "supported": true,
+      "tier": "ESTIMATE",
+      "enforcement": "pre",
+      "notes": "Per-field tiers, never promoted: dispatches/tool events/mutations/exploratory events EXACT (hook-counted at PreToolUse); token_proxy ESTIMATE (chars/4, labeled everywhere, never billing truth); tokens/cost UNAVAILABLE live in interactive sessions, CLOSE-TIME via telemetry reconciliation where headless. Declared tier is the report's floor, not its best field."
+    },
+    "receipt_bind": {
+      "supported": true,
+      "tier": "EXACT",
+      "enforcement": "pre",
+      "notes": "Native: every counted event appends to build-os/packets/routing/live_state/<receipt-id>.tsv for the open receipt; counts are DERIVED by counting rows, never stored; Full task dispatches seed stub contribution rows into the receipt itself."
+    },
+    "completion": {
+      "supported": true,
+      "tier": "EXACT",
+      "enforcement": "post",
+      "notes": "Close is routing-check.sh's gate: refuses silent escalation and undeclared budget breach at close, against the derived live-state counts."
+    },
+    "interruption": {
+      "supported": true,
+      "tier": "EXACT",
+      "enforcement": "none",
+      "notes": "No active interruption handler exists; resumability is passive but real — the open receipt (executed_mode '-') and the append-only live state survive session death, and the next hooked session is governed against them. Nothing fires AT interruption, hence enforcement none."
+    },
+    "degradation": {
+      "supported": true,
+      "tier": "EXACT",
+      "enforcement": "pre",
+      "notes": "The live fan-out brake: at budget_max_subagents the gate stamps the degradation via record-degradation.sh BEFORE close and blocks further dispatch; a degraded receipt refuses new dispatch (stop the expensive mode, not the task)."
+    },
+    "capability_declaration": {
+      "supported": true,
+      "tier": "EXACT",
+      "enforcement": "none",
+      "notes": "This file, derived from the executed hook surface and guarded by tests/adapter_contract_tests.sh (which drives the real hook to spot-check these claims)."
+    }
+  }
+}

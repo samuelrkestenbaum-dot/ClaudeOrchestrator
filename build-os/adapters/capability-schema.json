@@ -1,0 +1,45 @@
+{
+  "schema_id": "build-os/adapters/capability-schema/v0",
+  "description": "Machine-checkable capability-declaration format for provider adapters. Enforced by build-os/adapters/conformance.sh (bash + node, no external validator). Doctrine: build-os/adapters/ADAPTER_CONTRACT.md; memory: build-os/memory/provider_adapter_contract.md.",
+  "schema_const": "adapter-capability/v0",
+  "required_top": ["schema", "adapter_id", "provider", "verification", "lifecycle"],
+  "lifecycle_points": [
+    "task_start",
+    "context_delivery",
+    "authority_grant",
+    "mutation_event",
+    "telemetry_report",
+    "receipt_bind",
+    "completion",
+    "interruption",
+    "degradation",
+    "capability_declaration"
+  ],
+  "point_required": ["supported", "tier", "enforcement", "notes"],
+  "tiers": ["EXACT", "ESTIMATE", "CLOSE-TIME", "UNAVAILABLE"],
+  "enforcement_points": ["pre", "post", "none"],
+  "verification_states": ["executed", "unverified"],
+  "verification_rules": {
+    "executed": "verification.evidence must name executed proof in this repository (a suite that drives the adapter).",
+    "unverified": "verification.access is REQUIRED with the four honesty facts below; nothing may be marked supported."
+  },
+  "unverified_access_required": ["binary_present", "auth_present", "host_reachable", "successful_call"],
+  "illegal_combinations": [
+    {
+      "name": "UNSUPPORTED-TIER-CLAIM",
+      "rule": "A lifecycle point with supported=false MUST declare tier UNAVAILABLE. An unsupported operation measures nothing, so any measured tier on it is an overclaim."
+    },
+    {
+      "name": "EXACT-TELEMETRY-WITHOUT-OBSERVATION",
+      "rule": "telemetry_report with tier EXACT MUST declare enforcement pre or post. EXACT means counted by the adapter itself, which requires an observation point; tokens-EXACT-with-enforcement-none is the canonical overclaim."
+    },
+    {
+      "name": "UNVERIFIED-SUPPORT",
+      "rule": "verification.state != executed forbids supported=true on EVERY lifecycle point. Provider support is claimed only after a real successful call — four-state honesty (binary present / auth absent / host unreachable / no successful call) is recorded instead."
+    },
+    {
+      "name": "PHANTOM-ENFORCEMENT",
+      "rule": "A lifecycle point with supported=false MUST declare enforcement none. Claiming an enforcement point for an operation the adapter does not implement invents a gate that does not exist."
+    }
+  ]
+}
