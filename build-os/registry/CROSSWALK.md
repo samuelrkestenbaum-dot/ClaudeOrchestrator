@@ -72,11 +72,11 @@ the concept without performing the function and **is not coverage**.
 | valence | 0 | 0 | 0 | 0 | — | — |
 | agency | 17 | 12 | 4 | 1 | A, C | advise, gate, execute |
 | energy | 5 | 0 | 5 | 0 | A, C | advise, gate |
-| homeostasis | 39 | 1 | 38 | 0 | A | advise, gate |
+| homeostasis | 40 | 1 | 39 | 0 | A | advise, gate |
 | integration_bandwidth | 6 | 1 | 5 | 0 | A, C | advise, gate |
 | boundary | 13 | 0 | 13 | 0 | A | advise, gate |
 | ethical_admissibility | 2 | 1 | 0 | 1 | A | gate |
-| epistemic_quality | 50 | 19 | 30 | 1 | A, B, C | advise, gate |
+| epistemic_quality | 51 | 19 | 31 | 1 | A, B, C | advise, gate |
 | latent_state | 6 | 4 | 2 | 0 | A, C | advise, gate |
 | durability | 2 | 0 | 2 | 0 | A | gate |
 | gated_plasticity | 5 | 4 | 1 | 0 | A, B, C | advise, gate |

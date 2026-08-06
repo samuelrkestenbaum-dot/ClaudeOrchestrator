@@ -1175,7 +1175,7 @@ chain_suite "tests/intake_tests.sh"           "second-repository intake: provena
 chain_suite "tests/adapter_contract_tests.sh" "the provider-adapter contract: overclaims refused by name, behavioral conformance, refusal-not-fake, resumable interruption"
 chain_suite "tests/measure_window_tests.sh"   "the measured-window recorder: verbatim meter readings at both edges and git-derived durable output"
 
-echo "== 30. Chained Context Compiler suites (index, capsule, expansion economy, earned verification) =="
+echo "== 30. Chained Context Compiler suites (index, capsule, expansion economy, earned verification, capability) =="
 # The Context Compiler four-lane fan-out (LANE A/B/C/D: isolated worktrees,
 # disjoint write sets, one merge-integration pass owning this file) landed four
 # sibling suites over SEAMS 1-6. Same device and same reasons as sections 26 and
@@ -1202,6 +1202,13 @@ chain_suite "tests/compiler_index_tests.sh"     "the SEAM 1 repository index: gi
 chain_suite "tests/compiler_capsule_tests.sh"   "the SEAM 2/5 task capsule: no file admitted without a rule, budget overflow disclosed rather than truncated, and a byte-identical cache prefix across tasks"
 chain_suite "tests/compiler_expansion_tests.sh" "the SEAM 3/4 context economy: sliced expansions with exact withheld-byte accounting, denial logged as data, and a compactor that emits nothing from speculation"
 chain_suite "tests/compiler_verifier_tests.sh"  "the SEAM 6 earned verification: six named triggers driven one at a time, absence never read as safety, and a dispatch above the recorded routing mode refused"
+# THE FIFTH SUITE arrived after the fan-out closed, alone rather than in a lane,
+# and is chained under the same rule as the four above: its own registry entry
+# and its module's land in the SAME COMMIT as this line (RULING 4). It needs the
+# chaining for a sharper version of the reason the others do — the capability
+# reporter is not merely INERT, it is called by NOTHING at all, which its own
+# section 11 proves; chaining its suite is the only consumer it has.
+chain_suite "tests/compiler_capability_tests.sh" "the SEAM 1 capability report: index signal quality measured before a capsule is trusted, exact integer eligibility arithmetic, unavailable never rendered as zero, and a recommendation that can refuse to compile at all"
 
 echo
 echo "==== RESULT: $PASS passed, $FAIL failed ===="

@@ -1285,3 +1285,17 @@ class: A
 runtime_authority: gate
 binding_kind: proxies
 rationale: Test state over earned verification: the economics default holding, each of six triggers silent on a clean outcome and firing alone on its own condition, absence never read as safety, partial descriptors refused, all three routing decisions derived, the recorded routing mode binding in both directions, and a trigger that caught nothing reported as such. A suite's function is property preservation, same as its siblings.
+
+control: compiler.capability_report
+binds_to: epistemic_quality
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Asks the one question a capsule cannot ask about itself — is this capsule small because it was SELECTIVE, or small because the index behind it was IGNORANT? — and is willing to answer that the honest move is to abandon the capsule and explore the repository the ordinary way. Every share it prints carries its denominator, a metric with no denominator prints `unavailable` with its reason rather than 0, a file the index never parsed is never described as understood, and the eligibility precondition is integer arithmetic so no rounding decides it. Proxies because the quality it grades is the INDEX's self-report: coverage is read off SEAM 1's own heuristic tests_covering and its regex extractors, so the tool measures how much the indexer claims to have understood, not how much was there to understand — and its two recommendation thresholds are derived defaults it labels as uncalibrated.
+
+control: suite.compiler_capability
+binds_to: homeostasis
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Test state over the capability reporter: four CLI refusals exiting 2, each of the three recommendation states reached by its own fixture, an empty index yielding `unavailable` with no NaN, no Infinity and no fabricated 0/0, byte-identical output across runs in both modes, the AMENDMENT 1 boundary driven on both sides of one half with its integer test quoted, no bare percentage anywhere in a corpus of real reports, derivation parity with `build-index stats` against a real index of this repository, and the emptiness proof that nothing calls the tool. A suite's function is property preservation, same as its siblings.
