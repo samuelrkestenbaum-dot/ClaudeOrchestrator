@@ -108,3 +108,35 @@ satisfy it; that is a build decision, not an amendment to this rule.
 
 This amendment is recorded BEFORE any A/B task has been selected or run,
 so it cannot function as post-hoc selection of a favourable repository.
+
+## AMENDMENT 2 — arm B must REPLACE broad context, not supplement it
+
+Recorded before any A/B task is selected, closing a gap the original
+design left implicit.
+
+Arm B was written as "the worker receives the compiled capsule and may buy
+more context through the expansion protocol". That describes what B
+RECEIVES but never forbids what B ALSO receives. If the harness delivers
+the ordinary broad context AND the capsule, arm B's token usage rises by
+construction — the capsule becomes pure overhead, and the experiment would
+measure an addition while claiming to test a substitution. A compression
+thesis cannot be tested by adding bytes.
+
+BINDING: in arm B the compiled capsule REPLACES the broad-context delivery.
+The worker's starting context is the capsule plus the immutable prefix
+(SEAM 5) and nothing else; every further byte arrives through a recorded
+expansion request (SEAM 3). Arm A is unchanged and receives exactly what
+today's execution receives.
+
+MECHANICAL CHECK, run per task before its measurement is admitted: arm B's
+initial input must not contain the broad-context payload — verified by
+asserting that B's starting bytes equal the rendered capsule plus prefix,
+recorded in the run record. A task whose arm B starts with both is
+registered `result confounded` under the existing stop conditions and is
+excluded from the aggregate; it is not silently repaired and re-run.
+
+COROLLARY, stated so it cannot be discovered late as a surprise: if the
+capsule is materially incomplete, arm B pays for the gap twice — once in
+expansion requests and once in the rework a wrong early hypothesis causes.
+That is not a flaw in the experiment; it is the honest cost of compression
+that went too far, and outcome 4 exists to record it.
