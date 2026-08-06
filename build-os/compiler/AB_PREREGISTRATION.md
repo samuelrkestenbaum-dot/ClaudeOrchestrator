@@ -140,3 +140,97 @@ capsule is materially incomplete, arm B pays for the gap twice — once in
 expansion requests and once in the rework a wrong early hypothesis causes.
 That is not a flaw in the experiment; it is the honest cost of compression
 that went too far, and outcome 4 exists to record it.
+
+## AMENDMENT 3 — the registered decision rules (operator ruling, pre-run)
+
+Recorded before any A/B task is selected and before blinding is built.
+SUPERSEDES the original five-outcome list where they conflict.
+
+### 3.1 The vocabulary is SEVEN outcomes
+
+1. `supported`
+2. `compression only`
+3. `acceleration only`
+4. `inconclusive`
+5. `context compilation harmful`
+6. `small-because-uninformed`
+7. `result confounded`
+
+Three of these are distinct FAILURE SHAPES and must never be collapsed:
+
+- **`context compilation harmful`** — the compiler had ADEQUATE structural
+  signal and still produced worse economics, more rework, more
+  intervention, or lower acceptance. The thesis was tested and lost.
+- **`small-because-uninformed`** — the compiler LACKED structural
+  understanding, so a small capsule does not represent useful
+  compression. The thesis was not really tested.
+- **`result confounded`** — the arm contract, the initial-context
+  substitution rule (Amendment 2), the seed, or a measurement boundary
+  was violated. The run is invalid, not the thesis.
+
+Canonical wording is `result confounded` (with a space) in all published
+text; `result_confounded` is permitted only as a machine code, and both
+must be emitted together so they cannot diverge.
+
+### 3.2 Wall-clock thresholds (registered, symmetric)
+
+Median elapsed-time change, arm B relative to arm A:
+
+| Band | Classification |
+|---|---|
+| >= 25% faster | meaningful acceleration |
+| 10% - 24.9% faster | directional improvement, not independently decisive |
+| < 10% absolute change | no meaningful elapsed-time difference |
+| 10% - 24.9% slower | directional harm |
+| >= 25% slower | meaningful harm |
+
+Rationale recorded: wall-clock is noisy, and 25% is the smallest band
+that is operationally meaningful. This closes the gap where "35-65%
+faster" existed only as a hypothesis and never as a decision rule.
+
+### 3.3 The `supported` verdict requires ALL FOUR
+
+1. no acceptance-quality loss (the veto, already binding);
+2. the registered token criterion met (>= 25% median uncached reduction);
+3. median elapsed time >= 25% faster;
+4. no material increase in human intervention or rework.
+
+A token win with < 25% elapsed improvement may qualify as
+`compression only`, subject to the remaining criteria. An elapsed win
+without the token criterion may qualify as `acceleration only`. Meeting
+neither, with acceptance intact, is `inconclusive`.
+
+### 3.4 Resolutions of the six named ambiguities
+
+- **Prefix double-count (the load-bearing one).** Arm B receives the
+  RENDERED capsule, whose FIRST SEGMENT IS the immutable prefix per SEAM
+  5. The starting-context contract is exactly those rendered bytes —
+  prefix and capsule are not added together, because the prefix is
+  already inside. `duplicated_prefix_content` remains a confound
+  detector for the case where a prefix is ALSO supplied separately.
+- **Amendment 1 vs outcome 6.** These govern different moments and no
+  longer conflict: an eligibility failure measured BEFORE a run means the
+  repository is EXCLUDED and the run does not start; inadequate signal
+  discovered AFTER a run yields outcome 6, `small-because-uninformed`.
+- **SEAM 2 prefix digest.** A capsule MUST declare its prefix digest for
+  arm B admission. A capsule that declares none cannot be admitted to
+  arm B — convention is promoted to requirement.
+- **Outcome ordering.** `compression only` and `acceleration only` no
+  longer overlap: they are selected by WHICH criterion was met (token
+  vs elapsed), and meeting both with the other two gates satisfied is
+  `supported`.
+- **Primary metric.** The combined metric sums tokens, seconds and human
+  attention without common units or registered weights. It is therefore
+  DIRECTION-ONLY and may never be the sole basis of a verdict; the four
+  gates in 3.3 decide.
+- **Eligibility binds the RUN, not only arm B.** Arm A executed on a
+  repository arm B could not see is not a comparison.
+
+### 3.5 Minimum n — derived default, explicitly reversible
+
+The preregistration registered no minimum task count for "too small to
+separate". Derived default, recorded so no threshold is chosen after
+seeing data: fewer than FIVE completed un-confounded task-pairs cannot
+return `supported` or `context compilation harmful`; such an aggregate
+returns `inconclusive` with the count stated. This is my derivation, not
+an operator ruling, and the operator may replace it before the run.
