@@ -1951,3 +1951,35 @@ design; recovery: one `build-os/tools/route-task.sh` command.
 NOTHING PUSHED (3 packet commits + close local, pending go; 4 ahead of
 origin). NOTHING IN FLIGHT, NOTHING STAGED — the real-repo pilot is the
 next product decision. `residue.md` frozen (blob `01517ad2…`).
+
+
+## PACKET-0055-structured-routing-action — CLOSED PASS-AS-FIXED 2026-08-06 — ROUTING EXCEPTION NOW A STRUCTURED ACTION
+
+Receipt `build-os/receipts/gravito_structured_routing_action_a.md`. Commits
+`99ee076` + `cbca633` + `52f429e` (fix doc-only), base `e293e75`.
+OPERATOR RULING: the deadlock guard's whole-JSON substring breadth was "a real
+enforcement bypass, not merely a wording issue" — hardened before the real-repo
+pilot (sentence verbatim in the live contract). SHIPPED: the ungated
+pass now requires an exact-invocation match over the extracted
+`tool_input.command` field (benign JSON escapes only, metachar reject, strict
+ERE, optional interpreter prefix); extraction failure falls TOWARD GATING;
+`ROUTING-TOOL-PASS` rows fingerprinted (tool, sha256 first-12-hex, sanitized
+excerpt); recovery proven clean end-to-end; store-unavailable NOT a brick
+(uncreatable → FAIL-OPEN-STORE-UNAVAILABLE on stderr fallback;
+missing-but-creatable → blocks w/ working recovery). All SEVEN named bounds now
+at full size in the contract AND mirrored in
+`routing.universal_task_entry_gate` notes (registry 2474 lines; anchors
+unmoved). GATES: qa GREEN **2875/0 solo** (2801+74 new); iso 2801/0 at
+`99ee076`; probe 15/15 attacks blocked, 8/8 legit fingerprinted; overhead
+52/34/59 ms vs 250; compat 6/0; census **129**, refs **459** (binding
+extractor; naive 461, prose excluded); safety grep clean. Reviewer
+fix-then-pass ONE item (contract carried 4 of 7 bounds) fixed in `52f429e`;
+targeted re-review pass. `DC-0001` 34→35, same commit. Second eyes NONE (Codex
+403, stated). Directives: CROSSWALK.md:230 stale AT BASE (follow-up packet);
+red-first 30/44 per reviewer (handback 30/43, off by one).
+
+STANDING: NO routing receipt open — next session's FIRST mutation-capable call
+WILL BE BLOCKED until routed; task entry by design, recovery one
+`build-os/tools/route-task.sh` command. NOTHING PUSHED
+(4 ahead of origin, pending go). NOTHING IN FLIGHT.
+`residue.md` frozen (blob `01517ad2…`).

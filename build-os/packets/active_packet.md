@@ -2609,7 +2609,7 @@ surface the T2–T4 refusals and per-arm acceptance explicitly.
 
 ## IN FLIGHT — `structured-routing-action` (declared 2026-08-06)
 
-- **Packet id:** `PACKET-0055-structured-routing-action` — minted; 0 commits/0 files before this edit.
+- **Packet id (CLOSED):** `PACKET-0055-structured-routing-action` — minted; 0 commits/0 files before this edit.
 - **Lane:** `substantive`. **Depth 2.** Routing receipt issued before building:
   `routing-PACKET-0055-structured-routing-action-20260806T015246Z.md`, selected_mode
   gravito_full, binding.
@@ -2636,3 +2636,73 @@ surface the T2–T4 refusals and per-arm acceptance explicitly.
 - **Frozen:** bench/, build-os/experiments/, build-os/metrics/ (the close-time
   metrics row is the archivist's, not this packet's), build-os/memory/residue.md
   (blob `01517ad2…`). No push/merge/deploy/secrets without explicit operator go.
+
+## CLOSE RECORD — `gravito_structured_routing_action_a` (`PACKET-0055-structured-routing-action`) — closed 2026-08-06 by the archivist. NOTHING IN FLIGHT.
+
+- **Packet id (CLOSED):** `PACKET-0055-structured-routing-action`. Receipt:
+  `build-os/receipts/gravito_structured_routing_action_a.md`. **Lane:** `substantive`.
+  **Depth 3, announced** — build; qa ‖ reviewer concurrently; one bounded fix round
+  (`fix-then-pass`, 1 enumerated item), targeted re-review at that item only. Base
+  `e293e75` (PACKET-0054's close), re-verified at close (`git merge-base HEAD e293e75`
+  → `e293e75`), tree quiet at `52f429e`.
+- **Commits:** `99ee076` (declaration + gravito_full routing receipt, 2 files +88/−0,
+  green in isolation 2801/0) + `cbca633` (build, 8 files +520/−57) + `52f429e` (the one
+  permitted fix commit — doc-only, 2 files +17/−2). Per-commit numstat sums 10 paths
+  +625/−59; union `e293e75..52f429e` 10 files +623/−57 — reconcile exactly (2
+  build-commit lines rewritten within-range by the fix).
+- **WHAT SHIPPED (operator ruling: the deadlock guard's substring breadth was "a real
+  enforcement bypass, not merely a wording issue" — hardened BEFORE the real-repo
+  pilot):** the mutgate exception narrowed from whole-JSON substring to a STRUCTURED
+  ROUTING ACTION — exact-invocation match over the extracted `tool_input.command` field
+  (benign JSON escapes only, whole-command metacharacter reject, strict ERE with
+  optional interpreter/path prefix), extraction failure falling TOWARD GATING;
+  fingerprinted `ROUTING-TOOL-PASS` rows (tool, sha256 first-12-hex, ≤80-char sanitized
+  excerpt) closing the 0054 residual; recovery path proven clean end-to-end;
+  store-unavailable proven NOT a brick (uncreatable → FAIL-OPEN-STORE-UNAVAILABLE on
+  the stderr fallback; missing-but-creatable → blocks with working recovery). The
+  operator's status framing sentence sits verbatim in `routing_contract_live.md`.
+- **Gates:** qa GREEN — FULL SUITE **2875/0 exit 0 solo** (base 2801/0; +74 = the new
+  `tests/routing_structured_action_tests.sh` exactly, chained-vector reconciled);
+  commit-1 iso **2801/0** in a worktree at `99ee076`; QA's 61-assertion probe harness
+  15/15 attack shapes blocked with zero pass rows, 8/8 legit shapes fingerprinted with
+  independently recomputed sha256, lifecycle walked, store-unavailable both branches;
+  overhead ALLOW 52 ms / BLOCK 34 ms / fingerprinted pass 59 ms vs ≤250 ms; safety
+  grep clean (attack strings are stdin fixtures, never executed; the one executed eval
+  runs the refusal's own recovery command into mktemp scratch, deliberate); backward
+  compat 6 receipts / 0 violations; registry census **129**, evidence_refs **459**
+  (binding extractor; naive grep 461 — prose citations excluded by design), 8 anchors
+  content-verified. Reviewer **fix-then-pass on ONE item**, fixed in `52f429e` (the
+  contract's "at full size" bounds list carried 4 of the builder's 7 named bounds; the
+  missing three — argument non-literality under expansion with the
+  pre-expansion-literal fingerprint corollary; privilege-relative store probe; sha256
+  best-effort fallback — existed in no repo artifact; fixed in the contract + mirrored
+  line-count-neutral in `routing.universal_task_entry_gate`'s notes,
+  `control_registry.txt` stayed 2474 lines, all 15 anchors byte-compared unmoved);
+  targeted re-review: pass → **PASS-AS-FIXED**. STRENGTHS verified by the reviewer:
+  the `$VAR` soundness claim TRUE at shell-semantics level (expansion output never
+  re-parsed for operators); extraction first-occurrence heuristic safe against
+  model-controlled content (planted "command" keys in string values are necessarily
+  escaped); the 8 "unchanged by design" anchors byte-compared identical base-vs-HEAD —
+  the twice-burned defect class did NOT fire. TWO CLOSE-TIME DIRECTIVES recorded:
+  (1) `CROSSWALK.md:230` ("homeostasis — 24 bound") stale AT BASE (base already 30, now
+  31) — named follow-up for a future packet, out of scope by deliberate call; (2) the
+  red-first figure is 30 passed / 44 failed per the reviewer's independent measure (the
+  builder's handback said 30/43 — off by one; repo artifacts carry only "twenty-one
+  attack shapes," accurate). Second eyes NONE (Codex 403 at proxy on both transports —
+  stated, not pretended). `DC-0001` numeral moved **34 → 35** in this close commit,
+  derived from the receipt store.
+- **Live routing receipt closed:** `executed_mode: gravito_full` (matches selected; no
+  escalation); `consumed_process_dispatches: 5` — TRANSCRIPT-DERIVED, CLOSE-TIME tier
+  (builder 1 + qa 1 + reviewer 1 + targeted re-review resume 1 + archivist 1 = 5 ≤
+  allowance 7; hooks not loaded this session, no `live_state/` file exists to
+  corroborate or contradict); all other consumption `-`, honest admissions.
+- **STANDING NOTE, BINDING ON THE NEXT SESSION:** with this receipt close-filled, NO
+  routing receipt remains open — the next session's FIRST mutation-capable call WILL BE
+  BLOCKED until it routes; mandatory task entry working by design, recovery one
+  `build-os/tools/route-task.sh` command (same as the 0054 close note).
+- **Boundaries:** NOTHING PUSHED — `99ee076`, `cbca633`, `52f429e`, and this close
+  commit local pending explicit operator go (4 ahead of origin after this close); none
+  may be amended. No merge, deploy, or secrets. `residue.md` stays frozen (blob
+  `01517ad2…`). **NOTHING IS IN FLIGHT; NOTHING IS STAGED** — the real-repository pilot
+  is the operator's next product decision, and staging it is a routing act the
+  archivist does not take.

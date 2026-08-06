@@ -27,9 +27,19 @@ budget_max_cost_usd: 1.50
 process_dispatch_allowance: 7
 # --- empty at issue; filled at close. AN UNKNOWN IS NOT A ZERO: "-" is an honest
 # --- admission and is never refused; refusal is for CONTRADICTION, not absence.
-executed_mode: -
+executed_mode: gravito_full
 escalation: -
 escalation_evidence: -
+# --- close-time record (archivist, 2026-08-06, at close of PACKET-0055): executed
+# --- mode matches the selected mode — no escalation occurred, so escalation stays
+# --- '-'. consumed_process_dispatches below is TRANSCRIPT-DERIVED at CLOSE TIME,
+# --- NOT a hook-measured EXACT count: hooks were NOT loaded this session, so no
+# --- live_state/ file exists for this packet and no EXACT tier is available. The
+# --- transcript shape: builder 1 + qa 1 + reviewer 1 + targeted re-review resume
+# --- 1 + archivist 1 = 5, within process_dispatch_allowance 7. All other
+# --- consumption fields stay '-' — transcript-only, not derivable from any
+# --- committed record; an unknown is not a zero, and '-' is the admission this
+# --- gate accepts.
 consumed_subagents: -
 consumed_total_tokens: -
 consumed_uncached_tokens: -
@@ -43,7 +53,7 @@ degradation_note: -
 # --- consumption where derivable at close — tokens or cost with provenance, or
 # --- "-" as an admission, NEVER a zero nobody measured. Receipts predating these
 # --- fields stay valid: routing-check.sh reads an absent field as "-".
-consumed_process_dispatches: -
+consumed_process_dispatches: 5
 attr_task_execution: -
 attr_context_retrieval: -
 attr_subagent_execution: -
