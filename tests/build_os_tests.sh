@@ -1285,6 +1285,59 @@ echo "== 32. THE EXP-0004 BLINDING INSTRUMENT — the last pre-analysis requirem
 # lesson).
 chain_suite "tests/exp0004_blinding_tests.sh"    "the EXP-0004 blinding instrument: a condition mapping DERIVED from a registered rule rather than sampled and committed by digest before the run, an adjudicator view carrying no starting-context field at all, capsule size withheld from the analyst until acceptance is frozen, a planted leak refused by name, a freeze that refuses while any of the fourteen artifacts is missing and names each one, a reveal that names every unmet condition and refuses a self-consistent seal that is not THE seal, and the load-bearing proof that one anonymous verdict translates to opposite registered outcomes under the two sealed bits"
 
+echo "== 33. THE DESIGN-PARTNER SURFACES — the demo environment and the evidence dashboard =="
+# WHY THIS IS ITS OWN SECTION AND NOT TWO LINES IN SECTION 32. That section's
+# title is a statement of fact about the EXP-0004 blinding instrument. These two
+# lanes have nothing to do with EXP-0004, and appending them there would make
+# the title false to buy nothing. They belong together, and apart from
+# everything above them, because they are the same object seen twice: what a
+# design partner is SHOWN (the ten-minute demo) and what a design partner is
+# LEFT WITH (the evidence view). Both arrived by transplant from a misplaced
+# worktree, and until this commit neither had any consumer inside this command.
+#
+# WHAT THE DEMO SUITE PROTECTS. build-os/demo/run-demo.sh drives the REAL tools
+# against fixture repositories it creates under mktemp; no step is simulated and
+# no output is scripted. The assertions worth having inside the repository
+# verification command are the BOTH-DIRECTION ones, because a demo that can only
+# reach the happy state is a slide deck with a shell prompt: an unrouted
+# mutation is BLOCKED (hook exit 2) and the recovery command the block prints
+# actually UNBLOCKS it (exit 0); a genuine fan-out breach has its CONCEALED
+# close refused (exit 2) while the DECLARED close passes (exit 0); and the
+# capability reporter reaches both ELIGIBLE and bypass. Two honesty invariants
+# ride along and are cheap to keep and expensive to lose — the customer display
+# speaks no internal vocabulary, and the demo tree contains no percentage
+# presented as a measured result.
+#
+# WHAT THE DASHBOARD SUITE PROTECTS. The human contract and the renderer's
+# embedded field registry must be the SAME table, so a spec that has drifted
+# from the code cannot be excused as a documentation lag. The load-bearing rule
+# is that AN UNKNOWN IS NEVER A ZERO: an UNAVAILABLE field renders
+# `unavailable (<reason>)`, stays unavailable even when an input file
+# volunteers a value for it — driven with a fixture that deliberately supplies
+# one — and an EMPTY store renders unavailable-with-reason rather than a wall of
+# zeros. Six of the twenty-three fields are UNAVAILABLE and four of those six
+# are the outcome fields a buyer actually cares about; this suite is what stops
+# that admission being quietly deleted later.
+#
+# ONE NOTE ON THE VERDICT GRAMMAR, recorded because it was nearly a silent
+# defect. dashboard_contract_tests.sh carries a SKIP count, which the house
+# verdict line has no field for, so it emits BOTH lines: its own
+# `TESTS: N passed, M failed, K skipped`, and the house
+# `==== RESULT: N passed, M failed ====` that chain_suite parses. Before that
+# second line existed chain_suite would have found no RESULT, reported one
+# failure, and DISCARDED all thirty of its assertions — a suite that looks wired
+# and proves nothing. demo_environment_tests.sh was house-conformant already.
+# chain_suite itself is UNCHANGED: the grammar it accepts was not widened.
+#
+# Appended BELOW section 32 for the reason sections 30, 31 and 32 each state
+# about themselves: this file's two trailing verdict lines are cited by
+# suite.build_os's evidence_refs, so appending moves only those two, and they
+# are re-derived in the SAME COMMIT. All four surfaces these two lanes added —
+# the demo runner, the renderer, and both suites — are registered in that same
+# commit too (RULING 4, the PACKET-0048 lesson).
+chain_suite "tests/demo_environment_tests.sh"    "the design-partner demo environment: ten scripted steps each driving a real tool against a mktemp fixture repository and each leaving an observable artifact, an unrouted mutation BLOCKED at hook exit 2 with the recovery command it prints proven to unblock it at exit 0, a real fan-out breach whose concealed close is refused and whose declared close passes, both compiler verdict states reached rather than asserted, a customer display carrying no internal vocabulary, a demo tree with no percentage presented as a measured result, resumability across a completed workspace, and a full run proven to leave this repository's working tree byte-for-byte unchanged"
+chain_suite "tests/dashboard_contract_tests.sh"  "the product evidence dashboard contract: every field declaring a source and a tier with every UNAVAILABLE field declaring a reason, the markdown contract and the renderer's embedded registry reconciled field-for-field so a drifted spec is a defect rather than a lag, an UNAVAILABLE field that renders unavailable-with-reason and NEVER as 0 even when an input file volunteers a value for it, an empty store that renders honestly instead of a wall of zeros, valid --json carrying a legal tier per field, a customer view scanned for internal vocabulary, a renderer that writes exactly one file and refuses to run with nowhere honest to write, and an onboarding tree swept for external-validation claims it cannot support"
+
 echo
 echo "==== RESULT: $PASS passed, $FAIL failed ===="
 [ "$FAIL" -eq 0 ]

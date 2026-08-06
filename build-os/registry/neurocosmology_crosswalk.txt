@@ -1432,3 +1432,31 @@ class: A
 runtime_authority: gate
 binding_kind: proxies
 rationale: Test state over the EXP-0004 blinding instrument: every file present and non-executable with the zero-executable census under build-os/experiments/ re-asserted, no RNG and no wall clock in any blinding tool, a mapping that re-derives from its own recorded rule while a single flipped assignment moves the committed digest, the per-task rule sealable but recorded invalid for aggregate analysis, an adjudicator view with no starting-context field and only opaque work-product ids, capsule size withheld before the freeze and preserved after it, a planted leak refused by name, a freeze refusing while any of the fourteen artifacts is missing, a snapshot invalidated by a changed input and by an edited digest, the four reveal conditions each refused and named, and the counterfactual in which one anonymous verdict translates to two opposite registered outcomes. A suite's function is property preservation, same as its siblings.
+
+control: demo.partner_walkthrough
+binds_to: homeostasis
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Test state over an integration, which is this primitive's function rather than epistemic contact: ten steps driving the REAL runtime, intake, hook, selector, shell, brake and capability reporter in the operator's required order against a fixture repository the script builds for the purpose, dying at the first step that does not succeed. The failure it exists to prevent is the one every unit suite in this census is blind to — parts that each pass alone while the walkthrough a design partner would actually be shown has never been executed end to end. It binds here and not to epistemic_quality on the binding rule's own tie-breaker: it makes no claim about whether the system is any GOOD, only that the composition still runs. Proxies, and doubly so: its own five refusal paths have never been driven, so what a green run establishes is that the happy path composes, and the artifacts it leaves are read by a person and by its suite and by nothing else.
+
+control: dashboard.evidence_view
+binds_to: epistemic_quality
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: It bounds what may be CLAIMED from the artefacts this system actually keeps, which is why it lands here and not on boundary — the same reading that puts adoption.boundary_manifest on epistemic_quality, since bounding a claim is not bounding a write scope. The load-bearing discipline is structural rather than editorial: a field the system cannot measure returns before the value lookup ever runs, so no input file can promote it, and no code path converts an absent value into a zero — a measured zero and an unmeasured field are different claims and this view refuses to conflate them. It reports its own incompleteness in the same table and the same type size as its results, including that four of the six unavailable fields are the outcome fields a buyer cares about most. Proxies because the honesty is enforced over a FIXED registry of 23 fields and two denylists: it guarantees that what the table admits it cannot measure is rendered as unmeasured, and guarantees nothing about a field nobody thought to put in the table.
+
+control: suite.demo_environment
+binds_to: homeostasis
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Test state over the design-partner demo: an unattended end-to-end run exiting 0, one observable artifact per numbered step carrying the markers that prove the step really happened, the block proven to block at hook exit 2 AND the printed recovery proven to unblock at exit 0, a concealed close refused against a declared close that passes, both compiler verdict states reached rather than asserted, a customer display with no internal vocabulary, a demo tree with no percentage presented as a result, no path into the frozen pilot repository, resumability, and a full run proven to leave this repository's working tree unchanged. A suite's function is property preservation, same as its siblings. Proxies for the standing reason its siblings do, and for one of its own: three of its checks are negative greps that pass by finding nothing, so they bound the leaks, metrics and paths somebody thought to pattern for and bound nothing else.
+
+control: suite.dashboard_contract
+binds_to: homeostasis
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Test state over the evidence dashboard and the onboarding package: the human contract and the renderer's embedded registry reconciled field-for-field so a drifted spec is a defect rather than a documentation lag, an ESTIMATE rendered carrying its label, an UNAVAILABLE rendered with a reason and never as a bare zero and never promoted by an input volunteering a value for it, an empty store rendered honestly instead of as a wall of zeros, valid --json with a legal tier per field, a renderer that writes exactly one file and refuses when there is nowhere honest to write, and an onboarding tree swept for external-validation claims it cannot support. A suite's function is property preservation, same as its siblings. Proxies because its sharpest checks run over ONE fixture store and the vocabulary and overclaim sweeps are denylists, so what they preserve is the properties somebody wrote a pattern for.
