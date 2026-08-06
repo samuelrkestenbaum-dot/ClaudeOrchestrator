@@ -9,6 +9,13 @@
 # condition receipts were REFUSED at close and ZERO degradation notes were
 # written mid-flight, because nothing mechanical existed mid-flight.
 #
+# PACKET-0054 EXTENDED THIS FILE (never forked it) into the UNIVERSAL TASK-ENTRY
+# boundary: the gate now also fires on MUTATION-CAPABLE tools (Edit, Write,
+# NotebookEdit, Bash) via the `mutgate` subcommand, so parent-only work that
+# dispatches nothing is governed too. Contract half:
+# build-os/memory/routing_contract_live.md; adapter expression:
+# build-os/memory/provider_adapter_contract.md (this file is ADAPTER #1).
+#
 # SUBCOMMANDS (wired in .claude/settings.json):
 #   gate    PreToolUse, matcher Task|Agent — the dispatch gate. BLOCKS (exit 2):
 #             * when NO open routing receipt exists (open = newest receipt in
@@ -32,9 +39,35 @@
 #           On ALLOW it appends the dispatch to the live state and, for Full
 #           task dispatches, seeds a stub contribution row into the receipt
 #           (close-fill tooling for the marginal-contribution table).
+#   mutgate PreToolUse, matcher Edit|Write|NotebookEdit|Bash — the TASK-ENTRY
+#           gate (PACKET-0054). A mutation-capable call with NO open routing
+#           receipt is BLOCKED with the recovery command (route-task.sh, incl a
+#           cheap direct-mode example — tiny work routes too, cheaply). Two
+#           classes pass UNGATED, logged: (a) DEADLOCK GUARD — a Bash command
+#           invoking the routing tools themselves (route-task.sh /
+#           mode-select.mjs / routing-check.sh / record-degradation.sh by path;
+#           without this no session could issue the receipt its first gated
+#           call requires), logged ROUTING-TOOL-PASS; (b) READ-ONLY git
+#           inspection (status/log/diff/show/rev-parse/ls-files/branch),
+#           counted exploratory. Any git command carrying push|commit|merge|
+#           rebase|reset|checkout|restore|clean|apply|am|cherry-pick|tag|stash
+#           or -f/--force is mutation-capable. The classification is a NAMED
+#           HEURISTIC over the raw hook JSON — a hostile command evades it
+#           (sh -c); this is discipline-for-honest-agents plus audit trail,
+#           NOT a sandbox (the sandbox is the platform's permission system).
+#           Also enforces the fire-once REASSESS trip (see count).
 #   count   PreToolUse, matcher * — the tool-event counter. NEVER blocks.
 #           Deliberately jq-free (sed only) so its per-call overhead stays
-#           trivial; the suite measures and asserts the bound.
+#           trivial; the suite measures and asserts the bound. PACKET-0054:
+#           each row carries chars= (the ESTIMATE token-proxy input); Read/
+#           Grep/Glob additionally append an exploratory_event row (the
+#           explore half of the explore/execute split); and the counter ARMS
+#           the repetitive-loop trip — consecutive same-tool calls >=
+#           ROUTING_REASSESS_SAME_TOOL_MAX (derived default 25) or chars/4 >=
+#           ROUTING_REASSESS_PROXY_MULT (default 4) x
+#           budget_max_uncached_tokens — which blocks the NEXT mutation-capable
+#           call ONCE with a REASSESS refusal; a reassessment record (fresh
+#           receipt, or an escalation/degradation entry) resets the trip.
 #   post    PostToolUse, matcher * — counts a tool_failure ONLY where the
 #           tool_response exposes success:false / is_error:true. Where no
 #           status is exposed, nothing is guessed — the state-file label
@@ -72,6 +105,10 @@ SDIR="$RDIR/live_state"
 RECDEG="$CODE_ROOT/build-os/tools/record-degradation.sh"
 PROCESS_ROLES="builder qa reviewer archivist build-orchestrator"
 DEFAULT_PROCESS_ALLOWANCE=7
+# Reassessment-trip thresholds: DERIVED DEFAULTS, operator-tunable via env —
+# stated as such in every refusal; neither is a law.
+SAME_TOOL_MAX="${ROUTING_REASSESS_SAME_TOOL_MAX:-25}"
+PROXY_MULT="${ROUTING_REASSESS_PROXY_MULT:-4}"
 
 now(){ date -u +%Y-%m-%dT%H:%M:%SZ; }
 
@@ -97,9 +134,12 @@ write_labels(){ # <dest-file> <receipt-basename> — create-once via noclobber
     printf 'label\tprocess_dispatches\tEXACT (hook-counted; subagent_type in builder|qa|reviewer|archivist|build-orchestrator; attributed governance_process)\n'; \
     printf 'label\ttool_events\tEXACT (hook-counted PreToolUse events in sessions where the gate is loaded)\n'; \
     printf 'label\ttool_failures\tEXACT only where PostToolUse exposes success:false/is_error; otherwise unavailable — absence of a row is NOT evidence of success\n'; \
+    printf 'label\texploratory_events\tEXACT (hook-counted Read/Grep/Glob and read-only git inspection — the explore half of the explore/execute split)\n'; \
+    printf 'label\tmutation_events\tEXACT (hook-counted ADMITTED mutation-capable calls: Edit/Write/NotebookEdit/Bash outside the routing-tool and read-only-git classes)\n'; \
+    printf 'label\ttoken_proxy\tESTIMATE (sum of tool-input chars / 4 — a chars-based proxy; thresholds are derived defaults, operator-tunable; NEVER billing truth and never promoted to a higher tier)\n'; \
     printf 'label\telapsed_s\tEXACT (derived at read time: receipt issued_at vs now; never stored)\n'; \
-    printf 'label\ttokens\tunavailable_live (close-time reconciliation via telemetry where headless; not hook-visible in interactive sessions)\n'; \
-    printf 'label\tcost_usd\tunavailable_live (close-time reconciliation via telemetry where headless; not hook-visible in interactive sessions)\n'; \
+    printf 'label\ttokens\tunavailable_live in interactive sessions (tier UNAVAILABLE); close-time reconciliation via telemetry where headless (tier CLOSE-TIME); never presented at a higher tier\n'; \
+    printf 'label\tcost_usd\tunavailable_live in interactive sessions (tier UNAVAILABLE); close-time reconciliation via telemetry where headless (tier CLOSE-TIME); never presented at a higher tier\n'; \
     } > "$1" ) 2>/dev/null || true
 }
 
@@ -242,13 +282,155 @@ gate_decide(){ # <stdin-json>
 # The always-on observer. Never blocks, never parses with jq (a node/jq spawn
 # per tool call is exactly the overhead this path must not carry): one sed pull
 # of tool_name, one grep per receipt to find the open one, one append.
+# PACKET-0054: chars= is the ESTIMATE token-proxy input (length of everything
+# after "tool_input" in the raw event — a chars proxy, not a parse); Read/Grep/
+# Glob get an exploratory_event row beside their tool_event row; and arm_check
+# arms the repetitive-loop trip the mutgate enforces.
 count_tool(){ # <stdin-json>
-  local in="$1" tool rec
+  local in="$1" tool rec ti chars
   tool="$(printf '%s' "$in" | sed -n 's/.*"tool_name"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | head -n1)"
   [ -n "$tool" ] || tool="-"
   rec="$(open_receipt)" || rec=""
   [ -n "$rec" ] || return 0   # no open receipt: nothing to count against, no state invented
-  staterow "$rec" tool_event "tool_name=$tool" || return 1
+  ti="${in#*\"tool_input\"}"; chars="${#ti}"
+  staterow "$rec" tool_event "tool_name=$tool chars=$chars" || return 1
+  case "$tool" in
+    Read|Grep|Glob) staterow "$rec" exploratory_event "tool_name=$tool source=read_class" || return 1 ;;
+  esac
+  arm_check "$rec" || return 1
+  return 0
+}
+
+# Arm the reassessment trip when the window since the last boundary row
+# (reassess_block / reassess_reset) shows a repetitive parent loop. Arming is
+# once per window; the trip itself fires ONCE, at the next mutation-capable
+# call (mutgate). Counters are DERIVED by reading rows, never stored.
+arm_check(){ # <receipt-path>
+  local sf run sum armed trip="" val="" thr="" tier="" bud esc_s deg_s v
+  sf="$SDIR/$(basename "$1" .md).tsv"
+  [ -f "$sf" ] || return 0
+  read -r run sum armed <<EOF
+$(awk -F'\t' '
+    $2=="reassess_block"||$2=="reassess_reset"{run=0;sum=0;last="";armed=0;next}
+    $2=="reassess_armed"{armed=1;next}
+    $2=="tool_event"{
+      t=""; if(match($3,/tool_name=[^ ]*/)) t=substr($3,RSTART+10,RLENGTH-10);
+      if(t!="" && t==last) run++; else {run=1;last=t};
+      if(match($3,/chars=[0-9]+/)) sum+=substr($3,RSTART+6,RLENGTH-6)+0 }
+    END{print run+0, sum+0, armed+0}' "$sf")
+EOF
+  [ "$armed" = "1" ] && return 0
+  if [ "$run" -ge "$SAME_TOOL_MAX" ] 2>/dev/null; then
+    trip="same_tool"; val="$run"; thr="$SAME_TOOL_MAX"; tier="EXACT"
+  else
+    bud="$(fval "$1" budget_max_uncached_tokens)"
+    if is_num "$bud" && [ "$((sum / 4))" -ge "$((PROXY_MULT * bud))" ]; then
+      trip="proxy"; val="$((sum / 4))"; thr="$((PROXY_MULT * bud))"; tier="ESTIMATE"
+    fi
+  fi
+  [ -n "$trip" ] || return 0
+  esc_s="-"; deg_s="-"
+  v="$(fval "$1" escalation_evidence)"; [ -n "$v" ] && [ "$v" != "-" ] && esc_s="set"
+  v="$(fval "$1" degradation_note)";    [ -n "$v" ] && [ "$v" != "-" ] && deg_s="set"
+  staterow "$1" reassess_armed "trip=$trip value=$val threshold=$thr tier=$tier esc=$esc_s deg=$deg_s" || return 1
+  return 0
+}
+
+# --------------------------------------------------------------- mutgate -----
+# The UNIVERSAL TASK-ENTRY boundary (PACKET-0054): every mutation-capable tool
+# call requires an open routing receipt — including parent-only work that never
+# dispatches. Classification is a NAMED HEURISTIC over the raw hook JSON
+# (stated in routing_contract_live.md): a hostile command evades it with sh -c
+# or a wrapper; this gate is discipline-for-honest-agents plus an audit trail,
+# NOT a sandbox — the sandbox is the platform's permission system.
+mut_classify(){ # <raw-json> <tool> -> routing_tool | git_readonly | mutation | other
+  local in="$1" tool="$2"
+  case "$tool" in
+    Edit|Write|NotebookEdit) printf 'mutation'; return 0 ;;
+    Bash) : ;;
+    *) printf 'other'; return 0 ;;
+  esac
+  # DEADLOCK GUARD: the routing tools themselves pass ungated (logged), or no
+  # session could ever issue the receipt its first gated call requires.
+  case "$in" in
+    *route-task.sh*|*mode-select.mjs*|*routing-check.sh*|*record-degradation.sh*)
+      printf 'routing_tool'; return 0 ;;
+  esac
+  if printf '%s' "$in" | grep -qE '(^|[^A-Za-z0-9_])git([^A-Za-z0-9_]|$)'; then
+    # Any git command carrying a mutating subcommand or a force flag is
+    # mutation-capable — checked FIRST so `git status && git push` gates.
+    if printf '%s' "$in" | grep -qE '(^|[^A-Za-z0-9_-])(push|commit|merge|rebase|reset|checkout|restore|clean|apply|am|cherry-pick|tag|stash)([^A-Za-z0-9_-]|$)|--force(-with-lease)?([^A-Za-z0-9_-]|$)|[[:space:]]-f([[:space:]\"\\]|$)'; then
+      printf 'mutation'; return 0
+    fi
+    # The read-only inspection class, by git subcommand. `git -C dir status`
+    # and other indirections fall through to mutation-capable — conservative.
+    if printf '%s' "$in" | grep -qE 'git[[:space:]]+(status|log|diff|show|rev-parse|ls-files|branch)([^A-Za-z0-9_-]|$)'; then
+      printf 'git_readonly'; return 0
+    fi
+    printf 'mutation'; return 0
+  fi
+  printf 'mutation'   # Bash defaults to mutation-capable: the boundary is entry, not tool trivia
+}
+
+mutgate_decide(){ # <stdin-json> — protocol on stdout: ALLOW or BLOCK + message
+  local in="$1" tool cls rec tid="none" mode="-" v
+  tool="$(printf '%s' "$in" | sed -n 's/.*"tool_name"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | head -n1)"
+  [ -n "$tool" ] || return 1   # unreadable event -> fail open in the wrapper
+  cls="$(mut_classify "$in" "$tool")"
+  rec="$(open_receipt)" || rec=""
+  if [ -n "$rec" ]; then tid="$(fval "$rec" task_id)"; mode="$(fval "$rec" selected_mode)"; [ -n "$tid" ] || tid="-"; fi
+  case "$cls" in
+    routing_tool)
+      logrow "$tid" "$mode" "ROUTING-TOOL-PASS" "tool=$tool ungated=deadlock-guard"
+      [ -n "$rec" ] && { staterow "$rec" routing_tool_pass "tool_name=$tool" || true; }
+      printf 'ALLOW\n'; return 0 ;;
+    git_readonly)
+      logrow "$tid" "$mode" "GIT-READONLY-PASS" "tool=$tool class=exploratory heuristic=git-subcommand"
+      [ -n "$rec" ] && { staterow "$rec" exploratory_event "tool_name=$tool source=git_readonly" || true; }
+      printf 'ALLOW\n'; return 0 ;;
+    other)
+      printf 'ALLOW\n'; return 0 ;;
+  esac
+  if [ -z "$rec" ]; then
+    logrow "none" "-" "BLOCK-MUTATION-NO-RECEIPT" "tool=$tool"
+    printf 'BLOCK\n'
+    printf 'routing-gate: MUTATION BLOCKED — %s is mutation-capable and NO OPEN routing receipt exists under build-os/packets/routing/ (open = executed_mode "-"). Every substantive task routes at entry; tiny work routes too, it just routes cheaply (direct mode). Recovery is ONE command, then retry this call:\n' "$tool"
+    printf '  build-os/tools/route-task.sh --task-id <id> --description "<one line>" --descriptor <13-field-json>\n'
+    printf 'Cheap direct-mode example (copy, adjust the id/description):\n'
+    printf '  build-os/tools/route-task.sh --task-id quick-task-1 --description "small routed task" --descriptor '\''{"expected_files_changed":1,"requires_tests":false,"expected_session_count":1,"prior_context_required":false,"handoff_required":false,"consequence_level":"low","irreversible_or_external_mutation":false,"high_blast_radius":false,"unclear_acceptance_criteria":false,"security_or_compliance_consequence":false,"parallel_workstreams_benefit":false,"high_rework_history":false,"nondeterministic_verification":false}'\''\n'
+    printf 'Continue the task — only this unrouted call is refused, not the work.\n'
+    return 0
+  fi
+  # The fire-once REASSESS trip: armed by the counter, enforced here, reset by
+  # a reassessment record (fresh receipt = fresh state file; or an escalation/
+  # degradation entry landing after the arming snapshot).
+  local sf armed esc_s deg_s snap_esc snap_deg
+  sf="$SDIR/$(basename "$rec" .md).tsv"
+  armed=""
+  if [ -f "$sf" ]; then
+    armed="$(awk -F'\t' '$2=="reassess_block"||$2=="reassess_reset"{a=""} $2=="reassess_armed"{a=$3} END{print a}' "$sf")"
+  fi
+  if [ -n "$armed" ]; then
+    esc_s="-"; deg_s="-"
+    v="$(fval "$rec" escalation_evidence)"; [ -n "$v" ] && [ "$v" != "-" ] && esc_s="set"
+    v="$(fval "$rec" degradation_note)";    [ -n "$v" ] && [ "$v" != "-" ] && deg_s="set"
+    snap_esc="$(printf '%s' "$armed" | sed -n 's/.*esc=\([^ ]*\).*/\1/p')"; [ -n "$snap_esc" ] || snap_esc="-"
+    snap_deg="$(printf '%s' "$armed" | sed -n 's/.*deg=\([^ ]*\).*/\1/p')"; [ -n "$snap_deg" ] || snap_deg="-"
+    if [ "$esc_s" != "$snap_esc" ] || [ "$deg_s" != "$snap_deg" ]; then
+      staterow "$rec" reassess_reset "reason=reassessment-record-landed esc=$esc_s deg=$deg_s (armed snapshot esc=$snap_esc deg=$snap_deg)" || true
+      logrow "$tid" "$mode" "REASSESS-RESET" "tool=$tool $armed"
+      # fall through to ALLOW — the trip is reset, the counters restart
+    else
+      staterow "$rec" reassess_block "$armed fired=once" || true
+      logrow "$tid" "$mode" "BLOCK-REASSESS" "tool=$tool $armed"
+      printf 'BLOCK\n'
+      printf 'routing-gate: MUTATION BLOCKED ONCE — REASSESS. A repetitive parent loop tripped on receipt %s (%s). Where the trip is the token proxy, its value is tier ESTIMATE — chars/4, never billing truth. The thresholds are derived defaults, operator-tunable (ROUTING_REASSESS_SAME_TOOL_MAX, ROUTING_REASSESS_PROXY_MULT). Re-route before continuing: confirm the mode via build-os/tools/route-task.sh (a fresh receipt), or record an evidence-bearing escalation on the receipt, or degrade honestly via build-os/tools/record-degradation.sh. This trip fires exactly once — the next mutation-capable call passes, and a reassessment record resets the trip. Continue the task — only this one call is refused, not the work.\n' "$(basename "$rec")" "$armed"
+      return 0
+    fi
+  fi
+  staterow "$rec" mutation_event "tool_name=$tool class=mutation" || return 1
+  logrow "$tid" "$mode" "ALLOW-MUTATION" "tool=$tool"
+  printf 'ALLOW\n'
   return 0
 }
 
@@ -277,6 +459,14 @@ status_report(){
   printf 'task_dispatches: %s (EXACT, derived from %s)\n' "$(count_kind "$rec" task_dispatch)" "${sf#"$DATA_ROOT/"}"
   printf 'process_dispatches: %s (EXACT, attributed governance_process)\n' "$(count_kind "$rec" process_dispatch)"
   printf 'tool_events: %s (EXACT, sessions where the gate is loaded)\n' "$(count_kind "$rec" tool_event)"
+  printf 'exploratory_events: %s (EXACT — the explore half of the explore/execute split)\n' "$(count_kind "$rec" exploratory_event)"
+  printf 'mutation_events: %s (EXACT — admitted mutation-capable calls)\n' "$(count_kind "$rec" mutation_event)"
+  if [ -f "$sf" ]; then
+    printf 'token_proxy: %s (ESTIMATE — sum of tool-input chars / 4; never billing truth)\n' \
+      "$(awk -F'\t' '$2=="tool_event" && match($3,/chars=[0-9]+/){s+=substr($3,RSTART+6,RLENGTH-6)+0} END{print int(s/4)}' "$sf")"
+  else
+    printf 'token_proxy: 0 (ESTIMATE — no state rows yet)\n'
+  fi
   printf 'tool_failures: %s (EXACT only where PostToolUse exposes status)\n' "$(count_kind "$rec" tool_failure)"
   issued="$(fval "$rec" issued_at)"
   if elapsed="$(( $(date -u +%s) - $(date -ud "$issued" +%s 2>/dev/null || echo 0) ))" 2>/dev/null && [ -n "$issued" ]; then
@@ -292,9 +482,9 @@ status_report(){
 # ---------------------------------------------------------------- wrapper ----
 CMD="${1:-}"
 case "$CMD" in
-  gate|count|post|status) ;;
+  gate|mutgate|count|post|status) ;;
   -h|--help|help) sed -n '2,70p' "${BASH_SOURCE[0]}"; exit 0 ;;
-  *) printf 'routing-gate: unknown command "%s" — expected gate|count|post|status\n' "${CMD:-}" >&2; exit 2 ;;
+  *) printf 'routing-gate: unknown command "%s" — expected gate|mutgate|count|post|status\n' "${CMD:-}" >&2; exit 2 ;;
 esac
 
 if [ "$CMD" = "status" ]; then status_report; exit $?; fi
@@ -317,8 +507,12 @@ case "$CMD" in
   post)
     post_tool "$IN" || logrow "-" "-" "FAIL-OPEN" "cmd=post internal error"
     exit 0 ;;
-  gate)
-    OUT="$(gate_decide "$IN" 2>/dev/null)"; RC=$?
+  gate|mutgate)
+    if [ "$CMD" = "gate" ]; then
+      OUT="$(gate_decide "$IN" 2>/dev/null)"; RC=$?
+    else
+      OUT="$(mutgate_decide "$IN" 2>/dev/null)"; RC=$?
+    fi
     DECISION="$(printf '%s\n' "$OUT" | sed -n '1p')"
     if [ "$RC" -eq 0 ] && [ "$DECISION" = "ALLOW" ]; then
       exit 0
@@ -328,7 +522,7 @@ case "$CMD" in
     else
       # FAIL OPEN: a broken gate must not brick every session. Logged, because
       # a silent fail-open is an invisible outage of the control plane.
-      logrow "-" "-" "FAIL-OPEN" "cmd=gate rc=$RC decision=${DECISION:-none}"
+      logrow "-" "-" "FAIL-OPEN" "cmd=$CMD rc=$RC decision=${DECISION:-none}"
       exit 0
     fi ;;
 esac

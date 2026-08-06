@@ -1,4 +1,4 @@
-# Routing contract — LIVE enforcement half (PACKET-0053)
+# Routing contract — LIVE enforcement half (PACKET-0053, extended by PACKET-0054)
 
 This file extends `routing_contract.md` (which stays authoritative for the
 binding-verdict rule, escalation semantics and the circuit-breaker order). It
@@ -6,6 +6,58 @@ exists because PACKET-0050's enforcement was **machine-at-close only**: the
 gate refused a contradiction after the tokens were spent, and EXP-0003
 measured exactly that — both condition receipts REFUSED at close, ZERO
 degradation notes written mid-flight. This half is the mid-flight machine.
+PACKET-0054 widened it from dispatch-only to **universal task entry** (below),
+and expressed the hook surface as a provider adapter —
+`provider_adapter_contract.md`, with `.claude/hooks/routing-gate.sh` as
+ADAPTER #1 and the telemetry tier vocabulary
+(EXACT | ESTIMATE | CLOSE-TIME | UNAVAILABLE) defined there.
+
+## The universal task-entry boundary (PACKET-0054)
+
+**Every substantive task routes at entry — including parent-only work that
+never dispatches.** The PreToolUse gate now also fires on the
+MUTATION-CAPABLE tools (`Edit|Write|NotebookEdit|Bash`, subcommand `mutgate`):
+a mutation-capable call with NO open routing receipt is BLOCKED, and the
+refusal carries the recovery command with a cheap direct-mode example — tiny
+work routes too, it just routes cheaply. **The FIRST action of any new session
+is to issue or confirm a routing receipt** (one command:
+`build-os/tools/route-task.sh`; confirming = an open receipt already exists
+for the task in flight, e.g. the active packet's, which stays open until the
+archivist's close-fill — then the next session re-routes).
+
+- **DEADLOCK GUARD.** A Bash command invoking the routing tools themselves
+  (`route-task.sh`, `mode-select.mjs`, `routing-check.sh`,
+  `record-degradation.sh` — matched on the script path appearing in the
+  command) passes UNGATED and is logged `ROUTING-TOOL-PASS`. Without it, no
+  session could issue the receipt its first gated call requires.
+- **Read-only git inspection** (`status|log|diff|show|rev-parse|ls-files|
+  branch` by subcommand) passes ungated, logged `GIT-READONLY-PASS`, counted
+  exploratory. Any git command carrying `push|commit|merge|rebase|reset|
+  checkout|restore|clean|apply|am|cherry-pick|tag|stash` or `-f/--force` is
+  mutation-capable.
+- **THE CLASSIFICATION IS A NAMED HEURISTIC, not a sandbox.** It reads the
+  raw hook JSON; a hostile command evades it trivially (`sh -c`, `eval`, a
+  wrapper script, `git -C` indirection lands conservative-mutation, and e.g.
+  `git branch -D` slips the read-only class). The gate is
+  discipline-for-honest-agents plus an audit trail; the sandbox is the
+  platform's permission system, which this gate does not replace.
+- **Exploratory reads stay ungated but counted.** Read/Grep/Glob (and the
+  read-only git class) append `exploratory_event` rows when a receipt is
+  open, so the record shows the explore/execute split; admitted
+  mutation-capable calls append `mutation_event` rows. All activity binds to
+  the open receipt's live-state file; at close, `routing-check.sh` REPORTS
+  (never refuses) `activity_binding UNBOUND-ACTIVITY` where a closed receipt
+  recorded mutation events but every consumption field is `-` with no
+  telemetry reconciliation — absence is admission, made visible.
+- **Repetitive-loop reassessment, fire-once.** The counter arms a trip when
+  consecutive same-tool calls reach `ROUTING_REASSESS_SAME_TOOL_MAX` (derived
+  default 25) or the ESTIMATE token proxy (chars/4) reaches
+  `ROUTING_REASSESS_PROXY_MULT` (default 4) × `budget_max_uncached_tokens` —
+  derived defaults, operator-tunable, never laws. The NEXT mutation-capable
+  call is blocked ONCE with a REASSESS refusal (re-route: fresh receipt via
+  route-task.sh, or an escalation/degradation record); a reassessment record
+  resets the trip, and a fired trip never blocks twice — a reassessment loop
+  that blocks forever would be a brick, and the suite proves it is not.
 
 ## The four enforcement layers — named exactly, no checkbox theater
 
@@ -29,12 +81,15 @@ degradation notes written mid-flight. This half is the mid-flight machine.
    token awareness between hook events. Labeled protocol because that is what
    it is.
 4. **not-yet-enforced** — named open gaps: live tokens/cost are invisible to
-   hooks in interactive sessions (state files carry
-   `tokens: unavailable_live (close-time reconciliation via telemetry where
-   headless)`); non-dispatch work is ungated beyond receipt presence and
-   counting; a session that lies into its receipt is caught only by
-   STATE-DISAGREE where a state file exists; sessions without the hook loaded
-   (see below) are ungated entirely.
+   hooks in interactive sessions (state files carry the tier labels — tokens
+   `unavailable_live` interactive / close-time reconciliation via telemetry
+   where headless; see `provider_adapter_contract.md`); the Bash
+   classification is an evadable heuristic (named above), so a dishonest
+   session slips the mutation gate; a session that lies into its receipt is
+   caught only by STATE-DISAGREE where a state file exists; sessions without
+   the hook loaded (see below) are ungated entirely. (PACKET-0053's
+   "non-dispatch work is ungated" gap is CLOSED by PACKET-0054's task-entry
+   boundary, to the heuristic's stated bound.)
 
 ## When the gate becomes live
 

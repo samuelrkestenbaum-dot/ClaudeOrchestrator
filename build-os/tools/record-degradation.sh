@@ -83,9 +83,12 @@ if [ ! -f "$SF" ]; then
     printf 'label\tprocess_dispatches\tEXACT (hook-counted; subagent_type in builder|qa|reviewer|archivist|build-orchestrator; attributed governance_process)\n'; \
     printf 'label\ttool_events\tEXACT (hook-counted PreToolUse events in sessions where the gate is loaded)\n'; \
     printf 'label\ttool_failures\tEXACT only where PostToolUse exposes success:false/is_error; otherwise unavailable — absence of a row is NOT evidence of success\n'; \
+    printf 'label\texploratory_events\tEXACT (hook-counted Read/Grep/Glob and read-only git inspection — the explore half of the explore/execute split)\n'; \
+    printf 'label\tmutation_events\tEXACT (hook-counted ADMITTED mutation-capable calls: Edit/Write/NotebookEdit/Bash outside the routing-tool and read-only-git classes)\n'; \
+    printf 'label\ttoken_proxy\tESTIMATE (sum of tool-input chars / 4 — a chars-based proxy; thresholds are derived defaults, operator-tunable; NEVER billing truth and never promoted to a higher tier)\n'; \
     printf 'label\telapsed_s\tEXACT (derived at read time: receipt issued_at vs now; never stored)\n'; \
-    printf 'label\ttokens\tunavailable_live (close-time reconciliation via telemetry where headless; not hook-visible in interactive sessions)\n'; \
-    printf 'label\tcost_usd\tunavailable_live (close-time reconciliation via telemetry where headless; not hook-visible in interactive sessions)\n'; \
+    printf 'label\ttokens\tunavailable_live in interactive sessions (tier UNAVAILABLE); close-time reconciliation via telemetry where headless (tier CLOSE-TIME); never presented at a higher tier\n'; \
+    printf 'label\tcost_usd\tunavailable_live in interactive sessions (tier UNAVAILABLE); close-time reconciliation via telemetry where headless (tier CLOSE-TIME); never presented at a higher tier\n'; \
     } > "$SF" ) 2>/dev/null || true
 fi
 printf '%s\tDEGRADATION\tdowngraded_to=gravito_light reason=%s preserved_evidence=%s\n' \

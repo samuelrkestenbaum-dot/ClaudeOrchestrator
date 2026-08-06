@@ -224,6 +224,23 @@ check_receipt(){ # <file> — increments VIOL per finding; prints one status lin
     if [ "$con" = "-" ] || [ "$conp" = "-" ]; then
       printf '  state_says   %s task=%s process=%s (live state beside an admission — information, not a refusal)\n' "$f" "$n_state_task" "$n_state_proc"
     fi
+    # activity_binding (PACKET-0054): a CLOSED receipt whose live state records
+    # mutation events while every consumption field is '-' and no telemetry
+    # reconciliation exists is REPORTED, never refused — absence is admission,
+    # and this line is what makes the unbound activity visible.
+    local n_mut all_unbound cb
+    n_mut="$(awk -F'\t' '$2=="mutation_event"{n++} END{print n+0}' "$sf")"
+    if [ "$exe" != "-" ] && [ "$n_mut" -gt 0 ]; then
+      all_unbound=1
+      for cb in $BUDGET_PAIRS; do
+        [ "$(fval "$f" "consumed_$cb")" = "-" ] || all_unbound=0
+      done
+      [ "$conp" = "-" ] || all_unbound=0
+      if [ "$all_unbound" = "1" ]; then
+        printf '  activity_binding %s UNBOUND-ACTIVITY: %s mutation event(s) recorded live while every consumption field is %s and no telemetry reconciliation exists — REPORTED, not refused: absence is admission, and this line is the visibility.\n' \
+          "$f" "$n_mut" "'-'"
+      fi
+    fi
   fi
   printf 'routing-check: %s selected=%s executed=%s admissions=%s(admission fields, not zeros) contributions=%s(%s non-contributing)\n' \
     "$f" "$sel" "$exe" "$admissions" "$nrows" "$nnoncontrib"

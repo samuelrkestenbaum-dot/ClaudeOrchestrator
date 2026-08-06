@@ -1089,3 +1089,17 @@ class: A
 runtime_authority: gate
 binding_kind: proxies
 rationale: Validates that a degradation record CAN be honest before it is written — a receipt that exists, a reason that is non-empty, a note that has never been filled, a staged stamp that verifiably landed. Shape is a proxy for soundness: a well-formed degradation note can still describe a degradation that did not happen.
+
+control: routing.universal_task_entry_gate
+binds_to: boundary
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Refuses the impermissible movement at TASK ENTRY — a mutation-capable call with no routing record, or a repetitive loop that has outrun its own reassessment — before the mutation executes, closing routing.live_dispatch_gate's own named gap (non-dispatch work crossed no boundary it could refuse). Still proxies rather than instantiates, and the gaps are structural and stated: the Bash classification is an evadable NAMED HEURISTIC (sh -c), it fails open on its own errors, and it governs only sessions where the hook is loaded — the real boundary is the platform permission system, which this gate does not replace.
+
+control: suite.routing_task_entry
+binds_to: homeostasis
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Test state over the task-entry boundary: every mutation class blocked and admitted in both directions, the deadlock guard proven from both sides, the fire-once trip proven non-bricking, tier honesty asserted (ESTIMATE never relabeled), the recovery example executed for real, and both hot-path overheads measured against a stated bound. A suite's function is property preservation, same as its siblings.
