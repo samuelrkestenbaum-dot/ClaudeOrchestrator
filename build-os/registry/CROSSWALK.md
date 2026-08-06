@@ -72,14 +72,14 @@ the concept without performing the function and **is not coverage**.
 | valence | 0 | 0 | 0 | 0 | — | — |
 | agency | 17 | 12 | 4 | 1 | A, C | advise, gate, execute |
 | energy | 5 | 0 | 5 | 0 | A, C | advise, gate |
-| homeostasis | 40 | 1 | 39 | 0 | A | advise, gate |
+| homeostasis | 44 | 1 | 43 | 0 | A | advise, gate |
 | integration_bandwidth | 6 | 1 | 5 | 0 | A, C | advise, gate |
-| boundary | 13 | 0 | 13 | 0 | A | advise, gate |
+| boundary | 16 | 0 | 16 | 0 | A | advise, gate |
 | ethical_admissibility | 2 | 1 | 0 | 1 | A | gate |
-| epistemic_quality | 51 | 19 | 31 | 1 | A, B, C | advise, gate |
+| epistemic_quality | 56 | 19 | 36 | 1 | A, B, C | advise, gate |
 | latent_state | 6 | 4 | 2 | 0 | A, C | advise, gate |
 | durability | 2 | 0 | 2 | 0 | A | gate |
-| gated_plasticity | 5 | 4 | 1 | 0 | A, B, C | advise, gate |
+| gated_plasticity | 6 | 4 | 2 | 0 | A, B, C | advise, gate |
 | collective_coherence | 5 | 4 | 1 | 0 | A, C | gate |
 | goal_ecology | 1 | 0 | 1 | 0 | C | observe |
 | wisdom | 1 | 0 | 0 | 1 | C | advise |
@@ -264,14 +264,14 @@ for "in name only". Ranked by how badly the `bound` column overstates `inst`:
    `wisdom`. Their one binding apiece is information about the concept, and by
    this file's own rule it is **not coverage**. Read them as empty.
    `ethical_admissibility` was the fourth until this packet.
-8. **`integration_bandwidth` — 2 bound, 1 instantiating,** and the proxy is a
+8. **`integration_bandwidth` — 6 bound, 1 instantiating,** and the proxy is a
    proxy for the same reason `tools.skill_budget_audit` is: it measures the
    quantity and then exits 0, so the number it produces cannot bind the thing
    that produced it.
 
 By contrast, the primitives whose bindings genuinely do the work are
-**`gated_plasticity`** (4 of 4 instantiating), **`collective_coherence`** (4 of
-5), and **`latent_state`** (4 of 5).
+**`gated_plasticity`** (4 of 6 instantiating), **`collective_coherence`** (4 of
+5), and **`latent_state`** (4 of 6).
 
 ---
 
@@ -326,7 +326,7 @@ not blind — necessary for evidence, never sufficient. One binding,
 to discriminate. Reading this primitive's binding count as dense epistemic coverage would be exactly
 the overclaim this registry exists to prevent.
 
-**`boundary` — every boundary here is detective, not preventive, so 0 of 4
+**`boundary` — every boundary here is detective, not preventive, so 0 of 16
 instantiate.** The tripwire and the shell fingerprint both work by hashing
 before and after and naming what changed, so the prohibited write **happens**
 and is then reported. That is worth having — `maint.real_memory_tripwire` is
@@ -339,8 +339,8 @@ at **commit** granularity, not at **write** granularity. That is why they
 gap exactly: whatever happens between the write and the commit is outside the
 reach of every boundary control in the census.
 
-**`durability` — the instrument exists and is empty, and 0 of 1 instantiate.**
-One binding, and it measures conservation across a single *transformation*, not
+**`durability` — the instrument exists and is empty, and 0 of 2 instantiate.**
+Two bindings, and the elder of them measures conservation across a single *transformation*, not
 across *time*. It touches **none** of the five representations the primitive
 declares — not D₁/D₇/D₃₀/D₉₀ retention, not rollback, not rework, not escaped
 regressions.

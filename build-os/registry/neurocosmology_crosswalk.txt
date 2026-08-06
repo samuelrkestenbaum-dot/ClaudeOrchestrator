@@ -625,7 +625,7 @@ binds_to: homeostasis
 class: A
 runtime_authority: gate
 binding_kind: proxies
-rationale: Test state over the router, the guidance files, the hooks, the installers and eleven chained siblings. Red-driven: green means planted defects are caught, not that the system is well.
+rationale: Test state over the router, the guidance files, the hooks, the installers and thirty-eight chained siblings. Red-driven: green means planted defects are caught, not that the system is well.
 
 control: suite.build_os_maintenance
 binds_to: homeostasis
@@ -1299,3 +1299,94 @@ class: A
 runtime_authority: gate
 binding_kind: proxies
 rationale: Test state over the capability reporter: four CLI refusals exiting 2, each of the three recommendation states reached by its own fixture, an empty index yielding `unavailable` with no NaN, no Infinity and no fabricated 0/0, byte-identical output across runs in both modes, the AMENDMENT 1 boundary driven on both sides of one half with its integer test quoted, no bare percentage anywhere in a corpus of real reports, derivation parity with `build-index stats` against a real index of this repository, and the emptiness proof that nothing calls the tool. A suite's function is property preservation, same as its siblings.
+
+control: compiler.entry_context_mode
+binds_to: epistemic_quality
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Records which context mode a task actually started under, and when the arm contract was broken says CONFOUNDED and writes the record anyway rather than repairing the task, stripping the extra context or re-running — each of which would erase the evidence that the harness broke its own contract. Proxies rather than instantiates for a gap the file states about itself: --initial-label is OPERATOR-SUPPLIED AND UNVERIFIED, so the tool records what it was told a file is and never infers a file's kind from its contents, which means a mislabelled artifact yields a confidently wrong record. The record is also closed at task start, so it is a statement about the starting line and not about the run.
+
+control: compiler.entry_admission
+binds_to: boundary
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Decides which movement is permitted — whether a task may run under compiled_context at all — and is one of the few PREVENTIVE boundaries in the census: five override flags are built as named refusal paths, so --force, --override, --allow-bypass, --force-compiled and --ignore-bypass each exit 2 saying no flag, argument or environment variable can force compiled_context past an eligibility refusal, and the only thing allowed to change the answer is fixing the INDEX and measuring again. Proxies for the same reason intake.install_preflight does: nothing obliges any caller to consult it, so the boundary holds only for whoever asks. It gates MODE SELECTION and does not authorise a run.
+
+control: compiler.entry_activation
+binds_to: boundary
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: The permitted-movement check at the outermost edge — may EXP-0004 begin at all — evaluating every precondition and naming all of them rather than stopping at the first, because a refusal that names one problem produces a fix-and-retry loop instead of a decision. Proxies, and the gap is that it holds no capability to enforce anything: it checks, it activates nothing, it writes nothing, and its own pass says the arm may proceed only "as far as THIS boundary can tell". Its suite asserts the string ACTIVATED never appears in any output, which is the honest reading of a boundary that cannot stop what it disapproves of.
+
+control: compiler.eligibility_assessment
+binds_to: epistemic_quality
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Grades whether a repository is measurable enough to experiment on, and refuses in three distinct ways for three distinct reasons without collapsing them: bad inputs (exit 2), instruments that contradict each other (exit 3), and an honest negative verdict (exit 1, NOT-ELIGIBLE, a legitimate recorded outcome rather than a failure). It refuses a dirty tree rather than tidying it, on the stated ground that a verdict computed against an uncommitted tree is not reproducible. Proxies because an ELIGIBLE verdict is a statement about the INDEX at one pinned commit and predicts nothing about whether a capsule compiled from it will win.
+
+control: compiler.eligibility_record
+binds_to: epistemic_quality
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Recomputes the reporter's published verdict mechanically from the same two integers the report itself carries, and REFUSES when the two disagree instead of picking a winner — because a disagreement means exactly one of them is wrong and nothing in the file can tell which, so resolving it by choosing would manufacture a verdict out of a defect. Proxies, and the gap is exact: agreement is not correctness. Both readings consume the same two published integers, so a report that published the wrong integers yields two agreeing wrong answers and nothing here would notice.
+
+control: compiler.eligibility_backlog
+binds_to: boundary
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Decides what is permitted into the candidate set, and its load-bearing refusal is the one that would otherwise fail silently and permissively — an exclusion file with no entries REFUSES rather than emitting an unfiltered backlog, because an empty filter admitting everything is how prior-pilot contamination would enter the experiment invisibly. Proxies because matching is regex and deliberately broad: exclusion is over-inclusive by design, since a false exclusion costs one candidate task while a false inclusion contaminates a matched-arm experiment.
+
+control: exp4.registration_gate
+binds_to: homeostasis
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Preserves the properties a matched-arm experiment depends on, at the only moment they can still be enforced: the frozen fields must be present and identical across arms or the task set is refused BY NAME, the AMENDMENT 1 precondition must arrive as a number because the preregistration states it as one, all ten prior-pilot tasks are refused at registration rather than silently skipped later, arm ordering is derived from a registered rule with no RNG and no wall-clock anywhere in the harness, and no arm may start on a moving tree. Proxies because it enforces that the frozen fields are present and identical, never that they were well chosen.
+
+control: exp4.measurement_schema
+binds_to: epistemic_quality
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: The one place the distinction between measured and unknown is mechanical rather than cultural: every field is a { value, tier } cell, a field with no tier is refused because an untiered number is a number nobody has to stand behind, the blank template is all '-' at tier UNAVAILABLE and VALIDATES, and it contains no zero anywhere — admissions are legal, guesses are not. An unknown is never a zero, which is the failure mode that would otherwise move an aggregate quietly. Proxies because the tier label is OPERATOR-SUPPLIED: the schema enforces that every value carries one and that the vocabulary is closed, and cannot tell whether a value labeled MEASURED was actually measured.
+
+control: exp4.verdict_aggregator
+binds_to: epistemic_quality
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Renders the judgement in a closed vocabulary of seven registered labels, computed mechanically from the preregistration's own thresholds, and refuses a reduction against an arm A baseline of zero because it is undefined rather than infinite. The assertion that costs something is the ACCEPTANCE VETO: a 50% token win and a 50% time win with acceptance falling 3/3 to 2/3 returns `context compilation harmful`, not a trade, and a vetoed aggregate cannot return supported, compression only or acceleration only. Proxies because the seven labels and their thresholds are PREREGISTERED CHOICES, not calibrated constants — the tool guarantees the rule is applied mechanically and cannot be overridden after the fact, and nothing about whether it was the right rule to preregister.
+
+control: exp4.prereg_threshold_binding
+binds_to: gated_plasticity
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Changing the rules safely, applied to the one rule set an experiment must not be allowed to edit mid-flight: thresholds are parsed OUT of AB_PREREGISTRATION.md at read time and compared against the constants cited in this module, and a value that moved after registration is a REFUSAL, not an update. A threshold that cannot be sourced refuses rather than being invented, and a preregistered sentence that has gone absent refuses rather than applying a rule the file no longer states. Proxies because it detects DISAGREEMENT between the parsed sentence and the cited constant; a preregistration edited in both places at once is a governance failure, not a parsing one, and no amount of reading the file can catch it.
+
+control: suite.context_mode
+binds_to: homeostasis
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Test state over the EXP-0004 entry seam: nonsense refused, the compiled_context clean path, an adversarial set that refuses or confounds but never silently accepts, expansion permitted and measured but unable to rewrite the record, an incomplete capsule allowed to fail honestly, a smaller starting prompt never counted as a win by itself, every override flag refused, activation refusing unless every precondition holds, and an emptiness proof — ZERO live references to the seam anywhere on the live surface, with a positive control proving the same grep does find the string in the three entry files. A suite's function is property preservation, same as its siblings.
+
+control: suite.exp0004_harness
+binds_to: homeostasis
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Test state over the EXP-0004 harness: the three tools present and non-executable with the zero-executable census under build-os/experiments/ re-asserted, no RNG and no wall-clock anywhere in the harness so ordering is derived rather than sampled, the frozen fields and AMENDMENT 1 enforced at registration, all ten prior-pilot tasks refused by name, eight identical-across-arms refusals each naming its field, a clean reset between arms, an all-unknown template that validates while containing no zero, a confounded arm B that leaves the aggregate and never returns, and the acceptance veto driven at the most favourable possible case and still required to return harmful. A suite's function is property preservation, same as its siblings.
+
+control: suite.eligibility_workflow
+binds_to: homeostasis
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Test state over the post-pilot eligibility workflow: output-directory safety, an ELIGIBLE assessment emitting a backlog of CANDIDATES with prior-pilot tasks excluded, INELIGIBLE treated as a legitimate verdict rather than a failure, a dirty tree refused with its reproducibility reason AND no eligibility.json and no candidates.json left behind, a verdict disagreement refused rather than resolved by choosing, determinism at a fixed commit, and the read-only claim proven twice — dynamically by digesting the target including .git before and after a full run and requiring byte-identity, and statically by grepping the tool source for twelve mutating git verbs and requiring none. A suite's function is property preservation, same as its siblings.

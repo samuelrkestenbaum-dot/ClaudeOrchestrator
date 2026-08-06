@@ -1210,6 +1210,41 @@ chain_suite "tests/compiler_verifier_tests.sh"  "the SEAM 6 earned verification:
 # section 11 proves; chaining its suite is the only consumer it has.
 chain_suite "tests/compiler_capability_tests.sh" "the SEAM 1 capability report: index signal quality measured before a capsule is trusted, exact integer eligibility arithmetic, unavailable never rendered as zero, and a recommendation that can refuse to compile at all"
 
+echo "== 31. THE THREE PRE-ACTIVATION LANES — the EXP-0004 entry seam, its harness, and the eligibility workflow =="
+# WHY THIS SECTION EXISTS. Three independent lanes landed the machinery that has
+# to exist BEFORE EXP-0004 can begin: the entry seam that decides which context
+# mode a task runs under (build-os/compiler/entry/), the matched-arm harness that
+# registers, measures and adjudicates the run (EXP-0004-context-compiler/harness/),
+# and the operator workflow that decides whether a repository is eligible at all
+# (build-os/compiler/eligibility/). Their suites arrived discoverable-only —
+# section 26's wiring guard named all three as present-but-never-chained — so
+# each is chained here through chain_suite, folding its counts into this file's
+# totals rather than collapsing into a single pass/fail.
+#
+# WHAT CHAINING BUYS HERE, AND IT IS NOT THE SAME BUY AS SECTION 30's. Section 30
+# chains suites over an INERT compiler; these three chain suites over machinery
+# that is inert AND pre-activation — nothing calls it, and nothing will call it
+# until an experiment that has not started yet begins. That is the worst possible
+# rot profile: code whose first real use is the run it is supposed to protect.
+# The entry seam's own section 8 proves the inertness by scanning the live
+# surface for a single reference and requiring zero, so these suites are quite
+# literally the only consumer any of this code has.
+#
+# THE MODE GUARD RIDES ALONG. EXP-0004's harness lives under build-os/experiments/,
+# where EXP-0003's suite asserts ZERO executables. exp0004_harness_tests.sh §1
+# re-asserts that census itself (0 executables anywhere under experiments/), so
+# chaining it puts that guard in the repo verification command rather than in a
+# suite somebody has to remember to run.
+#
+# Appended BELOW section 30 for the reason section 30 states about itself: this
+# file's trailing verdict lines are cited by suite.build_os's evidence_refs, and
+# appending moves only those two, which are re-derived in the SAME COMMIT. All
+# thirteen surfaces these lanes added — ten modules and these three suites — are
+# registered in that same commit too (RULING 4, the PACKET-0048 lesson).
+chain_suite "tests/context_mode_tests.sh"        "the EXP-0004 entry seam: the two context modes with no third and no default, an adversarial set that refuses or confounds but never silently accepts, admission gated on measured eligibility with no override flag, the activation boundary naming every unmet precondition, and the operator's proof that nothing live references the seam"
+chain_suite "tests/exp0004_harness_tests.sh"     "the EXP-0004 matched-arm harness: the frozen-field and AMENDMENT 1 checks at registration, all ten prior-pilot tasks refused by name, arm ordering derived rather than sampled, a tier vocabulary in which an unknown is never a zero, a confounded arm B that leaves the aggregate and never returns, the acceptance veto that makes a token win a loss, and thresholds that must come from the preregistration or refuse"
+chain_suite "tests/eligibility_workflow_tests.sh" "the post-pilot eligibility workflow: a dirty tree refused with its reproducibility reason, NOT-ELIGIBLE treated as a legitimate verdict rather than a failure, a reporter/mechanical disagreement REFUSED instead of resolved by choosing, and a byte-identity proof that the assessment writes nothing inside the repository it assesses"
+
 echo
 echo "==== RESULT: $PASS passed, $FAIL failed ===="
 [ "$FAIL" -eq 0 ]
