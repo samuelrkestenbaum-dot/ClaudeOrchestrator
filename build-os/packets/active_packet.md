@@ -2520,3 +2520,27 @@ surface the T2–T4 refusals and per-arm acceptance explicitly.
   STAGED** — the operator's directive ends with "complete the bounded build, report the
   evidence, and stop for the next product decision." Staging is a routing act, and the
   archivist takes none.
+
+## IN FLIGHT — `universal-task-entry-governance` (declared 2026-08-06)
+
+- **Packet id:** `PACKET-0054-universal-task-entry` — minted; 0 commits/0 files before this edit.
+- **Lane:** `substantive`. **Depth 2.** Routing receipt issued before building:
+  `routing-PACKET-0054-…-20260806T002034Z.md`, gravito_full (high_blast_radius +
+  high_rework_history — this gate will govern EVERY session's mutation-capable tool use).
+- **Branch base:** at `ef36c42` — the pushed tip (PACKET-0053 published under ruling).
+- **Objective (operator's product decision — the narrow 7-item correction):** close the gap
+  the operator named: "live dispatch governance completed; universal task-entry governance
+  still incomplete." (1) An execution-start boundary for EVERY substantive task including
+  parent-only work; (2) an active routing record required before any MUTATION-CAPABLE tool
+  use (Edit/Write/NotebookEdit/Bash), not only Task|Agent; (3) exploratory reads
+  (Read/Grep/Glob and read-only inspection) distinguished from execution — counted, ungated;
+  (4) all tool activity and eventual provider telemetry bound to the task record;
+  (5) long/repetitive parent-loop detection that forces reassessment (block-with-reroute,
+  estimate-tier token proxy honestly labeled ESTIMATE); (6) the hook contract expressed as a
+  PROVIDER-ADAPTER contract with the Claude hooks as its first adapter, labeled; (7) live
+  token/cost as an adapter capability with honest fallback tiers where exact telemetry is
+  absent. DEADLOCK GUARD is a hard requirement: the routing tools themselves (route-task /
+  mode-select / routing-check / record-degradation) must pass ungated (logged) or no session
+  could ever issue the receipt its first Edit requires.
+- **Frozen:** bench/, all EXP trees, metrics store; no push without go; nothing beyond the
+  seven items — the real-repository pilot is the NEXT step after this closes, not this packet.
