@@ -2606,3 +2606,33 @@ surface the T2–T4 refusals and per-arm acceptance explicitly.
   `01517ad2…`). **NOTHING IS IN FLIGHT; NOTHING IS STAGED** — the real-repository pilot
   is the operator's next product decision, and staging it is a routing act the archivist
   does not take.
+
+## IN FLIGHT — `structured-routing-action` (declared 2026-08-06)
+
+- **Packet id:** `PACKET-0055-structured-routing-action` — minted; 0 commits/0 files before this edit.
+- **Lane:** `substantive`. **Depth 2.** Routing receipt issued before building:
+  `routing-PACKET-0055-structured-routing-action-20260806T015246Z.md`, selected_mode
+  gravito_full, binding.
+- **Branch base:** at `e293e75` — PACKET-0054's close, re-verified before this edit
+  (`git merge-base HEAD e293e75` → `e293e75`), tree quiet.
+- **Objective (operator ruling — the deadlock guard's substring breadth is "a real
+  enforcement bypass, not merely a wording issue"; harden BEFORE the real-repository
+  pilot):** (1) replace the substring-based routing exception with a STRUCTURED
+  ROUTING ACTION — the ungated pass applies only to an exactly-recognized routing
+  invocation extracted from the actual `tool_input.command` field, matched whole
+  against a strict single-invocation pattern with no chaining/substitution
+  metacharacters, extraction failure falling toward GATING, never toward an ungated
+  pass; (2) fingerprint every ROUTING-TOOL-PASS record (which tool, sha256 first
+  12 hex chars of the exact command, sanitized ≤80-char TSV-safe excerpt) in both
+  ledgers; (3) preserve a recovery path that cannot carry unrelated mutations,
+  proven end-to-end from the refusal's own text; (4) test the attack shapes
+  (compound commands, comments, non-command-field mentions, sh -c/eval quoting,
+  command substitution, newline injection, mutation hidden behind a legitimate
+  prefix) AND the legitimate invocation set explicitly; (5) prove store-unavailable
+  is not a brick. Plus: rewrite the DEADLOCK GUARD bullet in
+  `routing_contract_live.md` to the structured action with the NEW honest bounds
+  named, and re-point every registry anchor into routing-gate.sh in the same
+  commit, content-verified (RULING 4 — burned twice already).
+- **Frozen:** bench/, build-os/experiments/, build-os/metrics/ (the close-time
+  metrics row is the archivist's, not this packet's), build-os/memory/residue.md
+  (blob `01517ad2…`). No push/merge/deploy/secrets without explicit operator go.
