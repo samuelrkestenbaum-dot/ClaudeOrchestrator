@@ -35,8 +35,13 @@ cheap checks). Therefore:
   of weekly Fable capacity (and at most 2 all-models points) — an UPPER
   BOUND, not a point estimate; the true pilot share is smaller by the
   (unmeasured) non-pilot session activity in the window.
-- Meter granularity is whole points, so the delta itself carries ±1-point
-  quantization uncertainty in each direction.
+- Display precision below whole percentages is unknown; the earlier
+  "±1-point quantization" phrasing overclaimed knowledge of the meter's
+  rounding behavior and is WITHDRAWN by operator correction. The
+  defensible statement: the displayed readings increased by 2 percentage
+  points on both meters; because the window included non-pilot activity,
+  2 points is a CEILING for pilot-attributable movement — not a precise
+  pilot-consumption measurement.
 - No finer attribution is possible without per-boundary readings; the
   next pilot should take operator readings immediately at measured-window
   open AND close to shrink the window to the tasks themselves.
@@ -45,5 +50,6 @@ cheap checks). Therefore:
 
 Five connected real-repository tasks, 5/5 accepted, ~44 min measured
 work, zero human interventions, four durable product commits — for AT
-MOST two percentage points of weekly Fable 5 usage (window-bounded upper
-bound including non-pilot session overhead; ±1 point display quantization).
+MOST two percentage points of displayed weekly Fable 5 movement (a
+window-bounded ceiling including non-pilot session overhead; display
+precision below whole percentages unknown).
