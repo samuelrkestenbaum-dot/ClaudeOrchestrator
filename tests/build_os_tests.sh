@@ -1245,6 +1245,46 @@ chain_suite "tests/context_mode_tests.sh"        "the EXP-0004 entry seam: the t
 chain_suite "tests/exp0004_harness_tests.sh"     "the EXP-0004 matched-arm harness: the frozen-field and AMENDMENT 1 checks at registration, all ten prior-pilot tasks refused by name, arm ordering derived rather than sampled, a tier vocabulary in which an unknown is never a zero, a confounded arm B that leaves the aggregate and never returns, the acceptance veto that makes a token win a loss, and thresholds that must come from the preregistration or refuse"
 chain_suite "tests/eligibility_workflow_tests.sh" "the post-pilot eligibility workflow: a dirty tree refused with its reproducibility reason, NOT-ELIGIBLE treated as a legitimate verdict rather than a failure, a reporter/mechanical disagreement REFUSED instead of resolved by choosing, and a byte-identity proof that the assessment writes nothing inside the repository it assesses"
 
+echo "== 32. THE EXP-0004 BLINDING INSTRUMENT — the last pre-analysis requirement =="
+# WHY THIS IS ITS OWN SECTION AND NOT A FOURTH LINE IN SECTION 31. That section's
+# title is a statement of fact about THREE parallel lanes; the blinding
+# instrument did not arrive in a lane, and appending it there would make the
+# title false to buy nothing. It shares section 31's THEME — machinery that must
+# exist before EXP-0004 may begin — and nothing else about its provenance.
+#
+# WHAT IT PROTECTS. EXP-0004 labels its measurement records `A` and `B` with no
+# blinding whatsoever, at exactly the point where the incentive to see a
+# favourable result is strongest. The five files under
+# EXP-0004-context-compiler/blinding/ seal the label-to-condition mapping from a
+# declared salt and a REGISTERED rule, commit its sha256 before the run, build an
+# adjudicator view and an analyst view that are scanned for leaks BEFORE either
+# is written, freeze fourteen named artifacts, and open the one-way reveal only
+# when four named conditions all hold. Nothing here measures the thesis; it
+# decides whether a measurement of it will be worth anything.
+#
+# WHY CHAINING IS THE ONLY CONSUMER IT HAS, AND WHY THAT MATTERS MORE HERE THAN
+# IN SECTIONS 30 AND 31. These tools are inert and pre-activation like the
+# harness, but their first real use is the ONE run they exist to protect, and a
+# blinding instrument discovered broken afterwards cannot be re-run — the numbers
+# have been seen by then. The assertion worth having inside the repo verification
+# command is its section 13: the SAME anonymous verdict translates to
+# `compression only` under one sealed bit and to `context compilation harmful`
+# under the other, so the blinded artifact demonstrably does not contain the
+# answer, while a full re-run under the opposite seal recovers the SAME outcome.
+#
+# THE MODE GUARD RIDES ALONG, as in section 31: exp0004_blinding_tests.sh §1
+# re-asserts ZERO executables anywhere under build-os/experiments/ and that each
+# of the five blinding files is mode 644, so EXP-0003's census gains a third
+# independent watch inside this command.
+#
+# Appended BELOW section 31 for the reason sections 30 and 31 state about
+# themselves: this file's trailing verdict lines are cited by suite.build_os's
+# evidence_refs, and appending moves only those two, which are re-derived in the
+# SAME COMMIT. All six surfaces this instrument added — five modules and this
+# suite — are registered in that same commit too (RULING 4, the PACKET-0048
+# lesson).
+chain_suite "tests/exp0004_blinding_tests.sh"    "the EXP-0004 blinding instrument: a condition mapping DERIVED from a registered rule rather than sampled and committed by digest before the run, an adjudicator view carrying no starting-context field at all, capsule size withheld from the analyst until acceptance is frozen, a planted leak refused by name, a freeze that refuses while any of the fourteen artifacts is missing and names each one, a reveal that names every unmet condition and refuses a self-consistent seal that is not THE seal, and the load-bearing proof that one anonymous verdict translates to opposite registered outcomes under the two sealed bits"
+
 echo
 echo "==== RESULT: $PASS passed, $FAIL failed ===="
 [ "$FAIL" -eq 0 ]

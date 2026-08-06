@@ -1390,3 +1390,45 @@ class: A
 runtime_authority: gate
 binding_kind: proxies
 rationale: Test state over the post-pilot eligibility workflow: output-directory safety, an ELIGIBLE assessment emitting a backlog of CANDIDATES with prior-pilot tasks excluded, INELIGIBLE treated as a legitimate verdict rather than a failure, a dirty tree refused with its reproducibility reason AND no eligibility.json and no candidates.json left behind, a verdict disagreement refused rather than resolved by choosing, determinism at a fixed commit, and the read-only claim proven twice — dynamically by digesting the target including .git before and after a full run and requiring byte-identity, and statically by grepping the tool source for twelve mutating git verbs and requiring none. A suite's function is property preservation, same as its siblings.
+
+control: exp4.blinding_seal
+binds_to: epistemic_quality
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: The commitment that decides whether any EXP-0004 number will be worth anything: the mapping from analysis label to execution condition is a pure function of a DECLARED salt and a REGISTERED rule, both recorded inside the sealed artifact, and its sha256 is committed before the run — so a third party holding the artifact can re-derive every assignment and confirm nothing was chosen after the data existed. `reproduce` runs exactly that re-derivation and refuses a seal whose units, label maps or aggregate validity no longer follow the rule the seal itself records. Proxies because the digest proves the mapping did not CHANGE and cannot prove it was WITHHELD: the salt lives inside the sealed file, publishing it before the reveal breaks the blind outright, and that obligation rests on the operator where no check here can reach it.
+
+control: exp4.blinding_views
+binds_to: boundary
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Which information may reach which role, enforced at the moment a view is rendered rather than after it is read: the acceptance adjudicator sees the task id, an opaque work-product reference, the test results and the acceptance question and nothing else, and the comparative analyst sees economics under Arm X / Arm Y with the starting-size and expansion fields withheld until acceptance is frozen. Every view is scanned before it is written and a leaking one is REFUSED rather than written with a warning, so unlike the detective boundaries elsewhere in this census the prohibited disclosure does not occur. Proxies because the scan is a FIXED DENYLIST — eight forbidden strings and three patterns — so it catches the leaks somebody thought of; and because unit ids appear in both views by design, so anyone holding both can join them.
+
+control: exp4.blinding_freeze
+binds_to: epistemic_quality
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Fixes what "the analysis is finished" means before the seal may be opened, so it cannot mean whatever is convenient on the day: fourteen named artifacts must exist or the freeze refuses and names every missing one, and the snapshot records each artifact's sha256 plus a digest over the whole list, which makes a later edit a visible break rather than a quiet one. The fourteenth is the anonymous provisional verdict, because freezing the numbers but not the verdict would leave the only step that matters free to happen after the reveal. Proxies because the snapshot makes an edit VISIBLE, not impossible: it guarantees a rewritten input no longer matches its digest, and nothing more.
+
+control: exp4.blinding_reveal
+binds_to: boundary
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: The single permitted movement out of the blind, and it opens once: the freeze snapshot must validate against the frozen inputs, the provisional verdict must exist and still be anonymous, the sealed mapping's sha256 must equal the digest committed before the run, and the reveal timestamp must be supplied because no clock is read. Each unmet condition is named in the refusal, and a self-consistent seal that is not THE seal the frozen verdict was produced under is refused by digest, because translating an analysis with another run's mapping fails silently and looks well-formed. Proxies because the conditions bind the ARTIFACTS and not the people: nothing here stops anyone opening the sealed file directly, so an early reveal is made detectable and refusable rather than impossible.
+
+control: exp4.blinding_flow
+binds_to: homeostasis
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: The failure it exists to prevent is the one every other blinding control is blind to: four modules that each pass alone while the COMPOSITION has never been run. It executes the ten steps in the operator's required order — including the stated ordering correction, acceptance frozen first and the fourteen-item snapshot last — dies at the first step that does not succeed, and asserts mid-flow that starting sizes have not reached the analyst while acceptance is still open. That is test state over an integration, which is this primitive's function and not epistemic contact. Proxies for the standing reason its siblings do, and for one of its own that is larger: the whole demonstration is SIMULATED over five invented matched pairs, so a green run is evidence that the machinery composes and evidence of nothing else at all.
+
+control: suite.exp0004_blinding
+binds_to: homeostasis
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Test state over the EXP-0004 blinding instrument: every file present and non-executable with the zero-executable census under build-os/experiments/ re-asserted, no RNG and no wall clock in any blinding tool, a mapping that re-derives from its own recorded rule while a single flipped assignment moves the committed digest, the per-task rule sealable but recorded invalid for aggregate analysis, an adjudicator view with no starting-context field and only opaque work-product ids, capsule size withheld before the freeze and preserved after it, a planted leak refused by name, a freeze refusing while any of the fourteen artifacts is missing, a snapshot invalidated by a changed input and by an edited digest, the four reveal conditions each refused and named, and the counterfactual in which one anonymous verdict translates to two opposite registered outcomes. A suite's function is property preservation, same as its siblings.
