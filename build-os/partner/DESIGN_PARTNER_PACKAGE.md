@@ -87,11 +87,24 @@ override exists (ROUTING_GATE_DISABLE=1) and is always logged.
 - Evidence report: the pilot ends with a written report in the
   PILOT-0001 form — including whatever is unflattering.
 
-## 7. Pricing structure — OPERATOR DECISION REQUIRED
+## 7. Pricing structure — PROVISIONAL, NON-BINDING
 
-Marked open. Options to decide: fixed-fee pilot / pilot fee credited
-against license / free-with-case-study-rights. Nothing here is binding
-until the operator sets it.
+Operator-set draft, explicitly provisional pending the clean-window
+economic pilot and the unfamiliar-repository proof:
+
+- **Assisted pilot — $25,000-$50,000, 4-6 weeks**, one or two
+  repositories: installation, baseline measurement, governed AI
+  execution, weekly evidence report, accepted-output and intervention
+  tracking, final economic assessment.
+- **Enterprise pilot — $50,000-$100,000**: broader scope with security
+  review, several teams, or custom integrations.
+
+EVERY figure above is PROVISIONAL and non-binding. It is priced against
+internal evidence only (PILOT-0001, plus the native-governance proof);
+no external customer has yet run Gravito, and no controlled economic
+result exists. The numbers are expected to move once the clean-window
+pilot and an unfamiliar-repository pilot produce measured cost-per-
+accepted-outcome evidence. Nothing here constitutes an offer.
 
 ## 8. Customer responsibilities
 
