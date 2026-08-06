@@ -143,3 +143,17 @@ agreement — a live demonstration of the PACKET-0050/0053 doctrine working
 against the orchestrator's own bookkeeping. Row rewritten to the binding
 format (duplicated_work=n with the partial-duplication nuance carried in
 the output_ref text), re-swept exit 0. Counted as 1 rework event for T3.
+
+# T4 measurements (appended; tier-labeled)
+
+selected gravito_light / executed gravito_light, no escalation / elapsed
+679s EXACT (04:44:49→04:56:08), light budget 600s BREACHED by 79s with
+degradation note (determinism evidence = 5 test-suite executions dominated
+wall clock) / parent tool calls 7 EXACT / subagents 0 / tool failures 0 /
+tokens+cost UNAVAILABLE live / human interventions 0 / REWORK 1: first
+hypothesis (dispatcher describe alone is the polluter) was WRONG — its
+hermetization left the timeout in place; second pass hermetized the
+formatting describe's remaining real dispatches, then 26/26 / acceptance
+MET: dry-run passes full-file 3/3 consecutive (1.6s vs 30s timeout),
+assertions untouched, file 42s vs ~171s baseline / pilot commit 605ba68
+(1 file, +33/−4, test-only).
