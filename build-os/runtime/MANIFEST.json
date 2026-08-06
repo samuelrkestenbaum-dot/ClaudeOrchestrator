@@ -1,0 +1,113 @@
+{
+  "name": "gravito-runtime",
+  "version": "0.1.0",
+  "description": "Versioned Gravito routing runtime: the five executables and three contracts proven in the empathiq pilot install, plus the settings.json hook wiring and .gitignore stanza — installable without manual copying.",
+  "generated": "2026-08-06",
+  "files": [
+    {
+      "source": ".claude/hooks/routing-gate.sh",
+      "install": ".claude/hooks/routing-gate.sh",
+      "mode": "executable",
+      "header": false,
+      "sha256": "0b83040575507b82e165a33c61ac6148db32580b293cb1057e60f0741c5d74c6"
+    },
+    {
+      "source": "build-os/tools/route-task.sh",
+      "install": "build-os/tools/route-task.sh",
+      "mode": "executable",
+      "header": false,
+      "sha256": "f76e7eb88eef401b5a3f514d7f779d7b00ec8f137d8b1ed651d25c273bc1ae0e"
+    },
+    {
+      "source": "build-os/tools/mode-select.mjs",
+      "install": "build-os/tools/mode-select.mjs",
+      "mode": "executable",
+      "header": false,
+      "sha256": "e5c9711e7e36f406f4a26668343077c9a213c6e10139f4002f457ad4414e6439"
+    },
+    {
+      "source": "build-os/tools/routing-check.sh",
+      "install": "build-os/tools/routing-check.sh",
+      "mode": "executable",
+      "header": false,
+      "sha256": "25c1f4f5845ccc2e0e393cc87d53be3300f3eeaa5cd8c54babe2732e7f9ecb19"
+    },
+    {
+      "source": "build-os/tools/record-degradation.sh",
+      "install": "build-os/tools/record-degradation.sh",
+      "mode": "executable",
+      "header": false,
+      "sha256": "e30388719e33414842186844aa61f3aa2235ff1d902a891917bb35e1b960c7e8"
+    },
+    {
+      "source": "build-os/memory/routing_contract.md",
+      "install": "build-os/memory/routing_contract.md",
+      "mode": "contract",
+      "header": true,
+      "sha256": "6ca950f68270628eb17d579e72f2aa8adebf629c7dd1b59ba0d9269881e2888a"
+    },
+    {
+      "source": "build-os/memory/routing_contract_live.md",
+      "install": "build-os/memory/routing_contract_live.md",
+      "mode": "contract",
+      "header": true,
+      "sha256": "e8f75d9a3ee6cd80d81464701d6c78492ac6fc34e63a0abda5217d1e79a32c08"
+    },
+    {
+      "source": "build-os/memory/provider_adapter_contract.md",
+      "install": "build-os/memory/provider_adapter_contract.md",
+      "mode": "contract",
+      "header": true,
+      "sha256": "22fe125c01c29f7fecaad49f0576ee7421dac433bc828434f2c480a7387f51f7"
+    }
+  ],
+  "settings_hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Task|Agent",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/routing-gate.sh gate"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write|NotebookEdit|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/routing-gate.sh mutgate"
+          }
+        ]
+      },
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/routing-gate.sh count"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/routing-gate.sh post"
+          }
+        ]
+      }
+    ]
+  },
+  "gitignore": [
+    "# Gravito routing store: receipts (build-os/packets/routing/*.md) are TRACKED —",
+    "# in a product install the receipts ARE the evidence. Only the high-churn live",
+    "# ledgers stay untracked (append-only per-session logs, one row per tool event).",
+    "build-os/packets/routing/live_gate_log.tsv",
+    "build-os/packets/routing/live_state/"
+  ]
+}
