@@ -234,3 +234,51 @@ seeing data: fewer than FIVE completed un-confounded task-pairs cannot
 return `supported` or `context compilation harmful`; such an aggregate
 returns `inconclusive` with the count stated. This is my derivation, not
 an operator ruling, and the operator may replace it before the run.
+
+## AMENDMENT 4 — the blinding protocol, and a correction to 3.5
+
+### 4.1 Blinding is now a built protocol, not a promise
+
+The original "Blinding" section said only that a mapping's sha256 would
+be committed before analysis. That is now implemented and binding:
+`build-os/experiments/EXP-0004-context-compiler/blinding/`.
+
+- The mapping is DERIVED from a recorded rule plus a salt, never sampled,
+  and is reproducible from `rule_text` alone.
+- `mapping.sha256` is committed BEFORE the first task executes.
+  `mapping.sealed.json` and THE SALT stay out of the repository until the
+  reveal conditions are met — the salt must be withheld as strictly as
+  the mapping, because publishing it breaks the blind outright.
+- Two separated views: the ACCEPTANCE ADJUDICATOR sees no arm labels and
+  no starting-context bytes (a small prompt beside a large one identifies
+  the treatment instantly); the COMPARATIVE ANALYST sees economics under
+  `Arm X` / `Arm Y` only.
+- A fourteen-artifact freeze snapshot must validate before reveal. Order
+  is fixed because both cannot be first: acceptance freezes, THEN the
+  anonymous verdict, THEN the full snapshot.
+- Reveal is one-way and refuses on: missing freeze, missing anonymous
+  verdict, digest mismatch, or a mutated sealed mapping. Every blinded
+  artifact carries the digest of the mapping that produced it, so a seal
+  that is self-consistent but WRONG is refused rather than silently
+  mistranslated.
+- A mapping whose rule mixes conditions within an arm across tasks seals
+  with `aggregate_analysis_valid: false`, and the tools refuse to
+  aggregate over it.
+
+### 4.2 Correction to AMENDMENT 3.5 (minimum n) — mine, still reversible
+
+3.5 as written applies the five-pair minimum to `supported` AND
+`context compilation harmful` alike. A four-pair run with a large
+acceptance shortfall would therefore downgrade to `inconclusive`, which
+reads as suppressing a harm signal.
+
+The correction keeps the rule SYMMETRIC — an underpowered harm claim is
+as unsound as an underpowered success claim, and this project has
+already ruled that conclusion rules must not be asymmetric — but forbids
+the signal being lost. Below the minimum, the verdict is `inconclusive`
+AND the output MUST state the observed direction and the shortfall, e.g.
+"inconclusive (n=4 below the registered minimum of 5; direction: arm B
+acceptance 3/4 vs arm A 4/4 — directionally harmful, underpowered)".
+
+Symmetry is preserved; silence is not permitted. Still my derived
+default rather than an operator ruling, and still replaceable pre-run.
