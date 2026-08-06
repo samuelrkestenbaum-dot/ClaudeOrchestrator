@@ -155,3 +155,15 @@ T1 starts, that is a confound to record, not to smooth over.
    Packet numbers, doctrine chains, census counts, archivist mechanics and
    rotation rules are internal, and the report should say which of the
    pilot's overhead a customer would never see.
+
+## FREEZE AMENDMENT 2 — model restored to claude-fable-5 (before task 1, zero tasks run)
+
+Operator ruling: the pilot exists partly to test the ~6% weekly-credit
+observation made on Fable 5, so the measured pilot runs on
+**claude-fable-5**. Sequence, fully disclosed and preserved in the evidence
+chain: freeze named claude-fable-5 → operator temporarily selected
+claude-opus-5 (Amendment 1, disclosed, zero measured tasks run) → operator
+restored claude-fable-5 (this amendment, still zero measured tasks run).
+The frozen pilot model is **claude-fable-5** for ALL measured tasks T1–T5.
+Both amendments stay in the chain; neither is edited or removed. Any model
+change after T1 begins is a recorded confound, not an amendable setting.
