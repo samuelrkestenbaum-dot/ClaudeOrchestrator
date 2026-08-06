@@ -1,0 +1,11 @@
+{
+  "artifact": "exclusion_decisions",
+  "experiment": "EXP-0004",
+  "source": "SIMULATED — this fixture stands in for the run's real exclusion ledger",
+  "n_admitted": 5,
+  "n_excluded": 0,
+  "excluded": [],
+  "confounds_recorded": [],
+  "amendment_2_substitution_check": "every admitted unit of the compiled condition recorded broad_context_included = false; no unit was excluded under AMENDMENT 2",
+  "note": "This artifact is produced by the EXECUTION layer, which is permitted to know condition identity, and is frozen unopened by the blinded roles."
+}

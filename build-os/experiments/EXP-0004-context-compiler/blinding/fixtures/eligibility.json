@@ -1,0 +1,11 @@
+{
+  "artifact": "eligibility",
+  "experiment": "EXP-0004",
+  "source": "SIMULATED — this fixture stands in for the run's real AMENDMENT 1 eligibility record",
+  "no_parser_share_pct": 12.0,
+  "files_admitted_as_candidates": 415,
+  "measured_by": "build-index.mjs stats",
+  "recorded_before_the_first_condition_ran": true,
+  "signal_inadequate": false,
+  "note": "A repository property, not a condition property. It reveals nothing about which label is which and is therefore safe to show the analyst."
+}
