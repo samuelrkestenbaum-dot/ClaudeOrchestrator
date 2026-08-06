@@ -101,3 +101,16 @@ BUDGET BREACH, honest: max_elapsed_seconds 600 EXCEEDED (671s) — cause:
 three unavoidable test-runtime executions (160s, 23s, 160s) needed to
 localize the order-dependence; degradation applied: stayed light, no
 subagents, no scope growth; max_tool_calls 25 NOT exceeded (8).
+
+# T2 measurements (appended; tier-labeled)
+
+selected gravito_light / executed gravito_light, no escalation / elapsed
+289s EXACT (04:25:42→04:30:31), WITHIN the 600s light budget / parent tool
+calls 6 (EXACT): 2 reads, 1 edit, 3 vitest invocations / subagents 0 /
+tool failures 0 / tokens+cost UNAVAILABLE live / human interventions 0 /
+acceptance MET: hermetic test 28ms in-file + 3/3 deterministic filtered
+runs; vacuous shadow deleted; 26 tests, only pre-existing dry-run timeout
+remains (T4 target — full-file failure detail now pinned: 30006ms TIMEOUT,
+first dry-run invocation only, only after earlier tests have run) /
+rework 0 / pilot commit e01c901 (1 file, test-only) / commit amended once
+pre-close for a 1-char session-trailer typo, disclosed.
