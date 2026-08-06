@@ -25,11 +25,25 @@ is to issue or confirm a routing receipt** (one command:
 for the task in flight, e.g. the active packet's, which stays open until the
 archivist's close-fill — then the next session re-routes).
 
-- **DEADLOCK GUARD.** A Bash command invoking the routing tools themselves
+- **DEADLOCK GUARD.** A Bash event naming any of the routing tools
   (`route-task.sh`, `mode-select.mjs`, `routing-check.sh`,
-  `record-degradation.sh` — matched on the script path appearing in the
-  command) passes UNGATED and is logged `ROUTING-TOOL-PASS`. Without it, no
-  session could issue the receipt its first gated call requires.
+  `record-degradation.sh`) passes UNGATED and is logged `ROUTING-TOOL-PASS`.
+  Without it, no session could issue the receipt its first gated call
+  requires. **Its true breadth is wider than "a command that invokes the
+  tool":** the match is a substring test over the ENTIRE raw hook JSON,
+  checked BEFORE the git classification — so a compound command
+  (`route-task.sh; git push --force`), a comment that merely mentions a
+  routing tool, or a tool path appearing in any non-command field (e.g. the
+  description) ALL pass ungated, and `ROUTING-TOOL-PASS` mislabels such
+  events. This is the SOLE ungated pass in the task-entry boundary, so its
+  breadth is stated at full size rather than softened: it grants a hostile
+  agent nothing beyond the `sh -c` evasion named below (the not-a-sandbox
+  bound holds), but honest audit reads of the log must treat
+  `ROUTING-TOOL-PASS` as "the event mentioned a routing tool," not "the
+  event only ran one." The match is deliberately NOT narrowed to the command
+  field: a guard that could misparse an event and block the receipt-issuing
+  command would re-create the deadlock it exists to prevent, and blocking is
+  the failure mode this guard must never have.
 - **Read-only git inspection** (`status|log|diff|show|rev-parse|ls-files|
   branch` by subcommand) passes ungated, logged `GIT-READONLY-PASS`, counted
   exploratory. Any git command carrying `push|commit|merge|rebase|reset|
