@@ -77,3 +77,34 @@ Halt and record `result confounded` if arms diverge in repo state, if the
 capsule leaks into arm A, or if the compiler is wired into any live
 routing path during the run (v0 ships inert precisely so this is
 detectable).
+
+## AMENDMENT 1 — repository signal is a precondition (recorded before any run)
+
+The first end-to-end integration exposed a confound the original design
+missed. Running the merged compiler against THIS repository:
+
+- index: 415 files, 583,282 bytes
+- capsule for a JS-seeded task: 6,622 rendered bytes vs 6,589,592 tracked
+  repository bytes
+- BUT the indexer's own stats: **no_parser 390/415 (94.0%)**, partial
+  415/415 (100%), files_with_a_covering_test 4/415 (1.0%)
+
+ClaudeOrchestrator is shell-dominant and v0 extracts symbols only from
+JS/TS (plus partial Python/Go/Rust). So on this repo the capsule is small
+largely because the index has almost NO structural signal to admit — not
+because compilation is efficient. **Small-because-uninformed is the exact
+failure mode outcome 4 names.** An A/B run here would measure a compiler
+operating nearly blind and could register `context compilation harmful`
+for a reason that has nothing to do with the compression thesis.
+
+BINDING AMENDMENT: EXP-0004 may only run on a repository where the index
+has measured parser coverage. The precondition is stated as a number, not
+a judgement — **no_parser share of files admitted-as-candidates must be
+below 50%, measured by `build-index.mjs stats` and RECORDED in the run
+record before arm A begins.** A repository failing that check is either
+excluded or the run is registered `result confounded` under the existing
+stop conditions. Adding a shell extractor to the indexer would also
+satisfy it; that is a build decision, not an amendment to this rule.
+
+This amendment is recorded BEFORE any A/B task has been selected or run,
+so it cannot function as post-hoc selection of a favourable repository.

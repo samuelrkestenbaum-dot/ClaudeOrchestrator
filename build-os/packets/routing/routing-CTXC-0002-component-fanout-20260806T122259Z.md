@@ -27,10 +27,10 @@ budget_max_cost_usd: 1.50
 process_dispatch_allowance: 7
 # --- empty at issue; filled at close. AN UNKNOWN IS NOT A ZERO: "-" is an honest
 # --- admission and is never refused; refusal is for CONTRADICTION, not absence.
-executed_mode: -
+executed_mode: gravito_full
 escalation: -
 escalation_evidence: -
-consumed_subagents: -
+consumed_subagents: 0
 consumed_total_tokens: -
 consumed_uncached_tokens: -
 consumed_model_calls: -
@@ -43,7 +43,7 @@ degradation_note: -
 # --- consumption where derivable at close — tokens or cost with provenance, or
 # --- "-" as an admission, NEVER a zero nobody measured. Receipts predating these
 # --- fields stay valid: routing-check.sh reads an absent field as "-".
-consumed_process_dispatches: -
+consumed_process_dispatches: 5
 attr_task_execution: -
 attr_context_retrieval: -
 attr_subagent_execution: -
@@ -65,3 +65,4 @@ attr_experiment_audit: -
 # Recorded as a defect of the orchestrator, not smoothed over. The live
 # mutgate would have blocked this in a hook-loaded session; this session
 # predates its own wiring, which is exactly the gap PACKET-0054 names.
+contribution: ctxc-lanes-A-D-plus-integration | build the four compiler components against fixed seams, then reconcile them into one registered tree | 485 new assertions merged; full suite 3713/0; seam integration proven end-to-end on a real index | changed_implementation=y | changed_conclusion=y | caught_defect=y | duplicated_work=n | tokens=414581 | cost=- | time=-
