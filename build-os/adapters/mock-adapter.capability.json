@@ -1,0 +1,71 @@
+{
+  "schema": "adapter-capability/v0",
+  "adapter_id": "mock-local",
+  "provider": "local-mock",
+  "verification": {
+    "state": "executed",
+    "evidence": "build-os/adapters/conformance.sh --exercise drives build-os/adapters/mock-adapter.sh through all ten operations in tests/adapter_contract_tests.sh. PROOF SCOPE: this adapter proves CONTRACT behavior only — mock != real provider, and it demonstrates nothing about any network host."
+  },
+  "lifecycle": {
+    "task_start": {
+      "supported": true,
+      "tier": "EXACT",
+      "enforcement": "pre",
+      "notes": "Persists task state under ADAPTER_STATE_DIR before answering ok; refuses duplicate starts; resume:true restores interrupted state with counts intact."
+    },
+    "context_delivery": {
+      "supported": true,
+      "tier": "EXACT",
+      "enforcement": "pre",
+      "notes": "Appends delivered items to context.jsonl and reports the exact delivered count; refuses unknown tasks."
+    },
+    "authority_grant": {
+      "supported": true,
+      "tier": "EXACT",
+      "enforcement": "pre",
+      "notes": "Persists the envelope; REFUSES any request for external mutation authority — that belongs to the operator, never an adapter."
+    },
+    "mutation_event": {
+      "supported": true,
+      "tier": "EXACT",
+      "enforcement": "pre",
+      "notes": "Refused BEFORE execution when no admitting authority_grant exists; admitted events appended to events.tsv and counted EXACT (attempts, not completions)."
+    },
+    "telemetry_report": {
+      "supported": true,
+      "tier": "EXACT",
+      "enforcement": "pre",
+      "notes": "EXACT is honest HERE because the telemetry is the mock's own synthetic state — it counts every event it generates. provider_cost_usd stays value:null tier:UNAVAILABLE (the mock has no billing surface and does not guess one)."
+    },
+    "receipt_bind": {
+      "supported": true,
+      "tier": "EXACT",
+      "enforcement": "pre",
+      "notes": "Binds the task to the named receipt id; a rebind lands as an event, never silently."
+    },
+    "completion": {
+      "supported": true,
+      "tier": "EXACT",
+      "enforcement": "pre",
+      "notes": "Refuses unknown, already-complete, and interrupted-unresumed tasks; final response carries the EXACT counts, the receipt binding, and the degradation fact."
+    },
+    "interruption": {
+      "supported": true,
+      "tier": "EXACT",
+      "enforcement": "pre",
+      "notes": "Writes tasks/<id>/resume.json preserving counts and bindings; the task is marked interrupted and completion is refused until task_start resume:true."
+    },
+    "degradation": {
+      "supported": true,
+      "tier": "EXACT",
+      "enforcement": "pre",
+      "notes": "Requires a reason (silent degradation refused); persists reason+evidence; every later telemetry_report and completion carries degraded:true."
+    },
+    "capability_declaration": {
+      "supported": true,
+      "tier": "EXACT",
+      "enforcement": "none",
+      "notes": "Emits this file verbatim (single source of truth); MOCK_DECLARE_UNSUPPORTED is a TEST FIXTURE that removes claims and refuses the matching operations — used to prove refused-not-faked."
+    }
+  }
+}

@@ -1,0 +1,78 @@
+{
+  "schema": "adapter-capability/v0",
+  "adapter_id": "codex",
+  "provider": "openai-codex",
+  "verification": {
+    "state": "unverified",
+    "evidence": "Four-state honesty, each state observed not guessed: (1) binary PRESENT (/opt/node22/bin/codex resolves on PATH); (2) auth ABSENT (no credential material found for the CLI); (3) host UNREACHABLE from this environment (curl exit with HTTP 000 / proxy 403 on every attempt); (4) NO SUCCESSFUL CALL has ever completed. Until a real call succeeds, no lifecycle point may be marked supported; Codex sessions are OUTSIDE the governed boundary and must be stated as such. Absent access does not block the architecture: this declaration validates against the schema while claiming nothing.",
+    "access": {
+      "binary_present": true,
+      "auth_present": false,
+      "host_reachable": false,
+      "last_observed_http": "000",
+      "successful_call": false
+    }
+  },
+  "lifecycle": {
+    "task_start": {
+      "supported": false,
+      "tier": "UNAVAILABLE",
+      "enforcement": "none",
+      "notes": "interface-unverified: no executed evidence; not guessed."
+    },
+    "context_delivery": {
+      "supported": false,
+      "tier": "UNAVAILABLE",
+      "enforcement": "none",
+      "notes": "interface-unverified: no executed evidence; not guessed."
+    },
+    "authority_grant": {
+      "supported": false,
+      "tier": "UNAVAILABLE",
+      "enforcement": "none",
+      "notes": "interface-unverified: no executed evidence; not guessed."
+    },
+    "mutation_event": {
+      "supported": false,
+      "tier": "UNAVAILABLE",
+      "enforcement": "none",
+      "notes": "interface-unverified: whether Codex exposes a pre-execution hook surface is UNKNOWN here, and is not assumed."
+    },
+    "telemetry_report": {
+      "supported": false,
+      "tier": "UNAVAILABLE",
+      "enforcement": "none",
+      "notes": "interface-unverified: no telemetry surface has been observed; no tier is claimed."
+    },
+    "receipt_bind": {
+      "supported": false,
+      "tier": "UNAVAILABLE",
+      "enforcement": "none",
+      "notes": "interface-unverified: no executed evidence; not guessed."
+    },
+    "completion": {
+      "supported": false,
+      "tier": "UNAVAILABLE",
+      "enforcement": "none",
+      "notes": "interface-unverified: no executed evidence; not guessed."
+    },
+    "interruption": {
+      "supported": false,
+      "tier": "UNAVAILABLE",
+      "enforcement": "none",
+      "notes": "interface-unverified: no executed evidence; not guessed."
+    },
+    "degradation": {
+      "supported": false,
+      "tier": "UNAVAILABLE",
+      "enforcement": "none",
+      "notes": "interface-unverified: no executed evidence; not guessed."
+    },
+    "capability_declaration": {
+      "supported": false,
+      "tier": "UNAVAILABLE",
+      "enforcement": "none",
+      "notes": "This FILE exists (schema-valid, claiming nothing), but no executable Codex adapter implements the operation — supported would mean a live adapter answers it, and none does."
+    }
+  }
+}
