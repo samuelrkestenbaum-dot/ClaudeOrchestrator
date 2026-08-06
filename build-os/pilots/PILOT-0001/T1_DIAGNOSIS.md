@@ -157,3 +157,39 @@ formatting describe's remaining real dispatches, then 26/26 / acceptance
 MET: dry-run passes full-file 3/3 consecutive (1.6s vs 30s timeout),
 assertions untouched, file 42s vs ~171s baseline / pilot commit 605ba68
 (1 file, +33/−4, test-only).
+
+# T5 measurements (appended; tier-labeled) — fresh-context follow-up
+
+Implemented as a FRESH-CONTEXT AGENT (no conversational memory, durable
+artifacts only) because the orchestrating session cannot spawn a true new
+operator session mid-pilot — deviation disclosed; frozen acceptance
+criteria unchanged. selected gravito_light / executed gravito_light, no
+escalation, receipt self-issued BEFORE any mutation (mandatory task entry
+honored by a fresh context) and self-close-filled, sweep 12 receipts /
+0 violations / elapsed 318s EXACT, WITHIN budget / tool calls 27 EXACT /
+subagents 0 / agent tokens 82,082 EXACT (harness) / human interventions 0 /
+acceptance MET: stripe lines 0, total 778 < 782 strict, sorted diff = 4
+removals + 1 cosmetic union-count shift, zero new; 7 stripe test files:
+87 pass | 13 fail | 3 todo BYTE-IDENTICAL before/after (stash-diff proof —
+the 13 are pre-existing debt) / rework 0 / pilot commit 7262b8d (3 files
++18/−4, no any-casts, period derived as items envelope) / DURABLE-CONTEXT
+VERDICT: sufficient — nothing conversational needed; named gap for future
+freezes: record per-suite baseline pass/fail state for any suite an
+acceptance clause references (T5 had to stash-measure it) / T1 errata
+disclosed: C5 said 3 stripe errors, baseline had 4 (checkout.ts pin).
+
+# PILOT TOTALS (measured tasks T1–T5)
+
+Wall: T1 671 + T2 289 + T3 694 + T4 679 + T5 318 = 2,651s measured
+(~44 min; full span 04:13:41→05:03Z ≈ 50 min incl. inter-task closes).
+Depths: light×4, full×1 (selector's choices on honest descriptors; no
+forced balance). Subagents: 2 total (T3 verifier 84,385 tok EXACT / T5
+fresh-context 82,082 tok EXACT = 166,467 EXACT; parent-loop tokens
+UNAVAILABLE live per adapter contract). Budget breaches: 2 honest
+(T1 +71s, T4 +79s, both degradation-noted; T3 within its Full 900s).
+Escalations: 0. Silent escalation: 0. Close-time gate interventions: 1
+(T3 first close REFUSED, MALFORMED contribution row — fixed, re-swept).
+Durable output: 4 product commits (e01c901, 41aed7a, 605ba68, 7262b8d),
++1 test file (4 tests), 1 skipped-coverage restored, 1 vacuous test
+removed, 1 pre-existing 30s-timeout failure fixed (26/26 ×3), tsc
+782→778, five-for-five acceptance.
