@@ -1,0 +1,64 @@
+{
+  "index_version": 1,
+  "repo_head": "0000000000000000000000000000000000000000",
+  "generated_at": "2026-01-01T00:00:00Z",
+  "files": {
+    "src/cart.mjs": {
+      "blob": "aaaa111", "lang": "javascript", "kind": "source",
+      "symbols": ["addItem", "removeItem"], "imports": ["src/pricing.mjs"],
+      "imported_by": [], "tests_covering": ["tests/cart.test.mjs"],
+      "last_changed": "2026-01-01T00:00:00Z", "error_count": 0, "lines": 120
+    },
+    "src/pricing.mjs": {
+      "blob": "bbbb222", "lang": "javascript", "kind": "source",
+      "symbols": ["price"], "imports": [], "imported_by": ["src/cart.mjs"],
+      "tests_covering": ["tests/pricing.test.mjs"],
+      "last_changed": "2026-01-01T00:00:00Z", "error_count": 0, "lines": 80
+    },
+    "src/legacy-report.mjs": {
+      "blob": "cccc333", "lang": "javascript", "kind": "source",
+      "symbols": ["render"], "imports": [], "imported_by": [],
+      "tests_covering": [],
+      "last_changed": "2026-01-01T00:00:00Z", "error_count": 0, "lines": 240
+    },
+    "src/opaque.mjs": {
+      "blob": "dddd444", "lang": "prolog", "kind": "source",
+      "symbols": [], "partial": true, "imports": [], "imported_by": [],
+      "tests_covering": null,
+      "last_changed": "2026-01-01T00:00:00Z", "error_count": null, "lines": 60
+    },
+    "tests/cart.test.mjs": {
+      "blob": "eeee555", "lang": "javascript", "kind": "test",
+      "symbols": [], "imports": ["src/cart.mjs"], "imported_by": [],
+      "tests_covering": [], "last_changed": "2026-01-01T00:00:00Z",
+      "error_count": 0, "lines": 90
+    },
+    "tests/pricing.test.mjs": {
+      "blob": "ffff666", "lang": "javascript", "kind": "test",
+      "symbols": [], "imports": ["src/pricing.mjs"], "imported_by": [],
+      "tests_covering": [], "last_changed": "2026-01-01T00:00:00Z",
+      "error_count": 0, "lines": 45
+    },
+    "docs/guide.md": {
+      "blob": "9999aaa", "lang": "markdown", "kind": "doc",
+      "symbols": [], "imports": [], "imported_by": [], "tests_covering": [],
+      "last_changed": "2026-01-01T00:00:00Z", "error_count": null, "lines": 300
+    },
+    "build-os/tools/route-task.sh": {
+      "blob": "7777bbb", "lang": "bash", "kind": "source",
+      "symbols": [], "imports": [], "imported_by": [],
+      "tests_covering": ["tests/routing_task_entry_tests.sh"],
+      "last_changed": "2026-01-01T00:00:00Z", "error_count": 0, "lines": 200
+    },
+    ".claude/agents/qa.md": {
+      "blob": "8888ccc", "lang": "markdown", "kind": "config",
+      "symbols": [], "imports": [], "imported_by": [], "tests_covering": [],
+      "last_changed": "2026-01-01T00:00:00Z", "error_count": null, "lines": 70
+    }
+  },
+  "symbols": {
+    "addItem": { "defined_in": "src/cart.mjs", "line": 12, "referenced_in": ["tests/cart.test.mjs"] },
+    "price": { "defined_in": "src/pricing.mjs", "line": 3, "referenced_in": ["src/cart.mjs"] }
+  },
+  "error_clusters": []
+}
