@@ -1919,3 +1919,35 @@ NOTHING PUSHED (`aa0c968`, `dda0dea`, `61503fa` + the close commit local, pendin
 explicit go; 4 ahead of origin). NOTHING IN FLIGHT, NOTHING STAGED — the operator's
 directive ends: complete the bounded build, report the evidence, and stop for the
 next product decision. `residue.md` frozen (blob `01517ad2…`).
+
+
+## PACKET-0054-universal-task-entry — CLOSED PASS-AS-FIXED 2026-08-06 — TASK ENTRY IS NOW UNIVERSAL
+
+Receipt `build-os/receipts/gravito_universal_task_entry_a.md`. Commits `725c6a4`
++ `22f6bb3` + `d30be0c` (one fix commit, prose-only), base `ef36c42` (pushed
+tip). SHIPPED: mutgate `Edit|Write|NotebookEdit|Bash` — a routing record
+required before ANY mutation-capable tool use, parent work included; the
+DEADLOCK GUARD with honest breadth (substring over the ENTIRE raw hook
+JSON, `ROUTING-TOOL-PASS`, sole ungated pass, deliberately not narrowed);
+explore/execute split (reads counted, ungated); fire-once parent-loop
+reassessment (ESTIMATE-tier token proxy); provider-adapter contract
+(`provider_adapter_contract.md`, Claude hooks first adapter, Codex row
+INTERFACE-UNVERIFIED); live token/cost with honest fallback tiers. GATES: qa
+GREEN **2801/0 solo** (2677+124 new); iso 2677/0 at `725c6a4`; safety grep
+clean; census **128**, mismatches **24**, gate-on-advise **14**, refs **451**;
+compat 5/0; overhead ~50/~30 ms vs 250 ms. Reviewer fix-then-pass ONE item
+(deadlock-guard breadth understated) fixed in `d30be0c`; `mut_classify` reorder
+DECLINED (blocked command IS the recovery command); reviewer withdrew;
+builder limitation 4 REFUTED (not open). `DC-0001` 33→34 derived, same commit.
+Second eyes NONE (Codex 403, stated).
+
+**SELF-APPLICATION, BINDING ON THE NEXT SESSION.** (a) `live_gate_log.tsv` and
+`live_state/*.tsv` now accrue as UNTRACKED ledgers — future packets MUST
+declare them packet-expected-unstaged at tree-quiet checks. (b) NO routing
+receipt remains open: the next session's FIRST mutation-capable call WILL BE
+BLOCKED by the new mutgate until it routes — task entry WORKING by
+design; recovery: one `build-os/tools/route-task.sh` command.
+
+NOTHING PUSHED (3 packet commits + close local, pending go; 4 ahead of
+origin). NOTHING IN FLIGHT, NOTHING STAGED — the real-repo pilot is the
+next product decision. `residue.md` frozen (blob `01517ad2…`).

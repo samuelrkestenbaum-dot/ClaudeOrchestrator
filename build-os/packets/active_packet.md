@@ -2523,7 +2523,7 @@ surface the T2–T4 refusals and per-arm acceptance explicitly.
 
 ## IN FLIGHT — `universal-task-entry-governance` (declared 2026-08-06)
 
-- **Packet id:** `PACKET-0054-universal-task-entry` — minted; 0 commits/0 files before this edit.
+- **Packet id (CLOSED):** `PACKET-0054-universal-task-entry` — minted; 0 commits/0 files before this edit.
 - **Lane:** `substantive`. **Depth 2.** Routing receipt issued before building:
   `routing-PACKET-0054-…-20260806T002034Z.md`, gravito_full (high_blast_radius +
   high_rework_history — this gate will govern EVERY session's mutation-capable tool use).
@@ -2544,3 +2544,65 @@ surface the T2–T4 refusals and per-arm acceptance explicitly.
   could ever issue the receipt its first Edit requires.
 - **Frozen:** bench/, all EXP trees, metrics store; no push without go; nothing beyond the
   seven items — the real-repository pilot is the NEXT step after this closes, not this packet.
+
+## CLOSE RECORD — `gravito_universal_task_entry_a` (`PACKET-0054-universal-task-entry`) — closed 2026-08-06 by the archivist. NOTHING IN FLIGHT.
+
+- **Packet id (CLOSED):** `PACKET-0054-universal-task-entry`. Receipt:
+  `build-os/receipts/gravito_universal_task_entry_a.md`. **Lane:** `substantive`.
+  **Depth 3, announced** — build; qa ‖ reviewer concurrently; one bounded fix round
+  (`fix-then-pass`, 1 enumerated item), targeted re-review at that item only. Base
+  `ef36c42` (the pushed tip), re-verified at close (`git merge-base HEAD
+  origin/claude/project-handoff-merge-ramhds` → `ef36c42`), tree quiet at `d30be0c`.
+- **Commits:** `725c6a4` (declaration + gravito_full routing receipt via
+  high_blast_radius + high_rework_history) + `22f6bb3` (build, 14 files +922/−32;
+  same-commit registration, census 126→128) + `d30be0c` (the one permitted fix commit —
+  prose-only, 1 file +18/−4, no hook lines shifted, no anchors re-pointed). Per-commit
+  numstat sums 16 paths +1022/−36; union `ef36c42..d30be0c` 16 files +1018/−32 —
+  reconcile exactly (4 build-commit lines rewritten within-range by the fix).
+- **WHAT SHIPPED:** the universal task-entry boundary — mutgate on
+  `Edit|Write|NotebookEdit|Bash` (an active routing record before ANY mutation-capable
+  tool use, parent-only work included); the DEADLOCK GUARD with its breadth honestly
+  stated (substring over the ENTIRE raw hook JSON, `ROUTING-TOOL-PASS`, sole ungated
+  pass, deliberately not narrowed — narrowing could block the recovery command itself);
+  explore/execute split (reads counted, ungated); fire-once parent-loop reassessment
+  (estimate-tier token proxy labeled ESTIMATE, reset gated on
+  change-since-arming-snapshot); provider-adapter contract
+  (`build-os/memory/provider_adapter_contract.md`, Claude hooks first adapter, Codex row
+  interface-unverified); live token/cost as adapter capability with honest fallback tiers.
+- **Gates:** qa GREEN — FULL SUITE **2801/0 exit 0 solo** (= 2677 + 124, the new
+  `tests/routing_task_entry_tests.sh`); commit-1 iso **2677/0** in a detached worktree at
+  `725c6a4`; safety grep clean (the single `rm -rf` hit is the suite's own mktemp cleanup
+  trap, `tests/routing_task_entry_tests.sh:841`); census **128**, 0 unregistered/phantom,
+  mismatches **24** declared=reported, gate-on-advise **14**, evidence_refs **451** =
+  README; backward compat 5 live receipts / 0 violations; overhead mutgate ALLOW ~50 ms,
+  BLOCK ~30 ms vs the 250 ms bound; frozen surfaces untouched (`bench/`,
+  `build-os/experiments/`, `build-os/metrics/`). Reviewer **fix-then-pass on ONE item**,
+  fixed in `d30be0c` (`routing_contract_live.md` understated the deadlock guard's
+  breadth — now states full breadth, the mislabel audit-read instruction,
+  sole-ungated-pass status, and the non-narrowing rationale); targeted re-review: pass →
+  **PASS-AS-FIXED**. The reviewer's optional `mut_classify` reorder DECLINED with stated
+  reason (brick: the blocked command would BE the recovery command); reviewer validated
+  and withdrew it. NOTABLE: builder's limitation 4 (pre-armed escalation resolves first
+  trip) TESTED AND REFUTED by the reviewer — recorded refuted, not open. Residual future
+  scope, not a defect: `ROUTING-TOOL-PASS` rows carry no command text; ledger-level
+  disambiguation is a future packet. Second eyes NONE (Codex 403 at proxy — stated, not
+  pretended). `DC-0001` numeral moved **33 → 34** in this close commit, derived from the
+  receipt store.
+- **Live routing receipt closed:** `executed_mode: gravito_full` (matches selected; no
+  escalation); `consumed_process_dispatches: 5` — TRANSCRIPT-DERIVED, CLOSE-TIME tier,
+  never a hook-measured EXACT count (builder 1 + qa 1 + reviewer 1 + targeted re-review
+  resume 1 + archivist 1 = 5, within allowance 7; this session's hooks are NOT loaded, so
+  no `live_state/` file exists to corroborate or contradict); all other consumption `-`,
+  honest admissions.
+- **SELF-APPLICATION — TWO NOTES BINDING ON THE NEXT SESSION.** (a) From next session
+  start, `live_gate_log.tsv` and `live_state/*.tsv` accrue as UNTRACKED ledgers — future
+  packets must declare them packet-expected-unstaged at tree-quiet checks. (b) This close
+  leaves NO open routing receipt, so the next session's FIRST mutation-capable call WILL
+  BE BLOCKED by the new mutgate until it routes — mandatory task entry working by design;
+  recovery is one `build-os/tools/route-task.sh` command.
+- **Boundaries:** NOTHING PUSHED — `725c6a4`, `22f6bb3`, `d30be0c`, and this close
+  commit local pending explicit operator go (4 ahead of origin after this close); none
+  may be amended. No merge, deploy, or secrets. `residue.md` stays frozen (blob
+  `01517ad2…`). **NOTHING IS IN FLIGHT; NOTHING IS STAGED** — the real-repository pilot
+  is the operator's next product decision, and staging it is a routing act the archivist
+  does not take.
