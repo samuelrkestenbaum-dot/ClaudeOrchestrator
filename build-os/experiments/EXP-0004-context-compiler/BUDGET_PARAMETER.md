@@ -43,11 +43,11 @@ necessarily does not fit. Each number below was obtained by bisection over the
 
 | task | budget (bytes) | base | spent | admitted | dropped | dropped at priority |
 |---|---:|---:|---:|---:|---:|---|
-| E1 | 79,093 | 35,220 | 43,873 | 53 / 187 | 134 | 5 only |
-| E2 | 125,657 | 48,283 | 77,374 | 133 / 260 | 127 | 5 only |
-| E3 | 42,354 | 23,388 | 18,966 | 41 / 122 | 81 | 5 only |
-| E4 | 148,910 | 53,227 | 95,683 | 193 / 288 | 95 | 5 only |
-| E5 | 56,992 | 23,789 | 33,203 | 34 / 124 | 90 | 5 only |
+| E1 | 79,507 | 35,634 | 43,873 | 53 / 187 | 134 | 5 only |
+| E2 | 126,071 | 48,697 | 77,374 | 133 / 260 | 127 | 5 only |
+| E3 | 42,767 | 23,801 | 18,966 | 41 / 122 | 81 | 5 only |
+| E4 | 149,332 | 53,649 | 95,683 | 193 / 288 | 95 | 5 only |
+| E5 | 57,405 | 24,202 | 33,203 | 34 / 124 | 90 | 5 only |
 
 In every task the drop set is priority 5 and **nothing else** — which is the
 rule holding, verified rather than asserted.
@@ -83,11 +83,11 @@ Read it."). The consequence, measured:
 
 | task | capsule.md at derived budget | capsule.md unbudgeted | floor at budget≈base |
 |---|---:|---:|---:|
-| E1 | 132,728 | 138,523 | ~108,092 |
-| E2 | 174,982 | 180,268 | — |
-| E3 | 76,674 | 81,209 | — |
-| E4 | 185,284 | 187,187 | — |
-| E5 | 94,228 | 97,318 | — |
+| E1 | 133,034 | 138,523 | ~108,092 |
+| E2 | 175,288 | 180,268 | — |
+| E3 | 76,979 | 81,209 | — |
+| E4 | 185,598 | 187,187 | — |
+| E5 | 94,533 | 97,318 | — |
 
 Declining a file saves roughly 500 bytes of disclosure against roughly 800–900
 bytes of content, so **the budget is a weak size lever and there is a floor set
@@ -102,6 +102,53 @@ equally fixed in advance: **the experiment measures this compiler build, whose
 exclusion-disclosure rendering is a large fraction of its own output, not the
 concept of context compilation.** Recording that boundary after seeing the
 result would be worthless; recording it now is the point.
+
+## Amendment, same day, still before any arm: the numbers moved by 414 bytes
+
+The budgets first derived here were 79,093 / 125,657 / 42,354 / 148,910 /
+56,992. They are now 414 bytes higher, each. The cause is recorded rather than
+quietly overwritten:
+
+The first derivation ran against **incomplete task descriptors**. Three fields
+were missing, and each is a condition the preregistration requires to be
+*identical across arms*:
+
+- `task_id` — every capsule rendered as `Task UNNAMED-TASK`;
+- `verification` — the capsule rendered "_no verification command was
+  supplied — say so rather than inventing one_", so arm B would have had no
+  verification command while arm A's prompt named one. That is an
+  arm mismatch on a frozen field, not a cosmetic gap;
+- `repo_wide_baseline` / `baseline_measured_at` — the capsule read
+  "repo-wide: not measured" when it is measured and pinned.
+
+Completing the descriptors grew every capsule's fixed base by exactly 414
+bytes, so the rule — base + cost(priority 1..4) — returns a budget 414 higher.
+**The admitted set did not change on any task**: same files, same per-rung
+counts, same drop set of priority 5 only. That stability is the useful part:
+the rule is a property of the ladder, not of the byte number, and completing
+the descriptor did not let one extra file in.
+
+## The baseline measurement command, named exactly
+
+Establishing the work tree surfaced a second thing worth pinning. `tsc` reports
+**781** errors at the seed under `tsconfig.json` and **754** under
+`tsconfig.app.json`; the 27-error difference is entirely `*.test.ts` files,
+which `tsconfig.app.json` excludes. The frozen baseline — "754 total at seed",
+carried in TASK_FREEZE.md and in all five task descriptors — is the
+`tsconfig.app.json` number, the one the repository's own `check:app` and
+deploy gate use.
+
+The measurement is therefore fixed, for both arms, as:
+
+    npx cross-env NODE_OPTIONS=--max-old-space-size=4096 tsc --noEmit -p tsconfig.app.json
+
+A work tree built from the seed reproduces the authoritative 754-error list
+**exactly** under that command — zero extra, zero missing, after normalising
+line/column and the repository path prefix — and the five clusters come back
+at their frozen sizes: E1 15/6, E2 13/8, E3 8/8, E4 6/4 (the range form
+`Expected N-M arguments`), E5 5/4. Had the other config been used, every task's
+"total below the count at task start" criterion would have been measured
+against a different denominator than the one the freeze records.
 
 ## What is NOT permitted from here
 
