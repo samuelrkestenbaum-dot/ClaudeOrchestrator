@@ -37,8 +37,8 @@ TMP="$(mktemp -d "${TMPDIR:-/tmp}/dashboard-tests.XXXXXX")"
 trap 'rm -rf "$TMP"' EXIT
 
 ok(){   PASS=$((PASS+1)); printf '  PASS  %s\n' "$1"; }
-no(){   FAIL=$((FAIL+1)); printf '  FAIL  %s\n' "$1"; [ $# -gt 1 ] && printf '        %s\n' "$2"; }
-skip(){ SKIP=$((SKIP+1)); printf '  SKIP  %s\n' "$1"; [ $# -gt 1 ] && printf '        %s\n' "$2"; }
+no(){   FAIL=$((FAIL+1)); printf '  FAIL  %s\n' "$1"; [ -n "${2:-}" ] && printf '        %s\n' "$2"; }
+skip(){ SKIP=$((SKIP+1)); printf '  SKIP  %s\n' "$1"; [ -n "${2:-}" ] && printf '        %s\n' "$2"; }
 sect(){ printf '\n== %s ==\n' "$1"; }
 
 # ---------------------------------------------------------------- 0. present --
@@ -375,5 +375,10 @@ fi
 # ------------------------------------------------------------------ summary ---
 printf '\n----------------------------------------------------------\n'
 printf 'TESTS: %d passed, %d failed, %d skipped\n' "$PASS" "$FAIL" "$SKIP"
+# The house verdict line the repo's chain_suite parses. Emitted in addition
+# to the line above, which carries the skip count the house grammar has no
+# field for. Without this line chain_suite finds no RESULT and discards every
+# assertion in this file while still reporting a pass — a fake wire.
+printf '==== RESULT: %d passed, %d failed ====\n' "$PASS" "$FAIL"
 [ "$FAIL" -eq 0 ] || exit 1
 exit 0

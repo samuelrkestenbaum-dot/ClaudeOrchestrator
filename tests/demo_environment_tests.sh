@@ -27,7 +27,7 @@ SCRIPT_MD="$DEMO_DIR/DEMO_SCRIPT.md"
 PASS=0
 FAIL=0
 ok(){   PASS=$((PASS+1)); printf 'ok   %s\n' "$1"; }
-bad(){  FAIL=$((FAIL+1)); printf 'FAIL %s\n' "$1"; [ $# -gt 1 ] && printf '     %s\n' "$2"; }
+bad(){  FAIL=$((FAIL+1)); printf 'FAIL %s\n' "$1"; [ -n "${2:-}" ] && printf '     %s\n' "$2"; }
 
 # assert_file_has <label> <file> <fixed-string>...
 assert_file_has(){
