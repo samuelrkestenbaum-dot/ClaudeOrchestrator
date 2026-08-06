@@ -13,10 +13,18 @@ EXP-0004 = `build-os/compiler/AB_PREREGISTRATION.md` + Amendments 1-4.
       quiet-watch was DELETED for exactly this reason; re-arm only after
       PILOT-0002 closes.)
 - [ ] `cd /home/user/ClaudeOrchestrator && git status --porcelain` empty.
-- [ ] `git status --porcelain` — the
-      two untracked paths (`.serena/`, `build-os/packets/routing/`) are
-      pre-existing and NOT product files; either leave them or add them
-      to `.gitignore` BEFORE the window, never during it.
+- [ ] `git status --porcelain` — the two untracked paths (`.serena/`,
+      `build-os/packets/routing/`) are pre-existing and NOT product
+      files. **DECIDED: leave them untracked.** Adding a `.gitignore`
+      entry would require a commit on the frozen repository, and the
+      pilot branch must be cut from the pinned seed `93f75ea` exactly —
+      a tidier `git status` is not worth moving the seed the freeze
+      names. They are inert for T1-T5.
+      **Consequence carried forward to Phase 2, not forgotten:**
+      `assess-repo.sh` refuses on a dirty tree INCLUDING untracked
+      paths, so they must be resolved before the eligibility run — at
+      that point the pilot's own commits already exist, so the seed is
+      no longer at stake and a `.gitignore` commit is free.
 - [ ] Pilot branch created from the frozen seed:
       `git checkout -b pilot/PILOT-0002-clean-window 93f75ea`
       (FREEZE.md pins 93f75ea, the native-install tip.)
