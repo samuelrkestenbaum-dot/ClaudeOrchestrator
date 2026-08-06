@@ -1,0 +1,480 @@
+#!/usr/bin/env bash
+# gravito — the customer-facing control surface (READ-ONLY).
+#
+# WHAT THIS IS. A single entry CLI that renders what the routing layer already
+# records — task, selected depth, why, authority, budgets, live activity,
+# throttle events, result, evidence, cost categories — in CUSTOMER words. It
+# never writes: no receipt, no ledger, no state file is ever touched here.
+#
+# THE VOCABULARY CONTRACT. Default human output speaks the customer's language
+# (Direct / Light / Full, helper agents, budgets, throttle, evidence) and does
+# NOT speak the internal doctrine's (mode identifiers, governance role names,
+# doctrine section ids). Free-text fields written by internal tools (the
+# degradation note, escalation records, throttle reasons) pass through a
+# translation layer before display. --json (tasks/task) is the machine seam
+# for a future web shell; it carries the same customer-word values.
+#
+# HONESTY RULES, inherited from the recording layer and preserved on display:
+#   * an unknown is UNAVAILABLE (human) / null (json) — NEVER a zero nobody
+#     measured;
+#   * counts shown as exact are the recording layer's exact counts; the token
+#     proxy is labeled an estimate and never promoted;
+#   * a missing ledger or live record is stated as missing, not silently
+#     rendered as "no activity".
+#
+# DATA READ (all under one store dir, default <repo>/build-os/packets/routing):
+#   *.md                    routing receipts (one per task; open = unfilled result)
+#   live_gate_log.tsv       the append-only activity ledger (5-field TSV)
+#   live_state/<receipt>.tsv  per-task live activity rows (3-field TSV)
+set -uo pipefail
+
+SELF_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT="$(cd "$SELF_DIR/../.." && pwd)"
+STORE="$ROOT/build-os/packets/routing"
+
+usage(){
+  cat <<'EOF'
+gravito — see what ran, why, and what it cost (read-only)
+
+  gravito tasks    [--dir <store>] [--json]   list tasks
+  gravito task <id> [--dir <store>] [--json]  one task, the full card
+  gravito activity [--dir <store>] [--tail N] the activity ledger, translated
+  gravito explain                             first-run: what this does for you
+EOF
+}
+
+die(){ printf 'gravito: %s\n' "$*" >&2; exit 2; }
+
+# ---------------------------------------------------------------- parsing ----
+CMD="${1:-}"; [ $# -gt 0 ] && shift
+JSON=0; TAIL=20; TASK_ID=""
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --dir)  [ $# -ge 2 ] || die "--dir needs a value"; STORE="$2"; shift 2 ;;
+    --json) JSON=1; shift ;;
+    --tail) [ $# -ge 2 ] || die "--tail needs a number"; TAIL="$2"; shift 2 ;;
+    -h|--help) usage; exit 0 ;;
+    -*) die "unknown flag $1" ;;
+    *)  [ -z "$TASK_ID" ] && TASK_ID="$1" || die "unexpected argument $1"; shift ;;
+  esac
+done
+LEDGER="$STORE/live_gate_log.tsv"
+SDIR="$STORE/live_state"
+
+# ---------------------------------------------------------------- helpers ----
+fval(){ # <file> <field> -> value ('-' if absent: absent is an admission)
+  local v
+  v="$(awk -v k="$2" 'index($0, k": ")==1 { print substr($0, length(k)+3); exit }' "$1")"
+  [ -n "$v" ] && printf '%s' "$v" || printf -- '-'
+}
+dval(){ # <descriptor-json> <key> -> bare value
+  printf '%s' "$1" | grep -oE "\"$2\":(\"[^\"]*\"|[^,}]*)" | head -n1 \
+    | sed -E "s/^\"$2\"://; s/^\"//; s/\"$//"
+}
+is_num(){ printf '%s' "$1" | grep -qE '^[0-9]+(\.[0-9]+)?$'; }
+
+mode_word(){ # internal mode id -> customer word
+  case "$1" in
+    direct) printf 'Direct' ;;
+    gravito_light) printf 'Light' ;;
+    gravito_full) printf 'Full' ;;
+    -) printf -- '-' ;;
+    *) printf 'Unknown' ;;
+  esac
+}
+mode_desc(){
+  case "$1" in
+    Direct) printf 'a small change made straight away in the main loop' ;;
+    Light)  printf 'one careful pass in the main loop; no helper agents' ;;
+    Full)   printf 'implementation plus independent checking and review; helper agents allowed' ;;
+    *)      printf 'depth not recorded' ;;
+  esac
+}
+
+# The TRANSLATION LAYER for free text written by internal tools. Word-level,
+# case-sensitive: a user's own uppercase task name (e.g. PACKET-0053) is the
+# user's vocabulary and stays; the lowercase doctrine form is translated.
+sanitize(){
+  sed -E \
+    -e 's/gravito_full/Full mode/g' \
+    -e 's/gravito_light/Light mode/g' \
+    -e 's/mandatory_full_regate/a required full re-check/g' \
+    -e 's/DC-[0-9]+/a recorded design decision/g' \
+    -e 's/\bpackets\b/tasks/g' \
+    -e 's/\bpacket\b/task/g' \
+    -e 's/\barchivist\b/record-keeping/g' \
+    -e 's/\bcensused\b/registered/g' \
+    -e 's/\bcensus\b/registry/g' \
+    -e 's/\bqa\b/verification/g' \
+    -e 's/\breviewer\b/review/g' \
+    -e 's/\bbuilder\b/implementation/g' \
+    -e 's/\bsubagents?\b/helper agents/g' \
+    -e 's/\bdispatches\b/helper runs/g'
+}
+
+# json string escaper (values here are controlled text; covers \ " and TSV/NL)
+jstr(){ local s="$1"; s="${s//\\/\\\\}"; s="${s//\"/\\\"}"; s="${s//$'\t'/ }"; s="${s//$'\n'/ }"; printf '"%s"' "$s"; }
+jnum(){ if is_num "$1"; then printf '%s' "$1"; else printf 'null'; fi; }
+
+# Receipts, newest first (by the trailing UTC stamp in the file name).
+receipt_files(){
+  [ -d "$STORE" ] || return 0
+  local f key
+  while IFS= read -r f; do
+    key="$(basename "$f" .md | grep -oE '[0-9]{8}T[0-9]{6}Z$' || true)"
+    [ -n "$key" ] || key="00000000T000000Z"
+    printf '%s\t%s\n' "$key" "$f"
+  done < <(find "$STORE" -maxdepth 1 -type f -name '*.md' 2>/dev/null | sort) \
+    | sort -r | cut -f2
+}
+receipt_for(){ # <task-id> -> path, rc 1 if none
+  local f
+  while IFS= read -r f; do
+    [ "$(fval "$f" task_id)" = "$1" ] && { printf '%s' "$f"; return 0; }
+  done < <(receipt_files)
+  return 1
+}
+status_of(){ # <receipt> -> open|closed
+  local em; em="$(fval "$1" executed_mode)"
+  [ "$em" = "-" ] && printf 'open' || printf 'closed'
+}
+describe(){ # <task-id> -> plain one-liner (the full description is stored as a fingerprint only)
+  printf '%s' "$1" | tr '-' ' '
+}
+count_kind(){ # <state-file> <kind>
+  awk -F'\t' -v k="$2" '$2==k{n++} END{print n+0}' "$1"
+}
+
+# Decisive routing factors from the descriptor, in plain language, max 4.
+why_lines(){ # <descriptor-json>
+  local d="$1" n=0 v
+  emit(){ [ "$n" -lt 4 ] && { printf '%s\n' "$1"; n=$((n+1)); }; }
+  case "$(dval "$d" consequence_level)" in
+    high)   emit "high consequence if it goes wrong" ;;
+    medium) emit "moderate consequence if it goes wrong" ;;
+    low)    emit "low consequence" ;;
+  esac
+  [ "$(dval "$d" irreversible_or_external_mutation)" = "true" ] && emit "changes would be hard to undo or would leave this machine"
+  [ "$(dval "$d" high_blast_radius)" = "true" ]                 && emit "a mistake would touch a wide area"
+  [ "$(dval "$d" security_or_compliance_consequence)" = "true" ] && emit "security or compliance is at stake"
+  [ "$(dval "$d" requires_tests)" = "true" ]                     && emit "needs tests to prove it works"
+  [ "$(dval "$d" high_rework_history)" = "true" ]                && emit "similar work has needed rework before"
+  [ "$(dval "$d" unclear_acceptance_criteria)" = "true" ]        && emit "success criteria were unclear at the start"
+  [ "$(dval "$d" nondeterministic_verification)" = "true" ]      && emit "verification is not fully repeatable"
+  [ "$(dval "$d" parallel_workstreams_benefit)" = "true" ]       && emit "parts of the work can run in parallel"
+  v="$(dval "$d" expected_files_changed)"
+  is_num "$v" && [ "$v" -gt 1 ] 2>/dev/null && emit "expected to touch about $v files"
+  true
+}
+
+unavail(){ printf 'UNAVAILABLE (not measured — an unknown is never shown as 0)'; }
+qty(){ # <value> <unit-suffix> -> value+unit or the honest label
+  if is_num "$1"; then printf '%s%s' "$1" "$2"; else unavail; fi
+}
+
+# ------------------------------------------------------------------ tasks ----
+cmd_tasks(){
+  local f id st mode started first=1
+  [ -d "$STORE" ] || die "no task store at $STORE"
+  if [ "$JSON" = "1" ]; then
+    printf '['
+    while IFS= read -r f; do
+      id="$(fval "$f" task_id)"; st="$(status_of "$f")"
+      mode="$(mode_word "$(fval "$f" selected_mode)")"; started="$(fval "$f" issued_at)"
+      [ "$first" = "1" ] || printf ','
+      first=0
+      printf '{"id":%s,"description":%s,"mode":%s,"status":%s,"started":%s}' \
+        "$(jstr "$id")" "$(jstr "$(describe "$id")")" "$(jstr "$mode")" "$(jstr "$st")" "$(jstr "$started")"
+    done < <(receipt_files)
+    printf ']\n'
+    return 0
+  fi
+  printf 'YOUR TASKS (newest first) — details: gravito task <id>\n\n'
+  printf '%-42s %-7s %-7s %-21s %s\n' "ID" "DEPTH" "STATUS" "STARTED" "DESCRIPTION"
+  while IFS= read -r f; do
+    id="$(fval "$f" task_id)"; st="$(status_of "$f")"
+    mode="$(mode_word "$(fval "$f" selected_mode)")"; started="$(fval "$f" issued_at)"
+    printf '%-42s %-7s %-7s %-21s %s\n' "$id" "$mode" "$st" "$started" "$(describe "$id")"
+  done < <(receipt_files)
+}
+
+# ------------------------------------------------------------------- task ----
+cmd_task(){
+  [ -n "$TASK_ID" ] || die "which task? usage: gravito task <id> — list them with: gravito tasks"
+  local rec
+  rec="$(receipt_for "$TASK_ID")" || die "no task named '$TASK_ID' here — list what exists with: gravito tasks"
+
+  local id st sel exe selw exew desc issued deg esc esc_ev note sf
+  id="$(fval "$rec" task_id)"; st="$(status_of "$rec")"
+  sel="$(fval "$rec" selected_mode)"; exe="$(fval "$rec" executed_mode)"
+  selw="$(mode_word "$sel")"; exew="$(mode_word "$exe")"
+  desc="$(fval "$rec" descriptor)"; issued="$(fval "$rec" issued_at)"
+  deg="$(fval "$rec" degradation_note)"; esc="$(fval "$rec" escalation)"
+  esc_ev="$(fval "$rec" escalation_evidence)"
+  sf="$SDIR/$(basename "$rec" .md).tsv"
+
+  # budgets
+  local b_sub b_tok b_calls b_wall b_cost
+  b_sub="$(fval "$rec" budget_max_subagents)"; b_tok="$(fval "$rec" budget_max_total_tokens)"
+  b_calls="$(fval "$rec" budget_max_model_calls)"; b_wall="$(fval "$rec" budget_max_wall_clock_s)"
+  b_cost="$(fval "$rec" budget_max_cost_usd)"
+  # consumption / cost categories
+  local c_sub c_tok c_calls c_wall c_cost
+  c_sub="$(fval "$rec" consumed_subagents)"; c_tok="$(fval "$rec" consumed_total_tokens)"
+  c_calls="$(fval "$rec" consumed_model_calls)"; c_wall="$(fval "$rec" consumed_wall_clock_s)"
+  c_cost="$(fval "$rec" consumed_cost_usd)"
+  local a_task a_ctx a_help a_verif a_rev a_proc a_exp
+  a_task="$(fval "$rec" attr_task_execution)";    a_ctx="$(fval "$rec" attr_context_retrieval)"
+  a_help="$(fval "$rec" attr_subagent_execution)"; a_verif="$(fval "$rec" attr_verification)"
+  a_rev="$(fval "$rec" attr_review)";             a_proc="$(fval "$rec" attr_governance_process)"
+  a_exp="$(fval "$rec" attr_experiment_audit)"
+
+  # live activity (derived from the state file, where one exists)
+  local have_state=0 n_tools=0 n_expl=0 n_mut=0 n_task_d=0 n_proc_d=0 proxy=0
+  if [ -f "$sf" ]; then
+    have_state=1
+    n_tools="$(count_kind "$sf" tool_event)"
+    n_expl="$(count_kind "$sf" exploratory_event)"
+    n_mut="$(count_kind "$sf" mutation_event)"
+    n_task_d="$(count_kind "$sf" task_dispatch)"
+    n_proc_d="$(count_kind "$sf" process_dispatch)"
+    proxy="$(awk -F'\t' '$2=="tool_event" && match($3,/chars=[0-9]+/){s+=substr($3,RSTART+6,RLENGTH-6)+0} END{print int(s/4)}' "$sf")"
+  fi
+
+  # throttle / reassessment events (state rows + the recorded note)
+  local events=""
+  if [ "$have_state" = "1" ]; then
+    events="$(awk -F'\t' '
+      $2=="DEGRADATION"    {print $1"\tthrottled: "$3}
+      $2=="reassess_block" {print $1"\tpaused once to reassess a repetitive loop ("$3")"}
+      $2=="reassess_reset" {print $1"\treassessment recorded — resumed"}
+    ' "$sf" | sanitize)"
+  fi
+
+  # evidence: ledger rows for this task
+  local ledger_rows="-"
+  [ -f "$LEDGER" ] && ledger_rows="$(awk -F'\t' -v id="$id" '$2==id{n++} END{print n+0}' "$LEDGER")"
+
+  # result line. A filled degradation note only means "throttled down" where
+  # the executed depth actually dropped; otherwise it is an honest budget note
+  # on a run that finished at its selected depth.
+  local result note_s="" throttled=0
+  [ -n "$deg" ] && [ "$deg" != "-" ] && [ "$exe" = "gravito_light" ] && [ "$sel" = "gravito_full" ] && throttled=1
+  if [ "$st" = "open" ]; then
+    result="still in progress"
+  elif [ "$throttled" = "1" ]; then
+    result="ran, throttled down to Light mode along the way (work continued)"
+  elif [ "$exe" = "$sel" ]; then
+    result="ran as selected ($exew)"
+  else
+    result="ran as $exew (selected $selw)"
+  fi
+  [ -n "$deg" ] && [ "$deg" != "-" ] && note_s="$(printf '%s' "$deg" | sanitize)"
+  local esc_s=""
+  [ -n "$esc" ] && [ "$esc" != "-" ] && esc_s="$(printf '%s\n%s' "$esc" "$esc_ev" | sanitize | tr '\n' ' ')"
+
+  if [ "$JSON" = "1" ]; then
+    {
+      printf '{'
+      printf '"id":%s,"description":%s,"status":%s,"started":%s,' \
+        "$(jstr "$id")" "$(jstr "$(describe "$id")")" "$(jstr "$st")" "$(jstr "$issued")"
+      printf '"mode":{"selected":%s,"executed":%s},' "$(jstr "$selw")" \
+        "$([ "$exe" = "-" ] && printf 'null' || jstr "$exew")"
+      printf '"why":['
+      local first=1 line
+      while IFS= read -r line; do
+        [ -n "$line" ] || continue
+        [ "$first" = "1" ] || printf ','
+        first=0; printf '%s' "$(jstr "$line")"
+      done < <(why_lines "$desc")
+      printf '],'
+      printf '"authority":{"helpers_allowed":%s,"scope":"local changes in this working copy only","external_actions":"require your explicit go"},' "$(jnum "$b_sub")"
+      printf '"budgets":{"helpers":%s,"total_tokens":%s,"model_calls":%s,"wall_clock_s":%s,"cost_usd":%s},' \
+        "$(jnum "$b_sub")" "$(jnum "$b_tok")" "$(jnum "$b_calls")" "$(jnum "$b_wall")" "$(jnum "$b_cost")"
+      if [ "$have_state" = "1" ]; then
+        printf '"activity":{"tool_actions":%s,"exploratory":%s,"governed_changes":%s,"helper_runs":%s,"process_steps":%s,"token_proxy_estimate":%s},' \
+          "$n_tools" "$n_expl" "$n_mut" "$n_task_d" "$n_proc_d" "$proxy"
+      else
+        printf '"activity":null,'
+      fi
+      printf '"events":['
+      first=1
+      while IFS= read -r line; do
+        [ -n "$line" ] || continue
+        [ "$first" = "1" ] || printf ','
+        first=0; printf '%s' "$(jstr "$line")"
+      done <<<"$events"
+      printf '],'
+      printf '"result":{"summary":%s,"budget_note":%s,"escalation":%s},' \
+        "$(jstr "$result")" \
+        "$([ -n "$note_s" ] && jstr "$note_s" || printf 'null')" \
+        "$([ -n "$esc_s" ] && jstr "$esc_s" || printf 'null')"
+      printf '"evidence":{"receipt":%s,"ledger_rows":%s,"live_record":%s},' \
+        "$(jstr "$rec")" "$(jnum "$ledger_rows")" \
+        "$([ "$have_state" = "1" ] && jstr "$sf" || printf 'null')"
+      printf '"costs":{"time_s":%s,"spend_usd":%s,"total_tokens":%s,"model_calls":%s,"helpers_used":%s,' \
+        "$(jnum "$c_wall")" "$(jnum "$c_cost")" "$(jnum "$c_tok")" "$(jnum "$c_calls")" "$(jnum "$c_sub")"
+      printf '"by_category":{"doing_the_work":%s,"reading_context":%s,"helper_work":%s,"checking_the_work":%s,"independent_review":%s,"process_overhead":%s,"experiment_audit":%s}}' \
+        "$(jnum "$a_task")" "$(jnum "$a_ctx")" "$(jnum "$a_help")" "$(jnum "$a_verif")" "$(jnum "$a_rev")" "$(jnum "$a_proc")" "$(jnum "$a_exp")"
+      printf '}\n'
+    }
+    return 0
+  fi
+
+  printf 'TASK  %s\n' "$id"
+  printf '  what:    %s\n' "$(describe "$id")"
+  printf '  status:  %s      started: %s\n' "$st" "$issued"
+  printf '\nDEPTH AND WHY\n'
+  printf '  depth: %s — %s\n' "$selw" "$(mode_desc "$selw")"
+  printf '  why this depth:\n'
+  why_lines "$desc" | sed 's/^/    - /'
+  printf '\nAUTHORITY GRANTED\n'
+  printf '  local changes in this working copy only; nothing is pushed, published,\n'
+  printf '  or deployed without your explicit go\n'
+  if is_num "$b_sub" && [ "$b_sub" -gt 0 ]; then
+    printf '  may delegate to up to %s helper agents\n' "$b_sub"
+  else
+    printf '  no helper agents — the work stays in one loop\n'
+  fi
+  printf '\nBUDGETS (ceilings agreed up front, not bills)\n'
+  printf '  helper agents: %s\n' "$(qty "$b_sub" '')"
+  printf '  work volume:   %s\n' "$(qty "$b_tok" ' tokens')"
+  printf '  model calls:   %s\n' "$(qty "$b_calls" '')"
+  printf '  time:          %s\n' "$(qty "$b_wall" ' s')"
+  printf '  spend:         %s\n' "$(if is_num "$b_cost"; then printf '$%s' "$b_cost"; else unavail; fi)"
+  printf '\nLIVE ACTIVITY\n'
+  if [ "$have_state" = "1" ]; then
+    printf '  tool actions: %s\n' "$n_tools"
+    printf '  explore vs execute: %s exploratory reads, %s governed changes\n' "$n_expl" "$n_mut"
+    printf '  helper runs: %s   process steps: %s\n' "$n_task_d" "$n_proc_d"
+    printf '  estimated work volume: ~%s tokens (an estimate from tool-input size; not billing truth)\n' "$proxy"
+  else
+    printf '  %s\n' "$(unavail)"
+    printf '  (no live record exists for this task — recording starts with the first\n   governed session after install)\n'
+  fi
+  printf '\nTHROTTLE / REASSESSMENT EVENTS\n'
+  if [ -n "$events" ]; then
+    printf '%s\n' "$events" | sed 's/^/  - /; s/\t/  /'
+  elif [ "$throttled" = "1" ]; then
+    printf '  - throttled down to Light mode during the run (see the result note below)\n'
+  elif [ -n "$note_s" ]; then
+    printf '  - a budget overrun was recorded honestly (see the result note below)\n'
+  else
+    printf '  none recorded\n'
+  fi
+  printf '\nRESULT\n'
+  printf '  %s\n' "$result"
+  [ -n "$note_s" ] && printf '  budget note (recorded honestly; the work was not stopped):\n    %s\n' "$note_s"
+  [ -n "$esc_s" ] && printf '  depth was raised during the run: %s\n' "$esc_s"
+  printf '\nEVIDENCE (inspect any of these yourself)\n'
+  printf '  receipt:            %s\n' "$rec"
+  if [ -f "$LEDGER" ]; then
+    printf '  activity ledger:    %s rows for this task in %s\n' "$ledger_rows" "$LEDGER"
+  else
+    printf '  activity ledger:    %s\n' "$(unavail)"
+  fi
+  if [ "$have_state" = "1" ]; then
+    printf '  live record:        %s\n' "$sf"
+  else
+    printf '  live record:        none exists for this task\n'
+  fi
+  printf '\nCOST CATEGORIES (filled at close where measured; unknowns stay unknown)\n'
+  printf '  time:               %s\n' "$(qty "$c_wall" ' s')"
+  printf '  spend:              %s\n' "$(if is_num "$c_cost"; then printf '$%s' "$c_cost"; else unavail; fi)"
+  printf '  work volume (tokens): %s\n' "$(qty "$c_tok" '')"
+  printf '  model calls:        %s\n' "$(qty "$c_calls" '')"
+  printf '  helpers used:       %s\n' "$(qty "$c_sub" '')"
+  printf '  by category:\n'
+  printf '    doing the work:     %s\n' "$(qty "$a_task" '')"
+  printf '    reading context:    %s\n' "$(qty "$a_ctx" '')"
+  printf '    helper work:        %s\n' "$(qty "$a_help" '')"
+  printf '    checking the work:  %s\n' "$(qty "$a_verif" '')"
+  printf '    independent review: %s\n' "$(qty "$a_rev" '')"
+  printf '    process overhead:   %s\n' "$(qty "$a_proc" '')"
+  printf '    experiment audit:   %s\n' "$(qty "$a_exp" '')"
+}
+
+# --------------------------------------------------------------- activity ----
+translate_decision(){ # <decision-code> -> customer sentence
+  case "$1" in
+    BLOCK-MUTATION-NO-RECEIPT) printf 'blocked an unrouted change (recovery offered)' ;;
+    BLOCK-NO-RECEIPT)          printf 'blocked an unrouted helper dispatch (recovery offered)' ;;
+    ROUTING-TOOL-PASS)         printf 'routing action' ;;
+    GIT-READONLY-PASS)         printf 'read-only inspection' ;;
+    ALLOW-MUTATION)            printf 'governed change admitted' ;;
+    ALLOW-TASK-DISPATCH)       printf 'helper run admitted' ;;
+    ALLOW-PROCESS-DISPATCH)    printf 'process step admitted' ;;
+    BLOCK-FANOUT-BUDGET)       printf 'helper limit reached — throttled to the lighter depth (work continues)' ;;
+    BLOCK-DEGRADED)            printf 'blocked a helper run after the throttle (work continues in the lighter depth)' ;;
+    BLOCK-MODE-*)              printf 'blocked a helper run above the selected depth' ;;
+    BLOCK-PROCESS-ALLOWANCE)   printf 'process-step limit reached — consolidated into the main loop' ;;
+    BLOCK-REASSESS)            printf 'paused once to reassess a repetitive loop' ;;
+    REASSESS-RESET)            printf 'reassessment recorded — resumed' ;;
+    FAIL-OPEN*)                printf 'gate error — failed open (never blocks on its own bugs)' ;;
+    DISABLED-BY-OPERATOR)      printf 'operator override' ;;
+    *)                         printf 'gate event' ;;
+  esac
+}
+
+cmd_activity(){
+  if [ ! -f "$LEDGER" ]; then
+    printf 'ACTIVITY: %s\n' "$(unavail)"
+    printf 'No activity ledger exists yet at %s.\n' "$LEDGER"
+    printf 'The gate records activity from the next governed session onward.\n'
+    return 0
+  fi
+  is_num "$TAIL" || die "--tail needs a number"
+  printf 'RECENT ACTIVITY (last %s of %s events) — every row is verifiable in %s\n\n' \
+    "$TAIL" "$(grep -c '' "$LEDGER" || true)" "$LEDGER"
+  tail -n "$TAIL" "$LEDGER" | while IFS=$'\t' read -r ts task depth decision detail; do
+    local who="$task"
+    { [ -z "$who" ] || [ "$who" = "none" ] || [ "$who" = "-" ]; } && who="(no routed task)"
+    printf '%s  %-38s %s\n' "$ts" "$who" "$(translate_decision "$decision")"
+  done
+}
+
+# ---------------------------------------------------------------- explain ----
+cmd_explain(){
+  cat <<EOF
+GRAVITO — what it does for you (two minutes, no internals required)
+
+Gravito is a control surface for AI work in this project. Before a change is
+made, the work is ROUTED: it gets a depth, a budget, and a receipt you can
+read. Afterwards you can always see what ran, why, and what it cost.
+
+The three depths:
+  Direct — a small, reversible change made straight away.
+  Light  — one careful pass in the main loop; no helper agents.
+  Full   — implementation plus independent checking and review; helper
+           agents allowed, capped by an explicit budget.
+
+What blocks: a change with NO routing decision is stopped BEFORE it happens,
+and the refusal always carries its own recovery. Recovery is one command,
+then retry the change (copy and adjust the id and description):
+
+  build-os/tools/route-task.sh --task-id my-task-1 \\
+    --description "small routed task" \\
+    --descriptor '{"expected_files_changed":1,"requires_tests":false,"expected_session_count":1,"prior_context_required":false,"handoff_required":false,"consequence_level":"low","irreversible_or_external_mutation":false,"high_blast_radius":false,"unclear_acceptance_criteria":false,"security_or_compliance_consequence":false,"parallel_workstreams_benefit":false,"high_rework_history":false,"nondeterministic_verification":false}'
+
+Where the evidence lives: $STORE/
+one receipt file per task plus an append-only activity ledger. Browse it
+with:  gravito tasks   ·   gravito task <id>   ·   gravito activity
+
+Honest bounds — what this is NOT:
+  - Not a sandbox. It disciplines honest work and leaves an audit trail;
+    the platform's permission system is the real fence.
+  - Protection starts at the NEXT session after install, not mid-session.
+  - Live token and cost figures are not visible mid-run; anything unmeasured
+    is labeled UNAVAILABLE — never guessed, never shown as 0.
+EOF
+}
+
+# ---------------------------------------------------------------- dispatch ---
+case "$CMD" in
+  tasks)    cmd_tasks ;;
+  task)     cmd_task ;;
+  activity) cmd_activity ;;
+  explain)  cmd_explain ;;
+  ""|-h|--help|help) usage ;;
+  *) usage >&2; die "unknown command '$CMD'" ;;
+esac
