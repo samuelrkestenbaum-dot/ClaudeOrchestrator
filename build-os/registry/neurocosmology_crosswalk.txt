@@ -121,7 +121,7 @@ system_representation: runtime health; test state; repo cleanliness; dependency 
 observable_proxies: seventeen suite RESULT lines; merge preconditions over git status; post-merge verification; hook idempotence; static assertions over the maintenance layer's own source
 binding_quality: instantiates
 claimed_max_authority: gate
-known_limitations: THE LARGEST COUNT IN THIS CROSSWALK AND THE ONE MOST AT RISK OF BEING MISREAD. Seventeen of its twenty-two bindings are test suites, and a suite's empirical status is `red_driven` — the registry README's concession applies here at full force: a check written against a fixture written by the same author in the same hour mostly proves the two agree. A green suite is evidence that PLANTED defects are caught. It is not a measurement of system health. There is no runtime health signal in this system at all, and nothing observes the system WHILE it operates: every binding here is a pre-condition or a post-condition around a run, never a state variable during one. `suite.build_os_maintenance` is the only binding that exercises recovery, and it does so against a cold install in a scratch repo rather than against a damaged live one.
+known_limitations: THE LARGEST COUNT IN THIS CROSSWALK AND THE ONE MOST AT RISK OF BEING MISREAD. Twenty-six of its thirty-one bindings are test suites, and a suite's empirical status is `red_driven` — the registry README's concession applies here at full force: a check written against a fixture written by the same author in the same hour mostly proves the two agree. A green suite is evidence that PLANTED defects are caught. It is not a measurement of system health. There is no runtime health signal in this system at all, and nothing observes the system WHILE it operates: every binding here is a pre-condition or a post-condition around a run, never a state variable during one. `suite.build_os_maintenance` is the only binding that exercises recovery, and it does so against a cold install in a scratch repo rather than against a damaged live one.
 
 primitive: integration_bandwidth
 universal_function: how much change can be safely absorbed
@@ -1103,3 +1103,10 @@ class: A
 runtime_authority: gate
 binding_kind: proxies
 rationale: Test state over the task-entry boundary: every mutation class blocked and admitted in both directions, the deadlock guard proven from both sides, the fire-once trip proven non-bricking, tier honesty asserted (ESTIMATE never relabeled), the recovery example executed for real, and both hot-path overheads measured against a stated bound. A suite's function is property preservation, same as its siblings.
+
+control: suite.routing_structured_action
+binds_to: homeostasis
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Test state over the PACKET-0055 hardening of the task-entry boundary's sole ungated pass: every attack shape (compound, comment, wrapper, substitution, injection, non-command-field mention) proven to gate, the legitimate invocation set proven to pass, the ROUTING-TOOL-PASS fingerprint recomputed independently, the refusal's own recovery command executed for real, and store-unavailable proven fail-open rather than a brick. A suite's function is property preservation, same as its siblings.

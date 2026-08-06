@@ -43,19 +43,19 @@
 #           gate (PACKET-0054). A mutation-capable call with NO open routing
 #           receipt is BLOCKED with the recovery command (route-task.sh, incl a
 #           cheap direct-mode example — tiny work routes too, cheaply). Two
-#           classes pass UNGATED, logged: (a) DEADLOCK GUARD — a Bash command
-#           invoking the routing tools themselves (route-task.sh /
-#           mode-select.mjs / routing-check.sh / record-degradation.sh by path;
-#           without this no session could issue the receipt its first gated
-#           call requires), logged ROUTING-TOOL-PASS; (b) READ-ONLY git
-#           inspection (status/log/diff/show/rev-parse/ls-files/branch),
-#           counted exploratory. Any git command carrying push|commit|merge|
-#           rebase|reset|checkout|restore|clean|apply|am|cherry-pick|tag|stash
-#           or -f/--force is mutation-capable. The classification is a NAMED
-#           HEURISTIC over the raw hook JSON — a hostile command evades it
-#           (sh -c); this is discipline-for-honest-agents plus audit trail,
-#           NOT a sandbox (the sandbox is the platform's permission system).
-#           Also enforces the fire-once REASSESS trip (see count).
+#           classes pass UNGATED, logged: (a) DEADLOCK GUARD — since
+#           PACKET-0055 a STRUCTURED ROUTING ACTION: only a command whose
+#           extracted tool_input.command field IS exactly one clean routing-
+#           tool invocation (no chaining/substitution metacharacters) passes,
+#           logged ROUTING-TOOL-PASS with an action fingerprint (tool, sha256,
+#           excerpt); everything else falls through TOWARD GATING. (b) READ-
+#           ONLY git inspection (status/log/diff/show/rev-parse/ls-files/
+#           branch), counted exploratory. Any git command carrying push|commit|
+#           merge|rebase|reset|checkout|restore|clean|apply|am|cherry-pick|tag|
+#           stash or -f/--force is mutation-capable. The classification is a
+#           NAMED HEURISTIC (sh -c evades the mutation class): discipline-for-
+#           honest-agents plus audit trail, NOT a sandbox (the sandbox is the
+#           platform's permission system). Fire-once REASSESS trip (see count).
 #   count   PreToolUse, matcher * — the tool-event counter. NEVER blocks.
 #           Deliberately jq-free (sed only) so its per-call overhead stays
 #           trivial; the suite measures and asserts the bound. PACKET-0054:
@@ -120,7 +120,7 @@ logrow(){ # <task_id> <depth> <decision> <detail>
   # file (named in routing_contract_live.md layer 4). Never fails the caller.
   if ! { mkdir -p "$RDIR" 2>/dev/null && \
     printf '%s\t%s\t%s\t%s\t%s\n' "$(now)" "${1:--}" "${2:--}" "${3:--}" "${4:--}" >> "$LOGF"; } 2>/dev/null; then
-    printf 'routing-gate UNLOGGED(store unwritable): %s %s %s %s\n' "${1:--}" "${2:--}" "${3:--}" "${4:--}" >&2 || true
+    { printf 'routing-gate UNLOGGED(store unwritable): %s %s %s %s\n' "${1:--}" "${2:--}" "${3:--}" "${4:--}" >&9; } 2>/dev/null || printf 'routing-gate UNLOGGED(store unwritable): %s %s %s %s\n' "${1:--}" "${2:--}" "${3:--}" "${4:--}" >&2 || true
   fi
 }
 
@@ -339,10 +339,76 @@ EOF
 # --------------------------------------------------------------- mutgate -----
 # The UNIVERSAL TASK-ENTRY boundary (PACKET-0054): every mutation-capable tool
 # call requires an open routing receipt — including parent-only work that never
-# dispatches. Classification is a NAMED HEURISTIC over the raw hook JSON
-# (stated in routing_contract_live.md): a hostile command evades it with sh -c
-# or a wrapper; this gate is discipline-for-honest-agents plus an audit trail,
-# NOT a sandbox — the sandbox is the platform's permission system.
+# dispatches. Classification is a NAMED HEURISTIC (stated in
+# routing_contract_live.md): a hostile command evades the mutation class with
+# sh -c or a wrapper; this gate is discipline-for-honest-agents plus an audit
+# trail, NOT a sandbox — the sandbox is the platform's permission system.
+#
+# THE STRUCTURED ROUTING ACTION (PACKET-0055). The deadlock-guard exception —
+# the SOLE ungated pass in the task-entry boundary — no longer substring-
+# matches the raw event (the operator ruled that breadth "a real enforcement
+# bypass, not merely a wording issue"). It fires only when the ACTUAL
+# tool_input.command field, extracted and trimmed, IS exactly one clean
+# routing-tool invocation: an optional interpreter prefix (bash/sh for the .sh
+# tools, node for mode-select.mjs), an optional path prefix, exactly one of
+# route-task.sh | mode-select.mjs | routing-check.sh | record-degradation.sh,
+# then arguments free of every chaining/substitution metacharacter — no ';',
+# '&', '|', backtick, '$(', '<', '>', no newline; quotes, braces, brackets,
+# colons and commas stay legal, so the refusal's own quoted-JSON --descriptor
+# recovery example passes. Everything that merely MENTIONS a routing tool —
+# compound commands, comments, sh -c/eval wrappers, substitution, routing-tool
+# paths in non-command fields — and every event the extractor cannot read
+# falls THROUGH to normal classification: extraction fails TOWARD GATING,
+# never toward an ungated pass (the recovery command is clean and always
+# extracts, so the fall-through cannot re-create the deadlock). The extraction
+# is itself a heuristic over JSON-in-shell, and that failure direction is its
+# stated bound.
+RT_STRICT='^((bash|sh) +)?([A-Za-z0-9._/-]*/)?(route-task\.sh|routing-check\.sh|record-degradation\.sh)( |$)|^(node +)?([A-Za-z0-9._/-]*/)?mode-select\.mjs( |$)'
+
+extract_command(){ # <raw-json> -> tool_input.command's JSON string content (escape-encoded); rc 1 = absent/unreadable
+  local in="$1" rest raw
+  case "$in" in *'"command"'*) ;; *) return 1 ;; esac
+  # First occurrence of the unescaped key: a decoy INSIDE a JSON string value
+  # is necessarily \"-escaped, so its colon-quote shape cannot match below.
+  rest="${in#*\"command\"}"
+  raw="$(printf '%s' "$rest" | sed -n 's/^[[:space:]]*:[[:space:]]*"\(\([^"\\]\|\\.\)*\)".*/\1/p' | head -n1)"
+  [ -n "$raw" ] || return 1
+  printf '%s' "$raw"
+}
+
+routing_action(){ # <raw-json> -> "<tool>\t<decoded command>" iff the command IS one clean routing invocation; rc 1 otherwise
+  local in="$1" raw cmd stripped t BS='\' SENT=$'\x01'
+  raw="$(extract_command "$in")" || return 1
+  # Only the benign JSON escapes \" \\ \/ may appear: any other escape (\n,
+  # \t, \u003b, ...) could conceal a metacharacter from the checks below, so
+  # its presence falls through — toward gating.
+  stripped="$(printf '%s' "$raw" | sed 's|\\["\\/]||g')"
+  case "$stripped" in *"$BS"*) return 1 ;; esac
+  # Decode the three benign escapes so the checks and the fingerprint see the
+  # command exactly as the shell receives it. Decoding cannot conceal a
+  # forbidden character: none of the three decodes to one.
+  cmd=${raw//"$BS$BS"/$SENT}
+  cmd=${cmd//"$BS"\"/\"}
+  cmd=${cmd//"$BS"\//\/}
+  cmd=${cmd//$SENT/$BS}
+  cmd="${cmd#"${cmd%%[! ]*}"}"; cmd="${cmd%"${cmd##*[! ]}"}"
+  [ -n "$cmd" ] || return 1
+  case "$cmd" in
+    *';'*|*'&'*|*'|'*|*'`'*|*'$('*|*'<'*|*'>'*|*$'\n'*|*$'\t'*|*$'\r'*) return 1 ;;
+  esac
+  printf '%s' "$cmd" | grep -qE "$RT_STRICT" || return 1
+  t="$(printf '%s' "$cmd" | grep -oE 'route-task\.sh|mode-select\.mjs|routing-check\.sh|record-degradation\.sh' | head -n1)"
+  printf '%s\t%s' "$t" "$cmd"
+}
+
+# Can the receipt store be used at all — listable where it exists, creatable
+# where it is not? When NEITHER holds, route-task.sh could never write the
+# receipt a block would demand, so mutgate_decide FAILS OPEN instead of
+# refusing into a dead end (PACKET-0055; the trace rides the stderr fallback).
+store_available(){
+  if [ -d "$RDIR" ]; then ls "$RDIR" >/dev/null 2>&1; else mkdir -p "$RDIR" 2>/dev/null; fi
+}
+
 mut_classify(){ # <raw-json> <tool> -> routing_tool | git_readonly | mutation | other
   local in="$1" tool="$2"
   case "$tool" in
@@ -350,12 +416,11 @@ mut_classify(){ # <raw-json> <tool> -> routing_tool | git_readonly | mutation | 
     Bash) : ;;
     *) printf 'other'; return 0 ;;
   esac
-  # DEADLOCK GUARD: the routing tools themselves pass ungated (logged), or no
-  # session could ever issue the receipt its first gated call requires.
-  case "$in" in
-    *route-task.sh*|*mode-select.mjs*|*routing-check.sh*|*record-degradation.sh*)
-      printf 'routing_tool'; return 0 ;;
-  esac
+  # DEADLOCK GUARD, structured (PACKET-0055): exactly-recognized routing
+  # invocations only — without an ungated pass here no session could issue the
+  # receipt its first gated call requires; anything short of an exact
+  # invocation falls through to the git/mutation classes and gates.
+  if routing_action "$in" >/dev/null; then printf 'routing_tool'; return 0; fi
   if printf '%s' "$in" | grep -qE '(^|[^A-Za-z0-9_])git([^A-Za-z0-9_]|$)'; then
     # Any git command carrying a mutating subcommand or a force flag is
     # mutation-capable — checked FIRST so `git status && git push` gates.
@@ -373,7 +438,7 @@ mut_classify(){ # <raw-json> <tool> -> routing_tool | git_readonly | mutation | 
 }
 
 mutgate_decide(){ # <stdin-json> — protocol on stdout: ALLOW or BLOCK + message
-  local in="$1" tool cls rec tid="none" mode="-" v
+  local in="$1" tool cls rec tid="none" mode="-" v act rtool rcmd sha exc
   tool="$(printf '%s' "$in" | sed -n 's/.*"tool_name"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | head -n1)"
   [ -n "$tool" ] || return 1   # unreadable event -> fail open in the wrapper
   cls="$(mut_classify "$in" "$tool")"
@@ -381,8 +446,20 @@ mutgate_decide(){ # <stdin-json> — protocol on stdout: ALLOW or BLOCK + messag
   if [ -n "$rec" ]; then tid="$(fval "$rec" task_id)"; mode="$(fval "$rec" selected_mode)"; [ -n "$tid" ] || tid="-"; fi
   case "$cls" in
     routing_tool)
-      logrow "$tid" "$mode" "ROUTING-TOOL-PASS" "tool=$tool ungated=deadlock-guard"
-      [ -n "$rec" ] && { staterow "$rec" routing_tool_pass "tool_name=$tool" || true; }
+      # THE ACTION FINGERPRINT (PACKET-0055): the pass row records WHICH tool
+      # matched, the first 12 hex chars of the exact command's sha256, and a
+      # sanitized <=80-char excerpt (tabs/newlines stripped — the ledgers are
+      # TSV). Only exact invocations reach this label at all, so the ledger
+      # alone now distinguishes "ran route-task.sh" from anything else.
+      act="$(routing_action "$in")" || act=$'-\t-'
+      rtool="${act%%$'\t'*}"; rcmd="${act#*$'\t'}"
+      sha="-"
+      if command -v sha256sum >/dev/null 2>&1; then
+        sha="$(printf '%s' "$rcmd" | sha256sum 2>/dev/null | cut -c1-12)"; [ -n "$sha" ] || sha="-"
+      fi
+      exc="$(printf '%s' "$rcmd" | tr -d '\t\r\n' | cut -c1-80)"
+      logrow "$tid" "$mode" "ROUTING-TOOL-PASS" "tool=$tool ungated=deadlock-guard routing_tool=$rtool sha256=$sha cmd=$exc"
+      [ -n "$rec" ] && { staterow "$rec" routing_tool_pass "tool_name=$tool routing_tool=$rtool sha256=$sha cmd=$exc" || true; }
       printf 'ALLOW\n'; return 0 ;;
     git_readonly)
       logrow "$tid" "$mode" "GIT-READONLY-PASS" "tool=$tool class=exploratory heuristic=git-subcommand"
@@ -392,6 +469,17 @@ mutgate_decide(){ # <stdin-json> — protocol on stdout: ALLOW or BLOCK + messag
       printf 'ALLOW\n'; return 0 ;;
   esac
   if [ -z "$rec" ]; then
+    if ! store_available; then
+      # STORE-UNAVAILABLE IS NOT A BRICK (PACKET-0055): with the store neither
+      # readable nor creatable, route-task.sh could never write the receipt a
+      # block would demand — a refusal here is a dead end whose own recovery
+      # command cannot succeed. FAIL OPEN instead, traced: the row itself
+      # rides the stderr fallback (UNLOGGED(store unwritable)) whenever the
+      # log file shares the store's fate — the layer-4 mechanics of 0053.
+      logrow "none" "-" "FAIL-OPEN-STORE-UNAVAILABLE" "tool=$tool store unreadable and uncreatable: recovery cannot succeed, so blocking would be a dead end"
+      printf 'ALLOW\n'
+      return 0
+    fi
     logrow "none" "-" "BLOCK-MUTATION-NO-RECEIPT" "tool=$tool"
     printf 'BLOCK\n'
     printf 'routing-gate: MUTATION BLOCKED — %s is mutation-capable and NO OPEN routing receipt exists under build-os/packets/routing/ (open = executed_mode "-"). Every substantive task routes at entry; tiny work routes too, it just routes cheaply (direct mode). Recovery is ONE command, then retry this call:\n' "$tool"
@@ -508,6 +596,11 @@ case "$CMD" in
     post_tool "$IN" || logrow "-" "-" "FAIL-OPEN" "cmd=post internal error"
     exit 0 ;;
   gate|mutgate)
+    # Keep the hook's REAL stderr reachable on fd 9: the decide functions run
+    # with stderr silenced (incidental tool noise must not pollute a refusal),
+    # but logrow's unwritable-store fallback line must still escape — a trace
+    # that dies inside the capture is no trace (PACKET-0055).
+    exec 9>&2
     if [ "$CMD" = "gate" ]; then
       OUT="$(gate_decide "$IN" 2>/dev/null)"; RC=$?
     else

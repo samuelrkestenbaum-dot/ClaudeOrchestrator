@@ -12,7 +12,11 @@ and expressed the hook surface as a provider adapter —
 ADAPTER #1 and the telemetry tier vocabulary
 (EXACT | ESTIMATE | CLOSE-TIME | UNAVAILABLE) defined there.
 
-## The universal task-entry boundary (PACKET-0054)
+## The universal task-entry boundary (PACKET-0054, hardened by PACKET-0055)
+
+**Universal mutation-entry governance is complete for hooked Claude sessions; cross-provider and all-activity governance remain incomplete.**
+(The operator's status framing, stated here so completeness is never
+overclaimed.)
 
 **Every substantive task routes at entry — including parent-only work that
 never dispatches.** The PreToolUse gate now also fires on the
@@ -25,25 +29,46 @@ is to issue or confirm a routing receipt** (one command:
 for the task in flight, e.g. the active packet's, which stays open until the
 archivist's close-fill — then the next session re-routes).
 
-- **DEADLOCK GUARD.** A Bash event naming any of the routing tools
-  (`route-task.sh`, `mode-select.mjs`, `routing-check.sh`,
-  `record-degradation.sh`) passes UNGATED and is logged `ROUTING-TOOL-PASS`.
-  Without it, no session could issue the receipt its first gated call
-  requires. **Its true breadth is wider than "a command that invokes the
-  tool":** the match is a substring test over the ENTIRE raw hook JSON,
-  checked BEFORE the git classification — so a compound command
-  (`route-task.sh; git push --force`), a comment that merely mentions a
-  routing tool, or a tool path appearing in any non-command field (e.g. the
-  description) ALL pass ungated, and `ROUTING-TOOL-PASS` mislabels such
-  events. This is the SOLE ungated pass in the task-entry boundary, so its
-  breadth is stated at full size rather than softened: it grants a hostile
-  agent nothing beyond the `sh -c` evasion named below (the not-a-sandbox
-  bound holds), but honest audit reads of the log must treat
-  `ROUTING-TOOL-PASS` as "the event mentioned a routing tool," not "the
-  event only ran one." The match is deliberately NOT narrowed to the command
-  field: a guard that could misparse an event and block the receipt-issuing
-  command would re-create the deadlock it exists to prevent, and blocking is
-  the failure mode this guard must never have.
+- **DEADLOCK GUARD — a STRUCTURED ROUTING ACTION, not a substring match
+  (PACKET-0055; the operator ruled the 0054 substring breadth "a real
+  enforcement bypass, not merely a wording issue").** The SOLE ungated pass
+  in the task-entry boundary now applies only to an exactly-recognized
+  routing invocation: the gate extracts the ACTUAL `tool_input.command` field
+  from the hook JSON, trims it, and requires the ENTIRE command to match one
+  strict single-invocation shape — an optional interpreter prefix (`bash`/
+  `sh` for the shell tools, `node` for `mode-select.mjs`), an optional path
+  prefix, exactly one of `route-task.sh` | `mode-select.mjs` |
+  `routing-check.sh` | `record-degradation.sh`, then arguments free of every
+  chaining/substitution metacharacter (no `;`, `&`, `|`, backtick, `$(`,
+  `<`, `>`, no newline; quotes, braces, brackets, colons and commas stay
+  legal, so the refusal's own quoted 13-field `--descriptor` recovery example
+  passes). Such a pass is logged `ROUTING-TOOL-PASS` with an **action
+  fingerprint** — which tool matched, the first 12 hex chars of the exact
+  command's sha256, and a sanitized ≤80-char excerpt — in both the log row
+  and the state-file `routing_tool_pass` row, so the ledger alone now
+  distinguishes "ran route-task.sh" from anything else: ONLY exact
+  invocations reach `ROUTING-TOOL-PASS` at all. Everything that merely
+  MENTIONS a routing tool — a compound command (`route-task.sh …; git push
+  --force`), a comment, a routing-tool path in a non-command JSON field, an
+  `sh -c`/`eval` wrapper, command substitution — falls THROUGH to normal
+  classification and gates as ordinary mutation. **New honest bounds, at
+  full size:** (1) the command-field extraction is itself a
+  heuristic over JSON-in-shell, and its named failure direction is
+  TOWARD GATING, never toward an ungated pass — an event
+  it cannot extract, or that carries any JSON escape beyond `\"` `\\` `\/`,
+  is never an ungated pass (the recovery command is clean and always
+  extracts, so the fall-through cannot re-create the deadlock); (2) a
+  wrapper script that merely CALLS `route-task.sh` no longer passes ungated —
+  it gates as ordinary mutation, and that is INTENDED; (3) the match is by
+  tool basename, not canonical path, so a hostile file NAMED like a routing
+  tool at another path still passes ungated — within the not-a-sandbox
+  bound; (4) `sh -c` evasion of the MUTATION gate itself remains exactly as
+  named below, unchanged. **Store-unavailable is not a brick:** when the
+  receipt store can neither be read nor created, the mutation gate FAILS
+  OPEN with a `FAIL-OPEN-STORE-UNAVAILABLE` row — itself riding the layer-4
+  stderr fallback — because a block whose own recovery command cannot
+  possibly succeed would be a dead end; a merely-missing-but-creatable store
+  still blocks, and the one recovery command escapes it.
 - **Read-only git inspection** (`status|log|diff|show|rev-parse|ls-files|
   branch` by subcommand) passes ungated, logged `GIT-READONLY-PASS`, counted
   exploratory. Any git command carrying `push|commit|merge|rebase|reset|
