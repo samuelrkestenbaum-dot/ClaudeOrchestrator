@@ -1187,3 +1187,101 @@ class: A
 runtime_authority: gate
 binding_kind: proxies
 rationale: Test state over the adapter contract: real declarations validated, fabricated overclaims refused by name, the mock's full behavioural walk, refusal-not-fake for declared-unsupported operations, resumable interruption. A suite's function is property preservation, same as its siblings.
+
+control: compiler.repo_index
+binds_to: epistemic_quality
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Turns a repository into a structured claim about itself and grades that claim in the artefact — partial on every file it could not parse to an AST, symbols_partial on a whole-word text match, tests_covering_heuristic on an import-or-basename guess, errors_measured false when no error list was supplied. Proxies rather than instantiates because the honesty is in the LABEL: it reports how weak each derivation is, it does not make the derivation strong. An unresolved import produces no reverse edge, which is the one place the tool refuses to guess outright.
+
+control: compiler.task_compiler
+binds_to: integration_bandwidth
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: A byte budget over what may enter a worker's context, spent against a measured base cost with a fixed priority ladder that STOPS rather than skipping ahead — so a surviving low-priority file can never displace a dropped high-priority one, and every drop is disclosed with the request that would fetch it. A proxy because bytes are a stand-in for the quantity that actually matters: how much a worker can integrate. Nothing here measures comprehension; it measures size, and says so.
+
+control: compiler.capsule_renderer
+binds_to: boundary
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Enforces one boundary and nothing else: volatile task content may never be interleaved into the cache-stable prefix, since a single task field in segment 1 invalidates the cached prefix for every other task. The sentinels make the boundary machine-checkable and the suite byte-compares two tasks' prefixes across it. Proxies because the renderer does not itself refuse a violation — it emits the prefix verbatim and the SUITE is what notices; a boundary held by a test rather than by the code is a boundary observed, not enforced.
+
+control: compiler.capsule_accounting
+binds_to: energy
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Accounts for capacity spend in a compiled prompt — exact bytes per capsule field and per SEAM 5 segment, and the prefix share that is the cache economics in one number. The token figure is explicitly a chars/4 PROXY at tier ESTIMATE and never EXACT, which is the gap named rather than hidden: bytes are measurable here, real token cost is CLOSE-TIME at best, and the tool refuses to present the second as the first.
+
+control: compiler.expansion_api
+binds_to: integration_bandwidth
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: The other half of the same bandwidth ceiling: what a worker may BUY after the capsule ships the minimum, priced in bytes against a budget spent through an append-only ledger so a fresh process cannot forget an earlier purchase. Denial is data — an unknown symbol, an unknown path or an exhausted budget appends its reason and exits 3. A proxy for the same reason as the compiler's: the accounting is exact, the slice CHOICE is a line-window heuristic, and the file says so itself.
+
+control: compiler.artifact_registry
+binds_to: durability
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Content-addressed storage where the id IS the digest, so a tampered object no longer hashes to its own name and `verify` is what notices — proven by mutating a stored object on disk and requiring the check to fail and name the id. Proxies because durability is checked only when someone ASKS: nothing here is continuously verified, dedupe and append-only-ness protect the index rather than the medium, and a lost objects directory is detected as `missing` without being recoverable.
+
+control: compiler.trace_compactor
+binds_to: epistemic_quality
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: The one rule it exists to enforce is an evidence rule: a fact may be emitted ONLY from an observed failure — a command that ran with a numeric exit — and a trace of pure speculation emits nothing and says so. Every clause of the conclusion is composed from the observed record, so no opinion can enter. Proxies because the predicate is exact over the ENTRY while the entry itself is trusted: nothing verifies that a recorded command ever ran, and error-line selection and the scope fallback are regexes over text rather than resolvers.
+
+control: compiler.uncertainty_assessor
+binds_to: epistemic_quality
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Grades an outcome's evidentiary state before anything is spent on examining it: four distinct coverage claims kept apart (covered, measured-uncovered, unknown, exempt), an absent test result treated as a gap rather than as coverage, an absent confidence report recorded `unavailable` and never `high`, and a partial descriptor refused instead of guessed. Proxies because the inputs are self-reported — worker confidence is an assertion, and coverage is read off SEAM 1's own heuristic tests_covering rather than executed coverage.
+
+control: compiler.verifier_router
+binds_to: agency
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Decides what happens next — none, targeted or full — from which triggers fired, and refuses to act above the authority the routing receipt records unless a new evidence-bearing escalation exists; de-escalation is free. Proxies because the agency is exercised over a dispatch that does not happen: the compiler ships INERT, so the decision is computed and printed rather than carried out, and the refusal stops a run nobody has started.
+
+control: compiler.contribution_log
+binds_to: epistemic_quality
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Exists to make a trigger's claim falsifiable — it records what each dispatched verifier actually changed and reports, per trigger, how often the verification it bought caught anything, including the honest never-caught-anything verdict. The math refuses to flatter: unrated rows leave the denominator, zero rated rows yield a null rate rather than a zero, and every report carries its own volume caveat. Proxies because the ratings are supplied by the caller: the instrument measures what it is told, and nothing here verifies a `caught_defect: y`.
+
+control: suite.compiler_index
+binds_to: homeostasis
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Test state over the SEAM 1 indexer: shape and git-derived blob shas, the honesty flags, determinism byte-compared across runs, incremental reuse proven by a sentinel that survives only a genuine copy, four fixture repositories including an empty one, and every refusal driven. A suite's function is property preservation, same as its siblings.
+
+control: suite.compiler_capsule
+binds_to: homeostasis
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Test state over the capsule and its cache contract: every declared SEAM 2 field present, no file admitted without a rule, budget overflow disclosed rather than truncated, the PREFIX byte-compared across two different tasks, facts and decisions injected only on scope overlap, oversized artifacts referenced rather than inlined, and the ESTIMATE tier driven in both directions. A suite's function is property preservation, same as its siblings.
+
+control: suite.compiler_expansion
+binds_to: homeostasis
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Test state over the context economy: six request types with content-plus-withheld equalling source, denial exiting 3 onto the ledger, a budget spent across processes, a registry corruption planted on disk and detected by name, a speculation-only trace proven to emit nothing, and an append-only ledger whose column count survives crafted tabs and newlines. A suite's function is property preservation, same as its siblings.
+
+control: suite.compiler_verifier
+binds_to: homeostasis
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Test state over earned verification: the economics default holding, each of six triggers silent on a clean outcome and firing alone on its own condition, absence never read as safety, partial descriptors refused, all three routing decisions derived, the recorded routing mode binding in both directions, and a trigger that caught nothing reported as such. A suite's function is property preservation, same as its siblings.

@@ -70,15 +70,15 @@ the concept without performing the function and **is not coverage**.
 | meaning_metric | 0 | 0 | 0 | 0 | — | — |
 | mass | 1 | 0 | 0 | 1 | A | advise |
 | valence | 0 | 0 | 0 | 0 | — | — |
-| agency | 16 | 12 | 3 | 1 | A, C | advise, gate, execute |
-| energy | 4 | 0 | 4 | 0 | A, C | advise, gate |
-| homeostasis | 35 | 1 | 34 | 0 | A | advise, gate |
-| integration_bandwidth | 4 | 1 | 3 | 0 | A, C | advise, gate |
-| boundary | 12 | 0 | 12 | 0 | A | advise, gate |
+| agency | 17 | 12 | 4 | 1 | A, C | advise, gate, execute |
+| energy | 5 | 0 | 5 | 0 | A, C | advise, gate |
+| homeostasis | 39 | 1 | 38 | 0 | A | advise, gate |
+| integration_bandwidth | 6 | 1 | 5 | 0 | A, C | advise, gate |
+| boundary | 13 | 0 | 13 | 0 | A | advise, gate |
 | ethical_admissibility | 2 | 1 | 0 | 1 | A | gate |
-| epistemic_quality | 46 | 19 | 26 | 1 | A, B, C | advise, gate |
+| epistemic_quality | 50 | 19 | 30 | 1 | A, B, C | advise, gate |
 | latent_state | 6 | 4 | 2 | 0 | A, C | advise, gate |
-| durability | 1 | 0 | 1 | 0 | A | gate |
+| durability | 2 | 0 | 2 | 0 | A | gate |
 | gated_plasticity | 5 | 4 | 1 | 0 | A, B, C | advise, gate |
 | collective_coherence | 5 | 4 | 1 | 0 | A, C | gate |
 | goal_ecology | 1 | 0 | 1 | 0 | C | observe |

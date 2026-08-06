@@ -1175,6 +1175,34 @@ chain_suite "tests/intake_tests.sh"           "second-repository intake: provena
 chain_suite "tests/adapter_contract_tests.sh" "the provider-adapter contract: overclaims refused by name, behavioral conformance, refusal-not-fake, resumable interruption"
 chain_suite "tests/measure_window_tests.sh"   "the measured-window recorder: verbatim meter readings at both edges and git-derived durable output"
 
+echo "== 30. Chained Context Compiler suites (index, capsule, expansion economy, earned verification) =="
+# The Context Compiler four-lane fan-out (LANE A/B/C/D: isolated worktrees,
+# disjoint write sets, one merge-integration pass owning this file) landed four
+# sibling suites over SEAMS 1-6. Same device and same reasons as sections 26 and
+# 29: each suite is invoked through chain_suite so its counts fold into this
+# file's totals rather than collapsing into one pass/fail, and a dead suite is
+# one named failure instead of a silent absence — section 26's wiring guard
+# reported all four as discoverable-only until these lines existed.
+#
+# WHAT CHAINING BUYS HERE, GIVEN THAT THE COMPILER SHIPS INERT. The ten compiler
+# modules are wired into no live routing path (SEAMS.md: "v0 ships INERT"), so
+# nothing in the running system would notice if they rotted. That is precisely
+# why the suites belong in the repo verification command rather than in a doc
+# pointer: an unwired subsystem is the one whose regressions are invisible, and
+# the only thing standing between it and silent decay is a suite that runs
+# whether or not anybody remembers it exists.
+#
+# This section lives BELOW section 29 for the reason section 29 states about
+# itself: evidence_refs cite lines of this file, and inserting these lines
+# mid-file would have moved every one of them. Appending here moves only the two
+# final verdict lines, whose citations are re-derived in the same commit.
+# The four suites' registry entries land in the SAME COMMIT as this wiring
+# (the PACKET-0048 lesson, RULING 4).
+chain_suite "tests/compiler_index_tests.sh"     "the SEAM 1 repository index: git-tracked file set, blob-sha incremental reuse, byte-determinism, and heuristics that label themselves"
+chain_suite "tests/compiler_capsule_tests.sh"   "the SEAM 2/5 task capsule: no file admitted without a rule, budget overflow disclosed rather than truncated, and a byte-identical cache prefix across tasks"
+chain_suite "tests/compiler_expansion_tests.sh" "the SEAM 3/4 context economy: sliced expansions with exact withheld-byte accounting, denial logged as data, and a compactor that emits nothing from speculation"
+chain_suite "tests/compiler_verifier_tests.sh"  "the SEAM 6 earned verification: six named triggers driven one at a time, absence never read as safety, and a dispatch above the recorded routing mode refused"
+
 echo
 echo "==== RESULT: $PASS passed, $FAIL failed ===="
 [ "$FAIL" -eq 0 ]

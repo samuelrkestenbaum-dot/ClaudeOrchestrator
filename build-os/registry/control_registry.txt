@@ -1141,7 +1141,7 @@ inputs: the router, the guidance files, the hooks, the installers, and thirty ch
 output: ==== RESULT: N passed, M failed ====
 owning_module: tests/build_os_tests.sh
 consuming_policies: the repository's single verification command; swarm-merge.sh runs it as the post-merge verification
-evidence_refs: tests/build_os_tests.sh:1179; tests/build_os_tests.sh:1180
+evidence_refs: tests/build_os_tests.sh:1207; tests/build_os_tests.sh:1208
 failure_behavior: exits non-zero when FAIL is non-zero
 rollback_behavior: read-only; all fixtures live in mktemp dirs
 promotion_requirement: n/a
@@ -2670,3 +2670,255 @@ promotion_requirement: already load_bearing; nothing above this status exists
 demotion_requirement: it stops being load_bearing the day it is unchained from the repo suite
 authority_mismatch: none
 notes: WRITTEN RED-FIRST in LANE 4 of the four-lane fan-out and chained by the merge-integration pass in the same commit as this entry (RULING 4, the PACKET-0048 lesson). Its two fitted coverage floors (lines 105 and 248) are registered to tests.nonvacuity_minimums, not here. Behavioural proof today runs against the mock alone — contract proof, not provider proof, exactly as the mock's own entry states.
+
+control: compiler.repo_index
+class: A
+implementation_status: implemented
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: sensor
+inputs: a git repository path (the file set is `git ls-files` only, so untracked debris is absent by construction), an optional prior index for --since incremental reuse, an optional tsc-style error list, and --deterministic to null the one clock field
+output: a SEAM 1 index JSON — per file blob sha, language, kind, symbols with declaration lines, raw and resolved imports, reverse edges, heuristic tests_covering, last_changed from one git log pass, and per-file error counts — plus a stats report that states its own coverage; or a refusal (exit 2) that writes nothing
+owning_module: build-os/compiler/index/build-index.mjs
+consuming_policies: NONE IN THE RUNTIME — the compiler ships INERT (build-os/compiler/SEAMS.md, "Non-goals for v0": no automatic wiring into the live routing path), so nothing in a live execution path consumes this index today; build-os/compiler/compile/compile-task.mjs reads it when invoked explicitly, and tests/compiler_index_tests.sh drives every branch and every refusal on every suite run, chained from tests/build_os_tests.sh section 30
+evidence_refs: build-os/compiler/index/build-index.mjs:36; build-os/compiler/index/build-index.mjs:110; build-os/compiler/index/build-index.mjs:116; build-os/compiler/index/build-index.mjs:117; build-os/compiler/index/build-index.mjs:301; build-os/compiler/index/build-index.mjs:355
+failure_behavior: die() writes the reason to stderr and exits 2 — on a missing repository path, a path that is not a directory, a directory that is not a git repository, an unknown flag, an unexpected argument, an unreadable or shapeless --since index, an unreadable --errors file, a missing or malformed index at stats, and an unknown or absent subcommand. Inside a successful run the failure direction is DISCLOSURE rather than refusal: an unresolvable import specifier stays verbatim and produces no reverse edge, an unreadable tracked file is counted skipped, and partial/symbols_partial/tests_covering_heuristic/errors_measured are written into the index so a consumer cannot mistake "not extracted" for "not present"
+rollback_behavior: writes one file, the path given by --out (stdout when absent); the indexed repository is only ever read, and a refusal happens before any write
+promotion_requirement: load_bearing the day a live routing path consumes an index rather than an explicit invocation producing one — SEAMS.md's own precondition for un-INERTing v0
+demotion_requirement: n/a — nothing depends on it today, which is the honest reading of implementation_status: implemented
+authority_mismatch: none
+notes: LANE A of the Context Compiler four-lane fan-out (four isolated worktree lanes plus one merge-integration pass owning the hot files), REGISTERED BY THE MERGER IN THE SAME COMMIT that chains its suite into the repo verification command (the PACKET-0048 lesson, RULING 4). implementation_status is `implemented` and NOT `load_bearing` because the ladder in build-os/registry/README.md §2 is explicit that being implemented is not being load-bearing: a load_bearing claim must name a live policy that consumes the output, and SEAMS.md states there is none. WHAT IT DOES NOT ESTABLISH, named rather than implied away: extraction is regex/line based for every language it reads and blind for the rest, referenced_in is a whole-word text match, and tests_covering is an import-or-basename heuristic — all three are flagged in the index itself and reported by `stats`, so what is registered here is honest labelling, not an AST.
+
+control: compiler.task_compiler
+class: A
+implementation_status: implemented
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: conscience
+inputs: a SEAM 1 index, a task descriptor (seed files and symbols, objective, acceptance, baselines, authority, verification, declared artifacts), an optional SEAM 4 facts JSONL, an optional `topic: text` decisions file, a byte budget, and an artifact inline threshold
+output: capsule.json and capsule.md in --out — the admitted file list with one rule per file, the dependency neighborhood, allowed mutation surface, artifact refs pinned by sha256, and a provenance block recording why each admitted thing got in and what every withheld thing was; or a refusal (exit 2) that writes neither file
+owning_module: build-os/compiler/compile/compile-task.mjs
+consuming_policies: NONE IN THE RUNTIME — the compiler ships INERT (build-os/compiler/SEAMS.md), so no live routing path compiles a capsule today; tests/compiler_capsule_tests.sh drives the relevance walk, the budgeter, determinism, fact and decision injection, artifact thresholding and the degenerate case on every suite run, chained from tests/build_os_tests.sh section 30
+evidence_refs: build-os/compiler/compile/compile-task.mjs:59; build-os/compiler/compile/compile-task.mjs:125; build-os/compiler/compile/compile-task.mjs:128; build-os/compiler/compile/compile-task.mjs:132; build-os/compiler/compile/compile-task.mjs:280; build-os/compiler/compile/compile-task.mjs:382
+failure_behavior: die() writes the reason to stderr and exits 2 — on an unreadable or non-JSON index or task, a missing --index or --task, a non-numeric budget, a negative artifact threshold, an unknown option, an option missing its value, a task descriptor that is not a JSON object, and a facts file whose line is not valid JSONL. INSIDE a run it fails TOWARD DISCLOSURE and never toward silence: a budget overflow STOPS at the priority ladder rather than skipping ahead to whatever fits, and every dropped file, withheld fact, uninjected decision and unreadable artifact is written into provenance.excluded_notable with the request that would fetch it
+rollback_behavior: writes exactly two files into --out (created with mkdir -p); every input is read-only, and a refusal precedes both writes
+promotion_requirement: load_bearing when a live routing path compiles capsules instead of an operator invoking the tool by hand
+demotion_requirement: n/a — nothing consumes it today
+authority_mismatch: none
+notes: LANE B of the Context Compiler four-lane fan-out, REGISTERED BY THE MERGER IN THE SAME COMMIT as the chaining (RULING 4, the PACKET-0048 lesson). `implemented` rather than `load_bearing` for the same reason as compiler.repo_index: the subsystem is wired into nothing (SEAMS.md, "v0 ships INERT"). THE NAMED HEURISTIC, stated because the budgeter's honesty depends on it being visible: fact and decision injection is case-insensitive SUBSTRING scope matching over admitted paths and symbols, with no notion of topic hierarchy or synonymy — "auth" matches src/oauth/x.js — so a match is a candidate, not a proof of relevance.
+
+control: compiler.capsule_renderer
+class: A
+implementation_status: implemented
+empirical_status: unvalidated
+runtime_authority: gate
+nervous_system_role: motor
+inputs: a parsed capsule.json (SEAM 2) and the immutable prefix constant from capsule-prefix.mjs; as a CLI, --capsule and an optional --out
+output: capsule.md in SEAM 5 order — the byte-identical PREFIX between sentinels, then the repository-derived SLOW section, then the task-specific VOLATILE section — written to --out or stdout; or exit 2 having written nothing
+owning_module: build-os/compiler/compile/render-capsule.mjs
+consuming_policies: NONE IN THE RUNTIME — the compiler ships INERT (build-os/compiler/SEAMS.md); compile-task.mjs imports renderCapsule() when invoked explicitly, and tests/compiler_capsule_tests.sh byte-compares the PREFIX section of two capsules for different tasks on every suite run, chained from tests/build_os_tests.sh section 30
+evidence_refs: build-os/compiler/compile/render-capsule.mjs:54; build-os/compiler/compile/render-capsule.mjs:186; build-os/compiler/compile/render-capsule.mjs:192; build-os/compiler/compile/render-capsule.mjs:199; build-os/compiler/compile/render-capsule.mjs:209
+failure_behavior: the CLI returns 2 — surfaced as an exit status by the invoked-as-main guard — on an unknown option, an absent --capsule, and a capsule file that cannot be read or parsed. The library function itself never refuses: renderCapsule() is total, and an absent section renders as a stated empty result ("an empty map here is a stated result, not a rendering failure") rather than an exception
+rollback_behavior: pure function of (capsule, prefix) — no clock, no environment, no filesystem read; the only write is --out, and every refusal precedes it
+promotion_requirement: load_bearing when a live path renders prompts through it; the cache economics it exists for are unmeasured against a real provider today
+demotion_requirement: n/a — nothing consumes it today
+authority_mismatch: none
+notes: LANE B of the Context Compiler four-lane fan-out, REGISTERED BY THE MERGER IN THE SAME COMMIT as the chaining (RULING 4, the PACKET-0048 lesson). empirical_status is `unvalidated` HONESTLY and deliberately: the suite proves the SEAM 5 INVARIANT hard — the prefix is byte-identical across two different tasks, the sentinel order holds, and the degenerate capsule carries the identical prefix — but nothing red-drives the three CLI refusals that make this file a gate surface at all, so nothing has established that those refusals discriminate. build-os/tools/evidence-policy.sh will therefore name this class-A gate out of licence on its advisory channel, and that finding is correct; authority_mismatch stays `none` because the CLASS table licenses gate (README §3a's four-gates-on-unvalidated precedent).
+
+control: compiler.capsule_accounting
+class: A
+implementation_status: implemented
+empirical_status: unvalidated
+runtime_authority: gate
+nervous_system_role: sensor
+inputs: a capsule.json, optionally its rendered capsule.md, and --json for the machine form
+output: a size report — exact item counts, exact capsule.json bytes broken down per field, exact per-section bytes for the SEAM 5 PREFIX/SLOW/VOLATILE segments, the prefix share of the rendered capsule, and a chars/4 token PROXY carried at tier ESTIMATE and never at EXACT; or exit 2 having printed nothing
+owning_module: build-os/compiler/compile/capsule-stats.mjs
+consuming_policies: NONE IN THE RUNTIME — the compiler ships INERT (build-os/compiler/SEAMS.md); tests/compiler_capsule_tests.sh §10 asserts the tier labelling in both directions (ESTIMATE present, EXACT never applied to a token figure) and the per-section accounting on every suite run, chained from tests/build_os_tests.sh section 30
+evidence_refs: build-os/compiler/compile/capsule-stats.mjs:32; build-os/compiler/compile/capsule-stats.mjs:85; build-os/compiler/compile/capsule-stats.mjs:159; build-os/compiler/compile/capsule-stats.mjs:165; build-os/compiler/compile/capsule-stats.mjs:172; build-os/compiler/compile/capsule-stats.mjs:180
+failure_behavior: returns 2 — surfaced as an exit status by the invoked-as-main guard — on an unknown option, an absent --capsule, and any read or parse error raised while collecting (caught and reported with its message rather than thrown as a stack trace)
+rollback_behavior: reads two files and prints; it writes nothing anywhere, under any outcome
+promotion_requirement: load_bearing when a live path budgets against its numbers rather than an operator reading them
+demotion_requirement: n/a — nothing consumes it today
+authority_mismatch: none
+notes: LANE B of the Context Compiler four-lane fan-out, REGISTERED BY THE MERGER IN THE SAME COMMIT as the chaining (RULING 4, the PACKET-0048 lesson). empirical_status `unvalidated` for the same honest reason as compiler.capsule_renderer: the suite red-drives the TIER RULE (a token figure labelled EXACT fails the run) but never drives the exit-2 refusals that make the file a gate surface. THE PROXY IS THE POINT AND IT IS LABELLED: the token figure is chars/4, it is tier ESTIMATE everywhere it appears, the formula is printed beside it, and the report says in words that real token cost is CLOSE-TIME at best — the same tier discipline provider_adapter_contract.md binds the rest of the system to.
+
+control: compiler.expansion_api
+class: A
+implementation_status: implemented
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: reflex
+inputs: one of the six SEAM 3 request types with its argument, a SEAM 1 index, a repository root, the append-only events TSV, a task id, an optional decisions log, an optional artifact registry, and an optional byte budget spent against the LEDGER rather than against process memory
+output: a JSON response carrying the granted slice with exact source/content/withheld byte accounting and the separately reported billed byte count — or a denial carrying its machine-readable reason; either way one escaped row is appended to the ledger, and `report` renders the context economy as an error signal rather than a usage meter
+owning_module: build-os/compiler/runtime/expand.mjs
+consuming_policies: NONE IN THE RUNTIME — the compiler ships INERT (build-os/compiler/SEAMS.md), so no worker buys context through it today; tests/compiler_expansion_tests.sh drives all six request types, both denial classes and the ledger's injection resistance on every suite run, chained from tests/build_os_tests.sh section 30
+evidence_refs: build-os/compiler/runtime/expand.mjs:132; build-os/compiler/runtime/expand.mjs:183; build-os/compiler/runtime/expand.mjs:378; build-os/compiler/runtime/expand.mjs:384; build-os/compiler/runtime/expand.mjs:390; build-os/compiler/runtime/expand.mjs:393
+failure_behavior: TWO DISTINCT NON-ZERO OUTCOMES, kept apart on purpose. Exit 2 is USAGE — no request type, an unknown request type, or a missing --task/--events/argument. Exit 3 is a DENIAL and is a normal outcome on the record: an unknown symbol, a path outside the repository root, an unknown path, a bad range, an unknown topic, an unconfigured registry, an unknown artifact, no indexed callers, and a budget the slice would exceed. A denial appends its row with its reason before exiting, so a protocol that logged only its grants is exactly what this refuses to be
+rollback_behavior: appends to one ledger file (creating it with a header if absent) and prints; the repository, index, decisions log and artifact registry are only read. Rows are only ever added, never rewritten, and every field is escaped so a crafted request cannot forge a row or shift a column
+promotion_requirement: load_bearing when a live worker's context purchases route through it and its budget binds a real run
+demotion_requirement: n/a — nothing consumes it today
+authority_mismatch: none
+notes: LANE C of the Context Compiler four-lane fan-out, REGISTERED BY THE MERGER IN THE SAME COMMIT as the chaining (RULING 4, the PACKET-0048 lesson). THE ACCOUNTING IS EXACT; THE CHOICE IS NOT — the file says so itself: a line window around a declaration is not a parsed symbol span and a caller snippet is a line match rather than a call graph, so `content_bytes + withheld_bytes == source_bytes` is checkable arithmetic over a heuristic selection. The budget is checked AFTER the slice is built, deliberately, so the question answered is "can this task afford THIS slice" and not "does it have some bytes left".
+
+control: compiler.artifact_registry
+class: A
+implementation_status: implemented
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: memory
+inputs: a registry directory, and for put a file plus an optional one-line summary and timestamp; for get/ref an id; for verify nothing but the store itself
+output: a content-addressed object store — <registry>/objects/<sha256> plus a four-field append-only index.tsv — the stored id on put, raw bytes on get, a SEAM 2 artifact_ref JSON on ref, and a census on verify that names every object whose bytes no longer hash to their own name
+owning_module: build-os/compiler/runtime/artifacts.mjs
+consuming_policies: NONE IN THE RUNTIME — the compiler ships INERT (build-os/compiler/SEAMS.md); expand.mjs serves need_artifact out of it when invoked explicitly, and tests/compiler_expansion_tests.sh §9 red-drives corruption by mutating a stored object behind the registry's back on every suite run, chained from tests/build_os_tests.sh section 30
+evidence_refs: build-os/compiler/runtime/artifacts.mjs:92; build-os/compiler/runtime/artifacts.mjs:117; build-os/compiler/runtime/artifacts.mjs:140; build-os/compiler/runtime/artifacts.mjs:159; build-os/compiler/runtime/artifacts.mjs:184; build-os/compiler/runtime/artifacts.mjs:191
+failure_behavior: exit 2 on usage — no command, no --registry, an unknown command, or a put of a file that does not exist. Exit 1 on an id that is not 64 lowercase hex or names no stored object, and on any verify finding at least one corrupt or missing object, with every offending id printed beside the digest its bytes actually produce
+rollback_behavior: put writes one object and appends one index row, and does neither when the bytes are already stored (dedupe is a consequence of content addressing, not a feature); get, ref and verify write nothing at all. The index is append-only: a later put of identical bytes does not rewrite the first summary
+promotion_requirement: load_bearing when a live capsule path pins real baseline artifacts through it
+demotion_requirement: n/a — nothing consumes it today
+authority_mismatch: none
+notes: LANE C of the Context Compiler four-lane fan-out, REGISTERED BY THE MERGER IN THE SAME COMMIT as the chaining (RULING 4, the PACKET-0048 lesson). The red drive is the sharp one and it is a real planted defect rather than a synthetic argument: the suite appends bytes to a stored object on disk and requires verify to exit non-zero AND to name the id, because a tamper check that reports clean is decorative. `id` and `sha256` are equal BY CONSTRUCTION in every ref this store emits — SEAM 2 keeps both fields for a future named-artifact store, and this one does not pretend to be one.
+
+control: compiler.trace_compactor
+class: A
+implementation_status: implemented
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: memory
+inputs: a JSONL trace of command entries (command text, numeric exit, captured output, optional scope) and note entries, a task id, an optional pinned timestamp, and for `match` a facts file plus a scope query
+output: SEAM 4 fact objects, one JSON per line, each carrying evidence_class "observed" and a reusable_conclusion COMPOSED from the observed record — the command, the exit status, the error line, the touched scope — never authored as prose; or nothing at all, with the reason stated on stderr
+owning_module: build-os/compiler/runtime/compact-trace.mjs
+consuming_policies: NONE IN THE RUNTIME — the compiler ships INERT (build-os/compiler/SEAMS.md); compile-task.mjs reads a facts JSONL into failed_approaches when invoked explicitly, and tests/compiler_expansion_tests.sh §10 drives a speculation-only trace and requires an empty emission on every suite run, chained from tests/build_os_tests.sh section 30
+evidence_refs: build-os/compiler/runtime/compact-trace.mjs:65; build-os/compiler/runtime/compact-trace.mjs:103; build-os/compiler/runtime/compact-trace.mjs:117; build-os/compiler/runtime/compact-trace.mjs:154; build-os/compiler/runtime/compact-trace.mjs:194; build-os/compiler/runtime/compact-trace.mjs:197
+failure_behavior: exit 2 on usage — no recognised subcommand, a missing --task or --scope, or a trace/facts file that does not exist. THE PRIMARY REFUSAL IS NOT AN EXIT CODE AND THAT IS DELIBERATE: an entry without both a command string and a numeric exit did not demonstrably run, so it is skipped as evidence, and a trace containing only speculation emits NOTHING and says on stderr that it emitted nothing and why, at exit 0. Emitting nothing is the correct outcome, not a failure — a fabricated fact is shaped exactly like an observed one and would steer later capsules invisibly
+rollback_behavior: reads the trace and writes stdout, plus the --out file when one is named; deterministic — the same trace, task and --now produce byte-identical output, and a repeated identical fact is deduplicated by its own content hash
+promotion_requirement: load_bearing when a live path compacts real traces into the facts file a live capsule injects
+demotion_requirement: n/a — nothing consumes it today
+authority_mismatch: none
+notes: LANE C of the Context Compiler four-lane fan-out, REGISTERED BY THE MERGER IN THE SAME COMMIT as the chaining (RULING 4, the PACKET-0048 lesson). WHAT IS NOT ESTABLISHED, stated because the honesty rule could otherwise be read as stronger than it is: the observed/speculative predicate is exact over the ENTRY, but the compactor trusts the trace it is handed — nothing here verifies that a recorded command ever ran. Error-line selection and the scope fallback are both regexes over text, not a resolver, which is why the binding in the crosswalk is `proxies` rather than `instantiates`.
+
+control: compiler.uncertainty_assessor
+class: A
+implementation_status: implemented
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: sensor
+inputs: a task outcome descriptor — task_id, changed_files, prior_attempt_failed and baseline_ambiguous all REQUIRED, plus optional lines_changed, test_result and worker_confidence — and a SEAM 1 index supplied inline or by path
+output: one JSON assessment: per-trigger fired/why/evidence/scope for each of the six named SEAM 6 triggers, the derived thresholds with their derivations, the firing list, and the verification_earned verdict; or a refusal (exit 2) that assesses nothing
+owning_module: build-os/compiler/verify/assess.mjs
+consuming_policies: NONE IN THE RUNTIME — the compiler ships INERT (build-os/compiler/SEAMS.md), so no live dispatch consults it; build-os/compiler/verify/route-verifier.mjs consumes its output when invoked explicitly, and tests/compiler_verifier_tests.sh drives each trigger alone, the honesty rule and every refusal on every suite run, chained from tests/build_os_tests.sh section 30
+evidence_refs: build-os/compiler/verify/assess.mjs:60; build-os/compiler/verify/assess.mjs:83; build-os/compiler/verify/assess.mjs:88; build-os/compiler/verify/assess.mjs:115; build-os/compiler/verify/assess.mjs:138; build-os/compiler/verify/assess.mjs:152
+failure_behavior: exit 2 on a partial or malformed descriptor — absent or empty task_id, changed_files that is not an array of non-empty paths, a non-boolean prior_attempt_failed or baseline_ambiguous, a negative or non-integer lines_changed, a test_result or worker_confidence outside its enum, input that is not a JSON object, and any case with no readable index. AN UNANSWERED QUESTION IS REFUSED, NOT READ AS FALSE, following mode-select.mjs's convention. Inside a run the failure direction is toward FIRING: a missing test result fires incomplete_tests, and a file absent from the index or carrying tests_covering:null is UNKNOWN coverage and fires — absence of a signal is never treated as a safe signal
+rollback_behavior: reads its input and at most one index file, and writes only stdout; deterministic with no clock and no randomness, so identical input yields byte-identical output
+promotion_requirement: load_bearing when a live routing path assesses real outcomes instead of an operator invoking the tool
+demotion_requirement: n/a — nothing consumes it today
+authority_mismatch: none
+notes: LANE D of the Context Compiler four-lane fan-out, REGISTERED BY THE MERGER IN THE SAME COMMIT as the chaining (RULING 4, the PACKET-0048 lesson). THE ONE DELIBERATE NON-TRIGGER, recorded so it cannot be mistaken for an oversight: a test_result of "fail" does NOT fire incomplete_tests — red is complete evidence of failure and the response is to fix it, not to buy a verifier confirming it — and the value is still recorded verbatim in `signals`. A missing confidence signal is recorded "unavailable" and never "high", and it does not fire low_confidence, because an absent report is not a low report either.
+
+control: compiler.verifier_router
+class: A
+implementation_status: implemented
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: reflex
+inputs: an assess.mjs assessment object and an authority block naming the mode recorded in the routing receipt, the receipt path, and optionally an escalation plus its evidence
+output: one JSON dispatch decision — none, targeted or full — with the rule that produced it stated in words, the examination scope derived from WHICH triggers fired, one question per fired trigger, the files excluded from scope, and the authority reconciliation; or a refusal (exit 2) that dispatches nothing
+owning_module: build-os/compiler/verify/route-verifier.mjs
+consuming_policies: NONE IN THE RUNTIME — the compiler ships INERT (build-os/compiler/SEAMS.md), so no verifier is actually dispatched from it; tests/compiler_verifier_tests.sh §8-§9 drives all three decisions and both authority directions on every suite run, chained from tests/build_os_tests.sh section 30
+evidence_refs: build-os/compiler/verify/route-verifier.mjs:56; build-os/compiler/verify/route-verifier.mjs:83; build-os/compiler/verify/route-verifier.mjs:87; build-os/compiler/verify/route-verifier.mjs:112; build-os/compiler/verify/route-verifier.mjs:142; build-os/compiler/verify/route-verifier.mjs:143
+failure_behavior: exit 2 on input that is not a JSON object, an assessment missing its triggers or fired list, an absent authority block, an unrecognised authority mode (refused rather than treated as permissive), a fired trigger outside the SEAM 6 vocabulary, and — the load-bearing one — a dispatch above the mode the receipt records with no evidence-bearing escalation. The refusal names the exact record that would make the dispatch legal, and an escalation declared with a "-" or empty evidence field is refused as no escalation at all
+rollback_behavior: reads its input and writes only stdout; no clock, no randomness, no filesystem writes, and de-escalation is free and needs no record
+promotion_requirement: load_bearing when a live path dispatches verifiers through it and the refusal actually stops a run
+demotion_requirement: n/a — nothing consumes it today
+authority_mismatch: none
+notes: LANE D of the Context Compiler four-lane fan-out, REGISTERED BY THE MERGER IN THE SAME COMMIT as the chaining (RULING 4, the PACKET-0048 lesson). It mirrors build-os/memory/routing_contract.md rather than restating it: the recorded mode is BINDING and silent escalation is prohibited. Rule 2(b) — three or more triggers whose combined scope already covers the whole diff routes FULL — exists so that a "targeted" label cannot hide a full examination, and the economics it encodes are executed evidence rather than preference (EXP-0002 measured 3.96x under uncontrolled Full fan-out; PILOT-0001's single Full verifier examined six areas and changed nothing).
+
+control: compiler.contribution_log
+class: A
+implementation_status: implemented
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: memory
+inputs: a log path, and for `record` a row JSON carrying task_id, the dispatch decision, the trigger(s) that bought it, a verifier reference, the four routing-receipt contribution fields each y/n/-, and optional token/cost/time/ts values stored verbatim
+output: one appended contribution line per accepted row, and on `efficacy` a per-trigger report — fired, rated, unrated, caught, duplicated, caught_rate and a verdict in words — over all six SEAM 6 triggers including those that have never fired; or a refusal (exit 2) that appends nothing
+owning_module: build-os/compiler/verify/contribution-log.mjs
+consuming_policies: NONE IN THE RUNTIME — the compiler ships INERT (build-os/compiler/SEAMS.md), so no dispatch records into it; tests/compiler_verifier_tests.sh §10-§11 drives both refusals and the never-caught-anything report on every suite run, chained from tests/build_os_tests.sh section 30
+evidence_refs: build-os/compiler/verify/contribution-log.mjs:59; build-os/compiler/verify/contribution-log.mjs:64; build-os/compiler/verify/contribution-log.mjs:88; build-os/compiler/verify/contribution-log.mjs:97; build-os/compiler/verify/contribution-log.mjs:149; build-os/compiler/verify/contribution-log.mjs:175
+failure_behavior: exit 2 on an unknown subcommand, a missing log path, a row that is not JSON or not an object, an absent task_id, a decision outside targeted/full/none, an empty trigger list, a trigger outside the SEAM 6 vocabulary, a contribution value outside exactly y/n/-, and a row for decision "none" — no verifier ran, so there is no contribution to claim. An all-"-" row is ACCEPTED as an honest admission and reported as non-contributing, because refusal is for CONTRADICTION and not for absence
+rollback_behavior: appends one line to the named log and prints; refused rows never reach the file, which the suite proves by re-counting the log after each refusal. It never reads the clock — a caller may supply ts, stored verbatim, defaulting to "-"
+promotion_requirement: load_bearing when real dispatches record into it and the efficacy report is consulted before a trigger is trusted or retired
+demotion_requirement: n/a — nothing consumes it today
+authority_mismatch: none
+notes: LANE D of the Context Compiler four-lane fan-out, REGISTERED BY THE MERGER IN THE SAME COMMIT as the chaining (RULING 4, the PACKET-0048 lesson). THE MATH IS THE PRODUCT AND IT IS STATED IN THE FILE: caught_rate divides by RATED rows only, rows recorded "-" are excluded from the denominator rather than counted as misses, zero rated rows yields a null rate with a stated note instead of a zero, and `never_caught_a_defect` is asserted only on rated evidence — a trigger whose rows are all unrated has not been shown useless, it has not been measured. Every report carries its own volume caveat, because a rate over a small integer is noise and the report says so about itself.
+
+control: suite.compiler_index
+class: A
+implementation_status: load_bearing
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: immune
+inputs: four purpose-built git fixture repositories (a TS/JS tree with tests, a mixed python/go tree, an empty repo, and a language with no parser), a tsc-style error list, a poisoned prior index carrying a sentinel symbol, and build-index.mjs's build and stats surfaces
+output: a pass/fail verdict over SEAM 1: the index shape and its git-derived blob shas, the honesty flags, kind and symbol extraction, the whole-word referenced_in heuristic, import resolution with unresolved specifiers producing no reverse edge, both tests_covering paths, byte-determinism across runs, incremental reuse proven by a sentinel that only survives if the blob was genuinely copied, error clustering, the three degenerate fixtures, the coverage-reporting stats surface, and every refusal
+owning_module: tests/compiler_index_tests.sh
+consuming_policies: chained from tests/build_os_tests.sh section 30, which exits non-zero on its failure
+evidence_refs: tests/compiler_index_tests.sh:153; tests/compiler_index_tests.sh:233; tests/compiler_index_tests.sh:255; tests/compiler_index_tests.sh:423; tests/compiler_index_tests.sh:426; tests/compiler_index_tests.sh:430
+failure_behavior: prints each failing assertion and exits 1 via the house-style verdict, failing the whole chained run
+rollback_behavior: none needed — every fixture repository and every produced index lives in mktemp; the canonical tree is only read, and no model invocation occurs
+promotion_requirement: already load_bearing; nothing above this status exists
+demotion_requirement: it stops being load_bearing the day it is unchained from the repo suite
+authority_mismatch: none
+notes: WRITTEN RED-FIRST in LANE A of the Context Compiler four-lane fan-out (four isolated worktree lanes, disjoint write sets, one merge-integration pass owning the hot files) and CHAINED BY THE MERGER IN THE SAME COMMIT AS THIS ENTRY (RULING 4, the PACKET-0048 lesson). The sentinel proof is the sharp assertion: a symbol that exists only in a poisoned prior index must survive an incremental build, so a claim of reuse that silently re-parsed would fail rather than pass. This suite is what keeps an INERT subsystem from decaying invisibly — nothing in the running system would otherwise notice.
+
+control: suite.compiler_capsule
+class: A
+implementation_status: load_bearing
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: immune
+inputs: a fixture SEAM 1 index, two different task descriptors, a seedless task against an empty index, a facts JSONL and a decisions file whose scopes deliberately miss, an artifact over the inline threshold and one under it, and the compile, render and stats surfaces plus the immutable prefix constant
+output: a pass/fail verdict over SEAM 2 and SEAM 5: every declared capsule field present, no file admitted without a stated rule, budget overflow disclosed in provenance rather than silently truncated, byte-identical capsule.json AND capsule.md across runs, a PREFIX section byte-identical between two different tasks in the mandated prefix/slow/volatile order, facts and decisions injected only on scope overlap and otherwise disclosed by id alone, an oversized artifact referenced by sha256 rather than inlined, honest ESTIMATE tiering in the stats report, and a degenerate compile that states why it is empty instead of crashing
+owning_module: tests/compiler_capsule_tests.sh
+consuming_policies: chained from tests/build_os_tests.sh section 30, which exits non-zero on its failure
+evidence_refs: tests/compiler_capsule_tests.sh:384; tests/compiler_capsule_tests.sh:394; tests/compiler_capsule_tests.sh:508; tests/compiler_capsule_tests.sh:511; tests/compiler_capsule_tests.sh:545; tests/compiler_capsule_tests.sh:569
+failure_behavior: prints each failing assertion and exits 1 via the house-style verdict, failing the whole chained run
+rollback_behavior: none needed — every fixture, capsule and rendered markdown lives in mktemp; the canonical tree is only read, and no model invocation occurs
+promotion_requirement: already load_bearing; nothing above this status exists
+demotion_requirement: it stops being load_bearing the day it is unchained from the repo suite
+authority_mismatch: none
+notes: WRITTEN RED-FIRST in LANE B of the Context Compiler four-lane fan-out and CHAINED BY THE MERGER IN THE SAME COMMIT AS THIS ENTRY (RULING 4, the PACKET-0048 lesson). The cache assertion is the one that cannot be faked by inspection: two capsules for DIFFERENT tasks are byte-compared over their PREFIX sections, so a single task field leaking into segment 1 — the exact failure SEAM 5 exists to prevent — fails the run instead of quietly costing a cache. The tier assertion is driven in both directions: ESTIMATE must be present, and EXACT applied to a token figure is a failure.
+
+control: suite.compiler_expansion
+class: A
+implementation_status: load_bearing
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: immune
+inputs: a fixture repository with an index, a decisions log, a content-addressed registry populated through the tool itself, traces containing only speculation and traces containing an observed non-zero exit, crafted tab/newline payloads aimed at the ledger, and the expand, artifacts and compact-trace surfaces
+output: a pass/fail verdict over SEAM 3 and SEAM 4: each of the six request types returning a slice with content plus withheld equalling source, denial exiting 3 with its reason on the ledger, a budget spent against the ledger across processes, the context-economy report stating its error signal in words, the registry's put/get/ref/verify round trip with dedupe and a red-driven corruption detection, a compactor that emits nothing from speculation and a composed fact from an observed failure, scope-overlap matching, and an append-only ledger whose column count survives crafted input
+owning_module: tests/compiler_expansion_tests.sh
+consuming_policies: chained from tests/build_os_tests.sh section 30, which exits non-zero on its failure
+evidence_refs: tests/compiler_expansion_tests.sh:252; tests/compiler_expansion_tests.sh:254; tests/compiler_expansion_tests.sh:263; tests/compiler_expansion_tests.sh:329; tests/compiler_expansion_tests.sh:344; tests/compiler_expansion_tests.sh:426
+failure_behavior: prints each failing assertion and exits 1 via the house-style verdict, failing the whole chained run
+rollback_behavior: none needed — the fixture repository, ledgers, registry and traces all live in mktemp; the canonical tree is only read, and no model invocation occurs
+promotion_requirement: already load_bearing; nothing above this status exists
+demotion_requirement: it stops being load_bearing the day it is unchained from the repo suite
+authority_mismatch: none
+notes: WRITTEN RED-FIRST in LANE C of the Context Compiler four-lane fan-out and CHAINED BY THE MERGER IN THE SAME COMMIT AS THIS ENTRY (RULING 4, the PACKET-0048 lesson). Two assertions carry real planted defects rather than agreeable fixtures: a stored artifact is MUTATED ON DISK behind the registry's back and verify must exit non-zero naming the id, and a speculation-only trace must produce an empty file — a compactor that invented one fact there would fail the run with its own invention quoted back. Its non-vacuity floor is DERIVED (request types x surfaces) and states no numeric literal, so it is deliberately not a member of the tests.nonvacuity_minimums family.
+
+control: suite.compiler_verifier
+class: A
+implementation_status: load_bearing
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: immune
+inputs: a base outcome descriptor patched one field at a time, a fixture SEAM 1 index carrying covered, uncovered and not-measured files, receipts recording direct and full routing modes with and without evidence-bearing escalations, contribution rows spanning caught, uncaught and unrated outcomes, and the assess, route-verifier and contribution-log surfaces
+output: a pass/fail verdict over SEAM 6: the economics default holding on a clean small tested diff, all six triggers silent on a clean outcome and each firing alone on its own condition, the honesty rule proven where it costs (an absent test result fires, an absent confidence signal is recorded unavailable and does not), thresholds carrying their derivations, partial descriptors refused rather than guessed, scope following from which trigger fired, all three routing decisions derived and stated, the recorded routing mode binding the dispatch in both directions, contribution rows refused on a forked vocabulary and on a no-dispatch claim, the never-caught-anything report, determinism and purity
+owning_module: tests/compiler_verifier_tests.sh
+consuming_policies: chained from tests/build_os_tests.sh section 30, which exits non-zero on its failure
+evidence_refs: tests/compiler_verifier_tests.sh:118; tests/compiler_verifier_tests.sh:186; tests/compiler_verifier_tests.sh:249; tests/compiler_verifier_tests.sh:326; tests/compiler_verifier_tests.sh:378; tests/compiler_verifier_tests.sh:396
+failure_behavior: prints each failing assertion and exits 1 via the house-style verdict, failing the whole chained run
+rollback_behavior: none needed — every descriptor, index, receipt and contribution log lives in mktemp; the canonical tree is only read, and no model invocation occurs
+promotion_requirement: already load_bearing; nothing above this status exists
+demotion_requirement: it stops being load_bearing the day it is unchained from the repo suite
+authority_mismatch: none
+notes: WRITTEN RED-FIRST in LANE D of the Context Compiler four-lane fan-out and CHAINED BY THE MERGER IN THE SAME COMMIT AS THIS ENTRY (RULING 4, the PACKET-0048 lesson). The efficacy assertion is the uncomfortable one and it is the point: a trigger that fired twice and caught nothing must be REPORTED as never having caught anything, so the suite proves the instrument can indict a trigger rather than only flatter one. The authority assertions run in both directions — a direct-mode receipt dispatching full is refused, and a full-mode receipt routing targeted is permitted and is NOT recorded as an escalation, because de-escalation is free.
