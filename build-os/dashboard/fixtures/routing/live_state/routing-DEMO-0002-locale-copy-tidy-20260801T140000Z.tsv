@@ -1,0 +1,21 @@
+# FABRICATED FIXTURE - not a measurement. One closed task whose cost was never knowable.
+label	task_dispatches	EXACT (hook-counted ALLOW decisions at PreToolUse, in sessions where the gate is loaded; attempts, not completions)
+label	tool_events	EXACT (hook-counted PreToolUse events in sessions where the gate is loaded)
+label	exploratory_events	EXACT (hook-counted read-class events - the explore half of the explore/execute split)
+label	mutation_events	EXACT (hook-counted ADMITTED mutation-capable calls)
+label	token_proxy	ESTIMATE (sum of tool-input chars / 4 - a chars-based proxy; NEVER billing truth and never promoted to a higher tier)
+label	tokens	unavailable_live in interactive sessions (tier UNAVAILABLE); close-time reconciliation via telemetry where headless (tier CLOSE-TIME)
+2026-08-01T09:00:06Z	tool_event	tool_name=Edit chars=400
+2026-08-01T09:00:12Z	tool_event	tool_name=Edit chars=455
+2026-08-01T09:00:18Z	tool_event	tool_name=Edit chars=510
+2026-08-01T09:00:24Z	tool_event	tool_name=Edit chars=565
+2026-08-01T09:00:30Z	tool_event	tool_name=Edit chars=620
+2026-08-01T09:00:36Z	tool_event	tool_name=Edit chars=675
+2026-08-01T09:00:42Z	tool_event	tool_name=Edit chars=730
+2026-08-01T09:00:48Z	tool_event	tool_name=Edit chars=785
+2026-08-01T09:00:54Z	tool_event	tool_name=Edit chars=840
+2026-08-01T09:00:58Z	exploratory_event	tool_name=Grep source=read_class
+2026-08-01T09:01:02Z	exploratory_event	tool_name=Grep source=read_class
+2026-08-01T09:01:06Z	exploratory_event	tool_name=Grep source=read_class
+2026-08-01T09:01:14Z	mutation_event	tool_name=Edit class=mutation
+2026-08-01T09:01:22Z	mutation_event	tool_name=Edit class=mutation

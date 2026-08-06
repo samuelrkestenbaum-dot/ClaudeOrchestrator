@@ -1,0 +1,14 @@
+2026-08-01T09:00:00Z	none	-	BLOCK-MUTATION-NO-RECEIPT	tool=Edit
+2026-08-01T09:07:13Z	none	-	BLOCK-NO-RECEIPT	subagent_type=implementation
+2026-08-01T09:14:26Z	DEMO-0001-refund-rounding-fix	gravito_full	ROUTING-TOOL-PASS	tool=Bash ungated=deadlock-guard sha256=1a2b3c4d5e6f
+2026-08-01T09:21:39Z	DEMO-0001-refund-rounding-fix	gravito_full	ALLOW-MUTATION	tool=Edit
+2026-08-01T09:28:52Z	DEMO-0001-refund-rounding-fix	gravito_full	ALLOW-TASK-DISPATCH	subagent_type=verification n=1 budget=3
+2026-08-01T09:35:05Z	DEMO-0001-refund-rounding-fix	gravito_full	ALLOW-TASK-DISPATCH	subagent_type=review n=2 budget=3
+2026-08-01T10:42:18Z	DEMO-0001-refund-rounding-fix	gravito_full	GIT-READONLY-PASS	tool=Bash class=exploratory
+2026-08-01T10:49:31Z	DEMO-0001-refund-rounding-fix	gravito_full	ALLOW-PROCESS-DISPATCH	subagent_type=implementation n=1 allowance=7
+2026-08-01T10:56:44Z	DEMO-0002-locale-copy-tidy	gravito_light	ALLOW-MUTATION	tool=Edit
+2026-08-01T10:03:57Z	DEMO-0002-locale-copy-tidy	gravito_light	BLOCK-FANOUT-BUDGET	subagent_type=verification n=0 budget=0 degradation=stamped
+2026-08-01T10:10:10Z	DEMO-0002-locale-copy-tidy	gravito_light	BLOCK-REASSESS	tool=Edit trip=same-tool
+2026-08-01T10:17:23Z	DEMO-0002-locale-copy-tidy	gravito_light	REASSESS-RESET	tool=Edit
+2026-08-01T11:24:36Z	none	-	BLOCK-MUTATION-NO-RECEIPT	tool=Write
+2026-08-01T11:31:49Z	DEMO-0003-nav-aria-label	direct	ALLOW-MUTATION	tool=Edit
