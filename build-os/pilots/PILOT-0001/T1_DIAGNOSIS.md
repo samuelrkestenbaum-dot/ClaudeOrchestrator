@@ -114,3 +114,32 @@ remains (T4 target — full-file failure detail now pinned: 30006ms TIMEOUT,
 first dry-run invocation only, only after earlier tests have run) /
 rework 0 / pilot commit e01c901 (1 file, test-only) / commit amended once
 pre-close for a 1-char session-trailer typo, disclosed.
+
+# T3 measurements (appended; tier-labeled)
+
+selected gravito_full / executed gravito_full (value factor:
+security_or_compliance — audit-trail change; NOT manufactured, selector
+chose it on an honest descriptor) / elapsed 694s EXACT (04:31:20→04:42:54),
+WITHIN the 900s full budget (an earlier draft of this row estimated 1030s
+and a breach before the end-time was measured — corrected here to the
+measured value; the draft error is disclosed, not hidden) / parent tool calls 9 EXACT / subagents 1
+of 3 (verification agent: 84,385 tokens EXACT, 319s, 32 tool uses) /
+tool failures 0 / parent tokens UNAVAILABLE live / human interventions 0 /
+tests: new suite 4/4 green (54ms, hermetic); tsc 782=782 zero new errors /
+acceptance MET: kind flows end-to-end, back-compat proven, enumerators
+verified complete by independent agent / rework 0 / pilot commit 41aed7a
+(3 files +81/-9 approx) / FULL-MODE CONTRIBUTION ANSWER (the operator's
+standing question): the extra agent caught NO defect the parent missed —
+six adversarial hunts all VERIFIED-CLEAN; its value was independent
+confidence on a compliance surface, and the honest row says so.
+
+## T3 governance event, disclosed: close-time gate REFUSED the first close
+
+routing-check.sh REFUSED the T3 close once (exit 2, MALFORMED): the
+contribution row was written key=value instead of the receipt's
+pipe-delimited format, with 'partial' outside the y/n/- vocabulary. The
+machine refused the unreadable measurement rather than treating it as
+agreement — a live demonstration of the PACKET-0050/0053 doctrine working
+against the orchestrator's own bookkeeping. Row rewritten to the binding
+format (duplicated_work=n with the partial-duplication nuance carried in
+the output_ref text), re-swept exit 0. Counted as 1 rework event for T3.
