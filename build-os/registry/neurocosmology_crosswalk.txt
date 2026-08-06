@@ -113,7 +113,7 @@ system_representation: compute budget; context budget; WIP; tool availability; l
 observable_proxies: a 900-second supervise budget; 900, 30 and 1800-second handoff budgets; a 30000-character startup skill budget
 binding_quality: proxies
 claimed_max_authority: gate
-known_limitations: THREE BINDINGS, NONE INSTANTIATING, and every constant inside them is unvalidated or assumed. `tools.skill_budget_audit` is the only real capacity accounting and it still only proxies: 30000 is an assumed platform constant its own entry says must be verified, SKILL.md byte size only approximates token cost, and it EXITS 0 WHEN OVER BUDGET, so the one control that measures capacity cannot act on its own measurement — a measurement that cannot bind the measurer is a stand-in for capacity management, not an instance of it. The two timeout controls treat wall-clock as a stand-in for capacity, which is the crudest proxy available: a run that is slow because it is thorough and a run that is slow because it is stuck produce the same number.
+known_limitations: FOUR BINDINGS, NONE INSTANTIATING, and every constant inside them is unvalidated or assumed. `tools.skill_budget_audit` is the only real capacity accounting and it still only proxies: 30000 is an assumed platform constant its own entry says must be verified, SKILL.md byte size only approximates token cost, and it EXITS 0 WHEN OVER BUDGET, so the one control that measures capacity cannot act on its own measurement — a measurement that cannot bind the measurer is a stand-in for capacity management, not an instance of it. The two timeout controls treat wall-clock as a stand-in for capacity, which is the crudest proxy available: a run that is slow because it is thorough and a run that is slow because it is stuck produce the same number. `measure.window_recorder`, the fourth, is the closest thing to a real spend record and still a proxy twice over: its meter readings are operator-pasted verbatim percentages the tool can neither verify nor decompose, so it enforces the DISCIPLINE of the window — verbatim edges, git-derived output, nothing hand-entered — and never the measurement itself.
 
 primitive: homeostasis
 universal_function: staying stable while operating
@@ -121,7 +121,7 @@ system_representation: runtime health; test state; repo cleanliness; dependency 
 observable_proxies: seventeen suite RESULT lines; merge preconditions over git status; post-merge verification; hook idempotence; static assertions over the maintenance layer's own source
 binding_quality: instantiates
 claimed_max_authority: gate
-known_limitations: THE LARGEST COUNT IN THIS CROSSWALK AND THE ONE MOST AT RISK OF BEING MISREAD. Twenty-six of its thirty-one bindings are test suites, and a suite's empirical status is `red_driven` — the registry README's concession applies here at full force: a check written against a fixture written by the same author in the same hour mostly proves the two agree. A green suite is evidence that PLANTED defects are caught. It is not a measurement of system health. There is no runtime health signal in this system at all, and nothing observes the system WHILE it operates: every binding here is a pre-condition or a post-condition around a run, never a state variable during one. `suite.build_os_maintenance` is the only binding that exercises recovery, and it does so against a cold install in a scratch repo rather than against a damaged live one.
+known_limitations: THE LARGEST COUNT IN THIS CROSSWALK AND THE ONE MOST AT RISK OF BEING MISREAD. Thirty of its thirty-five bindings are test suites, and a suite's empirical status is `red_driven` — the registry README's concession applies here at full force: a check written against a fixture written by the same author in the same hour mostly proves the two agree. A green suite is evidence that PLANTED defects are caught. It is not a measurement of system health. There is no runtime health signal in this system at all, and nothing observes the system WHILE it operates: every binding here is a pre-condition or a post-condition around a run, never a state variable during one. `suite.build_os_maintenance` is the only binding that exercises recovery, and it does so against a cold install in a scratch repo rather than against a damaged live one.
 
 primitive: integration_bandwidth
 universal_function: how much change can be safely absorbed
@@ -137,7 +137,7 @@ system_representation: action classes; write scopes; policy rules; authority cei
 observable_proxies: hash snapshots of the real memory files taken in-process and again in-shell; presence of the tripwire module; the GRAVITO:MANAGED banner set
 binding_quality: proxies
 claimed_max_authority: gate
-known_limitations: EVERY BOUNDARY HERE IS DETECTIVE, NOT PREVENTIVE, SO NOT ONE OF THE FOUR INSTANTIATES. The tripwire and the shell fingerprint both work by hashing before and after and naming what changed — so the prohibited write HAPPENS, and is then reported. That is worth having, and `maint.real_memory_tripwire` is field_observed against a real suite that destroyed live memory at exit 0, but it is not what the primitive means: a boundary that constrained reachable futures would refuse the write. The counter-argument is real and is recorded rather than discarded: both are `gate`, so the offending change cannot LAND even though the write does — the boundary is enforced at COMMIT granularity, not at WRITE granularity. That is why they proxy the primitive rather than failing to touch it, and it is also the precise size of the gap: any damage done between the write and the commit is out of scope for every boundary control in the census. Three of the four bindings police one narrow scope, the memory files. The authority ceilings that DO exist — the class-to-authority licence table — are enforced by `registry.reconciliation`, which binds to epistemic_quality because it checks that a mismatch is DECLARED, never that it is permitted.
+known_limitations: EVERY BOUNDARY HERE IS DETECTIVE, NOT PREVENTIVE, SO NOT ONE OF THE FOUR INSTANTIATES. The tripwire and the shell fingerprint both work by hashing before and after and naming what changed — so the prohibited write HAPPENS, and is then reported. That is worth having, and `maint.real_memory_tripwire` is field_observed against a real suite that destroyed live memory at exit 0, but it is not what the primitive means: a boundary that constrained reachable futures would refuse the write. The counter-argument is real and is recorded rather than discarded: both are `gate`, so the offending change cannot LAND even though the write does — the boundary is enforced at COMMIT granularity, not at WRITE granularity. That is why they proxy the primitive rather than failing to touch it, and it is also the precise size of the gap: any damage done between the write and the commit is out of scope for every boundary control in the census. Three of the four bindings police one narrow scope, the memory files. The authority ceilings that DO exist — the class-to-authority licence table — are enforced by `registry.reconciliation`, which binds to epistemic_quality because it checks that a mismatch is DECLARED, never that it is permitted. The two lane-fan-out arrivals change the shape without closing the gap: `intake.install_preflight` is the census's first PREVENTIVE boundary — it refuses before a byte moves — but nothing obliges the installer to consult it, so the boundary holds only for whoever asked; and `adapter.mock_reference` enforces the contract's pre-execution bounds against nothing but its own synthetic state dir.
 
 primitive: ethical_admissibility
 universal_function: which futures must not be entered at all
@@ -153,7 +153,7 @@ system_representation: evidence coverage; receipts; calibration; claim-state rec
 observable_proxies: git numstat recomputation of claimed row values; vacuity refusals across seven surfaces; occupancy and length floors on evidence rows; the tree-derived discovery rule
 binding_quality: instantiates
 claimed_max_authority: gate
-known_limitations: THE LARGEST BINDING SET IN THIS FILE, AND THE COUNT OVERSTATES THE CONTACT. Roughly three quarters of the controls in this registry are `red_driven` and only three are `field_observed`, so most of what binds here has been shown to fire on a defect its own author planted, and nothing more. The bindings divide sharply. A small group compares a claim against something the claimant did not write — `metrics.record.verify_git` against git numstat, `adoption.lane_size_check` against measured churn, `registry.discovery_rule` against the tree — and those genuinely instantiate the primitive. The larger group checks SHAPE, OCCUPANCY, LENGTH or VACUITY: `adoption.boundary_manifest` validates that a manifest is well-formed and not that the boundary it declares is true, which is why it sits with its siblings `adoption.schema_invariant` and `adoption.store_validate` rather than above them; `metrics.record.note_minimum` passes twelve repeated characters, `adoption.junk_row_thresholds` scores a row of plausible fabrications as full, and seven separate "the scan found nothing" refusals prove only that a check was not blind — a necessary condition for evidence and never a sufficient one. `maint.tripwire_coverage_scan` is registered `refuted`: measured, and found not to discriminate. Nothing here is `calibrated` except two threshold controls fitted to n=4 packets of this repository's own history. Reading this primitive's binding count as dense epistemic coverage would be the overclaim the registry exists to prevent.
+known_limitations: THE LARGEST BINDING SET IN THIS FILE, AND THE COUNT OVERSTATES THE CONTACT. Roughly three quarters of the controls in this registry are `red_driven` and only three are `field_observed`, so most of what binds here has been shown to fire on a defect its own author planted, and nothing more. The bindings divide sharply. A small group compares a claim against something the claimant did not write — `metrics.record.verify_git` against git numstat, `adoption.lane_size_check` against measured churn, `registry.discovery_rule` against the tree — and those genuinely instantiate the primitive. The larger group checks SHAPE, OCCUPANCY, LENGTH or VACUITY: `adoption.boundary_manifest` validates that a manifest is well-formed and not that the boundary it declares is true, which is why it sits with its siblings `adoption.schema_invariant` and `adoption.store_validate` rather than above them; `metrics.record.note_minimum` passes twelve repeated characters, `adoption.junk_row_thresholds` scores a row of plausible fabrications as full, and seven separate "the scan found nothing" refusals prove only that a check was not blind — a necessary condition for evidence and never a sufficient one. `maint.tripwire_coverage_scan` is registered `refuted`: measured, and found not to discriminate. Nothing here is `calibrated` except two threshold controls fitted to n=4 packets of this repository's own history. Reading this primitive's binding count as dense epistemic coverage would be the overclaim the registry exists to prevent. The two lane-fan-out arrivals sit squarely in the proxy group and say so themselves: `intake.repo_survey` grades its own confidence (manifest presence standing in for what a repo is) rather than verifying a finding, and `adapter.conformance_driver` compares declarations against behaviour whose only executable subject today is a mock sharing the declaration's author.
 
 primitive: latent_state
 universal_function: hidden state beneath the explicit claims
@@ -161,7 +161,7 @@ system_representation: contradiction detection; unstated dependencies; claim-sta
 observable_proxies: row counts at four render stages; receipt stems against store rows; module specifiers recovered from source; suites on disk against suites chained; RESULT lines against exit codes
 binding_quality: instantiates
 claimed_max_authority: gate
-known_limitations: Five bindings, and every one is a PAIRWISE EQUALITY between two places that were already supposed to agree. That is contradiction detection at its narrowest: each check is told in advance which two things to compare, so it can only find a divergence somebody already anticipated. Nothing here searches for unstated dependencies in general — `maint.source_scan_mask` recovers declared module specifiers with a heuristic lexer and is itself registered `refuted`. Nothing carries state across runs, so DRIFT in the temporal sense is not observed at all; all five fire within a single invocation. The claim-state gap this system actually suffers from — an artefact whose prose has quietly stopped describing the tree — is caught only at the specific pairings someone thought to write down.
+known_limitations: Five bindings, and every one is a PAIRWISE EQUALITY between two places that were already supposed to agree. That is contradiction detection at its narrowest: each check is told in advance which two things to compare, so it can only find a divergence somebody already anticipated. Nothing here searches for unstated dependencies in general — `maint.source_scan_mask` recovers declared module specifiers with a heuristic lexer and is itself registered `refuted`. Nothing carries state across runs, so DRIFT in the temporal sense is not observed at all; all five fire within a single invocation. The claim-state gap this system actually suffers from — an artefact whose prose has quietly stopped describing the tree — is caught only at the specific pairings someone thought to write down. `runtime.manifest_helper` adds the install-state records (manifest, INSTALLED_VERSION.json, receipts) and proxies for the standing reason: a record is true at write time and reconciled only when status is asked for, so drift between record and disk is caught on demand, never observed as it happens.
 
 primitive: durability
 universal_function: what persists through time
@@ -177,7 +177,7 @@ system_representation: amendment lane; staged policy changes; rollback; quorum; 
 observable_proxies: a justified override token that must cite the measured value; a computed-but-unauthorised threshold drift report; two cross-file pinnings of a threshold and a budget
 binding_quality: instantiates
 claimed_max_authority: gate
-known_limitations: THE BEST-SERVED PRIMITIVE RELATIVE TO ITS SIZE, and the only one where the system's own design reasoning matches the primitive's intent explicitly: `adoption.threshold_drift_advisory` computes what the rule WOULD become and refuses to be promoted, on the stated grounds that a threshold following the data is a control surface for whoever writes the data. What is missing is everything social. There is no quorum, no external authorization, no staging and no rollback of a rule change. An amendment here is a commit by whoever is at the keyboard; these guards ensure a rule cannot change in ONE PLACE ONLY, not that the change was ever authorised. `adoption.lane_override` is a real amendment lane, but it is policed for FORM — a justification of sufficient length that names the measured file count — and never for merit.
+known_limitations: THE BEST-SERVED PRIMITIVE RELATIVE TO ITS SIZE, and the only one where the system's own design reasoning matches the primitive's intent explicitly: `adoption.threshold_drift_advisory` computes what the rule WOULD become and refuses to be promoted, on the stated grounds that a threshold following the data is a control surface for whoever writes the data. What is missing is everything social. There is no quorum, no external authorization, no staging and no rollback of a rule change. An amendment here is a commit by whoever is at the keyboard; these guards ensure a rule cannot change in ONE PLACE ONLY, not that the change was ever authorised. `adoption.lane_override` is a real amendment lane, but it is policed for FORM — a justification of sufficient length that names the measured file count — and never for merit. `runtime.versioned_install` extends the pattern to installed-runtime change and proxies for the same reason it is useful: admission is byte identity at file granularity — refuse dirty, refuse overwrite, back up before force — which gates THAT content changes and never whether the change is safe.
 
 primitive: collective_coherence
 universal_function: alignment across multiple agents
@@ -1110,3 +1110,80 @@ class: A
 runtime_authority: gate
 binding_kind: proxies
 rationale: Test state over the PACKET-0055 hardening of the task-entry boundary's sole ungated pass: every attack shape (compound, comment, wrapper, substitution, injection, non-command-field mention) proven to gate, the legitimate invocation set proven to pass, the ROUTING-TOOL-PASS fingerprint recomputed independently, the refusal's own recovery command executed for real, and store-unavailable proven fail-open rather than a brick. A suite's function is property preservation, same as its siblings.
+
+control: runtime.versioned_install
+binds_to: gated_plasticity
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Admits change to an installed runtime only through a gate — refuse a dirty canonical, refuse overwriting differing bytes, refuse upgrading over local drift without an explicit force that backs up first. Proxies rather than instantiates because admission is decided by byte identity at file granularity: it gates THAT content changes, never whether the change is safe, and the backup that makes force reversible is a copy, not a proven-equivalent state.
+
+control: runtime.manifest_helper
+binds_to: latent_state
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Owns the runtime's durable state records — the release manifest with computed sha256s, INSTALLED_VERSION.json, per-action receipts — so what is installed where, at which version, is represented rather than remembered. A record is a proxy for the state it describes: true at write time, reconciled only when status is asked for, never continuously.
+
+control: intake.repo_survey
+binds_to: epistemic_quality
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Exists to keep claims about an unfamiliar repo honest — DISCOVERED vs GUESSED provenance, confidence labels, UNRECOGNIZED over a best guess, NOT MEASURED over an unrun baseline. Manifest presence is a stand-in for what the repo actually is, and the tool grades its own confidence rather than verifying the finding — a proxy for epistemic quality, not established truth.
+
+control: intake.install_preflight
+binds_to: boundary
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Refuses, before a byte moves, an install that would overwrite customer bytes — preventive in shape, unlike the census's detective boundaries. Still a proxy: it PREVIEWS the boundary for whoever asked, and nothing obliges install-project.sh to consult it, so the prohibited write is stopped only in the workflow that chose to run the preflight first. The unenforced seam is the gap.
+
+control: measure.window_recorder
+binds_to: energy
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Records capacity spend across a measured window: verbatim operator meter readings at both edges, durable output derived from git rather than hand-entered. The readings are the proxy — an externally displayed percentage the tool can neither verify nor decompose — so it enforces the discipline of the window, not the measurement itself.
+
+control: adapter.conformance_driver
+binds_to: epistemic_quality
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Refuses capability overclaims by name and measures an adapter against its own declaration — claim-vs-artifact checking in the census's usual shape. Level 1 checks structure and the named illegal combinations; level 2 compares declared behaviour with driven behaviour — but its only executable subject today is the mock, whose declaration and behaviour share an author, so what is established is contract shape, not provider truth.
+
+control: adapter.mock_reference
+binds_to: boundary
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Enforces the contract's boundaries pre-execution — mutation refused before recording without an admitting grant, external mutation authority refused categorically, completion refused until an interrupted task resumes. The bounds are real and preventive, and they protect nothing but the mock's own synthetic state dir: a reference implementation of the boundary, standing in for the provider adapters that would have to hold it against something real.
+
+control: suite.runtime_version
+binds_to: homeostasis
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Test state over the versioned runtime: the self-check driven CLEAN and DIRTY, install/upgrade/rollback/uninstall each proven in both directions against scratch customer repos, the no-overwrite and drift refusals red-driven with planted conflicts. A suite's function is property preservation, same as its siblings.
+
+control: suite.shell_surface
+binds_to: homeostasis
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Test state over the customer shell: real receipts rendered leak-free, the machine seam kept valid JSON, degradation notes proven translated rather than quoted, open/closed honesty asserted against a synthetic store covering every decision code. A suite's function is property preservation, same as its siblings.
+
+control: suite.intake
+binds_to: homeostasis
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Test state over intake and preflight: provenance labels, name-only secrets with a planted VALUE that must appear nowhere, the honest unrun and honestly-red baseline, the write-nothing preflight proven by before/after hashes. A suite's function is property preservation, same as its siblings.
+
+control: suite.adapter_contract
+binds_to: homeostasis
+class: A
+runtime_authority: gate
+binding_kind: proxies
+rationale: Test state over the adapter contract: real declarations validated, fabricated overclaims refused by name, the mock's full behavioural walk, refusal-not-fake for declared-unsupported operations, resumable interruption. A suite's function is property preservation, same as its siblings.

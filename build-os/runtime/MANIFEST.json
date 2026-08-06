@@ -58,7 +58,7 @@
       "install": "build-os/memory/provider_adapter_contract.md",
       "mode": "contract",
       "header": true,
-      "sha256": "22fe125c01c29f7fecaad49f0576ee7421dac433bc828434f2c480a7387f51f7"
+      "sha256": "335e41496dfb0368f1931fd92046646b1259499784c2a845d33af5a06d2c35d8"
     }
   ],
   "settings_hooks": {

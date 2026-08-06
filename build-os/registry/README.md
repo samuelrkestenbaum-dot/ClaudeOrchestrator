@@ -202,7 +202,7 @@ its mismatch at exit 0, silently, while the report went on naming it.
 
 **An entry is not a line.** Entries are cut at different granularities:
 `metrics.record.note_minimum` classifies one comparison, and
-`tests.nonvacuity_minimums` classifies a family of 34 fitted constants across 12
+`tests.nonvacuity_minimums` classifies a family of 43 fitted constants across 15
 test files. So "20 of 97 declare a mismatch" is a fact about this file's
 granularity, not a count of the heuristics that can stop a build — that number is
 **56**, in `MISMATCHES.md`'s summary table. The family's membership is not
@@ -816,7 +816,7 @@ in `scan-controls.sh`, with its reason beside it, where `grep` finds it;
 `scan-controls.sh patterns` prints the list and its size, so an allowance
 quietly growing is visible without reading the file. **It is empty today.**
 
-The registry carries **459** `evidence_refs`. That number is not remembered: the
+The registry carries **525** `evidence_refs`. That number is not remembered: the
 same total was previously written down in three artefacts as 218, 184 and 184
 against a live 224, because each was a hand count frozen at a different moment.
 `tests/control_registry_tests.sh` §25 recomputes it from the registry and fails

@@ -1051,13 +1051,13 @@ inputs: how many artefacts, files, links, scripts, blocks, rows, receipts or quo
 output: pass, or a FAIL declaring the scan vacuous
 owning_module: tests/entitlement_tests.sh
 consuming_policies: the FAIL count of twelve suites (pilot_kit, entitlement, control_registry, release_metadata, speed_benchmark, lane_declaration, metrics_adoption, build_os_maintenance, lane_enforcement, swarm_merge, scaffold_seeding, gate_depth), every one chained into tests/build_os_tests.sh
-evidence_refs: tests/pilot_kit_tests.sh:97; tests/pilot_kit_tests.sh:115; tests/pilot_kit_tests.sh:117; tests/pilot_kit_tests.sh:176; tests/pilot_kit_tests.sh:255; tests/pilot_kit_tests.sh:304; tests/pilot_kit_tests.sh:316; tests/pilot_kit_tests.sh:327; tests/pilot_kit_tests.sh:334; tests/pilot_kit_tests.sh:367; tests/pilot_kit_tests.sh:458; tests/entitlement_tests.sh:126; tests/entitlement_tests.sh:136; tests/entitlement_tests.sh:345; tests/entitlement_tests.sh:481; tests/control_registry_tests.sh:81; tests/control_registry_tests.sh:186; tests/control_registry_tests.sh:442; tests/control_registry_tests.sh:1633; tests/release_metadata_tests.sh:121; tests/release_metadata_tests.sh:200; tests/release_metadata_tests.sh:315; tests/speed_benchmark_tests.sh:421; tests/speed_benchmark_tests.sh:570; tests/speed_benchmark_tests.sh:581; tests/lane_declaration_tests.sh:493; tests/lane_declaration_tests.sh:496; tests/metrics_adoption_tests.sh:418; tests/metrics_adoption_tests.sh:421; tests/build_os_maintenance_tests.sh:92; tests/build_os_maintenance_tests.sh:2121; tests/build_os_maintenance_tests.sh:2146; tests/lane_enforcement_tests.sh:56; tests/swarm_merge_tests.sh:404; tests/scaffold_seeding_tests.sh:241; tests/gate_depth_tests.sh:73; tests/control_registry_tests.sh:828; tests/build_os_tests.sh:1077; tests/build_os_tests.sh:1146
+evidence_refs: tests/pilot_kit_tests.sh:97; tests/pilot_kit_tests.sh:115; tests/pilot_kit_tests.sh:117; tests/pilot_kit_tests.sh:176; tests/pilot_kit_tests.sh:255; tests/pilot_kit_tests.sh:304; tests/pilot_kit_tests.sh:316; tests/pilot_kit_tests.sh:327; tests/pilot_kit_tests.sh:334; tests/pilot_kit_tests.sh:367; tests/pilot_kit_tests.sh:458; tests/entitlement_tests.sh:126; tests/entitlement_tests.sh:136; tests/entitlement_tests.sh:345; tests/entitlement_tests.sh:481; tests/control_registry_tests.sh:81; tests/control_registry_tests.sh:186; tests/control_registry_tests.sh:442; tests/control_registry_tests.sh:1633; tests/release_metadata_tests.sh:121; tests/release_metadata_tests.sh:200; tests/release_metadata_tests.sh:315; tests/speed_benchmark_tests.sh:421; tests/speed_benchmark_tests.sh:570; tests/speed_benchmark_tests.sh:581; tests/lane_declaration_tests.sh:493; tests/lane_declaration_tests.sh:496; tests/metrics_adoption_tests.sh:418; tests/metrics_adoption_tests.sh:421; tests/build_os_maintenance_tests.sh:92; tests/build_os_maintenance_tests.sh:2121; tests/build_os_maintenance_tests.sh:2146; tests/lane_enforcement_tests.sh:56; tests/swarm_merge_tests.sh:404; tests/scaffold_seeding_tests.sh:241; tests/gate_depth_tests.sh:73; tests/control_registry_tests.sh:828; tests/build_os_tests.sh:1077; tests/build_os_tests.sh:1146; tests/runtime_version_tests.sh:89; tests/runtime_version_tests.sh:162; tests/adapter_contract_tests.sh:105; tests/adapter_contract_tests.sh:248
 failure_behavior: a FAIL per blind scanner; the run exits non-zero
 rollback_behavior: read-only
 promotion_requirement: n/a
 demotion_requirement: n/a
 authority_mismatch: declared
-notes: ONE ENTRY COVERING A FAMILY OF 35, IN 12 FILES — corrected from 5 refs and a claim of "six", which undercounted by 28 and was falsifiable with one grep. THE INCLUSION RULE, so the membership can be re-derived rather than trusted: a comparison in tests/*.sh of the form `-ge N` or `-gt N` with N > 1 that floors how much a scanner or driver COVERED, and whose failure makes every assertion downstream of it meaningless. N <= 1 is excluded deliberately — "the scan found at least one thing" IS the invariant and is Class A; every constant above 1 is a snapshot of the tree on the day it was written. The scan finds 37 such lines; three are excluded with stated reasons (build_os_maintenance_tests.sh:200, a self-constructed fixture's size; pilot_kit_tests.sh:340, a length floor on failure text; speed_benchmark_tests.sh:405, which mirrors metrics.record.note_minimum and would otherwise be classified twice). 34 remain and all 34 are this control; tests/control_registry_tests.sh section 21 reconciles the scan against this entry so the membership cannot drift silently again. Includes control_registry_tests.sh:772 — `[ "$PASS" -ge 40 ]`, the count of assertions that existed the day THIS packet was written, gating THIS packet's own suite. The vacuity principle is Class A and is one of the best things in this repository; all 34 constants implementing it are Class C, and they are what compares. MISMATCHES.md section 10 lists every member.
+notes: ONE ENTRY COVERING A FAMILY OF 43, IN 15 FILES — first corrected from 5 refs and a claim of "six", which undercounted by 28 and was falsifiable with one grep. THE INCLUSION RULE, so the membership can be re-derived rather than trusted: a comparison in tests/*.sh of the form `-ge N` or `-gt N` with N > 1 that floors how much a scanner or driver COVERED, and whose failure makes every assertion downstream of it meaningless. N <= 1 is excluded deliberately — "the scan found at least one thing" IS the invariant and is Class A; every constant above 1 is a snapshot of the tree on the day it was written. The scan finds 46 such lines; three are excluded with stated reasons (build_os_maintenance_tests.sh:200, a self-constructed fixture's size; pilot_kit_tests.sh:340, a length floor on failure text; speed_benchmark_tests.sh:429, which mirrors metrics.record.note_minimum and would otherwise be classified twice). 43 remain and all 43 are this control; tests/control_registry_tests.sh section 21 reconciles the scan against this entry so the membership cannot drift silently again. Includes control_registry_tests.sh:828 — `[ "$PASS" -ge 40 ]`, the count of assertions that existed the day THIS packet was written, gating THIS packet's own suite. FOUR MEMBERS ARRIVED WITH THE FOUR-LANE FAN-OUT and were registered by the merge-integration pass in the same commit that chained their suites: tests/runtime_version_tests.sh:89 and :162 (8-file floors over version output and fresh-install status) and tests/adapter_contract_tests.sh:105 and :248 (the schema's illegal-combination floor and the behavioural driver's coverage floor). The vacuity principle is Class A and is one of the best things in this repository; all 43 constants implementing it are Class C, and they are what compares. MISMATCHES.md section 10 lists every member.
 
 control: gatedepth.sentinel_drift
 class: A
@@ -1137,11 +1137,11 @@ implementation_status: load_bearing
 empirical_status: red_driven
 runtime_authority: gate
 nervous_system_role: immune
-inputs: the router, the guidance files, the hooks, the installers, and eleven chained sibling suites
+inputs: the router, the guidance files, the hooks, the installers, and thirty chained sibling suites
 output: ==== RESULT: N passed, M failed ====
 owning_module: tests/build_os_tests.sh
 consuming_policies: the repository's single verification command; swarm-merge.sh runs it as the post-merge verification
-evidence_refs: tests/build_os_tests.sh:1160; tests/build_os_tests.sh:1161
+evidence_refs: tests/build_os_tests.sh:1179; tests/build_os_tests.sh:1180
 failure_behavior: exits non-zero when FAIL is non-zero
 rollback_behavior: read-only; all fixtures live in mktemp dirs
 promotion_requirement: n/a
@@ -2472,3 +2472,201 @@ promotion_requirement: already load_bearing; nothing above this status exists
 demotion_requirement: it stops being load_bearing the day it is unchained from the repo suite
 authority_mismatch: none
 notes: REGISTERED IN THE SAME COMMIT AS THE BEHAVIOUR IT DRIVES (the PACKET-0048 lesson). Written RED FIRST against the 0054 substring guard: all twenty-one attack shapes passed ungated before the structured action landed, reproducing the reviewer's three proven bypass shapes and extending them; the suite therefore proves the narrowing, not merely the new code path. The recovery proof executes the refusal's OWN embedded command (with one clean --out redirection into the scratch root, itself re-classified) so a recovery path that stopped working could not pass; the fingerprint assertion recomputes the sha256 from the command text rather than trusting the row.
+
+control: runtime.versioned_install
+class: A
+implementation_status: implemented
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: motor
+inputs: MANIFEST.json (the versioned release record: file list, per-file sha256, settings hook entries, gitignore stanza), the canonical tree it was cut from, a named target repo, and the target's INSTALLED_VERSION.json where one exists
+output: a versioned install / status / upgrade / rollback / uninstall of the 8-file routing runtime, each mutating action leaving a JSON receipt and an INSTALLED_VERSION.json record — or a refusal that copies nothing at all
+owning_module: build-os/runtime/gravito-runtime.sh
+consuming_policies: tests/runtime_version_tests.sh drives every subcommand and every refusal in both directions on every suite run, chained from tests/build_os_tests.sh section 29
+evidence_refs: build-os/runtime/gravito-runtime.sh:43; build-os/runtime/gravito-runtime.sh:81; build-os/runtime/gravito-runtime.sh:129; build-os/runtime/gravito-runtime.sh:159; build-os/runtime/gravito-runtime.sh:259
+failure_behavior: dies refusing to operate on the canonical repo itself; `version` exits 2 the moment a canonical file stops matching MANIFEST.json, so unversioned content cannot ship; install checks the WHOLE plan first and dies with every conflict named while copying nothing (the no-overwrite guarantee is total, not partial); upgrade dies over drifted-local files unless --force-theirs is given, and --force-theirs backs the local copy up BEFORE replacing it
+rollback_behavior: upgrade writes build-os/runtime/backup/<timestamp>/ before touching a file; `rollback` restores the most recent backup; uninstall removes only files whose bytes still match the install record and preserves receipts, backups and every customer file
+promotion_requirement: load_bearing on the first real customer install that ships through this tool instead of the manual five-file copy it replaces
+demotion_requirement: deleting it returns installs to the copied-install pattern the empathiq pilot performed by hand
+authority_mismatch: none
+notes: LANE 1 of the four-lane fan-out (four isolated worktree lanes plus one merge-integration pass owning the hot files), REGISTERED BY THE MERGER IN THE SAME COMMIT that chains its suite into the repo verification command (the PACKET-0048 lesson, RULING 4). The check-then-write window between the phase-1 conflict scan and the phase-2 copies is the named residual gap: identity is checked by sha256 at scan time, not again at write time.
+
+control: runtime.manifest_helper
+class: A
+implementation_status: implemented
+empirical_status: unvalidated
+runtime_authority: gate
+nervous_system_role: memory
+inputs: MANIFEST.json, INSTALLED_VERSION.json, .claude/settings.json and .gitignore in a target repo, TSV rows on stdin for the record writers, and the runtime DEFINITION authored at its own top
+output: the structured half of every gravito-runtime.sh operation — manifest regeneration with computed sha256s, file and gitignore listings, additive settings merge and deep-equal-only unmerge, install records and JSON receipts — or a non-zero die on bad usage, a missing key, or an unknown command
+owning_module: build-os/runtime/runtime-json.mjs
+consuming_policies: gravito-runtime.sh routes every structured read/write through it (the bash driver never parses JSON with grep/sed); tests/runtime_version_tests.sh exercises those paths on every run, chained from tests/build_os_tests.sh section 29
+evidence_refs: build-os/runtime/runtime-json.mjs:63; build-os/runtime/runtime-json.mjs:72; build-os/runtime/runtime-json.mjs:90; build-os/runtime/runtime-json.mjs:117; build-os/runtime/runtime-json.mjs:137; build-os/runtime/runtime-json.mjs:197
+failure_behavior: die() writes the reason to stderr and exits 1 — on missing usage arguments, a key absent from a manifest, or an unknown command — which aborts the bash driver mid-operation rather than letting it continue on unparsed structure
+rollback_behavior: writes only the files it is explicitly pointed at (a manifest tmp, an install record, a receipt, a settings or gitignore merge target); no state of its own to roll back
+promotion_requirement: rises with runtime.versioned_install — it is that control's structured-data half, not an independent instrument
+demotion_requirement: n/a — unwiring it from gravito-runtime.sh removes its one caller
+authority_mismatch: none
+notes: A HELPER CLASSIFIED AT GATE FOR WHAT IT CAN DO, NOT FOR WHAT IT IS FOR: the scanner's operational rule is that a file able to terminate a run non-zero exercises gate, and die() does exactly that. empirical_status is unvalidated HONESTLY: the suite exercises its success paths on every run, but nothing red-drives die() itself, so nothing has established that the refusal discriminates — the evidence axis will name this gate out of licence on its advisory channel, and that finding is correct. Same fan-out and same-commit registration as runtime.versioned_install (LANE 1, RULING 4).
+
+control: intake.repo_survey
+class: A
+implementation_status: implemented
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: sensor
+inputs: an unfamiliar target repository (manifests, CI configs, instruction files, directory shape), an optional report dir, and the opt-in --run-baseline flag with its timeout
+output: INTAKE_REPORT.md and intake.json in the report dir — every finding confidence-labelled, every command marked DISCOVERED or GUESSED, secrets-shaped paths named without their contents, BASELINE: NOT MEASURED unless actually run, and a candidate task-graph seed — or exit 2 on bad usage or a missing target
+owning_module: build-os/intake/repo-intake.sh
+consuming_policies: tests/intake_tests.sh drives it over four fixtures (node/vitest, python, unrecognizable, baseline-red) with a planted secret VALUE that must appear nowhere, chained from tests/build_os_tests.sh section 29
+evidence_refs: build-os/intake/repo-intake.sh:49; build-os/intake/repo-intake.sh:55; build-os/intake/repo-intake.sh:138; build-os/intake/repo-intake.sh:234; build-os/intake/repo-intake.sh:288; build-os/intake/repo-intake.sh:343
+failure_behavior: exit 2 on an unknown option, an unexpected argument, or an absent target; inside a run the honesty doctrine fails TOWARD DISCLOSURE — no manifest match yields an explicit UNRECOGNIZED [CONFIDENCE: NONE] line rather than a best guess, and an unrun baseline yields BASELINE: NOT MEASURED rather than a verdict
+rollback_behavior: reads the target, writes only the report dir (a mktemp dir unless --out says otherwise); baseline commands are opt-in and run under a timeout because they execute the repo's own test command
+promotion_requirement: load_bearing on the first real second-repository intake whose report an operator routes work from
+demotion_requirement: n/a — the gate is argument and usage validity; the findings themselves are labelled candidates and bind nobody
+authority_mismatch: none
+notes: WHAT GATES HERE IS NARROW AND STATED: bad usage and a missing target refuse; the detection content never does — a wrong guess exits 0 wearing its GUESSED label, which is the design, not a gap. The heuristics are honest about being heuristics (that is the lane's whole deliverable), and the suite red-drives the honesty rather than the accuracy: a planted secret value, a deliberately failing baseline reported RED, an unrecognizable repo reported UNRECOGNIZED. LANE 3 of the four-lane fan-out, registered by the merge-integration pass in the same commit as the chaining (RULING 4, the PACKET-0048 lesson).
+
+control: intake.install_preflight
+class: A
+implementation_status: implemented
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: conscience
+inputs: a target repo, the engine file set install-project.sh copies, the maintenance MANAGED list read out of install-maintenance.sh itself so the two cannot drift apart, the customer-seed templates, and the three merge surfaces (settings.json, CLAUDE.md, .gitignore)
+output: a WOULD-CREATE / IDENTICAL / WOULD-REFUSE / KEPT classification for every file an install would place, previews of the three in-place merges, and a PREFLIGHT: CLEAR (exit 0) or PREFLIGHT: WOULD-REFUSE (exit 2) verdict — having written nothing under any outcome
+owning_module: build-os/intake/install-preflight.sh
+consuming_policies: tests/intake_tests.sh sections 5-7 drive the CLEAR, collision-refusal and bad-settings paths and hash the target tree before and after to prove nothing moved, chained from tests/build_os_tests.sh section 29
+evidence_refs: build-os/intake/install-preflight.sh:37; build-os/intake/install-preflight.sh:61; build-os/intake/install-preflight.sh:66; build-os/intake/install-preflight.sh:155; build-os/intake/install-preflight.sh:157
+failure_behavior: exit 2 with every collision named when any file the installers would place exists with different content, when the MANAGED list cannot be extracted (an uncovered layer is a refusal, not a gap), or when the target's settings.json does not parse (the real installer would crash halfway through it)
+rollback_behavior: nothing to roll back — it writes no byte anywhere under any outcome, which the suite proves by before/after tree hash
+promotion_requirement: load_bearing the day the install path is required to pass preflight before install-project.sh may run
+demotion_requirement: n/a — today nothing obliges an installer to consult it, and that unenforced seam is named in its crosswalk binding
+authority_mismatch: none
+notes: THE VERDICT GATES THE RUN THAT ASKED, NOT THE INSTALL ITSELF: install-project.sh does not invoke it, so its protection is real only in the workflow that runs it first — the preview is preventive, the enforcement seam is open, and both halves are stated rather than implied away. LANE 3 of the four-lane fan-out, registered by the merge-integration pass in the same commit as the chaining (RULING 4, the PACKET-0048 lesson).
+
+control: measure.window_recorder
+class: A
+implementation_status: implemented
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: memory
+inputs: operator meter readings pasted VERBATIM at open and close, a model id, task-event notes, and at close a repo path plus --since sha for the git derivation
+output: an append-only WINDOW.tsv holding both verbatim readings, timestamped task events, and a close row whose durable-output counts (commits, files, insertions, deletions) are derived from git rather than hand-entered
+owning_module: build-os/measure/window.sh
+consuming_policies: tests/measure_window_tests.sh drives all eight protocol invariants in both directions, chained from tests/build_os_tests.sh section 29
+evidence_refs: build-os/measure/window.sh:16; build-os/measure/window.sh:23; build-os/measure/window.sh:26; build-os/measure/window.sh:31; build-os/measure/window.sh:41; build-os/measure/window.sh:44
+failure_behavior: dies at exit 2 on a second open, a note or close with no open window, a note after close, and any open or close missing its --reading — the discipline that keeps report-writing outside the window and readings verbatim is enforced, not requested
+rollback_behavior: appends rows to one TSV in the named dir; nothing else is touched
+promotion_requirement: load_bearing when a post-PILOT-0002 pilot's economics are recorded through it and read back in a pilot report
+demotion_requirement: n/a — PILOT-0002's frozen protocol is deliberately untouched by this tool
+authority_mismatch: none
+notes: LANE 7's instrument, merged through the same fan-out and registered by the merge-integration pass in the same commit as the chaining (RULING 4). Its suite's verdict line does not use the house FAIL variable, so the scanner does not discover the suite as a surface of its own — the tool is the registered control here; the suite is its executed proof, chained all the same. The readings are honest because they are VERBATIM AND UNINTERPRETED: the tool enforces when they may be recorded, and no arithmetic inside it ever converts one into a cost claim.
+
+control: adapter.conformance_driver
+class: A
+implementation_status: implemented
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: immune
+inputs: a capability declaration JSON, build-os/adapters/capability-schema.json (vocabularies and lifecycle point lists read from the schema, not baked in), and optionally --exercise with an adapter command to drive
+output: SCHEMA-OK/SCHEMA-FAIL lines for structure and the four NAMED illegal combinations, BEHAV-OK/BEHAV-FAIL/BEHAV-SKIP lines for the ten-operation behavioural walk, and a CONFORMANCE RESULT line; exit 0 only at zero failures on both levels
+owning_module: build-os/adapters/conformance.sh
+consuming_policies: tests/adapter_contract_tests.sh validates the three real declarations, fabricates each overclaim and requires its BY-NAME refusal, and runs the full behavioural walk against the mock adapter, chained from tests/build_os_tests.sh section 29
+evidence_refs: build-os/adapters/conformance.sh:95; build-os/adapters/conformance.sh:99; build-os/adapters/conformance.sh:103; build-os/adapters/conformance.sh:145; build-os/adapters/conformance.sh:195; build-os/adapters/conformance.sh:290
+failure_behavior: a declaration overclaim fails BY NAME (UNSUPPORTED-TIER-CLAIM, PHANTOM-ENFORCEMENT, UNVERIFIED-SUPPORT, EXACT-TELEMETRY-WITHOUT-OBSERVATION) so the refusal teaches the rule it enforces; behaviourally, a refused operation must exit 2 AND say status refused — a crash is not an honest refusal — and the final verdict exits non-zero on any failure at either level
+rollback_behavior: level 2 drives the adapter against a mktemp state dir removed on exit; declaration files are only read
+promotion_requirement: load_bearing when adapter onboarding requires a green conformance run before an adapter may be declared
+demotion_requirement: n/a — nothing yet consumes its verdict but its own suite
+authority_mismatch: none
+notes: LANE 4 of the four-lane fan-out, registered by the merge-integration pass in the same commit as the chaining (RULING 4, the PACKET-0048 lesson). An adapter is measured AGAINST ITS OWN CLAIMS: declared-unsupported operations get the refusal check and their positive checks are skipped, so a modest declaration cannot fail for modesty and an immodest one cannot hide. The known limit: level 2's only executable subject today is the mock adapter — contract proof, not provider proof.
+
+control: adapter.mock_reference
+class: A
+implementation_status: implemented
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: reflex
+inputs: ADAPTER_STATE_DIR, one of the contract's ten operation names as argv[1], a JSON request on stdin, and the MOCK_DECLARE_UNSUPPORTED fixture variable
+output: one JSON response per call with op and status ok|refused|error (exit 0/2/1), durable per-task state under tasks/<id>, and telemetry whose counts are derived by counting its own event rows, never stored
+owning_module: build-os/adapters/mock-adapter.sh
+consuming_policies: build-os/adapters/conformance.sh --exercise drives it through the full behavioural walk; tests/adapter_contract_tests.sh does so on every suite run, chained from tests/build_os_tests.sh section 29
+evidence_refs: build-os/adapters/mock-adapter.sh:46; build-os/adapters/mock-adapter.sh:70; build-os/adapters/mock-adapter.sh:77; build-os/adapters/mock-adapter.sh:175; build-os/adapters/mock-adapter.sh:184; build-os/adapters/mock-adapter.sh:231
+failure_behavior: refuses at exit 2 — before recording anything — a mutation_event with no mutation-admitting authority_grant (enforcement point: pre), ANY grant of external mutation authority (that belongs to the operator, never to an adapter), an unknown operation, a declared-unsupported operation (refused, never faked), a reasonless degradation, and completion of an interrupted task until it is resumed
+rollback_behavior: all state lives under the caller-supplied ADAPTER_STATE_DIR; interruption writes resume.json so the completion refusal always has a recovery path
+promotion_requirement: n/a — it is deliberately a reference implementation; a provider adapter, not this mock, would be the thing to promote
+demotion_requirement: n/a
+authority_mismatch: none
+notes: PROOF OF CONTRACT BEHAVIOUR, NOT OF ANY PROVIDER — it demonstrates what a conforming adapter looks like and demonstrates nothing about any network host; its telemetry is honestly EXACT only because the telemetry is its own synthetic state, and provider_cost_usd stays UNAVAILABLE because it has no billing surface and does not guess one. The refusals it enforces bound only its own state dir. LANE 4 of the four-lane fan-out, registered by the merge-integration pass in the same commit as the chaining (RULING 4).
+
+control: suite.runtime_version
+class: A
+implementation_status: load_bearing
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: immune
+inputs: the canonical repo, MANIFEST.json, gravito-runtime.sh and runtime-json.mjs, plus scratch customer repos and a deliberately tampered canonical copy built in mktemp
+output: a pass/fail verdict over the versioned runtime's required behaviours: CLEAN/DIRTY self-check, full install wiring, idempotent re-install, the no-overwrite refusal that copies nothing, three-state drift status, drift-refusing upgrade with backup under --force-theirs, rollback from the most recent backup, and surgical uninstall that keeps customer bytes and receipts
+owning_module: tests/runtime_version_tests.sh
+consuming_policies: chained from tests/build_os_tests.sh section 29, which exits non-zero on its failure
+evidence_refs: tests/runtime_version_tests.sh:95; tests/runtime_version_tests.sh:152; tests/runtime_version_tests.sh:154; tests/runtime_version_tests.sh:180; tests/runtime_version_tests.sh:189; tests/runtime_version_tests.sh:225
+failure_behavior: prints each failing assertion and exits 1 via the house-style verdict, failing the whole chained run
+rollback_behavior: none needed — every fixture including the tampered canonical copy lives in mktemp; the live tree is only read
+promotion_requirement: already load_bearing; nothing above this status exists
+demotion_requirement: it stops being load_bearing the day it is unchained from the repo suite
+authority_mismatch: none
+notes: WRITTEN RED-FIRST in LANE 1 of the four-lane fan-out and CHAINED BY THE MERGE-INTEGRATION PASS IN THE SAME COMMIT AS THIS ENTRY (RULING 4, the PACKET-0048 lesson). Its two fitted coverage floors (lines 89 and 162) are registered to tests.nonvacuity_minimums, not here — the same split every chained suite observes.
+
+control: suite.shell_surface
+class: A
+implementation_status: load_bearing
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: immune
+inputs: build-os/shell/gravito, the repository's real routing receipts read read-only, and a synthetic store covering every decision code the surface must translate
+output: a pass/fail verdict over the customer shell: real receipts listed and rendered card-by-card with no internal vocabulary leaking, --json emitting valid JSON on both surfaces, open/closed status honesty, throttle events surfaced, degradation notes TRANSLATED rather than quoted raw, a usable first-run explain path, and usable errors
+owning_module: tests/shell_surface_tests.sh
+consuming_policies: chained from tests/build_os_tests.sh section 29, which exits non-zero on its failure
+evidence_refs: tests/shell_surface_tests.sh:59; tests/shell_surface_tests.sh:76; tests/shell_surface_tests.sh:105; tests/shell_surface_tests.sh:252; tests/shell_surface_tests.sh:263
+failure_behavior: prints each failing assertion and exits 1 via the house-style verdict, failing the whole chained run
+rollback_behavior: none needed — the live receipt store is read and never written; synthetic stores live in mktemp
+promotion_requirement: already load_bearing; nothing above this status exists
+demotion_requirement: it stops being load_bearing the day it is unchained from the repo suite
+authority_mismatch: none
+notes: WRITTEN RED-FIRST in LANE 2 of the four-lane fan-out and chained by the merge-integration pass in the same commit as this entry (RULING 4, the PACKET-0048 lesson). The leak scan is a NAMED DENYLIST of internal vocabulary — a term missing from the list is a leak it cannot see, which is the standing limit of every denylist scan in this repository, stated rather than implied away.
+
+control: suite.intake
+class: A
+implementation_status: load_bearing
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: immune
+inputs: repo-intake.sh and install-preflight.sh, four fixture repositories (node/vitest with a planted secret VALUE, python, unrecognizable, a baseline-red variant) and collision and bad-settings preflight targets, all built in mktemp
+output: a pass/fail verdict over intake honesty and preflight safety: DISCOVERED vs GUESSED provenance, name-only secrets with the planted VALUE absent from every output, BASELINE: NOT MEASURED by default and honestly RED when run, UNRECOGNIZED stated rather than guessed, preflight CLEAR and WOULD-REFUSE verdicts, and before/after tree hashes proving the preflight writes nothing
+owning_module: tests/intake_tests.sh
+consuming_policies: chained from tests/build_os_tests.sh section 29, which exits non-zero on its failure
+evidence_refs: tests/intake_tests.sh:162; tests/intake_tests.sh:191; tests/intake_tests.sh:194; tests/intake_tests.sh:226; tests/intake_tests.sh:247; tests/intake_tests.sh:301
+failure_behavior: prints each failing assertion and exits 1 via the house-style verdict, failing the whole chained run
+rollback_behavior: none needed — every fixture lives in mktemp and the intake writes only its own report dirs
+promotion_requirement: already load_bearing; nothing above this status exists
+demotion_requirement: it stops being load_bearing the day it is unchained from the repo suite
+authority_mismatch: none
+notes: WRITTEN RED-FIRST in LANE 3 of the four-lane fan-out and chained by the merge-integration pass in the same commit as this entry (RULING 4, the PACKET-0048 lesson). The planted secret VALUE assertion is the sharp one: it greps every produced byte — reports, JSON, baseline logs, stdout — for a string that must never appear, so a single leak fails the run by construction.
+
+control: suite.adapter_contract
+class: A
+implementation_status: load_bearing
+empirical_status: red_driven
+runtime_authority: gate
+nervous_system_role: immune
+inputs: ADAPTER_CONTRACT.md, capability-schema.json, the three real capability declarations, conformance.sh, mock-adapter.sh driven in mktemp state dirs, and provider_adapter_contract.md's pointers at the v0 formalization
+output: a pass/fail verdict over the adapter contract: the three real declarations validate, every fabricated overclaim is refused BY ITS NAME, the mock passes full behavioural conformance, declared-unsupported operations are refused rather than faked, interruption leaves resumable state whose counts survive resume, and the memory contract still names the v0 artifacts
+owning_module: tests/adapter_contract_tests.sh
+consuming_policies: chained from tests/build_os_tests.sh section 29, which exits non-zero on its failure
+evidence_refs: tests/adapter_contract_tests.sh:135; tests/adapter_contract_tests.sh:263; tests/adapter_contract_tests.sh:288; tests/adapter_contract_tests.sh:292; tests/adapter_contract_tests.sh:295
+failure_behavior: prints each failing assertion and exits 1 via the house-style verdict, failing the whole chained run
+rollback_behavior: none needed — adapter state dirs and patched declarations live in mktemp; the shipped declarations are only read
+promotion_requirement: already load_bearing; nothing above this status exists
+demotion_requirement: it stops being load_bearing the day it is unchained from the repo suite
+authority_mismatch: none
+notes: WRITTEN RED-FIRST in LANE 4 of the four-lane fan-out and chained by the merge-integration pass in the same commit as this entry (RULING 4, the PACKET-0048 lesson). Its two fitted coverage floors (lines 105 and 248) are registered to tests.nonvacuity_minimums, not here. Behavioural proof today runs against the mock alone — contract proof, not provider proof, exactly as the mock's own entry states.

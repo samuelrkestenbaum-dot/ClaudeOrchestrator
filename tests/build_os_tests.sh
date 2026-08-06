@@ -1156,6 +1156,25 @@ else
   printf '%s' "$SP_HITS"
 fi
 
+echo "== 29. Chained lane suites (versioned runtime, customer shell, repo intake, adapter contract, measured window) =="
+# The four-lane fan-out (LANE 1-4: isolated worktrees, disjoint write sets, one
+# merge-integration pass owning this file) landed five sibling suites. Same
+# device and same reasons as section 26: each suite is invoked through
+# chain_suite so its counts fold into this file's totals rather than collapsing
+# into one pass/fail, and a dead suite is one named failure instead of a silent
+# absence — section 26's wiring guard reported all five as discoverable-only
+# until these lines existed. This section lives BELOW section 28 deliberately:
+# ten evidence_refs cite lines of this file between the chain_suite definition
+# and the final verdict, and inserting these lines mid-file would have moved
+# every one of them (the same constraint line 854 packs itself flat to honour).
+# The five suites' registry entries land in the SAME COMMIT as this wiring
+# (the PACKET-0048 lesson, RULING 4).
+chain_suite "tests/runtime_version_tests.sh"  "the versioned Gravito runtime: manifest self-check, no-overwrite install, drift status, backed-up upgrade, rollback, surgical uninstall"
+chain_suite "tests/shell_surface_tests.sh"    "the customer shell surface: real receipts rendered leak-free, valid --json, translated degradation notes"
+chain_suite "tests/intake_tests.sh"           "second-repository intake: provenance-labelled detection, name-only secrets, opt-in honest baseline, write-nothing install preflight"
+chain_suite "tests/adapter_contract_tests.sh" "the provider-adapter contract: overclaims refused by name, behavioral conformance, refusal-not-fake, resumable interruption"
+chain_suite "tests/measure_window_tests.sh"   "the measured-window recorder: verbatim meter readings at both edges and git-derived durable output"
+
 echo
 echo "==== RESULT: $PASS passed, $FAIL failed ===="
 [ "$FAIL" -eq 0 ]
