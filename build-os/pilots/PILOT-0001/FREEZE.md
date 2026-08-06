@@ -121,3 +121,37 @@ secrets without explicit scoped operator go; suite commands as named per
 task; pilot commits land ONLY on pilot/PILOT-0001-internal-external-style.
 No new Gravito architecture during the pilot absent an executed pilot
 blocker requiring a minimal correction.
+
+## FREEZE AMENDMENT 1 — model change, disclosed (before task 1, zero tasks run)
+
+The operator switched this session's model to **claude-opus-5** after the
+freeze commit and BEFORE T1 began. The frozen settings above named
+claude-fable-5. Amending rather than silently editing: the pilot's frozen
+model is now **claude-opus-5**, and no measured task ran under the previous
+value. This matters because the pilot's headline metric is per-percentage-
+point of weekly credit and weekly-meter consumption is model-specific — a
+mid-pilot model change would confound it. If the model changes again after
+T1 starts, that is a confound to record, not to smooth over.
+
+## OPERATOR-BINDING NOTES FOR THE FINAL REPORT (recorded at freeze time)
+
+1. **Keep the enforcement limitation prominent**: this pilot tests
+   cross-repository control through protocol, receipts, and close-time
+   reconciliation — NOT full native runtime enforcement. Hooks are not
+   active inside the pilot repository.
+2. **Never present this as external customer validation.** Exact label:
+   Internal external-style real-repository pilot.
+3. **Full mode's burden of proof is open**: Full has shown it can consume
+   resources; it has NOT shown its extra agents consistently catch what
+   Direct or Light would miss. If Full activates in this pilot, its
+   contribution rows must answer that question honestly — including a
+   negative answer.
+4. **Process expansion is a named weakness**: every control must answer
+   "did this layer prevent a real failure or improve an outcome enough to
+   justify its ongoing cost?" The pilot should report where Gravito's own
+   ceremony cost more than it returned.
+5. **Product simplicity is now critical**: the customer-facing surface is
+   task → selected mode and reason → budget → progress → result → evidence.
+   Packet numbers, doctrine chains, census counts, archivist mechanics and
+   rotation rules are internal, and the report should say which of the
+   pilot's overhead a customer would never see.
