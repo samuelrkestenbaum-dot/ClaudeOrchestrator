@@ -1891,3 +1891,31 @@ byte ceiling. This file does, and it is nearly out; that is why this block is sh
   `d2c09c6`, `8ba368a`, `727de75` and this close commit stay **local**. `c2d97f8` remains the
   **selection anchor** and **may not be amended**, and neither may the three execution commits.
 
+
+## PACKET-0053-live-enforcement — CLOSED PASS-AS-FIXED 2026-08-06 — GRAVITO IS NOW A RUNTIME GOVERNOR, LIVE AT NEXT SESSION START
+
+Receipt `build-os/receipts/gravito_live_enforcement_a.md`. Commits `aa0c968` +
+`dda0dea` + `61503fa` (one fix commit), base `89d67df` (pushed tip). Four labeled
+layers: PreToolUse hook `routing-gate.sh` (receipt-presence gate, depth enforcement,
+fan-out throttle BEFORE dispatch, process-allowance ledger default **7 = the
+mandatory_full_regate chain, DERIVED** — the 0050/0051 question resolved,
+auto-stamped degradation, every decision logged w/ stderr fallback);
+`routing-check.sh` EXTENDED (CONTRIBUTION-MISSING, STATE-DISAGREE reported never
+reconciled, seven attribution layers, old receipts = '-' admissions); protocol
+labeled; NOT-YET-ENFORCED named (live tokens/cost `unavailable_live`; unhooked
+sessions; the residual no-trace vector). qa GREEN 2677/0 solo; iso 2545/0 +
+2677/0; overhead 27 ms vs 250 ms; census **126**, mismatches **24**, gate-on-advise
+**14**, README refs **440**; reviewer fix-then-pass 2 items fixed in `61503fa`.
+`DC-0001` 32→33 derived, same commit. Second eyes NONE (Codex 403, stated).
+
+**CRITICAL — READ BEFORE THE NEXT SESSION'S FIRST DISPATCH.** The hooks load at
+NEXT session start, and with this close NO routing receipt remains open, so **the
+next session's FIRST substantive dispatch WILL BE BLOCKED until it issues a
+routing receipt via `build-os/tools/route-task.sh`. That is mandatory routing
+entry WORKING, not a malfunction** — the refusal message carries the recovery
+command.
+
+NOTHING PUSHED (`aa0c968`, `dda0dea`, `61503fa` + the close commit local, pending
+explicit go; 4 ahead of origin). NOTHING IN FLIGHT, NOTHING STAGED — the operator's
+directive ends: complete the bounded build, report the evidence, and stop for the
+next product decision. `residue.md` frozen (blob `01517ad2…`).

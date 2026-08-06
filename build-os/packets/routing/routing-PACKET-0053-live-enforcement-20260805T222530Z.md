@@ -20,13 +20,25 @@ budget_max_wall_clock_s: 900
 budget_max_cost_usd: 1.50
 # --- empty at issue; filled at close. AN UNKNOWN IS NOT A ZERO: "-" is an honest
 # --- admission and is never refused; refusal is for CONTRADICTION, not absence.
-executed_mode: -
+executed_mode: gravito_full
 escalation: -
 escalation_evidence: -
+# --- close-time record (archivist, 2026-08-06, at close of PACKET-0053): executed
+# --- mode matches the selected mode — no escalation occurred, so escalation stays
+# --- '-'. Consumption fields stay '-' FOR THE DOCTRINAL REASON, not from neglect:
+# --- this packet's own serial agent passes and live token/call/cost counters are
+# --- transcript-only — nothing in git attests to them, and a transcript figure is
+# --- not written into a measured cell. '-' is the admission this gate accepts (an
+# --- unknown is not a zero). consumed_process_dispatches (a PACKET-0053 field this
+# --- pre-extension receipt did not carry at issue) is written '-' with a SPECIFIC
+# --- admission: the hook that counts process dispatches EXACTLY loads at NEXT
+# --- session start, so no live_state/ file exists for this packet and the count is
+# --- transcript-only — not derivable from any committed record of this session.
 consumed_subagents: -
 consumed_total_tokens: -
 consumed_uncached_tokens: -
 consumed_model_calls: -
 consumed_wall_clock_s: -
 consumed_cost_usd: -
+consumed_process_dispatches: -
 degradation_note: -

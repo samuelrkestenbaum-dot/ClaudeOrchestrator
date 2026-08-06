@@ -2438,9 +2438,9 @@ surface the T2–T4 refusals and per-arm acceptance explicitly.
   close's append, `current_state.md` is within ~1.7 KB of its 204,800 B ceiling —
   the NEXT close cannot proceed without the operator authorizing the re-block.
 
-## IN FLIGHT — `live-routing-and-economic-enforcement` (declared 2026-08-05)
+## CLOSED — `live-routing-and-economic-enforcement` (declared 2026-08-05; closed 2026-08-06 by the archivist)
 
-- **Packet id:** `PACKET-0053-live-enforcement` — minted; 0 commits/0 files before this edit.
+- **Packet id (CLOSED):** `PACKET-0053-live-enforcement` — minted; 0 commits/0 files before this edit.
 - **Lane:** `substantive`. **Depth 2.** Routing receipt issued before building:
   `routing-PACKET-0053-live-enforcement-20260805T222530Z.md`, gravito_full via honest value
   factors high_blast_radius (the hook touches how every session executes) + high_rework_history.
@@ -2461,3 +2461,62 @@ surface the T2–T4 refusals and per-arm acceptance explicitly.
   is not. Direct stays near-zero overhead — always observing, not always ceremonious.
 - **Out of scope:** benchmarks, EXP re-runs, broad governance, memory files beyond the packet's
   own receipts. No push without go.
+
+## CLOSE RECORD — `gravito_live_enforcement_a` (`PACKET-0053-live-enforcement`) — closed 2026-08-06 by the archivist. NOTHING IN FLIGHT.
+
+- **Packet id (CLOSED):** `PACKET-0053-live-enforcement`. Receipt:
+  `build-os/receipts/gravito_live_enforcement_a.md`. **Lane:** `substantive`.
+  **Depth 3, announced** — build; qa ‖ reviewer concurrently; one bounded fix round
+  (`fix-then-pass`, 2 enumerated items). Base `89d67df` (the pushed tip), re-verified at
+  close (`git merge-base 61503fa 89d67df` → `89d67df`), tree quiet at `61503fa`.
+- **Commits:** `aa0c968` (declaration + gravito_full routing receipt via
+  high_blast_radius + high_rework_history) + `dda0dea` (build; same-commit registration,
+  census 121→126) + `61503fa` (the one permitted fix commit — amended twice
+  pre-measurement, message typo then an 8-citation +5 anchor shift re-pointed by content
+  verification, disclosed).
+- **WHAT SHIPPED — four labeled enforcement layers.** MACHINE-BEFORE-EXECUTION:
+  `.claude/hooks/routing-gate.sh` (PreToolUse Task|Agent) — receipt-presence gate, depth
+  enforcement, fan-out throttle AT the budget BEFORE the dispatch executes,
+  process-allowance ledger (default **7 = the mandatory_full_regate chain, DERIVED** —
+  the 0050/0051 calibration question resolved), auto-stamped degradation via
+  `record-degradation.sh` ("Stop the expensive mode, not the task"), every decision
+  logged (stderr fallback when the store is unwritable). MACHINE-AT-CLOSE:
+  `routing-check.sh` extended, never forked — CONTRIBUTION-MISSING, STATE-DISAGREE
+  reported never reconciled, seven attribution layers, old receipts pass as `-`
+  admissions. PROTOCOL-DURING: context minimization + token awareness, labeled.
+  NOT-YET-ENFORCED, named: live tokens/cost hook-invisible interactively
+  (`unavailable_live`, never estimated-as-exact); non-dispatch work ungated beyond
+  receipt presence + counting; unhooked sessions ungated; the residual no-trace vector
+  (store unwritable AND stderr discarded).
+- **Gates:** qa GREEN — suite **2677/0 solo** with per-suite delta arithmetic; commit-1
+  iso **2545/0 at `aa0c968`** + **2677/0 at `dda0dea`**; the hook driven through every
+  branch with qa's own fabricated stdin — all seven behaviors confirmed incl FAIL-OPEN
+  and DISABLED-BY-OPERATOR logging; backward compat proven on real pre-0053 receipts;
+  settings wiring valid, prior hooks preserved; overhead re-measured **27 ms/call** vs
+  the 250 ms bound; census **126**, mismatches **24**, gate-on-advise unchanged **14**,
+  README refs **440 derived**; frozen surfaces intact; hook safety scrutiny clean.
+  Reviewer **fix-then-pass on TWO items**, both fixed in `61503fa` (allowance 4→**7**,
+  derived from the doctrine's largest legal chain, RT9 driving the 7-dispatch regate
+  shape and blocking the 8th; the unwritable-store no-trace vector — stderr fallback +
+  the residual vector named in layer 4). Targeted confirmation: gate suite 132/0,
+  registry suite 180/0, scan-controls 0, FULL SUITE **2677/0 solo at `61503fa`** →
+  **PASS-AS-FIXED**. Second eyes NONE (Codex 403 at proxy, both gates attempted and
+  stated). `DC-0001` numeral moved **32 → 33** in this close commit, derived from the
+  receipt store.
+- **Live routing receipt closed:** `executed_mode: gravito_full` (matches selected; no
+  escalation); consumption fields stay `-` with the transcript-only admission;
+  `consumed_process_dispatches` stays `-` — NOT derivable: the counting hook loads at
+  next session start, so no `live_state/` file exists for this packet. Post-fill sweep
+  `routing-check.sh check` = 4 receipts, 0 violations, exit 0.
+- **GOES LIVE AT NEXT SESSION START — AND THE FIRST DISPATCH WILL BE BLOCKED, BY
+  DESIGN.** With this receipt's `executed_mode` filled, NO routing receipt remains
+  open; the next session's FIRST substantive dispatch will be REFUSED until it issues a
+  routing receipt via `build-os/tools/route-task.sh`. That is mandatory routing entry
+  working, not a malfunction — the refusal message carries the recovery command.
+- **Boundaries:** NOTHING PUSHED — `aa0c968`, `dda0dea`, `61503fa`, and this close
+  commit local pending explicit operator go (4 commits ahead of origin after this
+  close, derived from git); none may be amended. No merge, deploy, or secrets.
+  `residue.md` stays frozen (blob `01517ad2…`). **NOTHING IS IN FLIGHT; NOTHING IS
+  STAGED** — the operator's directive ends with "complete the bounded build, report the
+  evidence, and stop for the next product decision." Staging is a routing act, and the
+  archivist takes none.
