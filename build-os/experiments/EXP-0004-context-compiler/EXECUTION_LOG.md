@@ -139,3 +139,76 @@ Nothing was changed in response to what was seen: not the seed, not the task
 set, not the capsule budget, not the acceptance criteria, not the arm order.
 The two changes are a prompt-delivery mechanism and an oracle that measures the
 baseline its own criterion names.
+
+## Attempt 1 of pairs E4 and E5 — VOID (concurrency, on operator instruction)
+
+E1, E2 and E3 ran strictly sequentially and each of their four arms had the
+machine to itself. The operator then directed that the two remaining pairs be
+run concurrently to finish sooner, having been told in advance that this would
+contaminate elapsed time — a registered metric — on those pairs. E5 was launched
+on a second work tree, with its own baseline clone and its own test-baseline
+cache so the two oracles could not race.
+
+### What actually overlapped — measured, not assumed
+
+Windows are first-to-last stream timestamp, UTC.
+
+| arm | window | contention |
+|---|---|---|
+| E1.A | 23:20:31 – 23:34:26 | alone |
+| E1.B | 23:39:35 – 23:55:06 | alone |
+| E2.B | 00:02:44 – 00:21:14 | alone |
+| E2.A | 00:31:30 – 00:47:48 | alone |
+| E3.A | 00:52:45 – 01:09:23 | alone |
+| E3.B | 01:13:35 – 01:27:09 | alone |
+| E4.B | 01:31:00 – 01:52:13 | alone (E5 launched 01:53:18, after this closed) |
+| E5.A | 01:55:39 – 01:58:37 | against E4's post-arm-B `tsc`/vitest |
+| E4.A | 01:58:47 – 02:28:39 | against all of E5.B **and TIMED OUT** |
+| E5.B | 02:02:46 – 02:11:24 | entirely inside E4.A's window |
+
+The prediction made when the concurrency was authorised was wrong in its
+specifics: E4.A and E5.A were expected to collide and did not — they missed
+each other by **ten seconds**. What collided was E5.B, wholly inside E4.A.
+
+### The two failures were worse than degraded timing
+
+- **E4.A was truncated, not slowed.** `terminal_reason: aborted_tools`,
+  `is_error: true`, killed at the 1800 s ceiling after 73 turns and 23 edits
+  across 11 files. A truncated arm has no comparable token count and no
+  comparable work product; the loss is not confined to the clock.
+- **E5.A never performed the task.** Nine turns, zero files changed. It put a
+  `tsc` in the background, registered a `Monitor`, stated it would continue when
+  notified, and the session ended — because a headless `-p` run has nothing that
+  can wake it. Its 195 s and its small token count describe a no-op. Reported as
+  efficiency they would be a lie.
+
+Neither failure is a property of the context condition. One is CPU contention
+the experiment introduced; the other is a limitation of the execution fixture
+that could have struck either arm and happened to strike this one.
+
+### Disposition — both pairs re-run WHOLE, uncontended
+
+Same precedent as E1 attempt 1, and the same reasoning: the contamination is
+environmental and fixture-borne, not treatment-borne. Both arms of each pair are
+re-run so no arm is replaced in isolation. **Nothing is changed** — same
+timeout, same prompts, same budgets, same oracle, same arm order. If E4.A
+reaches the ceiling again with the machine to itself, that is a legitimate
+result and it stays in.
+
+Disclosed, because it is the fact that makes the re-run defensible rather than
+self-serving: **both discarded attempts favoured the compiled condition** — in
+E4 the compiled arm completed while the other timed out, and in E5 the compiled
+arm succeeded while the other did nothing. Re-running therefore runs *against* a
+flattering result, not toward one. Attempt 1's artifacts are kept at
+`pairs-out/E4-attempt1/` and `pairs-out/E5-attempt1/` and are not admitted to
+the aggregate.
+
+### One more fixture leak, found here
+
+The arm sessions could see **this session's task list** — E5.A said so in its
+own words, that the task list "belongs to a different workstream and isn't
+relevant". It is identical in both arms, so it does not bias the comparison, and
+AMENDMENT 2's mechanical check still passes because that check is on prompt
+bytes. It is still context that has no business inside an arm whose registered
+treatment is "the capsule and nothing else", and it is recorded as a known
+imperfection of the substitution rather than left to be discovered later.
