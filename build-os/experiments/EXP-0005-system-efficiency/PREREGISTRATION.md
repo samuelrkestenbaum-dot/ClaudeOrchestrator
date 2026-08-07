@@ -315,8 +315,8 @@ Run against this draft before freezing, per instruction.
 ## Readiness — what is NOT done
 
 - [ ] task set selected and frozen (**0 of ≥10**)
-- [ ] repository seed pinned
-- [ ] memory state pinned
+- [x] **repository seed pinned** — `2543c87`, tree `2f5e391f`, restored and verified by `harness/restore-seed.sh`, which refuses rather than warns (`memory/SEED-PIN.md`)
+- [x] **memory state pinned** — durable-state digest `3311a638…`, method now defined in the repository; `INVENTORY.md`'s headline digest is superseded as unreproducible, with the per-class evidence that the state itself did not drift
 - [x] **common timeout ceiling calibrated and frozen** — 5400 s, from three admissible calibration runs, before task selection (`calibration/TIMEOUT-RULE-FROZEN.md`)
 - [x] **three-role blinding harness built and leak-tested** — views made unjoinable by separate salt domains; 41 assertions incl. the adversarial join
 - [x] **governance-strip rule implemented and tested** — product-only adjudication, governance as denominator cost, leak ⇒ `result_confounded`
