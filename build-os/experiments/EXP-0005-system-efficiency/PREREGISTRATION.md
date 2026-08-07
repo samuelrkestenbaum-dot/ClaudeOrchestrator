@@ -317,9 +317,9 @@ Run against this draft before freezing, per instruction.
 - [ ] task set selected and frozen (**0 of ≥10**)
 - [ ] repository seed pinned
 - [ ] memory state pinned
-- [ ] common timeout ceiling calibrated and frozen (pre-task-selection)
-- [ ] three-role blinding harness built and leak-tested
-- [ ] governance-strip rule implemented and tested
+- [x] **common timeout ceiling calibrated and frozen** — 5400 s, from three admissible calibration runs, before task selection (`calibration/TIMEOUT-RULE-FROZEN.md`)
+- [x] **three-role blinding harness built and leak-tested** — views made unjoinable by separate salt domains; 41 assertions incl. the adversarial join
+- [x] **governance-strip rule implemented and tested** — product-only adjudication, governance as denominator cost, leak ⇒ `result_confounded`
 - [ ] mapping sealed, digest committed
 - [ ] this preregistration frozen
 
