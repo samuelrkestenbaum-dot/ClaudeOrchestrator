@@ -1,0 +1,1364 @@
+{
+  "backlog_version": 1,
+  "status": "CANDIDATES for selection, not a selection",
+  "selection_is_a_separate_step": "Selection and freezing is a separate, operator-gated step. This file selects nothing.",
+  "candidate_id_note": "candidate_id is the cluster's ordinal in the index, assigned before filtering, so an excluded cluster keeps its id and the surviving ids stay stable when the exclusion list changes. A gap in the numbering is an exclusion, not a lost cluster.",
+  "repo": "/home/user/empathiq-website",
+  "pinned_commit": "2543c873141fa64653a7993d326465d5e0dd1006",
+  "timestamp": "1970-01-01T00:00:00.000Z",
+  "source": "error clusters measured from the --errors input at the pinned commit (37 cluster(s))",
+  "errors_measured": true,
+  "exclusions_file": "/home/user/ClaudeOrchestrator/build-os/compiler/eligibility/prior-pilot-exclusions.txt",
+  "exclusion_rules": [
+    {
+      "pilot": "PILOT-0001",
+      "task": "T1 diagnose the red baseline",
+      "pattern": "red baseline|baseline diagnosis|T1_DIAGNOSIS",
+      "line": 54
+    },
+    {
+      "pilot": "PILOT-0001",
+      "task": "T2 hermetic notification test",
+      "pattern": "notification",
+      "line": 55
+    },
+    {
+      "pilot": "PILOT-0001",
+      "task": "T3 four_eyes_state_change audit kind",
+      "pattern": "four_eyes_state_change|four-eyes|audit[_-]?kind",
+      "line": 56
+    },
+    {
+      "pilot": "PILOT-0001",
+      "task": "T4 executeFixLayer dry-run timeout",
+      "pattern": "executeFixLayer|execute-fix-layer|dry-?run.*timeout",
+      "line": 57
+    },
+    {
+      "pilot": "PILOT-0001",
+      "task": "T5 stripe SDK-drift cluster",
+      "pattern": "stripe",
+      "line": 58
+    },
+    {
+      "pilot": "PILOT-0002",
+      "task": "T1 trpc client bridge->bridges drift cluster",
+      "pattern": "trpc|\\bbridges?\\b",
+      "line": 59
+    },
+    {
+      "pilot": "PILOT-0002",
+      "task": "T2 CoverageReportData drift",
+      "pattern": "CoverageReportData|coverage-?report|(^|/)coverage(/|\\.)",
+      "line": 60
+    },
+    {
+      "pilot": "PILOT-0002",
+      "task": "T3 agents hermetic and live-LLM tests",
+      "pattern": "agents[._-]test|(^|/)agents(/|\\.)|live-?llm",
+      "line": 61
+    },
+    {
+      "pilot": "PILOT-0002",
+      "task": "T4 training/router interface conflict",
+      "pattern": "AutoRetrainingPipeline|auto-?retraining|(^|/)training/",
+      "line": 62
+    },
+    {
+      "pilot": "PILOT-0002",
+      "task": "T5 voice-stream LogDomain and webhooks narrowing",
+      "pattern": "LogDomain|voice-?stream|webhooks?",
+      "line": 63
+    }
+  ],
+  "candidate_count": 28,
+  "excluded_count": 9,
+  "candidates": [
+    {
+      "candidate_id": "CAND-0002",
+      "signature": "TS18047: '<S>' is possibly '<S>'.",
+      "error_count": 114,
+      "files": [
+        "server/deployment/cms-content-layer.ts",
+        "server/deployment/deployment-persistence.ts",
+        "server/deployment/rollout-persistence.ts",
+        "server/emotional-geometry-runtime/alert-analytics.ts",
+        "server/emotional-geometry-runtime/escalation-engine.ts",
+        "server/emotional-geometry-runtime/geometry-alerting.ts",
+        "server/emotional-geometry-runtime/session-persistence.ts",
+        "server/governance/coverage-tracker.ts",
+        "server/governance/policy-as-code.ts",
+        "server/infrastructure/data-retention.ts",
+        "server/router-groups/geometry-admin-router.ts"
+      ],
+      "seed_files": [
+        "server/deployment/cms-content-layer.ts",
+        "server/deployment/deployment-persistence.ts",
+        "server/deployment/rollout-persistence.ts",
+        "server/emotional-geometry-runtime/alert-analytics.ts",
+        "server/emotional-geometry-runtime/escalation-engine.ts",
+        "server/emotional-geometry-runtime/geometry-alerting.ts",
+        "server/emotional-geometry-runtime/session-persistence.ts",
+        "server/governance/coverage-tracker.ts",
+        "server/governance/policy-as-code.ts",
+        "server/infrastructure/data-retention.ts",
+        "server/router-groups/geometry-admin-router.ts"
+      ],
+      "shape": "UNCLASSIFIED — AB_PREREGISTRATION asks for three shapes (simple isolated, ordinary multi-file, complex unfamiliar). Nothing here measures shape; the operator assigns it at selection.",
+      "index_signal": {
+        "files_in_index": 11,
+        "files_absent_from_index": 0,
+        "files_with_a_parser": 11,
+        "files_with_symbols": 11,
+        "files_with_a_covering_test": 10
+      }
+    },
+    {
+      "candidate_id": "CAND-0006",
+      "signature": "TS2352: Conversion of type '<S>' to type '<S>' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to '<S>' first.",
+      "error_count": 33,
+      "files": [
+        "server/agent/mcp/unified-gravito.ts",
+        "server/cron/internal-scheduler.ts",
+        "server/dogfooding/dogfooding-router.ts",
+        "server/emotional-geometry-runtime/validation/humanMapEvaluator.ts",
+        "server/emotional-geometry-runtime/validation/invarianceEvaluator.ts",
+        "server/governance/raw-sql-identifier-casing.standalone-test.ts",
+        "server/mcp/mcp-handler-v2.ts",
+        "server/reviewer/autopilot.ts",
+        "server/reviewer/lattice/drift-detection.ts",
+        "server/reviewer/outcome-tracking.ts"
+      ],
+      "seed_files": [
+        "server/agent/mcp/unified-gravito.ts",
+        "server/cron/internal-scheduler.ts",
+        "server/dogfooding/dogfooding-router.ts",
+        "server/emotional-geometry-runtime/validation/humanMapEvaluator.ts",
+        "server/emotional-geometry-runtime/validation/invarianceEvaluator.ts",
+        "server/governance/raw-sql-identifier-casing.standalone-test.ts",
+        "server/mcp/mcp-handler-v2.ts",
+        "server/reviewer/autopilot.ts",
+        "server/reviewer/lattice/drift-detection.ts",
+        "server/reviewer/outcome-tracking.ts"
+      ],
+      "shape": "UNCLASSIFIED — AB_PREREGISTRATION asks for three shapes (simple isolated, ordinary multi-file, complex unfamiliar). Nothing here measures shape; the operator assigns it at selection.",
+      "index_signal": {
+        "files_in_index": 10,
+        "files_absent_from_index": 0,
+        "files_with_a_parser": 10,
+        "files_with_symbols": 10,
+        "files_with_a_covering_test": 4
+      }
+    },
+    {
+      "candidate_id": "CAND-0008",
+      "signature": "TS2304: Cannot find name '<S>'.",
+      "error_count": 19,
+      "files": [
+        "server/governance/config-drizzle-adapter.ts",
+        "server/governance/geometry-memory.ts",
+        "server/governance/governed-openai.ts",
+        "server/governance/router.ts",
+        "server/governance/surface-discovery/remediation.ts",
+        "server/mcp/tool-executor.ts",
+        "server/routes/gravito-coverage-routes.ts"
+      ],
+      "seed_files": [
+        "server/governance/config-drizzle-adapter.ts",
+        "server/governance/geometry-memory.ts",
+        "server/governance/governed-openai.ts",
+        "server/governance/router.ts",
+        "server/governance/surface-discovery/remediation.ts",
+        "server/mcp/tool-executor.ts",
+        "server/routes/gravito-coverage-routes.ts"
+      ],
+      "shape": "UNCLASSIFIED — AB_PREREGISTRATION asks for three shapes (simple isolated, ordinary multi-file, complex unfamiliar). Nothing here measures shape; the operator assigns it at selection.",
+      "index_signal": {
+        "files_in_index": 7,
+        "files_absent_from_index": 0,
+        "files_with_a_parser": 7,
+        "files_with_symbols": 7,
+        "files_with_a_covering_test": 6
+      }
+    },
+    {
+      "candidate_id": "CAND-0009",
+      "signature": "TS2769: No overload matches this call.",
+      "error_count": 15,
+      "files": [
+        "server/agent/mcp/domains/enterprise.ts",
+        "server/agent/mcp/unified-gravito.ts",
+        "server/dogfooding/dogfooding-router.ts",
+        "server/governance/governance-scan-scheduler.ts",
+        "server/governance/surface-discovery/guardian.ts",
+        "server/reviewer/product-gaps-integration.ts"
+      ],
+      "seed_files": [
+        "server/agent/mcp/domains/enterprise.ts",
+        "server/agent/mcp/unified-gravito.ts",
+        "server/dogfooding/dogfooding-router.ts",
+        "server/governance/governance-scan-scheduler.ts",
+        "server/governance/surface-discovery/guardian.ts",
+        "server/reviewer/product-gaps-integration.ts"
+      ],
+      "shape": "UNCLASSIFIED — AB_PREREGISTRATION asks for three shapes (simple isolated, ordinary multi-file, complex unfamiliar). Nothing here measures shape; the operator assigns it at selection.",
+      "index_signal": {
+        "files_in_index": 6,
+        "files_absent_from_index": 0,
+        "files_with_a_parser": 6,
+        "files_with_symbols": 6,
+        "files_with_a_covering_test": 4
+      }
+    },
+    {
+      "candidate_id": "CAND-0010",
+      "signature": "TS2353: Object literal may only specify known properties, and '<S>' does not exist in type '<S>'.",
+      "error_count": 13,
+      "files": [
+        "server/distribution/router.ts",
+        "server/dogfooding/dogfooding-router.ts",
+        "server/governance/co-processor/telemetry.ts",
+        "server/governance/control-tower-router.ts",
+        "server/governance/regulator-export.standalone-test.ts",
+        "server/governance/surface-discovery/guardian.ts",
+        "server/mcp/mcp-handler-v2.ts",
+        "server/mcp/tool-executor.ts"
+      ],
+      "seed_files": [
+        "server/distribution/router.ts",
+        "server/dogfooding/dogfooding-router.ts",
+        "server/governance/co-processor/telemetry.ts",
+        "server/governance/control-tower-router.ts",
+        "server/governance/regulator-export.standalone-test.ts",
+        "server/governance/surface-discovery/guardian.ts",
+        "server/mcp/mcp-handler-v2.ts",
+        "server/mcp/tool-executor.ts"
+      ],
+      "shape": "UNCLASSIFIED — AB_PREREGISTRATION asks for three shapes (simple isolated, ordinary multi-file, complex unfamiliar). Nothing here measures shape; the operator assigns it at selection.",
+      "index_signal": {
+        "files_in_index": 8,
+        "files_absent_from_index": 0,
+        "files_with_a_parser": 8,
+        "files_with_symbols": 8,
+        "files_with_a_covering_test": 6
+      }
+    },
+    {
+      "candidate_id": "CAND-0012",
+      "signature": "TS2571: Object is of type '<S>'.",
+      "error_count": 10,
+      "files": [
+        "server/agent/mcp/unified-gravito-api.ts",
+        "server/governance/internal-gravito-client.ts",
+        "server/governance/usage-digest.ts",
+        "server/mcp/mcp-http-handler.ts"
+      ],
+      "seed_files": [
+        "server/agent/mcp/unified-gravito-api.ts",
+        "server/governance/internal-gravito-client.ts",
+        "server/governance/usage-digest.ts",
+        "server/mcp/mcp-http-handler.ts"
+      ],
+      "shape": "UNCLASSIFIED — AB_PREREGISTRATION asks for three shapes (simple isolated, ordinary multi-file, complex unfamiliar). Nothing here measures shape; the operator assigns it at selection.",
+      "index_signal": {
+        "files_in_index": 4,
+        "files_absent_from_index": 0,
+        "files_with_a_parser": 4,
+        "files_with_symbols": 4,
+        "files_with_a_covering_test": 3
+      }
+    },
+    {
+      "candidate_id": "CAND-0013",
+      "signature": "TS2307: Cannot find module '<S>' or its corresponding type declarations.",
+      "error_count": 8,
+      "files": [
+        "server/behavioral-profiler.ts",
+        "server/cron/internal-scheduler.ts",
+        "server/jobs/check-ingest-key-validity.ts",
+        "server/leads/router.ts",
+        "server/neuro-metrics-router.ts",
+        "server/routes/gravito-absence-detector.ts",
+        "server/routes/gravito-admin-mint.ts",
+        "server/routes/gravito-integrity-history.ts"
+      ],
+      "seed_files": [
+        "server/behavioral-profiler.ts",
+        "server/cron/internal-scheduler.ts",
+        "server/jobs/check-ingest-key-validity.ts",
+        "server/leads/router.ts",
+        "server/neuro-metrics-router.ts",
+        "server/routes/gravito-absence-detector.ts",
+        "server/routes/gravito-admin-mint.ts",
+        "server/routes/gravito-integrity-history.ts"
+      ],
+      "shape": "UNCLASSIFIED — AB_PREREGISTRATION asks for three shapes (simple isolated, ordinary multi-file, complex unfamiliar). Nothing here measures shape; the operator assigns it at selection.",
+      "index_signal": {
+        "files_in_index": 8,
+        "files_absent_from_index": 0,
+        "files_with_a_parser": 8,
+        "files_with_symbols": 8,
+        "files_with_a_covering_test": 2
+      }
+    },
+    {
+      "candidate_id": "CAND-0014",
+      "signature": "TS2551: Property '<S>' does not exist on type '<S>'. Did you mean '<S>'?",
+      "error_count": 7,
+      "files": [
+        "server/claims/router.ts",
+        "server/deployment/autonomous-loop-orchestrator.ts",
+        "server/deployment/deployment-router.ts",
+        "server/dogfooding/dogfooding-router.ts",
+        "server/observability/prometheus-metrics.ts"
+      ],
+      "seed_files": [
+        "server/claims/router.ts",
+        "server/deployment/autonomous-loop-orchestrator.ts",
+        "server/deployment/deployment-router.ts",
+        "server/dogfooding/dogfooding-router.ts",
+        "server/observability/prometheus-metrics.ts"
+      ],
+      "shape": "UNCLASSIFIED — AB_PREREGISTRATION asks for three shapes (simple isolated, ordinary multi-file, complex unfamiliar). Nothing here measures shape; the operator assigns it at selection.",
+      "index_signal": {
+        "files_in_index": 5,
+        "files_absent_from_index": 0,
+        "files_with_a_parser": 5,
+        "files_with_symbols": 5,
+        "files_with_a_covering_test": 4
+      }
+    },
+    {
+      "candidate_id": "CAND-0015",
+      "signature": "TS7053: Element implicitly has an '<S>' type because expression of type '<S>' can'<S>'{}'.",
+      "error_count": 7,
+      "files": [
+        "server/governance/surface-discovery/remediation.ts",
+        "server/nexus-command/router.ts",
+        "server/reviewer/auto-experiment.ts",
+        "server/services/auto-rewrite-pipeline.ts",
+        "server/services/document-governance.ts",
+        "server/services/organizational-memory.ts"
+      ],
+      "seed_files": [
+        "server/governance/surface-discovery/remediation.ts",
+        "server/nexus-command/router.ts",
+        "server/reviewer/auto-experiment.ts",
+        "server/services/auto-rewrite-pipeline.ts",
+        "server/services/document-governance.ts",
+        "server/services/organizational-memory.ts"
+      ],
+      "shape": "UNCLASSIFIED — AB_PREREGISTRATION asks for three shapes (simple isolated, ordinary multi-file, complex unfamiliar). Nothing here measures shape; the operator assigns it at selection.",
+      "index_signal": {
+        "files_in_index": 6,
+        "files_absent_from_index": 0,
+        "files_with_a_parser": 6,
+        "files_with_symbols": 6,
+        "files_with_a_covering_test": 5
+      }
+    },
+    {
+      "candidate_id": "CAND-0016",
+      "signature": "TS2554: Expected <N>-<N> arguments, but got <N>.",
+      "error_count": 6,
+      "files": [
+        "server/_core/index.ts",
+        "server/deployment/deployment-router.ts",
+        "server/governance/surface-discovery/guardian.ts",
+        "server/router-groups/geometry-admin-router.ts"
+      ],
+      "seed_files": [
+        "server/_core/index.ts",
+        "server/deployment/deployment-router.ts",
+        "server/governance/surface-discovery/guardian.ts",
+        "server/router-groups/geometry-admin-router.ts"
+      ],
+      "shape": "UNCLASSIFIED — AB_PREREGISTRATION asks for three shapes (simple isolated, ordinary multi-file, complex unfamiliar). Nothing here measures shape; the operator assigns it at selection.",
+      "index_signal": {
+        "files_in_index": 4,
+        "files_absent_from_index": 0,
+        "files_with_a_parser": 4,
+        "files_with_symbols": 4,
+        "files_with_a_covering_test": 3
+      }
+    },
+    {
+      "candidate_id": "CAND-0018",
+      "signature": "TS7006: Parameter '<S>' implicitly has an '<S>' type.",
+      "error_count": 5,
+      "files": [
+        "server/governance/surface-discovery/guardian.ts",
+        "server/routers/self-scan-router.ts",
+        "server/routes/gravito-absence-detector.ts",
+        "server/routes/gravito-integrity-history.ts"
+      ],
+      "seed_files": [
+        "server/governance/surface-discovery/guardian.ts",
+        "server/routers/self-scan-router.ts",
+        "server/routes/gravito-absence-detector.ts",
+        "server/routes/gravito-integrity-history.ts"
+      ],
+      "shape": "UNCLASSIFIED — AB_PREREGISTRATION asks for three shapes (simple isolated, ordinary multi-file, complex unfamiliar). Nothing here measures shape; the operator assigns it at selection.",
+      "index_signal": {
+        "files_in_index": 4,
+        "files_absent_from_index": 0,
+        "files_with_a_parser": 4,
+        "files_with_symbols": 4,
+        "files_with_a_covering_test": 2
+      }
+    },
+    {
+      "candidate_id": "CAND-0019",
+      "signature": "TS2300: Duplicate identifier '<S>'.",
+      "error_count": 4,
+      "files": [
+        "drizzle/schema.ts"
+      ],
+      "seed_files": [
+        "drizzle/schema.ts"
+      ],
+      "shape": "UNCLASSIFIED — AB_PREREGISTRATION asks for three shapes (simple isolated, ordinary multi-file, complex unfamiliar). Nothing here measures shape; the operator assigns it at selection.",
+      "index_signal": {
+        "files_in_index": 1,
+        "files_absent_from_index": 0,
+        "files_with_a_parser": 1,
+        "files_with_symbols": 1,
+        "files_with_a_covering_test": 1
+      }
+    },
+    {
+      "candidate_id": "CAND-0020",
+      "signature": "TS2365: Operator '<S>' cannot be applied to types '<S>' and '<S>'.",
+      "error_count": 4,
+      "files": [
+        "server/governance/policy-as-code.ts"
+      ],
+      "seed_files": [
+        "server/governance/policy-as-code.ts"
+      ],
+      "shape": "UNCLASSIFIED — AB_PREREGISTRATION asks for three shapes (simple isolated, ordinary multi-file, complex unfamiliar). Nothing here measures shape; the operator assigns it at selection.",
+      "index_signal": {
+        "files_in_index": 1,
+        "files_absent_from_index": 0,
+        "files_with_a_parser": 1,
+        "files_with_symbols": 1,
+        "files_with_a_covering_test": 1
+      }
+    },
+    {
+      "candidate_id": "CAND-0022",
+      "signature": "TS2367: This comparison appears to be unintentional because the types '<S>' and '<S>' have no overlap.",
+      "error_count": 3,
+      "files": [
+        "server/deployment/closed-loop-actions.ts",
+        "server/kill-switch/router.ts"
+      ],
+      "seed_files": [
+        "server/deployment/closed-loop-actions.ts",
+        "server/kill-switch/router.ts"
+      ],
+      "shape": "UNCLASSIFIED — AB_PREREGISTRATION asks for three shapes (simple isolated, ordinary multi-file, complex unfamiliar). Nothing here measures shape; the operator assigns it at selection.",
+      "index_signal": {
+        "files_in_index": 2,
+        "files_absent_from_index": 0,
+        "files_with_a_parser": 2,
+        "files_with_symbols": 2,
+        "files_with_a_covering_test": 2
+      }
+    },
+    {
+      "candidate_id": "CAND-0023",
+      "signature": "TS2349: This expression is not callable.",
+      "error_count": 2,
+      "files": [
+        "server/mcp/mcp-http-handler.ts",
+        "server/replay/router.ts"
+      ],
+      "seed_files": [
+        "server/mcp/mcp-http-handler.ts",
+        "server/replay/router.ts"
+      ],
+      "shape": "UNCLASSIFIED — AB_PREREGISTRATION asks for three shapes (simple isolated, ordinary multi-file, complex unfamiliar). Nothing here measures shape; the operator assigns it at selection.",
+      "index_signal": {
+        "files_in_index": 2,
+        "files_absent_from_index": 0,
+        "files_with_a_parser": 2,
+        "files_with_symbols": 2,
+        "files_with_a_covering_test": 2
+      }
+    },
+    {
+      "candidate_id": "CAND-0024",
+      "signature": "TS2552: Cannot find name '<S>'. Did you mean '<S>'?",
+      "error_count": 2,
+      "files": [
+        "server/mcp/tool-executor.ts"
+      ],
+      "seed_files": [
+        "server/mcp/tool-executor.ts"
+      ],
+      "shape": "UNCLASSIFIED — AB_PREREGISTRATION asks for three shapes (simple isolated, ordinary multi-file, complex unfamiliar). Nothing here measures shape; the operator assigns it at selection.",
+      "index_signal": {
+        "files_in_index": 1,
+        "files_absent_from_index": 0,
+        "files_with_a_parser": 1,
+        "files_with_symbols": 1,
+        "files_with_a_covering_test": 1
+      }
+    },
+    {
+      "candidate_id": "CAND-0025",
+      "signature": "TS2740: Type '<S>' is missing the following properties from type '<S>': length, pop, push, concat, and <N> more.",
+      "error_count": 2,
+      "files": [
+        "server/agent/mcp/unified-gravito.ts",
+        "server/governance/demo-review-engine.ts"
+      ],
+      "seed_files": [
+        "server/agent/mcp/unified-gravito.ts",
+        "server/governance/demo-review-engine.ts"
+      ],
+      "shape": "UNCLASSIFIED — AB_PREREGISTRATION asks for three shapes (simple isolated, ordinary multi-file, complex unfamiliar). Nothing here measures shape; the operator assigns it at selection.",
+      "index_signal": {
+        "files_in_index": 2,
+        "files_absent_from_index": 0,
+        "files_with_a_parser": 2,
+        "files_with_symbols": 2,
+        "files_with_a_covering_test": 1
+      }
+    },
+    {
+      "candidate_id": "CAND-0026",
+      "signature": "TS7053: Element implicitly has an '<S>' type because expression of type '<S>' can'<S>'{ critical: number; high: number; medium: number; low: number; }'.",
+      "error_count": 2,
+      "files": [
+        "server/agent/mcp/domains/hitl.ts"
+      ],
+      "seed_files": [
+        "server/agent/mcp/domains/hitl.ts"
+      ],
+      "shape": "UNCLASSIFIED — AB_PREREGISTRATION asks for three shapes (simple isolated, ordinary multi-file, complex unfamiliar). Nothing here measures shape; the operator assigns it at selection.",
+      "index_signal": {
+        "files_in_index": 1,
+        "files_absent_from_index": 0,
+        "files_with_a_parser": 1,
+        "files_with_symbols": 1,
+        "files_with_a_covering_test": 1
+      }
+    },
+    {
+      "candidate_id": "CAND-0027",
+      "signature": "TS2344: Type '<S>' does not satisfy the constraint '<S>'.",
+      "error_count": 1,
+      "files": [
+        "server/mcp/mcp-handler-v2.ts"
+      ],
+      "seed_files": [
+        "server/mcp/mcp-handler-v2.ts"
+      ],
+      "shape": "UNCLASSIFIED — AB_PREREGISTRATION asks for three shapes (simple isolated, ordinary multi-file, complex unfamiliar). Nothing here measures shape; the operator assigns it at selection.",
+      "index_signal": {
+        "files_in_index": 1,
+        "files_absent_from_index": 0,
+        "files_with_a_parser": 1,
+        "files_with_symbols": 1,
+        "files_with_a_covering_test": 1
+      }
+    },
+    {
+      "candidate_id": "CAND-0028",
+      "signature": "TS2454: Variable '<S>' is used before being assigned.",
+      "error_count": 1,
+      "files": [
+        "server/governance/surface-discovery/guardian.ts"
+      ],
+      "seed_files": [
+        "server/governance/surface-discovery/guardian.ts"
+      ],
+      "shape": "UNCLASSIFIED — AB_PREREGISTRATION asks for three shapes (simple isolated, ordinary multi-file, complex unfamiliar). Nothing here measures shape; the operator assigns it at selection.",
+      "index_signal": {
+        "files_in_index": 1,
+        "files_absent_from_index": 0,
+        "files_with_a_parser": 1,
+        "files_with_symbols": 1,
+        "files_with_a_covering_test": 1
+      }
+    },
+    {
+      "candidate_id": "CAND-0029",
+      "signature": "TS2488: Type '<S>' must have a '<S>' method that returns an iterator.",
+      "error_count": 1,
+      "files": [
+        "server/governance/surface-discovery/guardian.ts"
+      ],
+      "seed_files": [
+        "server/governance/surface-discovery/guardian.ts"
+      ],
+      "shape": "UNCLASSIFIED — AB_PREREGISTRATION asks for three shapes (simple isolated, ordinary multi-file, complex unfamiliar). Nothing here measures shape; the operator assigns it at selection.",
+      "index_signal": {
+        "files_in_index": 1,
+        "files_absent_from_index": 0,
+        "files_with_a_parser": 1,
+        "files_with_symbols": 1,
+        "files_with_a_covering_test": 1
+      }
+    },
+    {
+      "candidate_id": "CAND-0030",
+      "signature": "TS2538: Type '<S>' cannot be used as an index type.",
+      "error_count": 1,
+      "files": [
+        "server/mcp/tool-executor.ts"
+      ],
+      "seed_files": [
+        "server/mcp/tool-executor.ts"
+      ],
+      "shape": "UNCLASSIFIED — AB_PREREGISTRATION asks for three shapes (simple isolated, ordinary multi-file, complex unfamiliar). Nothing here measures shape; the operator assigns it at selection.",
+      "index_signal": {
+        "files_in_index": 1,
+        "files_absent_from_index": 0,
+        "files_with_a_parser": 1,
+        "files_with_symbols": 1,
+        "files_with_a_covering_test": 1
+      }
+    },
+    {
+      "candidate_id": "CAND-0032",
+      "signature": "TS2739: Type '<S>' is missing the following properties from type '<S>': autoRewritten, patchesApplied, flaggedForReview, manualRequired, skipped",
+      "error_count": 1,
+      "files": [
+        "server/governance/surface-discovery/guardian.ts"
+      ],
+      "seed_files": [
+        "server/governance/surface-discovery/guardian.ts"
+      ],
+      "shape": "UNCLASSIFIED — AB_PREREGISTRATION asks for three shapes (simple isolated, ordinary multi-file, complex unfamiliar). Nothing here measures shape; the operator assigns it at selection.",
+      "index_signal": {
+        "files_in_index": 1,
+        "files_absent_from_index": 0,
+        "files_with_a_parser": 1,
+        "files_with_symbols": 1,
+        "files_with_a_covering_test": 1
+      }
+    },
+    {
+      "candidate_id": "CAND-0033",
+      "signature": "TS2739: Type '<S>' is missing the following properties from type '<S>': p99_ms, max_ms",
+      "error_count": 1,
+      "files": [
+        "server/dx/router.ts"
+      ],
+      "seed_files": [
+        "server/dx/router.ts"
+      ],
+      "shape": "UNCLASSIFIED — AB_PREREGISTRATION asks for three shapes (simple isolated, ordinary multi-file, complex unfamiliar). Nothing here measures shape; the operator assigns it at selection.",
+      "index_signal": {
+        "files_in_index": 1,
+        "files_absent_from_index": 0,
+        "files_with_a_parser": 1,
+        "files_with_symbols": 1,
+        "files_with_a_covering_test": 1
+      }
+    },
+    {
+      "candidate_id": "CAND-0034",
+      "signature": "TS2741: Property '<S>' is missing in type '<S>' but required in type '<S>'.",
+      "error_count": 1,
+      "files": [
+        "server/nervous-system/integrated-nervous-system.ts"
+      ],
+      "seed_files": [
+        "server/nervous-system/integrated-nervous-system.ts"
+      ],
+      "shape": "UNCLASSIFIED — AB_PREREGISTRATION asks for three shapes (simple isolated, ordinary multi-file, complex unfamiliar). Nothing here measures shape; the operator assigns it at selection.",
+      "index_signal": {
+        "files_in_index": 1,
+        "files_absent_from_index": 0,
+        "files_with_a_parser": 1,
+        "files_with_symbols": 1,
+        "files_with_a_covering_test": 1
+      }
+    },
+    {
+      "candidate_id": "CAND-0035",
+      "signature": "TS7005: Variable '<S>' implicitly has an '<S>' type.",
+      "error_count": 1,
+      "files": [
+        "server/governance/trust-completeness-router.ts"
+      ],
+      "seed_files": [
+        "server/governance/trust-completeness-router.ts"
+      ],
+      "shape": "UNCLASSIFIED — AB_PREREGISTRATION asks for three shapes (simple isolated, ordinary multi-file, complex unfamiliar). Nothing here measures shape; the operator assigns it at selection.",
+      "index_signal": {
+        "files_in_index": 1,
+        "files_absent_from_index": 0,
+        "files_with_a_parser": 1,
+        "files_with_symbols": 1,
+        "files_with_a_covering_test": 0
+      }
+    },
+    {
+      "candidate_id": "CAND-0036",
+      "signature": "TS7034: Variable '<S>' implicitly has type '<S>' in some locations where its type cannot be determined.",
+      "error_count": 1,
+      "files": [
+        "server/governance/trust-completeness-router.ts"
+      ],
+      "seed_files": [
+        "server/governance/trust-completeness-router.ts"
+      ],
+      "shape": "UNCLASSIFIED — AB_PREREGISTRATION asks for three shapes (simple isolated, ordinary multi-file, complex unfamiliar). Nothing here measures shape; the operator assigns it at selection.",
+      "index_signal": {
+        "files_in_index": 1,
+        "files_absent_from_index": 0,
+        "files_with_a_parser": 1,
+        "files_with_symbols": 1,
+        "files_with_a_covering_test": 0
+      }
+    },
+    {
+      "candidate_id": "CAND-0037",
+      "signature": "TS7053: Element implicitly has an '<S>' type because expression of type '<S>' can'<S>'{ '<S>': number; '<S>': number; '<S>': number; '<S>': number; '<S>': number; '<S>': number; '<S>': number; '<S>': number; '<S>': number; }'.",
+      "error_count": 1,
+      "files": [
+        "server/emotional-geometry-runtime/geometry-metrics.ts"
+      ],
+      "seed_files": [
+        "server/emotional-geometry-runtime/geometry-metrics.ts"
+      ],
+      "shape": "UNCLASSIFIED — AB_PREREGISTRATION asks for three shapes (simple isolated, ordinary multi-file, complex unfamiliar). Nothing here measures shape; the operator assigns it at selection.",
+      "index_signal": {
+        "files_in_index": 1,
+        "files_absent_from_index": 0,
+        "files_with_a_parser": 1,
+        "files_with_symbols": 1,
+        "files_with_a_covering_test": 1
+      }
+    }
+  ],
+  "excluded": [
+    {
+      "candidate_id": "CAND-0001",
+      "signature": "TS2339: Property '<S>' does not exist on type '<S>'.",
+      "error_count": 171,
+      "files": [
+        "client/src/components/CoCreateDemo.tsx",
+        "client/src/pages/UserDashboard.tsx",
+        "server/abtest/manager.ts",
+        "server/adversarial-resilience.ts",
+        "server/agent/mcp/domains/hitl.ts",
+        "server/agent/mcp/domains/persistence.ts",
+        "server/agent/mcp/unified-tool-bridge.ts",
+        "server/claims/router.ts",
+        "server/deployment/autonomous-loop-orchestrator.ts",
+        "server/deployment/closed-loop-actions.ts",
+        "server/deployment/deployment-router.ts",
+        "server/dogfooding/complete-site-verification.ts",
+        "server/dogfooding/dogfooding-router.ts",
+        "server/emotional-geometry-runtime/validation/calibrationMode.ts",
+        "server/governance/control-tower-router.ts",
+        "server/governance/curiosity/shadow-mode.ts",
+        "server/governance/demo-review-engine.ts",
+        "server/governance/four-eyes-approval.standalone-test.ts",
+        "server/governance/geometry-memory.ts",
+        "server/governance/governance-dashboard-router.ts",
+        "server/governance/governance-scan-scheduler.ts",
+        "server/governance/narrative-coherence-trend.ts",
+        "server/governance/policy-as-code.ts",
+        "server/governance/router.ts",
+        "server/governance/structural-alert-channels.ts",
+        "server/governance/surface-discovery/guardian.ts",
+        "server/governance/surface-discovery/remediation.ts",
+        "server/governance/trpc-governance-middleware.ts",
+        "server/governance/trust-completeness-router.ts",
+        "server/mcp/mcp-handler-v2.ts",
+        "server/mcp/mcp-http-handler.ts",
+        "server/mcp/mcp-sync-wrapper.ts",
+        "server/mcp/schema-normalizer.ts",
+        "server/mcp/tool-executor.ts",
+        "server/mcp/tool-input-validator.ts",
+        "server/nexus-command/router.ts",
+        "server/reviewer/alignment/business-truth.ts",
+        "server/reviewer/audit/router.ts",
+        "server/reviewer/governance-enforced-audit.ts",
+        "server/router-groups/geometry-admin-router.ts",
+        "server/routers/self-scan-router.ts",
+        "server/services/auto-rewrite-pipeline.ts",
+        "server/surface-intelligence/recommendations-generator.ts",
+        "server/workflows/engine.ts"
+      ],
+      "seed_files": [
+        "client/src/components/CoCreateDemo.tsx",
+        "client/src/pages/UserDashboard.tsx",
+        "server/abtest/manager.ts",
+        "server/adversarial-resilience.ts",
+        "server/agent/mcp/domains/hitl.ts",
+        "server/agent/mcp/domains/persistence.ts",
+        "server/agent/mcp/unified-tool-bridge.ts",
+        "server/claims/router.ts",
+        "server/deployment/autonomous-loop-orchestrator.ts",
+        "server/deployment/closed-loop-actions.ts",
+        "server/deployment/deployment-router.ts",
+        "server/dogfooding/complete-site-verification.ts",
+        "server/dogfooding/dogfooding-router.ts",
+        "server/emotional-geometry-runtime/validation/calibrationMode.ts",
+        "server/governance/control-tower-router.ts",
+        "server/governance/curiosity/shadow-mode.ts",
+        "server/governance/demo-review-engine.ts",
+        "server/governance/four-eyes-approval.standalone-test.ts",
+        "server/governance/geometry-memory.ts",
+        "server/governance/governance-dashboard-router.ts",
+        "server/governance/governance-scan-scheduler.ts",
+        "server/governance/narrative-coherence-trend.ts",
+        "server/governance/policy-as-code.ts",
+        "server/governance/router.ts",
+        "server/governance/structural-alert-channels.ts",
+        "server/governance/surface-discovery/guardian.ts",
+        "server/governance/surface-discovery/remediation.ts",
+        "server/governance/trpc-governance-middleware.ts",
+        "server/governance/trust-completeness-router.ts",
+        "server/mcp/mcp-handler-v2.ts",
+        "server/mcp/mcp-http-handler.ts",
+        "server/mcp/mcp-sync-wrapper.ts",
+        "server/mcp/schema-normalizer.ts",
+        "server/mcp/tool-executor.ts",
+        "server/mcp/tool-input-validator.ts",
+        "server/nexus-command/router.ts",
+        "server/reviewer/alignment/business-truth.ts",
+        "server/reviewer/audit/router.ts",
+        "server/reviewer/governance-enforced-audit.ts",
+        "server/router-groups/geometry-admin-router.ts",
+        "server/routers/self-scan-router.ts",
+        "server/services/auto-rewrite-pipeline.ts",
+        "server/surface-intelligence/recommendations-generator.ts",
+        "server/workflows/engine.ts"
+      ],
+      "shape": "UNCLASSIFIED — AB_PREREGISTRATION asks for three shapes (simple isolated, ordinary multi-file, complex unfamiliar). Nothing here measures shape; the operator assigns it at selection.",
+      "index_signal": {
+        "files_in_index": 44,
+        "files_absent_from_index": 0,
+        "files_with_a_parser": 44,
+        "files_with_symbols": 44,
+        "files_with_a_covering_test": 33
+      },
+      "excluded": true,
+      "excluded_by": [
+        {
+          "pilot": "PILOT-0001",
+          "task": "T3 four_eyes_state_change audit kind",
+          "pattern": "four_eyes_state_change|four-eyes|audit[_-]?kind",
+          "exclusion_line": 56
+        },
+        {
+          "pilot": "PILOT-0002",
+          "task": "T1 trpc client bridge->bridges drift cluster",
+          "pattern": "trpc|\\bbridges?\\b",
+          "exclusion_line": 59
+        }
+      ]
+    },
+    {
+      "candidate_id": "CAND-0003",
+      "signature": "TS18046: '<S>' is of type '<S>'.",
+      "error_count": 111,
+      "files": [
+        "server/abtest/manager.ts",
+        "server/copilot/batch-page-updater.ts",
+        "server/copilot/brand-truth-bridge.ts",
+        "server/copilot/copilot-service.ts",
+        "server/copilot/site-audit-service.ts",
+        "server/governance/auto-fix.ts",
+        "server/governance/behavioral-correctness-audit.ts",
+        "server/governance/co-processor/session-log.ts",
+        "server/governance/content-surface-ingester.ts",
+        "server/governance/control-tower-router.ts",
+        "server/governance/governance-scan-scheduler.ts",
+        "server/governance/governed-openai.ts",
+        "server/governance/gravito-external-client.ts",
+        "server/governance/mcp-job-management.ts",
+        "server/governance/mcp-sync-wrapper.ts",
+        "server/governance/model-router.ts",
+        "server/governance/pack-lifecycle.ts",
+        "server/governance/policy-as-code.ts",
+        "server/governance/production-transport-selector.ts",
+        "server/governance/regulated-surface-preapproval.ts",
+        "server/governance/slack-governance-alerts.ts",
+        "server/governance/structural-proof-audit.ts",
+        "server/mcp/direct-dispatch-handlers.ts",
+        "server/nervous-system/integrated-router.ts",
+        "server/planes/router.ts",
+        "server/services/auto-rewrite-pipeline.ts"
+      ],
+      "seed_files": [
+        "server/abtest/manager.ts",
+        "server/copilot/batch-page-updater.ts",
+        "server/copilot/brand-truth-bridge.ts",
+        "server/copilot/copilot-service.ts",
+        "server/copilot/site-audit-service.ts",
+        "server/governance/auto-fix.ts",
+        "server/governance/behavioral-correctness-audit.ts",
+        "server/governance/co-processor/session-log.ts",
+        "server/governance/content-surface-ingester.ts",
+        "server/governance/control-tower-router.ts",
+        "server/governance/governance-scan-scheduler.ts",
+        "server/governance/governed-openai.ts",
+        "server/governance/gravito-external-client.ts",
+        "server/governance/mcp-job-management.ts",
+        "server/governance/mcp-sync-wrapper.ts",
+        "server/governance/model-router.ts",
+        "server/governance/pack-lifecycle.ts",
+        "server/governance/policy-as-code.ts",
+        "server/governance/production-transport-selector.ts",
+        "server/governance/regulated-surface-preapproval.ts",
+        "server/governance/slack-governance-alerts.ts",
+        "server/governance/structural-proof-audit.ts",
+        "server/mcp/direct-dispatch-handlers.ts",
+        "server/nervous-system/integrated-router.ts",
+        "server/planes/router.ts",
+        "server/services/auto-rewrite-pipeline.ts"
+      ],
+      "shape": "UNCLASSIFIED — AB_PREREGISTRATION asks for three shapes (simple isolated, ordinary multi-file, complex unfamiliar). Nothing here measures shape; the operator assigns it at selection.",
+      "index_signal": {
+        "files_in_index": 26,
+        "files_absent_from_index": 0,
+        "files_with_a_parser": 26,
+        "files_with_symbols": 26,
+        "files_with_a_covering_test": 20
+      },
+      "excluded": true,
+      "excluded_by": [
+        {
+          "pilot": "PILOT-0002",
+          "task": "T1 trpc client bridge->bridges drift cluster",
+          "pattern": "trpc|\\bbridges?\\b",
+          "exclusion_line": 59
+        }
+      ]
+    },
+    {
+      "candidate_id": "CAND-0004",
+      "signature": "TS2322: Type '<S>' is not assignable to type '<S>'.",
+      "error_count": 87,
+      "files": [
+        "client/src/pages/UserDashboard.tsx",
+        "client/src/pages/admin/RecallProofPreflight.tsx",
+        "server/agents/website-operator.ts",
+        "server/copilot/copilot-router.ts",
+        "server/copilot/copilot-service.ts",
+        "server/cron/cron-router.ts",
+        "server/deployment/deployment-router.ts",
+        "server/dogfooding/dogfooding-router.ts",
+        "server/dogfooding/orchestrator.ts",
+        "server/emotional-geometry-runtime/validation/validationOrchestrator.ts",
+        "server/governance-jet-engine.ts",
+        "server/governance/co-processor/session-log.ts",
+        "server/governance/continuous-self-audit.ts",
+        "server/governance/curiosity/curiosity-integration.ts",
+        "server/governance/demo-review-engine.ts",
+        "server/governance/design-system-coherence.ts",
+        "server/governance/dogfooding-bridge.ts",
+        "server/governance/internal-gravito-client.ts",
+        "server/governance/llm-circuit-breaker.ts",
+        "server/governance/persistence.ts",
+        "server/governance/prevention-layer.ts",
+        "server/governance/surface-discovery/guardian.ts",
+        "server/human_interaction/router.ts",
+        "server/mcp/mcp-http-handler.ts",
+        "server/mcp/tool-executor.ts",
+        "server/mcp/tracing-middleware.ts",
+        "server/nervous-system/dynamics/async-deep.ts",
+        "server/nervous-system/dynamics/claude-llm.ts",
+        "server/nervous-system/dynamics/runtime.ts",
+        "server/reviewer/auto-experiment.ts",
+        "server/reviewer/product-gaps-integration.ts",
+        "server/router-groups/geometry-admin-router.ts",
+        "server/routers/monitoring-dashboards.ts",
+        "server/routes/gravito-admin-check-integrity.ts",
+        "server/routes/gravito-admin-mint.ts",
+        "server/routes/gravito-customer-probe.ts",
+        "server/routes/gravito-mcp-routes.ts",
+        "server/sdk/router.ts",
+        "server/services/auto-apply-pipeline.ts",
+        "server/storage.ts",
+        "server/workflows/engine.ts"
+      ],
+      "seed_files": [
+        "client/src/pages/UserDashboard.tsx",
+        "client/src/pages/admin/RecallProofPreflight.tsx",
+        "server/agents/website-operator.ts",
+        "server/copilot/copilot-router.ts",
+        "server/copilot/copilot-service.ts",
+        "server/cron/cron-router.ts",
+        "server/deployment/deployment-router.ts",
+        "server/dogfooding/dogfooding-router.ts",
+        "server/dogfooding/orchestrator.ts",
+        "server/emotional-geometry-runtime/validation/validationOrchestrator.ts",
+        "server/governance-jet-engine.ts",
+        "server/governance/co-processor/session-log.ts",
+        "server/governance/continuous-self-audit.ts",
+        "server/governance/curiosity/curiosity-integration.ts",
+        "server/governance/demo-review-engine.ts",
+        "server/governance/design-system-coherence.ts",
+        "server/governance/dogfooding-bridge.ts",
+        "server/governance/internal-gravito-client.ts",
+        "server/governance/llm-circuit-breaker.ts",
+        "server/governance/persistence.ts",
+        "server/governance/prevention-layer.ts",
+        "server/governance/surface-discovery/guardian.ts",
+        "server/human_interaction/router.ts",
+        "server/mcp/mcp-http-handler.ts",
+        "server/mcp/tool-executor.ts",
+        "server/mcp/tracing-middleware.ts",
+        "server/nervous-system/dynamics/async-deep.ts",
+        "server/nervous-system/dynamics/claude-llm.ts",
+        "server/nervous-system/dynamics/runtime.ts",
+        "server/reviewer/auto-experiment.ts",
+        "server/reviewer/product-gaps-integration.ts",
+        "server/router-groups/geometry-admin-router.ts",
+        "server/routers/monitoring-dashboards.ts",
+        "server/routes/gravito-admin-check-integrity.ts",
+        "server/routes/gravito-admin-mint.ts",
+        "server/routes/gravito-customer-probe.ts",
+        "server/routes/gravito-mcp-routes.ts",
+        "server/sdk/router.ts",
+        "server/services/auto-apply-pipeline.ts",
+        "server/storage.ts",
+        "server/workflows/engine.ts"
+      ],
+      "shape": "UNCLASSIFIED — AB_PREREGISTRATION asks for three shapes (simple isolated, ordinary multi-file, complex unfamiliar). Nothing here measures shape; the operator assigns it at selection.",
+      "index_signal": {
+        "files_in_index": 41,
+        "files_absent_from_index": 0,
+        "files_with_a_parser": 41,
+        "files_with_symbols": 41,
+        "files_with_a_covering_test": 23
+      },
+      "excluded": true,
+      "excluded_by": [
+        {
+          "pilot": "PILOT-0002",
+          "task": "T1 trpc client bridge->bridges drift cluster",
+          "pattern": "trpc|\\bbridges?\\b",
+          "exclusion_line": 59
+        },
+        {
+          "pilot": "PILOT-0002",
+          "task": "T3 agents hermetic and live-LLM tests",
+          "pattern": "agents[._-]test|(^|/)agents(/|\\.)|live-?llm",
+          "exclusion_line": 61
+        }
+      ]
+    },
+    {
+      "candidate_id": "CAND-0005",
+      "signature": "TS2345: Argument of type '<S>' is not assignable to parameter of type '<S>'.",
+      "error_count": 75,
+      "files": [
+        "client/src/components/CoCreateDemo.tsx",
+        "server/adversarial-resilience.ts",
+        "server/agent/github-app.ts",
+        "server/agent/mcp/domains/persistence.ts",
+        "server/agent/mcp/unified-tool-bridge.ts",
+        "server/behavioral-profiler.ts",
+        "server/copilot/copilot-service.ts",
+        "server/cron/cron-router.ts",
+        "server/deployment/autonomous-experiment-monitor.ts",
+        "server/deployment/deployment-router.ts",
+        "server/dogfooding/surface-aware-router.ts",
+        "server/emotional-geometry-runtime/alert-analytics.ts",
+        "server/emotional-geometry-runtime/detection/WarpShellMonitor.ts",
+        "server/emotional-geometry-runtime/escalation-engine.ts",
+        "server/emotional-geometry-runtime/geometry-alerting.ts",
+        "server/emotional-geometry-runtime/session-persistence.ts",
+        "server/governance/adapters/mcp-registry-integrity-adapter.ts",
+        "server/governance/bridge-router.ts",
+        "server/governance/content-intelligence.ts",
+        "server/governance/control-tower-router.ts",
+        "server/governance/curiosity/curiosity-integration.ts",
+        "server/governance/curiosity/shadow-mode.ts",
+        "server/governance/governance-scan-scheduler.ts",
+        "server/governance/gravito-authority-layer.ts",
+        "server/governance/override-logger.ts",
+        "server/governance/realtime-invariant-monitor.ts",
+        "server/governance/router.ts",
+        "server/governance/trust-architecture-router.ts",
+        "server/health/router.ts",
+        "server/mcp/enterprise-middleware.ts",
+        "server/mcp/gate-enforcement.ts",
+        "server/mcp/mcp-handler-v2.ts",
+        "server/mcp/mcp-http-handler.ts",
+        "server/mcp/mcp-sync-wrapper.ts",
+        "server/mcp/nervous-system-stabilizer.ts",
+        "server/mcp/tool-executor.ts",
+        "server/mcp/tracing-middleware.ts",
+        "server/multimodal-gateway.ts",
+        "server/nervous-system/enhanced-system.ts",
+        "server/neuro-metrics-router.ts",
+        "server/neurocosmology-runtime-advanced/startup-init.ts",
+        "server/reviewer/governed-reviewer.ts",
+        "server/reviewer/product-gaps-integration.ts",
+        "server/reviewer/router.ts",
+        "server/router-groups/geometry-admin-router.ts",
+        "server/sdk/router.ts",
+        "server/surface-intelligence/router.ts"
+      ],
+      "seed_files": [
+        "client/src/components/CoCreateDemo.tsx",
+        "server/adversarial-resilience.ts",
+        "server/agent/github-app.ts",
+        "server/agent/mcp/domains/persistence.ts",
+        "server/agent/mcp/unified-tool-bridge.ts",
+        "server/behavioral-profiler.ts",
+        "server/copilot/copilot-service.ts",
+        "server/cron/cron-router.ts",
+        "server/deployment/autonomous-experiment-monitor.ts",
+        "server/deployment/deployment-router.ts",
+        "server/dogfooding/surface-aware-router.ts",
+        "server/emotional-geometry-runtime/alert-analytics.ts",
+        "server/emotional-geometry-runtime/detection/WarpShellMonitor.ts",
+        "server/emotional-geometry-runtime/escalation-engine.ts",
+        "server/emotional-geometry-runtime/geometry-alerting.ts",
+        "server/emotional-geometry-runtime/session-persistence.ts",
+        "server/governance/adapters/mcp-registry-integrity-adapter.ts",
+        "server/governance/bridge-router.ts",
+        "server/governance/content-intelligence.ts",
+        "server/governance/control-tower-router.ts",
+        "server/governance/curiosity/curiosity-integration.ts",
+        "server/governance/curiosity/shadow-mode.ts",
+        "server/governance/governance-scan-scheduler.ts",
+        "server/governance/gravito-authority-layer.ts",
+        "server/governance/override-logger.ts",
+        "server/governance/realtime-invariant-monitor.ts",
+        "server/governance/router.ts",
+        "server/governance/trust-architecture-router.ts",
+        "server/health/router.ts",
+        "server/mcp/enterprise-middleware.ts",
+        "server/mcp/gate-enforcement.ts",
+        "server/mcp/mcp-handler-v2.ts",
+        "server/mcp/mcp-http-handler.ts",
+        "server/mcp/mcp-sync-wrapper.ts",
+        "server/mcp/nervous-system-stabilizer.ts",
+        "server/mcp/tool-executor.ts",
+        "server/mcp/tracing-middleware.ts",
+        "server/multimodal-gateway.ts",
+        "server/nervous-system/enhanced-system.ts",
+        "server/neuro-metrics-router.ts",
+        "server/neurocosmology-runtime-advanced/startup-init.ts",
+        "server/reviewer/governed-reviewer.ts",
+        "server/reviewer/product-gaps-integration.ts",
+        "server/reviewer/router.ts",
+        "server/router-groups/geometry-admin-router.ts",
+        "server/sdk/router.ts",
+        "server/surface-intelligence/router.ts"
+      ],
+      "shape": "UNCLASSIFIED — AB_PREREGISTRATION asks for three shapes (simple isolated, ordinary multi-file, complex unfamiliar). Nothing here measures shape; the operator assigns it at selection.",
+      "index_signal": {
+        "files_in_index": 47,
+        "files_absent_from_index": 0,
+        "files_with_a_parser": 47,
+        "files_with_symbols": 47,
+        "files_with_a_covering_test": 35
+      },
+      "excluded": true,
+      "excluded_by": [
+        {
+          "pilot": "PILOT-0002",
+          "task": "T1 trpc client bridge->bridges drift cluster",
+          "pattern": "trpc|\\bbridges?\\b",
+          "exclusion_line": 59
+        }
+      ]
+    },
+    {
+      "candidate_id": "CAND-0007",
+      "signature": "TS2305: Module '<S>' has no exported member '<S>'.",
+      "error_count": 23,
+      "files": [
+        "server/agent/mcp/unified-gravito.ts",
+        "server/governance/advanced-runtime-bridge.standalone-test.ts",
+        "server/governance/governance-dashboard-router.ts",
+        "server/governance/surface-discovery/guardian.ts",
+        "server/human_interaction/router.ts",
+        "server/mcp/mcp-handler-v2.ts",
+        "server/mcp/mcp-sync-wrapper.ts",
+        "server/neurocosmology-runtime-advanced/feature-flags.standalone-test.ts",
+        "server/routers/admin-audit-dashboard.ts",
+        "server/routers/monitoring-dashboards.ts",
+        "server/surface-scoring/router.ts"
+      ],
+      "seed_files": [
+        "server/agent/mcp/unified-gravito.ts",
+        "server/governance/advanced-runtime-bridge.standalone-test.ts",
+        "server/governance/governance-dashboard-router.ts",
+        "server/governance/surface-discovery/guardian.ts",
+        "server/human_interaction/router.ts",
+        "server/mcp/mcp-handler-v2.ts",
+        "server/mcp/mcp-sync-wrapper.ts",
+        "server/neurocosmology-runtime-advanced/feature-flags.standalone-test.ts",
+        "server/routers/admin-audit-dashboard.ts",
+        "server/routers/monitoring-dashboards.ts",
+        "server/surface-scoring/router.ts"
+      ],
+      "shape": "UNCLASSIFIED — AB_PREREGISTRATION asks for three shapes (simple isolated, ordinary multi-file, complex unfamiliar). Nothing here measures shape; the operator assigns it at selection.",
+      "index_signal": {
+        "files_in_index": 11,
+        "files_absent_from_index": 0,
+        "files_with_a_parser": 11,
+        "files_with_symbols": 11,
+        "files_with_a_covering_test": 8
+      },
+      "excluded": true,
+      "excluded_by": [
+        {
+          "pilot": "PILOT-0002",
+          "task": "T1 trpc client bridge->bridges drift cluster",
+          "pattern": "trpc|\\bbridges?\\b",
+          "exclusion_line": 59
+        }
+      ]
+    },
+    {
+      "candidate_id": "CAND-0011",
+      "signature": "TS2554: Expected <N> arguments, but got <N>.",
+      "error_count": 10,
+      "files": [
+        "server/agent/mcp/unified-gravito.ts",
+        "server/deployment/autonomous-experiment-monitor.ts",
+        "server/governance/advanced-runtime-bridge.ts",
+        "server/governance/router.ts",
+        "server/governance/surface-discovery/guardian.ts",
+        "server/mcp/mcp-handler-v2.ts",
+        "server/neurocosmology-runtime-advanced/feature-flags.standalone-test.ts",
+        "server/router-groups/geometry-admin-router.ts",
+        "server/workflows/engine.ts"
+      ],
+      "seed_files": [
+        "server/agent/mcp/unified-gravito.ts",
+        "server/deployment/autonomous-experiment-monitor.ts",
+        "server/governance/advanced-runtime-bridge.ts",
+        "server/governance/router.ts",
+        "server/governance/surface-discovery/guardian.ts",
+        "server/mcp/mcp-handler-v2.ts",
+        "server/neurocosmology-runtime-advanced/feature-flags.standalone-test.ts",
+        "server/router-groups/geometry-admin-router.ts",
+        "server/workflows/engine.ts"
+      ],
+      "shape": "UNCLASSIFIED — AB_PREREGISTRATION asks for three shapes (simple isolated, ordinary multi-file, complex unfamiliar). Nothing here measures shape; the operator assigns it at selection.",
+      "index_signal": {
+        "files_in_index": 9,
+        "files_absent_from_index": 0,
+        "files_with_a_parser": 9,
+        "files_with_symbols": 9,
+        "files_with_a_covering_test": 7
+      },
+      "excluded": true,
+      "excluded_by": [
+        {
+          "pilot": "PILOT-0002",
+          "task": "T1 trpc client bridge->bridges drift cluster",
+          "pattern": "trpc|\\bbridges?\\b",
+          "exclusion_line": 59
+        }
+      ]
+    },
+    {
+      "candidate_id": "CAND-0017",
+      "signature": "TS2724: '<S>' has no exported member named '<S>'. Did you mean '<S>'?",
+      "error_count": 6,
+      "files": [
+        "server/governance/surface-discovery/webhook-adapter.ts",
+        "server/routers/admin-audit-dashboard.ts",
+        "server/routers/status-router.ts"
+      ],
+      "seed_files": [
+        "server/governance/surface-discovery/webhook-adapter.ts",
+        "server/routers/admin-audit-dashboard.ts",
+        "server/routers/status-router.ts"
+      ],
+      "shape": "UNCLASSIFIED — AB_PREREGISTRATION asks for three shapes (simple isolated, ordinary multi-file, complex unfamiliar). Nothing here measures shape; the operator assigns it at selection.",
+      "index_signal": {
+        "files_in_index": 3,
+        "files_absent_from_index": 0,
+        "files_with_a_parser": 3,
+        "files_with_symbols": 3,
+        "files_with_a_covering_test": 3
+      },
+      "excluded": true,
+      "excluded_by": [
+        {
+          "pilot": "PILOT-0002",
+          "task": "T5 voice-stream LogDomain and webhooks narrowing",
+          "pattern": "LogDomain|voice-?stream|webhooks?",
+          "exclusion_line": 63
+        }
+      ]
+    },
+    {
+      "candidate_id": "CAND-0021",
+      "signature": "TS2614: Module '<S>' has no exported member '<S>'. Did you mean to use '<S>' instead?",
+      "error_count": 4,
+      "files": [
+        "server/governance/audit-trail-persistence.ts",
+        "server/governance/coverage-tracker.ts",
+        "server/nervous-system/memory/persistence-bridge.ts"
+      ],
+      "seed_files": [
+        "server/governance/audit-trail-persistence.ts",
+        "server/governance/coverage-tracker.ts",
+        "server/nervous-system/memory/persistence-bridge.ts"
+      ],
+      "shape": "UNCLASSIFIED — AB_PREREGISTRATION asks for three shapes (simple isolated, ordinary multi-file, complex unfamiliar). Nothing here measures shape; the operator assigns it at selection.",
+      "index_signal": {
+        "files_in_index": 3,
+        "files_absent_from_index": 0,
+        "files_with_a_parser": 3,
+        "files_with_symbols": 3,
+        "files_with_a_covering_test": 2
+      },
+      "excluded": true,
+      "excluded_by": [
+        {
+          "pilot": "PILOT-0002",
+          "task": "T1 trpc client bridge->bridges drift cluster",
+          "pattern": "trpc|\\bbridges?\\b",
+          "exclusion_line": 59
+        }
+      ]
+    },
+    {
+      "candidate_id": "CAND-0031",
+      "signature": "TS2559: Type '<S>' has no properties in common with type '<S>'.",
+      "error_count": 1,
+      "files": [
+        "server/nervous-system/memory/persistence-bridge.ts"
+      ],
+      "seed_files": [
+        "server/nervous-system/memory/persistence-bridge.ts"
+      ],
+      "shape": "UNCLASSIFIED — AB_PREREGISTRATION asks for three shapes (simple isolated, ordinary multi-file, complex unfamiliar). Nothing here measures shape; the operator assigns it at selection.",
+      "index_signal": {
+        "files_in_index": 1,
+        "files_absent_from_index": 0,
+        "files_with_a_parser": 1,
+        "files_with_symbols": 1,
+        "files_with_a_covering_test": 0
+      },
+      "excluded": true,
+      "excluded_by": [
+        {
+          "pilot": "PILOT-0002",
+          "task": "T1 trpc client bridge->bridges drift cluster",
+          "pattern": "trpc|\\bbridges?\\b",
+          "exclusion_line": 59
+        }
+      ]
+    }
+  ],
+  "limitations": [
+    "A cluster is not a task. It is a set of errors sharing a normalized signature; cutting a task from it is a human judgement this tool does not make.",
+    "Cluster signatures are operand-blind (errors.mjs normalizes quoted operands to '<S>'), so exclusion patterns match mostly on PATHS. A frozen task whose paths this list names wrongly will not be caught by its message.",
+    "The exclusion patterns are deliberately broad, because a false exclusion costs one candidate while a false inclusion contaminates a frozen pilot that cannot be un-run.",
+    "index_signal describes what the INDEX knows about the files, not how hard the work is."
+  ]
+}

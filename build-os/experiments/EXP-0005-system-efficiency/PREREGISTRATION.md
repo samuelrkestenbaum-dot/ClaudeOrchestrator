@@ -314,7 +314,7 @@ Run against this draft before freezing, per instruction.
 
 ## Readiness — what is NOT done
 
-- [ ] task set selected and frozen (**0 of ≥10**)
+- [x] **task set selected and frozen — 12 of ≥10, across 4 shapes** (`tasks/TASK-FREEZE.md`), selected mechanically with all 1,984 exclusions recorded. `implementation_gap` is reported ABSENT with its cause rather than padded: 7 of its 10 enumerated candidates were governance detector documentation, and the 3 real ones were excluded by leakage and by the E1–E5 hard exclusion.
 - [x] **repository seed pinned** — `2543c87`, tree `2f5e391f`, restored and verified by `harness/restore-seed.sh`, which refuses rather than warns (`memory/SEED-PIN.md`)
 - [x] **memory state pinned** — durable-state digest `3311a638…`, method now defined in the repository; `INVENTORY.md`'s headline digest is superseded as unreproducible, with the per-class evidence that the state itself did not drift
 - [x] **common timeout ceiling calibrated and frozen** — 5400 s, from three admissible calibration runs, before task selection (`calibration/TIMEOUT-RULE-FROZEN.md`)

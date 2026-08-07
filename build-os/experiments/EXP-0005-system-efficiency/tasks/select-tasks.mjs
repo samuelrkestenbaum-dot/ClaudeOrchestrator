@@ -69,11 +69,32 @@ const parseGrep = (lines, shape) => lines.map((l) => {
   return m ? { shape, file: m[1], line: Number(m[2]), text: m[3].trim().slice(0, 200) } : null;
 }).filter(Boolean);
 
-// behavioural — from the baseline, the only source of observed failures
+// behavioural — from the baseline, the only source of observed failures.
+//
+// STABLE failures only. The raw baseline is ONE observation; the determinism
+// re-check found 10 unstable tests across 8 files. A flaky test cannot be an
+// admissible task, because acceptance would not be objectively determinable —
+// the task could "pass" without the work being done, or fail despite it.
+// Quarantine is at FILE granularity because one file flipped in BOTH
+// directions, which makes instability a property of the file's setup rather
+// than of a single test.
 const baseline = JSON.parse(fs.readFileSync(BASELINE, "utf8"));
+const stablePath = path.join(path.dirname(BASELINE), "STABLE-FAILURES.json");
+if (!fs.existsSync(stablePath)) {
+  console.error(`REFUSED: ${stablePath} not found. Selecting behavioural tasks from a single unverified run would admit flaky tests, whose acceptance is not objectively determinable.`);
+  process.exit(2);
+}
+const stable = JSON.parse(fs.readFileSync(stablePath, "utf8"));
+const QUARANTINED = new Set(stable.quarantined_files || []);
+const STABLE_KEYS = new Set((stable.stable || []).map((s) => `${s.file}::${s.test}`));
+
 const behavioural = (baseline.failing_tests || []).flatMap((f) =>
   (f.tests.length ? f.tests : [{ full_name: `(suite error) ${f.message ?? ""}`, failure: f.message }])
-    .map((t) => ({ shape: "behavioural", file: f.file, line: 0, text: t.full_name, detail: t.failure })));
+    .map((t) => ({ shape: "behavioural", file: f.file, line: 0, text: t.full_name, detail: t.failure })))
+  .filter((c) => !QUARANTINED.has(c.file))
+  // A suite_error carries no test names; it is stable if it failed to collect
+  // in both runs, which STABLE-FAILURES.json records separately.
+  .filter((c) => STABLE_KEYS.has(`${c.file}::${c.text}`) || (stable.stable_suite_error_files || []).includes(c.file));
 
 // type/interface — from the tsc dump, grouped by code
 const tscLines = fs.readFileSync(TSC_DUMP, "utf8").split("\n");
@@ -82,12 +103,77 @@ const typeDefects = tscLines.map((l) => {
   return m ? { shape: "type_defect", file: m[1].replace(/^\.\//, ""), line: Number(m[2]), ts_code: m[4], text: m[5].slice(0, 200) } : null;
 }).filter(Boolean);
 
+// --- false-positive filters ------------------------------------------------
+// The naive greps match PROSE, not constructs. Observed on the first run: a
+// comment reading "Now: converted to test.todo() since ..." was admitted as a
+// skipped test; a doc line explaining `// @ts-nocheck` was admitted as an
+// applied suppression; and "TODO" inside a string array and inside
+// documentation were admitted as implementation gaps. Each would have produced
+// a benchmark task with nothing to fix.
+//
+// This is also why `implementation_gap` enumerated 61 where SELECTION-RULE.md
+// recorded 10: the query was too loose, not the population larger.
+
+// A skip/todo must be a CALL in code, not a mention in a comment.
+const isRealSkip = (t) =>
+  /(^|[^\w.])(it|test|describe)\.(skip|todo)\s*[(<]/.test(t) && !/^\s*(\/\/|\*|\/\*)/.test(t);
+
+// A suppression directive lives in a comment BY DEFINITION, so the test is
+// whether the directive OPENS the comment (applied) rather than appearing
+// inside prose about it (described).
+const isRealSuppression = (t) => /^\s*(\/\/|\/\*+)\s*@ts-(ignore|expect-error|nocheck)\b/.test(t);
+
+// A marker must OPEN its comment. "NULL, TODO" inside an array literal and
+// "Placeholder Content -> TODO/stub responses" in a doc paragraph do not.
+// An ACTIONABLE marker takes the conventional `TODO:` or `TODO(ID):` form — an
+// instruction addressed to this code. A marker with no colon is almost always a
+// CATEGORY DESCRIPTION: this repository's governance adapters carry headings
+// like "// TODO/stub responses in API handlers" and "// TODO, FIXME, HACK, ...
+// in production code", sitting directly above `pattern: /TODO|FIXME/i`. They
+// describe what the scanner looks for elsewhere; there is nothing in them to fix.
+const isRealMarker = (t) =>
+  /^\s*(\/\/+|\/\*+|\*)\s*(TODO|FIXME|HACK)(\([^)]*\))?\s*:/.test(t) ||
+  /\/\/\s*(TODO|FIXME|HACK)(\([^)]*\))?\s*:/.test(t);
+
+// Cached file reads, for the two filters that need surrounding context.
+const fileCache = new Map();
+const linesOf = (rel) => {
+  if (!fileCache.has(rel)) {
+    try { fileCache.set(rel, fs.readFileSync(path.join(REPO, rel), "utf8").split("\n")); }
+    catch { fileCache.set(rel, []); }
+  }
+  return fileCache.get(rel);
+};
+
+// A marker inside a `// ====` banner is a SECTION HEADING describing what the
+// code below detects — not a gap in this file. Observed: three
+// integrity-adapter files whose headings read "TODO/stub responses in API
+// handlers" above a checkPlaceholderContent() that searches for exactly that.
+// Fixing them would mean nothing, because there is nothing to fix.
+const inBannerBlock = (c) => {
+  const L = linesOf(c.file);
+  const banner = /^\s*(\/\/|\*)\s*[=\-_*#]{5,}\s*$/;
+  for (const d of [-2, -1, 1, 2]) {
+    const l = L[c.line - 1 + d];
+    if (l !== undefined && banner.test(l)) return true;
+  }
+  return false;
+};
+
+// A test FILE that reads a secret out of the environment is environment-bound
+// in every test it contains, not only the ones whose names say so. Observed:
+// "should have a valid RSA private key format" reads
+// process.env.GITHUB_APP_PRIVATE_KEY but names no variable, so a name-based
+// filter misses it. File granularity is the honest unit here.
+const SECRET_ENV = /process\.env\.[A-Z0-9_]*(KEY|SECRET|TOKEN|PASSWORD|CREDENTIAL|DSN|WEBHOOK)[A-Z0-9_]*/;
+const readsSecretEnv = (rel) => SECRET_ENV.test(linesOf(rel).join("\n"));
+
 const populations = {
   behavioural,
   type_defect: typeDefects,
-  test_reliability: parseGrep(rg("\\b(it|test|describe)\\.(skip|todo)\\b"), "test_reliability"),
-  suppression: parseGrep(rg("@ts-(ignore|expect-error|nocheck)"), "suppression"),
-  implementation_gap: parseGrep(rg("\\b(TODO|FIXME|HACK)\\b"), "implementation_gap"),
+  test_reliability: parseGrep(rg("\\b(it|test|describe)\\.(skip|todo)\\b"), "test_reliability").filter((c) => isRealSkip(c.text)),
+  suppression: parseGrep(rg("@ts-(ignore|expect-error|nocheck)"), "suppression").filter((c) => isRealSuppression(c.text)),
+  implementation_gap: parseGrep(rg("\\b(TODO|FIXME|HACK)\\b"), "implementation_gap").filter((c) => isRealMarker(c.text)),
 };
 
 // --- leakage check against the pinned durable state -------------------------
@@ -134,6 +220,18 @@ function admit(c, selectedSoFar) {
   // anything derivable from a line number alone, so this errs toward exclusion.
   if (selectedSoFar.some((s) => s.file === rel))
     return { ok: false, reason: `not independent: ${rel} already carries selected task ${selectedSoFar.find((s) => s.file === rel).task_id}` };
+
+  // Environment- and credential-dependent tests are not code tasks. Observed:
+  // "should have GITHUB_APP_ID configured" and "GITHUB_APP_PRIVATE_KEY
+  // configured" both fail because a secret is absent, so the only "fix" is
+  // supplying a credential — which the standing constraint forbids, and which
+  // measures the environment rather than the system under test.
+  if (c.shape === "behavioural" &&
+      (/\b(env|process\.env|API[_ ]?KEY|SECRET|TOKEN|CREDENTIAL|PRIVATE[_ ]KEY|DATABASE_URL|configured)\b/i.test(`${c.text} ${c.detail ?? ""}`) || readsSecretEnv(rel)))
+    return { ok: false, reason: "not a code task: the test file reads a secret from the environment, so the only remedy is supplying a credential — forbidden, and it would measure the environment rather than the system" };
+
+  if (c.shape === "implementation_gap" && inBannerBlock(c))
+    return { ok: false, reason: "not an implementation gap: the marker is a section heading inside a banner block, describing what the code below detects rather than work left undone" };
 
   const hits = leakageHits(c);
   if (hits.length)
