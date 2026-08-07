@@ -79,8 +79,8 @@ standard context. **That is part of the system under test**, not a deviation.
 ## Frozen before execution
 
 Task ids; repository seed commit; objectives; acceptance criteria; verification
-commands; primary model id; every subagent model id; authority policy; per-arm
-timeout; retry policy; run order; **and the Gravito memory state**, pinned by
+commands; primary model id; every subagent model id; authority policy; the common
+timeout ceiling; retry policy; run order; **and the Gravito memory state**, pinned by
 commit — durable memory is a treatment component, so an unpinned memory makes
 the treatment undefined.
 
@@ -211,15 +211,42 @@ demonstrated:
 
 **No product redesign under the guise of harness hardening.**
 
-### Timeout asymmetry — an open design question, flagged not hidden
+### Timeout — ONE common ceiling, and why it is not per-arm
 
 Gravito's multi-stage flow plausibly runs longer in wall-clock than a single
-native pass. A per-task timeout tight enough to be meaningful may therefore
-truncate the Gravito arm more often than the native one, which would be an
-**asymmetric treatment** rather than a result. Registered handling: the timeout
-is set per arm from a pilot measurement taken **before** task selection, a
-truncated arm is recorded `is_error` and not admitted, and the truncation rate
-per arm is reported as a first-class figure.
+native pass. An earlier draft of this section proposed a **per-arm** timeout set
+as a fixed multiple of each arm's own median, on the theory that equal relative
+headroom is what "symmetric opportunity" means when architectures differ.
+
+**That was wrong and is corrected here.** EXP-0005 is a whole-system
+comparison. If Gravito needs more elapsed time *because it has more internal
+stages*, that extra time is **part of the treatment being measured**. Granting
+it proportionally more wall-clock would normalise away a real system-level
+disadvantage — compensating for the effect instead of measuring it, and doing so
+in the direction that flatters the substrate.
+
+**Registered rule:**
+
+1. Record the native and Gravito completion distributions **independently**,
+   from a pilot measured under a deliberately loose ceiling so the measurement
+   is not clipped by the parameter it is choosing.
+2. Derive **ONE common absolute timeout ceiling** from the **slower or wider** of
+   the two observed distributions.
+3. Set it with headroom generous enough that an ordinary successful task should
+   almost never reach it.
+4. Treat the ceiling as a **runaway / catastrophic-stop guard, never an
+   optimization target**. It exists to stop a hung run, not to discipline a slow
+   one.
+5. **Freeze the common rule before task selection**, so it cannot be chosen
+   after seeing candidate-task behaviour.
+6. Report each architecture's calibrated **median, max, spread and headroom**
+   relative to the common ceiling.
+7. During the run, report **timeout / truncation rate per arm as a first-class
+   outcome**, not as a footnote. A truncated arm is recorded `is_error` and is
+   not admitted.
+
+**If the Gravito distribution is materially slower or wider than native, that is
+preserved as evidence — not compensated for through a different allowance.**
 
 ## Adversarial review of this design
 
@@ -257,7 +284,7 @@ Run against this draft before freezing, per instruction.
 - [ ] task set selected and frozen (**0 of ≥10**)
 - [ ] repository seed pinned
 - [ ] memory state pinned
-- [ ] per-arm timeout calibrated
+- [ ] common timeout ceiling calibrated and frozen (pre-task-selection)
 - [ ] three-role blinding harness built and leak-tested
 - [ ] governance-strip rule implemented and tested
 - [ ] mapping sealed, digest committed
