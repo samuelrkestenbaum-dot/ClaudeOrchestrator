@@ -200,6 +200,7 @@ EXP-0004 admitted **10 measurements from 14 arm executions**. That is not
 normalised away. Hardened before EXP-0005 — generic runner faults only, already
 demonstrated:
 
+- **controller/subject session isolation** — see the invariant below;
 - stdin prompt delivery (an argument over `MAX_ARG_STRLEN` killed three arms);
 - no headless background-monitor dead-end (a `-p` session cannot be woken);
 - isolated work trees per concurrent run;
@@ -210,6 +211,38 @@ demonstrated:
 - **no concurrent measured runs**, since elapsed time is a registered metric.
 
 **No product redesign under the guise of harness hardening.**
+
+### Structural invariant — controller/subject isolation
+
+EXP-0004 found the orchestrator's task list visible inside both arms and
+recorded it as benign **because it was symmetric**. Calibration attempt 1 showed
+that reasoning does not extend: the measured child reported the *orchestrating
+session's own* `session_id`, so measurer and measured shared session-scoped
+state.
+
+> **Symmetric leakage between two treatment arms may preserve a matched
+> comparison. Leakage between the measurement controller and a measured subject
+> destroys measurement independence.** The first is a shared constant; the
+> second is the instrument reading itself.
+
+Binding consequences:
+
+- every measured arm runs under its own session identity, with session-scoped
+  environment (`CLAUDE_CODE_SESSION_ID`, `CLAUDE_CODE_CHILD_SESSION`,
+  `CLAUDE_PID`) scrubbed and a fresh id assigned;
+- isolation is **proven from the child's own emitted stream**, never inferred
+  from having spawned a process — *a new process is not a new session*;
+- a run that completes cleanly but cannot prove isolation is **inadmissible**;
+- both identities are recorded in the run evidence, and neither reaches a
+  blinded role.
+
+### Routing-gate overhead is treatment, not harness
+
+Calibration attempt 1's Gravito arm hit
+`MUTATION BLOCKED — no OPEN routing receipt exists`. That is the substrate
+working as designed. It is **not** disabled, bypassed, pre-opened or optimised
+for measurement. Time spent obtaining authority before acting belongs to the
+system under test, and EXP-0005 charges it to the Gravito arm.
 
 ### Timeout — ONE common ceiling, and why it is not per-arm
 
