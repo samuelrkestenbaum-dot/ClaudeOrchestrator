@@ -2,7 +2,7 @@
 
 Selected mechanically by `select-tasks.mjs` executing `SELECTION-RULE.md`, at
 seed `2543c87`. Every candidate considered, and the reason it was admitted or
-excluded, is in `SELECTION.json` — 1,984 exclusions recorded, not summarised.
+excluded, is in `SELECTION.json` — 1,918 exclusions recorded, not summarised.
 
 **12 tasks across 4 shapes**, above the registered minimum of 10.
 
@@ -135,7 +135,20 @@ The 10 unstable tests, and every test in the 8 files carrying one, are excluded:
 a flaky test cannot be an admissible task, because acceptance would not be
 objectively determinable.
 
-## Not frozen yet
+## A count correction
 
-This is the task set. The **preregistration is not frozen** and the **mapping is
-not sealed** — 6 of 8 readiness items. **Nothing executes.**
+An earlier report of this selection said **1,984** exclusions. The committed
+ledger holds **1,918** exclusions from **1,930** candidates walked.
+
+The difference is not a lost record. The 1,984 figure came from the run *before*
+the false-positive filters above; those filters removed 66 items from the
+**populations**, so they were never walked as candidates. They were query
+artifacts — prose matching a grep — not tasks that were considered and rejected.
+Every candidate that was actually walked carries its verdict.
+
+## Status
+
+Task set frozen. With the mapping sealed (`blinding/SEAL.md`) and the
+preregistration frozen, readiness is **8 of 8**, verified mechanically by
+`readiness-check.mjs`. **Nothing executes until the operator reviews the frozen
+design.**

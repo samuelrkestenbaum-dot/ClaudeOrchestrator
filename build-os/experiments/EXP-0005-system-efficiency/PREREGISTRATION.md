@@ -1,7 +1,26 @@
-# EXP-0005 — PREREGISTRATION (draft, not frozen, not executed)
+# EXP-0005 — PREREGISTRATION (FROZEN, not executed)
 
-**Status: DRAFT.** Nothing may execute until this file is frozen and committed.
-No task has been selected, no seed pinned, no mapping sealed.
+**Status: FROZEN.** All 8 readiness items are met. Nothing in this design may
+change from here: a preregistration amended after freezing is a description of
+choices, not a commitment to them.
+
+**No arm has executed.** The frozen design is returned for operator review
+first, per the standing instruction.
+
+| the eight | evidence |
+|---|---|
+| task set (12 ≥ 10, 4 shapes) | `tasks/TASK-FREEZE.md`, `tasks/SELECTION.json` |
+| repository seed pinned | `memory/SEED-PIN.md` — `2543c87`, tree `2f5e391f` |
+| memory state pinned | `memory/SEED-PIN.md` — digest `3311a638…` |
+| common timeout calibrated | `calibration/TIMEOUT-RULE-FROZEN.md` — 5400 s |
+| three-role blinding harness | `blinding/roles.mjs` — 41 assertions |
+| governance-strip rule | `blinding/governance-strip.mjs` |
+| mapping sealed, digest committed | `blinding/SEAL.md` — `db9348fb…` |
+| this preregistration frozen | this line |
+
+Every constant here is either stated in this file or **deterministically
+referenced** to an artifact committed alongside it. Nothing is carried in
+conversation.
 
 ## The question
 
@@ -312,15 +331,100 @@ Run against this draft before freezing, per instruction.
    experiment**. Stated as a limitation of EXP-0005 by construction, and the
    reason a second repository is the natural follow-on.
 
-## Readiness — what is NOT done
+## Deterministic references — every registered element, and where it lives
 
-- [x] **task set selected and frozen — 12 of ≥10, across 4 shapes** (`tasks/TASK-FREEZE.md`), selected mechanically with all 1,984 exclusions recorded. `implementation_gap` is reported ABSENT with its cause rather than padded: 7 of its 10 enumerated candidates were governance detector documentation, and the 3 real ones were excluded by leakage and by the E1–E5 hard exclusion.
+A frozen preregistration must be checkable without conversation. Each row is
+either stated above or fixed in a committed artifact.
+
+| registered element | where it is fixed |
+|---|---|
+| exact 12-task set, ids and shapes | `tasks/TASK-FREEZE.md` |
+| task-specific acceptance criteria | `tasks/TASK-FREEZE.md` § *Acceptance, frozen per shape* |
+| complete selection/exclusion procedure | `tasks/SELECTION-RULE.md`, executed by `tasks/select-tasks.mjs`; all 1,918 exclusion verdicts (1,930 candidates walked) in `tasks/SELECTION.json` |
+| repository seed | `memory/SEED-PIN.md` — `2543c873141fa64653a7993d326465d5e0dd1006`, tree `2f5e391f` |
+| clean/reset procedure | `harness/restore-seed.sh` — restores **and verifies**, refusing on wrong HEAD, wrong tree, wrong digest, dirty tree, or live ledgers present |
+| pinned Gravito memory snapshot + digest | `memory/SEED-PIN.md` — `3311a638…` (132 receipts, 6 memory files, 3 packets) |
+| allowed / excluded memory classes | `memory/INVENTORY.md`; exclusions enforced by `git clean -fdx` in the restore |
+| task-leakage checks | `tasks/SELECTION-RULE.md` § *Leakage check*; per-candidate verdicts in `tasks/SELECTION.json` |
+| common absolute timeout — 5400 s | `calibration/TIMEOUT-RULE-FROZEN.md` |
+| session-isolation requirement | § *Structural invariant — controller/subject isolation*, enforced by `experiments/harness/run-record.mjs` (`SESSION_SCOPED_ENV` scrub, `--session-id`, stream-verified) |
+| durable runner requirements | `experiments/harness/run-record.mjs` — `openRun()` before launch, so a launcher death is recorded rather than lost |
+| terminal-state admissibility | `run-record.mjs`: `completed`, `timed_out`, `aborted_streaming`, `killed`, `launcher_died`, `missing_result_event`, `infrastructure_error`; admissible **iff** `completed && isolation.isolated` |
+| arm N — native Claude | § *Arm N* |
+| arm G — whole Gravito | § *Arm G* |
+| identical primary worker model rule | § *Frozen before execution* — primary model id and every subagent model id |
+| UIC numerator definition | § *The numerator rule* — accepted durable **product** outcomes only |
+| uncached-token denominator | § *Compute accounting* |
+| governance artifacts = cost, not output | § *The numerator rule*; measured separately by `blinding/governance-strip.mjs` |
+| governance-strip confound rule | `blinding/governance-strip.mjs` — a leak ⇒ `result_confounded` |
+| three-role structural blinding | `blinding/roles.mjs` (41 assertions), architecture in § *Blinding* |
+| minimum n | ≥10 matched tasks; **12 frozen** |
+| stopping / retry rules | § *Fixture reliability* — no concurrent measured runs; retry policy frozen per task; a void arm is re-run **whole**, never repaired mid-run |
+| truncation reporting | any bounded coverage is logged with what was dropped; an unmeasured unit is `not_run`, never a zero |
+| registered outcome vocabulary | § *Registered outcomes* |
+| one-way reveal procedure | § *Blinding* — a separate deterministic step recomputing the mapping from the salt; `blinding/SEAL.md` |
+| mapping digest | `blinding/mapping.sha256.json` — `db9348fbc656edda95685bdde062944eb067fbeeca8f77a197327e7b93eb780d` |
+| Post-Outcome Disposition rules, frozen **before results exist** | `build-os/learning/disposition.mjs` + `corrective-packet.mjs`, both committed before any arm ran |
+
+## Known limitations — registered before results exist
+
+Stated now, so none of them can be discovered conveniently later.
+
+1. **One repository.** Every task comes from `empathiq-website`. "The substrate
+   works" and "the substrate happens to suit this codebase" are **not
+   separable** in a single-repository experiment. A second repository is the
+   natural follow-on, not a refinement of this one.
+
+2. **Established Gravito memory versus a fresh native worker.** Arm G starts
+   with 132 receipts and 6 memory files about *this* repository; arm N starts
+   with none. That asymmetry **is the treatment** — a Gravito stripped of memory
+   is not the system anyone would ship — but it means the comparison is
+   "system with accumulated state" against "system without", not two equally
+   informed workers.
+
+3. **No sequential memory compounding.** Task N's outcome does not become memory
+   available to task N+1; the frozen snapshot is restored before each Gravito
+   unit. Compounding is a **separate hypothesis with its own experiment**, so
+   this design measures neither its benefit nor its cost.
+
+4. **Four task shapes, not the broader mix originally envisioned.**
+   `implementation_gap` was dropped after its registered population of 10 proved
+   to be mostly governance detector documentation. Reporting the shape absent is
+   more valid than manufacturing one after inspection — but the mix is narrower
+   than planned, and that narrows what a result generalises to.
+
+5. **The EXP-0004 27-vs-28 candidate discrepancy is unresolved.** The freeze
+   states a 27-candidate backlog; deterministic re-derivation from the available
+   frozen inputs yields 28; EXP-0004 committed no `candidates.json`, so it
+   **cannot be resolved from frozen evidence**. EXP-0004 is not altered, and no
+   inference is made about which candidate "must have" been absent. Mitigated by
+   hard-excluding the union of all E1–E5 files and all prior-pilot-excluded
+   files (143 files).
+
+6. **Role separation at run time is a discipline, not a structure.** The seal
+   proves the mapping was fixed in advance and that the two blinded views are
+   unjoinable. It proves nothing about who holds what while the experiment runs.
+   See `blinding/SEAL.md` § *Two limitations* for the mechanism and the residual
+   gap.
+
+7. **The behavioural baseline's flake bound is one-sided.** Only the failing
+   subset was re-measured, so the 1.17% instability figure bounds the observed
+   failures, **not** the repository's flake rate, and does not refute
+   `DEFECT-0013`'s 6.26% over a different population.
+
+8. **Broader four-surface organizational readiness is a separate matter and
+   currently reads FAIL.** It is not part of this experiment, is not improved by
+   it, and must not be reported as though EXP-0005 bears on it.
+
+## Readiness — 8 of 8, verified mechanically by `readiness-check.mjs`
+
+- [x] **task set selected and frozen — 12 of ≥10, across 4 shapes** (`tasks/TASK-FREEZE.md`), selected mechanically with all 1,918 exclusions recorded. `implementation_gap` is reported ABSENT with its cause rather than padded: 7 of its 10 enumerated candidates were governance detector documentation, and the 3 real ones were excluded by leakage and by the E1–E5 hard exclusion.
 - [x] **repository seed pinned** — `2543c87`, tree `2f5e391f`, restored and verified by `harness/restore-seed.sh`, which refuses rather than warns (`memory/SEED-PIN.md`)
 - [x] **memory state pinned** — durable-state digest `3311a638…`, method now defined in the repository; `INVENTORY.md`'s headline digest is superseded as unreproducible, with the per-class evidence that the state itself did not drift
 - [x] **common timeout ceiling calibrated and frozen** — 5400 s, from three admissible calibration runs, before task selection (`calibration/TIMEOUT-RULE-FROZEN.md`)
 - [x] **three-role blinding harness built and leak-tested** — views made unjoinable by separate salt domains; 41 assertions incl. the adversarial join
 - [x] **governance-strip rule implemented and tested** — product-only adjudication, governance as denominator cost, leak ⇒ `result_confounded`
-- [ ] mapping sealed, digest committed
-- [ ] this preregistration frozen
+- [x] **mapping sealed, digest committed** — `db9348fb…`, 12 tasks / 24 units, one global mapping, derived not sampled, salt and seal outside the repository, 13 checks passing plus 41 harness assertions (`blinding/SEAL.md`)
+- [x] **this preregistration frozen** — see Status, below
 
-**Nothing executes until every box is ticked.**
+**8 of 8. Nothing executes until the operator reviews the frozen design.**
