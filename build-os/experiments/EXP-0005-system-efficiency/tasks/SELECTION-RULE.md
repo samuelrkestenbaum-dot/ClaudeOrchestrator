@@ -49,9 +49,8 @@ that reflects a property of the task is an ordering that could be tuned.
 
 ## Leakage check — against the FIXED inventory
 
-Every candidate is checked against durable-state digest
-`7de42dd1c5a779a257645a0deecea2d8292b8501f84832e8c21cf65542e76ae6`
-(132 receipts, 6 memory files, 3 packets), and must show:
+Every candidate is checked against the pinned durable state — **132 receipts, 6
+memory files, 3 packets** — and must show:
 
 - no receipt recording an identical or equivalent completed task;
 - no memory artifact containing the required patch;
@@ -69,6 +68,19 @@ flatters the arm with memory. Every exclusion is recorded with its reason.
 **Contamination excludes the TASK. It never purges the MEMORY.** Purging
 legitimate repository knowledge to make Gravito look fresh would replace the
 system under test with one nobody would ship.
+
+> **Digest reference, corrected.** This rule originally named durable-state
+> digest `7de42dd1c5a779a257645a0deecea2d8292b8501f84832e8c21cf65542e76ae6`.
+> That value proved **unreproducible** — its combination step was never
+> recorded, and sixteen candidate methods failed to recompute it against the
+> unchanged tree. The pinned state is now `3311a638…` by the method defined in
+> `memory/SEED-PIN.md`.
+>
+> **No selection criterion changed.** The state being checked against is
+> identical: the same 132 receipts, 6 memory files and 3 packets, whose
+> per-class digests reproduce exactly. Only the identifier's arithmetic
+> changed, from one nobody could verify to one anybody can. The original value
+> is left recorded above rather than deleted, so the correction is visible.
 
 ## Hard exclusions, no check required
 

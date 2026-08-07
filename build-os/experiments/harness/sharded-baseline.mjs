@@ -84,41 +84,65 @@ const files = INCLUDE_ROOTS.flatMap((r) => walk(path.join(REPO, r))).sort();
 log(`seed=${seedHead} discovered=${files.length} chunk=${CHUNK} timeout=${TIMEOUT_MS / 1000}s`);
 
 // --- chunk execution --------------------------------------------------------
+// Vitest is invoked as `node <vitest.mjs>` rather than through `npx`. THIS IS
+// NOT COSMETIC. `npx` execs a shell that execs node; npx then EXITS and the real
+// vitest process is reparented to init. A kill aimed at the spawned pid then
+// hits a corpse, the grandchildren keep the stdio pipes open, and `close` never
+// fires — so the timeout silently does nothing and one hung chunk stalls the
+// whole sweep. That was observed: a chunk ran 375 s against a 300 s ceiling and
+// was never killed. Spawning node directly, detached, gives one process group
+// that can actually be killed.
+const VITEST_BIN = path.join(REPO, "node_modules", "vitest", "vitest.mjs");
+if (!fs.existsSync(VITEST_BIN)) {
+  console.error(`REFUSED: no vitest at ${VITEST_BIN}`);
+  process.exit(2);
+}
+
 function runChunk(list, id) {
   return new Promise((resolve) => {
     const jsonPath = path.join(CHUNKS_DIR, `${id}.json`);
     const limit = list.length === 1 ? SINGLE_TIMEOUT_MS : TIMEOUT_MS;
     const started = Date.now();
+    try { fs.unlinkSync(jsonPath); } catch { /* first run */ }
+
     const child = spawn(
-      "npx",
-      ["vitest", "run", "--reporter=json", `--outputFile=${jsonPath}`, ...list],
-      { cwd: REPO, env: { ...process.env, CI: "1" }, stdio: ["ignore", "pipe", "pipe"] }
+      process.execPath,
+      [VITEST_BIN, "run", "--reporter=json", `--outputFile=${jsonPath}`, ...list],
+      { cwd: REPO, env: { ...process.env, CI: "1" }, stdio: ["ignore", "pipe", "pipe"], detached: true }
     );
 
     let out = "";
-    const cap = (b) => { if (out.length < 200_000) out += b.toString(); };
+    let lastOutput = Date.now();
+    const cap = (b) => { lastOutput = Date.now(); if (out.length < 200_000) out += b.toString(); };
     child.stdout.on("data", cap);
     child.stderr.on("data", cap);
 
+    let killed = false;
     const timer = setTimeout(() => {
-      try { process.kill(child.pid, "SIGKILL"); } catch { /* already gone */ }
+      killed = true;
+      // Negative pid = the whole process group. Killing only the leader leaves
+      // vitest's worker forks alive, which is how the first attempt leaked.
+      try { process.kill(-child.pid, "SIGKILL"); } catch { /* group already gone */ }
+      try { process.kill(child.pid, "SIGKILL"); } catch { /* leader already gone */ }
     }, limit);
 
-    child.on("close", (code, signal) => {
+    // Resolve on `exit`, NOT on `close`. `close` waits for every inherited pipe
+    // to shut, which a surviving grandchild can hold open indefinitely — the
+    // exact reason the first attempt's timeout never reported.
+    child.on("exit", (code, signal) => {
       clearTimeout(timer);
       const elapsed_s = (Date.now() - started) / 1000;
-      const killed = signal === "SIGKILL";
-      let report = null;
-      try { report = JSON.parse(fs.readFileSync(jsonPath, "utf8")); } catch { /* none written */ }
-      if (killed && !report) {
-        fs.writeFileSync(path.join(CHUNKS_DIR, `${id}.stdout.txt`), out);
-        return resolve({ status: "timeout", elapsed_s, files: list });
-      }
-      if (!report) {
-        fs.writeFileSync(path.join(CHUNKS_DIR, `${id}.stdout.txt`), out);
-        return resolve({ status: "no_report", elapsed_s, files: list, exit_code: code });
-      }
-      resolve({ status: "ok", elapsed_s, files: list, report });
+      const silent_for_s = (Date.now() - lastOutput) / 1000;
+      // Give the reporter a moment to flush its file, then stop listening.
+      setTimeout(() => {
+        try { child.stdout.destroy(); child.stderr.destroy(); } catch { /* already closed */ }
+        let report = null;
+        try { report = JSON.parse(fs.readFileSync(jsonPath, "utf8")); } catch { /* none written */ }
+        if (!report) fs.writeFileSync(path.join(CHUNKS_DIR, `${id}.stdout.txt`), out);
+        if (killed && !report) return resolve({ status: "timeout", elapsed_s, silent_for_s, files: list });
+        if (!report) return resolve({ status: "no_report", elapsed_s, silent_for_s, files: list, exit_code: code, signal });
+        resolve({ status: "ok", elapsed_s, silent_for_s, files: list, report, truncated_by_timeout: killed });
+      }, 250);
     });
   });
 }
@@ -166,11 +190,18 @@ while (queue.length) {
   } else if (r.status === "timeout" && list.length > 1) {
     const mid = Math.ceil(list.length / 2);
     queue.unshift(list.slice(0, mid), list.slice(mid));
-    log(`${id} TIMEOUT after ${r.elapsed_s.toFixed(1)}s — bisecting ${list.length} -> ${mid}+${list.length - mid}`);
+    // `silent_for` separates the two shapes a timeout can have: a chunk that
+    // went quiet (a genuine hang) and one still emitting output when the
+    // ceiling hit it (merely slow). Attempt 1 could not tell these apart, and
+    // that ambiguity is what let a dead run be misread as a long one.
+    log(`${id} TIMEOUT after ${r.elapsed_s.toFixed(1)}s (silent_for=${r.silent_for_s.toFixed(0)}s) — bisecting ${list.length} -> ${mid}+${list.length - mid}`);
   } else if (r.status === "timeout") {
-    hung.push(list[0]);
-    perFile.set(list[0], { status: "hung", tests: [], message: `no completion within ${SINGLE_TIMEOUT_MS / 1000}s when run alone` });
-    log(`${id} HUNG (isolated): ${list[0]}`);
+    hung.push({ file: list[0], silent_for_s: r.silent_for_s, elapsed_s: r.elapsed_s });
+    perFile.set(list[0], {
+      status: "hung", tests: [],
+      message: `no completion within ${SINGLE_TIMEOUT_MS / 1000}s when run alone; silent for ${r.silent_for_s.toFixed(0)}s at the ceiling`,
+    });
+    log(`${id} HUNG (isolated): ${list[0]} silent_for=${r.silent_for_s.toFixed(0)}s`);
   } else {
     // no_report: the process exited without writing JSON. Bisect too — the
     // cause may be one file crashing the runner, and that file must be named.
