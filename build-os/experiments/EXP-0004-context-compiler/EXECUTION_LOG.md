@@ -24,6 +24,31 @@ Baseline is measured **inside each arm at that arm's start**, because criterion
 (b) is "strictly below the count at task start". It is never assumed from the
 freeze.
 
+## Fixture conditions found during execution — matched, and disclosed anyway
+
+These were discovered while the pairs ran. Each is **identical in both arms**,
+so none of them biases the comparison. Each is recorded because an undisclosed
+constant is indistinguishable, in the numbers, from an unexplained one.
+
+- **Serena's MCP server and a TypeScript language server launch inside every
+  arm session.** They come from user scope, not from the work tree, so the
+  sparse-exclusion of `.claude/` does not remove them. Consequence worth naming:
+  every arm — including arm B — has a semantic code-navigation tool available,
+  which changes what "avoidable exploration" costs. The capsule is therefore
+  being compared against a baseline that is *better equipped* than a plain
+  file-reading agent, not worse.
+- **A fixed CLI system-prompt floor.** A trivial headless probe that made no
+  edits still spent ~29,400 cache-creation tokens. That floor is paid by both
+  arms and sets the scale against which any compression has to be read.
+- **A second model appears in every run.** `modelUsage` shows
+  `claude-haiku-4-5` alongside `claude-fable-5` — the CLI's own internal
+  small-model use. It is present in both arms and is included in the token
+  totals as reported, not subtracted.
+- **Execution is strictly sequential.** More than half of each measured window
+  is *local* CPU (E1's arm A: 402 s of API time inside an 849 s window) on a
+  4-core machine. Running pairs concurrently would have made elapsed time a
+  function of scheduler contention, and elapsed time is a registered metric.
+
 ## Attempt 1 of pair E1 — VOID (harness defect, no treatment delivered to arm B)
 
 ### Defect 1 — the prompt was passed as a command-line argument
