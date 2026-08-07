@@ -329,13 +329,47 @@ ctot="$(q "$CC" budget.candidates_total)"
 nrf="$(node "$WORK/why.mjs" "$CC" count)"
 [ "$nrf" -eq "$adm" ] 2>/dev/null && ok "relevant_files length equals budget.admitted" \
   || no "relevant_files ($nrf) disagrees with budget.admitted ($adm)"
+# v1: the guarantee is unchanged — NO candidate is dropped silently — but the
+# representation is. v0 emitted one ~500-byte paragraph per declined file, so a
+# capsule declining 134 files spent ~67 KB describing what it had chosen not to
+# send (EXP-0004 defect 2). The full declined set now lives in a
+# digest-addressed sidecar artifact; the prompt carries a summary and a handle.
+# These assertions check the SAME property against the new representation.
 ndrop="$(node -e '
 const c=JSON.parse(require("fs").readFileSync(process.argv[1],"utf8"));
-console.log(c.provenance.excluded_notable.filter(s=>/budget: dropped at priority \d/.test(s)).length);
+console.log((c.excluded_summary && c.excluded_summary.count) || 0);
 ' "$CC")"
 [ "$ndrop" -eq "$drop" ] 2>/dev/null \
-  && ok "every dropped candidate has a 'budget: dropped at priority N' line ($ndrop)" \
-  || no "dropped candidates without a disclosure line: $ndrop lines vs $drop dropped"
+  && ok "excluded_summary accounts for every dropped candidate ($ndrop)" \
+  || no "dropped candidates unaccounted: summary says $ndrop vs $drop dropped"
+byrule="$(node -e '
+const c=JSON.parse(require("fs").readFileSync(process.argv[1],"utf8"));
+const b=(c.excluded_summary||{}).by_rule||{};
+console.log(Object.values(b).reduce((a,x)=>a+x,0));
+' "$CC")"
+[ "$byrule" -eq "$drop" ] 2>/dev/null \
+  && ok "by_rule counts sum to the dropped total (no rung unaccounted)" \
+  || no "by_rule sums to $byrule, not $drop"
+dg="$(node -e '
+const c=JSON.parse(require("fs").readFileSync(process.argv[1],"utf8"));
+process.stdout.write(String((c.excluded_summary||{}).full_set_sha256||""));
+' "$CC")"
+[ -n "$dg" ] && ok "the complete declined set is addressed by digest" \
+  || no "no digest for the declined set — auditability was dropped, not moved"
+art="$(node -e '
+const c=JSON.parse(require("fs").readFileSync(process.argv[1],"utf8"));
+process.stdout.write(String((c.excluded_summary||{}).full_set_artifact||""));
+' "$CC")"
+if [ -n "$art" ] && [ -s "$OUTC/$art" ]; then
+  nart="$(grep -vc '^#' "$OUTC/$art")"
+  [ "$nart" -eq "$drop" ] 2>/dev/null \
+    && ok "the sidecar artifact carries all $nart declined candidates verbatim" \
+    || no "sidecar has $nart rows, expected $drop"
+  grep -q "$dg" "$OUTC/$art" && ok "the artifact states its own digest" \
+    || no "artifact does not carry its digest"
+else
+  no "declined-set artifact missing at $OUTC/$art"
+fi
 [ "$(node "$WORK/why.mjs" "$CC")" = "OK" ] \
   && ok "budgeted capsule still gives every admitted file a why" || no "budgeted capsule lost a why"
 # Priority order must be respected: the defining file can never be the one dropped

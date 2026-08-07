@@ -161,10 +161,40 @@ export function renderCapsule(capsule, prefix = IMMUTABLE_PREFIX) {
   out.push(`- admission priority (fixed, not learned): ` +
            `${Array.isArray(bu.priority_order) ? bu.priority_order.join(" > ") : "not stated"}`);
   out.push("");
+  const sd = c.semantic_dependencies || {};
+  if ((sd.evidence && sd.evidence.length) || (sd.notes && sd.notes.length)) {
+    out.push("### Semantic dependencies — who relies on the MEANING of what you may change");
+    out.push("");
+    if (Array.isArray(sd.error_named_properties) && sd.error_named_properties.length) {
+      out.push(`Properties named by this task's own diagnostics: ` +
+        sd.error_named_properties.map((p) => `\`${esc(p)}\``).join(", "));
+      out.push("");
+      out.push("**Removing one of these is the likeliest wrong fix.** Items below marked " +
+        "`ERROR-NAMED` show who depends on them.");
+      out.push("");
+    }
+    out.push(list(sd.evidence || [], "no semantic evidence was gathered"));
+    out.push("");
+    if (sd.honesty) { out.push(`> ${esc(sd.honesty)}`); out.push(""); }
+    if (sd.notes && sd.notes.length) { out.push(list(sd.notes, "")); out.push(""); }
+  }
+
   out.push("### Provenance — withheld, and why");
   out.push("");
+  const es = c.excluded_summary;
+  if (es) {
+    out.push(`- declined candidates: **${esc(es.count)}**`);
+    for (const [rule, n] of Object.entries(es.by_rule || {})) out.push(`  - ${esc(rule)}: ${esc(n)}`);
+    out.push(`- highest-risk declined:`);
+    for (const h of es.highest_risk || []) out.push(`  - ${esc(h)}`);
+    out.push(`- complete declined set: \`${esc(es.full_set_artifact)}\` (sha256 \`${esc(es.full_set_sha256)}\`)`);
+    out.push(`- to get more: ${esc(es.how_to_get_more)}`);
+    out.push("");
+    out.push(`> ${esc(es.honesty)}`);
+    out.push("");
+  }
   const ex = (c.provenance && c.provenance.excluded_notable) || [];
-  out.push(list(ex, "nothing was withheld"));
+  out.push(list(ex, es ? "no facts or decisions were withheld beyond the summary above" : "nothing was withheld"));
   out.push(E("VOLATILE"));
   out.push("");
 

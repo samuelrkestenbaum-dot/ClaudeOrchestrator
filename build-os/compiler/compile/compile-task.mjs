@@ -32,6 +32,7 @@ import path from "node:path";
 import crypto from "node:crypto";
 import { IMMUTABLE_PREFIX, PREFIX_SHA256 } from "./capsule-prefix.mjs";
 import { renderCapsule } from "./render-capsule.mjs";
+import { semanticEvidence, errorSignals } from "./semantic.mjs";
 
 // ---------------------------------------------------------------------------
 // Priority ladder. This is FIXED, not learned. When the byte budget cannot
@@ -103,6 +104,7 @@ function parseArgs(argv) {
   const opt = {
     index: null, task: null, facts: null, decisions: null,
     budget: null, out: ".", deterministic: false,
+    repoRoot: null, errors: null, semanticMax: 60,
     artifactThreshold: DEFAULT_ARTIFACT_THRESHOLD,
   };
   for (let i = 0; i < a.length; i++) {
@@ -120,6 +122,9 @@ function parseArgs(argv) {
       case "--out": opt.out = next(); break;
       case "--deterministic": opt.deterministic = true; break;
       case "--artifact-threshold": opt.artifactThreshold = Number(next()); break;
+      case "--repo-root": opt.repoRoot = next(); break;
+      case "--errors": opt.errors = next(); break;
+      case "--semantic-max": opt.semanticMax = Number(next()); break;
       case "-h": case "--help":
         process.stdout.write(USAGE); process.exit(0); break;
       default: die(`unknown option: ${k}`);
@@ -447,6 +452,8 @@ function main(argv) {
 
   // --- admission ---------------------------------------------------------
   const admitted = [];
+  const excluded = [];
+  let exclusionArtifact = null;
   let spent = 0;
   let stopped = false;
   for (const c of candidates) {
@@ -458,12 +465,14 @@ function main(argv) {
       spent += cost;
     } else {
       stopped = true; // priority is a ladder, not a knapsack: stop, do not skip
-      const p = PRIORITY.find((x) => x.n === c.priority);
-      provenance.excluded_notable.push(
-        `${c.path}: budget: dropped at priority ${c.priority} (${p ? p.label : "unknown"}) — ` +
-        `admitting it would cost ${cost} bytes against a ${budgetBytes}-byte budget with ` +
-        `${Math.max(0, budgetBytes - baseBytes - spent)} remaining; rule was "${c.why}" — ` +
-        `request it with need_file(${c.path})`);
+      // COMPACT DISCLOSURE (EXP-0004 defect 2). v0 emitted one paragraph per
+      // declined candidate — ~500 bytes each — so a capsule that declined 134
+      // files spent ~67 KB explaining what it had chosen NOT to send. A
+      // selective-attention system that pays more to describe its exclusions
+      // than to carry its inclusions has inverted its own purpose. The full
+      // list is still recorded, in a sidecar artifact addressed by digest;
+      // what leaves the prompt is the summary and the handle.
+      excluded.push({ path: c.path, priority: c.priority, cost, why: c.why });
     }
   }
 
@@ -517,6 +526,70 @@ function main(argv) {
     }
   }
 
+  // --- semantic dependency evidence (SEAM 2b) -----------------------------
+  // Not part of the byte budget: this is the evidence that stops a fix from
+  // being locally correct and globally wrong, and EXP-0004 showed that trading
+  // it away to save bytes is how a capsule loses on acceptance.
+  skeleton.semantic_dependencies = { evidence: [], notes: [], honesty: "" };
+  if (opt.repoRoot) {
+    let errorLines = [];
+    if (opt.errors) {
+      try { errorLines = fs.readFileSync(opt.errors, "utf8").split("\n").filter((l) => /error TS/.test(l)); }
+      catch { notes.push(`errors file unreadable: ${opt.errors} — semantic ranking runs without error signals`); }
+    }
+    const sig = errorSignals(errorLines);
+    const sem = semanticEvidence(opt.repoRoot, idx, definingFiles, {
+      maxItems: opt.semanticMax, errorProperties: sig.properties,
+    });
+    skeleton.semantic_dependencies = {
+      error_named_properties: sig.properties,
+      error_named_types: sig.types,
+      evidence: sem.items.map((i) =>
+        `[${i.rule}${i.error_named_property ? " · ERROR-NAMED" : ""}] ${i.where} — ${i.detail}`),
+      counts: sem.counts,
+      notes: sem.notes,
+      honesty:
+        "STATIC LINKAGE ONLY, never executed coverage. An item says a file textually references a symbol or " +
+        "property near an assertion; it does not say the test exercises it. Items marked ERROR-NAMED concern a " +
+        "property this task's own diagnostics name — deleting one of those is the likeliest wrong fix.",
+    };
+    for (const n of sem.notes) notes.push(n);
+  } else {
+    skeleton.semantic_dependencies.notes.push(
+      "no --repo-root supplied, so NO semantic dependency evidence was gathered. That is an absence of " +
+      "evidence, not evidence that nothing depends on this code.");
+  }
+
+  // --- compact exclusion summary, replacing per-file prose ----------------
+  if (excluded.length) {
+    const byPriority = new Map();
+    for (const e of excluded) {
+      const p = PRIORITY.find((x) => x.n === e.priority);
+      const key = `${e.priority} ${p ? p.label : "unknown"}`;
+      byPriority.set(key, (byPriority.get(key) || 0) + 1);
+    }
+    const full = excluded
+      .map((e) => `${e.path}\tpriority ${e.priority}\t${e.cost} bytes\t${e.why}`)
+      .sort()
+      .join("\n");
+    const digest = sha256(Buffer.from(full, "utf8"));
+    // Highest-risk first: the earliest ladder rung reached, then path. These
+    // are the ones a reader is most likely to want back.
+    const byRisk = [...excluded].sort((a, b) => a.priority - b.priority || (a.path < b.path ? -1 : 1));
+    exclusionArtifact = { digest, text: full, count: excluded.length };
+    skeleton.excluded_summary = {
+      count: excluded.length,
+      by_rule: Object.fromEntries([...byPriority.entries()].sort()),
+      highest_risk: byRisk.slice(0, 5).map((e) => `${e.path} (priority ${e.priority}: ${e.why})`),
+      full_set_sha256: digest,
+      full_set_artifact: `excluded-candidates-${digest.slice(0, 12)}.tsv`,
+      how_to_get_more: "need_file(<path>) for one, or need_artifact(<full_set_artifact>) for the complete list",
+      honesty:
+        "This is a SUMMARY, not a census. The complete declined set is recorded verbatim in the artifact " +
+        "above and is addressed by the digest, so auditability is preserved without spending the prompt on it.",
+    };
+  }
+
   skeleton.budget = {
     bytes: budgetBytes,
     base_bytes: baseBytes,
@@ -544,6 +617,14 @@ function main(argv) {
   fs.mkdirSync(opt.out, { recursive: true });
   fs.writeFileSync(path.join(opt.out, "capsule.json"), json, "utf8");
   fs.writeFileSync(path.join(opt.out, "capsule.md"), md, "utf8");
+  // The declined set leaves the prompt but not the record: auditability moves
+  // to a digest-addressed sidecar rather than being deleted.
+  if (exclusionArtifact) {
+    fs.writeFileSync(
+      path.join(opt.out, `excluded-candidates-${exclusionArtifact.digest.slice(0, 12)}.tsv`),
+      `# ${exclusionArtifact.count} declined candidates; sha256 ${exclusionArtifact.digest}\n` +
+      "# path\tpriority\tcost_bytes\trule\n" + exclusionArtifact.text + "\n", "utf8");
+  }
 
   process.stdout.write(
     `capsule: ${skeleton.task_id}  files ${admitted.length}/${candidates.length}  ` +
