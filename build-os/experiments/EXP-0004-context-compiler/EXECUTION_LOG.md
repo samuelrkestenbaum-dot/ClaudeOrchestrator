@@ -203,6 +203,13 @@ flattering result, not toward one. Attempt 1's artifacts are kept at
 `pairs-out/E4-attempt1/` and `pairs-out/E5-attempt1/` and are not admitted to
 the aggregate.
 
+### The re-run vindicated the diagnosis
+
+Uncontended, **E4.A completed in 1249 s over 91 turns** — comfortably inside the
+same 1800 s ceiling it had hit before. The timeout was contention, not the task.
+E5.A likewise ran normally (34 turns, 540 s, cluster resolved) instead of parking
+on a background monitor. Nothing about either arm was changed to achieve that.
+
 ### One more fixture leak, found here
 
 The arm sessions could see **this session's task list** — E5.A said so in its
@@ -212,3 +219,40 @@ AMENDMENT 2's mechanical check still passes because that check is on prompt
 bytes. It is still context that has no business inside an arm whose registered
 treatment is "the capsule and nothing else", and it is recorded as a known
 imperfection of the substitution rather than left to be discovered later.
+
+## Attempt 2 of pair E5 — VOID, and a STOPPING RULE committed before attempt 3
+
+E5's arm B terminated `aborted_streaming` with `is_error: true`, cut mid-`Bash`
+at 436 s — nowhere near the 1800 s ceiling, no stderr, an infrastructure stream
+abort.
+
+Its **work product is complete**: the cluster is fully resolved, no new errors,
+no regressions, no suppressions, all five acceptance criteria pass. What is not
+complete is its **economics**. The session was cut while verifying, so its
+elapsed time and token totals are **lower bounds, not measurements** — and it
+was the faster side of that pair. Admitting a lower-bounded winner biases the
+comparison in precisely the direction that flatters it.
+
+The rule applied is the one already applied to E4.A, and it is applied without
+reference to which condition it helps:
+
+> **An arm that ends with `is_error: true` did not complete its measured window,
+> and its economics are not admissible.**
+
+### The stopping rule, committed BEFORE attempt 3 runs
+
+Three attempts at one pair is the point where "re-run the infrastructure
+failure" starts to look like "run until the number is usable". So the stop is
+fixed in advance, in writing, before the attempt:
+
+> **E5 gets exactly one more whole-pair attempt.** If attempt 3 also ends with
+> an `is_error: true` arm, E5 is EXCLUDED. The aggregate then runs on four
+> pairs, takes the AMENDMENT 3.5 minimum-n penalty, and the verdict is whatever
+> the registered rules return on four — including `inconclusive`. No fourth
+> attempt, whatever the reason, and no relaxation of the rule above to rescue
+> a pair.
+
+Every attempt is retained (`pairs-out/E5-attempt1/`, `E5-attempt2/`) and none
+is silently dropped. The escalating disclosure is itself part of the result:
+three attempts at one pair is a fact about this fixture's reliability, and it
+belongs in the limitations, not in a footnote.
