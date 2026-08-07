@@ -1,0 +1,7 @@
+{
+  "authorized": "publish Post-Outcome Disposition v0",
+  "authorized_tip": "f8e1ed2",
+  "granted_by": "operator",
+  "note": "Content authorisation for this tip only. Confers no status on any artifact it makes reachable, and does not authorise a later tip.",
+  "confers_status": false
+}

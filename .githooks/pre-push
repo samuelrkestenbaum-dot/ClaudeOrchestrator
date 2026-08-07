@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# Gravito publication authority — the load-bearing check.
+# A diagnosed friction is not resolved until the control path behaves
+# differently, so this runs on every `git push` from this repository.
+set -uo pipefail
+[ -n "${GRAVITO_PUBLISH_BYPASS:-}" ] && { echo "pre-push: BYPASSED via GRAVITO_PUBLISH_BYPASS (recorded)"; exit 0; }
+while read -r _local_ref local_sha _remote_ref remote_sha; do
+  [ "$local_sha" = "0000000000000000000000000000000000000000" ] && continue
+  if [ "$remote_sha" = "0000000000000000000000000000000000000000" ]; then
+    node build-os/tools/publish-check.mjs --local "$local_sha" || exit 1
+  else
+    node build-os/tools/publish-check.mjs --local "$local_sha" --remote "$remote_sha" || exit 1
+  fi
+done
+exit 0
