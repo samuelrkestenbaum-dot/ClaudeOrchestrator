@@ -1,0 +1,75 @@
+{
+ "experiment": "EXP-0004",
+ "task_id": "E1",
+ "arm": "A",
+ "fields": {
+  "starting_context_bytes": {
+   "value": 1159,
+   "tier": "EXACT"
+  },
+  "expansion_bytes": {
+   "value": 108325,
+   "tier": "EXACT"
+  },
+  "total_tokens": {
+   "value": 3276804,
+   "tier": "EXACT"
+  },
+  "uncached_tokens": {
+   "value": 92686,
+   "tier": "EXACT"
+  },
+  "time_to_first_meaningful_edit_s": {
+   "value": 522.7,
+   "tier": "ESTIMATE"
+  },
+  "total_elapsed_s": {
+   "value": 849.35,
+   "tier": "EXACT"
+  },
+  "files_read": {
+   "value": 12,
+   "tier": "EXACT"
+  },
+  "search_operations": {
+   "value": 21,
+   "tier": "EXACT"
+  },
+  "context_expansions": {
+   "value": 42,
+   "tier": "EXACT"
+  },
+  "failed_hypotheses": {
+   "value": "-",
+   "tier": "UNAVAILABLE"
+  },
+  "rework_rounds": {
+   "value": 10,
+   "tier": "ESTIMATE"
+  },
+  "verifier_dispatches": {
+   "value": 7,
+   "tier": "EXACT"
+  },
+  "tests_run": {
+   "value": 205,
+   "tier": "EXACT"
+  },
+  "tests_passed": {
+   "value": 201,
+   "tier": "EXACT"
+  },
+  "acceptance_result": {
+   "value": "accepted",
+   "tier": "EXACT"
+  },
+  "regressions": {
+   "value": 0,
+   "tier": "EXACT"
+  },
+  "human_interventions": {
+   "value": 0,
+   "tier": "EXACT"
+  }
+ }
+}

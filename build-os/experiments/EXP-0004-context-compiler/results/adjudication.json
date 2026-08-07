@@ -1,0 +1,86 @@
+{
+ "view": "adjudication",
+ "experiment": "EXP-0004",
+ "units": [
+  {
+   "unit_id": "2f0af7c183ac197e",
+   "task_id": "E3",
+   "acceptance_result": "accepted",
+   "criteria": {"a": "pass", "b": "pass", "c": "pass", "d": "pass", "e": "pass"},
+   "reasoning": "Mechanical evidence is consistent with the diff: all 8 TS2307 errors are resolved by re-pointing unresolvable imports at real modules ('../gravito/supabase-db' -> '../supabase', './_core/db' -> './_core/db-singleton'), total drops 754 -> 744, no new errors, and the one failing test also failed at baseline. On (e), all 8 flagged `any` lines are pre-existing and carried across verbatim: the '-' side of each hunk already reads `(rows.rows || []).map((r: any) => ...`, `for (const row of (rows.rows || []) as any[])`, `const row = (stats.rows || [])[0] as any || {}` — the only edit is dropping `.rows` after the DB accessor change, and these rows come from raw `db.execute(sql`...`)` which is untyped upstream, so the meaning is unchanged. No interface was invented or widened; the change in server/cron/internal-scheduler.ts actually removes a silencer by deleting `as unknown as RemediationRun` and passing the real createRemediationRun field names instead.",
+   "disagreements_with_mechanical": ""
+  },
+  {
+   "unit_id": "43990398f37881f6",
+   "task_id": "E2",
+   "acceptance_result": "accepted",
+   "criteria": {"a": "pass", "b": "pass", "c": "pass", "d": "pass", "e": "pass"},
+   "reasoning": "All 13 TS2353 errors cleared, 754 -> 740, zero new errors, and all 8 test failures across the 231 covering tests were failing at baseline (regressed_count 0). On (e) there is no `any` anywhere in the diff; the judgement is about three added declarations. `correlationId?`/`requestId?`/`userId?` on ExecutionContext describe properties the runtime object demonstrably carries — unchanged code at line 1418 already reads `agentId: ctx.userId || 'mcp-caller'` — so this is a correct declaration, not a fabrication. `status?: string; createdAt?: Date` on MarketplaceListing/DistributionAgent and `name?: string` on PolicyDefinition are borderline, but the producing call sites really do set those values (`{...input, createdAt: new Date(), status: 'draft'}`), and declaring them optional states exactly the true fact that only some instances carry them, so no false guarantee is made. The telemetry.ts early-return fix makes the literal match the already-declared return type, which is a genuine correction.",
+   "disagreements_with_mechanical": ""
+  },
+  {
+   "unit_id": "53ec6c63379e97e4",
+   "task_id": "E1",
+   "acceptance_result": "accepted",
+   "criteria": {"a": "pass", "b": "pass", "c": "pass", "d": "pass", "e": "pass"},
+   "reasoning": "All 15 TS2769 errors cleared, 754 -> 737 (a net 17, so two collateral errors also went), zero new errors, and all 4 failures among 205 covering tests were baseline failures. On (e) the diff contains no `any` and no new type declaration; it moves in the opposite direction. It deletes the fabricated local `interface Claim { classification: 'verified' | 'unverified' | 'fabricated' }` and lets the real filter callbacks infer, and it replaces two `(x as unknown as Record<string, unknown>).field` escape hatches with genuine schema columns: `eq(learnedRules.isActive, true)`, `desc(learnedRules.timesApplied)`, `gte(governanceValidationRuns.executedAt, weekAgo)`. `fabricated_claims: 0` is a value-level decision, documented by the adjacent comment that classifyClaims has no 'fabricated' category — not a type assertion, and honest about the gap.",
+   "disagreements_with_mechanical": ""
+  },
+  {
+   "unit_id": "54350323dc2311de",
+   "task_id": "E5",
+   "acceptance_result": "accepted",
+   "criteria": {"a": "pass", "b": "pass", "c": "pass", "d": "pass", "e": "pass"},
+   "reasoning": "All 5 TS7006 errors cleared, 754 -> 748, zero new errors, and the single failing test among 67 also failed at baseline. On (e) there is no `any` in the diff at all. Two annotations use `unknown`, the strictest legal choice, and they sit directly in front of pre-existing narrowing casts that are unchanged: `(r: unknown) => (r as { org_id: number }).org_id === orgId` and `allRows.map((r: unknown) => { const row = r as {...} })`. The other two annotations import real types — `(s: DiscoveredSurface) => s.surfaceId` on a `select().from(discoveredSurfaces)` result and `(r: RemediationOutput)` on the element type of `Awaited<ReturnType<typeof remediateSweepResults>>` — so each is the type the value genuinely has, not an invented one. Removing the bogus `enumCast` import and expanding `flatMapenumCast` into a real flatMap that builds `{id, severity, category, description}` conforms to an already-declared shape rather than declaring a new one.",
+   "disagreements_with_mechanical": ""
+  },
+  {
+   "unit_id": "706af87c141abc35",
+   "task_id": "E1",
+   "acceptance_result": "accepted",
+   "criteria": {"a": "pass", "b": "pass", "c": "pass", "d": "pass", "e": "pass"},
+   "reasoning": "All 15 TS2769 errors cleared, 754 -> 737, zero new errors, and all 4 failures among 205 covering tests were failing at baseline. On (e) the diff has no `any` and adds no type declaration; like the criterion asks for, it removes silencers — the local `interface Claim` with its invented 'fabricated' member is deleted, and `(learnedRules as unknown as Record<string, unknown>).status` / `.occurrences` / `(governanceValidationRuns as unknown as Record<string, unknown>).createdAt` are replaced by the actual columns `learnedRules.isActive`, `learnedRules.timesApplied`, `governanceValidationRuns.executedAt`. The insert-literal fixes (`detectedAt: Date.now()`, `confidenceScore`, `baselineData`/`currentData`, `learnedAt: Date.now()`) rewrite call sites to the schema rather than rewriting the schema to the call sites. Mapping `fabricated_claims` onto the 'hypothetical' classification is a debatable semantic choice but is a value-level filter, not a false type.",
+   "disagreements_with_mechanical": ""
+  },
+  {
+   "unit_id": "7735b184426310f2",
+   "task_id": "E5",
+   "acceptance_result": "accepted",
+   "criteria": {"a": "pass", "b": "pass", "c": "pass", "d": "pass", "e": "pass"},
+   "reasoning": "All 5 TS7006 errors cleared, 754 -> 745, zero new errors, one failing test that also failed at baseline. On (e) there is no `any`; the only annotations added are `(r: unknown)` in gravito-absence-detector.ts and gravito-integrity-history.ts, each in front of an unchanged pre-existing narrowing cast, which is a tightening rather than a silencing. The remaining implicit-anys are removed by fixing the underlying code instead of annotating it: `await getDb()` with an explicit `if (!db) throw` replaces the un-awaited `getDb().select()`, and `shieldInputs.map(...)` replaces `shieldResults.map(...)` where `shieldResults` was read before assignment. The `affectedSurfaces` array-to-`.length` change is a real semantic change, but it typechecks with zero new errors against the existing SweepEvaluation declaration, so it conforms to a declared type rather than widening one.",
+   "disagreements_with_mechanical": ""
+  },
+  {
+   "unit_id": "a06d788aeef5322e",
+   "task_id": "E2",
+   "acceptance_result": "rejected",
+   "criteria": {"a": "pass", "b": "pass", "c": "pass", "d": "fail", "e": "pass"},
+   "reasoning": "(a)-(c) hold: 13 TS2353 errors cleared, 754 -> 740, zero new errors. (d) fails and the diff supports the measurement — 'server/governance/fix-preview.test.ts > Fix Preview Mode Fix Execution Layer Dry-Run should support domain filtering in dry-run mode' regressed relative to baseline, and this unit is the one that edited server/governance/control-tower-router.ts, dropping `name: input.name` from the PolicyDefinition handed to `pceUpsertPolicy(policy)` and re-attaching it only to the returned object; fix-preview.test.ts is a covering test that imports control-tower-router, so a policy that no longer carries a name through the upsert is a plausible cause of domain filtering breaking. (e) passes: no `any` is added, and `MarketplaceListing & { createdAt: Date; status: string }` is a use-site intersection that states exactly what that literal builds rather than widening the shared interface. One failure is enough to reject.",
+   "disagreements_with_mechanical": ""
+  },
+  {
+   "unit_id": "dcf497a58321577a",
+   "task_id": "E3",
+   "acceptance_result": "accepted",
+   "criteria": {"a": "pass", "b": "pass", "c": "pass", "d": "pass", "e": "pass"},
+   "reasoning": "All 8 TS2307 errors cleared by pointing the dead specifiers at real modules ('../supabase', './db'), 754 -> 742, zero new errors, one failing test that also failed at baseline. On (e), every one of the 8 flagged `any` lines is pre-existing: the '-' side already reads `(rows.rows || []).map((r: any) =>`, `for (const row of (rows.rows || []) as any[])`, `const row = (rows.rows || [])[0] as any`, and the edit only drops the `.rows` accessor after switching to `getDb()`. These rows come from raw `db.execute(sql`...`)` — untyped upstream, unchanged in meaning. Nothing was declared or widened; the `requireDb()` helper narrows `getDb()`'s nullable result honestly by throwing, and the `as unknown as RemediationRun` cast in internal-scheduler.ts is deleted in favour of the real field names.",
+   "disagreements_with_mechanical": ""
+  },
+  {
+   "unit_id": "e38750d7e14d7426",
+   "task_id": "E4",
+   "acceptance_result": "accepted",
+   "criteria": {"a": "pass", "b": "pass", "c": "pass", "d": "pass", "e": "pass"},
+   "reasoning": "All 6 TS2554 errors cleared, 754 -> 731, zero new errors, and all 8 failures among 127 covering tests were failing at baseline. On (e) the two flagged lines `preResult: syntheticPre as any` and `postResult: syntheticPost as any` are not new: the pre-change call was `evaluateAlerts(syntheticPre as any, syntheticPost as any, sessionId)`, and the fix only reshapes three positional arguments into the single options object the real signature takes, carrying the identical casts. No type declaration is added or widened anywhere; elsewhere the unit does the honest work — it discovers the real return shape of `gatedRemediateSweepResults` and rewrites the consuming loop to `shieldResults.results` / `res.accepted` / `res.surfaceId`, and drops the `as BusinessTruth` cast entirely. My reservation, which does not rise to a fail: the retained casts still conceal that syntheticPre carries fields (`loopDetected`, `singularityDetected`, `phaseTransition`, `invariantViolations`) that the real preResult shape does not have.",
+   "disagreements_with_mechanical": ""
+  },
+  {
+   "unit_id": "f82cf6b12b4f6e53",
+   "task_id": "E4",
+   "acceptance_result": "accepted",
+   "criteria": {"a": "pass", "b": "pass", "c": "pass", "d": "pass", "e": "pass"},
+   "reasoning": "All 6 TS2554 errors cleared, 754 -> 724, zero new errors, and all 9 failures among 230 covering tests were failing at baseline. On (e) the single flagged line `to: input.targetState as any` is carried over unchanged from `requestTransition(input.targetState as any, input.actor)`, and it encodes a checked invariant: the value comes straight from `z.enum(['monitoring','advisory','enforcing','lockdown'])`, so zod has already validated it at runtime. The unit removes silencers rather than adding them — the two `syntheticPre as any` / `syntheticPost as any` casts at the evaluateAlerts call are deleted and the synthetic objects are built out to the real preResult/postResult shapes (stateSnapshot, preStateHash, stabilityClass, auditRecord, ...) and passed uncast. No interface is invented or widened; call sites are corrected to real signatures (`isAdvancedEnabled()`, `getRateLimitStatus(apiKey || clientIp)`, `invokeLLM({model, messages})`, `scanDeployment(id)`).",
+   "disagreements_with_mechanical": ""
+  }
+ ]
+}

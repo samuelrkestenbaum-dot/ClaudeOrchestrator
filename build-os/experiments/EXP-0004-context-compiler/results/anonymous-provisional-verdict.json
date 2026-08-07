@@ -1,0 +1,80 @@
+{
+  "artifact": "anonymous_provisional_verdict",
+  "experiment": "EXP-0004",
+  "mapping_digest": "54e2406fc8d5edccddafebe5ade67da8f74ff05dcf59e32fdfb434c32b56703d",
+  "computed_from": "'Arm X' and 'Arm Y' alone. This artifact states NO registered outcome, because choosing one requires the sealed mapping. It is frozen first and translated afterwards, in that order and never the other way.",
+  "n_pairs": 5,
+  "minimum_pairs_rule": {
+    "minimum": 5,
+    "met": true,
+    "quoted": "fewer than FIVE completed un-confounded task-pairs",
+    "source": "AMENDMENT 3.5, a derived default the operator may replace before the run"
+  },
+  "confounded": false,
+  "confounds_recorded": [],
+  "signal_inadequate": false,
+  "acceptance": {
+    "Arm X": "4/5",
+    "Arm Y": "5/5",
+    "shortfall_for": "Arm X"
+  },
+  "uncached_tokens": {
+    "median_reduction_pct": {
+      "Arm X relative to Arm Y": -23.7,
+      "Arm Y relative to Arm X": 19.1
+    },
+    "gate_threshold_pct": 25,
+    "harm_threshold_pct": 10,
+    "gate_met_for": null
+  },
+  "elapsed": {
+    "median_reduction_pct": {
+      "Arm X relative to Arm Y": 17.3,
+      "Arm Y relative to Arm X": -20.9
+    },
+    "gate_threshold_pct": 25,
+    "band": {
+      "Arm X relative to Arm Y": "directional improvement, not independently decisive",
+      "Arm Y relative to Arm X": "directional harm"
+    },
+    "gate_met_for": null
+  },
+  "totals": {
+    "Arm X": {
+      "rework_rounds": 29,
+      "human_interventions": 0,
+      "failed_hypotheses": 0,
+      "verifier_dispatches": 39,
+      "regressions": 1
+    },
+    "Arm Y": {
+      "rework_rounds": 32,
+      "human_interventions": 0,
+      "failed_hypotheses": 0,
+      "verifier_dispatches": 46,
+      "regressions": 0
+    }
+  },
+  "rework_or_intervention_increase_for": "Arm Y",
+  "anonymous_label": "acceptance_shortfall_for:Arm X",
+  "thresholds_cited": [
+    {
+      "key": "elapsed_gate_pct",
+      "value": 25,
+      "phrase": "median elapsed time >= 25% faster",
+      "rule": "AMENDMENT 3.3, criterion 3"
+    },
+    {
+      "key": "elapsed_meaningful_pct",
+      "value": 25,
+      "phrase": "| >= 25% faster | meaningful acceleration |",
+      "rule": "AMENDMENT 3.2, band 1"
+    },
+    {
+      "key": "elapsed_directional_pct",
+      "value": 10,
+      "phrase": "| 10% - 24.9% faster | directional improvement, not independently decisive |",
+      "rule": "AMENDMENT 3.2, band 2"
+    }
+  ]
+}

@@ -1,0 +1,96 @@
+{
+  "artifact": "freeze_snapshot",
+  "experiment": "EXP-0004",
+  "required_artifacts": [
+    "task_level_acceptance",
+    "regressions",
+    "exclusion_decisions",
+    "tokens",
+    "elapsed",
+    "starting_context_bytes",
+    "expansion_bytes",
+    "rework",
+    "failed_hypotheses",
+    "verifier_dispatches",
+    "human_intervention",
+    "per_task_calculations",
+    "aggregate_calculations",
+    "anonymous_provisional_verdict"
+  ],
+  "n_required": 14,
+  "artifacts": [
+    {
+      "name": "task_level_acceptance",
+      "bytes": 1277,
+      "sha256": "1edca2d23185946b286ebefbde2aba01861b5b2c4e7d24eb31c6111209ce50e7"
+    },
+    {
+      "name": "regressions",
+      "bytes": 814,
+      "sha256": "c96d741be6ceeada9c1df76665683ffc1cdf7b7905b98644b124b9becebee8af"
+    },
+    {
+      "name": "exclusion_decisions",
+      "bytes": 1691,
+      "sha256": "c0d8399e6c48c79472633b60dde3634cacd8a6df0f5c61a2cb26dd2c33fe67cf"
+    },
+    {
+      "name": "tokens",
+      "bytes": 1666,
+      "sha256": "8e429af633dd67d07820ee7d3dc25365470ec3260a4b5dc8f28d99caefaa679b"
+    },
+    {
+      "name": "elapsed",
+      "bytes": 1855,
+      "sha256": "64b17a1b3da31795edd369061d4f70c78453b7f0bf8067ce2cbb9f1444572894"
+    },
+    {
+      "name": "starting_context_bytes",
+      "bytes": 1538,
+      "sha256": "04465e4e828c7681eca56f8833c2b20bfa11162e80a825c5802bc2ee21b8f46d"
+    },
+    {
+      "name": "expansion_bytes",
+      "bytes": 1685,
+      "sha256": "c6f20181bb58492521f05dfebc94a231d48c14182f430b776433f50c10e4c18d"
+    },
+    {
+      "name": "rework",
+      "bytes": 1294,
+      "sha256": "bee1200d718eece162e17069ef246a5c86da776df92b4f69921393aee4e4c0e4"
+    },
+    {
+      "name": "failed_hypotheses",
+      "bytes": 1363,
+      "sha256": "063529e83344a2a90f8c7341a33880ce4b5170ebd65442546fd1da0b0001c482"
+    },
+    {
+      "name": "verifier_dispatches",
+      "bytes": 1369,
+      "sha256": "dad56e88d04072e52c110066f96dc988bac389a9c31384bbaa5a3812b1469a25"
+    },
+    {
+      "name": "human_intervention",
+      "bytes": 1364,
+      "sha256": "2a8bd0bc9950379c047ce3a2d9de80ab78fbebbc2cbfaaceb395458938d6c8de"
+    },
+    {
+      "name": "per_task_calculations",
+      "bytes": 3235,
+      "sha256": "dbce7a86bc10993f4ddcaa6932348298560060b1ee156ca7dbfcac5baf9f5afa"
+    },
+    {
+      "name": "aggregate_calculations",
+      "bytes": 1301,
+      "sha256": "607e5a50a2f19321880314731042a479d1328a8c978d089875140b2e42c20b55"
+    },
+    {
+      "name": "anonymous_provisional_verdict",
+      "bytes": 2409,
+      "sha256": "5a4bb3bbe884bcf1c4b0faf7f69d0957a17917b42468a70923eb5103d5e09aeb"
+    }
+  ],
+  "snapshot_digest": "cfad3e743fc12aeee77a35e06bd4e9c1b2b89662e64126a57f415f8327f58c0c",
+  "digest_note": "sha256 over the lines '<name> <bytes> <sha256>' in the fixed required order. Changing any input changes its content hash, which changes this digest. That is what makes the snapshot immutable in the only sense that matters: not that it cannot be edited, but that an edit cannot be hidden.",
+  "reveal_note": "This snapshot is a PRECONDITION of the reveal, not a permission for it."
+}

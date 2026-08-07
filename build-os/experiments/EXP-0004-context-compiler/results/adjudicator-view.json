@@ -1,0 +1,97 @@
+{
+  "view": "adjudicator",
+  "experiment": "EXP-0004",
+  "mapping_digest": "54e2406fc8d5edccddafebe5ade67da8f74ff05dcf59e32fdfb434c32b56703d",
+  "purpose": "task-level acceptance, and nothing else",
+  "blinding_note": "This view is BLINDED. It carries no execution-condition identity, no starting-context byte counts, no expansion fields and no mode names. Each task appears as two units; which unit came from which execution condition is sealed and is not recoverable from anything below.",
+  "withheld": [
+    "starting-context byte counts",
+    "expansion byte counts and expansion request counts",
+    "token and elapsed economics",
+    "execution mode names",
+    "the analysis labels themselves"
+  ],
+  "n_units": 10,
+  "units": [
+    {
+      "unit_id": "2f0af7c183ac197e",
+      "task_id": "E3",
+      "work_product_ref": "wp-2f0af7c183ac197e.diff",
+      "tests_run": 8,
+      "tests_passed": 7,
+      "acceptance_question": "Does the work product referenced above satisfy this task's registered acceptance criteria, judged on its own merits?"
+    },
+    {
+      "unit_id": "43990398f37881f6",
+      "task_id": "E2",
+      "work_product_ref": "wp-43990398f37881f6.diff",
+      "tests_run": 231,
+      "tests_passed": 223,
+      "acceptance_question": "Does the work product referenced above satisfy this task's registered acceptance criteria, judged on its own merits?"
+    },
+    {
+      "unit_id": "53ec6c63379e97e4",
+      "task_id": "E1",
+      "work_product_ref": "wp-53ec6c63379e97e4.diff",
+      "tests_run": 205,
+      "tests_passed": 201,
+      "acceptance_question": "Does the work product referenced above satisfy this task's registered acceptance criteria, judged on its own merits?"
+    },
+    {
+      "unit_id": "54350323dc2311de",
+      "task_id": "E5",
+      "work_product_ref": "wp-54350323dc2311de.diff",
+      "tests_run": 67,
+      "tests_passed": 66,
+      "acceptance_question": "Does the work product referenced above satisfy this task's registered acceptance criteria, judged on its own merits?"
+    },
+    {
+      "unit_id": "706af87c141abc35",
+      "task_id": "E1",
+      "work_product_ref": "wp-706af87c141abc35.diff",
+      "tests_run": 205,
+      "tests_passed": 201,
+      "acceptance_question": "Does the work product referenced above satisfy this task's registered acceptance criteria, judged on its own merits?"
+    },
+    {
+      "unit_id": "7735b184426310f2",
+      "task_id": "E5",
+      "work_product_ref": "wp-7735b184426310f2.diff",
+      "tests_run": 67,
+      "tests_passed": 66,
+      "acceptance_question": "Does the work product referenced above satisfy this task's registered acceptance criteria, judged on its own merits?"
+    },
+    {
+      "unit_id": "a06d788aeef5322e",
+      "task_id": "E2",
+      "work_product_ref": "wp-a06d788aeef5322e.diff",
+      "tests_run": 381,
+      "tests_passed": 368,
+      "acceptance_question": "Does the work product referenced above satisfy this task's registered acceptance criteria, judged on its own merits?"
+    },
+    {
+      "unit_id": "dcf497a58321577a",
+      "task_id": "E3",
+      "work_product_ref": "wp-dcf497a58321577a.diff",
+      "tests_run": 8,
+      "tests_passed": 7,
+      "acceptance_question": "Does the work product referenced above satisfy this task's registered acceptance criteria, judged on its own merits?"
+    },
+    {
+      "unit_id": "e38750d7e14d7426",
+      "task_id": "E4",
+      "work_product_ref": "wp-e38750d7e14d7426.diff",
+      "tests_run": 127,
+      "tests_passed": 119,
+      "acceptance_question": "Does the work product referenced above satisfy this task's registered acceptance criteria, judged on its own merits?"
+    },
+    {
+      "unit_id": "f82cf6b12b4f6e53",
+      "task_id": "E4",
+      "work_product_ref": "wp-f82cf6b12b4f6e53.diff",
+      "tests_run": 230,
+      "tests_passed": 221,
+      "acceptance_question": "Does the work product referenced above satisfy this task's registered acceptance criteria, judged on its own merits?"
+    }
+  ]
+}

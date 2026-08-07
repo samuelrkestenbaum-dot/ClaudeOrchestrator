@@ -1,0 +1,41 @@
+{
+ "artifact": "exclusion_decisions",
+ "experiment": "EXP-0004",
+ "confounds_recorded": [],
+ "admitted_pairs": [
+  "E1",
+  "E2",
+  "E3",
+  "E4",
+  "E5"
+ ],
+ "void_attempts": [
+  {
+   "pair": "E1",
+   "attempt": 1,
+   "reason": "arm B never started - prompt exceeded MAX_ARG_STRLEN (131072 B); no treatment delivered",
+   "disposition": "whole pair re-run under corrected harness"
+  },
+  {
+   "pair": "E4",
+   "attempt": 1,
+   "reason": "arm A truncated at the 1800 s ceiling (aborted_tools, is_error true) under CPU contention introduced by concurrent execution",
+   "disposition": "whole pair re-run uncontended"
+  },
+  {
+   "pair": "E5",
+   "attempt": 1,
+   "reason": "arm A parked on a background monitor and performed no work (0 files) in headless -p, which has nothing that can wake it",
+   "disposition": "whole pair re-run uncontended"
+  },
+  {
+   "pair": "E5",
+   "attempt": 2,
+   "reason": "arm B terminated aborted_streaming (is_error true) mid-tool-use at 436 s; work product complete but elapsed and token totals are lower bounds",
+   "disposition": "whole pair re-run; stopping rule committed before attempt 3"
+  }
+ ],
+ "rule_applied": "An arm that ends with is_error true did not complete its measured window and its economics are not admissible. Applied without reference to which condition it helps.",
+ "stopping_rule": "Committed before E5 attempt 3: one more whole-pair attempt only; a further is_error arm would have excluded E5 and taken the minimum-n penalty. Attempt 3 was clean, so it expired unused.",
+ "attempts_to_admitted": "14 arm executions produced 10 admitted measurements"
+}

@@ -1,0 +1,41 @@
+{
+  "artifact": "reveal_audit",
+  "experiment": "EXP-0004",
+  "reveal_timestamp": "2026-08-07T09:30:00Z",
+  "timestamp_source": "supplied on the command line by the operator; this tool reads no clock, so the record is reproducible",
+  "mapping_digest": "54e2406fc8d5edccddafebe5ade67da8f74ff05dcf59e32fdfb434c32b56703d",
+  "mapping_digest_source": "mapping.sha256, committed before the run",
+  "seal_intact": true,
+  "freeze_snapshot_digest": "cfad3e743fc12aeee77a35e06bd4e9c1b2b89662e64126a57f415f8327f58c0c",
+  "freeze_artifacts_verified": 14,
+  "sealed_rule_id": "experiment-salt-parity",
+  "sealed_rule_scope": "experiment",
+  "sealed_rule_text": "EXPERIMENT-SCOPE PARITY. Let S be the declared salt. Compute h = sha256(S + '|' + 'EXP-0004') and take p = (first byte of h) & 1. If p = 0 then execution condition A is labelled 'Arm X' and condition B is labelled 'Arm Y'. If p = 1 then condition A is labelled 'Arm Y' and condition B is labelled 'Arm X'. The same labelling applies to EVERY task, so a label denotes one coherent condition throughout. The unit id of (task T, label L) is the first 16 hex characters of sha256(S + '|unit|' + T + '|' + L). No random number is sampled and no clock is read: given S and the task list, every assignment above is recomputable by anyone, which is what makes the committed digest a proof rather than a promise.",
+  "revealed_mapping": {
+    "current-execution condition (A)": "Arm Y",
+    "compiled-context condition (B)": "Arm X"
+  },
+  "anonymous_label_before_reveal": "acceptance_shortfall_for:Arm X",
+  "anonymous_verdict_digest": "5a4bb3bbe884bcf1c4b0faf7f69d0957a17917b42468a70923eb5103d5e09aeb",
+  "n_pairs": 5,
+  "registered_outcome": "context compilation harmful",
+  "registered_outcome_code": "context_compilation_harmful",
+  "registered_vocabulary": [
+    "supported",
+    "compression only",
+    "acceleration only",
+    "inconclusive",
+    "context compilation harmful",
+    "small-because-uninformed",
+    "result confounded"
+  ],
+  "canonical_wording_note": "AMENDMENT 3.1: the canonical wording and the machine code are emitted together so they cannot diverge.",
+  "translation_rule": "the binding acceptance veto",
+  "translation_reason": "the compiled condition accepted 4/5 against 5/5. \"Compression that costs acceptance is a loss, not a trade.\" A token or time win cannot buy back a lost acceptance.",
+  "acceptance_veto_applied": true,
+  "downgraded_from": null,
+  "median_uncached_reduction_pct_compiled_vs_current": -23.7,
+  "median_elapsed_reduction_pct_compiled_vs_current": 17.3,
+  "elapsed_band_compiled_vs_current": "directional improvement, not independently decisive",
+  "one_way_note": "The reveal is one-way. Nothing downstream of this record may re-enter the frozen artifacts; a figure that changes after this point invalidates the freeze snapshot and is visible as such."
+}

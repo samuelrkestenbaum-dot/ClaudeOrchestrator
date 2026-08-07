@@ -1,0 +1,191 @@
+{
+  "artifact": "calculations",
+  "experiment": "EXP-0004",
+  "mapping_digest": "54e2406fc8d5edccddafebe5ade67da8f74ff05dcf59e32fdfb434c32b56703d",
+  "computed_from": "the analyst view alone. Units are labelled 'Arm X' and 'Arm Y'; the mapping from those labels to execution conditions is sealed, so nothing below can be read as a statement about either condition.",
+  "labels": [
+    "Arm X",
+    "Arm Y"
+  ],
+  "n_pairs": 5,
+  "acceptance": {
+    "Arm X": {
+      "accepted": 4,
+      "n": 5,
+      "rate": 0.8
+    },
+    "Arm Y": {
+      "accepted": 5,
+      "n": 5,
+      "rate": 1
+    }
+  },
+  "totals": {
+    "Arm X": {
+      "rework_rounds": 29,
+      "human_interventions": 0,
+      "failed_hypotheses": 0,
+      "verifier_dispatches": 39,
+      "regressions": 1
+    },
+    "Arm Y": {
+      "rework_rounds": 32,
+      "human_interventions": 0,
+      "failed_hypotheses": 0,
+      "verifier_dispatches": 46,
+      "regressions": 0
+    }
+  },
+  "per_task": [
+    {
+      "task_id": "E1",
+      "uncached_tokens": {
+        "Arm X": 158829,
+        "Arm Y": 92686
+      },
+      "total_tokens": {
+        "Arm X": 7514877,
+        "Arm Y": 3276804
+      },
+      "total_elapsed_s": {
+        "Arm X": 949.79,
+        "Arm Y": 849.35
+      },
+      "acceptance": {
+        "Arm X": "accepted",
+        "Arm Y": "accepted"
+      },
+      "uncached_reduction_pct": {
+        "Arm X relative to Arm Y": -71.4,
+        "Arm Y relative to Arm X": 41.6
+      },
+      "elapsed_reduction_pct": {
+        "Arm X relative to Arm Y": -11.8,
+        "Arm Y relative to Arm X": 10.6
+      }
+    },
+    {
+      "task_id": "E2",
+      "uncached_tokens": {
+        "Arm X": 282770,
+        "Arm Y": 86351
+      },
+      "total_tokens": {
+        "Arm X": 3196323,
+        "Arm Y": 3551916
+      },
+      "total_elapsed_s": {
+        "Arm X": 1123.41,
+        "Arm Y": 991.04
+      },
+      "acceptance": {
+        "Arm X": "rejected",
+        "Arm Y": "accepted"
+      },
+      "uncached_reduction_pct": {
+        "Arm X relative to Arm Y": -227.5,
+        "Arm Y relative to Arm X": 69.5
+      },
+      "elapsed_reduction_pct": {
+        "Arm X relative to Arm Y": -13.4,
+        "Arm Y relative to Arm X": 11.8
+      }
+    },
+    {
+      "task_id": "E3",
+      "uncached_tokens": {
+        "Arm X": 82172,
+        "Arm Y": 66453
+      },
+      "total_tokens": {
+        "Arm X": 2359646,
+        "Arm Y": 2488275
+      },
+      "total_elapsed_s": {
+        "Arm X": 823.14,
+        "Arm Y": 1009.04
+      },
+      "acceptance": {
+        "Arm X": "accepted",
+        "Arm Y": "accepted"
+      },
+      "uncached_reduction_pct": {
+        "Arm X relative to Arm Y": -23.7,
+        "Arm Y relative to Arm X": 19.1
+      },
+      "elapsed_reduction_pct": {
+        "Arm X relative to Arm Y": 18.4,
+        "Arm Y relative to Arm X": -22.6
+      }
+    },
+    {
+      "task_id": "E4",
+      "uncached_tokens": {
+        "Arm X": 150856,
+        "Arm Y": 370158
+      },
+      "total_tokens": {
+        "Arm X": 4863707,
+        "Arm Y": 4318942
+      },
+      "total_elapsed_s": {
+        "Arm X": 1033.51,
+        "Arm Y": 1249.39
+      },
+      "acceptance": {
+        "Arm X": "accepted",
+        "Arm Y": "accepted"
+      },
+      "uncached_reduction_pct": {
+        "Arm X relative to Arm Y": 59.2,
+        "Arm Y relative to Arm X": -145.4
+      },
+      "elapsed_reduction_pct": {
+        "Arm X relative to Arm Y": 17.3,
+        "Arm Y relative to Arm X": -20.9
+      }
+    },
+    {
+      "task_id": "E5",
+      "uncached_tokens": {
+        "Arm X": 82221,
+        "Arm Y": 99029
+      },
+      "total_tokens": {
+        "Arm X": 1826191,
+        "Arm Y": 2447127
+      },
+      "total_elapsed_s": {
+        "Arm X": 438.27,
+        "Arm Y": 918.84
+      },
+      "acceptance": {
+        "Arm X": "accepted",
+        "Arm Y": "accepted"
+      },
+      "uncached_reduction_pct": {
+        "Arm X relative to Arm Y": 17,
+        "Arm Y relative to Arm X": -20.4
+      },
+      "elapsed_reduction_pct": {
+        "Arm X relative to Arm Y": 52.3,
+        "Arm Y relative to Arm X": -109.7
+      }
+    }
+  ],
+  "aggregate": {
+    "median_uncached_reduction_pct": {
+      "Arm X relative to Arm Y": -23.7,
+      "Arm Y relative to Arm X": 19.1
+    },
+    "median_elapsed_reduction_pct": {
+      "Arm X relative to Arm Y": 17.3,
+      "Arm Y relative to Arm X": -20.9
+    },
+    "elapsed_band": {
+      "Arm X relative to Arm Y": "directional improvement, not independently decisive",
+      "Arm Y relative to Arm X": "directional harm"
+    },
+    "reading_note": "'P relative to Q' is how much LOWER (or faster) P is than Q, as a percentage of Q. A negative figure means P is higher, or slower. Both directions are recorded so the reveal can select the one it needs without recomputing anything."
+  }
+}
