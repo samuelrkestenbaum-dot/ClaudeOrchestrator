@@ -65,10 +65,17 @@ if (git(["rev-parse", auth.authorized_tip]) !== tipSha) {
   process.exit(1);
 }
 
-// The authorised tip is the last commit; everything before it is incidental —
-// it already existed and is only becoming reachable.
+// The authorised tip is the last commit. Everything before it is incidental
+// UNLESS the operator named it too: a grant can cover a CHAIN, and an
+// explicitly-authorised ancestor is not incidental. The first version of this
+// modelled only "tip + incidental", so a two-commit grant was refused on its
+// own second commit — the conservative branch firing on approved content.
 const tip = commits[commits.length - 1];
-const incidentalShas = commits.slice(0, -1);
+const alsoAuthorized = Array.isArray(auth.also_authorized) ? auth.also_authorized : [];
+const alsoResolved = new Set();
+for (const ref of alsoAuthorized) { try { alsoResolved.add(git(["rev-parse", ref])); } catch {} }
+const incidentalShas = commits.slice(0, -1).filter((sha) => !alsoResolved.has(sha));
+const namedCount = commits.slice(0, -1).length - incidentalShas.length;
 
 // For each incidental commit, read the text it introduced so its status can be
 // checked. Unreadable content stays a refusal.
@@ -91,6 +98,7 @@ const result = publicationCheck({
 console.log(`publish-check: ${result.verdict.toUpperCase()}`);
 console.log(`  authorised: ${auth.authorized}`);
 console.log(`  tip: ${tip.slice(0, 7)}`);
+if (namedCount) console.log(`  · ${namedCount} further commit(s) explicitly named in the grant — authorised content, not incidental`);
 for (const r of result.reasons) console.log(`  · ${r}`);
 for (const b of result.blocking) console.error(`  ✗ ${b}`);
 if (result.verdict !== "proceed") {

@@ -10,6 +10,11 @@ AUTH=build-os/authority/publish-authorization.json
 SAVE=$(mktemp); cp "$AUTH" "$SAVE" 2>/dev/null
 
 # 1. THE EPISODE — replayed through the wired path.
+# Set the authorisation this case needs rather than reading whatever the LIVE
+# file happens to say. The first version depended on ambient operator state, so
+# it broke the moment a real grant legitimately moved on — a test reading live
+# state is not testing the code.
+node -e 'const fs=require("fs");fs.writeFileSync(process.argv[1],JSON.stringify({authorized:"replay fixture",authorized_tip:"f8e1ed2",granted_by:"operator",confers_status:false},null,2));' "$AUTH"
 out="$(node build-os/tools/publish-check.mjs --local f8e1ed2 --remote 86cb7c1 2>&1)"; rc=$?
 [ $rc -eq 0 ] && ok "REPLAY: the 1ffb356 -> f8e1ed2 episode now PROCEEDS" || no "replay still blocks" "$out"
 echo "$out" | grep -q "topology consequence, not approval" \
@@ -54,6 +59,20 @@ node build-os/tools/publish-check.mjs --local HEAD --remote 86cb7c1 >/dev/null 2
 node -e 'const fs=require("fs");const a=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));delete a.authorized_tip;fs.writeFileSync(process.argv[1],JSON.stringify(a,null,2));' "$AUTH"
 node build-os/tools/publish-check.mjs --local f8e1ed2 --remote 86cb7c1 >/dev/null 2>&1 \
   && no "an authorisation naming no tip was accepted" || ok "an authorisation naming no tip is REFUSED"
+cp "$SAVE" "$AUTH" 2>/dev/null
+
+# 4c. CHAIN GRANTS — an explicitly named ancestor is authorised content, not
+# incidental. The first model had only "tip + incidental", so a two-commit grant
+# was refused on its own second commit: the conservative branch firing on
+# content the operator had approved by name.
+node -e 'const fs=require("fs");const a=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));a.authorized_tip="c83de5a";delete a.also_authorized;fs.writeFileSync(process.argv[1],JSON.stringify(a,null,2));' "$AUTH"
+node build-os/tools/publish-check.mjs --local c83de5a --remote 7c92ea0 >/dev/null 2>&1 \
+  && no "a silent ancestor was published without being named" || ok "CHAIN: an unnamed silent ancestor still BLOCKS"
+node -e 'const fs=require("fs");const a=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));a.authorized_tip="c83de5a";a.also_authorized=["5ca2f0c"];fs.writeFileSync(process.argv[1],JSON.stringify(a,null,2));' "$AUTH"
+out4="$(node build-os/tools/publish-check.mjs --local c83de5a --remote 7c92ea0 2>&1)"; rc4=$?
+[ $rc4 -eq 0 ] && ok "CHAIN: naming the ancestor in the grant PROCEEDS" || no "chain grant still blocked" "$out4"
+echo "$out4" | grep -q "explicitly named in the grant" \
+  && ok "CHAIN: the named ancestor is reported as authorised content" || no "named ancestor not reported"
 cp "$SAVE" "$AUTH" 2>/dev/null
 
 # 5. The hook is installed and executable.
