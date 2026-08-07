@@ -1,0 +1,101 @@
+{
+ "artifact": "post_outcome_disposition",
+ "version": 0,
+ "experiment": "EXP-0004",
+ "rules_evaluated": 5,
+ "findings_generated": 5,
+ "findings": [
+  {
+   "finding_id": "EXP-0004-acceptance-shortfall-with-regression",
+   "rule": "acceptance-shortfall-with-regression",
+   "class": "product_defect",
+   "severity": "high",
+   "confidence": "high",
+   "component": "compiled-context.correctness",
+   "finding": "The compiled-context condition produced a REJECTED outcome on E2 carrying 1 measured regression(s). The work satisfied its stated objective and still broke behaviour, so the defect is in what the condition FAILED TO PRESERVE, not in what it failed to do.",
+   "evidence": [
+    "E2: acceptance=rejected, regressions=1",
+    "acceptance by condition: compiled-context 4/5, current-execution 5/5"
+   ],
+   "proposed_change": "preserve and surface the behavioural dependencies of values the change touches, so a locally correct fix cannot be silently globally wrong",
+   "authority": "bounded_internal_product_change",
+   "revalidation": "regression fixture reproducing this failure SHAPE (not a re-run of the frozen task)",
+   "disposition": "execute"
+  },
+  {
+   "finding_id": "EXP-0004-starting-context-dominates-and-loses",
+   "rule": "starting-context-dominates-and-loses",
+   "class": "optimization_opportunity",
+   "severity": "high",
+   "confidence": "high",
+   "component": "compiled-context.context_packaging",
+   "finding": "The compiled-context condition starts with 113.8x the context bytes of its counterpart (median 133034 vs 1169 B) and still spends MORE uncached tokens (median -23.7% relative). Front-loaded context is not paying for the exploration it was meant to replace.",
+   "evidence": [
+    "median starting context: 133034 B vs 1169 B",
+    "median uncached delta for the heavier condition: -23.7%"
+   ],
+   "proposed_change": "move bulk that is not load-bearing for the worker out of the starting payload and behind a retrievable handle, preserving auditability outside the prompt",
+   "authority": "bounded_internal_product_change",
+   "revalidation": "deterministic byte comparison on representative fixtures, before/after",
+   "disposition": "execute"
+  },
+  {
+   "finding_id": "EXP-0004-fixture-reliability-shortfall",
+   "rule": "fixture-reliability-shortfall",
+   "class": "measurement_defect",
+   "severity": "medium",
+   "confidence": "high",
+   "component": "experiment_harness.reliability",
+   "finding": "10 admitted measurements from 14 executions (71%). A harness that loses 4 in 14 is not yet safe to run unattended, and the loss rate is a property of the instrument rather than of the thesis.",
+   "evidence": [
+    "E1 attempt 1: arm B never started - prompt exceeded MAX_ARG_STRLEN (131072 B); no treatment delivered",
+    "E4 attempt 1: arm A truncated at the 1800 s ceiling (aborted_tools, is_error true) under CPU contention introduced by concurrent execution",
+    "E5 attempt 1: arm A parked on a background monitor and performed no work (0 files) in headless -p, which has nothing that can wake it",
+    "E5 attempt 2: arm B terminated aborted_streaming (is_error true) mid-tool-use at 436 s; work product complete but elapsed and token totals are lower bounds"
+   ],
+   "proposed_change": "harden the demonstrated runner faults only; no product redesign under harness work",
+   "authority": "bounded_internal_product_change",
+   "revalidation": "the same fault classes exercised as fixtures",
+   "disposition": "execute"
+  },
+  {
+   "finding_id": "EXP-0004-sign-flip-across-tasks",
+   "rule": "sign-flip-across-tasks",
+   "class": "unsupported_hypothesis",
+   "severity": "medium",
+   "confidence": "medium",
+   "component": "compiled-context.routing_policy",
+   "finding": "The per-task effect changes sign across the set: 2 flip(s), spread 287 percentage points (best +59.2%, worst -227.5%). UNIVERSAL application is therefore unsupported by this evidence. The mechanism is not uniformly wrong; it is unrouted.",
+   "evidence": [
+    "E1: -71.4%",
+    "E2: -227.5%",
+    "E3: -23.7%",
+    "E4: +59.2%",
+    "E5: +17.0%"
+   ],
+   "proposed_change": "replace universal application with a deterministic pre-task eligibility decision, using signals available BEFORE execution, with an explicit fallback",
+   "authority": "architectural_change",
+   "revalidation": "deterministic decision fixtures covering the favourable, unfavourable and unmeasurable shapes",
+   "disposition": "queue"
+  },
+  {
+   "finding_id": "EXP-0004-no-gate-met-either-direction",
+   "rule": "no-gate-met-either-direction",
+   "class": "unsupported_hypothesis",
+   "severity": "low",
+   "confidence": "high",
+   "component": "experiment.hypothesis",
+   "finding": "No registered gate was met in either direction. The measured effect is directional at best, and no claim of a decisive advantage is supported by this run.",
+   "evidence": [
+    "gates met: 0",
+    "pairs: 5"
+   ],
+   "proposed_change": "none — record the null and do not re-describe a directional result as a decisive one",
+   "authority": "none",
+   "revalidation": "not applicable",
+   "disposition": "observe"
+  }
+ ],
+ "authority_note": "`execute` means ELIGIBLE TO BECOME A BOUNDED PACKET, never 'already done'. Nothing here holds authority and nothing here is irreversible. Anything above bounded_internal_product_change is queued for a human.",
+ "generality_note": "These rules were authored by an agent that had already read the outcome they were first tested against. Every rule is a general predicate over the artifact schema and none names an experiment, task, component or constant drawn from it — but a rule set validated only on its inspiring experiment has NOT been shown to generalise."
+}
