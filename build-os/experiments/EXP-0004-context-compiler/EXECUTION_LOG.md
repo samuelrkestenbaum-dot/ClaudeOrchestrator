@@ -256,3 +256,35 @@ Every attempt is retained (`pairs-out/E5-attempt1/`, `E5-attempt2/`) and none
 is silently dropped. The escalating disclosure is itself part of the result:
 three attempts at one pair is a fact about this fixture's reliability, and it
 belongs in the limitations, not in a footnote.
+
+## Attempt 3 of pair E5 — CLEAN. The stopping rule was not needed.
+
+Both arms `completed`, `is_error: false`, on an otherwise idle machine. The
+cluster is resolved on both sides, no new errors, no regressions, no
+suppressions. E5 is admitted, and the pre-committed stopping rule expired
+unused rather than being quietly relaxed.
+
+**The set is five clean pairs.** Ten arms, every one `terminal_reason:
+completed` and `is_error: false`, every one measured with the machine to
+itself.
+
+## What the run cost in attempts, stated plainly
+
+| pair | attempts | why the earlier ones were void |
+|---|---:|---|
+| E1 | 2 | arm B never started — prompt exceeded `MAX_ARG_STRLEN` |
+| E2 | 1 | — |
+| E3 | 1 | — |
+| E4 | 2 | arm A timed out under CPU contention introduced by concurrency |
+| E5 | 3 | (1) contention + a background-monitor park that did no work; (2) `aborted_streaming` mid-tool-use |
+
+Fourteen arm executions produced ten admitted measurements. That ratio is a
+property of THIS FIXTURE, not of the thesis, and it belongs in the limitations:
+a harness that loses four arms in fourteen to argument limits, CPU contention,
+a headless-mode monitor dead-end and a stream abort is not yet an instrument
+anyone should run unattended.
+
+Every discarded attempt is retained under `pairs-out/*-attempt*/`. None was
+dropped silently, and the one directional fact that could have made a re-run
+self-serving — that both E4/E5 attempt-1 failures favoured the compiled
+condition — is recorded above rather than omitted.
