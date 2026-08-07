@@ -1,0 +1,347 @@
+[dotenv@17.2.3] injecting env (11) from .env.test -- tip: ⚙️  specify custom .env file path with { path: '/custom/path/.env' }
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: 👥 sync secrets across teammates & machines: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: 📡 add observability to secrets: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (0) from .env.test -- tip: ⚙️  suppress all logs with { quiet: true }
+
+ RUN  v3.2.4 /home/user/empathiq-website
+
+[2026-08-07 19:33:51.480] [33mWARN[39m: [36m[WARNING] Missing feature environment variables (LLM features disabled): OPENAI_API_KEY[39m
+    [35mdomain[39m: "general"
+[Vitest Setup] Initializing test database and audit trail...
+[Vitest Setup] Audit trail not available (DB may be offline), continuing without it: Error: Failed query: 
+      CREATE TABLE IF NOT EXISTS governance_audit_trail (
+        id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+        event_type VARCHAR(50) NOT NULL,
+        timestamp BIGINT NOT NULL,
+        correlation_id VARCHAR(255),
+        surface_type VARCHAR(50),
+        artifact_type VARCHAR(50),
+        content TEXT,
+        block_release BOOLEAN NOT NULL DEFAULT FALSE,
+        risk_score INT NOT NULL DEFAULT 0,
+        degraded_mode BOOLEAN NOT NULL DEFAULT FALSE,
+        elapsed_ms INT NOT NULL DEFAULT 0,
+        gravito_run_id VARCHAR(255),
+        issues JSON,
+        context JSON,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+      CREATE INDEX IF NOT EXISTS idx_timestamp ON governance_audit_trail (timestamp);
+      CREATE INDEX IF NOT EXISTS idx_correlation_id ON governance_audit_trail (correlation_id);
+      CREATE INDEX IF NOT EXISTS idx_surface_type ON governance_audit_trail (surface_type);
+      CREATE INDEX IF NOT EXISTS idx_event_type ON governance_audit_trail (event_type);
+      CREATE INDEX IF NOT EXISTS idx_gravito_run_id ON governance_audit_trail (gravito_run_id);
+    
+params: 
+[2026-08-07 19:33:51.504] [31mERROR[39m: [36m[AuditTrail] Schema initialization failed[39m
+    [35mdomain[39m: "governance"
+    err: "Failed query: \n      CREATE TABLE IF NOT EXISTS governance_audit_trail (\n        id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,\n        event_type VARCHAR(50) NOT NULL,\n        timestamp BIGINT NOT NULL,\n        correlation_id VARCHAR(255),\n        surface_type VARCHAR(50),\n        artifact_type VARCHAR(50),\n        content TEXT,\n        block_release BOOLEAN NOT NULL DEFAULT FALSE,\n        risk_score INT NOT NULL DEFAULT 0,\n        degraded_mode BOOLEAN NOT NULL DEFAULT FALSE,\n        elapsed_ms INT NOT NULL DEFAULT 0,\n        gravito_run_id VARCHAR(255),\n        issues JSON,\n        context JSON,\n        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n      );\n      CREATE INDEX IF NOT EXISTS idx_timestamp ON governance_audit_trail (timestamp);\n      CREATE INDEX IF NOT EXISTS idx_correlation_id ON governance_audit_trail (correlation_id);\n      CREATE INDEX IF NOT EXISTS idx_surface_type ON governance_audit_trail (surface_type);\n      CREATE INDEX IF NOT EXISTS idx_event_type ON governance_audit_trail (event_type);\n      CREATE INDEX IF NOT EXISTS idx_gravito_run_id ON governance_audit_trail (gravito_run_id);\n    \nparams: "
+[2026-08-07 19:33:52.662] [33mWARN[39m: [36m[WARNING] Missing feature environment variables (LLM features disabled): OPENAI_API_KEY[39m
+    [35mdomain[39m: "general"
+[2026-08-07 19:33:52.990] [33mWARN[39m: [36m[WARNING] Missing feature environment variables (LLM features disabled): OPENAI_API_KEY[39m
+    [35mdomain[39m: "general"
+[2026-08-07 19:33:53.782] [33mWARN[39m: [36m[WARNING] Missing feature environment variables (LLM features disabled): OPENAI_API_KEY[39m
+    [35mdomain[39m: "general"
+[2026-08-07 19:33:54.698] [32mINFO[39m: [36m[Prometheus] prom-client metrics initialized successfully[39m
+    [35mdomain[39m: "prometheus-metrics"
+[2026-08-07 19:33:54.699] [32mINFO[39m: [36m[Prometheus] prom-client metrics initialized successfully[39m
+    [35mdomain[39m: "prometheus-metrics"
+[2026-08-07 19:33:54.698] [32mINFO[39m: [36m[Prometheus] prom-client metrics initialized successfully[39m
+    [35mdomain[39m: "prometheus-metrics"
+[2026-08-07 19:33:54.915] [32mINFO[39m: [36mGeometryRuntimeBridge loaded (functional mode)[39m
+    [35mdomain[39m: "emotional-geometry"
+[2026-08-07 19:33:54.915] [32mINFO[39m: [36mGeometryRuntimeBridge loaded (functional mode)[39m
+    [35mdomain[39m: "emotional-geometry"
+[2026-08-07 19:33:54.917] [32mINFO[39m: [36mGeometryRuntimeBridge loaded (functional mode)[39m
+    [35mdomain[39m: "emotional-geometry"
+[2026-08-07 19:33:55.556] [33mWARN[39m: [36m[GovernancePersistence] Failed to get all active baselines:[39m
+    [35mdomain[39m: "governance"
+[2026-08-07 19:33:55.557] [33mWARN[39m: [36m[GovernancePersistence] Failed to get drift snapshots:[39m
+    [35mdomain[39m: "governance"
+[2026-08-07 19:33:55.557] [33mWARN[39m: [36m[GovernancePersistence] Failed to get all active baselines:[39m
+    [35mdomain[39m: "governance"
+[2026-08-07 19:33:55.560] [33mWARN[39m: [36m[GovernancePersistence] Failed to get all active baselines:[39m
+    [35mdomain[39m: "governance"
+[2026-08-07 19:33:55.564] [33mWARN[39m: [36m[GovernancePersistence] Failed to get all active baselines:[39m
+    [35mdomain[39m: "governance"
+[2026-08-07 19:33:55.574] [33mWARN[39m: [36m[GovernancePersistence] Failed to get all active baselines:[39m
+    [35mdomain[39m: "governance"
+[2026-08-07 19:33:55.577] [32mINFO[39m: [36m[PolicyResolver] Active profile changed to: Enterprise[39m
+    [35mdomain[39m: "general"
+[2026-08-07 19:33:55.580] [32mINFO[39m: [36m[Shield] reviewContent called - surface: website, mode: release_gate, runId: run_1786131235580_1f4f9cda[39m
+    [35mdomain[39m: "general"
+[2026-08-07 19:33:55.646] [33mWARN[39m: [36m[GovernancePersistence] Failed to get all active baselines:[39m
+    [35mdomain[39m: "governance"
+[2026-08-07 19:33:55.594] [31mERROR[39m: [36m[Database] Failed to upsert governed surface[39m
+    [35mdomain[39m: "database"
+    err: {
+      "type": "DrizzleQueryError",
+      "message": "Failed query: insert into \"governed_surfaces\" (\"id\", \"surfaceId\", \"surfaceType\", \"orgId\", \"contentSnapshot\", \"contentHash\", \"metadata\", \"lastReviewedAt\", \"lastScore\", \"lastViolations\", \"createdAt\", \"updatedAt\") values (default, $1, $2, $3, $4, $5, $6, $7, default, default, default, default) on conflict (\"surfaceId\") do update set \"surfaceType\" = $8, \"contentSnapshot\" = $9, \"contentHash\" = $10, \"metadata\" = $11, \"lastReviewedAt\" = $12\nparams: website:-rwbhv6,website,,Our AI helps with patient diagnosis and treatment recommendations for diabetes management.,f48cd8f06c0e832a298dda486488cde4ab3d69a7c96bbe9d9464b0f9cd3107d9,{\"mode\":\"release_gate\",\"surface_type\":\"website\",\"reviewed_at\":\"2026-08-07T19:33:55.580Z\"},2026-08-07T19:33:55.583Z,website,Our AI helps with patient diagnosis and treatment recommendations for diabetes management.,f48cd8f06c0e832a298dda486488cde4ab3d69a7c96bbe9d9464b0f9cd3107d9,{\"mode\":\"release_gate\",\"surface_type\":\"website\",\"reviewed_at\":\"2026-08-07T19:33:55.580Z\"},2026-08-07T19:33:55.583Z: connect ECONNREFUSED 127.0.0.1:5432",
+      "stack":
+          Error: Failed query: insert into "governed_surfaces" ("id", "surfaceId", "surfaceType", "orgId", "contentSnapshot", "contentHash", "metadata", "lastReviewedAt", "lastScore", "lastViolations", "createdAt", "updatedAt") values (default, $1, $2, $3, $4, $5, $6, $7, default, default, default, default) on conflict ("surfaceId") do update set "surfaceType" = $8, "contentSnapshot" = $9, "contentHash" = $10, "metadata" = $11, "lastReviewedAt" = $12
+          params: website:-rwbhv6,website,,Our AI helps with patient diagnosis and treatment recommendations for diabetes management.,f48cd8f06c0e832a298dda486488cde4ab3d69a7c96bbe9d9464b0f9cd3107d9,{"mode":"release_gate","surface_type":"website","reviewed_at":"2026-08-07T19:33:55.580Z"},2026-08-07T19:33:55.583Z,website,Our AI helps with patient diagnosis and treatment recommendations for diabetes management.,f48cd8f06c0e832a298dda486488cde4ab3d69a7c96bbe9d9464b0f9cd3107d9,{"mode":"release_gate","surface_type":"website","reviewed_at":"2026-08-07T19:33:55.580Z"},2026-08-07T19:33:55.583Z
+              at PostgresJsPreparedQuery.queryWithCache (file:///home/user/empathiq-website/node_modules/.pnpm/drizzle-orm@0.44.6_@opentelemetry+api@1.9.0_@types+pg@8.15.6_mysql2@3.15.1_postgres@3.4.9/node_modules/src/pg-core/session.ts:73:11)
+              at processTicksAndRejections (node:internal/process/task_queues:103:5)
+              at upsertGovernedSurface (/home/user/empathiq-website/server/db.ts:2876:5)
+              at DatabaseSurfaceRegistry.registerSurface (/home/user/empathiq-website/server/governance/surface-registry.ts:173:5)
+              at registerSurface (/home/user/empathiq-website/server/governance/surface-registry.ts:373:3)
+              at shieldReviewContent (/home/user/empathiq-website/server/agent/mcp/domains/shield.ts:825:5)
+              at /home/user/empathiq-website/server/agent/mcp/production-bridge.test.ts:28:20
+              at file:///home/user/empathiq-website/node_modules/.pnpm/@vitest+runner@3.2.4/node_modules/@vitest/runner/dist/chunk-hooks.js:752:20
+          caused by: Error: connect ECONNREFUSED 127.0.0.1:5432
+              at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+      "query": "insert into \"governed_surfaces\" (\"id\", \"surfaceId\", \"surfaceType\", \"orgId\", \"contentSnapshot\", \"contentHash\", \"metadata\", \"lastReviewedAt\", \"lastScore\", \"lastViolations\", \"createdAt\", \"updatedAt\") values (default, $1, $2, $3, $4, $5, $6, $7, default, default, default, default) on conflict (\"surfaceId\") do update set \"surfaceType\" = $8, \"contentSnapshot\" = $9, \"contentHash\" = $10, \"metadata\" = $11, \"lastReviewedAt\" = $12",
+      "params": [
+        "website:-rwbhv6",
+        "website",
+        null,
+        "Our AI helps with patient diagnosis and treatment recommendations for diabetes management.",
+        "f48cd8f06c0e832a298dda486488cde4ab3d69a7c96bbe9d9464b0f9cd3107d9",
+        "{\"mode\":\"release_gate\",\"surface_type\":\"website\",\"reviewed_at\":\"2026-08-07T19:33:55.580Z\"}",
+        "2026-08-07T19:33:55.583Z",
+        "website",
+        "Our AI helps with patient diagnosis and treatment recommendations for diabetes management.",
+        "f48cd8f06c0e832a298dda486488cde4ab3d69a7c96bbe9d9464b0f9cd3107d9",
+        "{\"mode\":\"release_gate\",\"surface_type\":\"website\",\"reviewed_at\":\"2026-08-07T19:33:55.580Z\"}",
+        "2026-08-07T19:33:55.583Z"
+      ]
+    }
+[2026-08-07 19:33:55.624] [33mWARN[39m: [36m[Shield] Surface registration failed (non-blocking):[39m
+    [35mdomain[39m: "general"
+[2026-08-07 19:33:55.624] [33mWARN[39m: [36m[PolicyResolver] business_truth.yaml not found, using defaults[39m
+    [35mdomain[39m: "general"
+[2026-08-07 19:33:55.698] [32mINFO[39m: [36m[SemanticValidator] Source of truth loaded from MCP spec[39m
+    [35mdomain[39m: "governance"
+    [35mtools[39m: 116
+    [35mcategories[39m: 9
+[2026-08-07 19:33:55.705] [31mERROR[39m: [36m[Shield] Cross-surface analysis failed:[39m
+    [35mdomain[39m: "general"
+[2026-08-07 19:33:55.706] [31mERROR[39m: [36m[Shield] Experience coherence analysis failed:[39m
+    [35mdomain[39m: "general"
+[2026-08-07 19:33:55.713] [33mWARN[39m: [36m[Shield] Score storage failed (non-blocking):[39m
+    [35mdomain[39m: "general"
+[2026-08-07 19:33:55.715] [32mINFO[39m: [36m[PolicyResolver] Active profile changed to: Enterprise[39m
+    [35mdomain[39m: "general"
+[2026-08-07 19:33:55.715] [32mINFO[39m: [36m[Shield] reviewContent called - surface: website, mode: release_gate, runId: run_1786131235715_d43ff049[39m
+    [35mdomain[39m: "general"
+[2026-08-07 19:33:55.719] [31mERROR[39m: [36m[Database] Failed to upsert governed surface[39m
+    [35mdomain[39m: "database"
+    err: {
+      "type": "DrizzleQueryError",
+      "message": "Failed query: insert into \"governed_surfaces\" (\"id\", \"surfaceId\", \"surfaceType\", \"orgId\", \"contentSnapshot\", \"contentHash\", \"metadata\", \"lastReviewedAt\", \"lastScore\", \"lastViolations\", \"createdAt\", \"updatedAt\") values (default, $1, $2, $3, $4, $5, $6, $7, default, default, default, default) on conflict (\"surfaceId\") do update set \"surfaceType\" = $8, \"contentSnapshot\" = $9, \"contentHash\" = $10, \"metadata\" = $11, \"lastReviewedAt\" = $12\nparams: website:ny2saz,website,,Our AI helps with patient diagnosis and treatment recommendations for diabetes management. Please consult a healthcare professional before making any medical decisions.,3e668469a79f77b9deaf0dda5691239c4d1b2982f5aa634337a26abe3155032e,{\"mode\":\"release_gate\",\"surface_type\":\"website\",\"reviewed_at\":\"2026-08-07T19:33:55.715Z\"},2026-08-07T19:33:55.715Z,website,Our AI helps with patient diagnosis and treatment recommendations for diabetes management. Please consult a healthcare professional before making any medical decisions.,3e668469a79f77b9deaf0dda5691239c4d1b2982f5aa634337a26abe3155032e,{\"mode\":\"release_gate\",\"surface_type\":\"website\",\"reviewed_at\":\"2026-08-07T19:33:55.715Z\"},2026-08-07T19:33:55.715Z: connect ECONNREFUSED 127.0.0.1:5432",
+      "stack":
+          Error: Failed query: insert into "governed_surfaces" ("id", "surfaceId", "surfaceType", "orgId", "contentSnapshot", "contentHash", "metadata", "lastReviewedAt", "lastScore", "lastViolations", "createdAt", "updatedAt") values (default, $1, $2, $3, $4, $5, $6, $7, default, default, default, default) on conflict ("surfaceId") do update set "surfaceType" = $8, "contentSnapshot" = $9, "contentHash" = $10, "metadata" = $11, "lastReviewedAt" = $12
+          params: website:ny2saz,website,,Our AI helps with patient diagnosis and treatment recommendations for diabetes management. Please consult a healthcare professional before making any medical decisions.,3e668469a79f77b9deaf0dda5691239c4d1b2982f5aa634337a26abe3155032e,{"mode":"release_gate","surface_type":"website","reviewed_at":"2026-08-07T19:33:55.715Z"},2026-08-07T19:33:55.715Z,website,Our AI helps with patient diagnosis and treatment recommendations for diabetes management. Please consult a healthcare professional before making any medical decisions.,3e668469a79f77b9deaf0dda5691239c4d1b2982f5aa634337a26abe3155032e,{"mode":"release_gate","surface_type":"website","reviewed_at":"2026-08-07T19:33:55.715Z"},2026-08-07T19:33:55.715Z
+              at PostgresJsPreparedQuery.queryWithCache (file:///home/user/empathiq-website/node_modules/.pnpm/drizzle-orm@0.44.6_@opentelemetry+api@1.9.0_@types+pg@8.15.6_mysql2@3.15.1_postgres@3.4.9/node_modules/src/pg-core/session.ts:73:11)
+              at processTicksAndRejections (node:internal/process/task_queues:103:5)
+              at upsertGovernedSurface (/home/user/empathiq-website/server/db.ts:2876:5)
+              at DatabaseSurfaceRegistry.registerSurface (/home/user/empathiq-website/server/governance/surface-registry.ts:173:5)
+              at registerSurface (/home/user/empathiq-website/server/governance/surface-registry.ts:373:3)
+              at shieldReviewContent (/home/user/empathiq-website/server/agent/mcp/domains/shield.ts:825:5)
+              at /home/user/empathiq-website/server/agent/mcp/production-bridge.test.ts:40:20
+              at file:///home/user/empathiq-website/node_modules/.pnpm/@vitest+runner@3.2.4/node_modules/@vitest/runner/dist/chunk-hooks.js:752:20
+          caused by: Error: connect ECONNREFUSED 127.0.0.1:5432
+              at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+      "query": "insert into \"governed_surfaces\" (\"id\", \"surfaceId\", \"surfaceType\", \"orgId\", \"contentSnapshot\", \"contentHash\", \"metadata\", \"lastReviewedAt\", \"lastScore\", \"lastViolations\", \"createdAt\", \"updatedAt\") values (default, $1, $2, $3, $4, $5, $6, $7, default, default, default, default) on conflict (\"surfaceId\") do update set \"surfaceType\" = $8, \"contentSnapshot\" = $9, \"contentHash\" = $10, \"metadata\" = $11, \"lastReviewedAt\" = $12",
+      "params": [
+        "website:ny2saz",
+        "website",
+        null,
+        "Our AI helps with patient diagnosis and treatment recommendations for diabetes management. Please consult a healthcare professional before making any medical decisions.",
+        "3e668469a79f77b9deaf0dda5691239c4d1b2982f5aa634337a26abe3155032e",
+        "{\"mode\":\"release_gate\",\"surface_type\":\"website\",\"reviewed_at\":\"2026-08-07T19:33:55.715Z\"}",
+        "2026-08-07T19:33:55.715Z",
+        "website",
+        "Our AI helps with patient diagnosis and treatment recommendations for diabetes management. Please consult a healthcare professional before making any medical decisions.",
+        "3e668469a79f77b9deaf0dda5691239c4d1b2982f5aa634337a26abe3155032e",
+        "{\"mode\":\"release_gate\",\"surface_type\":\"website\",\"reviewed_at\":\"2026-08-07T19:33:55.715Z\"}",
+        "2026-08-07T19:33:55.715Z"
+      ]
+    }
+[2026-08-07 19:33:55.720] [33mWARN[39m: [36m[Shield] Surface registration failed (non-blocking):[39m
+    [35mdomain[39m: "general"
+[2026-08-07 19:33:55.720] [33mWARN[39m: [36m[PolicyResolver] business_truth.yaml not found, using defaults[39m
+    [35mdomain[39m: "general"
+[2026-08-07 19:33:55.727] [31mERROR[39m: [36m[Database] Failed to upsert governed surface[39m
+    [35mdomain[39m: "database"
+    err: {
+      "type": "DrizzleQueryError",
+      "message": "Failed query: insert into \"governed_surfaces\" (\"id\", \"surfaceId\", \"surfaceType\", \"orgId\", \"contentSnapshot\", \"contentHash\", \"metadata\", \"lastReviewedAt\", \"lastScore\", \"lastViolations\", \"createdAt\", \"updatedAt\") values (default, $1, $2, $3, $4, $5, $6, $7, default, default, default, default) on conflict (\"surfaceId\") do update set \"surfaceType\" = $8, \"contentSnapshot\" = $9, \"contentHash\" = $10, \"metadata\" = $11, \"lastReviewedAt\" = $12\nparams: ingestion:text:ingest_4f095270b6a3d340,unknown,,Our AI helps with patient diagnosis and treatment recommendations for diabetes management.,f48cd8f06c0e832a298dda486488cde4ab3d69a7c96bbe9d9464b0f9cd3107d9,{\"ingestion_id\":\"ingest_4f095270b6a3d340\",\"surface_type\":\"text\",\"source\":\"website:-rwbhv6\",\"ingested_at\":\"2026-08-07T19:33:55.719Z\"},2026-08-07T19:33:55.719Z,unknown,Our AI helps with patient diagnosis and treatment recommendations for diabetes management.,f48cd8f06c0e832a298dda486488cde4ab3d69a7c96bbe9d9464b0f9cd3107d9,{\"ingestion_id\":\"ingest_4f095270b6a3d340\",\"surface_type\":\"text\",\"source\":\"website:-rwbhv6\",\"ingested_at\":\"2026-08-07T19:33:55.719Z\"},2026-08-07T19:33:55.719Z: connect ECONNREFUSED 127.0.0.1:5432",
+      "stack":
+          Error: Failed query: insert into "governed_surfaces" ("id", "surfaceId", "surfaceType", "orgId", "contentSnapshot", "contentHash", "metadata", "lastReviewedAt", "lastScore", "lastViolations", "createdAt", "updatedAt") values (default, $1, $2, $3, $4, $5, $6, $7, default, default, default, default) on conflict ("surfaceId") do update set "surfaceType" = $8, "contentSnapshot" = $9, "contentHash" = $10, "metadata" = $11, "lastReviewedAt" = $12
+          params: ingestion:text:ingest_4f095270b6a3d340,unknown,,Our AI helps with patient diagnosis and treatment recommendations for diabetes management.,f48cd8f06c0e832a298dda486488cde4ab3d69a7c96bbe9d9464b0f9cd3107d9,{"ingestion_id":"ingest_4f095270b6a3d340","surface_type":"text","source":"website:-rwbhv6","ingested_at":"2026-08-07T19:33:55.719Z"},2026-08-07T19:33:55.719Z,unknown,Our AI helps with patient diagnosis and treatment recommendations for diabetes management.,f48cd8f06c0e832a298dda486488cde4ab3d69a7c96bbe9d9464b0f9cd3107d9,{"ingestion_id":"ingest_4f095270b6a3d340","surface_type":"text","source":"website:-rwbhv6","ingested_at":"2026-08-07T19:33:55.719Z"},2026-08-07T19:33:55.719Z
+              at PostgresJsPreparedQuery.queryWithCache (file:///home/user/empathiq-website/node_modules/.pnpm/drizzle-orm@0.44.6_@opentelemetry+api@1.9.0_@types+pg@8.15.6_mysql2@3.15.1_postgres@3.4.9/node_modules/src/pg-core/session.ts:73:11)
+              at processTicksAndRejections (node:internal/process/task_queues:103:5)
+              at upsertGovernedSurface (/home/user/empathiq-website/server/db.ts:2876:5)
+              at DatabaseSurfaceRegistry.registerSurface (/home/user/empathiq-website/server/governance/surface-registry.ts:173:5)
+              at registerSurface (/home/user/empathiq-website/server/governance/surface-registry.ts:373:3)
+              at registerIngestionSurface (/home/user/empathiq-website/server/governance/content-ingestion-cognition-bridge.ts:169:5)
+              at ingestContent (/home/user/empathiq-website/server/governance/content-ingestion-cognition-bridge.ts:205:29)
+              at /home/user/empathiq-website/server/agent/mcp/domains/shield.ts:1245:7
+          caused by: Error: connect ECONNREFUSED 127.0.0.1:5432
+              at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+      "query": "insert into \"governed_surfaces\" (\"id\", \"surfaceId\", \"surfaceType\", \"orgId\", \"contentSnapshot\", \"contentHash\", \"metadata\", \"lastReviewedAt\", \"lastScore\", \"lastViolations\", \"createdAt\", \"updatedAt\") values (default, $1, $2, $3, $4, $5, $6, $7, default, default, default, default) on conflict (\"surfaceId\") do update set \"surfaceType\" = $8, \"contentSnapshot\" = $9, \"contentHash\" = $10, \"metadata\" = $11, \"lastReviewedAt\" = $12",
+      "params": [
+        "ingestion:text:ingest_4f095270b6a3d340",
+        "unknown",
+        null,
+        "Our AI helps with patient diagnosis and treatment recommendations for diabetes management.",
+        "f48cd8f06c0e832a298dda486488cde4ab3d69a7c96bbe9d9464b0f9cd3107d9",
+        "{\"ingestion_id\":\"ingest_4f095270b6a3d340\",\"surface_type\":\"text\",\"source\":\"website:-rwbhv6\",\"ingested_at\":\"2026-08-07T19:33:55.719Z\"}",
+        "2026-08-07T19:33:55.719Z",
+        "unknown",
+        "Our AI helps with patient diagnosis and treatment recommendations for diabetes management.",
+        "f48cd8f06c0e832a298dda486488cde4ab3d69a7c96bbe9d9464b0f9cd3107d9",
+        "{\"ingestion_id\":\"ingest_4f095270b6a3d340\",\"surface_type\":\"text\",\"source\":\"website:-rwbhv6\",\"ingested_at\":\"2026-08-07T19:33:55.719Z\"}",
+        "2026-08-07T19:33:55.719Z"
+      ]
+    }
+[2026-08-07 19:33:55.727] [32mINFO[39m: [36m[Shield] Ingestion bridge: surface registered for website:-rwbhv6[39m
+    [35mdomain[39m: "general"
+[2026-08-07 19:33:55.774] [31mERROR[39m: [36m[Shield] Cross-surface analysis failed:[39m
+    [35mdomain[39m: "general"
+[2026-08-07 19:33:55.797] [33mWARN[39m: [36m[GovernancePersistence] Failed to get all active baselines:[39m
+    [35mdomain[39m: "governance"
+[2026-08-07 19:33:56.136] [31mERROR[39m: [36m[Shield] Experience coherence analysis failed:[39m
+    [35mdomain[39m: "general"
+[2026-08-07 19:33:56.362] [33mWARN[39m: [36m[GovernancePersistence] Failed to get drift snapshots:[39m
+    [35mdomain[39m: "governance"
+[2026-08-07 19:33:57.083] [33mWARN[39m: [36m[GovernancePersistence] Failed to get all active baselines:[39m
+    [35mdomain[39m: "governance"
+[2026-08-07 19:33:59.656] [33mWARN[39m: [36m[Shield] Score storage failed (non-blocking):[39m
+    [35mdomain[39m: "general"
+[2026-08-07 19:33:59.657] [32mINFO[39m: [36m[PolicyResolver] Active profile changed to: Enterprise[39m
+    [35mdomain[39m: "general"
+[2026-08-07 19:33:59.658] [32mINFO[39m: [36m[Shield] reviewContent called - surface: website, mode: release_gate, runId: run_1786131239658_57920a6c[39m
+    [35mdomain[39m: "general"
+[2026-08-07 19:34:01.180] [33mWARN[39m: [36m[GovernancePersistence] Failed to get all active baselines:[39m
+    [35mdomain[39m: "governance"
+[2026-08-07 19:34:03.700] [33mWARN[39m: [36m[Shield] Cross-surface analysis timed out after 8000ms — skipping[39m
+    [35mdomain[39m: "general"
+[2026-08-07 19:34:03.725] [33mWARN[39m: [36m[Shield] Cross-surface analysis timed out after 8000ms — skipping[39m
+    [35mdomain[39m: "general"
+[2026-08-07 19:34:08.327] [31mERROR[39m: [36m[Database] Failed to upsert governed surface[39m
+    [35mdomain[39m: "database"
+    err: {
+      "type": "DrizzleQueryError",
+      "message": "Failed query: insert into \"governed_surfaces\" (\"id\", \"surfaceId\", \"surfaceType\", \"orgId\", \"contentSnapshot\", \"contentHash\", \"metadata\", \"lastReviewedAt\", \"lastScore\", \"lastViolations\", \"createdAt\", \"updatedAt\") values (default, $1, $2, $3, $4, $5, $6, $7, default, default, default, default) on conflict (\"surfaceId\") do update set \"surfaceType\" = $8, \"contentSnapshot\" = $9, \"contentHash\" = $10, \"metadata\" = $11, \"lastReviewedAt\" = $12\nparams: website:-qywhsv,website,,Our platform helps you manage your investment portfolio and maximize annual returns on your stock trading.,3f330aff0e87e15f475fcadff251546e293f7b7e6a7df87add122d569fb0fd65,{\"mode\":\"release_gate\",\"surface_type\":\"website\",\"reviewed_at\":\"2026-08-07T19:33:59.658Z\"},2026-08-07T19:33:59.658Z,website,Our platform helps you manage your investment portfolio and maximize annual returns on your stock trading.,3f330aff0e87e15f475fcadff251546e293f7b7e6a7df87add122d569fb0fd65,{\"mode\":\"release_gate\",\"surface_type\":\"website\",\"reviewed_at\":\"2026-08-07T19:33:59.658Z\"},2026-08-07T19:33:59.658Z: connect ECONNREFUSED 127.0.0.1:5432",
+      "stack":
+          Error: Failed query: insert into "governed_surfaces" ("id", "surfaceId", "surfaceType", "orgId", "contentSnapshot", "contentHash", "metadata", "lastReviewedAt", "lastScore", "lastViolations", "createdAt", "updatedAt") values (default, $1, $2, $3, $4, $5, $6, $7, default, default, default, default) on conflict ("surfaceId") do update set "surfaceType" = $8, "contentSnapshot" = $9, "contentHash" = $10, "metadata" = $11, "lastReviewedAt" = $12
+          params: website:-qywhsv,website,,Our platform helps you manage your investment portfolio and maximize annual returns on your stock trading.,3f330aff0e87e15f475fcadff251546e293f7b7e6a7df87add122d569fb0fd65,{"mode":"release_gate","surface_type":"website","reviewed_at":"2026-08-07T19:33:59.658Z"},2026-08-07T19:33:59.658Z,website,Our platform helps you manage your investment portfolio and maximize annual returns on your stock trading.,3f330aff0e87e15f475fcadff251546e293f7b7e6a7df87add122d569fb0fd65,{"mode":"release_gate","surface_type":"website","reviewed_at":"2026-08-07T19:33:59.658Z"},2026-08-07T19:33:59.658Z
+              at PostgresJsPreparedQuery.queryWithCache (file:///home/user/empathiq-website/node_modules/.pnpm/drizzle-orm@0.44.6_@opentelemetry+api@1.9.0_@types+pg@8.15.6_mysql2@3.15.1_postgres@3.4.9/node_modules/src/pg-core/session.ts:73:11)
+              at processTicksAndRejections (node:internal/process/task_queues:103:5)
+              at upsertGovernedSurface (/home/user/empathiq-website/server/db.ts:2876:5)
+              at DatabaseSurfaceRegistry.registerSurface (/home/user/empathiq-website/server/governance/surface-registry.ts:173:5)
+              at registerSurface (/home/user/empathiq-website/server/governance/surface-registry.ts:373:3)
+              at shieldReviewContent (/home/user/empathiq-website/server/agent/mcp/domains/shield.ts:825:5)
+              at /home/user/empathiq-website/server/agent/mcp/production-bridge.test.ts:54:20
+              at file:///home/user/empathiq-website/node_modules/.pnpm/@vitest+runner@3.2.4/node_modules/@vitest/runner/dist/chunk-hooks.js:752:20
+          caused by: Error: connect ECONNREFUSED 127.0.0.1:5432
+              at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+      "query": "insert into \"governed_surfaces\" (\"id\", \"surfaceId\", \"surfaceType\", \"orgId\", \"contentSnapshot\", \"contentHash\", \"metadata\", \"lastReviewedAt\", \"lastScore\", \"lastViolations\", \"createdAt\", \"updatedAt\") values (default, $1, $2, $3, $4, $5, $6, $7, default, default, default, default) on conflict (\"surfaceId\") do update set \"surfaceType\" = $8, \"contentSnapshot\" = $9, \"contentHash\" = $10, \"metadata\" = $11, \"lastReviewedAt\" = $12",
+      "params": [
+        "website:-qywhsv",
+        "website",
+        null,
+        "Our platform helps you manage your investment portfolio and maximize annual returns on your stock trading.",
+        "3f330aff0e87e15f475fcadff251546e293f7b7e6a7df87add122d569fb0fd65",
+        "{\"mode\":\"release_gate\",\"surface_type\":\"website\",\"reviewed_at\":\"2026-08-07T19:33:59.658Z\"}",
+        "2026-08-07T19:33:59.658Z",
+        "website",
+        "Our platform helps you manage your investment portfolio and maximize annual returns on your stock trading.",
+        "3f330aff0e87e15f475fcadff251546e293f7b7e6a7df87add122d569fb0fd65",
+        "{\"mode\":\"release_gate\",\"surface_type\":\"website\",\"reviewed_at\":\"2026-08-07T19:33:59.658Z\"}",
+        "2026-08-07T19:33:59.658Z"
+      ]
+    }
+[2026-08-07 19:34:08.328] [33mWARN[39m: [36m[Shield] Surface registration failed (non-blocking):[39m
+    [35mdomain[39m: "general"
+[2026-08-07 19:34:08.328] [33mWARN[39m: [36m[PolicyResolver] business_truth.yaml not found, using defaults[39m
+    [35mdomain[39m: "general"
+[2026-08-07 19:34:13.836] [31mERROR[39m: [36m[Database] Failed to upsert governed surface[39m
+    [35mdomain[39m: "database"
+    err: {
+      "type": "DrizzleQueryError",
+      "message": "Failed query: insert into \"governed_surfaces\" (\"id\", \"surfaceId\", \"surfaceType\", \"orgId\", \"contentSnapshot\", \"contentHash\", \"metadata\", \"lastReviewedAt\", \"lastScore\", \"lastViolations\", \"createdAt\", \"updatedAt\") values (default, $1, $2, $3, $4, $5, $6, $7, default, default, default, default) on conflict (\"surfaceId\") do update set \"surfaceType\" = $8, \"contentSnapshot\" = $9, \"contentHash\" = $10, \"metadata\" = $11, \"lastReviewedAt\" = $12\nparams: ingestion:text:ingest_0a487220d9ebf2d1,unknown,,Our AI helps with patient diagnosis and treatment recommendations for diabetes management. Please consult a healthcare professional before making any medical decisions.,3e668469a79f77b9deaf0dda5691239c4d1b2982f5aa634337a26abe3155032e,{\"ingestion_id\":\"ingest_0a487220d9ebf2d1\",\"surface_type\":\"text\",\"source\":\"website:ny2saz\",\"ingested_at\":\"2026-08-07T19:33:59.657Z\"},2026-08-07T19:33:59.657Z,unknown,Our AI helps with patient diagnosis and treatment recommendations for diabetes management. Please consult a healthcare professional before making any medical decisions.,3e668469a79f77b9deaf0dda5691239c4d1b2982f5aa634337a26abe3155032e,{\"ingestion_id\":\"ingest_0a487220d9ebf2d1\",\"surface_type\":\"text\",\"source\":\"website:ny2saz\",\"ingested_at\":\"2026-08-07T19:33:59.657Z\"},2026-08-07T19:33:59.657Z: connect ECONNREFUSED 127.0.0.1:5432",
+      "stack":
+          Error: Failed query: insert into "governed_surfaces" ("id", "surfaceId", "surfaceType", "orgId", "contentSnapshot", "contentHash", "metadata", "lastReviewedAt", "lastScore", "lastViolations", "createdAt", "updatedAt") values (default, $1, $2, $3, $4, $5, $6, $7, default, default, default, default) on conflict ("surfaceId") do update set "surfaceType" = $8, "contentSnapshot" = $9, "contentHash" = $10, "metadata" = $11, "lastReviewedAt" = $12
+          params: ingestion:text:ingest_0a487220d9ebf2d1,unknown,,Our AI helps with patient diagnosis and treatment recommendations for diabetes management. Please consult a healthcare professional before making any medical decisions.,3e668469a79f77b9deaf0dda5691239c4d1b2982f5aa634337a26abe3155032e,{"ingestion_id":"ingest_0a487220d9ebf2d1","surface_type":"text","source":"website:ny2saz","ingested_at":"2026-08-07T19:33:59.657Z"},2026-08-07T19:33:59.657Z,unknown,Our AI helps with patient diagnosis and treatment recommendations for diabetes management. Please consult a healthcare professional before making any medical decisions.,3e668469a79f77b9deaf0dda5691239c4d1b2982f5aa634337a26abe3155032e,{"ingestion_id":"ingest_0a487220d9ebf2d1","surface_type":"text","source":"website:ny2saz","ingested_at":"2026-08-07T19:33:59.657Z"},2026-08-07T19:33:59.657Z
+              at PostgresJsPreparedQuery.queryWithCache (file:///home/user/empathiq-website/node_modules/.pnpm/drizzle-orm@0.44.6_@opentelemetry+api@1.9.0_@types+pg@8.15.6_mysql2@3.15.1_postgres@3.4.9/node_modules/src/pg-core/session.ts:73:11)
+              at processTicksAndRejections (node:internal/process/task_queues:103:5)
+              at upsertGovernedSurface (/home/user/empathiq-website/server/db.ts:2876:5)
+              at DatabaseSurfaceRegistry.registerSurface (/home/user/empathiq-website/server/governance/surface-registry.ts:173:5)
+              at registerSurface (/home/user/empathiq-website/server/governance/surface-registry.ts:373:3)
+              at registerIngestionSurface (/home/user/empathiq-website/server/governance/content-ingestion-cognition-bridge.ts:169:5)
+              at ingestContent (/home/user/empathiq-website/server/governance/content-ingestion-cognition-bridge.ts:205:29)
+              at /home/user/empathiq-website/server/agent/mcp/domains/shield.ts:1245:7
+          caused by: Error: connect ECONNREFUSED 127.0.0.1:5432
+              at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1637:16)
+      "query": "insert into \"governed_surfaces\" (\"id\", \"surfaceId\", \"surfaceType\", \"orgId\", \"contentSnapshot\", \"contentHash\", \"metadata\", \"lastReviewedAt\", \"lastScore\", \"lastViolations\", \"createdAt\", \"updatedAt\") values (default, $1, $2, $3, $4, $5, $6, $7, default, default, default, default) on conflict (\"surfaceId\") do update set \"surfaceType\" = $8, \"contentSnapshot\" = $9, \"contentHash\" = $10, \"metadata\" = $11, \"lastReviewedAt\" = $12",
+      "params": [
+        "ingestion:text:ingest_0a487220d9ebf2d1",
+        "unknown",
+        null,
+        "Our AI helps with patient diagnosis and treatment recommendations for diabetes management. Please consult a healthcare professional before making any medical decisions.",
+        "3e668469a79f77b9deaf0dda5691239c4d1b2982f5aa634337a26abe3155032e",
+        "{\"ingestion_id\":\"ingest_0a487220d9ebf2d1\",\"surface_type\":\"text\",\"source\":\"website:ny2saz\",\"ingested_at\":\"2026-08-07T19:33:59.657Z\"}",
+        "2026-08-07T19:33:59.657Z",
+        "unknown",
+        "Our AI helps with patient diagnosis and treatment recommendations for diabetes management. Please consult a healthcare professional before making any medical decisions.",
+        "3e668469a79f77b9deaf0dda5691239c4d1b2982f5aa634337a26abe3155032e",
+        "{\"ingestion_id\":\"ingest_0a487220d9ebf2d1\",\"surface_type\":\"text\",\"source\":\"website:ny2saz\",\"ingested_at\":\"2026-08-07T19:33:59.657Z\"}",
+        "2026-08-07T19:33:59.657Z"
+      ]
+    }
+[2026-08-07 19:34:13.836] [32mINFO[39m: [36m[Shield] Ingestion bridge: surface registered for website:ny2saz[39m
+    [35mdomain[39m: "general"
+[2026-08-07 19:34:14.576] [33mWARN[39m: [36m[GovernancePersistence] Failed to get all active baselines:[39m
+    [35mdomain[39m: "governance"
+[2026-08-07 19:34:14.582] [33mWARN[39m: [36m[GovernancePersistence] Failed to get all active baselines:[39m
+    [35mdomain[39m: "governance"
+[2026-08-07 19:34:14.582] [33mWARN[39m: [36m[GovernancePersistence] Failed to get all active baselines:[39m
+    [35mdomain[39m: "governance"
+[2026-08-07 19:34:16.331] [33mWARN[39m: [36m[Shield] Cross-surface analysis timed out after 8000ms — skipping[39m
+    [35mdomain[39m: "general"
+[2026-08-07 19:34:16.962] [33mWARN[39m: [36m[GovernancePersistence] Failed to get drift snapshots:[39m
+    [35mdomain[39m: "governance"
+[2026-08-07 19:34:16.965] [33mWARN[39m: [36m[GovernancePersistence] Failed to get all active baselines:[39m
+    [35mdomain[39m: "governance"
+[2026-08-07 19:34:25.224] [33mWARN[39m: [36m[GovernancePersistence] Failed to get all active baselines:[39m
+    [35mdomain[39m: "governance"
+[2026-08-07 19:34:29.661] [32mINFO[39m: [36m[PolicyResolver] Active profile changed to: Enterprise[39m
+    [35mdomain[39m: "general"
+[2026-08-07 19:34:29.662] [32mINFO[39m: [36m[Shield] reviewContent called - surface: website, mode: release_gate, runId: run_1786131269662_11fbeb57[39m
+    [35mdomain[39m: "general"
+[2026-08-07 19:34:31.109] [33mWARN[39m: [36m[GovernancePersistence] Failed to get all active baselines:[39m
+    [35mdomain[39m: "governance"
+[2026-08-07 19:34:31.113] [33mWARN[39m: [36m[GovernancePersistence] Failed to get all active baselines:[39m
+    [35mdomain[39m: "governance"
+[2026-08-07 19:34:31.113] [33mWARN[39m: [36m[GovernancePersistence] Failed to get drift snapshots:[39m
+    [35mdomain[39m: "governance"
+[2026-08-07 19:34:36.755] [33mWARN[39m: [36m[GovernancePersistence] Failed to get all active baselines:[39m
+    [35mdomain[39m: "governance"
+[2026-08-07 19:34:40.254] [33mWARN[39m: [36m[GovernancePersistence] Failed to get all active baselines:[39m
+    [35mdomain[39m: "governance"
+[2026-08-07 19:34:41.031] [31mERROR[39m: [36m[Shield] Experience coherence analysis failed:[39m
+    [35mdomain[39m: "general"
+[2026-08-07 19:34:42.808] [33mWARN[39m: [36m[GovernancePersistence] Failed to get all active baselines:[39m
+    [35mdomain[39m: "governance"
+[2026-08-07 19:34:46.908] [33mWARN[39m: [36m[GovernancePersistence] Failed to get all active baselines:[39m
+    [35mdomain[39m: "governance"
+[2026-08-07 19:34:46.913] [33mWARN[39m: [36m[GovernancePersistence] Failed to get all active baselines:[39m
+    [35mdomain[39m: "governance"
+[2026-08-07 19:34:47.282] [32mINFO[39m: [36m[Shield] Cognitive loop (non-blocking): risk=intervene, stability=0.50, iterations=2, duration=51572ms[39m
+    [35mdomain[39m: "general"
+[2026-08-07 19:34:49.646] [33mWARN[39m: [36m[GovernancePersistence] Failed to get all active baselines:[39m
+    [35mdomain[39m: "governance"
+[2026-08-07 19:34:51.034] [32mINFO[39m: [36m[Shield] Cognitive loop (non-blocking): risk=intervene, stability=0.50, iterations=2, duration=10002ms[39m
+    [35mdomain[39m: "general"
+[2026-08-07 19:34:51.685] [33mWARN[39m: [36m[GovernancePersistence] Failed to get drift snapshots:[39m
+    [35mdomain[39m: "governance"
+[2026-08-07 19:34:56.154] [32mINFO[39m: [36m[Shield] Cognitive loop (non-blocking): risk=intervene, stability=0.50, iterations=2, duration=60017ms[39m
+    [35mdomain[39m: "general"
+[2026-08-07 19:34:57.286] [31mERROR[39m: [36m[Database] Failed to upsert governed surface[39m
+    [35mdomain[39m: "database"
+    err: {
+      "type": "DrizzleQueryError",
+      "message": "Failed query: insert into \"governed_surfaces\" (\"id\", \"surfaceId\", \"surfaceType\", \"orgId\", \"contentSnapshot\", \"contentHash\", \"metadata\", \"lastReviewedAt\", \"lastScore\", \"lastViolations\", \"createdAt\", \"updatedAt\") values (default, $1, $2, $3, $4, $5, $6, $7, default, default, default, default) on conflict (\"surfaceId\") do update set \"surfaceType\" = $8, \"contentSnapshot\" = $9, \"contentHash\" = $10, \"metadata\" = $11, \"lastReviewedAt\" = $12\nparams: website:-umpoxn,website,,Our platform helps you manage your investment portfolio and maximize annual returns on your stock trading. Past performance does not guarantee future results. All investments involve risk.,e5d4c9d213744ea90d5e253f7538564ecfda56cdf8765c17e6c5e9329ff1ba04,{\"mode\":\"release_gate\",\"surface_type\":\"website\",\"reviewed_at\":\"2026-08-07T19:34:29.662Z\"},2026-08-07T19:34:29.662Z,website,Our platform helps you manage your investment portfolio and maximize annual returns on your stock trading

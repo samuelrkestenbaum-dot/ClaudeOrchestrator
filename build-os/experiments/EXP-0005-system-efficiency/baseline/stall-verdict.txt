@@ -1,0 +1,2 @@
+STALLED 2026-08-07T19:58:50Z — no output growth for 900s
+last-line:     [35mdomain[39m: "integrated-nervous-system"
