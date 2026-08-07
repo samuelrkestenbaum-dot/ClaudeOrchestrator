@@ -288,3 +288,50 @@ Every discarded attempt is retained under `pairs-out/*-attempt*/`. None was
 dropped silently, and the one directional fact that could have made a re-run
 self-serving — that both E4/E5 attempt-1 failures favoured the compiled
 condition — is recorded above rather than omitted.
+
+## BLINDING: the adjudicator role held. The analyst role did NOT.
+
+Recorded **before** the reveal, so it cannot be read as an excuse constructed
+afterwards.
+
+**What held.** Acceptance was adjudicated by a separate agent that received only
+the opaque unit ids, the task objectives and criteria, the ten work-product
+diffs, and mechanically-measured acceptance evidence with every economic field
+stripped. It was instructed not to open the directories carrying condition
+identity. It returned 9 accepted / 1 rejected and its verdicts were written into
+the records unchanged. That role was genuinely blind.
+
+**What did not hold.** The blinding README names this exact failure mode:
+
+> Unit ids appear in both views. That is deliberate: it is how frozen acceptance
+> reaches the economics. It does mean anyone holding *both* views can join them.
+> **Neither blinded role holds both.**
+
+In this run, one agent held both. The execution layer legitimately knows arm
+identity — it has to, to hand the right prompt to the right arm — and the same
+agent then acted as comparative analyst. The join is not hypothetical: the
+adjudication rejected exactly one unit, and the execution layer already knew
+which arm carried the single measured test regression. One such coincidence is
+enough to identify a unit's condition, and from the analyst view that unit's
+label follows.
+
+So: **the analyst was not effectively blinded, and the sealed mapping was
+functionally recoverable before the reveal.** The seal file itself was never
+opened by the operator of this run — every join through it was performed by a
+script that printed counts only — but "did not read the file" is a weaker claim
+than "could not know", and only the weaker one is true here.
+
+**What limits the damage, and what does not.** The verdict is not a judgement
+call: `views.mjs` computes the calculations, the gates and the anonymous
+provisional label mechanically from the records, and `verdict.mjs` applies the
+registered vocabulary. Acceptance — the input most vulnerable to bias — came
+from the blind adjudicator, and `calculations` refuses outright if the
+adjudication and the records disagree. Nothing downstream of acceptance is
+chosen by the analyst. That bounds the exposure; it does not erase it, and it
+is not a substitute for a separate analyst.
+
+**The fix, for any future run:** the comparative analyst must be a separate
+agent that receives the analyst view and nothing else — no `pairs-out/`, no
+per-arm oracle output, no execution log. That is a one-line change to how the
+role is dispatched, and it was available here. It was not done, and this is the
+disclosure of that.
