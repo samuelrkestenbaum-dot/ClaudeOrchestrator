@@ -4,3 +4,9 @@
 # Repomix snapshot output — explicit handoffs only; never commit (sharing = STOP)
 repomix-output.xml
 repomix-output.*
+
+# Operator publication authority is LOCAL state, not repository content.
+# Tracking it created a chicken-and-egg: updating the record to name a new tip
+# either dirties the tree or changes the very tip it authorises. It also has no
+# business travelling to the remote — an authority grant is not an artifact.
+build-os/authority/publish-authorization.json
