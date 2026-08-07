@@ -1,0 +1,17 @@
+[2026-08-07T21:24:43.788Z] seed=2543c873141fa64653a7993d326465d5e0dd1006 discovered=148 chunk=10 timeout=600s
+[2026-08-07T21:31:19.921Z] c0001-10 ok 10f 395.9s failed=10 remaining_chunks=14
+[2026-08-07T21:34:40.785Z] c0002-10 ok 10f 200.6s failed=10 remaining_chunks=13
+[2026-08-07T21:41:43.738Z] c0003-10 ok 10f 422.7s failed=10 remaining_chunks=12
+[2026-08-07T21:42:31.256Z] c0004-10 ok 10f 47.3s failed=10 remaining_chunks=11
+[2026-08-07T21:47:01.798Z] c0005-10 ok 10f 270.3s failed=10 remaining_chunks=10
+[2026-08-07T21:49:41.741Z] c0006-10 ok 10f 159.7s failed=9 remaining_chunks=9
+[2026-08-07T21:50:12.591Z] c0007-10 ok 10f 30.6s failed=10 remaining_chunks=8
+[2026-08-07T21:51:38.543Z] c0008-10 ok 10f 85.7s failed=10 remaining_chunks=7
+[2026-08-07T21:53:07.872Z] c0009-10 ok 10f 89.1s failed=10 remaining_chunks=6
+[2026-08-07T21:54:00.848Z] c0010-10 ok 10f 52.7s failed=10 remaining_chunks=5
+[2026-08-07T21:57:15.909Z] c0011-10 ok 10f 194.8s failed=9 remaining_chunks=4
+[2026-08-07T22:00:54.410Z] c0012-10 ok 10f 218.2s failed=10 remaining_chunks=3
+[2026-08-07T22:02:03.650Z] c0013-10 ok 10f 69.0s failed=10 remaining_chunks=2
+[2026-08-07T22:02:40.052Z] c0014-10 ok 10f 36.1s failed=10 remaining_chunks=1
+[2026-08-07T22:02:43.366Z] c0015-8 ok 8f 3.1s failed=8 remaining_chunks=0
+[2026-08-07T22:02:43.413Z] DONE files=148 {"passed":2,"failed":140,"suite_error":6,"hung":0,"runner_crash":0,"not_reported":0,"not_run":0} tests_passed=2436 tests_failed=847 wall=38.0min

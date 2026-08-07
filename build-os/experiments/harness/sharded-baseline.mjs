@@ -80,7 +80,16 @@ function walk(dir, acc = []) {
   return acc;
 }
 
-const files = INCLUDE_ROOTS.flatMap((r) => walk(path.join(REPO, r))).sort();
+// `--only <list>` replaces discovery with an explicit file list. Used for the
+// DETERMINISM RE-CHECK: re-measuring just the files that failed, to separate a
+// test that fails deterministically at the seed from one that is merely flaky.
+// This is not a second baseline — it measures the STABILITY of the first, and a
+// flaky test is unusable for BOTH registered purposes (it cannot anchor a
+// regression baseline, and it cannot be an objectively acceptable task).
+const ONLY = opt("only", null);
+const files = ONLY
+  ? fs.readFileSync(path.resolve(ONLY), "utf8").split("\n").map((s) => s.trim()).filter(Boolean).sort()
+  : INCLUDE_ROOTS.flatMap((r) => walk(path.join(REPO, r))).sort();
 log(`seed=${seedHead} discovered=${files.length} chunk=${CHUNK} timeout=${TIMEOUT_MS / 1000}s`);
 
 // --- chunk execution --------------------------------------------------------
