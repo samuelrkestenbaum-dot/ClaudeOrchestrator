@@ -75,7 +75,7 @@ export const NEGATIVE = [
       links: {
         origination: { status: "PROVEN", evidence_ref: "a" },
         consumption: { status: "PROVEN", evidence_ref: "b" },
-        behavioral_divergence: { status: "PROVEN", evidence_ref: "c", counterfactual: "would have accepted the block", actor: "chatgpt", actor_discriminator: "d" },
+        behavioral_divergence: { status: "PROVEN", evidence_ref: "c", counterfactual: "would have accepted the block", actor: "chatgpt", candidate_actors: [{ id: "chatgpt", expects: { provider: "openai" } }], actor_evidence: { provider: { value: "openai", source: "row" } } },
         durable_write_back: { status: "ABSENT" },
         onward_consumability: { status: "ABSENT" },
       },
@@ -103,17 +103,17 @@ export const POSITIVE = [
     claim: {
       id: "FIX-P1", originating_surface: "claude", consuming_surface: "chatgpt",
       links: {
-        origination: { status: "PROVEN", evidence_ref: "ledger row", actor: "claude", actor_discriminator: "surface_id" },
-        consumption: { status: "PROVEN", evidence_ref: "accept row", actor: "chatgpt", actor_discriminator: "actor_id" },
+        origination: { status: "PROVEN", evidence_ref: "ledger row", actor: "claude", candidate_actors: [{ id: "claude", expects: { surface_identifier: "claude.x" } }], actor_evidence: { surface_identifier: { value: "claude.x", source: "row" } } },
+        consumption: { status: "PROVEN", evidence_ref: "accept row", actor: "chatgpt", candidate_actors: [{ id: "chatgpt", expects: { surface_identifier: "chatgpt.x" } }], actor_evidence: { surface_identifier: { value: "chatgpt.x", source: "row" } } },
         behavioral_divergence: {
-          status: "PROVEN", evidence_ref: "action row", actor: "chatgpt", actor_discriminator: "caller identity on the row",
+          status: "PROVEN", evidence_ref: "action row", actor: "chatgpt", candidate_actors: [{ id: "chatgpt", expects: { surface_identifier: "chatgpt.x" } }], actor_evidence: { surface_identifier: { value: "chatgpt.x", source: "caller identity on the row" } },
           counterfactual: "absent the state it would have taken the default branch",
         },
-        durable_write_back: { status: "PROVEN", evidence_ref: "outcome row", actor: "chatgpt", actor_discriminator: "actor_id" },
-        onward_consumability: { status: "PROVEN", evidence_ref: "third consumer read it", actor: "manus", actor_discriminator: "actor_id" },
+        durable_write_back: { status: "PROVEN", evidence_ref: "outcome row", actor: "chatgpt", candidate_actors: [{ id: "chatgpt", expects: { surface_identifier: "chatgpt.x" } }], actor_evidence: { surface_identifier: { value: "chatgpt.x", source: "row" } } },
+        onward_consumability: { status: "PROVEN", evidence_ref: "third consumer read it", actor: "manus", candidate_actors: [{ id: "manus", expects: { surface_identifier: "manus.x" } }], actor_evidence: { surface_identifier: { value: "manus.x", source: "row" } } },
       },
     },
-    expect: "NATIVE_CONTINUITY",
+    expect: "CROSS_SURFACE_BEHAVIORAL_CONTINUITY_PROVEN",
   },
   {
     name: "the same loop reached through a bridge — must NOT report as native",
@@ -121,16 +121,16 @@ export const POSITIVE = [
       id: "FIX-P2", originating_surface: "claude", consuming_surface: "chatgpt",
       bridge: { via: "chatgpt", attributable_as: "claude.cowork.session" },
       links: {
-        origination: { status: "PROVEN", evidence_ref: "ledger row", actor: "claude", actor_discriminator: "surface_id" },
-        consumption: { status: "PROVEN", evidence_ref: "accept row", actor: "chatgpt", actor_discriminator: "actor_id" },
+        origination: { status: "PROVEN", evidence_ref: "ledger row", actor: "claude", candidate_actors: [{ id: "claude", expects: { surface_identifier: "claude.x" } }], actor_evidence: { surface_identifier: { value: "claude.x", source: "row" } } },
+        consumption: { status: "PROVEN", evidence_ref: "accept row", actor: "chatgpt", candidate_actors: [{ id: "chatgpt", expects: { surface_identifier: "chatgpt.x" } }], actor_evidence: { surface_identifier: { value: "chatgpt.x", source: "row" } } },
         behavioral_divergence: {
-          status: "PROVEN", evidence_ref: "action row", actor: "chatgpt", actor_discriminator: "caller identity on the row",
+          status: "PROVEN", evidence_ref: "action row", actor: "chatgpt", candidate_actors: [{ id: "chatgpt", expects: { surface_identifier: "chatgpt.x" } }], actor_evidence: { surface_identifier: { value: "chatgpt.x", source: "caller identity on the row" } },
           counterfactual: "absent the state it would have taken the default branch",
         },
-        durable_write_back: { status: "PROVEN", evidence_ref: "outcome row", actor: "chatgpt", actor_discriminator: "actor_id" },
-        onward_consumability: { status: "PROVEN", evidence_ref: "third consumer read it", actor: "manus", actor_discriminator: "actor_id" },
+        durable_write_back: { status: "PROVEN", evidence_ref: "outcome row", actor: "chatgpt", candidate_actors: [{ id: "chatgpt", expects: { surface_identifier: "chatgpt.x" } }], actor_evidence: { surface_identifier: { value: "chatgpt.x", source: "row" } } },
+        onward_consumability: { status: "PROVEN", evidence_ref: "third consumer read it", actor: "manus", candidate_actors: [{ id: "manus", expects: { surface_identifier: "manus.x" } }], actor_evidence: { surface_identifier: { value: "manus.x", source: "row" } } },
       },
     },
-    expect: "BRIDGE_MEDIATED_CONTINUITY",
+    expect: "CROSS_SURFACE_BEHAVIORAL_CONTINUITY_PROVEN",
   },
 ];

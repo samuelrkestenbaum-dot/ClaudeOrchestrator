@@ -34,6 +34,8 @@
 // The verdict ladder ends at a CLASSIFICATION, not a boolean, because the
 // interesting real cases fail in specific ways that a boolean erases.
 
+import { resolveActorIdentity } from "./actor-identity.mjs";
+
 export const LINKS = [
   "origination",
   "consumption",
@@ -47,15 +49,29 @@ export const LINKS = [
 // INFERRED means somebody concluded it, which is not an observation.
 export const EVIDENCE_STATUS = ["ABSENT", "INFERRED", "REPORTED", "PROVEN"];
 
+// THE LADDER, as ratified by the operator. The middle rung is a valid
+// INTERMEDIATE DIAGNOSTIC STATE and is explicitly NOT a resting/pass grade:
+// cross-surface behavioural continuity is a claim about a DISTINCT RECEIVING
+// ACTOR, so until the acting party is identified the cross-surface property is
+// not proven — only that something changed. THE MIDDLE STATE IS NEVER COLLAPSED
+// UPWARD.
 export const VERDICTS = [
   "NOT_CROSS_SURFACE",
   "NO_TRANSFER",
   "CONSUMPTION_ONLY",
   "DIVERGENCE_UNFALSIFIABLE",
-  "CONTINUITY_ACTOR_UNDISAMBIGUATED",
-  "BRIDGE_MEDIATED_CONTINUITY",
-  "NATIVE_CONTINUITY",
+  "BEHAVIOR_CHANGE_OBSERVED_ACTOR_UNDISAMBIGUATED",
+  "CROSS_SURFACE_BEHAVIORAL_CONTINUITY_PROVEN",
 ];
+
+// Verdicts that count as a PASS. Kept as a set rather than "the top of the
+// ladder" so that adding a rung can never silently promote the middle state.
+export const PASSING = new Set(["CROSS_SURFACE_BEHAVIORAL_CONTINUITY_PROVEN"]);
+
+// Bridge-vs-native is an ORTHOGONAL axis, not a rung. Folding it into the
+// ladder was what let "reached through a bridge" and "proven" compete for one
+// slot; they answer different questions and are now reported separately.
+export const MEDIATION = ["native", "bridge"];
 
 const rank = (s) => Math.max(0, EVIDENCE_STATUS.indexOf(s));
 const atLeast = (link, s) => rank(link?.status) >= rank(s);
@@ -93,16 +109,19 @@ export function gradeContinuity(claim = {}) {
       downgrades.push("behavioral_divergence: no counterfactual supplied — downgraded; without a stated alternative behaviour the claim cannot be falsified, and receipt/echo/paraphrase all satisfy it vacuously");
     }
 
+    // ATTRIBUTION IS RESOLVED, NOT DECLARED. It used to be "DISAMBIGUATED iff
+    // the claim wrote an actor_discriminator string", which let a claim
+    // disambiguate itself by asserting it had. Identity now comes from the
+    // eight attributable fields, and prose cannot reach that verdict.
+    const resolution = resolveActorIdentity(l.actor_evidence || {}, l.candidate_actors || []);
+
     graded[name] = {
       status,
       asserted_status: l.status ?? "ABSENT",
       evidence_ref: l.evidence_ref ?? null,
-      actor: l.actor ?? null,
-      // Attribution is only DISAMBIGUATED when a discriminator is named. "It
-      // was ChatGPT" with nothing separating ChatGPT from the operator relaying
-      // it is a guess about which of two actors performed the behaviour.
-      actor_attribution: l.actor_discriminator ? "DISAMBIGUATED" : "UNDISAMBIGUATED",
-      actor_discriminator: l.actor_discriminator ?? null,
+      actor: resolution.resolved ?? l.actor ?? null,
+      actor_attribution: resolution.status,
+      actor_resolution: resolution,
       counterfactual: l.counterfactual ?? null,
     };
   }
@@ -130,16 +149,21 @@ export function gradeContinuity(claim = {}) {
     verdict = "DIVERGENCE_UNFALSIFIABLE";
     reasons.push("divergence is claimed, but it did not produce durable attributable state a further consumer can read — a behaviour change nobody can consume closes no loop");
   } else if (graded.behavioral_divergence.actor_attribution !== "DISAMBIGUATED") {
-    // The link that decides WHICH surface the claim is about. Getting all five
-    // links and still not knowing who acted is a real, common, and reportable
-    // outcome — not a pass.
-    verdict = "CONTINUITY_ACTOR_UNDISAMBIGUATED";
-    reasons.push(`every link holds, but the actor behind the divergence is not disambiguated: '${graded.behavioral_divergence.actor}' is not separated from other actors who could have performed it`);
+    // THE MIDDLE RUNG, AND IT IS NEVER COLLAPSED UPWARD. Cross-surface
+    // continuity asserts that a DISTINCT RECEIVING ACTOR changed behaviour.
+    // With the actor unresolved, a behaviour change is observed but the
+    // cross-surface property itself is not proven — every link can hold and
+    // the claim still not be about the surface it names.
+    const res = graded.behavioral_divergence.actor_resolution;
+    verdict = "BEHAVIOR_CHANGE_OBSERVED_ACTOR_UNDISAMBIGUATED";
+    reasons.push(
+      `behaviour change is observed, but the acting party is not resolved from attributable evidence: ${res.note}`,
+      "this is an INTERMEDIATE DIAGNOSTIC STATE, not a pass — until the actor is identified, what is proven is that behaviour changed, NOT that a distinct receiving surface changed it",
+    );
   } else {
-    verdict = claim.bridge ? "BRIDGE_MEDIATED_CONTINUITY" : "NATIVE_CONTINUITY";
-    reasons.push(claim.bridge
-      ? `all five links hold, but ${from} reached the write-back THROUGH ${claim.bridge.via} — this is bridge-mediated continuity and must not be reported as native`
-      : `all five links hold and ${from} acted natively`);
+    verdict = "CROSS_SURFACE_BEHAVIORAL_CONTINUITY_PROVEN";
+    reasons.push(`all five links hold and the acting party resolves to '${graded.behavioral_divergence.actor}' from attributable evidence`);
+    if (claim.bridge) reasons.push(`mediation is BRIDGE, via ${claim.bridge.via} — ${from} did not reach the write-back natively, and this must not be reported as native access`);
   }
 
   // A verdict that only withholds is half a tool. Naming the ONE thing that
@@ -151,19 +175,31 @@ export function gradeContinuity(claim = {}) {
     NO_TRANSFER: "establish that the consuming surface READ the state — a reference it could have read is not a reading",
     CONSUMPTION_ONLY: "identify a behaviour the consumer would NOT have performed absent the state, and state the counterfactual",
     DIVERGENCE_UNFALSIFIABLE: "supply the counterfactual, and durable state a further consumer can read",
-    CONTINUITY_ACTOR_UNDISAMBIGUATED:
-      "supply an actor_discriminator for behavioral_divergence — evidence separating the named actor from every " +
-      "other actor who could have performed it. Absence from THIS surface is not absence from the system: if the " +
-      "acting identity is recorded in a store this surface cannot read, the discriminator exists and must be " +
-      "fetched, through a proven bridge if necessary, rather than treated as unobtainable",
-    BRIDGE_MEDIATED_CONTINUITY: "obtain native access for the originating surface; the bridge proves the capability exists, not that the surface holds it",
-    NATIVE_CONTINUITY: null,
+    // The work order is COMPUTED, not written by hand: the resolver already
+    // knows which fields would separate the surviving candidates, so the next
+    // step names those fields instead of asking vaguely for better evidence.
+    BEHAVIOR_CHANGE_OBSERVED_ACTOR_UNDISAMBIGUATED: null,
+    CROSS_SURFACE_BEHAVIORAL_CONTINUITY_PROVEN: claim.bridge
+      ? "obtain NATIVE access for the originating surface; the bridge proves the capability exists in the system, not that the surface holds it"
+      : null,
   };
+
+  let missing = NEXT[verdict] ?? null;
+  if (verdict === "BEHAVIOR_CHANGE_OBSERVED_ACTOR_UNDISAMBIGUATED") {
+    const d = graded.behavioral_divergence.actor_resolution.discriminating_evidence;
+    missing = d.length
+      ? `fetch attributable evidence for: ${d.join(", ")} — these are the fields on which the surviving candidates differ. ` +
+        "Absence from THIS surface is not absence from the system: if the acting identity is recorded in a store this " +
+        "surface cannot read, it must be fetched, through a proven bridge if necessary, rather than treated as unobtainable"
+      : "no field in the identity schema separates the surviving candidates — either widen the schema or accept that these actors are indistinguishable here, and say which";
+  }
 
   return {
     artifact: "continuity_grade",
     claim_id: claim.id ?? null,
-    missing_to_advance: NEXT[verdict] ?? null,
+    missing_to_advance: missing,
+    passing: PASSING.has(verdict),
+    mediation: claim.bridge ? "bridge" : "native",
     originating_surface: from ?? null,
     consuming_surface: to ?? null,
     bridge: claim.bridge ?? null,

@@ -13,7 +13,7 @@ Neither statement is wrong. Stating either without naming its dimension is.
 |---|---|---|
 | 1 · `repository_surface_activity` | Is the surface leaving organizational memory? | claude **active** · chatgpt **active** · manus **UNTESTED** · surplus_recovery **UNTESTED** |
 | 2 · `live_operator_lab_participation` **= `four_surface_readiness`** | Is it connected to the live control plane? | **FAIL** — chatgpt active; claude, manus, surplus_recovery **missing** |
-| 3 · `cross_surface_behavioral_continuity` | Does knowledge transfer and change what another surface DOES? | **CONTINUITY_ACTOR_UNDISAMBIGUATED** |
+| 3 · `cross_surface_behavioral_continuity` | Does knowledge transfer and change what another surface DOES? | **BEHAVIOR_CHANGE_OBSERVED_ACTOR_UNDISAMBIGUATED** (not a pass) |
 
 These are different capabilities, and the substrate should know the difference.
 
@@ -72,10 +72,46 @@ settled by whoever typed `true`. That path is gone.
 | claim | verdict | weakest link |
 |---|---|---|
 | `CONT-0001` — HOF-0001, claude compiles, chatgpt accepts | `CONSUMPTION_ONLY` | behavioural divergence **absent** |
-| `CONT-0002` — the Operator Lab bridge episode | `CONTINUITY_ACTOR_UNDISAMBIGUATED` | consumption at `REPORTED` |
+| `CONT-0002` — the Operator Lab bridge episode | `BEHAVIOR_CHANGE_OBSERVED_ACTOR_UNDISAMBIGUATED` | consumption at `REPORTED` |
 
-Current: **`CONTINUITY_ACTOR_UNDISAMBIGUATED`** — stronger than
-`CONSUMPTION_ONLY`, and **short of** `BRIDGE_MEDIATED_CONTINUITY`.
+### The ladder, and why the middle rung never rounds up
+
+| rung | meaning |
+|---|---|
+| `CONSUMPTION_ONLY` | state was received; nothing shows the receiver acted differently |
+| `BEHAVIOR_CHANGE_OBSERVED_ACTOR_UNDISAMBIGUATED` | behaviour changed, but **who** changed it is unresolved |
+| `CROSS_SURFACE_BEHAVIORAL_CONTINUITY_PROVEN` | the acting party resolves from attributable evidence |
+
+The middle rung is an **intermediate diagnostic state and is never a pass.**
+The reason is structural rather than cautious: cross-surface continuity is a
+claim about a **distinct receiving actor**. With the actor unresolved, what is
+proven is that *behaviour changed* — not that *another surface* changed it.
+Every link can hold and the claim still not be about the surface it names.
+`PASSING` is a set containing only the top rung, so adding a rung can never
+silently promote the middle one.
+
+**Mediation is an orthogonal axis, not a rung.** `bridge` vs `native` is
+reported in its own field. Folding it into the ladder had let "reached through
+a bridge" and "proven" compete for one slot when they answer different
+questions.
+
+### Actor identity is resolved, never declared
+
+Attribution used to be `DISAMBIGUATED` iff the claim wrote an
+`actor_discriminator` string — so a claim could disambiguate itself by
+asserting that it had. `build-os/surfaces/actor-identity.mjs` now resolves
+identity from eight attributable fields (`surface_identifier`, `provider`,
+`model`, `originating_event`, `receiving_event`, `gate_invocation`,
+`durable_write_back`, `causal_linkage`), and a field counts as observed only
+when it carries **both a value and a source**. Prose reaches no verdict.
+
+When the evidence underdetermines the answer, **the ambiguity is the output**:
+the resolver returns every still-compatible candidate and names the specific
+fields on which they differ. An unresolved identity therefore carries its own
+work order rather than a shrug.
+
+Current: **`BEHAVIOR_CHANGE_OBSERVED_ACTOR_UNDISAMBIGUATED`** — stronger than
+`CONSUMPTION_ONLY`, and **not a pass**.
 
 **What CONT-0002 does establish.** Claude-originated durable state (a published
 `blocked` conclusion) was consumed; the consumer **rejected** it rather than
@@ -93,12 +129,17 @@ performed it*; the operator's own account is first-person. Naming a
 discriminator anyway would be exactly the fudge this subsystem exists to
 prevent, so the claim grades one rung lower instead.
 
-**That gap is a fetch, not a mystery.** The Lab records a calling identity on
-the rows the enumeration produced. One query for the caller identity on
-36263/36264 settles it. This repository has no Lab read path — the *same*
-layer-2 access gap already on record — so the discriminator is absent from
-**this surface**, not from the **system**, and every unfinished grade carries a
-`missing_to_advance` naming precisely that.
+**That gap is a fetch, not a mystery, and the fetch is computed.** Two
+candidates survive — `chatgpt` and `operator` — and the resolver reports that
+**`surface_identifier` and `provider`** are the fields on which they differ.
+The Lab records a calling identity on the rows the enumeration produced, so
+those fields are absent from **this surface**, not from the **system**.
+
+The enumeration behind that statement was exhaustive: no Operator Lab
+interface appears in any reachable MCP server's tools or resources, the
+project memory store is empty, and the one candidate server requires an
+interactive OAuth flow a non-interactive session cannot complete. Recorded
+with all eight fields at `build-os/motion/exhaustion/current.json`.
 
 ## Reporting rule
 
