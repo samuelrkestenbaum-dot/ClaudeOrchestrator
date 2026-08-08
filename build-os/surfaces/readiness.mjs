@@ -26,17 +26,22 @@ const tsv = (p) => fs.readFileSync(p, "utf8").split("\n")
 const familyOf = (instance) => String(instance || "").split(".")[0] || null;
 
 /**
- * NAME CORRECTED. This function measures REPOSITORY SURFACE ACTIVITY: which
- * declared families appear as writers in the committed kernel ledger. It was
- * briefly labelled `four_surface_readiness`, and that label is now known to be
- * wrong, because a second machine-readable authority — the live Operator Lab
- * `check_substrate_readiness` — reports a different answer for what was
- * presented as the same state.
+ * LAYER 1 of 3 — REPOSITORY SURFACE ACTIVITY.
  *
- * Two measurements that disagree cannot both be canonical. Until the divergence
- * is resolved (see build-os/surfaces/DIVERGENCE.md) this one answers only:
- * "who has written into the repository ledger", which is NOT the same question
- * as "who is participating in the live substrate right now".
+ * Answers: has this surface contributed attributable durable state to the
+ * repository/memory substrate? That is a coverage/health signal.
+ *
+ * It is explicitly NOT the operational readiness gate, and it never was. The
+ * divergence with the Operator Lab was never a contradiction — it was two
+ * different questions wearing one name. Claude is repository-active AND
+ * live-Operator-Lab-missing, and both statements are true simultaneously.
+ *
+ * The three layers, weakest to strongest:
+ *   1. repository_surface_activity        — leaves organizational memory
+ *   2. live_operator_lab_participation    — connected to the live control plane
+ *                                            (THIS is four_surface_readiness)
+ *   3. cross_surface_behavioral_continuity — knowledge transfers and changes
+ *                                            what another surface DOES
  */
 export function repositorySurfaceActivity({ kernelDir = "build-os/kernel", windowDays = 7, now = null } = {}) {
   const evPath = path.join(kernelDir, "memory_events.tsv");
@@ -77,9 +82,9 @@ export function repositorySurfaceActivity({ kernelDir = "build-os/kernel", windo
 
   return {
     artifact: "repository_surface_activity",
-    NOT_CANONICAL_READINESS:
-      "This is one of two disagreeing authorities. It is NOT four_surface_readiness. " +
-      "See build-os/surfaces/DIVERGENCE.md before quoting this verdict as readiness.",
+    NOT_THE_READINESS_GATE:
+      "This is a substrate-coverage/health signal, NOT four_surface_readiness. The canonical operational " +
+      "readiness gate is live_operator_lab_participation. See build-os/surfaces/SEMANTICS.md.",
     window_days: windowDays,
     window_anchor: anchor ? new Date(anchor).toISOString() : null,
     anchor_source: now ? "supplied" : "latest event in ledger (NOT wall clock — the gate must be reproducible)",
