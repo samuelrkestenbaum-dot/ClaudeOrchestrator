@@ -4,7 +4,19 @@
   "tasks": [
     { "id": "49", "subject": "Claude -> live Operator Lab write path", "status": "completed",
       "completion_evidence": "bridge path PROVEN via chatgpt (observe_interaction / gate_outbound_inference); ledgerId 36263/36264; live readiness moved ChatGPT-only -> Claude + ChatGPT under the unchanged gate. Native-direct access remains a separate capability improvement, not a blocker." },
-    { "id": "50", "subject": "Claude <-> ChatGPT behavioral continuity proof", "status": "pending", "depends_on": ["49"] },
+
+    { "id": "50", "subject": "Claude <-> ChatGPT behavioral continuity proof", "status": "completed", "depends_on": ["49"],
+      "completion_evidence": "DELIVERABLE COMPLETE, PROOF SHORT OF THE CLAIMED STRENGTH -- and the second half is not rounded up. build-os/surfaces/continuity.mjs grades continuity across five links and reports the weakest; the free-boolean path that let a caller assert DEMONSTRATED is removed and behavioralContinuity() now reads the grade. The record: CONT-0001 (HOF-0001) = CONSUMPTION_ONLY; CONT-0002 (Lab bridge) = CONTINUITY_ACTOR_UNDISAMBIGUATED. CONT-0002 establishes consumption, REJECTION of a Claude-originated concession against a stated counterfactual, live rows 36263/36264, and mechanical onward consumption (gate-stop.mjs generates its refusal from capability-map.mjs). It does NOT establish that ChatGPT was the acting party: repository evidence cannot separate ChatGPT from the operator, and the operator's account is first-person. 20/20 tests, 4 mutations caught.",
+      "residual": "52" },
+
+    { "id": "52", "subject": "Fetch the actor discriminator for CONT-0002 -- OPERATOR/BRIDGE ACTION",
+      "status": "blocked", "depends_on": [],
+      "detail": "One query against the Operator Lab store for the CALLER IDENTITY recorded on ledgerId 36263/36264. If it names a chatgpt agent, CONT-0002 advances from CONTINUITY_ACTOR_UNDISAMBIGUATED to BRIDGE_MEDIATED_CONTINUITY and layer 3 moves with it. If it names the operator, the claim is correct as graded and the episode is operator-mediated, not surface-continuous. Either answer is informative; the current state is that nobody knows which.",
+      "blocked_evidence": {
+        "verdict": "concession_allowed",
+        "artifact": "build-os/motion/exhaustion/current.json",
+        "why": "The discriminator exists in the SYSTEM but not on THIS SURFACE. No Lab read path is reachable from this session; the one candidate MCP server needs an interactive OAuth flow a non-interactive session cannot complete, and requesting a credential through chat is forbidden. The proven chatgpt bridge is operable by the operator, not from here. Passed the concession gate on all eight evidence fields." } },
+
     { "id": "51", "subject": "Audit the auditors - source fidelity and failure capability", "status": "pending", "depends_on": ["50"] }
   ]
 }

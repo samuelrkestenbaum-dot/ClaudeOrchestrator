@@ -1,0 +1,37 @@
+{
+  "for_conclusion": "the actor discriminator for CONT-0002 cannot be fetched from this surface",
+  "capability": "operator_lab_read",
+  "proposed_concession": "CONT-0002 cannot be advanced from CONTINUITY_ACTOR_UNDISAMBIGUATED to BRIDGE_MEDIATED_CONTINUITY from this surface, because the caller identity on Operator Lab ledgerId 36263/36264 is not readable here",
+  "concession_class": "blocked",
+  "available_interfaces": [
+    "repository: git, Read, Grep, Edit, Write, Bash",
+    "MCP servers reachable in this session: github, serena, slack, gmail, notion, supabase, cloudflare, netlify, hubspot, apollo, clay, otter, docusign, zapier, huggingface, elevenlabs-media, design-catalog",
+    "one MCP server present but UNAUTHENTICATED (33794ec3) — matches the 'candidate MCP server' already recorded against claude/operator_lab_write"
+  ],
+  "paths_attempted": [
+    "grep the repository ledgers for a chatgpt-attributed row belonging to the Lab-bridge episode",
+    "grep the whole tree for 36263/36264 to find any recorded caller identity",
+    "inspect build-os/kernel/actors.tsv and memory_events.tsv for a second chatgpt actor",
+    "check the session MCP surface for an Operator Lab read interface"
+  ],
+  "attempt_results": [
+    "only two chatgpt-attributed rows exist (EVT-0024, EVT-0025) and both belong to HOF-0001, not to the Lab-bridge episode",
+    "four hits, all of them prose written by this surface citing the ids; none records who called",
+    "actors.tsv holds one chatgpt family instance, ACT-0003, tied to the HOF-0001 handoff only",
+    "no Operator Lab interface is present; the one candidate server requires an interactive OAuth flow that a non-interactive session cannot complete, and requesting a credential through chat is forbidden"
+  ],
+  "workaround_classes_considered": [
+    "derive the actor from repository evidence",
+    "infer it from the operator's account",
+    "re-run the enumeration to generate a fresh, attributable row",
+    "route through the proven chatgpt bridge",
+    "record the claim at the strength the evidence supports"
+  ],
+  "why_each_viable_workaround_failed": "Derivation fails: no repository row records a caller for the Lab episode. Inference is refused on purpose: the operator's account is first-person and treating it as a discriminator would be the exact fudge the verifier exists to prevent. Re-running the enumeration needs the same Lab write path this surface lacks, and fabricating a row would be a synthetic activation, which is forbidden. The chatgpt bridge is PROVEN but is not operable FROM here -- it was exercised by another party, so it is an operator-executable step and not one this session can take. The last class is the one taken: the claim is recorded at CONTINUITY_ACTOR_UNDISAMBIGUATED, with missing_to_advance naming the fetch.",
+  "other_surface_may_hold_capability": {
+    "enumerated": true,
+    "surfaces_with_capability": [],
+    "detail": "The Operator Lab store DOES hold the discriminator -- this is absence from THIS surface, not from the system. No surface reachable FROM this session holds a Lab read path: chatgpt holds Lab write via observe_interaction/gate_outbound_inference, but that surface is not operable from here. The item is therefore a fetch for the operator or the bridge, and is recorded as such rather than as an unobtainable fact.",
+    "untested_surfaces": ["manus", "surplus_recovery"]
+  }
+}
