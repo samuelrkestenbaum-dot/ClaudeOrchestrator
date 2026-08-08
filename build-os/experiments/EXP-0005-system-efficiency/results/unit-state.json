@@ -1,0 +1,29 @@
+{
+  "unitState": {
+    "T01.native": "admissible",
+    "T01.gravito": "admissible",
+    "T02.gravito": "admissible",
+    "T02.native": "admissible",
+    "T03.native": "admissible",
+    "T03.gravito": "admissible",
+    "T04.gravito": "admissible",
+    "T04.native": "admissible",
+    "T05.native": "admissible",
+    "T05.gravito": "admissible",
+    "T06.gravito": "admissible",
+    "T06.native": "admissible",
+    "T07.native": "admissible",
+    "T07.gravito": "admissible",
+    "T08.gravito": "admissible",
+    "T08.native": "admissible",
+    "T09.native": "admissible",
+    "T09.gravito": "admissible",
+    "T10.gravito": "admissible",
+    "T10.native": "admissible",
+    "T11.native": "admissible",
+    "T11.gravito": "admissible",
+    "T12.gravito": "admissible",
+    "T12.native": "admissible"
+  },
+  "completedPairs": 12
+}

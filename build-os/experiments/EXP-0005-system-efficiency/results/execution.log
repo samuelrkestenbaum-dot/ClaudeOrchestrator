@@ -1,0 +1,99 @@
+[2026-08-08T01:42:25.521Z] run order fixed: 24 arms, alternating first-condition by task index
+[2026-08-08T01:42:25.534Z] starting T01/native
+[2026-08-08T01:42:30.511Z] UNIT T01/native: terminal=undefined admissible=false isolated=false elapsed=2.3s
+[2026-08-08T01:42:30.511Z] starting T01/gravito
+[2026-08-08T01:42:34.535Z] UNIT T01/gravito: terminal=undefined admissible=false isolated=false elapsed=1.4s
+[2026-08-08T01:42:34.535Z] pair T01: REQUIRES WHOLE-PAIR RERUN (a void arm voids its matched unit) — completed pairs: 0
+[2026-08-08T01:42:34.535Z] starting T02/gravito
+[2026-08-08T01:42:38.415Z] UNIT T02/gravito: terminal=undefined admissible=false isolated=false elapsed=1.2s
+[2026-08-08T01:42:38.415Z] starting T02/native
+[2026-08-08T01:42:41.802Z] UNIT T02/native: terminal=undefined admissible=false isolated=false elapsed=0.6s
+[2026-08-08T01:42:41.802Z] pair T02: REQUIRES WHOLE-PAIR RERUN (a void arm voids its matched unit) — completed pairs: 0
+[2026-08-08T01:42:41.802Z] starting T03/native
+[2026-08-08T01:42:44.878Z] UNIT T03/native: terminal=undefined admissible=false isolated=false elapsed=0.6s
+[2026-08-08T01:42:44.878Z] starting T03/gravito
+[2026-08-08T01:44:56.000Z] ABORTED ATTEMPT 1 — infrastructure fault, ZERO arms measured.
+[2026-08-08T01:44:56.000Z]   cause: --permission-mode bypassPermissions maps to --dangerously-skip-permissions, which the CLI refuses under root. Every child exited in ~1-2s, before any model call.
+[2026-08-08T01:44:56.000Z]   NOT a void-arm event under the registered rule: no arm produced a measurement, so there is nothing to void. The experiment had not started.
+[2026-08-08T01:44:56.000Z]   fix: --permission-mode dontAsk, identical in both arms, verified autonomous and not root-blocked; child session isolation independently confirmed.
+[2026-08-08T01:45:03.534Z] run order fixed: 24 arms, alternating first-condition by task index
+[2026-08-08T01:45:03.535Z] starting T01/native
+[2026-08-08T01:52:41.188Z] UNIT T01/native: terminal=undefined admissible=true isolated=true elapsed=455.0s
+[2026-08-08T01:52:41.194Z] starting T01/gravito
+[2026-08-08T01:57:29.150Z] UNIT T01/gravito: terminal=undefined admissible=true isolated=true elapsed=285.1s
+[2026-08-08T01:57:29.157Z] pair T01: COMPLETE — completed pairs: 1
+[2026-08-08T01:57:29.157Z] starting T02/gravito
+[2026-08-08T01:59:32.676Z] UNIT T02/gravito: terminal=undefined admissible=true isolated=true elapsed=120.4s
+[2026-08-08T01:59:32.676Z] starting T02/native
+[2026-08-08T02:00:43.680Z] UNIT T02/native: terminal=undefined admissible=true isolated=true elapsed=68.6s
+[2026-08-08T02:00:43.680Z] pair T02: COMPLETE — completed pairs: 2
+[2026-08-08T02:00:43.680Z] starting T03/native
+[2026-08-08T02:13:44.000Z] ABORTED ATTEMPT 2 — all arms VOID by infrastructure defect, before any valid measurement.
+[2026-08-08T02:13:44.000Z]   defect A: the harness captured economics but NOT the work product. The arm tree was destroyed at the next arm start, so diffs and verification were lost. Acceptance is the UIC NUMERATOR; nothing downstream of a missing diff is recoverable.
+[2026-08-08T02:13:44.000Z]   defect B: --permission-mode dontAsk DENIES Edit/Write/Bash. An arm reported it outright: "every write path and the verification command are denied". The arms could not perform the work.
+[2026-08-08T02:13:44.000Z]   fix A: capture full.diff, changed-paths.json (product vs governance), verification.txt and economics.json BEFORE the tree is touched; harness-induced substrate deletions in the native arm are excluded so they are not attributed to the arm.
+[2026-08-08T02:13:44.000Z]   fix B: --permission-mode acceptEdits, identical in both arms, verified to permit write AND bash.
+[2026-08-08T02:13:44.000Z]   validated on one arm before relaunch: 1 product file changed (the task target), 35 turns, diff and verification captured.
+[2026-08-08T02:13:44.000Z]   Under the registered rule no pair is owed a partial rerun: every arm from attempts 1 and 2 is discarded whole and the experiment restarts from T01.
+[2026-08-08T02:13:51.351Z] run order fixed: 24 arms, alternating first-condition by task index
+[2026-08-08T02:13:51.352Z] starting T01/native
+[2026-08-08T02:23:31.317Z] UNIT T01/native: terminal=undefined admissible=true isolated=true elapsed=571.5s
+[2026-08-08T02:23:31.318Z] starting T01/gravito
+[2026-08-08T02:26:04.675Z] UNIT T01/gravito: terminal=undefined admissible=true isolated=true elapsed=144.8s
+[2026-08-08T02:26:04.681Z] pair T01: COMPLETE — completed pairs: 1
+[2026-08-08T02:26:04.681Z] starting T02/gravito
+[2026-08-08T02:27:49.250Z] UNIT T02/gravito: terminal=undefined admissible=true isolated=true elapsed=97.1s
+[2026-08-08T02:27:49.251Z] starting T02/native
+[2026-08-08T02:29:19.202Z] UNIT T02/native: terminal=undefined admissible=true isolated=true elapsed=82.5s
+[2026-08-08T02:29:19.202Z] pair T02: COMPLETE — completed pairs: 2
+[2026-08-08T02:29:19.202Z] starting T03/native
+[2026-08-08T02:33:39.734Z] UNIT T03/native: terminal=undefined admissible=true isolated=true elapsed=253.3s
+[2026-08-08T02:33:39.735Z] starting T03/gravito
+[2026-08-08T02:40:46.739Z] UNIT T03/gravito: terminal=undefined admissible=true isolated=true elapsed=420.4s
+[2026-08-08T02:40:46.740Z] pair T03: COMPLETE — completed pairs: 3
+[2026-08-08T02:40:46.740Z] starting T04/gravito
+[2026-08-08T02:43:59.340Z] UNIT T04/gravito: terminal=undefined admissible=true isolated=true elapsed=100.5s
+[2026-08-08T02:43:59.340Z] starting T04/native
+[2026-08-08T02:47:40.218Z] UNIT T04/native: terminal=undefined admissible=true isolated=true elapsed=134.6s
+[2026-08-08T02:47:40.218Z] pair T04: COMPLETE — completed pairs: 4
+[2026-08-08T02:47:40.218Z] starting T05/native
+[2026-08-08T02:51:32.487Z] UNIT T05/native: terminal=undefined admissible=true isolated=true elapsed=144.8s
+[2026-08-08T02:51:32.488Z] starting T05/gravito
+[2026-08-08T02:55:03.640Z] UNIT T05/gravito: terminal=undefined admissible=true isolated=true elapsed=125.5s
+[2026-08-08T02:55:03.640Z] pair T05: COMPLETE — completed pairs: 5
+[2026-08-08T02:55:03.640Z] starting T06/gravito
+[2026-08-08T02:58:30.861Z] UNIT T06/gravito: terminal=undefined admissible=true isolated=true elapsed=122.5s
+[2026-08-08T02:58:30.861Z] starting T06/native
+[2026-08-08T03:02:50.219Z] UNIT T06/native: terminal=undefined admissible=true isolated=true elapsed=175.5s
+[2026-08-08T03:02:50.220Z] pair T06: COMPLETE — completed pairs: 6
+[2026-08-08T03:02:50.220Z] starting T07/native
+[2026-08-08T03:08:51.917Z] UNIT T07/native: terminal=undefined admissible=true isolated=true elapsed=159.1s
+[2026-08-08T03:08:51.918Z] starting T07/gravito
+[2026-08-08T03:16:50.823Z] UNIT T07/gravito: terminal=undefined admissible=true isolated=true elapsed=276.3s
+[2026-08-08T03:16:50.824Z] pair T07: COMPLETE — completed pairs: 7
+[2026-08-08T03:16:50.824Z] starting T08/gravito
+[2026-08-08T03:23:23.307Z] UNIT T08/gravito: terminal=undefined admissible=true isolated=true elapsed=387.6s
+[2026-08-08T03:23:23.307Z] starting T08/native
+[2026-08-08T03:29:03.791Z] UNIT T08/native: terminal=undefined admissible=true isolated=true elapsed=335.3s
+[2026-08-08T03:29:03.792Z] pair T08: COMPLETE — completed pairs: 8
+[2026-08-08T03:29:03.792Z] starting T09/native
+[2026-08-08T03:32:28.842Z] UNIT T09/native: terminal=undefined admissible=true isolated=true elapsed=170.0s
+[2026-08-08T03:32:28.843Z] starting T09/gravito
+[2026-08-08T03:36:31.392Z] UNIT T09/gravito: terminal=undefined admissible=true isolated=true elapsed=207.6s
+[2026-08-08T03:36:31.393Z] pair T09: COMPLETE — completed pairs: 9
+[2026-08-08T03:36:31.393Z] starting T10/gravito
+[2026-08-08T03:41:02.808Z] UNIT T10/gravito: terminal=undefined admissible=true isolated=true elapsed=186.8s
+[2026-08-08T03:41:02.809Z] starting T10/native
+[2026-08-08T03:46:04.209Z] UNIT T10/native: terminal=undefined admissible=true isolated=true elapsed=211.7s
+[2026-08-08T03:46:04.212Z] pair T10: COMPLETE — completed pairs: 10
+[2026-08-08T03:46:04.212Z] starting T11/native
+[2026-08-08T03:49:30.274Z] UNIT T11/native: terminal=undefined admissible=true isolated=true elapsed=122.6s
+[2026-08-08T03:49:30.274Z] starting T11/gravito
+[2026-08-08T03:52:44.250Z] UNIT T11/gravito: terminal=undefined admissible=true isolated=true elapsed=107.4s
+[2026-08-08T03:52:44.251Z] pair T11: COMPLETE — completed pairs: 11
+[2026-08-08T03:52:44.251Z] starting T12/gravito
+[2026-08-08T03:56:33.311Z] UNIT T12/gravito: terminal=undefined admissible=true isolated=true elapsed=141.8s
+[2026-08-08T03:56:33.311Z] starting T12/native
+[2026-08-08T04:00:08.997Z] UNIT T12/native: terminal=undefined admissible=true isolated=true elapsed=131.2s
+[2026-08-08T04:00:08.998Z] pair T12: COMPLETE — completed pairs: 12
+[2026-08-08T04:00:08.998Z] DRIVER DONE — completed pairs: 12 of 12
