@@ -1,0 +1,193 @@
+{
+  "artifact": "exp0005_anonymous_economics",
+  "source": "results/blinded/analyst-view.json",
+  "n_units": 24,
+  "n_tasks": 12,
+  "grouping_rule": "Within each task_id (exactly 2 units), the two ana_ids were sorted lexicographically; the smaller ana_id was assigned to group X and the larger to group Y. Applied mechanically to all 12 tasks. No other information was used, and the analyst does not know which experimental condition either group corresponds to.",
+  "group_assignment": [
+    {
+      "task_id": "T01",
+      "X_ana_id": "ana-023eef84887ecf59",
+      "Y_ana_id": "ana-462e096b4370340c"
+    },
+    {
+      "task_id": "T02",
+      "X_ana_id": "ana-0db16cdf451373b6",
+      "Y_ana_id": "ana-f0cafe4d0aedaef8"
+    },
+    {
+      "task_id": "T03",
+      "X_ana_id": "ana-98504f8c6b7006aa",
+      "Y_ana_id": "ana-f6c0b9221dbf4c61"
+    },
+    {
+      "task_id": "T04",
+      "X_ana_id": "ana-cd4e92fb328dd76b",
+      "Y_ana_id": "ana-f663869ca26d376f"
+    },
+    {
+      "task_id": "T05",
+      "X_ana_id": "ana-8bfef4fe58592aad",
+      "Y_ana_id": "ana-d77c213580a4f703"
+    },
+    {
+      "task_id": "T06",
+      "X_ana_id": "ana-812e2bbd62b34a41",
+      "Y_ana_id": "ana-af15e5748246a48a"
+    },
+    {
+      "task_id": "T07",
+      "X_ana_id": "ana-c0c1e63386cfd663",
+      "Y_ana_id": "ana-ee9a65a8b7b37674"
+    },
+    {
+      "task_id": "T08",
+      "X_ana_id": "ana-7df92435d1753189",
+      "Y_ana_id": "ana-b80d45d97e92f44d"
+    },
+    {
+      "task_id": "T09",
+      "X_ana_id": "ana-ebf16292bc60a550",
+      "Y_ana_id": "ana-fc8773fe4bc5ffb1"
+    },
+    {
+      "task_id": "T10",
+      "X_ana_id": "ana-c308de5a6a995ccb",
+      "Y_ana_id": "ana-db139d82ff73758a"
+    },
+    {
+      "task_id": "T11",
+      "X_ana_id": "ana-17a0698babbfe604",
+      "Y_ana_id": "ana-cdf544d5ec8e8bde"
+    },
+    {
+      "task_id": "T12",
+      "X_ana_id": "ana-465e1cad72b4753d",
+      "Y_ana_id": "ana-a97932037ff9496c"
+    }
+  ],
+  "acceptance_note": "acceptance_result values were taken as frozen from the source view and were not recomputed, reinterpreted, or altered.",
+  "groups": {
+    "X": {
+      "n_units": 12,
+      "accepted_outcomes": 4,
+      "acceptance_rate": 0.3333333333333333,
+      "total_uncached_tokens": 2517,
+      "total_tokens": 15924274,
+      "uic_accepted_per_1m_uncached_tokens": 1589.1934843067143,
+      "uncached_tokens_per_accepted_outcome": 629.25,
+      "total_tokens_per_accepted_outcome": 3981068.5,
+      "median_total_elapsed_s": 157.42849999999999,
+      "total_api_equivalent_cost_usd": 18.8588565,
+      "cost_per_accepted_outcome_usd": 4.714714125,
+      "sum_rework_rounds": 282,
+      "sum_human_interventions": 0,
+      "uncached_tokens_min": 25,
+      "uncached_tokens_median": 38.0,
+      "uncached_tokens_max": 2074,
+      "per_accepted_outcome_metrics_defined": true,
+      "note": ""
+    },
+    "Y": {
+      "n_units": 12,
+      "accepted_outcomes": 6,
+      "acceptance_rate": 0.5,
+      "total_uncached_tokens": 9282,
+      "total_tokens": 19431703,
+      "uic_accepted_per_1m_uncached_tokens": 646.4124111182934,
+      "uncached_tokens_per_accepted_outcome": 1547.0,
+      "total_tokens_per_accepted_outcome": 3238617.1666666665,
+      "median_total_elapsed_s": 151.964,
+      "total_api_equivalent_cost_usd": 20.6993915,
+      "cost_per_accepted_outcome_usd": 3.4498985833,
+      "sum_rework_rounds": 347,
+      "sum_human_interventions": 0,
+      "uncached_tokens_min": 21,
+      "uncached_tokens_median": 44.5,
+      "uncached_tokens_max": 5386,
+      "per_accepted_outcome_metrics_defined": true,
+      "note": ""
+    }
+  },
+  "between": {
+    "uic_higher_group": "X",
+    "uic_lower_group": "Y",
+    "uic_higher_value": 1589.1934843067143,
+    "uic_lower_value": 646.4124111182934,
+    "uic_multiple_higher_over_lower": 2.4584823202224872,
+    "uncached_tokens_per_accepted_outcome_reduction": {
+      "defined": true,
+      "X": 629.25,
+      "Y": 1547.0,
+      "lower_group": "X",
+      "higher_group": "Y",
+      "pct_reduction_from_higher_to_lower": 59.32449903038138
+    },
+    "total_tokens_per_accepted_outcome_reduction": {
+      "defined": true,
+      "X": 3981068.5,
+      "Y": 3238617.1666666665,
+      "lower_group": "Y",
+      "higher_group": "X",
+      "pct_reduction_from_higher_to_lower": 18.649549319066814
+    }
+  },
+  "threshold_table": [
+    {
+      "threshold_pct_reduction": 25,
+      "met": true,
+      "status": "MET",
+      "observed_pct_reduction": 59.32449903038138,
+      "direction": "X lower than Y"
+    },
+    {
+      "threshold_pct_reduction": 50,
+      "met": true,
+      "status": "MET",
+      "observed_pct_reduction": 59.32449903038138,
+      "direction": "X lower than Y"
+    },
+    {
+      "threshold_pct_reduction": 70,
+      "met": false,
+      "status": "NOT MET",
+      "observed_pct_reduction": 59.32449903038138,
+      "direction": "X lower than Y"
+    },
+    {
+      "threshold_pct_reduction": 80,
+      "met": false,
+      "status": "NOT MET",
+      "observed_pct_reduction": 59.32449903038138,
+      "direction": "X lower than Y"
+    },
+    {
+      "threshold_pct_reduction": 90,
+      "met": false,
+      "status": "NOT MET",
+      "observed_pct_reduction": 59.32449903038138,
+      "direction": "X lower than Y"
+    }
+  ],
+  "unavailable_fields": [
+    {
+      "field": "regressions",
+      "null_units": 24,
+      "of_units": 24,
+      "handling": "carried as UNAVAILABLE, not zero; excluded from all sums and ratios"
+    },
+    {
+      "field": "subagent_invocations",
+      "null_units": 24,
+      "of_units": 24,
+      "handling": "carried as UNAVAILABLE, not zero; excluded from all sums and ratios"
+    }
+  ],
+  "caveats": [
+    "n=12 units per group across 12 paired tasks; no significance testing was requested or performed.",
+    "The uncached_tokens totals are dominated by a small number of large units in each group, so uncached-token ratios are outlier-sensitive. Per-group medians of uncached_tokens are reported in group_uncached_token_distribution for context.",
+    "uncached_tokens is 2-4 orders of magnitude smaller than total_tokens for nearly every unit; this is reported as given and was not adjusted.",
+    "UIC, per-accepted-outcome, and cost-per-accepted-outcome figures are group-level aggregates, not per-task paired differences."
+  ],
+  "blinding_note": "Groups are labelled X and Y only. Assignment came solely from lexicographic ana_id order within each task, which carries no condition information. No run logs, diffs, adjudicator view, executor rows, or execution logs were read. The analyst makes no claim about which group is which condition."
+}

@@ -1,0 +1,136 @@
+{
+ "experiment": "EXP-0005",
+ "per_task": [
+  {
+   "task_id": "T01",
+   "delta": -96.63072776280323
+  },
+  {
+   "task_id": "T02",
+   "delta": -10.714285714285714
+  },
+  {
+   "task_id": "T03",
+   "delta": 1944.5945945945948
+  },
+  {
+   "task_id": "T04",
+   "delta": -34.375
+  },
+  {
+   "task_id": "T05",
+   "delta": -58.46153846153847
+  },
+  {
+   "task_id": "T06",
+   "delta": -56.14035087719298
+  },
+  {
+   "task_id": "T07",
+   "delta": 41.17647058823529
+  },
+  {
+   "task_id": "T08",
+   "delta": 4958.536585365854
+  },
+  {
+   "task_id": "T09",
+   "delta": 10672
+  },
+  {
+   "task_id": "T10",
+   "delta": -97.6401179941003
+  },
+  {
+   "task_id": "T11",
+   "delta": -47.72727272727273
+  },
+  {
+   "task_id": "T12",
+   "delta": -39.58333333333333
+  }
+ ],
+ "rejected": [
+  {
+   "task_id": "T01",
+   "condition": "native_claude",
+   "regressions": 0
+  },
+  {
+   "task_id": "T01",
+   "condition": "whole_gravito",
+   "regressions": 0
+  },
+  {
+   "task_id": "T02",
+   "condition": "whole_gravito",
+   "regressions": 0
+  },
+  {
+   "task_id": "T03",
+   "condition": "whole_gravito",
+   "regressions": 0
+  },
+  {
+   "task_id": "T04",
+   "condition": "whole_gravito",
+   "regressions": 0
+  },
+  {
+   "task_id": "T05",
+   "condition": "whole_gravito",
+   "regressions": 0
+  },
+  {
+   "task_id": "T06",
+   "condition": "whole_gravito",
+   "regressions": 0
+  },
+  {
+   "task_id": "T07",
+   "condition": "whole_gravito",
+   "regressions": 0
+  },
+  {
+   "task_id": "T08",
+   "condition": "whole_gravito",
+   "regressions": 0
+  },
+  {
+   "task_id": "T09",
+   "condition": "native_claude",
+   "regressions": 0
+  },
+  {
+   "task_id": "T09",
+   "condition": "whole_gravito",
+   "regressions": 0
+  },
+  {
+   "task_id": "T10",
+   "condition": "whole_gravito",
+   "regressions": 0
+  },
+  {
+   "task_id": "T11",
+   "condition": "whole_gravito",
+   "regressions": 0
+  },
+  {
+   "task_id": "T12",
+   "condition": "whole_gravito",
+   "regressions": 0
+  }
+ ],
+ "acceptance_line": "native_claude 10/12 accepted; whole_gravito 0/12 accepted",
+ "starting_heavy": null,
+ "starting_light": null,
+ "heavier_condition": "whole_gravito",
+ "heavier_lost_tokens": true,
+ "median_token_delta_heavy": null,
+ "treatment_condition": "whole_gravito",
+ "admitted": 24,
+ "attempted": 24,
+ "void_reasons": [],
+ "gates_met": 0
+}

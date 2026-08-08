@@ -1,0 +1,150 @@
+{
+  "artifact": "EXP-0005 blinded economics",
+  "view": "analyst (blinded)",
+  "grouping": "condition_label only (opaque sealed labels X / Y)",
+  "n_units": 24,
+  "acceptance_results": "FROZEN as received; not recomputed",
+  "unavailable_fields": {
+    "policy": "null == UNAVAILABLE, never zero; excluded from all sums and ratios",
+    "fields_null_for_all_24_units": [
+      "subagent_invocations",
+      "regressions"
+    ],
+    "count_null_cells": 48,
+    "consequence": "No regression-count comparison is possible; the 'no material increase in regressions' half of gate 2 is UNVERIFIABLE from this view. human_interventions IS available and is 0 for all 24 units."
+  },
+  "per_condition": {
+    "X": {
+      "n_tasks": 12,
+      "accepted_outcomes": 10,
+      "rejected_outcomes": 2,
+      "acceptance_rate": 0.833333,
+      "total_uncached_tokens": 2571,
+      "total_tokens": 20268553,
+      "uic_accepted_per_1M_uncached_tokens": 3889.5371,
+      "uncached_tokens_per_accepted_outcome": 257.1,
+      "total_tokens_per_accepted_outcome": 2026855.3,
+      "median_total_elapsed_s": 164.544,
+      "total_api_equivalent_cost_usd": 19.645183,
+      "cost_per_accepted_outcome_usd": 1.964518,
+      "sum_rework_rounds": 384,
+      "sum_human_interventions": 0,
+      "per_accepted_outcome_metrics_status": "DEFINED"
+    },
+    "Y": {
+      "n_tasks": 12,
+      "accepted_outcomes": 0,
+      "rejected_outcomes": 12,
+      "acceptance_rate": 0.0,
+      "total_uncached_tokens": 9228,
+      "total_tokens": 15087424,
+      "uic_accepted_per_1M_uncached_tokens": 0.0,
+      "uncached_tokens_per_accepted_outcome": "UNDEFINED",
+      "total_tokens_per_accepted_outcome": "UNDEFINED",
+      "median_total_elapsed_s": 143.3005,
+      "total_api_equivalent_cost_usd": 19.913065,
+      "cost_per_accepted_outcome_usd": "UNDEFINED",
+      "sum_rework_rounds": 245,
+      "sum_human_interventions": 0,
+      "per_accepted_outcome_metrics_status": "UNDEFINED \u2014 zero accepted outcomes; not infinity, not zero"
+    }
+  },
+  "between_conditions": {
+    "uic_X": 3889.5371,
+    "uic_Y": 0.0,
+    "uic_multiple_X_over_Y": "UNDEFINED \u2014 Y's UIC is exactly 0 (zero accepted outcomes over 9228 uncached tokens); a multiple against a zero denominator is not defined",
+    "uic_absolute_difference_X_minus_Y": 3889.5371,
+    "uic_direction": "X strictly higher than Y",
+    "pct_reduction_uncached_tokens_per_accepted_outcome": "UNDEFINED \u2014 Y's denominator metric does not exist (0 accepted outcomes)",
+    "pct_reduction_total_tokens_per_accepted_outcome": "UNDEFINED \u2014 same cause",
+    "aggregate_comparisons_that_ARE_defined": {
+      "total_uncached_tokens_X_vs_Y": {
+        "X": 2571,
+        "Y": 9228,
+        "pct_X_below_Y": 72.14
+      },
+      "total_tokens_X_vs_Y": {
+        "X": 20268553,
+        "Y": 15087424,
+        "pct_X_above_Y": 34.34
+      },
+      "total_cost_usd_X_vs_Y": {
+        "X": 19.645183,
+        "Y": 19.913065,
+        "pct_X_below_Y": 1.35
+      },
+      "median_elapsed_s": {
+        "X": 164.544,
+        "Y": 143.3005
+      },
+      "sum_rework_rounds": {
+        "X": 384,
+        "Y": 245
+      },
+      "sum_human_interventions": {
+        "X": 0,
+        "Y": 0
+      }
+    }
+  },
+  "threshold_table_uncached_tokens_per_accepted_outcome": [
+    {
+      "threshold_pct_reduction_uncached_per_accepted": 25,
+      "status": "UNDEFINED",
+      "reason": "Condition Y has zero accepted outcomes, so its uncached-tokens-per-accepted-outcome is UNDEFINED; no reduction ratio between the conditions can be formed in either direction."
+    },
+    {
+      "threshold_pct_reduction_uncached_per_accepted": 50,
+      "status": "UNDEFINED",
+      "reason": "Condition Y has zero accepted outcomes, so its uncached-tokens-per-accepted-outcome is UNDEFINED; no reduction ratio between the conditions can be formed in either direction."
+    },
+    {
+      "threshold_pct_reduction_uncached_per_accepted": 70,
+      "status": "UNDEFINED",
+      "reason": "Condition Y has zero accepted outcomes, so its uncached-tokens-per-accepted-outcome is UNDEFINED; no reduction ratio between the conditions can be formed in either direction."
+    },
+    {
+      "threshold_pct_reduction_uncached_per_accepted": 80,
+      "status": "UNDEFINED",
+      "reason": "Condition Y has zero accepted outcomes, so its uncached-tokens-per-accepted-outcome is UNDEFINED; no reduction ratio between the conditions can be formed in either direction."
+    },
+    {
+      "threshold_pct_reduction_uncached_per_accepted": 90,
+      "status": "UNDEFINED",
+      "reason": "Condition Y has zero accepted outcomes, so its uncached-tokens-per-accepted-outcome is UNDEFINED; no reduction ratio between the conditions can be formed in either direction."
+    }
+  ],
+  "gate_evaluation": {
+    "note": "Gates stated for whichever condition is the treatment; identity unknown to this role.",
+    "if_X_is_treatment": {
+      "g1_acceptance_no_worse": "MET \u2014 X 10/12 (0.8333) vs Y 0/12 (0.0)",
+      "g2_no_material_increase_in_regressions_or_human_interventions": "PARTIAL \u2014 human_interventions equal (0 vs 0), MET; regressions UNAVAILABLE for all units, so the regression half is UNVERIFIABLE",
+      "g3_ge_25pct_reduction_uncached_per_accepted": "UNDEFINED \u2014 comparator metric does not exist for Y",
+      "g4_positive_uic_improvement": "MET \u2014 X UIC 3889.5371 vs Y UIC 0.0",
+      "g5_min_n_ge_10": "MET \u2014 n=12 per condition"
+    },
+    "if_Y_is_treatment": {
+      "g1_acceptance_no_worse": "NOT MET \u2014 Y 0/12 vs X 10/12; ACCEPTANCE VETO fires",
+      "g2_no_material_increase_in_regressions_or_human_interventions": "PARTIAL \u2014 human_interventions equal (0 vs 0); regressions UNAVAILABLE",
+      "g3_ge_25pct_reduction_uncached_per_accepted": "UNDEFINED \u2014 Y has no per-accepted metric; Y also consumed 3.59x more uncached tokens in absolute terms (9228 vs 2571)",
+      "g4_positive_uic_improvement": "NOT MET \u2014 Y UIC 0.0 vs X UIC 3889.5371",
+      "g5_min_n_ge_10": "MET \u2014 n=12 per condition"
+    }
+  },
+  "registered_outcome_conditional": {
+    "if_X_is_the_treatment": "quality_gain_without_compute_gain",
+    "if_Y_is_the_treatment": "gravito_system_harmful",
+    "rationale_X": "X's acceptance dominates (10/12 vs 0/12) and its UIC is strictly positive against Y's zero, satisfying gates 1, 4 and 5. But system_efficiency_supported requires ALL five gates, and gate 3 cannot be established: with zero accepted outcomes in Y there is no uncached-tokens-per-accepted-outcome baseline to reduce by 25%, and X's total tokens are in fact 34.34% HIGHER than Y's while total cost is essentially level (-1.35%). A quality gain is demonstrated; a compute gain on the registered per-accepted metric is not.",
+    "rationale_Y": "Y produced zero accepted outcomes against X's ten, while consuming 3.59x the uncached tokens and marginally more cost. The binding ACCEPTANCE VETO forbids treating that as a compute trade, and there is no compute gain to trade in any case \u2014 the direction is harm, not shortfall.",
+    "vocabulary_used": [
+      "quality_gain_without_compute_gain",
+      "gravito_system_harmful"
+    ]
+  },
+  "caveats": [
+    "Condition Y accepted 0 of 12 tasks \u2014 a floor result. Every per-accepted-outcome metric for Y is UNDEFINED (not infinity, not zero), and every efficiency ratio and threshold row that needs Y as a denominator is therefore UNDEFINED rather than MET or NOT MET.",
+    "A total acceptance floor in one condition also means the registered efficiency comparison is structurally unevaluable, not merely unfavourable. If the adjudicator judges the zero-acceptance floor to be an artefact of harness or grading rather than of the condition, the correct reading shifts to result_confounded / inconclusive; from the analyst view alone there is no evidence for that and the frozen acceptance results are taken at face value.",
+    "regressions and subagent_invocations are null on all 24 units and were excluded from every sum and ratio.",
+    "rework_rounds are higher in X (384) than Y (245) in absolute terms, but X is the only condition that reached acceptance, so rework there is work that converged; the two sums are not like-for-like."
+  ]
+}

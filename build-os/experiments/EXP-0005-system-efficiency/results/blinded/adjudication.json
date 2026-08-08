@@ -1,0 +1,155 @@
+{
+ "artifact": "exp0005_acceptance_adjudication",
+ "n_units": 24,
+ "units": [
+  {
+   "adj_id": "adj-37282acf545bdbe5",
+   "task_id": "T01",
+   "acceptance_result": "rejected",
+   "reason": "Verification exits 1 and the named test still fails ('\u00d7 AgentPlanner > should create a plan with registered artifacts' \u2192 No \"getGovernanceBypassState\" export defined on the '../_core/llm' mock), so the planner.ts rewrite did not achieve the objective."
+  },
+  {
+   "adj_id": "adj-369b22ba0f9ec071",
+   "task_id": "T01",
+   "acceptance_result": "rejected",
+   "reason": "Product diff is empty \u2014 no work delivered \u2014 and the named test still fails in the verification output."
+  },
+  {
+   "adj_id": "adj-e596e2118272f16e",
+   "task_id": "T02",
+   "acceptance_result": "accepted",
+   "reason": "Diff fixes the real classifier bug ('general' \u2192 'generic', return type narrowed to SurfaceType) and verification shows '\u2713 ToolRouter > Content Classification > should classify generic content correctly', 1 passed."
+  },
+  {
+   "adj_id": "adj-a880defeb94e72cd",
+   "task_id": "T02",
+   "acceptance_result": "rejected",
+   "reason": "Product diff is empty \u2014 no work delivered \u2014 and the target test is still '\u00d7' failing in the verification output."
+  },
+  {
+   "adj_id": "adj-df28b0f3c24f404f",
+   "task_id": "T03",
+   "acceptance_result": "accepted",
+   "reason": "Diff makes PolicyResolver locate business_truth.yaml at its real path and fixes the default-truth shape; verification logs 'Loaded business_truth.yaml from .../server/copilot/business_truth.yaml' with 1 test passed."
+  },
+  {
+   "adj_id": "adj-fbda968b3a9287af",
+   "task_id": "T03",
+   "acceptance_result": "rejected",
+   "reason": "Product diff is empty \u2014 no work delivered \u2014 and the test still fails with 'expected 0 to be greater than 0'."
+  },
+  {
+   "adj_id": "adj-9b8542690f7f9adf",
+   "task_id": "T04",
+   "acceptance_result": "accepted",
+   "reason": "Diff removes the unsound `as unknown as Record<string, unknown>` indirection at line 374 and reads the real `avgLatencyMs` field, a genuine type fix with no any/ts-ignore; tsc output shows no new errors in the captured portion."
+  },
+  {
+   "adj_id": "adj-b6ca82316622643c",
+   "task_id": "T04",
+   "acceptance_result": "rejected",
+   "reason": "Product diff is empty \u2014 the TS2571 at unified-gravito-api.ts:374 was never touched."
+  },
+  {
+   "adj_id": "adj-21d8bab262ea7edc",
+   "task_id": "T05",
+   "acceptance_result": "accepted",
+   "reason": "Diff adds real null handling for `getDb()` at line 76 and at every other call site (throwing DatabaseUnavailableError or returning a defined fallback) rather than casting; no suppression or any-cast introduced."
+  },
+  {
+   "adj_id": "adj-ffffc58c9351c60f",
+   "task_id": "T05",
+   "acceptance_result": "rejected",
+   "reason": "Product diff is empty \u2014 the TS18047 at cms-content-layer.ts:76 was never touched."
+  },
+  {
+   "adj_id": "adj-a8b137c3394f82ec",
+   "task_id": "T06",
+   "acceptance_result": "accepted",
+   "reason": "Diff introduces a `requireDb()` helper that narrows the nullable handle by throwing DatabaseUnavailableError into the existing try/catch fallbacks, fixing line 21 and all sibling call sites without any-cast or suppression."
+  },
+  {
+   "adj_id": "adj-698dc8984059fa24",
+   "task_id": "T06",
+   "acceptance_result": "rejected",
+   "reason": "Product diff is empty \u2014 the TS18047 at deployment-persistence.ts:21 was never touched."
+  },
+  {
+   "adj_id": "adj-e0e475c6da554343",
+   "task_id": "T07",
+   "acceptance_result": "accepted",
+   "reason": "The test.todo at line 252 is replaced by a real `it(...)` that parses _core/index.ts with the TypeScript compiler API and asserts the dynamic import, the actual validatePlanMappings call, its result being inspected, and its position on the startup path; the captured output (truncated before the summary) shows the same exit status as the untouched baseline run, so it does not contradict the diff."
+  },
+  {
+   "adj_id": "adj-a621d3eb13cd1136",
+   "task_id": "T07",
+   "acceptance_result": "rejected",
+   "reason": "Product diff is empty \u2014 the placeholder at architectural-fixes.test.ts:252 remains a test.todo."
+  },
+  {
+   "adj_id": "adj-889d65c0ed51c508",
+   "task_id": "T08",
+   "acceptance_result": "accepted",
+   "reason": "The todo is now a real AST-based assertion over Home.tsx hero/SEO copy and verification exits 0 with '1 passed | 37 todo (38)', i.e. the placeholder passes and the file's other results are unchanged."
+  },
+  {
+   "adj_id": "adj-32210d61525a380c",
+   "task_id": "T08",
+   "acceptance_result": "rejected",
+   "reason": "Product diff is empty and verification still reports '38 todo (38)' \u2014 the placeholder was never implemented."
+  },
+  {
+   "adj_id": "adj-7de148ac9ee10932",
+   "task_id": "T09",
+   "acceptance_result": "rejected",
+   "reason": "Although the diff writes a real test, verification exits 1 with 'server/chaos-engineering.test.ts (39 tests | 39 skipped)' and the target case listed as '\u2193 db.ts getDb() handles missing DATABASE_URL gracefully' \u2014 it did not run or pass, so the required passing result is absent."
+  },
+  {
+   "adj_id": "adj-0d16a6363f9af59b",
+   "task_id": "T09",
+   "acceptance_result": "rejected",
+   "reason": "Product diff is empty \u2014 the placeholder at chaos-engineering.test.ts:90 remains a test.todo."
+  },
+  {
+   "adj_id": "adj-8d79ee694ba7bc8b",
+   "task_id": "T10",
+   "acceptance_result": "accepted",
+   "reason": "The @ts-ignore at line 583 (plus two siblings) is deleted and the underlying cause fixed by typing REQUIRED_ELEMENTS as a total Record<ContentType, RequiredElementSet> and adding the missing 'general' entry; no suppression relocated and no any introduced."
+  },
+  {
+   "adj_id": "adj-b4b8e58f7c5942c4",
+   "task_id": "T10",
+   "acceptance_result": "rejected",
+   "reason": "Product diff is empty \u2014 the suppression at enforced-quality-pipeline.ts:583 is still in place."
+  },
+  {
+   "adj_id": "adj-1082c62d437b9de2",
+   "task_id": "T11",
+   "acceptance_result": "accepted",
+   "reason": "All three @ts-ignore lines are removed and the drifted property path corrected to the real `claimIntentResult.shipping.*` shape; no cast or replacement suppression added."
+  },
+  {
+   "adj_id": "adj-94f0f74e101e7bb0",
+   "task_id": "T11",
+   "acceptance_result": "rejected",
+   "reason": "Product diff is empty \u2014 the suppression at batch-audit.ts:227 is still in place."
+  },
+  {
+   "adj_id": "adj-89eb8a29611cc642",
+   "task_id": "T12",
+   "acceptance_result": "accepted",
+   "reason": "The @ts-ignore at line 430 is removed by dropping the bogus OpenAI-style `choices[0].message.content` probe and parsing `govResult.content` directly \u2014 a real fix, not a relocated suppression."
+  },
+  {
+   "adj_id": "adj-58f0e15cd874f8c2",
+   "task_id": "T12",
+   "acceptance_result": "rejected",
+   "reason": "Product diff is empty \u2014 the suppression at claim-intent-classification.ts:430 is still in place."
+  }
+ ],
+ "counts": {
+  "accepted": 10,
+  "rejected": 14
+ },
+ "blinding_note": "I never saw condition or arm identity. I read only adjudicator-view.json and the referenced patches under results/blinded/diffs/, and did not open results/runs/, EXECUTOR-ROWS.json, or any condition-named file. The only environment string visible in the captured evidence was the generic working-directory path /home/user/exp0005-arm, which names no condition. I did observe the structural fact that 12 of the 24 units carry empty product diffs, but that is a property of the work products, not a disclosed condition label."
+}
