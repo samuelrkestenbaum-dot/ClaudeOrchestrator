@@ -39,9 +39,7 @@ echo "== discoverability =="
 # exists, but the worker can no longer find it. That must be VIOLATED.
 # A gate that neither delegates NOR advertises the no-shell route: the
 # capability exists in the classifier but the worker can never learn of it.
-sed -e 's|gate-recovery\.mjs|MISSING-RECOVERY-GENERATOR|g' \\
-    -e 's|build-os/packets/routing/routing-request.json|(undocumented)|g' \\
-    .claude/hooks/routing-gate.sh > "$TMP/undiscoverable.sh"
+sed -e 's|gate-recovery\.mjs|MISSING-RECOVERY-GENERATOR|g' -e 's|build-os/packets/routing/routing-request.json|(undocumented)|g' .claude/hooks/routing-gate.sh > "$TMP/undiscoverable.sh"
 d(){ node -e '
 import("./build-os/assumptions/registry.mjs").then(m=>{
  const c=m.coverage({gatePath:process.argv[1]});
@@ -109,8 +107,6 @@ echo "== adversarial matrix honesty =="
 t "simulated cells are NOT counted as validated" "$(node -e 'import("./build-os/assumptions/matrix.mjs").then(m=>{const r=m.matrixReport();console.log(String(r.validated.includes("clean+interactive+Edit")));})')" "false"
 t "untested cells are visible" "$(node -e 'import("./build-os/assumptions/matrix.mjs").then(m=>console.log(String(m.matrixReport().by_coverage.untested>0)))')" "true"
 
-echo "==== RESULT: $P passed, $F failed ===="
-[ "$F" -eq 0 ]
 
 echo "== live gate consults the selector =="
 G=$(mktemp -d); trap 'rm -rf "$TMP" "$TMP2" "$G"' EXIT
@@ -138,3 +134,62 @@ case "$out3" in *"host restriction, not a Gravito defect"*) ok "host-denied muta
 case "$out" in *"MUTATION BLOCKED"*) ok "mutation enforcement is NOT weakened by the wiring";; *) no "mutation still blocked";; esac
 # Selection is recorded.
 grep -q "RECOVERY-SELECTED" "$G/c/build-os/packets/routing/live_gate_log.tsv" 2>/dev/null && ok "the selection is recorded with provenance" || no "selection recorded"
+
+echo "== MUTATION TESTING: every negative fixture must catch a deliberately broken implementation =="
+# A fixture that cannot fail proves nothing. Each case below breaks the real
+# implementation and asserts the corresponding check TURNS RED. If a mutant
+# survives, that fixture is vacuous and the suite is lying about its coverage.
+M=$(mktemp -d); trap 'rm -rf "$TMP" "$TMP2" "$G" "$M"' EXIT
+mutant(){ # <sed-expr> <label> — break the SELECTOR, expect the named check to flip
+  mkdir -p "$M/a"; cp build-os/assumptions/*.mjs "$M/a/" 2>/dev/null
+  sed -i "$1" "$M/a/$2"
+}
+
+# M1 — break least-privilege ordering: prefer HIGHEST privilege.
+mkdir -p "$M/m1"; cp build-os/assumptions/*.mjs "$M/m1/"
+sed -i 's|viable.sort((a, b) => a.privilege - b.privilege|viable.sort((a, b) => b.privilege - a.privilege|' "$M/m1/authority-selector.mjs"
+got="$(node -e '
+import(process.argv[1]+"/authority-selector.mjs").then(async(s)=>{
+ const H=await import(process.argv[1]+"/host-profiles.mjs");
+ const r=s.selectAuthorityPath({gatePath:process.argv[2],host:H.HOSTS.find(x=>x.id==="claude_code_interactive"),mutation_class:"Edit"});
+ console.log(r.selected);});' "$M/m1" .claude/hooks/routing-gate.sh 2>/dev/null)"
+[ "$got" != "routing_request_channel" ] && ok "M1 killed: reversing least-privilege changes the selection (got '$got')" || no "M1 SURVIVED — the least-privilege assertion is vacuous"
+
+# M2 — break the host-denies check: treat a denied class as usable.
+mkdir -p "$M/m2"; cp build-os/assumptions/*.mjs "$M/m2/"
+sed -i 's|if (v === "allowed") return { ok: true, why: "allowed" };|if (v) return { ok: true, why: "allowed" };|' "$M/m2/authority-selector.mjs"
+got="$(node -e '
+import(process.argv[1]+"/authority-selector.mjs").then(async(s)=>{
+ const H=await import(process.argv[1]+"/host-profiles.mjs");
+ const r=s.selectAuthorityPath({gatePath:process.argv[2],host:H.HOSTS.find(x=>x.id==="claude_code_headless_dontAsk"),mutation_class:"Edit"});
+ console.log(r.decision);});' "$M/m2" .claude/hooks/routing-gate.sh 2>/dev/null)"
+[ "$got" != "refuse_host_denies_mutation" ] && ok "M2 killed: ignoring host denial changes the decision (got '$got')" || no "M2 SURVIVED — the host-denial assertion is vacuous"
+
+# M3 — break mismatch detection: never report a Gravito defect.
+mkdir -p "$M/m3"; cp build-os/assumptions/*.mjs "$M/m3/"
+sed -i 's|is_gravito_defect: candidates.length > 0,|is_gravito_defect: false,|' "$M/m3/authority-selector.mjs"
+got="$(node -e '
+import(process.argv[1]+"/authority-selector.mjs").then(async(s)=>{
+ const H=await import(process.argv[1]+"/host-profiles.mjs");
+ const r=s.selectAuthorityPath({gatePath:process.argv[2],host:H.HOSTS.find(x=>x.id==="claude_code_headless_acceptEdits"),mutation_class:"Edit"});
+ console.log(String(r.is_gravito_defect));});' "$M/m3" "$TMP2/prefix.sh" 2>/dev/null)"
+[ "$got" = "false" ] && ok "M3 killed: suppressing defect attribution is detectable (got '$got')" || no "M3 SURVIVED"
+
+# M4 — break the asymmetry null guard: reintroduce the null-as-zero coercion.
+mkdir -p "$M/m4"; cp build-os/assumptions/*.mjs "$M/m4/"
+sed -i 's|const rate = (n, d) => (typeof n === "number" && Number.isFinite(n) && d > 0 ? n / d : null);|const rate = (n, d) => (d > 0 ? n / d : null);|' "$M/m4/asymmetry.mjs"
+got="$(node -e '
+import(process.argv[1]+"/asymmetry.mjs").then(m=>{
+ console.log(String(m.detectAsymmetry({groups:[{id:"a",units:10,accepted:9,external_denials:null},{id:"b",units:10,accepted:0,external_denials:null}]}).findings_count>0));});' "$M/m4" 2>/dev/null)"
+[ "$got" = "true" ] && ok "M4 killed: the unmeasured-friction fixture catches null-as-zero" || no "M4 SURVIVED — the null guard is untested"
+
+# M5 — break state contradiction detection: disable the load-bearing rule.
+mkdir -p "$M/m5"; cp build-os/assumptions/*.mjs "$M/m5/"
+sed -i 's|when: (s) => s.load_bearing \&\& !s.durable \&\& !s.reconstructable \&\& !s.externally_supplied,|when: () => false,|' "$M/m5/state-classification.mjs"
+got="$(node -e '
+import(process.argv[1]+"/state-classification.mjs").then(m=>{
+ console.log(String(m.auditState([{id:"x",provenance:"declared",load_bearing:true,durable:false,reconstructable:false,ephemeral:true,required_before_first_action:true}]).findings_count));});' "$M/m5" 2>/dev/null)"
+[ "$got" != "2" ] && ok "M5 killed: disabling the load-bearing rule drops a finding (got '$got')" || no "M5 SURVIVED — the pre-#45 fixture is vacuous"
+
+echo "==== RESULT: $P passed, $F failed ===="
+[ "$F" -eq 0 ]
