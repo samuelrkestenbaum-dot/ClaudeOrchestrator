@@ -72,8 +72,27 @@ export function publicationCheck(req) {
 
   reasons.push(`content authorisation: '${req.authorized}' — granted by the operator`);
 
+  // A state transition needs its own authorisation — and CAN have one.
+  //
+  // The first version blocked on `confers_status` unconditionally, which made
+  // the flag unusable: an operator who explicitly authorised a freeze had no way
+  // to say so, and the only route to a push was to declare `confers_status:
+  // false` — i.e. to misdescribe what the publication does. A guard that can
+  // only be satisfied by lying to it is not a guard.
+  //
+  // Doctrine says questions (1) and (3) BOTH need authority, not that (3) can
+  // never have it. So the block now fires on an UNAUTHORISED transition only,
+  // and the authorisation must name the transition rather than be a bare `true`
+  // — an operator go for "publish this" is not a go for "and mark it frozen".
   if (req.confers_status === true) {
-    blocking.push("the publication itself confers a status (state transition), which needs its own authorisation");
+    const t = req.status_transition_authorized;
+    if (typeof t !== "string" || t.trim().length < 8) {
+      blocking.push(
+        "the publication itself confers a status (state transition), and no authorisation for that transition was " +
+        "supplied — set `status_transition_authorized` to the operator's words granting it");
+    } else {
+      reasons.push(`state transition authorised by the operator: '${t.trim()}'`);
+    }
   }
 
   for (const a of incidental) {

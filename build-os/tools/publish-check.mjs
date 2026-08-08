@@ -93,6 +93,7 @@ const result = publicationCheck({
   authorized: auth.authorized,
   incidental,
   confers_status: auth.confers_status === true,
+  status_transition_authorized: auth.status_transition_authorized,
 });
 
 console.log(`publish-check: ${result.verdict.toUpperCase()}`);
