@@ -125,6 +125,18 @@ export const ASSUMPTIONS = [
     untested_in: ["memory rotation", "packet close", "adapter dispatch"],
   },
   {
+    id: "claude-can-write-live-control-plane",
+    kind: "DECLARED",
+    claim: "The Claude surface can write to the live Operator Lab control plane, the store four_surface_readiness reads.",
+    load_bearing: true,
+    dependencies: ["Operator Lab write interface", "Claude surface identity", "credentials"],
+    evidence: "TESTED AND FOUND FALSE. No Operator Lab tool exists in this session's tool surface, no write interface is specified anywhere in this repository, and the only candidate MCP server requires an OAuth flow a non-interactive session cannot perform. See build-os/surfaces/CLAUDE-WRITE-PATH-BLOCKED.md.",
+    status: "violated",
+    validated_in: [],
+    untested_in: [],
+    violations: ["Claude has no write path to the live Operator Lab; layer-2 readiness cannot improve and layer-3 continuity cannot be exercised on the Claude<->ChatGPT pair until it exists"],
+  },
+  {
     id: "provider-host-neutrality",
     kind: "DECLARED",
     claim: "Gravito behaves equivalently across provider/host surfaces.",
@@ -147,7 +159,10 @@ export function coverage(ctx = { gatePath: ".claude/hooks/routing-gate.sh" }) {
     return {
       id: a.id, kind: a.kind, load_bearing: a.load_bearing, claim: a.claim,
       status: a.status, validated_in: a.validated_in || [], untested_in: a.untested_in || [],
-      violations: [], evidence: a.evidence,
+      // A DECLARED row may carry violations too: an assumption tested and found
+      // FALSE is stronger evidence than one merely asserted, and dropping its
+      // violations would hide the most informative rows in the registry.
+      violations: a.violations || [], evidence: a.evidence,
     };
   });
 

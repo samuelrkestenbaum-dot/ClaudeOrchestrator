@@ -55,13 +55,19 @@ import("./build-os/assumptions/registry.mjs").then(m=>{
  console.log(process.argv[1]==="untested"?c.untested_load_bearing.length:c.violated_load_bearing.length);
 });' "$1"; }
 t "untested load-bearing claims are surfaced as risk" "$(u untested)" "1"
-t "no load-bearing assumption is currently violated" "$(u violated)" "0"
+# Asserting "nothing is violated" encoded a STATE, not a property, and broke the
+# moment a real violation was registered. The property is that a KNOWN violation
+# is reported by name.
+t "a known-violated load-bearing assumption is reported" "$(node -e 'import("./build-os/assumptions/registry.mjs").then(m=>{const c=m.coverage({gatePath:".claude/hooks/routing-gate.sh"});console.log(String(c.violated_load_bearing.some(v=>v.id==="claude-can-write-live-control-plane")));})')" "true"
 
 echo "== the audit exits non-zero on a violation =="
 node build-os/assumptions/self-audit.mjs "$TMP/undiscoverable.sh" >/dev/null 2>&1
 t "self-audit exit code on a violated claim" "$?" "1"
+# Same correction: the audit must exit non-zero WHILE a load-bearing assumption
+# is violated. A green exit here would mean the audit is not reading its own
+# registry.
 node build-os/assumptions/self-audit.mjs >/dev/null 2>&1
-t "self-audit exit code when clean" "$?" "0"
+t "self-audit exits non-zero while a real violation stands" "$?" "1"
 
 
 # ---- #48 additions -------------------------------------------------------
