@@ -1,7 +1,7 @@
 {
   "note": "The durable queue the continuation controller reads. Task completion is NOT a stop condition; a commit awaiting a push grant is NOT a stop condition.",
   "published_tips": [
-    "5793e3e"
+    "d8a85d7"
   ],
   "tasks": [
     {
@@ -40,10 +40,19 @@
     {
       "id": "51",
       "subject": "Audit the auditors - source fidelity and failure capability",
-      "status": "pending",
+      "status": "in_progress",
       "depends_on": [
         "50"
       ]
+    },
+    {
+      "id": "53",
+      "subject": "Registry census reconciliation - 179 registered vs 136 discovered",
+      "status": "pending",
+      "depends_on": [],
+      "detail": "The 6 build_os_tests.sh failures remaining after RC-A, RC-B and the EXP-0005 allow-list. scan-controls: 179 registered controls vs 136 discovered surfaces; 23 over-authorised entries never reach mismatch_dispositions.txt; 19 unregistered surfaces; 2 fitted floors gate but are unregistered; 2 registered refs match no floor; 6 evidence_refs resolve to lines that exercise nothing; publish-check.test.sh performs durable writes and is uncensused in the mutator registry.",
+      "structural_finding": "control_registry.txt cites LINE NUMBERS. Inserting four chain_suite calls into build_os_tests.sh silently converted two citations into vacuous references pointing at comments. A guard that decays whenever anything is inserted above it should cite an ANCHOR, not a line -- this is the same defect family as the sentinel work in #36/#37.",
+      "why_separate": "Real, fixable debt. Deliberately not folded into the timeout packet rather than silently absorbed."
     }
   ]
 }

@@ -2321,7 +2321,7 @@ inputs: the two EXP-0003 harness modules, the frozen EXP-0002 seeder/tasks/oracl
 output: a pass/fail verdict over setup determinism (two seeds, two setups, identical digests equal to the preregistered pin), the oracle-driven T1/T2 proof, every runner refusal path, the frozen-prompt pins, and the mechanical close loop including the fabricated over-budget refusal
 owning_module: tests/exp3_harness_tests.sh
 consuming_policies: chained from tests/build_os_tests.sh section 26, which exits non-zero on its failure
-evidence_refs: tests/exp3_harness_tests.sh:101; tests/exp3_harness_tests.sh:104; tests/exp3_harness_tests.sh:123; tests/exp3_harness_tests.sh:194
+evidence_refs: tests/exp3_harness_tests.sh:101; tests/exp3_harness_tests.sh:104; tests/exp3_harness_tests.sh:170; tests/exp3_harness_tests.sh:194
 failure_behavior: prints each failing assertion and exits 1 via the house-style verdict, failing the whole chained run
 rollback_behavior: none needed — every fixture lives in mktemp; nothing under build-os/experiments/ is written; no claude invocation occurs, so the suite spends zero model tokens
 promotion_requirement: already load_bearing; nothing above this status exists
@@ -3167,7 +3167,7 @@ inputs: frozen-task-set, eligibility-evidence and aggregate fixtures in mktemp; 
 output: a pass/fail verdict over the EXP-0004 harness: the three tools present and NON-executable with the zero-executable census re-asserted, no RNG and no wall-clock anywhere in the harness, the frozen fields and the AMENDMENT 1 precondition enforced at registration, all ten prior-pilot tasks refused BY NAME, arm ordering derived and recorded, eight identical-across-arms refusals each naming its field, a clean reset between arms, a tier vocabulary in which an unknown is never a zero, a confounded arm B that leaves the aggregate and never comes back, the seven verdict labels computed mechanically, the acceptance veto, and thresholds sourced only from the preregistration
 owning_module: tests/exp0004_harness_tests.sh
 consuming_policies: chained from tests/build_os_tests.sh section 31, which exits non-zero on its failure
-evidence_refs: tests/exp0004_harness_tests.sh:202; tests/exp0004_harness_tests.sh:206; tests/exp0004_harness_tests.sh:370; tests/exp0004_harness_tests.sh:373; tests/exp0004_harness_tests.sh:489; tests/exp0004_harness_tests.sh:551
+evidence_refs: tests/exp0004_harness_tests.sh:223; tests/exp0004_harness_tests.sh:253; tests/exp0004_harness_tests.sh:370; tests/exp0004_harness_tests.sh:373; tests/exp0004_harness_tests.sh:536; tests/exp0004_harness_tests.sh:551
 failure_behavior: prints each failing assertion and exits 1 via the house-style verdict (tests/exp0004_harness_tests.sh:551), failing the whole chained run
 rollback_behavior: none needed — every fixture lives in mktemp; nothing under build-os/experiments/ is written, only read and counted; no model invocation occurs, so the suite spends zero model tokens
 promotion_requirement: already load_bearing; nothing above this status exists
@@ -3293,7 +3293,7 @@ inputs: the five blinding modules and the three fixture files, driven in mktemp 
 output: a pass/fail verdict over the EXP-0004 blinding instrument: every file present and NON-executable with the zero-executable census re-asserted, no RNG and no wall clock in any blinding tool, a mapping that re-derives from its own recorded rule and a digest that moves when one assignment does, the per-task rule sealable but recorded invalid for aggregate analysis, a leak-free adjudicator view carrying no starting-context field and only opaque work-product ids, capsule size withheld before the freeze and preserved after it, a planted leak refused by name, a freeze refusing while any of the fourteen artifacts is missing, a snapshot invalidated by a changed input and by an edited digest, the four reveal conditions each refused and named, the wrong-seal refusal, and the counterfactual in which one anonymous verdict translates to two opposite registered outcomes
 owning_module: tests/exp0004_blinding_tests.sh
 consuming_policies: chained from tests/build_os_tests.sh section 32, which exits non-zero on its failure
-evidence_refs: tests/exp0004_blinding_tests.sh:96; tests/exp0004_blinding_tests.sh:143; tests/exp0004_blinding_tests.sh:220; tests/exp0004_blinding_tests.sh:278; tests/exp0004_blinding_tests.sh:440; tests/exp0004_blinding_tests.sh:499
+evidence_refs: tests/exp0004_blinding_tests.sh:118; tests/exp0004_blinding_tests.sh:143; tests/exp0004_blinding_tests.sh:220; tests/exp0004_blinding_tests.sh:278; tests/exp0004_blinding_tests.sh:440; tests/exp0004_blinding_tests.sh:499
 failure_behavior: prints each failing assertion and exits 1 via the house-style verdict (tests/exp0004_blinding_tests.sh:499), failing the whole chained run
 rollback_behavior: none needed — every fixture and every mutation lives in mktemp; the repository is only read, by find and grep, for the executable census; no model is invoked and no network is touched
 promotion_requirement: already load_bearing; nothing above this status exists
