@@ -13,11 +13,53 @@
       "runs_completed": 1,
       "measured_at_head": "be10ee4",
       "profile": {
-        "slowest_section": "26. Chained sibling suites — 428.9s, 80.0% of the run",
+        "slowest_section": "26. Chained sibling suites \u2014 428.9s, 80.0% of the run",
         "longest_silent_gap_s": 109.3,
         "gap_location": "between tests/swarm_merge_tests.sh and tests/control_registry_tests.sh",
         "at_280s_ceiling": "25 of 33 sections complete, 70% of output lines, 256s of work still to run"
       }
     }
-  ]
+  ],
+  "triage": {
+    "note": "75 failures, 2 dominant root causes, both attributable to commit 1c1f68d (#48, selector made load-bearing in the live gate). Neither was visible while the 280s ceiling truncated the run.",
+    "root_causes": [
+      {
+        "id": "RC-A-stale-runtime-manifest",
+        "failures": 43,
+        "suites": [
+          "tests/runtime_version_tests.sh"
+        ],
+        "cause": "build-os/runtime/MANIFEST.json pins sha256 0b83040575 for .claude/hooks/routing-gate.sh; the file is now f2364d3f50. The manifest was last re-cut at 04e602a, BEFORE 1c1f68d edited the gate. The first assertion fails and every install/verify assertion cascades from it.",
+        "resolution": "OPERATOR DECISION. `regen-manifest` requires --version <v>: by the runtime tool's own design, re-cutting the manifest IS cutting a release. A worker must not pick a version number unilaterally.",
+        "verified": "7 of 8 manifest entries match; exactly 1 drifted."
+      },
+      {
+        "id": "RC-B-refusal-no-longer-advertises-shell-recovery",
+        "failures": 22,
+        "suites": [
+          "tests/routing_structured_action_tests.sh (7)",
+          "tests/demo_environment_tests.sh (15)"
+        ],
+        "cause": "1c1f68d made the gate GENERATE its refusal from the authority selector. Under the default host profile unknown_conservative, Bash is approval_required, so the selector correctly advertises the Write-class routing-request channel and states the shell path is NOT AVAILABLE. Three suites extract a `route-task.sh ... --descriptor` command from the refusal text; the extraction now returns empty, so `eval \"$RCMD --out ...\"` runs `--out` as a command.",
+        "the_real_defect": "The tests and the demo encode a HOST PROFILE they never declare: they assume a host where Bash is usable. That is the same class as authority_bootstrap_permission_class_mismatch from EXP-0005 -- a permission-lattice assumption baked in implicitly rather than stated. The gate's new behaviour is arguably CORRECT: advertising a path the host will refuse is what the selector exists to prevent, and capability-discoverable-at-failure requires advertising VIABLE paths, not all paths.",
+        "resolution": "OPERATOR DECISION, because the two readings lead to different fixes. (a) The refusal should still carry a shell recovery command -- then the selector's host-conditional advertising is the regression. (b) The tests and demo should declare a host profile in which Bash is viable, and assert against the refusal the selector generates for THAT profile -- then the product is right and three suites encode a superseded contract."
+      },
+      {
+        "id": "RC-C-scattered",
+        "failures": 10,
+        "suites": [
+          "control_registry (3)",
+          "mutator_registry (1)",
+          "exp3_harness (1)",
+          "routing_task_entry (2)",
+          "exp0004_harness (1)",
+          "exp0004_blinding (1)",
+          "parent-suite direct"
+        ],
+        "cause": "NOT YET TRIAGED. Recorded as untriaged rather than folded into the two known causes.",
+        "resolution": "open"
+      }
+    ],
+    "coverage_caveat": "This triage is from ONE completed run. It establishes that the suite CAN finish and that it is red; it does not establish which failures are deterministic. A second run is needed before any failure is called stable or flaky."
+  }
 }
