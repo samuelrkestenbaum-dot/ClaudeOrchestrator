@@ -25,7 +25,20 @@ const tsv = (p) => fs.readFileSync(p, "utf8").split("\n")
 /** Surface family from a surface_instance like "claude.cowork.session.ramhds". */
 const familyOf = (instance) => String(instance || "").split(".")[0] || null;
 
-export function readiness({ kernelDir = "build-os/kernel", windowDays = 7, now = null } = {}) {
+/**
+ * NAME CORRECTED. This function measures REPOSITORY SURFACE ACTIVITY: which
+ * declared families appear as writers in the committed kernel ledger. It was
+ * briefly labelled `four_surface_readiness`, and that label is now known to be
+ * wrong, because a second machine-readable authority — the live Operator Lab
+ * `check_substrate_readiness` — reports a different answer for what was
+ * presented as the same state.
+ *
+ * Two measurements that disagree cannot both be canonical. Until the divergence
+ * is resolved (see build-os/surfaces/DIVERGENCE.md) this one answers only:
+ * "who has written into the repository ledger", which is NOT the same question
+ * as "who is participating in the live substrate right now".
+ */
+export function repositorySurfaceActivity({ kernelDir = "build-os/kernel", windowDays = 7, now = null } = {}) {
   const evPath = path.join(kernelDir, "memory_events.tsv");
   const rows = tsv(evPath).filter((r) => r.length > 6 && /^EVT-/.test(r[0]));
 
@@ -63,14 +76,17 @@ export function readiness({ kernelDir = "build-os/kernel", windowDays = 7, now =
   const gate = active.length === DECLARED_SURFACES.length ? "PASS" : "FAIL";
 
   return {
-    artifact: "four_surface_readiness",
+    artifact: "repository_surface_activity",
+    NOT_CANONICAL_READINESS:
+      "This is one of two disagreeing authorities. It is NOT four_surface_readiness. " +
+      "See build-os/surfaces/DIVERGENCE.md before quoting this verdict as readiness.",
     window_days: windowDays,
     window_anchor: anchor ? new Date(anchor).toISOString() : null,
     anchor_source: now ? "supplied" : "latest event in ledger (NOT wall clock — the gate must be reproducible)",
     declared: DECLARED_SURFACES,
     surfaces,
     active,
-    readiness_gate: gate,
+    activity_gate: gate,
     gate_reason: gate === "PASS" ? "all declared surface families wrote inside the window"
       : `only ${active.length} of ${DECLARED_SURFACES.length} declared families wrote inside the window: ` +
         DECLARED_SURFACES.map((s) => `${s}=${surfaces[s].status}`).join(", "),
@@ -119,3 +135,6 @@ export function behavioralContinuity({ kernelDir = "build-os/kernel", proofs = [
         : "Continuity requires: A writes, B consumes, B's behaviour differs, and the result is written back attributably.",
   };
 }
+
+// Backwards-compatible alias, deliberately NOT named readiness.
+export const readiness = repositorySurfaceActivity;
