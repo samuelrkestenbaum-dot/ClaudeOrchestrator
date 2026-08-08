@@ -16,6 +16,7 @@ import { execFileSync, spawn } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { openRun, closeRun, classify, verifyIsolation, scrubbedEnv, newSessionId } from "../../harness/run-record.mjs";
+import { splitPaths } from "../blinding/governance-strip.mjs";
 
 const arg = (n, d = null) => { const i = process.argv.indexOf(`--${n}`); return i > 0 && process.argv[i + 1] ? process.argv[i + 1] : d; };
 const has = (n) => process.argv.includes(`--${n}`);
@@ -160,7 +161,7 @@ const out = fs.openSync(streamPath, "w");
 const child = spawn("claude", [
   "-p", "--output-format", "stream-json", "--verbose",
   "--model", MODEL, "--session-id", sessionId,
-  "--permission-mode", "dontAsk",
+  "--permission-mode", "acceptEdits",
 ], { cwd: ARM_TREE, env, stdio: ["pipe", out, "pipe"], detached: true });
 
 let stderr = "";
@@ -178,6 +179,78 @@ child.on("exit", (code, signal) => {
   fs.closeSync(out);
   const elapsedS = (Date.now() - started) / 1000;
   fs.writeFileSync(path.join(runDir, "stderr.txt"), stderr);
+
+  // --- capture the work product BEFORE anything destroys the tree ----------
+  // The first version of this harness recorded economics and then let the next
+  // arm delete the tree. Four arms ran with real edits and their diffs are
+  // gone, so they measured cost with no measurable outcome — and acceptance is
+  // the UIC NUMERATOR. Nothing downstream of a missing diff is recoverable.
+  try {
+    // The native arm's pre-flight DELETES the substrate. Those deletions are
+    // harness-induced, not work: attributing them to the arm would hand it a
+    // diff of thousands of removed governance files.
+    const harnessDeleted = ARM === "native" ? ["build-os", ".claude", "CLAUDE.md"] : [];
+    const excl = harnessDeleted.flatMap((p) => [":(exclude)" + p, ":(exclude)" + p + "/**"]);
+
+    const changed = sh("git", ["-C", ARM_TREE, "status", "--porcelain", "--", ".", ...excl])
+      .split("\n").filter(Boolean)
+      .map((l) => ({ status: l.slice(0, 2).trim(), path: l.slice(3).replace(/^"|"$/g, "") }))
+      .filter((c) => c.path !== "node_modules" && !c.path.startsWith("node_modules/"));
+
+    const split = splitPaths(changed.map((c) => c.path));
+
+    const tracked = sh("git", ["-C", ARM_TREE, "diff", "HEAD", "--", ".", ...excl,
+      ":(exclude)node_modules", ":(exclude)node_modules/**"], { maxBuffer: 64 * 1024 * 1024 });
+    // Untracked files are part of the work product and `git diff` cannot see
+    // them; a new file counts as work.
+    const untracked = changed.filter((c) => c.status === "??").map((c) => c.path);
+    const untrackedBody = untracked.map((p) => {
+      try { return `--- /dev/null\n+++ b/${p}\n` + fs.readFileSync(path.join(ARM_TREE, p), "utf8"); }
+      catch { return `+++ b/${p}\n(unreadable)`; }
+    }).join("\n");
+
+    const isGov = (p) => (split.governance || []).includes(p);
+    const productPaths = changed.map((c) => c.path).filter((p) => !isGov(p));
+    const govPaths = changed.map((c) => c.path).filter(isGov);
+
+    fs.writeFileSync(path.join(runDir, "full.diff"), tracked + "\n" + untrackedBody);
+    fs.writeFileSync(path.join(runDir, "changed-paths.json"), JSON.stringify({
+      product_paths: productPaths, governance_paths: govPaths,
+      note: "governance paths are measured as COST and never reach the adjudicator; a governance path inside the adjudicated diff is result_confounded",
+    }, null, 2));
+
+    // --- acceptance: run the frozen verification command ------------------
+    let vOut = "", vCode = null;
+    try {
+      vOut = sh("bash", ["-lc", task.verification.command],
+        { cwd: ARM_TREE, timeout: 900_000, maxBuffer: 64 * 1024 * 1024, stdio: "pipe" });
+      vCode = 0;
+    } catch (e) { vOut = String(e.stdout || "") + String(e.stderr || ""); vCode = e.status ?? null; }
+    fs.writeFileSync(path.join(runDir, "verification.txt"),
+      `$ ${task.verification.command}\n(exit ${vCode})\n\n${vOut}`);
+
+    // --- economics from the provider's own result event -------------------
+    const ev = fs.readFileSync(streamPath, "utf8").split("\n").filter(Boolean)
+      .map((l) => { try { return JSON.parse(l); } catch { return null; } }).filter(Boolean);
+    const res = ev.find((e) => e.type === "result") || {};
+    const u = res.usage || {};
+    fs.writeFileSync(path.join(runDir, "economics.json"), JSON.stringify({
+      // An unavailable field stays null. It is NEVER converted to zero.
+      uncached_input_tokens: u.input_tokens ?? null,
+      cache_read_input_tokens: u.cache_read_input_tokens ?? null,
+      cache_creation_input_tokens: u.cache_creation_input_tokens ?? null,
+      output_tokens: u.output_tokens ?? null,
+      num_turns: res.num_turns ?? null,
+      duration_api_ms: res.duration_api_ms ?? null,
+      total_cost_usd: res.total_cost_usd ?? null,
+      elapsed_s: elapsedS,
+      product_files_changed: productPaths.length,
+      governance_files_changed: govPaths.length,
+      verification_exit_code: vCode,
+    }, null, 2));
+  } catch (e) {
+    fs.writeFileSync(path.join(runDir, "capture-error.txt"), String(e.stack || e.message));
+  }
 
   const verdict = classify({ streamPath, exitCode: code, ceilingS: CEILING_S, elapsedS, launcherAlive: true });
   const isolation = verifyIsolation({
