@@ -18,6 +18,28 @@
         "gap_location": "between tests/swarm_merge_tests.sh and tests/control_registry_tests.sh",
         "at_280s_ceiling": "25 of 33 sections complete, 70% of output lines, 256s of work still to run"
       }
+    },
+    {
+      "suite": "tests/build_os_tests.sh",
+      "completed": true,
+      "result_line": "==== RESULT: 4688 passed, 9 failed ====",
+      "passed": 4688,
+      "failed": 9,
+      "exit_code": 0,
+      "wall_clock_s": 533,
+      "ceiling_s": 280,
+      "runs_completed": 2,
+      "measured_at_head": "3e32528",
+      "profile": {
+        "slowest_section": "26. Chained sibling suites \u2014 397.8s, 74.7% of the run",
+        "longest_silent_gap_s": 113.2,
+        "gap_location": "between tests/swarm_merge_tests.sh and tests/control_registry_tests.sh",
+        "at_280s_ceiling": "25 of 33 sections complete, 83% of output lines, 253s of work still to run",
+        "orphaned_children_before": 0,
+        "orphaned_children_after": 0,
+        "concurrent_suites_at_start": 0
+      },
+      "note": "Serialized and uncontended. 75 -> 9 failures. The 9 are exactly the RC-C residual already classified: control_registry 5, mutator_registry 1, and one each in exp3_harness / exp0004_harness / exp0004_blinding."
     }
   ],
   "triage": {
@@ -103,5 +125,7 @@
       }
     ],
     "coverage_caveat": "This triage is from ONE completed run. It establishes that the suite CAN finish and that it is red; it does not establish which failures are deterministic. A second run is needed before any failure is called stable or flaky."
-  }
+  },
+  "determinism_note": "Two completed runs now exist, 536s and 533s, so the DURATION is repeatable. They are NOT a repeat measurement of the same tree -- the second ran against 65 fixed failures -- so no failure has yet been shown deterministic. That still needs two runs at one HEAD.",
+  "orphan_correction": "EARLIER CLAIM WITHDRAWN. I reported orphaned `sleep` processes reparented to PID 1 as a suite defect. This clean run measured 0 before and 0 after. The orphans were from MY OWN killed background waiter loops, not from the suite. Attributing them to the suite was wrong."
 }
