@@ -1,0 +1,188 @@
+{
+  "artifact": "exp0005_task_definitions",
+  "seed": "2543c873141fa64653a7993d326465d5e0dd1006",
+  "n": 12,
+  "identical_across_arms": "objective, verification command, expected result, regression bound and the standing prohibition are IDENTICAL in both arms; the arms differ in context, never in what counts as done",
+  "tasks": [
+    {
+      "task_id": "T01",
+      "shape": "behavioural",
+      "file": "server/agent/agent.test.ts",
+      "line": null,
+      "ts_code": null,
+      "target": "AgentPlanner should create a plan with registered artifacts",
+      "objective": "The test `AgentPlanner should create a plan with registered artifacts` in `server/agent/agent.test.ts` is FAILING at this commit. Diagnose the real cause and fix the product code so the test passes.",
+      "verification": {
+        "command": "npx vitest run server/agent/agent.test.ts -t \"AgentPlanner should create a plan with registered artifacts\"",
+        "expect": "the named test passes",
+        "regression": "the 845 stable failures do not grow; no test outside the quarantined files moves pass->fail"
+      },
+      "standing_prohibition": "Do NOT use an any-cast, @ts-ignore, @ts-expect-error, @ts-nocheck, or a fabricated interface to silence rather than fix. A false type declaration is worse than an any. Do not weaken or delete a test to make it pass."
+    },
+    {
+      "task_id": "T02",
+      "shape": "behavioural",
+      "file": "server/agent/mcp/mcp-enforcement.test.ts",
+      "line": null,
+      "ts_code": null,
+      "target": "ToolRouter Content Classification should classify generic content correctly",
+      "objective": "The test `ToolRouter Content Classification should classify generic content correctly` in `server/agent/mcp/mcp-enforcement.test.ts` is FAILING at this commit. Diagnose the real cause and fix the product code so the test passes.",
+      "verification": {
+        "command": "npx vitest run server/agent/mcp/mcp-enforcement.test.ts -t \"ToolRouter Content Classification should classify generic content correctly\"",
+        "expect": "the named test passes",
+        "regression": "the 845 stable failures do not grow; no test outside the quarantined files moves pass->fail"
+      },
+      "standing_prohibition": "Do NOT use an any-cast, @ts-ignore, @ts-expect-error, @ts-nocheck, or a fabricated interface to silence rather than fix. A false type declaration is worse than an any. Do not weaken or delete a test to make it pass."
+    },
+    {
+      "task_id": "T03",
+      "shape": "behavioural",
+      "file": "server/agent/mcp/policy-resolver.test.ts",
+      "line": null,
+      "ts_code": null,
+      "target": "PolicyResolver resolvePolicy should include forbidden phrases from business_truth.yaml",
+      "objective": "The test `PolicyResolver resolvePolicy should include forbidden phrases from business_truth.yaml` in `server/agent/mcp/policy-resolver.test.ts` is FAILING at this commit. Diagnose the real cause and fix the product code so the test passes.",
+      "verification": {
+        "command": "npx vitest run server/agent/mcp/policy-resolver.test.ts -t \"PolicyResolver resolvePolicy should include forbidden phrases from business_truth.yaml\"",
+        "expect": "the named test passes",
+        "regression": "the 845 stable failures do not grow; no test outside the quarantined files moves pass->fail"
+      },
+      "standing_prohibition": "Do NOT use an any-cast, @ts-ignore, @ts-expect-error, @ts-nocheck, or a fabricated interface to silence rather than fix. A false type declaration is worse than an any. Do not weaken or delete a test to make it pass."
+    },
+    {
+      "task_id": "T04",
+      "shape": "type_defect",
+      "file": "server/agent/mcp/unified-gravito-api.ts",
+      "line": 374,
+      "ts_code": "TS2571",
+      "target": "Object is of type 'unknown'.",
+      "objective": "`server/agent/mcp/unified-gravito-api.ts` line 374 has TypeScript error TS2571: Object is of type 'unknown'. Fix the underlying type problem in the product code.",
+      "verification": {
+        "command": "npx tsc -p tsconfig.app.json --noEmit",
+        "expect": "TS2571 at server/agent/mcp/unified-gravito-api.ts:374 is gone; total errors strictly below 754",
+        "regression": "zero new errors, measured LINE-INSENSITIVELY"
+      },
+      "standing_prohibition": "Do NOT use an any-cast, @ts-ignore, @ts-expect-error, @ts-nocheck, or a fabricated interface to silence rather than fix. A false type declaration is worse than an any. Do not weaken or delete a test to make it pass."
+    },
+    {
+      "task_id": "T05",
+      "shape": "type_defect",
+      "file": "server/deployment/cms-content-layer.ts",
+      "line": 76,
+      "ts_code": "TS18047",
+      "target": "'db' is possibly 'null'.",
+      "objective": "`server/deployment/cms-content-layer.ts` line 76 has TypeScript error TS18047: 'db' is possibly 'null'. Fix the underlying type problem in the product code.",
+      "verification": {
+        "command": "npx tsc -p tsconfig.app.json --noEmit",
+        "expect": "TS18047 at server/deployment/cms-content-layer.ts:76 is gone; total errors strictly below 754",
+        "regression": "zero new errors, measured LINE-INSENSITIVELY"
+      },
+      "standing_prohibition": "Do NOT use an any-cast, @ts-ignore, @ts-expect-error, @ts-nocheck, or a fabricated interface to silence rather than fix. A false type declaration is worse than an any. Do not weaken or delete a test to make it pass."
+    },
+    {
+      "task_id": "T06",
+      "shape": "type_defect",
+      "file": "server/deployment/deployment-persistence.ts",
+      "line": 21,
+      "ts_code": "TS18047",
+      "target": "'db' is possibly 'null'.",
+      "objective": "`server/deployment/deployment-persistence.ts` line 21 has TypeScript error TS18047: 'db' is possibly 'null'. Fix the underlying type problem in the product code.",
+      "verification": {
+        "command": "npx tsc -p tsconfig.app.json --noEmit",
+        "expect": "TS18047 at server/deployment/deployment-persistence.ts:21 is gone; total errors strictly below 754",
+        "regression": "zero new errors, measured LINE-INSENSITIVELY"
+      },
+      "standing_prohibition": "Do NOT use an any-cast, @ts-ignore, @ts-expect-error, @ts-nocheck, or a fabricated interface to silence rather than fix. A false type declaration is worse than an any. Do not weaken or delete a test to make it pass."
+    },
+    {
+      "task_id": "T07",
+      "shape": "test_reliability",
+      "file": "server/architectural-fixes.test.ts",
+      "line": 252,
+      "ts_code": null,
+      "target": "test.todo('should be wired into server startup (validatePlanMappings called from _core/index.ts)');",
+      "objective": "`server/architectural-fixes.test.ts` line 252 contains a placeholder: test.todo('should be wired into server startup (validatePlanMappings called from _core/index.ts)'); Implement it as a real, passing test that genuinely verifies the described behaviour.",
+      "verification": {
+        "command": "npx vitest run server/architectural-fixes.test.ts",
+        "expect": "the placeholder is now a real test and it passes",
+        "regression": "the file’s other results are unchanged; deleting the todo rather than implementing it is a FAIL"
+      },
+      "standing_prohibition": "Do NOT use an any-cast, @ts-ignore, @ts-expect-error, @ts-nocheck, or a fabricated interface to silence rather than fix. A false type declaration is worse than an any. Do not weaken or delete a test to make it pass."
+    },
+    {
+      "task_id": "T08",
+      "shape": "test_reliability",
+      "file": "server/brand-alignment.test.ts",
+      "line": 12,
+      "ts_code": null,
+      "target": "test.todo('leads with AI governance positioning, not generic website audit');",
+      "objective": "`server/brand-alignment.test.ts` line 12 contains a placeholder: test.todo('leads with AI governance positioning, not generic website audit'); Implement it as a real, passing test that genuinely verifies the described behaviour.",
+      "verification": {
+        "command": "npx vitest run server/brand-alignment.test.ts",
+        "expect": "the placeholder is now a real test and it passes",
+        "regression": "the file’s other results are unchanged; deleting the todo rather than implementing it is a FAIL"
+      },
+      "standing_prohibition": "Do NOT use an any-cast, @ts-ignore, @ts-expect-error, @ts-nocheck, or a fabricated interface to silence rather than fix. A false type declaration is worse than an any. Do not weaken or delete a test to make it pass."
+    },
+    {
+      "task_id": "T09",
+      "shape": "test_reliability",
+      "file": "server/chaos-engineering.test.ts",
+      "line": 90,
+      "ts_code": null,
+      "target": "test.todo(\"db.ts getDb() handles missing DATABASE_URL gracefully\");",
+      "objective": "`server/chaos-engineering.test.ts` line 90 contains a placeholder: test.todo(\"db.ts getDb() handles missing DATABASE_URL gracefully\"); Implement it as a real, passing test that genuinely verifies the described behaviour.",
+      "verification": {
+        "command": "npx vitest run server/chaos-engineering.test.ts",
+        "expect": "the placeholder is now a real test and it passes",
+        "regression": "the file’s other results are unchanged; deleting the todo rather than implementing it is a FAIL"
+      },
+      "standing_prohibition": "Do NOT use an any-cast, @ts-ignore, @ts-expect-error, @ts-nocheck, or a fabricated interface to silence rather than fix. A false type declaration is worse than an any. Do not weaken or delete a test to make it pass."
+    },
+    {
+      "task_id": "T10",
+      "shape": "suppression",
+      "file": "server/agent/enforced-quality-pipeline.ts",
+      "line": 583,
+      "ts_code": null,
+      "target": "// @ts-ignore - auto-fixed",
+      "objective": "`server/agent/enforced-quality-pipeline.ts` line 583 carries a TypeScript suppression: // @ts-ignore - auto-fixed Remove the suppression and fix the underlying type problem properly.",
+      "verification": {
+        "command": "npx tsc -p tsconfig.app.json --noEmit",
+        "expect": "the suppression at server/agent/enforced-quality-pipeline.ts:583 is removed",
+        "regression": "tsc total does not increase; relocating the suppression or widening to any is a FAIL"
+      },
+      "standing_prohibition": "Do NOT use an any-cast, @ts-ignore, @ts-expect-error, @ts-nocheck, or a fabricated interface to silence rather than fix. A false type declaration is worse than an any. Do not weaken or delete a test to make it pass."
+    },
+    {
+      "task_id": "T11",
+      "shape": "suppression",
+      "file": "server/agent/mcp/batch-audit.ts",
+      "line": 227,
+      "ts_code": null,
+      "target": "// @ts-ignore - auto-fixed",
+      "objective": "`server/agent/mcp/batch-audit.ts` line 227 carries a TypeScript suppression: // @ts-ignore - auto-fixed Remove the suppression and fix the underlying type problem properly.",
+      "verification": {
+        "command": "npx tsc -p tsconfig.app.json --noEmit",
+        "expect": "the suppression at server/agent/mcp/batch-audit.ts:227 is removed",
+        "regression": "tsc total does not increase; relocating the suppression or widening to any is a FAIL"
+      },
+      "standing_prohibition": "Do NOT use an any-cast, @ts-ignore, @ts-expect-error, @ts-nocheck, or a fabricated interface to silence rather than fix. A false type declaration is worse than an any. Do not weaken or delete a test to make it pass."
+    },
+    {
+      "task_id": "T12",
+      "shape": "suppression",
+      "file": "server/agent/mcp/claim-intent-classification.ts",
+      "line": 430,
+      "ts_code": null,
+      "target": "// @ts-ignore — TS2339 interface drift",
+      "objective": "`server/agent/mcp/claim-intent-classification.ts` line 430 carries a TypeScript suppression: // @ts-ignore — TS2339 interface drift Remove the suppression and fix the underlying type problem properly.",
+      "verification": {
+        "command": "npx tsc -p tsconfig.app.json --noEmit",
+        "expect": "the suppression at server/agent/mcp/claim-intent-classification.ts:430 is removed",
+        "regression": "tsc total does not increase; relocating the suppression or widening to any is a FAIL"
+      },
+      "standing_prohibition": "Do NOT use an any-cast, @ts-ignore, @ts-expect-error, @ts-nocheck, or a fabricated interface to silence rather than fix. A false type declaration is worse than an any. Do not weaken or delete a test to make it pass."
+    }
+  ]
+}
