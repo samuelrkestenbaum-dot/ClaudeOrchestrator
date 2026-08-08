@@ -67,3 +67,43 @@ write API this repository can implement a client against; or an operator-execute
 write on Claude's behalf with the resulting record shown, which would prove the
 store accepts a Claude-attributed row even if it does not prove Claude can
 originate one.
+
+---
+
+# SUPERSEDED — the conclusion above was WRONG
+
+**A bridge path existed and I did not find it.** This record is kept rather than
+deleted, because it is the evidence for a defect worth more than the record.
+
+What I actually did: enumerated **my own tool surface**, found no Operator Lab
+tool, found the candidate MCP server unauthenticated, and concluded `blocked`.
+
+What was true: the Operator Lab exposed `observe_interaction` and
+`gate_outbound_inference`. Taking a genuine Claude interaction through them
+produced a real Claude-attributed control-plane event (ledgerId **36263**, then
+**36264** for the ChatGPT write-back), and the **unchanged** readiness gate moved
+from `active: ChatGPT` to `active: Claude, ChatGPT`. No synthetic rows, no
+modified readiness rule.
+
+**The error in one line: I treated absence from my interface as absence from the
+system.** Every fact I recorded was accurate; the inference from them was not.
+
+## What this cost, and what it bought
+
+It cost a false `blocked` that would have stalled #49 and #50 indefinitely.
+
+It bought the discovery that Gravito's capability-exhaustion doctrine **was not
+load-bearing** — it existed, and nothing sat between a worker's concession and
+the operator. That gap is now closed by `build-os/motion/`, wired into the Stop
+path, and the exact conclusion above is its primary regression test.
+
+## Status now
+
+| claim | state |
+|---|---|
+| Claude can reach the live control plane | **YES**, via a proven attributable bridge through the ChatGPT surface |
+| Claude has NATIVE direct Lab access | **NO** — still absent from the Claude session tool surface |
+| live readiness | **2 of 4** — Claude + ChatGPT active; manus, surplus_recovery missing |
+
+The distinction between **bridge-mediated** and **native-direct** stays explicit.
+Native access remains a real capability improvement; it is no longer a blocker.

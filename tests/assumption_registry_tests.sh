@@ -58,7 +58,21 @@ t "untested load-bearing claims are surfaced as risk" "$(u untested)" "1"
 # Asserting "nothing is violated" encoded a STATE, not a property, and broke the
 # moment a real violation was registered. The property is that a KNOWN violation
 # is reported by name.
-t "a known-violated load-bearing assumption is reported" "$(node -e 'import("./build-os/assumptions/registry.mjs").then(m=>{const c=m.coverage({gatePath:".claude/hooks/routing-gate.sh"});console.log(String(c.violated_load_bearing.some(v=>v.id==="claude-can-write-live-control-plane")));})')" "true"
+# THIRD correction of this same mistake. Asserting that a SPECIFIC assumption is
+# violated is still a snapshot - it broke again when that assumption was
+# corrected. The property is that the reporter responds to ANY violation, so it
+# is tested by INJECTING one rather than depending on reality containing one.
+t "a violated row is surfaced as violated_load_bearing" "$(node -e '
+import("./build-os/assumptions/registry.mjs").then(m=>{
+ const saved=m.ASSUMPTIONS.slice();
+ m.ASSUMPTIONS.push({id:"__probe",kind:"DECLARED",claim:"probe",load_bearing:true,status:"violated",validated_in:[],untested_in:[],violations:["injected"]});
+ const c=m.coverage({gatePath:".claude/hooks/routing-gate.sh"});
+ m.ASSUMPTIONS.length=0; saved.forEach(x=>m.ASSUMPTIONS.push(x));
+ console.log(String(c.violated_load_bearing.some(v=>v.id==="__probe")));})')" "true"
+t "with no violation present, none is reported" "$(node -e '
+import("./build-os/assumptions/registry.mjs").then(m=>{
+ const c=m.coverage({gatePath:".claude/hooks/routing-gate.sh"});
+ console.log(String(c.violated_load_bearing.length===0||c.violated_load_bearing.every(v=>v.violations.length>0)));})')" "true"
 
 echo "== the audit exits non-zero on a violation =="
 node build-os/assumptions/self-audit.mjs "$TMP/undiscoverable.sh" >/dev/null 2>&1
@@ -67,7 +81,12 @@ t "self-audit exit code on a violated claim" "$?" "1"
 # is violated. A green exit here would mean the audit is not reading its own
 # registry.
 node build-os/assumptions/self-audit.mjs >/dev/null 2>&1
-t "self-audit exits non-zero while a real violation stands" "$?" "1"
+# Same correction: exercise the audit against a gate KNOWN to violate a derived
+# claim, rather than asserting the live registry happens to contain one.
+node build-os/assumptions/self-audit.mjs "$TMP/undiscoverable.sh" >/dev/null 2>&1
+t "self-audit exits non-zero on a violated claim" "$?" "1"
+node build-os/assumptions/self-audit.mjs >/dev/null 2>&1
+t "self-audit exits zero when no load-bearing claim is violated" "$?" "0"
 
 
 # ---- #48 additions -------------------------------------------------------
