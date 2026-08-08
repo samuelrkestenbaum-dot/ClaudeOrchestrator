@@ -592,7 +592,15 @@ mutgate_decide(){ # <stdin-json> — protocol on stdout: ALLOW or BLOCK + messag
     # the path that actually works on this host. A static message that says
     # "run this Bash command" while the host denies Bash is how EXP-0005
     # produced 0/12.
-    _rec="$DATA_ROOT/build-os/assumptions/gate-recovery.mjs"
+    # CODE_ROOT, not DATA_ROOT. The recovery generator is CODE that ships with
+    # this gate, not per-repo DATA. Resolving it under the data root meant that
+    # whenever the two differ -- which is the entire purpose of
+    # ROUTING_GATE_ROOT / CLAUDE_PROJECT_DIR -- the selector silently could not
+    # be found, and the gate fell through to the fallback that advertises the
+    # shell route unconditionally. That is precisely the behaviour the selector
+    # was made load-bearing to prevent, reappearing in the one configuration
+    # nobody ran. The same call already resolves --gate under CODE_ROOT.
+    _rec="$CODE_ROOT/build-os/assumptions/gate-recovery.mjs"
     if command -v node >/dev/null 2>&1 && [ -f "$_rec" ] \
        && node "$_rec" --tool "$tool" --gate "$CODE_ROOT/.claude/hooks/routing-gate.sh" 2>/dev/null; then
       logrow "$tid" "-" "RECOVERY-SELECTED" "tool=$tool host=${GRAVITO_HOST_PROFILE:-unknown_conservative} source=selector"

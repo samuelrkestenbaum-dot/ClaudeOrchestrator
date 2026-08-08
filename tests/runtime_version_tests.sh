@@ -62,11 +62,21 @@ EOF
   printf 'node_modules/\n.env\n' > "$t/.gitignore"
 }
 
-echo "== 1. MANIFEST.json is the canonical v0.1.0 release manifest =="
+echo "== 1. MANIFEST.json is the canonical release manifest =="
 M="$RUNTIME_DIR/MANIFEST.json"
+# VERSION IS DERIVED, NOT SPELLED. These assertions used to hardcode "0.1.0",
+# so they measured a SNAPSHOT rather than an invariant: the first legitimate
+# release broke six of them, and the obvious repair -- typing the new number --
+# would have converted a guard into a transcription. What the suite actually
+# means is "the manifest, the tool, the install receipt and the upgrade receipt
+# all agree", and that holds at every version.
+VER="$(node -e "console.log(JSON.parse(require('fs').readFileSync('$M','utf8')).version)")"
+NEXT_VER="$(node -e "const v='$VER'.split('.').map(Number); v[2]+=1; console.log(v.join('.'))")"
+[ -n "$VER" ] && [ "$VER" != "$NEXT_VER" ] && ok "derived version pair $VER -> $NEXT_VER" \
+                                          || no "derived version pair ($VER -> $NEXT_VER)"
 node -e "JSON.parse(require('fs').readFileSync('$M','utf8'))" 2>/dev/null \
   && ok "MANIFEST.json is valid JSON" || no "MANIFEST.json is valid JSON"
-grep -q '"version": *"0.1.0"' "$M" && ok "manifest version 0.1.0" || no "manifest version 0.1.0"
+grep -q "\"version\": *\"$VER\"" "$M" && ok "manifest version $VER" || no "manifest version $VER"
 for f in $EXECUTABLES $CONTRACTS; do
   grep -qF "\"$f\"" "$M" && ok "manifest lists $f" || no "manifest lists $f"
 done
@@ -84,7 +94,7 @@ grep -qF 'build-os/packets/routing/live_state/' "$M" && ok "gitignore lines incl
 echo "== 2. version: self-check CLEAN + DIRTY detection =="
 OUT="$("$GR" version 2>&1)"; RC=$?
 [ "$RC" = 0 ] && ok "version exits 0 on clean canonical" || no "version exits 0 on clean canonical (rc=$RC)"
-echo "$OUT" | grep -q "0.1.0" && ok "version prints runtime version" || no "version prints runtime version"
+echo "$OUT" | grep -q "$VER" && ok "version prints runtime version" || no "version prints runtime version"
 N_SHA="$(echo "$OUT" | grep -cE '\b[0-9a-f]{64}\b')"
 [ "$N_SHA" -ge 8 ] && ok "version prints per-file sha256 (8 files)" || no "version prints per-file sha256 (got $N_SHA)"
 echo "$OUT" | grep -q "RUNTIME: CLEAN" && ok "clean canonical reports CLEAN" || no "clean canonical reports CLEAN"
@@ -127,7 +137,7 @@ grep -qxF 'build-os/packets/routing/live_gate_log.tsv' "$T1/.gitignore" \
 grep -qxF 'node_modules/' "$T1/.gitignore" && ok "customer .gitignore lines preserved" || no "customer .gitignore lines preserved"
 IV="$T1/build-os/runtime/INSTALLED_VERSION.json"
 [ -f "$IV" ] && ok "INSTALLED_VERSION.json written" || no "INSTALLED_VERSION.json written"
-grep -q '"version": *"0.1.0"' "$IV" && ok "installed version recorded" || no "installed version recorded"
+grep -q "\"version\": *\"$VER\"" "$IV" && ok "installed version recorded" || no "installed version recorded"
 grep -qF "$CANON_COMMIT" "$IV" && ok "installed source commit recorded" || no "installed source commit recorded"
 N_REC="$(node -e "console.log(JSON.parse(require('fs').readFileSync('$IV','utf8')).files.length)" 2>/dev/null)"
 [ "$N_REC" = "8" ] && ok "per-file sha records: 8" || no "per-file sha records: 8 (got $N_REC)"
@@ -163,8 +173,8 @@ N_CUR="$(echo "$OUT" | grep -c 'current')"
 echo "# local customer patch" >> "$T1/build-os/tools/routing-check.sh"
 sed -i 's/^/# canonical evolved\n/' "$CANON/build-os/tools/record-degradation.sh" 2>/dev/null \
   || { printf '# canonical evolved\n%s' "$(cat "$CANON/build-os/tools/record-degradation.sh")" > "$CANON/build-os/tools/record-degradation.sh"; }
-"$GR" regen-manifest --version 0.1.1 >/dev/null 2>&1 \
-  && ok "regen-manifest cuts v0.1.1 from evolved canonical" || no "regen-manifest cuts v0.1.1 from evolved canonical"
+"$GR" regen-manifest --version "$NEXT_VER" >/dev/null 2>&1 \
+  && ok "regen-manifest cuts v$NEXT_VER from evolved canonical" || no "regen-manifest cuts v$NEXT_VER from evolved canonical"
 "$GR" version >/dev/null 2>&1 && ok "canonical CLEAN again after regen" || no "canonical CLEAN again after regen"
 OUT="$("$GR" status "$T1" 2>&1)"
 echo "$OUT" | grep 'routing-check.sh' | grep -q 'drifted-local' \
@@ -173,13 +183,13 @@ echo "$OUT" | grep 'record-degradation.sh' | grep -q 'upgrade-available' \
   && ok "canonically evolved file reports upgrade-available" || no "canonically evolved file reports upgrade-available"
 echo "$OUT" | grep 'routing_contract.md' | grep -q 'current' \
   && ok "unchanged file reports current" || no "unchanged file reports current"
-echo "$OUT" | grep -q '0.1.1' && ok "status shows canonical version 0.1.1" || no "status shows canonical version 0.1.1"
+echo "$OUT" | grep -q "$NEXT_VER" && ok "status shows canonical version $NEXT_VER" || no "status shows canonical version $NEXT_VER"
 
 echo "== 6. upgrade: refusal on local drift; --force-theirs backs up first =="
 OUT="$("$GR" upgrade "$T1" 2>&1)"; RC=$?
 [ "$RC" != 0 ] && ok "upgrade refuses while drifted-local files exist" || no "upgrade refuses while drifted-local files exist"
 echo "$OUT" | grep -q 'routing-check.sh' && ok "upgrade refusal names the drifted file" || no "upgrade refusal names the drifted file"
-grep -q '"version": *"0.1.0"' "$IV" && ok "refused upgrade changes nothing" || no "refused upgrade changes nothing"
+grep -q "\"version\": *\"$VER\"" "$IV" && ok "refused upgrade changes nothing" || no "refused upgrade changes nothing"
 DRIFT_SHA="$(sha "$T1/build-os/tools/routing-check.sh")"
 OUT="$("$GR" upgrade "$T1" --force-theirs 2>&1)"; RC=$?
 [ "$RC" = 0 ] && ok "upgrade --force-theirs succeeds" || { no "upgrade --force-theirs succeeds (rc=$RC)"; echo "$OUT"; }
@@ -191,10 +201,10 @@ cmp -s "$T1/build-os/tools/routing-check.sh" "$CANON/build-os/tools/routing-chec
   && ok "forced file restored to canonical" || no "forced file restored to canonical"
 cmp -s "$T1/build-os/tools/record-degradation.sh" "$CANON/build-os/tools/record-degradation.sh" \
   && ok "upgrade-available file updated to canonical" || no "upgrade-available file updated to canonical"
-grep -q '"version": *"0.1.1"' "$IV" && ok "INSTALLED_VERSION bumped to 0.1.1" || no "INSTALLED_VERSION bumped to 0.1.1"
+grep -q "\"version\": *\"$NEXT_VER\"" "$IV" && ok "INSTALLED_VERSION bumped to $NEXT_VER" || no "INSTALLED_VERSION bumped to $NEXT_VER"
 UR="$(ls -1 "$T1"/build-os/runtime/receipts/upgrade-*.json 2>/dev/null | tail -n1)"
 [ -n "$UR" ] && ok "upgrade receipt written" || no "upgrade receipt written"
-grep -q '"from_version": *"0.1.0"' "$UR" 2>/dev/null && grep -q '"to_version": *"0.1.1"' "$UR" 2>/dev/null \
+grep -q "\"from_version\": *\"$VER\"" "$UR" 2>/dev/null && grep -q "\"to_version\": *\"$NEXT_VER\"" "$UR" 2>/dev/null \
   && ok "receipt records from/to versions" || no "receipt records from/to versions"
 OUT="$("$GR" status "$T1" 2>&1)"
 echo "$OUT" | grep -q 'STATUS: 8 current, 0 drifted-local, 0 upgrade-available' \
@@ -205,7 +215,7 @@ OUT="$("$GR" rollback "$T1" 2>&1)"; RC=$?
 [ "$RC" = 0 ] && ok "rollback exits 0" || { no "rollback exits 0 (rc=$RC)"; echo "$OUT"; }
 [ "$(sha "$T1/build-os/tools/routing-check.sh")" = "$DRIFT_SHA" ] \
   && ok "rollback restores the customer's local modification" || no "rollback restores the customer's local modification"
-grep -q '"version": *"0.1.0"' "$IV" && ok "rollback restores INSTALLED_VERSION 0.1.0" || no "rollback restores INSTALLED_VERSION 0.1.0"
+grep -q "\"version\": *\"$VER\"" "$IV" && ok "rollback restores INSTALLED_VERSION $VER" || no "rollback restores INSTALLED_VERSION $VER"
 ls "$T1"/build-os/runtime/receipts/rollback-*.json >/dev/null 2>&1 \
   && ok "rollback receipt written" || no "rollback receipt written"
 

@@ -1,15 +1,15 @@
 {
   "name": "gravito-runtime",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Versioned Gravito routing runtime: the five executables and three contracts proven in the empathiq pilot install, plus the settings.json hook wiring and .gitignore stanza — installable without manual copying.",
-  "generated": "2026-08-06",
+  "generated": "2026-08-08",
   "files": [
     {
       "source": ".claude/hooks/routing-gate.sh",
       "install": ".claude/hooks/routing-gate.sh",
       "mode": "executable",
       "header": false,
-      "sha256": "0b83040575507b82e165a33c61ac6148db32580b293cb1057e60f0741c5d74c6"
+      "sha256": "838168b76690054928ce3c00b1f5eaf9ab921101bc6886272f6fbdd461d903e4"
     },
     {
       "source": "build-os/tools/route-task.sh",

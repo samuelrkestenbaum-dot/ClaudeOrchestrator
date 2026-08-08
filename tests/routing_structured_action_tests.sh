@@ -68,8 +68,17 @@ edit_json(){ printf '{"session_id":"s1","transcript_path":"/tmp/t","cwd":".","ho
 bash_json(){ printf '{"session_id":"s1","transcript_path":"/tmp/t","cwd":".","hook_event_name":"PreToolUse","tool_name":"Bash","tool_input":{"command":"%s"}}' "$1"; }
 # JSON-escape a real shell command for embedding (backslashes then quotes).
 jesc(){ printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g'; }
+# HOST PROFILE IS DECLARED, NOT ASSUMED. This suite used to leave it unset,
+# which silently meant unknown_conservative -- a profile where Bash is
+# approval-gated with no approver. It then asserted that the refusal offers a
+# SHELL recovery command. Those two cannot both be true, and the selector is
+# right to refuse to advertise a route the host will deny. The undeclared
+# assumption was the defect, not the selector: same shape as
+# authority_bootstrap_permission_class_mismatch. Tests that mean to exercise
+# the shell path must say so.
+HOST_PROFILE="${HOST_PROFILE:-unknown_conservative}"
 rungate(){ # <root> <subcmd> <stdin> <outfile-stem> — exit code on stdout
-  printf '%s' "$3" | ROUTING_GATE_ROOT="$1" bash "$GATE" "$2" >"$4.out" 2>"$4.err"; echo $?
+  printf '%s' "$3" | ROUTING_GATE_ROOT="$1" GRAVITO_HOST_PROFILE="$HOST_PROFILE" bash "$GATE" "$2" >"$4.out" 2>"$4.err"; echo $?
 }
 statefile(){ printf '%s/build-os/packets/routing/live_state/%s.tsv' "$1" "$(basename "$2" .md)"; }
 logfile(){ printf '%s/build-os/packets/routing/live_gate_log.tsv' "$1"; }
@@ -220,7 +229,13 @@ awk -F'\t' 'NF!=3 && $1!="label" && !/^#/{bad=1} END{exit bad}' "$SFC" \
   && ok "the state file's 3-field TSV shape survived the fingerprint" \
   || no "a state row broke the 3-field TSV shape"
 
-echo "== 5. RECOVERY END-TO-END — the refusal's own command classifies routing_tool, executes, and unblocks =="
+echo "== 5. RECOVERY END-TO-END (host profile claude_code_interactive: Bash is viable) =="
+# Declared, because this section exercises the SHELL recovery path. Under an
+# approver-present host the selector still PREFERS the Write-class channel on
+# least privilege, and advertises the shell route as a higher-privilege
+# ALTERNATIVE -- which is what makes the command extractable here and absent
+# under the conservative default.
+HOST_PROFILE="claude_code_interactive"
 RD="$(mkroot rd)"
 RC="$(rungate "$RD" mutgate "$(edit_json)" "$WORK/rec1")"
 [ "$RC" = "2" ] && ok "a no-receipt Edit is blocked (the boundary is live)" || no "unrouted Edit passed (exit $RC)"
@@ -249,6 +264,8 @@ find "$RD/build-os/packets/routing" -maxdepth 1 -name 'routing-quick-task-1-*.md
 RC="$(rungate "$RD" mutgate "$(edit_json)" "$WORK/rec4")"
 [ "$RC" = "0" ] && ok "the NEXT mutation-capable call passes — recovery is one command, and it cannot carry unrelated mutations" \
                || no "mutation still blocked after recovery (exit $RC)"
+
+HOST_PROFILE="unknown_conservative"   # back to the conservative default
 
 echo "== 6. A compound command under an OPEN receipt lands MUTATION-capable, never routing_tool =="
 RE="$(mkroot re)"
@@ -316,5 +333,57 @@ RC="$(rungate "$RI" mutgate "$(edit_json)" "$WORK/nb3")"
                || no "Edit passed unrouted (exit $RC)"
 
 echo
+
+echo "== 9. HOST-CONDITIONAL RECOVERY — one selector, two hosts, opposite advice =="
+# The negative half is the point. A refusal that always lists every route would
+# pass a "does it mention route-task.sh" test while giving a worker on a
+# Bash-denied host a command it cannot run -- which is how EXP-0005 produced
+# 0/12. So the contract is CONDITIONAL: advertise a route only where it is
+# viable, and prove BOTH directions come from the same source of truth.
+REC="$SRC/build-os/assumptions/gate-recovery.mjs"
+CONS="$(node "$REC" --tool Edit --host unknown_conservative --gate "$GATE" 2>/dev/null)"
+INTER="$(node "$REC" --tool Edit --host claude_code_interactive --gate "$GATE" 2>/dev/null)"
+
+printf '%s' "$CONS" | grep -q "route-task.sh" \
+  && no "unknown_conservative advertises a Bash route the host will refuse" \
+  || ok "unknown_conservative does NOT advertise the shell route (Bash is approval-gated with no approver)"
+printf '%s' "$CONS" | grep -q "routing-request.json" \
+  && ok "...and it DOES advertise the Write-class routing-request channel, so the worker is not left with nothing" \
+  || no "the conservative refusal advertises no viable route at all"
+printf '%s' "$CONS" | grep -q "NOT AVAILABLE on this host: structured_routing_action" \
+  && ok "...and names the unavailable route explicitly, so its absence is discoverable rather than silent" \
+  || no "the unavailable route is omitted silently"
+
+printf '%s' "$INTER" | grep -q "route-task.sh --task-id quick-task-1" \
+  && ok "claude_code_interactive DOES advertise the shell route (approver present makes Bash viable)" \
+  || no "a Bash-viable host still hides the shell route"
+printf '%s' "$INTER" | grep -q "least-privileged viable route is 'routing_request_channel'" \
+  && ok "...but still PREFERS the Write-class channel — viability does not override least privilege" \
+  || no "the Bash-viable host lost the least-privilege preference"
+
+# SAME SOURCE OF TRUTH. The two answers must differ ONLY by host, and the live
+# gate must produce the selector's text rather than a second copy of it.
+[ "$CONS" != "$INTER" ] && ok "the two refusals differ, and differ by host alone (same generator, same gate)" \
+                        || no "the selector returns identical text for hosts with different permissions"
+grep -q "gate-recovery.mjs" "$GATE" \
+  && ok "the live gate GENERATES its refusal from that selector — not a second hand-maintained copy" \
+  || no "the gate carries its own refusal text, which can drift from the selector"
+
+# THE REGRESSION THAT HID HERE. The gate resolved its recovery generator under
+# the DATA root while resolving --gate under the CODE root. Wherever the two
+# differ -- which is the entire purpose of ROUTING_GATE_ROOT -- the selector
+# could not be found and the gate fell through to a fallback advertising the
+# shell route UNCONDITIONALLY, on every host. Nothing detected it, because the
+# suite that would have was truncated by a timeout.
+RDX="$(mkroot rdx)"
+HOST_PROFILE="unknown_conservative"
+RCX="$(rungate "$RDX" mutgate "$(edit_json)" "$WORK/rootsep")"
+[ "$RCX" = "2" ] && ok "with DATA_ROOT separate from CODE_ROOT the gate still blocks" || no "root separation broke the block (exit $RCX)"
+grep -q "SELECTOR UNAVAILABLE" "$WORK/rootsep.err" \
+  && no "the selector is UNFINDABLE when DATA_ROOT != CODE_ROOT — the fallback advertises Bash on every host" \
+  || ok "the selector RUNS when DATA_ROOT != CODE_ROOT (it is code, resolved under CODE_ROOT)"
+grep -q "route-task.sh" "$WORK/rootsep.err" \
+  && no "a separated data root leaks the shell route onto a Bash-denied host" \
+  || ok "...so a Bash-denied host is not offered the shell route through the back door"
 echo "==== RESULT: $PASS passed, $FAIL failed ===="
 [ "$FAIL" -eq 0 ]
