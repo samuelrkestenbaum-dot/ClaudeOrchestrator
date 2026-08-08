@@ -40,6 +40,42 @@
         "concurrent_suites_at_start": 0
       },
       "note": "Serialized and uncontended. 75 -> 9 failures. The 9 are exactly the RC-C residual already classified: control_registry 5, mutator_registry 1, and one each in exp3_harness / exp0004_harness / exp0004_blinding."
+    },
+    {
+      "suite": "tests/build_os_tests.sh",
+      "completed": true,
+      "result_line": "==== RESULT: 4703 passed, 6 failed ====",
+      "passed": 4703,
+      "failed": 6,
+      "exit_code": 1,
+      "ceiling_s": 280,
+      "measured_at_head": "2e0ddc7",
+      "wall_clock_s": 673,
+      "runs_completed": 3,
+      "note": "Determinism pair, run 1 of 2. HEAD 2e0ddc7 verified identical before and after; tree clean both times.",
+      "profile": {
+        "orphaned_children_before": 0,
+        "orphaned_children_after": 0,
+        "concurrent_suites_at_start": 0
+      }
+    },
+    {
+      "suite": "tests/build_os_tests.sh",
+      "completed": true,
+      "result_line": "==== RESULT: 4703 passed, 6 failed ====",
+      "passed": 4703,
+      "failed": 6,
+      "exit_code": 1,
+      "ceiling_s": 280,
+      "measured_at_head": "2e0ddc7",
+      "wall_clock_s": 610,
+      "runs_completed": 4,
+      "note": "Determinism pair, run 2 of 2. Same HEAD, same tree, IDENTICAL result line and identical failing set.",
+      "profile": {
+        "orphaned_children_before": 0,
+        "orphaned_children_after": 0,
+        "concurrent_suites_at_start": 0
+      }
     }
   ],
   "triage": {
@@ -126,6 +162,6 @@
     ],
     "coverage_caveat": "This triage is from ONE completed run. It establishes that the suite CAN finish and that it is red; it does not establish which failures are deterministic. A second run is needed before any failure is called stable or flaky."
   },
-  "determinism_note": "Two completed runs now exist, 536s and 533s, so the DURATION is repeatable. They are NOT a repeat measurement of the same tree -- the second ran against 65 fixed failures -- so no failure has yet been shown deterministic. That still needs two runs at one HEAD.",
+  "determinism_note": "PROVEN AT ONE HEAD. Two complete runs at 2e0ddc7, HEAD verified identical before and after each and the tree clean both times, produced the SAME result line (4703 passed, 6 failed) and the SAME failing set: control_registry 5, mutator_registry 1. The six remaining failures are deterministic, not flaky, so they are real debt rather than noise. WHAT THIS DOES NOT SHOW: two matching runs cannot refute DEFECT-0013's measured 6.26% non-determinism in the base tree -- at that rate a matching pair is unremarkable. It establishes these six failures reproduce, not that the suite is free of flake. Durations were 673s and 610s, a 10% spread wider than the earlier 536s/533s pair, so the wall clock is repeatable only to within about that.",
   "orphan_correction": "EARLIER CLAIM WITHDRAWN. I reported orphaned `sleep` processes reparented to PID 1 as a suite defect. This clean run measured 0 before and 0 after. The orphans were from MY OWN killed background waiter loops, not from the suite. Attributing them to the suite was wrong."
 }
