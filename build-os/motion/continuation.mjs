@@ -40,18 +40,23 @@ export const NON_TERMINAL = [
  */
 export function continuationDecision(state = {}) {
   const tasks = state.tasks || [];
-  const reasons = [];
 
+  // `term` takes its evidence EXPLICITLY. It used to default to `evaluated`,
+  // which is declared further down — so every early terminal path threw a
+  // temporal-dead-zone ReferenceError instead of permitting the stop, and a
+  // controller that throws on `operator_stop` is worse than no controller.
+  // The same defect class was fixed once already in gate-recovery.mjs; a
+  // default parameter referencing a later `const` is the shape to watch for.
   if (state.operator_stop === true)
-    return term("explicit_operator_stop", "the operator issued a stop");
+    return term("explicit_operator_stop", "the operator issued a stop", []);
   if (state.safety_stop === true)
-    return term("authority_or_safety_forbids_execution", "authority or safety policy forbids further execution");
+    return term("authority_or_safety_forbids_execution", "authority or safety policy forbids further execution", []);
   if (state.environment_terminating === true)
-    return term("unavoidable_environment_termination", "the environment is terminating");
+    return term("unavoidable_environment_termination", "the environment is terminating", []);
 
   const open = tasks.filter((t) => t.status !== "completed" && t.status !== "deleted");
   if (open.length === 0)
-    return term("no_remaining_queued_work", "the queue holds no open work");
+    return term("no_remaining_queued_work", "the queue holds no open work", []);
 
   // Runnable = every dependency completed, and any publication prerequisite
   // actually published. A task whose ONLY obstacle is an unpushed commit that
@@ -126,7 +131,7 @@ export function continuationDecision(state = {}) {
     binding: "STOP REFUSED — begin the next task.",
   };
 
-  function term(condition, why, ev = evaluated) {
+  function term(condition, why, ev) {
     return {
       artifact: "continuation_decision",
       decision: "stop",

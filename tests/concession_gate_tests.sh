@@ -43,18 +43,24 @@ t "a round surfacing no NEW path concedes (search converged)" \
 t "a round WITH a new path keeps searching" \
   "$(g "$BLOCKING" '{"round":2,"attemptedSignatures":["a"]}')" "continue_search"
 
-echo "== live Stop hook =="
+echo "== live Stop hook, DRAINED queue: the concession check is what decides =="
+# The two gates compose in a fixed order — continuation first, concession
+# second — so a suite that exercises the concession path against the REAL queue
+# measures the continuation refusal instead and proves nothing about
+# concessions. These cases therefore run against a project root whose queue
+# holds no open work, which is the only state in which the concession check is
+# the one that governs the outcome.
 T=$(mktemp -d); trap 'rm -rf "$T"' EXIT
+mkdir -p "$T/build-os/motion"
+ln -s "$PWD/build-os/motion/gate-stop.mjs" "$T/build-os/motion/gate-stop.mjs"
+echo '{"tasks":[{"id":"49","status":"completed"}]}' > "$T/build-os/motion/queue.json"
 printf '%s\n' '{"message":{"role":"assistant","content":[{"type":"text","text":"I cannot do this. It is blocked."}]}}' > "$T/c.jsonl"
-printf '{"transcript_path":"%s/c.jsonl"}' "$T" | CLAUDE_PROJECT_DIR="$PWD" bash .claude/hooks/concession-gate.sh >/dev/null 2>"$T/e"
+printf '{"transcript_path":"%s/c.jsonl"}' "$T" | CLAUDE_PROJECT_DIR="$T" bash .claude/hooks/concession-gate.sh >/dev/null 2>"$T/e"
 t "Stop hook refuses a bare concession" "$?" "2"
 grep -q "surfaces observed to hold" "$T/e" && ok "the refusal TELLS the worker where the capability lives" || no "refusal carries recovery guidance"
 printf '%s\n' '{"message":{"role":"assistant","content":[{"type":"text","text":"Done. 42 tests pass."}]}}' > "$T/o.jsonl"
-printf '{"transcript_path":"%s/o.jsonl"}' "$T" | CLAUDE_PROJECT_DIR="$PWD" bash .claude/hooks/concession-gate.sh >/dev/null 2>&1
-t "Stop hook allows a non-conceding turn" "$?" "0"
-
-echo "==== RESULT: $P passed, $F failed ===="
-[ "$F" -eq 0 ]
+printf '{"transcript_path":"%s/o.jsonl"}' "$T" | CLAUDE_PROJECT_DIR="$T" bash .claude/hooks/concession-gate.sh >/dev/null 2>&1
+t "Stop hook allows a non-conceding turn once the queue is drained" "$?" "0"
 
 echo "== continuation controller: task completion is NOT a stop condition =="
 c(){ node -e '
@@ -91,4 +97,15 @@ printf '%s\n' '{"message":{"role":"assistant","content":[{"type":"text","text":"
 printf '{"transcript_path":"%s/n.jsonl"}' "$T2" | CLAUDE_PROJECT_DIR="$PWD" bash .claude/hooks/concession-gate.sh >/dev/null 2>"$T2/e"
 t "a NON-conceding completion turn is refused while work remains" "$?" "2"
 grep -q "NEXT RUNNABLE TASK" "$T2/e" && ok "the refusal NAMES the next task" || no "refusal names the next task"
+
+# THE ORDERING IS PART OF THE CONTRACT, so it is asserted rather than assumed.
+# A conceding turn taken while work remains must be refused for the
+# CONTINUATION reason: telling such a worker only "record exhaustion evidence"
+# would let it satisfy the concession gate and stop with the queue still full.
+printf '%s\n' '{"message":{"role":"assistant","content":[{"type":"text","text":"I am blocked and cannot proceed."}]}}' > "$T2/b.jsonl"
+printf '{"transcript_path":"%s/b.jsonl"}' "$T2" | CLAUDE_PROJECT_DIR="$PWD" bash .claude/hooks/concession-gate.sh >/dev/null 2>"$T2/e2"
+grep -q "NEXT RUNNABLE TASK" "$T2/e2" && ok "continuation OUTRANKS the concession check while work remains" || no "continuation outranks the concession check"
 rm -rf "$T2"
+
+echo "==== RESULT: $P passed, $F failed ===="
+[ "$F" -eq 0 ]
