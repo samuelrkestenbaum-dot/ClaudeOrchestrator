@@ -72,5 +72,29 @@ echo "== an empty registry must not read as success =="
 t "zero checks is zero trustworthy, not a pass" \
   "$(node -e 'import("./build-os/audit/check-registry.mjs").then(m=>{const r=m.auditChecks([]);console.log(String(r.trustworthy))})')" "0"
 
+echo "== FULL-SUITE STATUS: a truncated run has no total =="
+# The rule this encodes: "most of the suite ran" may not quietly become "the
+# suite passes". It is the check auditor's discipline one level up -- there, a
+# check that never demonstrated a failure is UNPROVEN however often it passed.
+ss(){ node -e '
+import("./build-os/audit/suite-status.mjs").then(m=>{const r=m.suiteStatus(JSON.parse(process.argv[1]));
+console.log(process.argv[2]==="p"?String(r.passed):(process.argv[2]==="g"?String(r.green):(process.argv[2]==="c"?r.ceiling_verdict.split(" ")[0]:r.status)));});' "$1" "${2:-s}"; }
+CUT='{"suite":"x","completed":false,"exit_code":124,"ceiling_s":280,"passed":4473}'
+t "a timed-out run is TRUNCATED, never green" "$(ss "$CUT")" "TRUNCATED"
+t "  and it is not green" "$(ss "$CUT" g)" "false"
+# THE SUBSTITUTION BEING FORBIDDEN: a partial count must not survive as a total.
+t "  a truncated run reports NO pass count, even when one was offered" "$(ss "$CUT" p)" "null"
+t "  and the ceiling verdict is withheld until a full run is measured" "$(ss "$CUT" c)" "UNKNOWN"
+t "a completed run with failures is FAILING, not green"   "$(ss '{"suite":"x","completed":true,"passed":4473,"failed":75,"wall_clock_s":536,"ceiling_s":280,"runs_completed":1}')" "FAILING"
+t "  a completed clean run is GREEN"   "$(ss '{"suite":"x","completed":true,"passed":10,"failed":0,"wall_clock_s":5,"ceiling_s":280,"runs_completed":1}')" "GREEN"
+t "  a RESULT line with no recorded completed run is UNPROVEN"   "$(ss '{"suite":"x","completed":true,"passed":10,"failed":0,"runs_completed":0}')" "UNPROVEN"
+t "  an over-ceiling completed run marks the ceiling OBSOLETE"   "$(ss '{"suite":"x","completed":true,"passed":10,"failed":0,"wall_clock_s":536,"ceiling_s":280,"runs_completed":1}' c)" "OBSOLETE"
+t "one completed run is not a determinism claim"   "$(node -e 'import("./build-os/audit/suite-status.mjs").then(m=>console.log(String(/SINGLE RUN/.test(m.suiteStatus({completed:true,passed:1,failed:0,runs_completed:1}).determinism))))')" "true"
+
+echo "== the recorded run is represented honestly =="
+t "build_os_tests.sh is on record as FAILING, not green"   "$(node -e 'Promise.all([import("./build-os/audit/suite-status.mjs"),import("node:fs")]).then(([m,fs])=>{
+const j=JSON.parse(fs.readFileSync("build-os/audit/suite-runs.json","utf8"));
+console.log(m.suiteStatus(j.runs.find(r=>r.suite==="tests/build_os_tests.sh")).status)})')" "FAILING"
+
 echo "==== RESULT: $P passed, $F failed ===="
 [ "$F" -eq 0 ]
