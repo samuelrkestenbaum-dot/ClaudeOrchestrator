@@ -1,0 +1,9 @@
+{
+  "continuity.evidence-ref-required": "5e8407f38ff4def509c9c12db4be36296321f95c305022a73fdddaaa019d40c7",
+  "continuity.counterfactual-required": "5e8407f38ff4def509c9c12db4be36296321f95c305022a73fdddaaa019d40c7",
+  "continuity.middle-rung-never-collapses": "5e8407f38ff4def509c9c12db4be36296321f95c305022a73fdddaaa019d40c7",
+  "identity.resolved-not-declared": "c086970f49a3ef4a1a9ccb35e8e7804fc5672ef42e8617045b375dfbcb65263b",
+  "identity.ambiguity-preserved": "876c16d2fce563094b1a8e9a78dd999dd9437b1ef4294527e9bbf1adacf61b0a",
+  "continuation.terminal-conditions": "1f99557eda07ef4db099bf31d69738357498901fcf0150ff9d290e9238e23163",
+  "motion.continuation-outranks-concession": "d96718f2054126a64451ba937a937a45df06066f489396c246edbcad0e850e29"
+}
