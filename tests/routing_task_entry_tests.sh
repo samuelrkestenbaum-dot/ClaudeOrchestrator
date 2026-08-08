@@ -84,8 +84,13 @@ bash_json(){ # <command>
 tool_json(){ # <tool_name> [input-payload]
   printf '{"session_id":"s1","transcript_path":"/tmp/t","cwd":".","hook_event_name":"PreToolUse","tool_name":"%s","tool_input":{"file_path":"/x","payload":"%s"}}' "$1" "${2:-p}"
 }
+# HOST PROFILE DECLARED. Left unset this suite silently meant
+# unknown_conservative -- Bash approval-gated, no approver -- and then asserted
+# the refusal offers a route-task.sh SHELL command. The selector is right to
+# withhold a route the host would deny; the undeclared assumption was the bug.
+HOST_PROFILE="${HOST_PROFILE:-unknown_conservative}"
 rungate(){ # <root> <subcmd> <stdin> <outfile-stem> — exit code on stdout
-  printf '%s' "$3" | ROUTING_GATE_ROOT="$1" bash "$GATE" "$2" >"$4.out" 2>"$4.err"; echo $?
+  printf '%s' "$3" | ROUTING_GATE_ROOT="$1" GRAVITO_HOST_PROFILE="$HOST_PROFILE" bash "$GATE" "$2" >"$4.out" 2>"$4.err"; echo $?
 }
 statefile(){ printf '%s/build-os/packets/routing/live_state/%s.tsv' "$1" "$(basename "$2" .md)"; }
 logfile(){ printf '%s/build-os/packets/routing/live_gate_log.tsv' "$1"; }
@@ -143,6 +148,7 @@ grep -qi "provider_adapter_contract.md" "$CONTRACT_LIVE" \
 
 echo "== 2. RED — mutation-capable calls with NO open receipt are BLOCKED, with the recovery command =="
 RA="$(mkroot ra)"
+HOST_PROFILE="claude_code_interactive"   # this block asserts the SHELL recovery route
 RC="$(rungate "$RA" mutgate "$(edit_json)" "$WORK/m-edit")"
 [ "$RC" = "2" ] && ok "RED: Edit with an empty receipt store is BLOCKED (exit 2)" || no "RED FAILED: unrouted Edit passed (exit $RC)"
 RC="$(rungate "$RA" mutgate "$(write_json)" "$WORK/m-write")"

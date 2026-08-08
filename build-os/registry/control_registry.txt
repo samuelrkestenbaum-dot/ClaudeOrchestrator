@@ -1141,7 +1141,7 @@ inputs: the router, the guidance files, the hooks, the installers, and forty-one
 output: ==== RESULT: N passed, M failed ====
 owning_module: tests/build_os_tests.sh
 consuming_policies: the repository's single verification command; swarm-merge.sh runs it as the post-merge verification
-evidence_refs: tests/build_os_tests.sh:1342; tests/build_os_tests.sh:1343
+evidence_refs: tests/build_os_tests.sh:1350; tests/build_os_tests.sh:1351
 failure_behavior: exits non-zero when FAIL is non-zero
 rollback_behavior: read-only; all fixtures live in mktemp dirs
 promotion_requirement: n/a

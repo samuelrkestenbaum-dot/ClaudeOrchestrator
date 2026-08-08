@@ -56,8 +56,50 @@
           "exp0004_blinding (1)",
           "parent-suite direct"
         ],
-        "cause": "NOT YET TRIAGED. Recorded as untriaged rather than folded into the two known causes.",
-        "resolution": "open"
+        "cause": "TRIAGED INDIVIDUALLY. Four distinct causes, not one.",
+        "resolution": "2 fixed, 3 blocked by a standing constraint, 5 pre-existing debt (2 of which were mine and are fixed).",
+        "classified": [
+          {
+            "suites": [
+              "tests/routing_task_entry_tests.sh"
+            ],
+            "failures": 2,
+            "class": "stale_test_contract",
+            "evidence": "Same undeclared-host-profile assumption as RC-B: the suite left GRAVITO_HOST_PROFILE unset (meaning unknown_conservative, Bash approval-gated, no approver) and then asserted the refusal carries a route-task.sh shell command. Declaring claude_code_interactive for the block that measures shell recovery: 122/2 -> 124/0.",
+            "fixed": true
+          },
+          {
+            "suites": [
+              "tests/exp3_harness_tests.sh",
+              "tests/exp0004_harness_tests.sh",
+              "tests/exp0004_blinding_tests.sh"
+            ],
+            "failures": 3,
+            "class": "blocked_by_standing_constraint",
+            "evidence": "All three assert 'no executable files under build-os/experiments/'. The sole offender is build-os/experiments/EXP-0005-system-efficiency/harness/restore-seed.sh, tracked at mode 100755. It is a FROZEN EXP-0005 artifact, and the standing instruction forbids altering, rewriting, deleting, regenerating or rerunning any frozen EXP-0005 artifact. chmod would modify it.",
+            "fixed": false,
+            "note": "NOT a defect this worker may clear. Resolving it requires either an operator act unfreezing that one file's mode, or an explicit allow-list entry in the three suites. Both are operator decisions; neither is taken here."
+          },
+          {
+            "suites": [
+              "tests/mutator_registry_tests.sh"
+            ],
+            "failures": 1,
+            "class": "pre_existing_census_gap",
+            "evidence": "build-os/tools/publish-check.test.sh performs durable writes and is not censused in the mutator registry. The file predates this arc (it arrived with the publication-authority work), and the failure is unrelated to 1c1f68d.",
+            "fixed": false
+          },
+          {
+            "suites": [
+              "tests/control_registry_tests.sh"
+            ],
+            "failures": 5,
+            "class": "mixed",
+            "evidence": "TWO were mine: inserting the four chain_suite calls into build_os_tests.sh shifted line numbers, so control_registry.txt's evidence_refs for suite.build_os (lines 1342/1343) came to land on comment-only lines -- a VACUOUS-REF, the guard failing rather than passing. Re-pointed to 1350/1351, the RESULT line and its exit. THE REMAINDER IS PRE-EXISTING DRIFT: scan-controls reports 179 registered controls against 136 discovered surfaces, with 23 UNREPORTED over-authorised entries and 19 UNREGISTERED surfaces. That is a standing backlog, far larger than this arc, and is not fixed here.",
+            "fixed": "partially",
+            "note": "Line-numbered evidence_refs are inherently fragile: any insertion above a citation silently converts it into a vacuous reference. Worth a separate item -- cite an anchor, not a line."
+          }
+        ]
       }
     ],
     "coverage_caveat": "This triage is from ONE completed run. It establishes that the suite CAN finish and that it is red; it does not establish which failures are deterministic. A second run is needed before any failure is called stable or flaky."
