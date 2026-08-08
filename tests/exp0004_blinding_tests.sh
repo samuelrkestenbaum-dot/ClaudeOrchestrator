@@ -92,10 +92,57 @@ for f in "$SEAL" "$VIEWS" "$FREEZE" "$REVEAL" "$FLOW" "$RECORDS" "$EXCL" "$ELIG"
   [ -f "$f" ] && ok "present: ${f#$SRC/}" || no "missing: ${f#$SRC/}"
   [ ! -x "$f" ] && ok "NOT executable (mode 644 by design): ${f#$SRC/}" || no "executable: ${f#$SRC/}"
 done
-NEXEC="$(find "$SRC/build-os/experiments" -type f -perm -u+x 2>/dev/null | grep -c . || true)"
-[ "$NEXEC" = "0" ] \
-  && ok "0 executables anywhere under build-os/experiments/ (EXP-0003's census holds)" \
-  || no "$NEXEC executable file(s) under build-os/experiments/"
+# THE CENSUS, WITH ONE NARROW HISTORICAL EXCEPTION.
+#
+# build-os/experiments/EXP-0005-system-efficiency/harness/restore-seed.sh is
+# tracked at mode 755 and is a FROZEN EXP-0005 artifact. The standing
+# instruction forbids altering, rewriting, deleting or regenerating one, and a
+# chmod is an alteration. The operator ruled that its immutability outranks a
+# tidier census assumption, so it is exempted here rather than modified there.
+#
+# The exemption is deliberately unable to grow: ONE exact relative path and ONE
+# exact expected mode, compared literally. No glob, no directory prefix, no
+# "*.sh under EXP-*" -- a pattern would silently exempt every future experiment
+# file, which is how a narrow exception becomes a blanket one.
+FROZEN_EXEC_REL="EXP-0005-system-efficiency/harness/restore-seed.sh"
+FROZEN_EXEC_MODE="755"
+
+unexpected_execs(){ # <experiments-root> — every executable EXCEPT the one exemption
+  find "$1" -type f -perm -u+x 2>/dev/null | while IFS= read -r p; do
+    [ "${p#$1/}" = "$FROZEN_EXEC_REL" ] || printf '%s\n' "$p"
+  done
+}
+
+NEXEC="$(unexpected_execs "$SRC/build-os/experiments" | grep -c . || true)"
+[ "${NEXEC:-1}" = "0" ] \
+  && ok "0 unexpected executables under build-os/experiments/ (the census holds, one frozen exception aside)" \
+  || no "$NEXEC unexpected executable file(s) under build-os/experiments/: $(unexpected_execs "$SRC/build-os/experiments" | tr '\n' ' ')"
+
+# The exemption is pinned to a MODE as well as a path: if the frozen file's own
+# mode ever changes, that is itself a change to a frozen artifact and must fail.
+FROZEN_ABS="$SRC/build-os/experiments/$FROZEN_EXEC_REL"
+[ -f "$FROZEN_ABS" ] \
+  && ok "the exempted frozen artifact is present where the exemption says it is" \
+  || no "the exemption names a path that does not exist: $FROZEN_EXEC_REL"
+[ "$(stat -c '%a' "$FROZEN_ABS" 2>/dev/null)" = "$FROZEN_EXEC_MODE" ] \
+  && ok "...at exactly mode $FROZEN_EXEC_MODE — a change to the frozen file's own mode would fail here" \
+  || no "the frozen artifact's mode is $(stat -c '%a' "$FROZEN_ABS" 2>/dev/null), not the pinned $FROZEN_EXEC_MODE"
+
+# THE REGRESSION. An exemption nobody can see failing is an exemption that has
+# quietly become a blanket. Proven against a FIXTURE tree so the real
+# repository is never written to.
+CENSUS_FIX="$(mktemp -d)"
+mkdir -p "$CENSUS_FIX/EXP-0005-system-efficiency/harness" "$CENSUS_FIX/EXP-0009-decoy/harness"
+: > "$CENSUS_FIX/$FROZEN_EXEC_REL"; chmod 755 "$CENSUS_FIX/$FROZEN_EXEC_REL"
+: > "$CENSUS_FIX/EXP-0009-decoy/harness/new-tool.sh"; chmod 755 "$CENSUS_FIX/EXP-0009-decoy/harness/new-tool.sh"
+FOUND="$(unexpected_execs "$CENSUS_FIX" | grep -c . || true)"
+[ "$FOUND" = "1" ] \
+  && ok "REGRESSION: a NEW executable under build-os/experiments/ is still caught (the exemption did not become a blanket)" \
+  || no "a new executable under build-os/experiments/ was not caught (found $FOUND)"
+unexpected_execs "$CENSUS_FIX" | grep -q "EXP-0009-decoy" \
+  && ok "...and the one reported is the decoy, not the exempted frozen artifact" \
+  || no "the census reported the wrong file"
+rm -rf "$CENSUS_FIX"
 
 echo
 echo "== 2. The mapping is DERIVED from a recorded rule, not sampled =="
