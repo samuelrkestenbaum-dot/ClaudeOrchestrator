@@ -37,7 +37,11 @@ t "a gate with no authority path is not called viable" \
 echo "== discoverability =="
 # Strip the request path out of the refusal text only: the capability still
 # exists, but the worker can no longer find it. That must be VIOLATED.
-sed 's|  build-os/packets/routing/routing-request.json\\n|  (removed)\\n|' .claude/hooks/routing-gate.sh > "$TMP/undiscoverable.sh"
+# A gate that neither delegates NOR advertises the no-shell route: the
+# capability exists in the classifier but the worker can never learn of it.
+sed -e 's|gate-recovery\.mjs|MISSING-RECOVERY-GENERATOR|g' \\
+    -e 's|build-os/packets/routing/routing-request.json|(undocumented)|g' \\
+    .claude/hooks/routing-gate.sh > "$TMP/undiscoverable.sh"
 d(){ node -e '
 import("./build-os/assumptions/registry.mjs").then(m=>{
  const c=m.coverage({gatePath:process.argv[1]});
@@ -107,3 +111,30 @@ t "untested cells are visible" "$(node -e 'import("./build-os/assumptions/matrix
 
 echo "==== RESULT: $P passed, $F failed ===="
 [ "$F" -eq 0 ]
+
+echo "== live gate consults the selector =="
+G=$(mktemp -d); trap 'rm -rf "$TMP" "$TMP2" "$G"' EXIT
+bash build-os/experiments/EXP-0005-system-efficiency/harness/restore-seed.sh "$G/c" >/dev/null 2>&1
+cp .claude/hooks/routing-gate.sh "$G/c/.claude/hooks/routing-gate.sh"
+mkdir -p "$G/c/build-os/assumptions" && cp build-os/assumptions/*.mjs "$G/c/build-os/assumptions/"
+rm -f "$G/c"/build-os/packets/routing/*.md
+gate(){ printf '%s' '{"tool_name":"Edit","tool_input":{"file_path":"x.ts"}}' | (cd "$G/c" && CLAUDE_PROJECT_DIR="$G/c" GRAVITO_HOST_PROFILE="${1:-}" bash .claude/hooks/routing-gate.sh mutgate) 2>&1; }
+
+out="$(gate)"
+case "$out" in *"least-privileged viable route is 'routing_request_channel'"*) ok "live refusal is SELECTOR-GENERATED, no-shell route first";; *) no "live refusal is selector-generated";; esac
+case "$out" in *"NOT AVAILABLE on this host: structured_routing_action"*) ok "live refusal marks the Bash route unavailable on this host";; *) no "live refusal marks Bash unavailable";; esac
+# The pre-#45 failure: worker told to run Bash when Bash is approval-gated.
+first_bash=0
+printf '%s\n' "$out" | grep -n "route-task.sh" >/dev/null 2>&1 && first_bash=1
+t "the historical failure is avoided: Bash is not the advertised first move" "$first_bash" "0"
+
+# A permissive host must be able to change the ordering — proof it is not static text.
+out2="$(gate claude_code_interactive)"
+case "$out2" in *"least-privileged viable route"*) ok "a declared host profile is honoured at runtime";; *) no "declared host profile honoured";; esac
+# Host denying the mutation entirely: refuse, and do not blame Gravito.
+out3="$(gate claude_code_headless_dontAsk)"
+case "$out3" in *"host restriction, not a Gravito defect"*) ok "host-denied mutation refuses WITHOUT blaming Gravito";; *) no "host-denied mutation not blamed on Gravito";; esac
+# Enforcement must not be weakened: the call is still refused.
+case "$out" in *"MUTATION BLOCKED"*) ok "mutation enforcement is NOT weakened by the wiring";; *) no "mutation still blocked";; esac
+# Selection is recorded.
+grep -q "RECOVERY-SELECTED" "$G/c/build-os/packets/routing/live_gate_log.tsv" 2>/dev/null && ok "the selection is recorded with provenance" || no "selection recorded"

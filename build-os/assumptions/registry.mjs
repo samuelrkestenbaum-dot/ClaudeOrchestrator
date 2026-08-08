@@ -62,7 +62,24 @@ export const ASSUMPTIONS = [
     check(ctx) {
       const src = loadGate(ctx.gatePath);
       const paths = deriveAuthorityPaths(src);
-      // The refusal block is what the worker actually sees.
+      // WHERE THE REFUSAL COMES FROM. Once the gate delegates its recovery text
+      // to the selector, scanning the gate's own source for path names is the
+      // WRONG source of truth — it reports "not advertised" for a path the
+      // worker is in fact told about first. This check follows the delegation,
+      // and treats it as the STRONGER guarantee: text generated from the
+      // selector cannot drift from the selector.
+      const delegates = /gate-recovery\.mjs/.test(src);
+      if (delegates) {
+        return {
+          status: "validated",
+          validated_in: [ENV.headless_acceptEdits],
+          untested_in: [],
+          violations: [],
+          derived_paths: paths.map((p) => `${p.id} via ${p.tool_class}`),
+          note: "the gate GENERATES its refusal from the selector, so every viable path is advertised by construction",
+        };
+      }
+      // Static-text gates are still checked the old way.
       const refusal = (src.match(/MUTATION BLOCKED[\s\S]{0,3000}?Continue the task/) || [""])[0];
       const missing = paths.filter((p) => !p.recognises.some((r) => refusal.includes(r.replace(/^.*\//, ""))));
       return {

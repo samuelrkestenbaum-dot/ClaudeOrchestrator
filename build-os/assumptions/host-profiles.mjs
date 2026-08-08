@@ -58,5 +58,23 @@ export const HOSTS = [
   },
 ];
 
+// The default when the host has NOT declared itself. It assumes the shape that
+// actually broke EXP-0005 — writes allowed, shell approval-gated, no approver —
+// because assuming the permissive case is what turns an unknown host into a
+// runtime failure. Unknown resolves toward the SAFER path, never the freer one.
+export const DEFAULT_PROFILE_ID = "unknown_conservative";
+
+HOSTS.push({
+  id: DEFAULT_PROFILE_ID,
+  description: "host has not declared itself; assume writes usable and shell approval-gated with no approver",
+  permits: { Edit: "allowed", Write: "allowed", NotebookEdit: "allowed", Bash: "approval_required" },
+  approver_present: false,
+  observed_by: "DEFAULT — not an observation. Used when GRAVITO_HOST_PROFILE is unset, chosen so an undeclared host degrades toward the lower-privilege authority path.",
+});
+
+export function resolveHost(id) {
+  return HOSTS.find((h) => h.id === id) || HOSTS.find((h) => h.id === DEFAULT_PROFILE_ID);
+}
+
 export const OBSERVED = HOSTS.filter((h) => /^DIRECT OBSERVATION/.test(h.observed_by));
 export const UNVERIFIED = HOSTS.filter((h) => !/^DIRECT OBSERVATION/.test(h.observed_by));
