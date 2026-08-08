@@ -16,6 +16,8 @@
 
 import fs from "node:fs";
 import path from "node:path";
+import { continuityState } from "./continuity.mjs";
+import { CLAIMS } from "./continuity-claims.mjs";
 
 export const DECLARED_SURFACES = ["chatgpt", "claude", "manus", "surplus_recovery"];
 
@@ -105,7 +107,7 @@ export function repositorySurfaceActivity({ kernelDir = "build-os/kernel", windo
  *
  * Writes alone never satisfy this, however many there are.
  */
-export function behavioralContinuity({ kernelDir = "build-os/kernel", proofs = [] } = {}) {
+export function behavioralContinuity({ kernelDir = "build-os/kernel", claims = null } = {}) {
   const handoffPath = path.join(kernelDir, "memory_handoffs.tsv");
   let handoffs = [];
   try { handoffs = tsv(handoffPath).filter((r) => r.length > 3 && /^HOF-/.test(r[0])); } catch { handoffs = []; }
@@ -124,20 +126,28 @@ export function behavioralContinuity({ kernelDir = "build-os/kernel", proofs = [
     }
   }
 
-  const demonstrated = proofs.filter((p) => p.behaviour_changed === true && p.result_written_back === true);
+  // THE STATE IS GRADED, NOT ASSERTED. This function used to take
+  // `proofs: [{ behaviour_changed: true, result_written_back: true }]` and
+  // count the entries — two free booleans supplied by the party making the
+  // claim, so the strongest state the substrate could report was decided by
+  // whoever typed `true`. Claims now go through gradeContinuity(), which
+  // downgrades any link asserted PROVEN without an evidence reference and
+  // refuses a divergence claim that carries no counterfactual.
+  const graded = continuityState(claims ?? CLAIMS);
 
   return {
     artifact: "cross_surface_behavioral_continuity",
     cross_surface_handoffs: crossPairs,
     consumption_evidence: crossPairs.length > 0,
-    behaviour_change_proofs: demonstrated.length,
-    state: demonstrated.length > 0 ? "DEMONSTRATED"
-      : (crossPairs.length > 0 ? "CONSUMPTION_ONLY" : "NOT_DEMONSTRATED"),
+    claims_graded: graded.claims,
+    by_verdict: graded.by_verdict,
+    state: graded.state,
+    weakest_link_per_claim: graded.grades.map((g) => ({ claim: g.claim_id, verdict: g.verdict, weakest: g.weakest_link })),
+    downgrades: graded.grades.flatMap((g) => g.downgrades),
     note:
-      crossPairs.length > 0 && demonstrated.length === 0
-        ? "A handoff crossed surfaces, which shows state was RECEIVED. It does not show the receiving surface " +
-          "behaved differently because of it. Receipt is not continuity."
-        : "Continuity requires: A writes, B consumes, B's behaviour differs, and the result is written back attributably.",
+      "Continuity requires: A writes, B consumes, B's behaviour differs against a stated counterfactual, the " +
+      "result is written back attributably, and a further consumer can read it. A handoff crossing surfaces " +
+      "shows state was RECEIVED; receipt is not continuity, and an assertion is not evidence.",
   };
 }
 
