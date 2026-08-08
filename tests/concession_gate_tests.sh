@@ -55,3 +55,40 @@ t "Stop hook allows a non-conceding turn" "$?" "0"
 
 echo "==== RESULT: $P passed, $F failed ===="
 [ "$F" -eq 0 ]
+
+echo "== continuation controller: task completion is NOT a stop condition =="
+c(){ node -e '
+import("./build-os/motion/continuation.mjs").then(m=>{const d=m.continuationDecision(JSON.parse(process.argv[1]));
+console.log(process.argv[2]==="next"?String(d.next_task):(process.argv[2]==="term"?String(d.terminal_condition):d.decision));});' "$1" "${2:-dec}"; }
+Q='{"published_tips":["8bc4739"],"tasks":[{"id":"49","status":"completed"},{"id":"50","status":"pending","depends_on":["49"]},{"id":"51","status":"pending","depends_on":["50"]}]}'
+
+t "THE REGRESSION: finished task + committed + stop fires => CONTINUE" "$(c "$Q")" "continue"
+t "and it selects #50, not #51" "$(c "$Q" next)" "50"
+t "#51 stays queued behind #50" "$(c '{"tasks":[{"id":"50","status":"pending"},{"id":"51","status":"pending","depends_on":["50"]}]}' next)" "50"
+t "an unpushed commit alone does NOT stop work" \
+  "$(c '{"published_tips":[],"tasks":[{"id":"49","status":"completed"},{"id":"50","status":"pending","depends_on":["49"]}]}')" "continue"
+t "but a task REQUIRING publication waits for it" \
+  "$(c '{"published_tips":[],"tasks":[{"id":"50","status":"pending","requires_publication_of":["abc123"]}]}')" "continue"
+
+echo "== genuine terminal conditions must ALLOW the stop =="
+t "explicit operator stop" "$(c '{"operator_stop":true,"tasks":[{"id":"50","status":"pending"}]}')" "stop"
+t "  reason recorded" "$(c '{"operator_stop":true,"tasks":[{"id":"50","status":"pending"}]}' term)" "explicit_operator_stop"
+t "empty queue" "$(c '{"tasks":[{"id":"49","status":"completed"}]}')" "stop"
+t "safety/authority forbids" "$(c '{"safety_stop":true,"tasks":[{"id":"50","status":"pending"}]}')" "stop"
+t "environment terminating" "$(c '{"environment_terminating":true,"tasks":[{"id":"50","status":"pending"}]}')" "stop"
+t "all remaining genuinely blocked WITH exhaustion evidence" \
+  "$(c '{"tasks":[{"id":"50","status":"pending","blocked_evidence":{"verdict":"concession_allowed"}}]}')" "stop"
+t "  but blocked WITHOUT exhaustion evidence keeps going" \
+  "$(c '{"tasks":[{"id":"50","status":"pending","depends_on":["99"]}]}')" "continue"
+
+echo "== loop protection =="
+t "the same task selected twice with no state change is escalated past" \
+  "$(c '{"tasks":[{"id":"50","status":"pending"},{"id":"51","status":"pending"}],"transition_log":[{"next_task":"50","state_changed":false},{"next_task":"50","state_changed":false}]}' next)" "51"
+
+echo "== live Stop hook consults continuation, not only concessions =="
+T2=$(mktemp -d)
+printf '%s\n' '{"message":{"role":"assistant","content":[{"type":"text","text":"Done. 59 tests pass. Nothing is running."}]}}' > "$T2/n.jsonl"
+printf '{"transcript_path":"%s/n.jsonl"}' "$T2" | CLAUDE_PROJECT_DIR="$PWD" bash .claude/hooks/concession-gate.sh >/dev/null 2>"$T2/e"
+t "a NON-conceding completion turn is refused while work remains" "$?" "2"
+grep -q "NEXT RUNNABLE TASK" "$T2/e" && ok "the refusal NAMES the next task" || no "refusal names the next task"
+rm -rf "$T2"

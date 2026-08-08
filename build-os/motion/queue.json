@@ -1,0 +1,10 @@
+{
+  "note": "The durable queue the continuation controller reads. Task completion is NOT a stop condition; a commit awaiting a push grant is NOT a stop condition.",
+  "published_tips": ["8bc4739"],
+  "tasks": [
+    { "id": "49", "subject": "Claude -> live Operator Lab write path", "status": "completed",
+      "completion_evidence": "bridge path PROVEN via chatgpt (observe_interaction / gate_outbound_inference); ledgerId 36263/36264; live readiness moved ChatGPT-only -> Claude + ChatGPT under the unchanged gate. Native-direct access remains a separate capability improvement, not a blocker." },
+    { "id": "50", "subject": "Claude <-> ChatGPT behavioral continuity proof", "status": "pending", "depends_on": ["49"] },
+    { "id": "51", "subject": "Audit the auditors - source fidelity and failure capability", "status": "pending", "depends_on": ["50"] }
+  ]
+}

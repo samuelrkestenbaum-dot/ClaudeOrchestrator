@@ -7,6 +7,7 @@
 import fs from "node:fs";
 import { isConcession } from "./concession-gate.mjs";
 import { enumerateCapability } from "./capability-map.mjs";
+import { continuationDecision, TERMINAL_CONDITIONS as TERMINAL } from "./continuation.mjs";
 
 let ev = {};
 try { ev = JSON.parse(fs.readFileSync(0, "utf8")); } catch { process.exit(0); }
@@ -25,6 +26,32 @@ try {
     }
   }
 } catch { process.exit(0); }
+
+// CONTINUATION IS CHECKED FIRST, and it applies whether or not the turn
+// concedes. The observed defect was a turn that conceded NOTHING - it simply
+// finished a task and stopped - so a stop gate that only inspects concessions
+// would have allowed it.
+try {
+  const q = JSON.parse(fs.readFileSync(`${process.env.CLAUDE_PROJECT_DIR || "."}/build-os/motion/queue.json`, "utf8"));
+  const cont = continuationDecision(q);
+  if (cont.decision === "continue") {
+    process.stderr.write(
+`STOP REFUSED — the queue still holds runnable work.
+
+Finishing a task is NOT a stop condition, and neither is a commit awaiting a push grant:
+execution authority and publication authority are different. An unpushed commit blocks
+publication, not work.
+
+NEXT RUNNABLE TASK: #${cont.next_task}${cont.next_subject ? " — " + cont.next_subject : ""}
+${cont.reasons.map((r) => "  - " + r).join("\n")}
+
+Begin it now. Do not stop for a narrative recap.
+
+Stopping requires one of: ${TERMINAL.join(", ")}.
+`);
+    process.exit(2);
+  }
+} catch { /* no queue file: fall through to the concession check */ }
 
 const { conceding } = isConcession(lastAssistant);
 if (!conceding) process.exit(0);
