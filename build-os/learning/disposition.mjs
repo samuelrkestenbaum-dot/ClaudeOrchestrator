@@ -152,6 +152,69 @@ export const RULES = [
     }),
   },
   {
+    id: "total-acceptance-floor",
+    // A condition with a real sample and ZERO accepted outcomes. v0 could not
+    // see this at all: its only acceptance rule required `regressions > 0`,
+    // and a treatment that does nothing breaks nothing. Non-action was
+    // invisible to a rule set that only knew how to recognise damage.
+    when: (ev) => ev.byCondition.some((c) => c.units >= 5 && c.accepted === 0)
+               && ev.byCondition.some((c) => c.accepted > 0),
+    build: (ev) => {
+      const floor = ev.byCondition.find((c) => c.units >= 5 && c.accepted === 0);
+      const other = ev.byCondition.find((c) => c.accepted > 0);
+      return {
+        class: "product_defect",
+        severity: "high",
+        confidence: "high",
+        component: `${floor.condition}.operational_capability`,
+        finding:
+          `The ${floor.condition} condition produced ZERO accepted outcomes across ${floor.units} units while ` +
+          `${other.condition} produced ${other.accepted}/${other.units}. A total acceptance floor is not a ` +
+          `degraded result on a spectrum — it is the absence of operation, and per-accepted-outcome economics ` +
+          `for that condition are UNDEFINED rather than poor.`,
+        evidence: ev.byCondition.map((c) => `${c.condition}: ${c.accepted}/${c.units} accepted`),
+        proposed_change:
+          "determine whether the condition ever entered an operational state, before attributing the floor to " +
+          "the quality of its work",
+        // DELIBERATELY `queue`, not `execute`, and the reason is executed
+        // rather than assumed: the FIRST diagnosis of the outcome that
+        // inspired this predicate was wrong, and an auto-opened packet would
+        // have implemented that wrong fix. A total floor identifies WHERE to
+        // look; it does not identify the cause, and the two are not the same
+        // finding.
+        authority: "operator_decision",
+        revalidation: "reproduce the floor condition in isolation and identify the first operation that could not proceed",
+        disposition: "queue",
+      };
+    },
+  },
+  {
+    id: "spend-without-durable-output",
+    // Cost incurred, nothing durable produced. Separates "worked badly" from
+    // "never acted" — the distinction the outcome vocabulary could not express.
+    when: (ev) => ev.byCondition.some((c) => c.units >= 5 && c.durable_changes === 0 && (c.total_tokens ?? 0) > 0),
+    build: (ev) => {
+      const c = ev.byCondition.find((x) => x.units >= 5 && x.durable_changes === 0 && (x.total_tokens ?? 0) > 0);
+      return {
+        class: "measurement_defect",
+        severity: "high",
+        confidence: "high",
+        component: `${c.condition}.execution_entry`,
+        finding:
+          `The ${c.condition} condition spent ${c.total_tokens} tokens across ${c.units} units and produced ZERO ` +
+          `durable changes. Spend without output is evidence the condition never reached the work, and any ` +
+          `token-efficiency reading of it is measuring an abandoned attempt.`,
+        evidence: [`${c.condition}: ${c.units} units, ${c.total_tokens} tokens, ${c.durable_changes} durable changes`],
+        proposed_change:
+          "record a distinct outcome state for a treatment that never executed, so non-action is not reported as " +
+          "efficiency; treat any efficiency comparison against this condition as unevaluable",
+        authority: "operator_decision",
+        revalidation: "a fixture in which a condition spends tokens and produces no durable artifact",
+        disposition: "queue",
+      };
+    },
+  },
+  {
     id: "no-gate-met-either-direction",
     when: (ev) => ev.gatesMet === 0 && ev.perTask.length > 0,
     build: (ev) => ({
@@ -195,6 +258,10 @@ export function normalise(input) {
     treatmentCondition: input.treatment_condition || "the treatment condition",
     admitted: input.admitted ?? 0,
     attempted: input.attempted ?? 0,
+    // Per-condition rollups. `null` means the experiment did not report the
+    // field; it is never coerced to 0, because "no accepted outcomes" and "we
+    // did not measure acceptance" are different claims.
+    byCondition: Array.isArray(input.by_condition) ? input.by_condition : [],
     voidReasons: input.void_reasons || [],
     gatesMet: input.gates_met ?? 0,
   };
@@ -214,7 +281,7 @@ export function dispose(input) {
   findings.sort((a, b) => order[a.severity] - order[b.severity] || (a.rule < b.rule ? -1 : 1));
   return {
     artifact: "post_outcome_disposition",
-    version: 0,
+    version: 1,
     experiment: ev.experiment,
     rules_evaluated: RULES.length,
     findings_generated: findings.length,
