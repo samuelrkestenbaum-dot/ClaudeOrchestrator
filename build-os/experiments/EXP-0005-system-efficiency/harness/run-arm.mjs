@@ -160,7 +160,7 @@ const out = fs.openSync(streamPath, "w");
 const child = spawn("claude", [
   "-p", "--output-format", "stream-json", "--verbose",
   "--model", MODEL, "--session-id", sessionId,
-  "--permission-mode", "bypassPermissions",
+  "--permission-mode", "dontAsk",
 ], { cwd: ARM_TREE, env, stdio: ["pipe", out, "pipe"], detached: true });
 
 let stderr = "";
