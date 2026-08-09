@@ -1,0 +1,35 @@
+{
+  "artifact": "exp0006_readjudication_log",
+  "defect": "acceptance keyed on raw tsc message text, which embeds absolute paths; baseline and arm trees sit at different paths",
+  "classification": "measurement_critical — fixed before the affected runs were admitted, per the frozen stopping rules",
+  "rule_changed": false,
+  "applied_to": "every recorded unit, uniformly and blind to arm",
+  "originals_preserved_as": "acceptance.original.json",
+  "changes": [
+    {
+      "unit": "T01.gravito",
+      "status": "readjudicated",
+      "was": false,
+      "now": true,
+      "flipped": true,
+      "new_errors_before_fix": 5,
+      "new_errors_after_fix": 0,
+      "normalisations": 10
+    },
+    {
+      "unit": "T01.native",
+      "status": "readjudicated",
+      "was": false,
+      "now": true,
+      "flipped": true,
+      "new_errors_before_fix": 5,
+      "new_errors_after_fix": 0,
+      "normalisations": 10
+    },
+    {
+      "unit": "T02.gravito",
+      "status": "skipped",
+      "why": "no verification artifact"
+    }
+  ]
+}

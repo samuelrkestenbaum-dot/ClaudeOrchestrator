@@ -1,0 +1,33 @@
+{
+  "accepted": false,
+  "task_file": "server/services/organizational-memory.ts",
+  "condition_1_zero_errors_in_file": {
+    "pass": true,
+    "errors_before": 2,
+    "errors_after": 0,
+    "remaining": []
+  },
+  "condition_2_no_new_errors_elsewhere": {
+    "pass": false,
+    "new_error_count": 5,
+    "new_errors": [
+      "server/claims/router.ts: TS2551 Property 'governanceClaims' does not exist on type 'typeof import(\"/home/user/exp0006-arm/drizzle/schema\")'. Did you mean 'governanceScans'?",
+      "server/claims/router.ts: TS2339 Property 'governanceClaims' does not exist on type 'typeof import(\"/home/user/exp0006-arm/drizzle/schema\")'.",
+      "server/claims/router.ts: TS2339 Property 'governanceClaims' does not exist on type 'typeof import(\"/home/user/exp0006-arm/drizzle/schema\")'.",
+      "server/claims/router.ts: TS2339 Property 'governanceClaims' does not exist on type 'typeof import(\"/home/user/exp0006-arm/drizzle/schema\")'.",
+      "server/emotional-geometry-runtime/validation/calibrationMode.ts: TS2339 Property 'fireAlert' does not exist on type 'typeof import(\"/home/user/exp0006-arm/server/emotional-geometry-runtime/geometry-alerting\")'."
+    ]
+  },
+  "diff_rejection": {
+    "rejected": false,
+    "hits": [],
+    "deletion_suspected": false,
+    "lines_added": 3,
+    "lines_removed": 3,
+    "note": "patterns are matched on ADDED lines only; matching the whole file would reject a task for `any` casts the seed already contained"
+  },
+  "total_errors_before": 781,
+  "total_errors_after": 779,
+  "verdict_basis": "compiler output and diff text only — no judgement, no adjudicator opinion",
+  "verification_exit_code": 2
+}

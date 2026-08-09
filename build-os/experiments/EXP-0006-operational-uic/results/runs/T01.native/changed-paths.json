@@ -1,0 +1,8 @@
+{
+  "base_commit": "e45df9784bb9ea151dc994e510d61dae27f3e651",
+  "product_paths": [
+    "server/services/organizational-memory.ts"
+  ],
+  "governance_paths": [],
+  "note": "governance paths are DENOMINATOR COST and receive no numerator credit; measured against the administered commit, so substrate administration is not attributed to the arm"
+}
