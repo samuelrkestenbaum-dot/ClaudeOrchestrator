@@ -1,0 +1,10 @@
+{
+  "base_commit": "e96643ef5f8cd51e18e0a782e6032a2e452599da",
+  "product_paths": [
+    "server/nervous-system/dynamics/async-deep.ts"
+  ],
+  "governance_paths": [
+    "build-os/packets/routing/routing-T07-20260809T043752Z.md"
+  ],
+  "note": "governance paths are DENOMINATOR COST and receive no numerator credit; measured against the administered commit, so substrate administration is not attributed to the arm"
+}

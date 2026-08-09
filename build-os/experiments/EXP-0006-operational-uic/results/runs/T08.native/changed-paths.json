@@ -1,0 +1,9 @@
+{
+  "base_commit": "49c82c1575cf05e228a34527b23a508b87195c21",
+  "product_paths": [
+    "server/mcp/mcp-handler-v2.ts",
+    "server/mcp/tool-executor.ts"
+  ],
+  "governance_paths": [],
+  "note": "governance paths are DENOMINATOR COST and receive no numerator credit; measured against the administered commit, so substrate administration is not attributed to the arm"
+}
