@@ -1,0 +1,100 @@
+{
+  "artifact": "exp0006_mapping_digest",
+  "experiment": "EXP-0006",
+  "mapping_sha256": "15a20b71b3a2c808fa348fdd6bb866b823dada37ec0e474c14a8d70d6ab2378a",
+  "n_tasks": 12,
+  "n_units": 24,
+  "arms": [
+    "native",
+    "gravito"
+  ],
+  "task_ids": [
+    "T01",
+    "T02",
+    "T03",
+    "T04",
+    "T05",
+    "T06",
+    "T07",
+    "T08",
+    "T09",
+    "T10",
+    "T11",
+    "T12"
+  ],
+  "sealed_location": "OUTSIDE the repository — deliberately not recorded here, because a path is a lead",
+  "verification": [
+    {
+      "name": "all_task_ids_represented",
+      "ok": true,
+      "detail": "12 of 12"
+    },
+    {
+      "name": "one_unit_per_task_per_arm",
+      "ok": true,
+      "detail": "24 = 12 tasks x 2 arms"
+    },
+    {
+      "name": "mapping_is_global_not_per_task",
+      "ok": true,
+      "detail": "each arm carries exactly one label across every task"
+    },
+    {
+      "name": "no_adj_id_collision",
+      "ok": true,
+      "detail": "24 distinct"
+    },
+    {
+      "name": "no_ana_id_collision",
+      "ok": true,
+      "detail": "24 distinct"
+    },
+    {
+      "name": "id_domains_disjoint",
+      "ok": true,
+      "detail": "no identifier appears in both domains — this is what makes the views unjoinable"
+    },
+    {
+      "name": "adversarial_join_fails",
+      "ok": true,
+      "detail": "blind holds — no shared key exists"
+    },
+    {
+      "name": "adjudicator_view_free_of_condition",
+      "ok": true,
+      "detail": "no arm or condition field"
+    },
+    {
+      "name": "analyst_view_free_of_condition",
+      "ok": true,
+      "detail": "no arm or condition field"
+    },
+    {
+      "name": "adjudicator_view_free_of_economics",
+      "ok": true,
+      "detail": "no economic field"
+    },
+    {
+      "name": "analyst_view_free_of_diffs",
+      "ok": true,
+      "detail": "no diff reference"
+    },
+    {
+      "name": "no_governance_path_in_adjudicated_refs",
+      "ok": true,
+      "detail": "adjudicated diff references are product paths only"
+    },
+    {
+      "name": "ids_are_salt_dependent",
+      "ok": true,
+      "detail": "a different salt yields different ids for the same (task, arm)"
+    },
+    {
+      "name": "sealed_before_any_arm_executed",
+      "ok": true,
+      "detail": "no measured arm has produced a run directory"
+    }
+  ],
+  "what_this_digest_proves": "The mapping existed, in exactly this form, BEFORE any arm executed. It does not reveal the mapping and cannot be satisfied by a different one. Re-deriving from the salt at reveal reproduces this digest, or the reveal is invalid.",
+  "what_it_does_not_prove": "Nothing about whether the ROLES stay separate during execution. That is a property of who holds what at run time."
+}
