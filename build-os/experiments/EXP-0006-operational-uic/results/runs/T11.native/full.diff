@@ -1,0 +1,41 @@
+diff --git a/server/nervous-system/dynamics/claude-llm.ts b/server/nervous-system/dynamics/claude-llm.ts
+index 05e7c90..d09b64d 100644
+--- a/server/nervous-system/dynamics/claude-llm.ts
++++ b/server/nervous-system/dynamics/claude-llm.ts
+@@ -150,6 +150,24 @@ export function detectComplexity(
+ // CORE INVOCATION
+ // ============================================================================
+ 
++/**
++ * Extended-thinking content block as returned by the Claude API.
++ * The governed bridge types content blocks as text-only, so thinking blocks
++ * are detected structurally at runtime.
++ */
++interface ThinkingBlock {
++  type: 'thinking';
++  thinking: string;
++}
++
++function isThinkingBlock(block: unknown): block is ThinkingBlock {
++  if (typeof block !== 'object' || block === null) {
++    return false;
++  }
++  const candidate = block as Record<string, unknown>;
++  return candidate.type === 'thinking' && typeof candidate.thinking === 'string';
++}
++
+ /**
+  * Invoke Claude with extended thinking for deep emotional analysis
+  */
+@@ -175,8 +193,8 @@ async function invokeWithExtendedThinking(
+   let textContent = '';
+   
+   for (const block of response.content) {
+-    if ((block as unknown as Record<string, unknown>).type === 'thinking') {
+-      thinkingContent = (block as unknown as Record<string, unknown>).thinking;
++    if (isThinkingBlock(block)) {
++      thinkingContent = block.thinking;
+     } else if (block.type === 'text') {
+       textContent = block.text;
+     }
+

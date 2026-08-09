@@ -1,0 +1,11 @@
+{
+  "base_commit": "fadbc43b0115d53eceb4a1a7eeab3545a0707620",
+  "product_paths": [
+    "server/_core/logger.ts",
+    "server/emotional-geometry-runtime/alert-analytics.ts"
+  ],
+  "governance_paths": [
+    "build-os/packets/routing/routing-T10-20260809T052039Z.md"
+  ],
+  "note": "governance paths are DENOMINATOR COST and receive no numerator credit; measured against the administered commit, so substrate administration is not attributed to the arm"
+}

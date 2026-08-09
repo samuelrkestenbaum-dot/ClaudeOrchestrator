@@ -1,0 +1,79 @@
+diff --git a/server/nervous-system/integrated-nervous-system.ts b/server/nervous-system/integrated-nervous-system.ts
+index 2262b4a..4d5ec04 100644
+--- a/server/nervous-system/integrated-nervous-system.ts
++++ b/server/nervous-system/integrated-nervous-system.ts
+@@ -29,6 +29,7 @@ import { GovernanceRequestNormalizer } from '../mcp/governance-request-schema';
+ import type { GovernanceResponse } from '../mcp/deterministic-fallback';
+ import { DeterministicFallback } from '../mcp/deterministic-fallback';
+ import { InternalRateLimiter } from '../mcp/internal-rate-limiter';
++import type { CircuitBreakerMetrics } from '../governance/circuit-breaker';
+ import { getCircuitBreakerMetrics, getAllCircuitBreakerMetrics, withCircuitBreaker } from '../governance/circuit-breaker';
+ 
+ const log = createLogger('integrated-nervous-system');
+@@ -73,15 +74,31 @@ export interface INSDeps {
+   rng?: () => number;
+ }
+ 
++export type HealthStatus = 'healthy' | 'degraded' | 'critical';
++
+ export interface NervousSystemHealth {
+   /** Overall health status */
+-  status: 'healthy' | 'degraded' | 'critical';
+-  /** Subsystem health checks */
++  status: HealthStatus;
++  /** Per-subsystem health checks, each with its own supporting detail */
+   subsystems: {
+-    circuitBreaker: 'healthy' | 'degraded' | 'critical';
+-    rateLimiter: 'healthy' | 'degraded' | 'critical';
+-    curiosityEngine: 'healthy' | 'degraded' | 'critical';
+-    shadowMode: 'healthy' | 'degraded' | 'critical';
++    nervousSystem: {
++      status: HealthStatus;
++      totalCalls: number;
++      successfulCalls: number;
++      degradedCalls: number;
++    };
++    circuitBreakers: {
++      status: HealthStatus;
++      openCount: number;
++      totalBreakers: number;
++      tripCount: number;
++      metrics: CircuitBreakerMetrics[];
++    };
++    rateLimiter: {
++      status: HealthStatus;
++      utilization: number;
++      stats: ReturnType<typeof InternalRateLimiter.getRateLimitStats>;
++    };
+   };
+   /** Metrics */
+   metrics: {
+@@ -89,13 +106,18 @@ export interface NervousSystemHealth {
+     successRate: number;
+     averageLatency: number;
+     degradedModeRate: number;
+-    circuitBreakerState: string;
+     rateLimitUtilization: number;
+     fallbackRate: number;
+     blockRate: number;
+     avgRiskScore: number;
+     circuitBreakerTripCount: number;
+   };
++  /** Point-in-time diagnostic detail (not aggregated rates) */
++  diagnostics: {
++    circuitBreakerState: string;
++    auditTrailEvents: number;
++    latencySamples: number;
++  };
+   /** Timestamp */
+   timestamp: number;
+ }
+@@ -254,7 +276,6 @@ export class IntegratedNervousSystem {
+           tripCount: circuitBreakerTripCount,
+           metrics: circuitBreakerMetrics,
+         },
+-        // @ts-ignore — type assignment mismatch (interface drift)
+         rateLimiter: {
+           status: rateLimiterHealth,
+           utilization: rateLimitUtilization,
+

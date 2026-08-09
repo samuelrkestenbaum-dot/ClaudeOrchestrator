@@ -1,0 +1,10 @@
+{
+  "base_commit": "f706d32b02ae7bcb910c36bb199fc7bea174bcf0",
+  "product_paths": [
+    "server/nervous-system/integrated-nervous-system.ts"
+  ],
+  "governance_paths": [
+    "build-os/packets/routing/routing-T09-20260809T051444Z.md"
+  ],
+  "note": "governance paths are DENOMINATOR COST and receive no numerator credit; measured against the administered commit, so substrate administration is not attributed to the arm"
+}

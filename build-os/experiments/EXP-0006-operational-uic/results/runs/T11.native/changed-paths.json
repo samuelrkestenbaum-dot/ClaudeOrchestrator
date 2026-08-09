@@ -1,0 +1,8 @@
+{
+  "base_commit": "9e52057f011ad1eefff7cb0cb5a82dbd74902d44",
+  "product_paths": [
+    "server/nervous-system/dynamics/claude-llm.ts"
+  ],
+  "governance_paths": [],
+  "note": "governance paths are DENOMINATOR COST and receive no numerator credit; measured against the administered commit, so substrate administration is not attributed to the arm"
+}

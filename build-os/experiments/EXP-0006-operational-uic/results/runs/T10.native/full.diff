@@ -1,0 +1,140 @@
+diff --git a/server/_core/logger.ts b/server/_core/logger.ts
+index c59b823..9128a62 100644
+--- a/server/_core/logger.ts
++++ b/server/_core/logger.ts
+@@ -223,6 +223,7 @@ export type LogDomain =
+   | 'billing'
+   | 'emotional-geometry'
+   | 'alert-sse'
++  | 'alert-analytics'
+   | 'neurocosmology-advanced'
+   | 'tenant-analytics'
+   | 'tenant-governance'
+diff --git a/server/emotional-geometry-runtime/alert-analytics.ts b/server/emotional-geometry-runtime/alert-analytics.ts
+index b4e33cc..358b239 100644
+--- a/server/emotional-geometry-runtime/alert-analytics.ts
++++ b/server/emotional-geometry-runtime/alert-analytics.ts
+@@ -77,6 +77,23 @@ export interface IncidentDetail extends IncidentSummary {
+ /** Time window for grouping alerts into incidents (5 minutes) */
+ const INCIDENT_GROUPING_WINDOW_MS = 5 * 60 * 1000;
+ 
++/** Zeroed stats, returned when the database is unavailable or a query fails. */
++function emptySummaryStats(): AlertSummaryStats {
++  return {
++    totalAlerts: 0,
++    totalUnacknowledged: 0,
++    totalIncidents: 0,
++    openIncidents: 0,
++    mostFrequentType: null,
++    mostFrequentTypeCount: 0,
++    peakHour: null,
++    peakHourCount: 0,
++    avgAcknowledgeTimeMs: null,
++    alertsByType: [],
++    alertsBySeverity: [],
++  };
++}
++
+ // ─── Analytics Queries ────────────────────────────────────────────
+ 
+ /**
+@@ -88,6 +105,10 @@ export async function getAlertFrequencyByType(options: {
+ }): Promise<AlertTrend[]> {
+   try {
+     const db = await getDb();
++    if (!db) {
++      log.warn('Alert frequency query skipped — database not available');
++      return [];
++    }
+     const since = Date.now() - options.days * 24 * 60 * 60 * 1000;
+ 
+     // Query raw data from alert history
+@@ -150,6 +171,10 @@ export async function getAlertFrequencyByType(options: {
+ export async function getAlertSummaryStats(days: number = 30): Promise<AlertSummaryStats> {
+   try {
+     const db = await getDb();
++    if (!db) {
++      log.warn('Alert summary stats skipped — database not available');
++      return emptySummaryStats();
++    }
+     const since = Date.now() - days * 24 * 60 * 60 * 1000;
+ 
+     // Total alerts and unacknowledged
+@@ -255,19 +280,7 @@ export async function getAlertSummaryStats(days: number = 30): Promise<AlertSumm
+     };
+   } catch (err) {
+     log.error({ error: err instanceof Error ? err.message : String(err) }, 'Failed to get alert summary stats');
+-    return {
+-      totalAlerts: 0,
+-      totalUnacknowledged: 0,
+-      totalIncidents: 0,
+-      openIncidents: 0,
+-      mostFrequentType: null,
+-      mostFrequentTypeCount: 0,
+-      peakHour: null,
+-      peakHourCount: 0,
+-      avgAcknowledgeTimeMs: null,
+-      alertsByType: [],
+-      alertsBySeverity: [],
+-    };
++    return emptySummaryStats();
+   }
+ }
+ 
+@@ -288,6 +301,11 @@ export async function groupAlertIntoIncident(alert: {
+ }): Promise<{ incidentId: string; isNew: boolean; alertCount: number }> {
+   try {
+     const db = await getDb();
++    if (!db) {
++      log.warn({ alertType: alert.alertType }, 'Incident grouping skipped — database not available');
++      // Return a synthetic incident ID so the alert isn't lost
++      return { incidentId: `inc_unavailable_${Date.now()}`, isNew: true, alertCount: 1 };
++    }
+     const windowStart = alert.firedAt - INCIDENT_GROUPING_WINDOW_MS;
+ 
+     // Find an existing open incident of the same type within the grouping window
+@@ -371,6 +389,10 @@ export async function getIncidents(options?: {
+ }): Promise<{ incidents: IncidentSummary[]; total: number }> {
+   try {
+     const db = await getDb();
++    if (!db) {
++      log.warn('Incident query skipped — database not available');
++      return { incidents: [], total: 0 };
++    }
+     const limit = options?.limit ?? 50;
+     const offset = options?.offset ?? 0;
+     const conditions: any[] = [];
+@@ -432,6 +454,10 @@ export async function getIncidents(options?: {
+ export async function getIncidentDetail(incidentId: string): Promise<IncidentDetail | null> {
+   try {
+     const db = await getDb();
++    if (!db) {
++      log.warn({ incidentId }, 'Incident detail lookup skipped — database not available');
++      return null;
++    }
+ 
+     const [incident] = await db.select()
+       .from(alertIncidents)
+@@ -498,6 +524,10 @@ export async function resolveIncident(
+ ): Promise<boolean> {
+   try {
+     const db = await getDb();
++    if (!db) {
++      log.warn({ incidentId }, 'Incident resolution skipped — database not available');
++      return false;
++    }
+     await db.update(alertIncidents)
+       .set({
+         status: 'resolved',
+@@ -523,6 +553,10 @@ export async function acknowledgeIncident(
+ ): Promise<boolean> {
+   try {
+     const db = await getDb();
++    if (!db) {
++      log.warn({ incidentId }, 'Incident acknowledgement skipped — database not available');
++      return false;
++    }
+     await db.update(alertIncidents)
+       .set({ status: 'acknowledged' })
+       .where(eq(alertIncidents.incidentId, incidentId));
+
