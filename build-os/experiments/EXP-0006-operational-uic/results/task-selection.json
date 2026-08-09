@@ -1,0 +1,503 @@
+{
+  "artifact": "exp0006_task_selection",
+  "seed": "EXP-0006",
+  "repo": "/home/user/empathiq-website",
+  "repo_head": "2543c873141fa64653a7993d326465d5e0dd1006",
+  "repo_clean": true,
+  "signal": "tsc --noEmit typecheck errors — an objective compiler signal, not a judgement",
+  "acceptance_rule": "A task is ACCEPTED when `npx tsc --noEmit` reports ZERO errors for its file AND introduces no new error in any other file. Independently testable, deterministic, and not a matter of anyone's opinion.",
+  "exclusions": [
+    {
+      "id": "gravito_adjacent",
+      "why": "touches the mechanisms under test — routing, authority, governance, the Gravito embed"
+    },
+    {
+      "id": "test_files",
+      "why": "changing a test to match code inverts the acceptance criterion"
+    },
+    {
+      "id": "generated",
+      "why": "generated output is not authored product work"
+    },
+    {
+      "id": "needs_external",
+      "why": "requires credentials or a live external system this host does not have"
+    }
+  ],
+  "pool_size": 175,
+  "eligible_size": 100,
+  "excluded": [
+    {
+      "file": "server/agent/mcp/unified-gravito-api.ts",
+      "excluded_by": "gravito_adjacent"
+    },
+    {
+      "file": "server/agent/mcp/unified-gravito.ts",
+      "excluded_by": "gravito_adjacent"
+    },
+    {
+      "file": "server/deployment/round4plus-features.test.ts",
+      "excluded_by": "test_files"
+    },
+    {
+      "file": "server/deployment/round6-features.test.ts",
+      "excluded_by": "test_files"
+    },
+    {
+      "file": "server/emotional-geometry-runtime/manifold-session-state-accumulation.test.ts",
+      "excluded_by": "test_files"
+    },
+    {
+      "file": "server/governance-jet-engine.ts",
+      "excluded_by": "gravito_adjacent"
+    },
+    {
+      "file": "server/governance/adapters/mcp-registry-integrity-adapter.ts",
+      "excluded_by": "gravito_adjacent"
+    },
+    {
+      "file": "server/governance/advanced-runtime-bridge.standalone-test.ts",
+      "excluded_by": "gravito_adjacent"
+    },
+    {
+      "file": "server/governance/advanced-runtime-bridge.ts",
+      "excluded_by": "gravito_adjacent"
+    },
+    {
+      "file": "server/governance/audit-trail-persistence.ts",
+      "excluded_by": "gravito_adjacent"
+    },
+    {
+      "file": "server/governance/auto-fix.ts",
+      "excluded_by": "gravito_adjacent"
+    },
+    {
+      "file": "server/governance/behavioral-correctness-audit.ts",
+      "excluded_by": "gravito_adjacent"
+    },
+    {
+      "file": "server/governance/bridge-router.ts",
+      "excluded_by": "gravito_adjacent"
+    },
+    {
+      "file": "server/governance/co-processor/review-health-telemetry.test.ts",
+      "excluded_by": "gravito_adjacent"
+    },
+    {
+      "file": "server/governance/co-processor/session-log.ts",
+      "excluded_by": "gravito_adjacent"
+    },
+    {
+      "file": "server/governance/co-processor/telemetry.ts",
+      "excluded_by": "gravito_adjacent"
+    },
+    {
+      "file": "server/governance/config-drizzle-adapter.ts",
+      "excluded_by": "gravito_adjacent"
+    },
+    {
+      "file": "server/governance/content-intelligence.ts",
+      "excluded_by": "gravito_adjacent"
+    },
+    {
+      "file": "server/governance/content-surface-ingester.ts",
+      "excluded_by": "gravito_adjacent"
+    },
+    {
+      "file": "server/governance/continuous-self-audit.ts",
+      "excluded_by": "gravito_adjacent"
+    },
+    {
+      "file": "server/governance/control-tower-router.ts",
+      "excluded_by": "gravito_adjacent"
+    },
+    {
+      "file": "server/governance/coverage-tracker.ts",
+      "excluded_by": "gravito_adjacent"
+    },
+    {
+      "file": "server/governance/curiosity/curiosity-integration.ts",
+      "excluded_by": "gravito_adjacent"
+    },
+    {
+      "file": "server/governance/curiosity/shadow-mode.ts",
+      "excluded_by": "gravito_adjacent"
+    },
+    {
+      "file": "server/governance/demo-review-engine.ts",
+      "excluded_by": "gravito_adjacent"
+    },
+    {
+      "file": "server/governance/design-system-coherence.ts",
+      "excluded_by": "gravito_adjacent"
+    },
+    {
+      "file": "server/governance/dogfooding-bridge.ts",
+      "excluded_by": "gravito_adjacent"
+    },
+    {
+      "file": "server/governance/enterprise-activation-readiness.test.ts",
+      "excluded_by": "gravito_adjacent"
+    },
+    {
+      "file": "server/governance/four-eyes-approval.standalone-test.ts",
+      "excluded_by": "gravito_adjacent"
+    },
+    {
+      "file": "server/governance/geometry-memory.ts",
+      "excluded_by": "gravito_adjacent"
+    },
+    {
+      "file": "server/governance/governance-dashboard-router.ts",
+      "excluded_by": "gravito_adjacent"
+    },
+    {
+      "file": "server/governance/governance-scan-scheduler.ts",
+      "excluded_by": "gravito_adjacent"
+    },
+    {
+      "file": "server/governance/governed-generate-manifold-influence.test.ts",
+      "excluded_by": "gravito_adjacent"
+    },
+    {
+      "file": "server/governance/governed-openai.ts",
+      "excluded_by": "gravito_adjacent"
+    },
+    {
+      "file": "server/governance/gravito-authority-layer.ts",
+      "excluded_by": "gravito_adjacent"
+    },
+    {
+      "file": "server/governance/gravito-external-client.ts",
+      "excluded_by": "gravito_adjacent"
+    },
+    {
+      "file": "server/governance/internal-gravito-client.ts",
+      "excluded_by": "gravito_adjacent"
+    },
+    {
+      "file": "server/governance/journey-coherence.test.ts",
+      "excluded_by": "gravito_adjacent"
+    },
+    {
+      "file": "server/governance/llm-circuit-breaker.ts",
+      "excluded_by": "gravito_adjacent"
+    },
+    {
+      "file": "server/governance/mcp-job-management.ts",
+      "excluded_by": "gravito_adjacent"
+    },
+    {
+      "file": "server/governance/mcp-sync-wrapper.ts",
+      "excluded_by": "gravito_adjacent"
+    },
+    {
+      "file": "server/governance/model-router.ts",
+      "excluded_by": "gravito_adjacent"
+    },
+    {
+      "file": "server/governance/narrative-coherence-trend.ts",
+      "excluded_by": "gravito_adjacent"
+    },
+    {
+      "file": "server/governance/override-logger.ts",
+      "excluded_by": "gravito_adjacent"
+    },
+    {
+      "file": "server/governance/pack-lifecycle.ts",
+      "excluded_by": "gravito_adjacent"
+    },
+    {
+      "file": "server/governance/persistence.ts",
+      "excluded_by": "gravito_adjacent"
+    },
+    {
+      "file": "server/governance/policy-as-code.ts",
+      "excluded_by": "gravito_adjacent"
+    },
+    {
+      "file": "server/governance/prevention-layer.ts",
+      "excluded_by": "gravito_adjacent"
+    },
+    {
+      "file": "server/governance/production-transport-selector.ts",
+      "excluded_by": "gravito_adjacent"
+    },
+    {
+      "file": "server/governance/raw-sql-identifier-casing.standalone-test.ts",
+      "excluded_by": "gravito_adjacent"
+    },
+    {
+      "file": "server/governance/realtime-invariant-monitor.ts",
+      "excluded_by": "gravito_adjacent"
+    },
+    {
+      "file": "server/governance/regulated-surface-preapproval.ts",
+      "excluded_by": "gravito_adjacent"
+    },
+    {
+      "file": "server/governance/regulator-export.standalone-test.ts",
+      "excluded_by": "gravito_adjacent"
+    },
+    {
+      "file": "server/governance/router.ts",
+      "excluded_by": "gravito_adjacent"
+    },
+    {
+      "file": "server/governance/slack-governance-alerts.ts",
+      "excluded_by": "gravito_adjacent"
+    },
+    {
+      "file": "server/governance/structural-alert-channels.ts",
+      "excluded_by": "gravito_adjacent"
+    },
+    {
+      "file": "server/governance/structural-proof-audit.ts",
+      "excluded_by": "gravito_adjacent"
+    },
+    {
+      "file": "server/governance/surface-discovery/guardian.ts",
+      "excluded_by": "gravito_adjacent"
+    },
+    {
+      "file": "server/governance/surface-discovery/remediation.ts",
+      "excluded_by": "gravito_adjacent"
+    },
+    {
+      "file": "server/governance/surface-discovery/webhook-adapter.ts",
+      "excluded_by": "gravito_adjacent"
+    },
+    {
+      "file": "server/governance/trpc-governance-middleware.ts",
+      "excluded_by": "gravito_adjacent"
+    },
+    {
+      "file": "server/governance/trust-architecture-router.ts",
+      "excluded_by": "gravito_adjacent"
+    },
+    {
+      "file": "server/governance/trust-completeness-router.ts",
+      "excluded_by": "gravito_adjacent"
+    },
+    {
+      "file": "server/governance/usage-digest.ts",
+      "excluded_by": "gravito_adjacent"
+    },
+    {
+      "file": "server/governance/watchdog.test.ts",
+      "excluded_by": "gravito_adjacent"
+    },
+    {
+      "file": "server/mcp/parabolic-fixes.test.ts",
+      "excluded_by": "test_files"
+    },
+    {
+      "file": "server/reviewer/governance-enforced-audit.ts",
+      "excluded_by": "gravito_adjacent"
+    },
+    {
+      "file": "server/routes/gravito-absence-detector.ts",
+      "excluded_by": "gravito_adjacent"
+    },
+    {
+      "file": "server/routes/gravito-admin-check-integrity.ts",
+      "excluded_by": "gravito_adjacent"
+    },
+    {
+      "file": "server/routes/gravito-admin-mint.ts",
+      "excluded_by": "gravito_adjacent"
+    },
+    {
+      "file": "server/routes/gravito-coverage-routes.ts",
+      "excluded_by": "gravito_adjacent"
+    },
+    {
+      "file": "server/routes/gravito-customer-probe.ts",
+      "excluded_by": "gravito_adjacent"
+    },
+    {
+      "file": "server/routes/gravito-integrity-history.ts",
+      "excluded_by": "gravito_adjacent"
+    },
+    {
+      "file": "server/routes/gravito-mcp-routes.ts",
+      "excluded_by": "gravito_adjacent"
+    },
+    {
+      "file": "server/services/document-governance.ts",
+      "excluded_by": "gravito_adjacent"
+    }
+  ],
+  "requested": 12,
+  "selected": [
+    {
+      "task_id": "T01",
+      "file": "server/services/organizational-memory.ts",
+      "error_count": 2,
+      "codes": [
+        "TS7053"
+      ],
+      "first_error": {
+        "line": 216,
+        "code": "TS7053",
+        "msg": "Element implicitly has an 'any' type because expression of type '0' can't be used to index type '{}'."
+      }
+    },
+    {
+      "task_id": "T02",
+      "file": "server/services/auto-apply-pipeline.ts",
+      "error_count": 1,
+      "codes": [
+        "TS2322"
+      ],
+      "first_error": {
+        "line": 168,
+        "code": "TS2322",
+        "msg": "Type '{}' is not assignable to type '\"low\" | \"medium\" | \"high\" | \"critical\"'."
+      }
+    },
+    {
+      "task_id": "T03",
+      "file": "server/agent/github-app.ts",
+      "error_count": 1,
+      "codes": [
+        "TS2345"
+      ],
+      "first_error": {
+        "line": 1147,
+        "code": "TS2345",
+        "msg": "Argument of type '{ runId: string; surface: string; repo: string; prNumber: number; triggeredBy: string; triggerType: \"webhook\"; startedAt: string; finishedAt: "
+      }
+    },
+    {
+      "task_id": "T04",
+      "file": "client/src/pages/UserDashboard.tsx",
+      "error_count": 2,
+      "codes": [
+        "TS2322",
+        "TS2339"
+      ],
+      "first_error": {
+        "line": 474,
+        "code": "TS2322",
+        "msg": "Type 'Partial<ApiKey>' is not assignable to type '{ id: number; keyPrefix: string; name: string | null; isActive: boolean; createdAt: Date; lastUsedAt: Date | n"
+      }
+    },
+    {
+      "task_id": "T05",
+      "file": "server/replay/router.ts",
+      "error_count": 1,
+      "codes": [
+        "TS2349"
+      ],
+      "first_error": {
+        "line": 77,
+        "code": "TS2349",
+        "msg": "This expression is not callable."
+      }
+    },
+    {
+      "task_id": "T06",
+      "file": "server/deployment/deployment-router.ts",
+      "error_count": 15,
+      "codes": [
+        "TS2322",
+        "TS2339",
+        "TS2345",
+        "TS2551",
+        "TS2554"
+      ],
+      "first_error": {
+        "line": 235,
+        "code": "TS2554",
+        "msg": "Expected 2-3 arguments, but got 1."
+      }
+    },
+    {
+      "task_id": "T07",
+      "file": "server/nervous-system/dynamics/async-deep.ts",
+      "error_count": 1,
+      "codes": [
+        "TS2322"
+      ],
+      "first_error": {
+        "line": 260,
+        "code": "TS2322",
+        "msg": "Type 'unknown' is not assignable to type 'string'."
+      }
+    },
+    {
+      "task_id": "T08",
+      "file": "server/mcp/mcp-handler-v2.ts",
+      "error_count": 9,
+      "codes": [
+        "TS2305",
+        "TS2339",
+        "TS2344",
+        "TS2345",
+        "TS2352",
+        "TS2353",
+        "TS2554"
+      ],
+      "first_error": {
+        "line": 39,
+        "code": "TS2305",
+        "msg": "Module '\"./async-job-queue\"' has no exported member 'JobStatus'."
+      }
+    },
+    {
+      "task_id": "T09",
+      "file": "server/nervous-system/integrated-nervous-system.ts",
+      "error_count": 1,
+      "codes": [
+        "TS2741"
+      ],
+      "first_error": {
+        "line": 264,
+        "code": "TS2741",
+        "msg": "Property 'circuitBreakerState' is missing in type '{ totalCalls: number; successRate: number; averageLatency: number; degradedModeRate: number; fallbackRate: nu"
+      }
+    },
+    {
+      "task_id": "T10",
+      "file": "server/emotional-geometry-runtime/alert-analytics.ts",
+      "error_count": 17,
+      "codes": [
+        "TS18047",
+        "TS2345"
+      ],
+      "first_error": {
+        "line": 16,
+        "code": "TS2345",
+        "msg": "Argument of type '\"alert-analytics\"' is not assignable to parameter of type 'LogDomain'."
+      }
+    },
+    {
+      "task_id": "T11",
+      "file": "server/nervous-system/dynamics/claude-llm.ts",
+      "error_count": 1,
+      "codes": [
+        "TS2322"
+      ],
+      "first_error": {
+        "line": 179,
+        "code": "TS2322",
+        "msg": "Type 'unknown' is not assignable to type 'string'."
+      }
+    },
+    {
+      "task_id": "T12",
+      "file": "client/src/pages/admin/RecallProofPreflight.tsx",
+      "error_count": 8,
+      "codes": [
+        "TS2322"
+      ],
+      "first_error": {
+        "line": 280,
+        "code": "TS2322",
+        "msg": "Type '{ children: string[]; label: string; ok: boolean; }' is not assignable to type '{ label: string; children: string; ok?: boolean | null | undefined; }'."
+      }
+    }
+  ],
+  "note": "Selection is blind to arm performance and to expected difficulty: files are ordered by a seeded hash of their path, so neither party chose which work Gravito would be measured on."
+}

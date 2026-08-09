@@ -1,0 +1,5 @@
+1909c50ef3d7c42cfdee847745a7c515a7c1f2b15ff1402e59b4073b6f9d04fb  build-os/experiments/EXP-0006-operational-uic/PREREGISTRATION.md
+c9080dc6a302a01c27a687fbedada6fb44568674ce454090cb7e11a9090229e6  build-os/experiments/EXP-0006-operational-uic/select-tasks.mjs
+44eebaa4a8bca982aae80ec487ab30c14b5e8fcd4b0f58c3ada2c1f9e8e5bf24  build-os/experiments/EXP-0006-operational-uic/preflight.mjs
+212632b65d8d63133d1cc11c0066b66fbb6ea89d81b5faf913a4e3758a6dfe65  build-os/experiments/EXP-0006-operational-uic/results/task-selection.json
+80d36689a5002ce1408a502ead4602fe37f3c1466d2e5d8f2d4062686d0b7bad  build-os/experiments/EXP-0006-operational-uic/results/preflight.json
