@@ -1141,7 +1141,7 @@ inputs: the router, the guidance files, the hooks, the installers, and forty-one
 output: ==== RESULT: N passed, M failed ====
 owning_module: tests/build_os_tests.sh
 consuming_policies: the repository's single verification command; swarm-merge.sh runs it as the post-merge verification
-evidence_refs: tests/build_os_tests.sh:1350; tests/build_os_tests.sh:1351
+evidence_refs: tests/build_os_tests.sh:1352; tests/build_os_tests.sh:1353
 failure_behavior: exits non-zero when FAIL is non-zero
 rollback_behavior: read-only; all fixtures live in mktemp dirs
 promotion_requirement: n/a
@@ -1689,7 +1689,7 @@ inputs: mutator_registry.txt, defect_classes.txt, findings.txt, governance_basel
 output: pass, or a per-record list of malformed ids, duplicate ids, dangling control ids, stale authority copies, discharged findings and re-authorised baseline entries
 owning_module: build-os/registry/scan-mutators.sh
 consuming_policies: tests/mutator_registry_tests.sh section 12 consumes its exit code against the live tree
-evidence_refs: build-os/registry/scan-mutators.sh:249; build-os/registry/scan-mutators.sh:258; build-os/registry/scan-mutators.sh:366
+evidence_refs: build-os/registry/scan-mutators.sh:249; build-os/registry/scan-mutators.sh:262; build-os/registry/scan-mutators.sh:366
 failure_behavior: prints every violation and exits 2 without writing anything; it refuses outright on an empty store, on 0 derived ids or on an empty baseline, because each of those makes the check vacuous rather than clean
 rollback_behavior: none needed — it reads files and prints, and writes nothing anywhere
 promotion_requirement: already load_bearing; nothing above this status exists

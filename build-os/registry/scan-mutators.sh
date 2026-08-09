@@ -62,6 +62,10 @@ set -uo pipefail
 
 SELF_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO="$(cd "$SELF_DIR/../.." && pwd)"
+# The anchor resolver is node. A missing node must FAIL CLOSED on an anchored
+# citation rather than silently skip it: "the resolver was unavailable" and
+# "the evidence resolves" are different statements.
+NODE_BIN="$(command -v node || true)"
 
 refuse(){ printf 'scan-mutators: REFUSED — %s\n' "$*" >&2; exit 2; }
 viol(){ VIOL=$((VIOL+1)); printf '  %s\n' "$*"; }
@@ -304,9 +308,32 @@ while IFS= read -r id; do
   for ref in $(field_of mutator "$id" evidence_refs "$MUTREG" | tr ';' ' '); do
     [ -n "$ref" ] || continue
     nref=$((nref+1))
-    rf="${ref%:*}"; rl="${ref##*:}"
-    [ -f "$REPO/$rf" ] || { viol "NO-EVIDENCE     $id cites $ref, but $rf is not a file under $REPO"; continue; }
-    case "$rl" in ''|*[!0-9]*) viol "NO-EVIDENCE     $id cites \"$ref\", which carries no line number"; continue ;; esac
+    # ANCHORED FORM (path#c:hex) resolves by CONTENT; the positional form is
+    # unchanged. Per ANCHOR-CONTRACT.md v1 both are legal during the migration,
+    # and an anchor that cannot be resolved fails CLOSED — "the resolver was
+    # unavailable" is not "the evidence resolves".
+    case "$ref" in
+      *'#c:'*)
+        rf="${ref%%#c:*}"
+        [ -f "$REPO/$rf" ] || { viol "NO-EVIDENCE     $id cites $ref, but $rf is not a file under $REPO"; continue; }
+        if [ -z "$NODE_BIN" ]; then
+          viol "ANCHOR-UNRESOLVABLE $id cites $ref but node is unavailable, so the anchor cannot be resolved. Failing closed."
+          continue
+        fi
+        _res="$("$NODE_BIN" "$SELF_DIR/anchor-resolve.mjs" "$REPO" "$ref" 2>/dev/null | head -n1)"
+        case "$(printf '%s' "$_res" | cut -f2)" in
+          RESOLVED)  rl="$(printf '%s' "$_res" | cut -f3)" ;;
+          AMBIGUOUS) viol "ANCHOR-AMBIGUOUS $id cites $ref, whose content occurs $(printf '%s' "$_res" | cut -f4) times in $rf — content naming more than one line identifies no object"; continue ;;
+          STALE)     viol "ANCHOR-STALE    $id cites $ref, but no line in $rf carries that content any more — the cited text was edited or removed"; continue ;;
+          *)         viol "ANCHOR-UNRESOLVED $id cites $ref and the resolver returned an unexpected state"; continue ;;
+        esac
+        ;;
+      *)
+        rf="${ref%:*}"; rl="${ref##*:}"
+        [ -f "$REPO/$rf" ] || { viol "NO-EVIDENCE     $id cites $ref, but $rf is not a file under $REPO"; continue; }
+        case "$rl" in ''|*[!0-9]*) viol "NO-EVIDENCE     $id cites \"$ref\", which carries no line number"; continue ;; esac
+        ;;
+    esac
     tot="$(wc -l < "$REPO/$rf" | tr -d ' ')"
     { [ "$rl" -ge 1 ] && [ "$rl" -le "${tot:-0}" ]; } \
       || viol "NO-EVIDENCE     $id cites $ref, which is past the end of a ${tot:-0}-line file"
