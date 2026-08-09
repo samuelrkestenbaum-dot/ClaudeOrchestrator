@@ -1,9 +1,9 @@
 {
   "accepted": true,
-  "task_file": "server/nervous-system/integrated-nervous-system.ts",
+  "task_file": "server/deployment/deployment-router.ts",
   "condition_1_zero_errors_in_file": {
     "pass": true,
-    "errors_before": 1,
+    "errors_before": 15,
     "errors_after": 0,
     "remaining": []
   },
@@ -20,16 +20,14 @@
     "pattern_removed_counts": {},
     "hits_offset_by_removals": [],
     "deletion_suspected": false,
-    "lines_added": 6,
-    "lines_removed": 2,
+    "lines_added": 17,
+    "lines_removed": 13,
     "note": "patterns are matched on ADDED lines only; matching the whole file would reject a task for `any` casts the seed already contained"
   },
   "total_errors_before": 781,
-  "total_errors_after": 780,
+  "total_errors_after": 766,
   "path_normalisations_applied": 10,
   "path_normalisation_note": "tsc embeds absolute paths in some messages, and the baseline tree and the arm tree sit at different paths. Without normalising the tree root out, the SAME pre-existing error hashes differently and an untouched file reads as a regression. The frozen acceptance rule is unchanged; an environment difference is removed, not a code difference. This count is reported so the correction can never be silent.",
   "verdict_basis": "compiler output and diff text only — no judgement, no adjudicator opinion",
-  "verification_exit_code": 2,
-  "readjudicated": true,
-  "readjudication_reason": "recomputed from the stored compiler output and diff after the path-normalisation defect was found on the pilot's first arm; the frozen acceptance rule is unchanged and the original verdict is preserved alongside"
+  "verification_exit_code": 2
 }

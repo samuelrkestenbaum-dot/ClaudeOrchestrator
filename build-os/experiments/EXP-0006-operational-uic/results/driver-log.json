@@ -4,52 +4,100 @@
   "order_rule": "odd task index -> native first; even -> gravito first",
   "units": [
     {
-      "task": "T01",
+      "task": "T05",
       "arm": "native",
       "exit": 0,
-      "wall_s": 274
+      "wall_s": 179
     },
     {
-      "task": "T01",
+      "task": "T05",
       "arm": "gravito",
       "exit": 0,
-      "wall_s": 379
+      "wall_s": 330
     },
     {
-      "task": "T02",
+      "task": "T06",
       "arm": "gravito",
       "exit": 0,
-      "wall_s": 357
+      "wall_s": 591
     },
     {
-      "task": "T02",
+      "task": "T06",
       "arm": "native",
       "exit": 0,
-      "wall_s": 223
+      "wall_s": 428
     },
     {
-      "task": "T03",
+      "task": "T07",
       "arm": "native",
       "exit": 0,
-      "wall_s": 223
+      "wall_s": 155
     },
     {
-      "task": "T03",
+      "task": "T07",
       "arm": "gravito",
       "exit": 0,
-      "wall_s": 565
+      "wall_s": 348
     },
     {
-      "task": "T04",
+      "task": "T08",
       "arm": "gravito",
       "exit": 0,
-      "wall_s": 748
+      "wall_s": 872
     },
     {
-      "task": "T04",
+      "task": "T08",
       "arm": "native",
       "exit": 0,
-      "wall_s": 400
+      "wall_s": 616
+    },
+    {
+      "task": "T09",
+      "arm": "native",
+      "exit": 0,
+      "wall_s": 296
+    },
+    {
+      "task": "T09",
+      "arm": "gravito",
+      "exit": 0,
+      "wall_s": 441
+    },
+    {
+      "task": "T10",
+      "arm": "gravito",
+      "exit": 0,
+      "wall_s": 294
+    },
+    {
+      "task": "T10",
+      "arm": "native",
+      "exit": 0,
+      "wall_s": 237
+    },
+    {
+      "task": "T11",
+      "arm": "native",
+      "exit": 0,
+      "wall_s": 203
+    },
+    {
+      "task": "T11",
+      "arm": "gravito",
+      "exit": 0,
+      "wall_s": 387
+    },
+    {
+      "task": "T12",
+      "arm": "gravito",
+      "exit": 0,
+      "wall_s": 337
+    },
+    {
+      "task": "T12",
+      "arm": "native",
+      "exit": 0,
+      "wall_s": 215
     }
   ]
 }

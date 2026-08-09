@@ -59,9 +59,9 @@
     {
       "unit": "T03.native",
       "status": "readjudicated",
-      "was": false,
+      "was": true,
       "now": true,
-      "flipped": true,
+      "flipped": false,
       "new_errors_before_fix": 0,
       "new_errors_after_fix": 0,
       "normalisations": 10
@@ -78,6 +78,166 @@
     },
     {
       "unit": "T04.native",
+      "status": "readjudicated",
+      "was": true,
+      "now": true,
+      "flipped": false,
+      "new_errors_before_fix": 0,
+      "new_errors_after_fix": 0,
+      "normalisations": 10
+    },
+    {
+      "unit": "T05.gravito",
+      "status": "readjudicated",
+      "was": true,
+      "now": true,
+      "flipped": false,
+      "new_errors_before_fix": 0,
+      "new_errors_after_fix": 0,
+      "normalisations": 10
+    },
+    {
+      "unit": "T05.native",
+      "status": "readjudicated",
+      "was": true,
+      "now": true,
+      "flipped": false,
+      "new_errors_before_fix": 0,
+      "new_errors_after_fix": 0,
+      "normalisations": 10
+    },
+    {
+      "unit": "T06.gravito",
+      "status": "readjudicated",
+      "was": true,
+      "now": true,
+      "flipped": false,
+      "new_errors_before_fix": 0,
+      "new_errors_after_fix": 0,
+      "normalisations": 10
+    },
+    {
+      "unit": "T06.native",
+      "status": "readjudicated",
+      "was": true,
+      "now": true,
+      "flipped": false,
+      "new_errors_before_fix": 0,
+      "new_errors_after_fix": 0,
+      "normalisations": 10
+    },
+    {
+      "unit": "T07.gravito",
+      "status": "readjudicated",
+      "was": false,
+      "now": false,
+      "flipped": false,
+      "new_errors_before_fix": 0,
+      "new_errors_after_fix": 0,
+      "normalisations": 10
+    },
+    {
+      "unit": "T07.native",
+      "status": "readjudicated",
+      "was": false,
+      "now": false,
+      "flipped": false,
+      "new_errors_before_fix": 0,
+      "new_errors_after_fix": 0,
+      "normalisations": 10
+    },
+    {
+      "unit": "T08.gravito",
+      "status": "readjudicated",
+      "was": true,
+      "now": true,
+      "flipped": false,
+      "new_errors_before_fix": 0,
+      "new_errors_after_fix": 0,
+      "normalisations": 10
+    },
+    {
+      "unit": "T08.native",
+      "status": "readjudicated",
+      "was": true,
+      "now": true,
+      "flipped": false,
+      "new_errors_before_fix": 0,
+      "new_errors_after_fix": 0,
+      "normalisations": 10
+    },
+    {
+      "unit": "T09.gravito",
+      "status": "readjudicated",
+      "was": true,
+      "now": true,
+      "flipped": false,
+      "new_errors_before_fix": 0,
+      "new_errors_after_fix": 0,
+      "normalisations": 10
+    },
+    {
+      "unit": "T09.native",
+      "status": "readjudicated",
+      "was": true,
+      "now": true,
+      "flipped": false,
+      "new_errors_before_fix": 0,
+      "new_errors_after_fix": 0,
+      "normalisations": 10
+    },
+    {
+      "unit": "T10.gravito",
+      "status": "readjudicated",
+      "was": true,
+      "now": true,
+      "flipped": false,
+      "new_errors_before_fix": 0,
+      "new_errors_after_fix": 0,
+      "normalisations": 10
+    },
+    {
+      "unit": "T10.native",
+      "status": "readjudicated",
+      "was": true,
+      "now": true,
+      "flipped": false,
+      "new_errors_before_fix": 0,
+      "new_errors_after_fix": 0,
+      "normalisations": 10
+    },
+    {
+      "unit": "T11.gravito",
+      "status": "readjudicated",
+      "was": true,
+      "now": true,
+      "flipped": false,
+      "new_errors_before_fix": 0,
+      "new_errors_after_fix": 0,
+      "normalisations": 10
+    },
+    {
+      "unit": "T11.native",
+      "status": "readjudicated",
+      "was": false,
+      "now": false,
+      "flipped": false,
+      "new_errors_before_fix": 0,
+      "new_errors_after_fix": 0,
+      "normalisations": 10
+    },
+    {
+      "unit": "T12.gravito",
+      "status": "readjudicated",
+      "was": true,
+      "now": true,
+      "flipped": false,
+      "new_errors_before_fix": 0,
+      "new_errors_after_fix": 0,
+      "normalisations": 10
+    },
+    {
+      "unit": "T12.native",
       "status": "readjudicated",
       "was": true,
       "now": true,

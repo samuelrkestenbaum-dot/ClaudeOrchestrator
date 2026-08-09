@@ -1,0 +1,23 @@
+diff --git a/client/src/pages/admin/RecallProofPreflight.tsx b/client/src/pages/admin/RecallProofPreflight.tsx
+index d6ed03c..5c207d0 100644
+--- a/client/src/pages/admin/RecallProofPreflight.tsx
++++ b/client/src/pages/admin/RecallProofPreflight.tsx
+@@ -6,7 +6,7 @@
+  * Recall proof run. The dedicated operator key is held in component state only:
+  * never persisted to browser storage, cookies, URL params, or echoed.
+  */
+-import { useState } from "react";
++import { useState, type ReactNode } from "react";
+ import GravitoShell from "@/components/gravito/GravitoShell";
+ 
+ interface PreflightBlocker {
+@@ -95,7 +95,7 @@ function Badge({ tone, children }: { tone: "go" | "stop" | "warn" | "neutral"; c
+   );
+ }
+ 
+-function CheckRow({ label, children, ok }: { label: string; children: string; ok?: boolean | null }) {
++function CheckRow({ label, children, ok }: { label: string; children: ReactNode; ok?: boolean | null }) {
+   const tone = ok === true ? "go" : ok === false ? "stop" : "neutral";
+   return (
+     <div
+

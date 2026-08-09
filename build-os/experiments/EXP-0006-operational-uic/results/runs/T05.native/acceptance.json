@@ -29,5 +29,7 @@
   "path_normalisations_applied": 10,
   "path_normalisation_note": "tsc embeds absolute paths in some messages, and the baseline tree and the arm tree sit at different paths. Without normalising the tree root out, the SAME pre-existing error hashes differently and an untouched file reads as a regression. The frozen acceptance rule is unchanged; an environment difference is removed, not a code difference. This count is reported so the correction can never be silent.",
   "verdict_basis": "compiler output and diff text only — no judgement, no adjudicator opinion",
-  "verification_exit_code": 2
+  "verification_exit_code": 2,
+  "readjudicated": true,
+  "readjudication_reason": "recomputed from the stored compiler output and diff after the path-normalisation defect was found on the pilot's first arm; the frozen acceptance rule is unchanged and the original verdict is preserved alongside"
 }

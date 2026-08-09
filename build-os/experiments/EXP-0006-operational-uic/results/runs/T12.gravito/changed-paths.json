@@ -1,0 +1,10 @@
+{
+  "base_commit": "1ebf4163c810856d0932451e6af6ee2863a3ea5a",
+  "product_paths": [
+    "client/src/pages/admin/RecallProofPreflight.tsx"
+  ],
+  "governance_paths": [
+    "build-os/packets/routing/routing-T12-20260809T053856Z.md"
+  ],
+  "note": "governance paths are DENOMINATOR COST and receive no numerator credit; measured against the administered commit, so substrate administration is not attributed to the arm"
+}
