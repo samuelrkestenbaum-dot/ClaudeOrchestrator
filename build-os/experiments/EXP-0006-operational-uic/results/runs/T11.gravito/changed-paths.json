@@ -1,0 +1,10 @@
+{
+  "base_commit": "d39508005b0980683aa4b48c5a0f2ae53aebee0b",
+  "product_paths": [
+    "server/nervous-system/dynamics/claude-llm.ts"
+  ],
+  "governance_paths": [
+    "build-os/packets/routing/routing-T11-20260809T053316Z.md"
+  ],
+  "note": "governance paths are DENOMINATOR COST and receive no numerator credit; measured against the administered commit, so substrate administration is not attributed to the arm"
+}
