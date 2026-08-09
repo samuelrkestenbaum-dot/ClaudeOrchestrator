@@ -1,0 +1,63 @@
+{
+  "artifact": "exp0006_preflight",
+  "model": "claude-opus-5",
+  "permission_mode": "acceptEdits",
+  "results": [
+    {
+      "id": "worker_cli_present",
+      "status": "PASS",
+      "detail": "claude CLI available: 2.1.226 (Claude Code)",
+      "evidence": "2.1.226 (Claude Code)"
+    },
+    {
+      "id": "first_mutation_authority",
+      "status": "PASS",
+      "detail": "a child in --permission-mode acceptEdits MUTATED a file on disk (exit 0, 18s)",
+      "evidence": {
+        "verified_by": "reading the file, not the worker's claim"
+      }
+    },
+    {
+      "id": "session_isolation",
+      "status": "PASS",
+      "detail": "child ran under its OWN id 3fea6312..., distinct from this session's 5489b495... and equal to the id it was launched with",
+      "evidence": null
+    },
+    {
+      "id": "token_accounting",
+      "status": "PASS",
+      "detail": "usage reports input_tokens=6 and cache_read_input_tokens=81967 — uncached is derivable",
+      "evidence": null
+    },
+    {
+      "id": "substrate_present",
+      "status": "PASS",
+      "detail": "all substrate paths exist: build-os, .claude, CLAUDE.md",
+      "evidence": null
+    },
+    {
+      "id": "substrate_loads",
+      "status": "PASS",
+      "detail": "4 load-bearing controllers import without throwing",
+      "evidence": null
+    },
+    {
+      "id": "host_profile_registered",
+      "status": "PASS",
+      "detail": "host=unknown_conservative permits Edit=allowed Bash=approval_required approver=false",
+      "evidence": {
+        "id": "unknown_conservative",
+        "description": "host has not declared itself; assume writes usable and shell approval-gated with no approver",
+        "permits": {
+          "Edit": "allowed",
+          "Write": "allowed",
+          "NotebookEdit": "allowed",
+          "Bash": "approval_required"
+        },
+        "approver_present": false,
+        "observed_by": "DEFAULT — not an observation. Used when GRAVITO_HOST_PROFILE is unset, chosen so an undeclared host degrades toward the lower-privilege authority path."
+      }
+    }
+  ],
+  "ready": true
+}

@@ -1,7 +1,7 @@
 {
   "note": "The durable queue the continuation controller reads. Task completion is NOT a stop condition; a commit awaiting a push grant is NOT a stop condition.",
   "published_tips": [
-    "ec690e0"
+    "cd44a8e"
   ],
   "tasks": [
     {
@@ -73,23 +73,22 @@
     {
       "id": "54",
       "subject": "Live self-gate coverage for Claude and ChatGPT (EXIT-2)",
-      "status": "pending",
+      "status": "completed",
       "depends_on": [],
-      "blocks_objective": true,
-      "serves_exit_criteria": [
-        "EXIT-2"
-      ],
+      "blocks_objective": false,
+      "serves_exit_criteria": [],
       "cost": "medium",
       "detail": "BOUNDED RECONCILIATION, not a self-gating build. The operator ran the exact sequence the metric supposedly wants on chatgpt.operator_lab.strategy: called gate_outbound_inference, got allow, THEN wrote the substantive interaction as ledger 36266, then reran check_substrate_readiness. self_gate_hygiene.chatgpt still reads 0 / uncovered. Claude shows the same shape: a real live gate event, self_gate still 0. QUESTION: what exact event/source does self_gate_hygiene count, and why does a demonstrated same-surface pre-output gate invocation not increment it? Outcome A: the metric measures a STRONGER requirement -> name the missing behaviour precisely and implement only that. Outcome B: measurement defect -> classify it, fix narrowly if possible, and do NOT let a broken metric indefinitely block EXIT-5. Do not open a general assurance workstream from this.",
-      "bounded": true
+      "bounded": true,
+      "completion_evidence": "OPERATOR RULING, bounded. Direct live evidence demonstrates pre-output gating on both active surface identities: gate_outbound_inference was called by chatgpt.operator_lab.strategy, returned a real allow, and the substantive interaction was then written as ledger 36266 \u2014 yet self_gate_hygiene.chatgpt stayed 0 / uncovered across repeated probes. Claude shows the same shape. CLASSIFIED UNDERLYING_GATE_BEHAVIOR_PROVEN / COVERAGE_METRIC_UNRECONCILED. The metric is NOT called fixed and its instrumentation is NOT claimed to be understood; the exposed Lab interface does not expose which internal event it counts. It is recorded as known debt and is no longer a blocking precondition for EXIT-5.",
+      "known_debt": "self_gate_hygiene does not reflect gating behaviour that can be directly demonstrated on the actual surface identities. Further investigation is DEFER unless #55 produces evidence that missing self-gating materially affected execution.",
+      "is_debt": true
     },
     {
       "id": "55",
       "subject": "Fresh operational UIC benchmark on a functioning system (EXIT-5)",
-      "status": "pending",
-      "depends_on": [
-        "54"
-      ],
+      "status": "in_progress",
+      "depends_on": [],
       "blocks_objective": true,
       "produces_required_evidence": true,
       "serves_exit_criteria": [
@@ -97,7 +96,9 @@
         "EXIT-5"
       ],
       "cost": "high",
-      "detail": "EXP-0005 measured a system that could not bootstrap and returned gravito_system_harmful with 0/12 accepted. The efficiency thesis is still unanswered. This runs fresh work on the repaired system."
+      "detail": "EXP-0005 measured a system that could not bootstrap and returned gravito_system_harmful with 0/12 accepted. The efficiency thesis is still unanswered. This runs fresh work on the repaired system.",
+      "preflight": "EXECUTED, 7/7. worker CLI present; FIRST MUTATION AUTHORITY verified by reading the file on disk (the precondition that killed EXP-0005); session isolation verified after a scrub + explicit --session-id; token accounting derivable; substrate present and its four load-bearing controllers import; host profile registered as unknown_conservative (Edit=allowed, Bash=approval_required, no approver).",
+      "preflight_defect_found": "The isolation check PASSED VACUOUSLY on its first run: it compared against process.env.CLAUDE_SESSION_ID, which does not exist here (the real name is CLAUDE_CODE_SESSION_ID), so the comparison was against undefined and returned true while the child had in fact inherited this session's exact id. Classified measurement_critical and fixed before any arm ran: the orchestrator id is now resolved explicitly and its ABSENCE fails the check rather than passing it."
     }
   ],
   "primary_objective": {
@@ -106,7 +107,7 @@
     "statement": "Demonstrate that Gravito reliably improves real AI work across persistent, governed, multi-surface execution.",
     "exit_criteria": [
       "EXIT-1 actor-disambiguated Claude<->ChatGPT continuity \u2014 CLOSED (CONT-0002 = CROSS_SURFACE_BEHAVIORAL_CONTINUITY_PROVEN, mediation=bridge)",
-      "EXIT-2 live self-gating covered",
+      "EXIT-2 live self-gating \u2014 RULED: UNDERLYING_GATE_BEHAVIOR_PROVEN / COVERAGE_METRIC_UNRECONCILED. NOT a blocker to EXIT-5.",
       "EXIT-3 no runtime-critical defect blocking normal execution",
       "EXIT-4 fresh end-to-end work runs",
       "EXIT-5 fresh UIC comparison completed"
