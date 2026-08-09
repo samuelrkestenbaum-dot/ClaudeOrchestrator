@@ -1,0 +1,165 @@
+{
+  "arm": "gravito",
+  "acts": [
+    {
+      "act": "administer_code",
+      "path": "build-os/adapters"
+    },
+    {
+      "act": "administer_code",
+      "path": "build-os/assumptions"
+    },
+    {
+      "act": "administer_code",
+      "path": "build-os/audit"
+    },
+    {
+      "act": "administer_code",
+      "path": "build-os/authority"
+    },
+    {
+      "act": "administer_code",
+      "path": "build-os/bootstrap"
+    },
+    {
+      "act": "administer_code",
+      "path": "build-os/business"
+    },
+    {
+      "act": "administer_code",
+      "path": "build-os/compiler"
+    },
+    {
+      "act": "administer_code",
+      "path": "build-os/dashboard"
+    },
+    {
+      "act": "administer_code",
+      "path": "build-os/demo"
+    },
+    {
+      "act": "administer_code",
+      "path": "build-os/intake"
+    },
+    {
+      "act": "administer_code",
+      "path": "build-os/kernel"
+    },
+    {
+      "act": "administer_code",
+      "path": "build-os/learning"
+    },
+    {
+      "act": "administer_code",
+      "path": "build-os/maintenance"
+    },
+    {
+      "act": "administer_code",
+      "path": "build-os/measure"
+    },
+    {
+      "act": "administer_code",
+      "path": "build-os/metrics"
+    },
+    {
+      "act": "administer_code",
+      "path": "build-os/motion"
+    },
+    {
+      "act": "administer_code",
+      "path": "build-os/onboarding"
+    },
+    {
+      "act": "administer_code",
+      "path": "build-os/partner"
+    },
+    {
+      "act": "administer_code",
+      "path": "build-os/registry"
+    },
+    {
+      "act": "administer_code",
+      "path": "build-os/runbooks"
+    },
+    {
+      "act": "administer_code",
+      "path": "build-os/runtime"
+    },
+    {
+      "act": "administer_code",
+      "path": "build-os/shell"
+    },
+    {
+      "act": "administer_code",
+      "path": "build-os/surfaces"
+    },
+    {
+      "act": "administer_code",
+      "path": "build-os/tools"
+    },
+    {
+      "act": "administer_code",
+      "path": ".claude"
+    },
+    {
+      "act": "administer_code",
+      "path": "CLAUDE.md"
+    },
+    {
+      "act": "retain_data",
+      "path": "build-os/memory"
+    },
+    {
+      "act": "retain_data",
+      "path": "build-os/receipts"
+    },
+    {
+      "act": "retain_data",
+      "path": "build-os/packets"
+    },
+    {
+      "act": "retain_data",
+      "path": "build-os/design"
+    },
+    {
+      "act": "retain_data",
+      "path": "build-os/graph"
+    },
+    {
+      "act": "withhold",
+      "path": "build-os/experiments"
+    },
+    {
+      "act": "withhold",
+      "path": "build-os/pilots"
+    }
+  ],
+  "code_source": "/home/user/ClaudeOrchestrator",
+  "code_dirs": [
+    "build-os/adapters",
+    "build-os/assumptions",
+    "build-os/audit",
+    "build-os/authority",
+    "build-os/bootstrap",
+    "build-os/business",
+    "build-os/compiler",
+    "build-os/dashboard",
+    "build-os/demo",
+    "build-os/intake",
+    "build-os/kernel",
+    "build-os/learning",
+    "build-os/maintenance",
+    "build-os/measure",
+    "build-os/metrics",
+    "build-os/motion",
+    "build-os/onboarding",
+    "build-os/partner",
+    "build-os/registry",
+    "build-os/runbooks",
+    "build-os/runtime",
+    "build-os/shell",
+    "build-os/surfaces",
+    "build-os/tools"
+  ],
+  "administered_sha": "62a3570ae757e406e266b915053388e1912750eb"
+}

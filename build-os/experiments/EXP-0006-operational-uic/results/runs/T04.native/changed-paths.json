@@ -1,0 +1,10 @@
+{
+  "base_commit": "3c1f57fc6935d49ec85da3beb60a48c2abb04fad",
+  "product_paths": [
+    "client/src/lib/trpc.ts",
+    "client/src/pages/UserDashboard.tsx",
+    "server/supabase-adapter.ts"
+  ],
+  "governance_paths": [],
+  "note": "governance paths are DENOMINATOR COST and receive no numerator credit; measured against the administered commit, so substrate administration is not attributed to the arm"
+}

@@ -1,0 +1,11 @@
+{
+  "base_commit": "e441f312ad7177e5c5565a789f0d9c7c43f0a019",
+  "product_paths": [
+    "client/src/pages/UserDashboard.tsx"
+  ],
+  "governance_paths": [
+    "build-os/motion/exhaustion/current.json",
+    "build-os/packets/routing/routing-T04-20260809T035043Z.md"
+  ],
+  "note": "governance paths are DENOMINATOR COST and receive no numerator credit; measured against the administered commit, so substrate administration is not attributed to the arm"
+}

@@ -9,27 +9,82 @@
     {
       "unit": "T01.gravito",
       "status": "readjudicated",
-      "was": false,
+      "was": true,
       "now": true,
-      "flipped": true,
-      "new_errors_before_fix": 5,
+      "flipped": false,
+      "new_errors_before_fix": 0,
       "new_errors_after_fix": 0,
       "normalisations": 10
     },
     {
       "unit": "T01.native",
       "status": "readjudicated",
-      "was": false,
+      "was": true,
       "now": true,
-      "flipped": true,
-      "new_errors_before_fix": 5,
+      "flipped": false,
+      "new_errors_before_fix": 0,
       "new_errors_after_fix": 0,
       "normalisations": 10
     },
     {
       "unit": "T02.gravito",
-      "status": "skipped",
-      "why": "no verification artifact"
+      "status": "readjudicated",
+      "was": true,
+      "now": true,
+      "flipped": false,
+      "new_errors_before_fix": 0,
+      "new_errors_after_fix": 0,
+      "normalisations": 10
+    },
+    {
+      "unit": "T02.native",
+      "status": "readjudicated",
+      "was": true,
+      "now": true,
+      "flipped": false,
+      "new_errors_before_fix": 0,
+      "new_errors_after_fix": 0,
+      "normalisations": 10
+    },
+    {
+      "unit": "T03.gravito",
+      "status": "readjudicated",
+      "was": true,
+      "now": true,
+      "flipped": false,
+      "new_errors_before_fix": 0,
+      "new_errors_after_fix": 0,
+      "normalisations": 10
+    },
+    {
+      "unit": "T03.native",
+      "status": "readjudicated",
+      "was": false,
+      "now": true,
+      "flipped": true,
+      "new_errors_before_fix": 0,
+      "new_errors_after_fix": 0,
+      "normalisations": 10
+    },
+    {
+      "unit": "T04.gravito",
+      "status": "readjudicated",
+      "was": true,
+      "now": true,
+      "flipped": false,
+      "new_errors_before_fix": 0,
+      "new_errors_after_fix": 0,
+      "normalisations": 10
+    },
+    {
+      "unit": "T04.native",
+      "status": "readjudicated",
+      "was": true,
+      "now": true,
+      "flipped": false,
+      "new_errors_before_fix": 0,
+      "new_errors_after_fix": 0,
+      "normalisations": 10
     }
   ]
 }

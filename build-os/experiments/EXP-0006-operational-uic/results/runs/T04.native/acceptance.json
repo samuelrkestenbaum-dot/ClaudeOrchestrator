@@ -1,6 +1,6 @@
 {
   "accepted": true,
-  "task_file": "server/services/organizational-memory.ts",
+  "task_file": "client/src/pages/UserDashboard.tsx",
   "condition_1_zero_errors_in_file": {
     "pass": true,
     "errors_before": 2,
@@ -20,8 +20,8 @@
     "pattern_removed_counts": {},
     "hits_offset_by_removals": [],
     "deletion_suspected": false,
-    "lines_added": 7,
-    "lines_removed": 5,
+    "lines_added": 6,
+    "lines_removed": 3,
     "note": "patterns are matched on ADDED lines only; matching the whole file would reject a task for `any` casts the seed already contained"
   },
   "total_errors_before": 781,

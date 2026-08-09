@@ -1,0 +1,10 @@
+{
+  "base_commit": "62a3570ae757e406e266b915053388e1912750eb",
+  "product_paths": [
+    "server/agent/github-app.ts"
+  ],
+  "governance_paths": [
+    "build-os/packets/routing/routing-T03-github-app-ts2345-20260809T033826Z.md"
+  ],
+  "note": "governance paths are DENOMINATOR COST and receive no numerator credit; measured against the administered commit, so substrate administration is not attributed to the arm"
+}

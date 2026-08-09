@@ -1,5 +1,5 @@
 {
-  "accepted": false,
+  "accepted": true,
   "task_file": "server/agent/github-app.ts",
   "condition_1_zero_errors_in_file": {
     "pass": true,
@@ -13,8 +13,16 @@
     "new_errors": []
   },
   "diff_rejection": {
-    "rejected": true,
-    "hits": [
+    "rejected": false,
+    "hits": [],
+    "net_introduced": {},
+    "pattern_added_counts": {
+      "any_cast": 1
+    },
+    "pattern_removed_counts": {
+      "any_cast": 1
+    },
+    "hits_offset_by_removals": [
       {
         "pattern": "any_cast",
         "why": "erases the type rather than satisfying it",
@@ -31,5 +39,7 @@
   "path_normalisations_applied": 10,
   "path_normalisation_note": "tsc embeds absolute paths in some messages, and the baseline tree and the arm tree sit at different paths. Without normalising the tree root out, the SAME pre-existing error hashes differently and an untouched file reads as a regression. The frozen acceptance rule is unchanged; an environment difference is removed, not a code difference. This count is reported so the correction can never be silent.",
   "verdict_basis": "compiler output and diff text only — no judgement, no adjudicator opinion",
-  "verification_exit_code": 2
+  "verification_exit_code": 2,
+  "readjudicated": true,
+  "readjudication_reason": "recomputed from the stored compiler output and diff after the path-normalisation defect was found on the pilot's first arm; the frozen acceptance rule is unchanged and the original verdict is preserved alongside"
 }

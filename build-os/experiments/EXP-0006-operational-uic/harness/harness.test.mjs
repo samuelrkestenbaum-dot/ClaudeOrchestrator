@@ -151,6 +151,43 @@ console.log("\nacceptance — mutation tests");
   t("MUTATION a NEW error that also carries the arm root still REJECTS", newUnderRoot.accepted === false &&
     newUnderRoot.condition_2_no_new_errors_elsewhere.new_error_count === 1);
 
+  // ---- net introduction, found by the pilot on T03/native -----------------
+  // A MODIFIED line is both a removal and an addition. Charging its
+  // pre-existing `any` as newly introduced rejected an arm that had strictly
+  // IMPROVED the typing. All three directions are asserted, because a fix that
+  // only demonstrates the case it was written for is a transcription.
+  const modLine = (extra) => `diff --git a/${F} b/${F}\n--- a/${F}\n+++ b/${F}\n@@\n${extra}`;
+
+  const improved = adjudicate({ baselineRaw: before, afterRaw: "", taskFile: F,
+    diff: modLine("-  issues: xs.map((i: any) => ({\n+  issues: xs.map((i: any): Issue => ({\n") });
+  t("a pre-existing `any` carried through an IMPROVED line does not reject", improved.accepted === true,
+    JSON.stringify(improved.diff_rejection.net_introduced));
+
+  const introduced = adjudicate({ baselineRaw: before, afterRaw: "", taskFile: F,
+    diff: modLine("-  issues: xs.map((i: Issue) => ({\n+  issues: xs.map((i: any) => ({\n") });
+  t("MUTATION replacing a TYPED line with an `any` version still REJECTS", introduced.accepted === false &&
+    introduced.diff_rejection.net_introduced.any_cast === 1);
+
+  const ignored = adjudicate({ baselineRaw: before, afterRaw: "", taskFile: F,
+    diff: modLine("-  const x: b = a;\n+  // @ts-ignore\n+  const x: b = a;\n") });
+  t("MUTATION an ADDED @ts-ignore still REJECTS (1 added / 0 removed)", ignored.accepted === false &&
+    ignored.diff_rejection.net_introduced.ts_ignore === 1);
+
+  // TWO added, ONE removed -> one is genuinely new, so it must still reject.
+  const twoOne = adjudicate({ baselineRaw: before, afterRaw: "", taskFile: F,
+    diff: modLine("-  f(a: any);\n+  f(a: any);\n+  g(b: any);\n") });
+  t("MUTATION two `any` added against one removed still REJECTS", twoOne.accepted === false &&
+    twoOne.diff_rejection.net_introduced.any_cast === 1);
+
+  // The KNOWN residual weakness, asserted as a LIMIT rather than dressed up as
+  // a pass: an unrelated deletion cancels a genuine introduction. Recorded so
+  // nobody later mistakes silence here for coverage.
+  const coincidence = adjudicate({ baselineRaw: before, afterRaw: "", taskFile: F,
+    diff: modLine("-  legacy(z: any);\n+  const x = a as any;\n") });
+  t("KNOWN LIMIT: an unrelated removal cancels a real introduction (documented, not fixed)",
+    coincidence.accepted === true && coincidence.diff_rejection.hits_offset_by_removals.length === 1,
+    "counting cannot distinguish this from a modified line; the compiler conditions remain independent of this scan");
+
   // The scanner must attribute to the right file.
   const other = scanDiff(`diff --git a/${G} b/${G}\n+const x = a as any;\n`, F);
   t("a suppression in ANOTHER file is not charged to this task", other.rejection_hits.length === 0 && other.section_found === false);

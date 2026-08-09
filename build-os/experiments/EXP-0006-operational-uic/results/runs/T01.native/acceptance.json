@@ -15,6 +15,10 @@
   "diff_rejection": {
     "rejected": false,
     "hits": [],
+    "net_introduced": {},
+    "pattern_added_counts": {},
+    "pattern_removed_counts": {},
+    "hits_offset_by_removals": [],
     "deletion_suspected": false,
     "lines_added": 3,
     "lines_removed": 3,

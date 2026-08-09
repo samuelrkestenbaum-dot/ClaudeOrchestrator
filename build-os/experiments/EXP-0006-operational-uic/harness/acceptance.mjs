@@ -119,7 +119,8 @@ export const REJECTION_PATTERNS = [
  */
 export function scanDiff(diff, taskFile) {
   const sections = String(diff).split(/(?=^diff --git )/m).filter(Boolean);
-  const hits = [];
+  const hits = [], removedHits = [];
+  const addedCount = {}, removedCount = {};
   let added = 0, removed = 0, sectionFound = false;
 
   for (const s of sections) {
@@ -129,14 +130,64 @@ export function scanDiff(diff, taskFile) {
     sectionFound = true;
     for (const line of s.split("\n")) {
       if (line.startsWith("+++") || line.startsWith("---")) continue;
+      const body = line.slice(1);
       if (line.startsWith("+")) {
         added++;
-        const body = line.slice(1);
-        for (const rp of REJECTION_PATTERNS) if (rp.re.test(body)) hits.push({ pattern: rp.id, why: rp.why, line: body.trim().slice(0, 160) });
-      } else if (line.startsWith("-")) removed++;
+        for (const rp of REJECTION_PATTERNS) if (rp.re.test(body)) {
+          addedCount[rp.id] = (addedCount[rp.id] || 0) + 1;
+          hits.push({ pattern: rp.id, why: rp.why, line: body.trim().slice(0, 160) });
+        }
+      } else if (line.startsWith("-")) {
+        removed++;
+        for (const rp of REJECTION_PATTERNS) if (rp.re.test(body)) {
+          removedCount[rp.id] = (removedCount[rp.id] || 0) + 1;
+          removedHits.push({ pattern: rp.id, line: body.trim().slice(0, 160) });
+        }
+      }
     }
   }
-  return { section_found: sectionFound, added, removed, rejection_hits: hits };
+
+  // NET INTRODUCTION. A pattern counts only where its occurrences on ADDED
+  // lines exceed its occurrences on REMOVED lines.
+  //
+  // Added-line matching alone was not enough, and the pilot proved it on
+  // T03/native. A MODIFIED line appears in a unified diff as both a removal and
+  // an addition, so an arm that improved this line:
+  //
+  //   - issues: (auditResult.issues || []).map((i: any) => ({
+  //   + issues: (auditResult.issues || []).map((i: any): Issue => ({
+  //
+  // was charged with introducing an `any` that was already there. It had added
+  // a return type — strictly better typing — and was rejected for it.
+  //
+  // Everything the rule exists for survives: replacing a typed line with an
+  // `any` version is 1 added / 0 removed and still rejects; an added
+  // @ts-ignore is 1/0 and still rejects. Carrying a pre-existing `any` through
+  // a line you improved is 1/1 and does not.
+  //
+  // KNOWN RESIDUAL WEAKNESS, recorded rather than hidden: counting can be
+  // cancelled by coincidence. An arm that adds an `any` on one line while
+  // deleting an unrelated line that happened to contain one nets to zero and
+  // escapes. Per-line pairing would catch it, but reliably matching "the same
+  // line, modified" across a unified diff is guesswork, and a WRONG pairing
+  // rejects honest work. The asymmetry decides it: a false rejection destroys
+  // the numerator outright, while a false acceptance still has to satisfy
+  // conditions 1 and 2, which are computed by the compiler and independent of
+  // this scan. Both counts are reported so the case is visible if it occurs.
+  const net = {};
+  for (const rp of REJECTION_PATTERNS) {
+    const n = (addedCount[rp.id] || 0) - (removedCount[rp.id] || 0);
+    if (n > 0) net[rp.id] = n;
+  }
+
+  return {
+    section_found: sectionFound, added, removed,
+    pattern_added_counts: addedCount, pattern_removed_counts: removedCount,
+    net_introduced: net,
+    rejection_hits: hits.filter((h) => net[h.pattern] > 0),
+    hits_offset_by_removals: hits.filter((h) => !(net[h.pattern] > 0)),
+    removed_pattern_lines: removedHits,
+  };
 }
 
 /**
@@ -194,6 +245,10 @@ export function adjudicate({ baselineRaw, afterRaw, taskFile, diff }) {
     diff_rejection: {
       rejected: rejected_by_diff,
       hits: scan.rejection_hits,
+      net_introduced: scan.net_introduced,
+      pattern_added_counts: scan.pattern_added_counts,
+      pattern_removed_counts: scan.pattern_removed_counts,
+      hits_offset_by_removals: scan.hits_offset_by_removals,
       deletion_suspected,
       lines_added: scan.added,
       lines_removed: scan.removed,

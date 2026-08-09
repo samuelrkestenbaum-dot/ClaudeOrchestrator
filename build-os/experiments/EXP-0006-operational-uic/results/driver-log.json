@@ -1,0 +1,55 @@
+{
+  "artifact": "exp0006_driver_log",
+  "dry_run": false,
+  "order_rule": "odd task index -> native first; even -> gravito first",
+  "units": [
+    {
+      "task": "T01",
+      "arm": "native",
+      "exit": 0,
+      "wall_s": 274
+    },
+    {
+      "task": "T01",
+      "arm": "gravito",
+      "exit": 0,
+      "wall_s": 379
+    },
+    {
+      "task": "T02",
+      "arm": "gravito",
+      "exit": 0,
+      "wall_s": 357
+    },
+    {
+      "task": "T02",
+      "arm": "native",
+      "exit": 0,
+      "wall_s": 223
+    },
+    {
+      "task": "T03",
+      "arm": "native",
+      "exit": 0,
+      "wall_s": 223
+    },
+    {
+      "task": "T03",
+      "arm": "gravito",
+      "exit": 0,
+      "wall_s": 565
+    },
+    {
+      "task": "T04",
+      "arm": "gravito",
+      "exit": 0,
+      "wall_s": 748
+    },
+    {
+      "task": "T04",
+      "arm": "native",
+      "exit": 0,
+      "wall_s": 400
+    }
+  ]
+}
