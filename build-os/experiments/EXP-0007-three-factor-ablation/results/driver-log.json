@@ -1,0 +1,126 @@
+{
+  "artifact": "exp0007_driver_log",
+  "order_rule": "config list rotated by task index",
+  "units": [
+    {
+      "task": "T01",
+      "config": "baseline",
+      "exit": 0,
+      "wall_s": 335
+    },
+    {
+      "task": "T01",
+      "config": "A",
+      "exit": 0,
+      "wall_s": 645
+    },
+    {
+      "task": "T01",
+      "config": "B",
+      "exit": 0,
+      "wall_s": 806
+    },
+    {
+      "task": "T01",
+      "config": "C",
+      "exit": 0,
+      "wall_s": 373
+    },
+    {
+      "task": "T01",
+      "config": "ABC",
+      "exit": 0,
+      "wall_s": 531
+    },
+    {
+      "task": "T02",
+      "config": "A",
+      "exit": 0,
+      "wall_s": 515
+    },
+    {
+      "task": "T02",
+      "config": "B",
+      "exit": 0,
+      "wall_s": 597
+    },
+    {
+      "task": "T02",
+      "config": "C",
+      "exit": 0,
+      "wall_s": 382
+    },
+    {
+      "task": "T02",
+      "config": "ABC",
+      "exit": 0,
+      "wall_s": 521
+    },
+    {
+      "task": "T02",
+      "config": "baseline",
+      "exit": 0,
+      "wall_s": 347
+    },
+    {
+      "task": "T03",
+      "config": "B",
+      "exit": 0,
+      "wall_s": 1274
+    },
+    {
+      "task": "T03",
+      "config": "C",
+      "exit": 0,
+      "wall_s": 442
+    },
+    {
+      "task": "T03",
+      "config": "ABC",
+      "exit": 0,
+      "wall_s": 458
+    },
+    {
+      "task": "T03",
+      "config": "baseline",
+      "exit": 0,
+      "wall_s": 431
+    },
+    {
+      "task": "T03",
+      "config": "A",
+      "exit": 0,
+      "wall_s": 366
+    },
+    {
+      "task": "T04",
+      "config": "C",
+      "exit": 0,
+      "wall_s": 770
+    },
+    {
+      "task": "T04",
+      "config": "ABC",
+      "exit": 0,
+      "wall_s": 699
+    },
+    {
+      "task": "T04",
+      "config": "baseline",
+      "exit": 0,
+      "wall_s": 1270
+    },
+    {
+      "task": "T04",
+      "config": "A",
+      "exit": 0,
+      "wall_s": 775
+    },
+    {
+      "task": "T04",
+      "config": "B",
+      "exit": 0,
+      "wall_s": 612
+    }
+  ]
+}

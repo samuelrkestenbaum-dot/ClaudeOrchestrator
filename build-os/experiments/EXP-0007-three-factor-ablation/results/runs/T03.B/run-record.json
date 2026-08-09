@@ -1,0 +1,25 @@
+{
+ "artifact": "run_record",
+ "run_id": "R-17ede1503978",
+ "task_id": "T03",
+ "arm": "B",
+ "launched_at": "2026-08-09T13:17:51.436Z",
+ "expected_session_id": "94c5686b-a07d-45dd-a08b-beb54567a04d",
+ "orchestrator_session_id": "5489b495-ae3d-5612-a4e1-61b4b5c6b6e4",
+ "timeout_ceiling_s": 1200,
+ "pid": null,
+ "state": "terminal",
+ "terminal_reason": "timed_out",
+ "admissible": false,
+ "is_error": true,
+ "result_event_observed": false,
+ "child_session_id": "94c5686b-a07d-45dd-a08b-beb54567a04d",
+ "isolation": {
+  "isolated": true,
+  "observed": [
+   "94c5686b-a07d-45dd-a08b-beb54567a04d"
+  ],
+  "reason": "child session id is distinct from the orchestrator's and matches the assignment"
+ },
+ "admissibility_note": "REFUSED: terminal reason 'timed_out' is not a completion"
+}

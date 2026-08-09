@@ -1,0 +1,18 @@
+{
+  "base_commit": "060928d8e47324e4e39ded5374ad0d8509349cf4",
+  "product_paths": [
+    "server/agent/github-app.ts"
+  ],
+  "governance_paths": [
+    "build-os/motion/exhaustion/CONT-0002-actor-discriminator.json",
+    "build-os/motion/exhaustion/current.json",
+    "build-os/motion/findings-51-audit-the-auditors.md",
+    "build-os/motion/queue.json",
+    "build-os/packets/routing/routing-T03-github-app-typecheck-20260809T131856Z.md",
+    "build-os/packets/routing/routing-T03-queue-state-reconcile-20260809T132727Z.md",
+    "build-os/packets/routing/routing-queue-51-audit-pass-2-hooks-20260809T133253Z.md",
+    "build-os/packets/routing/routing-queue-51-audit-pass-3-20260809T133546Z.md",
+    "build-os/packets/routing/routing-queue-51-audit-pass-4-20260809T133733Z.md",
+    "build-os/packets/routing/routing-queue-51-audit-the-auditors-20260809T132923Z.md"
+  ]
+}

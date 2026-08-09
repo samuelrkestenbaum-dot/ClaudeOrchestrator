@@ -74,6 +74,16 @@ export function parseErrors(raw) {
  * by a general /home/user/... pattern: a broad pattern would also erase a real
  * path difference that happened to live under the same parent.
  */
+/**
+ * Any absolute path, used ONLY to detect that two errors are the same error
+ * under different tree names. Never used to rewrite what the adjudicator
+ * reports — a broad eraser would hide a genuine path difference, which is why
+ * the first fix avoided one. As a detector it cannot: it only ever moves an
+ * error from "new" to "already present in the baseline", and it can only do
+ * that when a baseline error matches it exactly once both sides are erased.
+ */
+export const ABS_PATH = /(?:\/[\w.\-]+){2,}/g;
+
 export const TREE_ROOTS = ["/home/user/empathiq-website", "/home/user/exp0006-arm"];
 
 /** Replace any known tree root with a stable placeholder, and count the hits. */
@@ -207,7 +217,25 @@ export function adjudicate({ baselineRaw, afterRaw, taskFile, diff }) {
   const condition_1 = taskErrorsAfter.length === 0;
 
   // Condition 2 — new errors ANYWHERE ELSE.
-  const newElsewhere = after.filter((e) => e.file !== taskFile && !beforeKeys.has(key(e)));
+  //
+  // ROOT-INDEPENDENT, on the second attempt. The first fix normalised against an
+  // ENUMERATED root list, and EXP-0007 promptly ran under /home/user/exp0007-arm
+  // — a name that list did not contain — so five untouched files read as
+  // regressions again, for exactly the reason already documented and believed
+  // closed. Enumerating the roots you can currently see is not a fix; it is a
+  // fix with an expiry date.
+  //
+  // The durable form uses the broad absolute-path pattern ONLY AS A DETECTOR,
+  // never as an eraser — which is what made a broad pattern unsafe before. A
+  // candidate counts as new only if, after erasing EVERY absolute path from
+  // both sides, it still has no match in the baseline. So a real new error is
+  // still new (nothing in the baseline matches it), while the same pre-existing
+  // error under a different tree name is recognised as the same error.
+  const generic = (e) => `${e.file} ${e.code} ${String(e.msg).replace(ABS_PATH, "<ABS>")}`;
+  const beforeGeneric = new Set(before.map(generic));
+  const candidates = after.filter((e) => e.file !== taskFile && !beforeKeys.has(key(e)));
+  const newElsewhere = candidates.filter((e) => !beforeGeneric.has(generic(e)));
+  const pathArtifacts = candidates.length - newElsewhere.length;
   const condition_2 = newElsewhere.length === 0;
 
   // REPORTED, not silent. If normalisation is doing heavy lifting on a unit,
@@ -240,6 +268,10 @@ export function adjudicate({ baselineRaw, afterRaw, taskFile, diff }) {
     condition_2_no_new_errors_elsewhere: {
       pass: condition_2,
       new_error_count: newElsewhere.length,
+      path_artifacts_excluded: pathArtifacts,
+      path_artifact_note:
+        "errors identical to a baseline error once every absolute path is erased — the same pre-existing error seen " +
+        "under a different tree name. Reported, never silently dropped.",
       new_errors: newElsewhere.slice(0, 20).map((e) => `${e.file}: ${e.code} ${e.msg}`),
     },
     diff_rejection: {

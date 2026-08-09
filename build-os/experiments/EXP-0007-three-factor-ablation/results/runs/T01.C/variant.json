@@ -1,0 +1,12 @@
+{
+  "config": "C",
+  "acts": [
+    {
+      "factor": "C",
+      "act": "silent_protocol_state",
+      "detail": "announcement requirements rewritten to their silent equivalents in the body, then the silent-state rule appended — no contradictory instruction survives"
+    }
+  ],
+  "baseline": false,
+  "administered_sha": "7392c96d521f9e603afd02a3c62c11ce73603cc7"
+}

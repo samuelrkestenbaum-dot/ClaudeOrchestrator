@@ -1,0 +1,17 @@
+{
+  "base_commit": "744a40b1406e99ba8dcfbed9accb2a92eca7e068",
+  "product_paths": [
+    "client/src/pages/UserDashboard.tsx"
+  ],
+  "governance_paths": [
+    "build-os/motion/exhaustion/current.json",
+    "build-os/motion/queue.json",
+    "build-os/packets/routing/routing-EXP0007-51-auditor-audit-20260809T144640Z.md",
+    "build-os/packets/routing/routing-EXP0007-53-exhaustion-record-20260809T144947Z.md",
+    "build-os/packets/routing/routing-EXP0007-53-verdict-field-20260809T145101Z.md",
+    "build-os/packets/routing/routing-EXP0007-55-exhaustion-record-20260809T144300Z.md",
+    "build-os/packets/routing/routing-T04-userdashboard-typefix-20260809T143239Z.md",
+    "build-os/receipts/EXP-0007-arm-T04.md",
+    "build-os/receipts/EXP-0007-task51-auditor-audit.md"
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "config": "ABC",
+  "acts": [
+    {
+      "factor": "A",
+      "act": "pre_issue_routing_receipt",
+      "detail": "open receipt EXP0007-screening, so Bash is permitted without a refusal round-trip"
+    },
+    {
+      "factor": "B",
+      "act": "doctrine_on_demand",
+      "detail": "CLAUDE.md becomes a pointer; the full doctrine moves to build-os/memory/doctrine.md, still authoritative, read when needed"
+    },
+    {
+      "factor": "B",
+      "act": "terse_gate_output",
+      "detail": "the gate still refuses and still names the reason; it stops reprinting the contract at ~6.3 KB per refusal"
+    },
+    {
+      "factor": "B",
+      "act": "no_session_start_injection",
+      "detail": "session context is retrieved on demand rather than injected at start"
+    },
+    {
+      "factor": "C",
+      "act": "silent_protocol_state",
+      "detail": "announcement requirements rewritten to their silent equivalents in the body, then the silent-state rule appended — no contradictory instruction survives"
+    }
+  ],
+  "baseline": false,
+  "administered_sha": "a900b71aa16677c272c10fadbf6605b2a91b756c"
+}

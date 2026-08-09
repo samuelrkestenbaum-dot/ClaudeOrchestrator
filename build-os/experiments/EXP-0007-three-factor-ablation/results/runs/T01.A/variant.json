@@ -1,0 +1,12 @@
+{
+  "config": "A",
+  "acts": [
+    {
+      "factor": "A",
+      "act": "pre_issue_routing_receipt",
+      "detail": "open receipt EXP0007-screening, so Bash is permitted without a refusal round-trip"
+    }
+  ],
+  "baseline": false,
+  "administered_sha": "3580ab301174c1baf589d47632dc3563fb81a3b9"
+}

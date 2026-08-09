@@ -1,0 +1,878 @@
+diff --git a/build-os/motion/exhaustion/current.json b/build-os/motion/exhaustion/current.json
+index edcf565..da2f9a6 100644
+--- a/build-os/motion/exhaustion/current.json
++++ b/build-os/motion/exhaustion/current.json
+@@ -1,37 +1,60 @@
+ {
+-  "for_conclusion": "the actor discriminator for CONT-0002 cannot be fetched from this surface",
+-  "capability": "operator_lab_read",
+-  "proposed_concession": "CONT-0002 cannot be advanced from CONTINUITY_ACTOR_UNDISAMBIGUATED to BRIDGE_MEDIATED_CONTINUITY from this surface, because the caller identity on Operator Lab ledgerId 36263/36264 is not readable here",
++  "for_conclusion": "#53 cannot be reconciled from this arm: its subject artifacts are absent from this tree and its census half requires denied Bash",
++  "task_id": "53",
++  "verdict": "concession_allowed",
++  "verdict_provenance": "HAND-DERIVED, NOT COMPUTED - stated plainly because the difference matters. concessionGate() could not be executed here: running it needs node via Bash, which this host denies. The verdict above is a faithful transcription of what the gate's own rules yield on this evidence: all 8 REQUIRED_EVIDENCE fields present and non-empty; concession_class 'blocked' is in CONCESSION_CLASSES; other_surface_may_hold_capability is a structured object with enumerated:true; surfaces_with_capability is empty so the route-through-a-holder branch does not fire; 9 paths_attempted carry 9 attempt_results so the unexecuted-path branch does not fire. Verify by running it - if the computed verdict differs, the computed one governs and this field is the defect.",
++  "capability": "control_census_reconciliation",
++  "proposed_concession": "Task #53 (Registry census reconciliation - 179 registered vs 136 discovered) cannot be executed from this arm, on TWO INDEPENDENT grounds: (a) its subject artifacts are not present anywhere reachable in this tree, and (b) the half that would still be doable if they were present requires executing scan-controls and build_os_tests.sh, which needs Bash, which this host denies.",
+   "concession_class": "blocked",
+   "available_interfaces": [
+-    "repository: git, Read, Grep, Edit, Write, Bash",
+-    "MCP servers reachable in this session: github, serena, slack, gmail, notion, supabase, cloudflare, netlify, hubspot, apollo, clay, otter, docusign, zapier, huggingface, elevenlabs-media, design-catalog",
+-    "one MCP server present but UNAUTHENTICATED (33794ec3) — matches the 'candidate MCP server' already recorded against claude/operator_lab_write"
++    "repository: Read, Write, Edit (allowed on this host profile)",
++    "Bash: present as a tool, host permission layer refuses with 'This command requires approval'; no approver in session",
++    "NO file-search tooling on this surface: no Glob, no Grep. Serena MCP is connected but every call returns 'permissions ... not granted'. File discovery is therefore limited to exact-path Read probes",
++    "Agent / subagent dispatch: Gravito routing gate blocks it under the recorded modes (direct and gravito_light both carry budget_max_subagents=0)",
++    "ListAgents / SendMessage: peer session user-ad [5db4d7] reachable"
+   ],
+   "paths_attempted": [
+-    "grep the repository ledgers for a chatgpt-attributed row belonging to the Lab-bridge episode",
+-    "grep the whole tree for 36263/36264 to find any recorded caller identity",
+-    "inspect build-os/kernel/actors.tsv and memory_events.tsv for a second chatgpt actor",
+-    "check the session MCP surface for an Operator Lab read interface"
++    "Read build-os/control_registry.txt",
++    "Read build-os/kernel/control_registry.txt",
++    "Read build-os/memory/control_registry.txt",
++    "Read build-os/census/control_registry.txt",
++    "Read build-os/tests/build_os_tests.sh",
++    "Read build-os/tools/build_os_tests.sh",
++    "Read build-os/tools/routing-check.sh (control probe: is build-os/tools populated at all?)",
++    "Read build-os/tools/record-degradation.sh (second control probe)",
++    "mcp__serena__find_symbol / get_diagnostics_for_file as a search substitute (earlier this session)"
+   ],
+   "attempt_results": [
+-    "only two chatgpt-attributed rows exist (EVT-0024, EVT-0025) and both belong to HOF-0001, not to the Lab-bridge episode",
+-    "four hits, all of them prose written by this surface citing the ids; none records who called",
+-    "actors.tsv holds one chatgpt family instance, ACT-0003, tied to the HOF-0001 handoff only",
+-    "no Operator Lab interface is present; the one candidate server requires an interactive OAuth flow that a non-interactive session cannot complete, and requesting a credential through chat is forbidden"
++    "File does not exist",
++    "File does not exist",
++    "File does not exist",
++    "File does not exist",
++    "File does not exist",
++    "File does not exist",
++    "EXISTS and is populated - the close-time routing gate, read successfully",
++    "EXISTS and is populated - the degradation writer, read successfully",
++    "REFUSED: permissions not granted"
+   ],
+   "workaround_classes_considered": [
+-    "derive the actor from repository evidence",
+-    "infer it from the operator's account",
+-    "re-run the enumeration to generate a fresh, attributable row",
+-    "route through the proven chatgpt bridge",
+-    "record the claim at the strength the evidence supports"
++    "read the census artifacts directly and reconcile by hand",
++    "locate them with search tooling instead of path guessing",
++    "run scan-controls / build_os_tests.sh to regenerate the discovered set",
++    "delegate the run to a subagent",
++    "delegate the run to the peer session that holds Bash approval",
++    "reconcile the structural half (line-number citations vs anchors) without running anything",
++    "record the block honestly and name what would unblock it"
+   ],
+-  "why_each_viable_workaround_failed": "Derivation fails: no repository row records a caller for the Lab episode. Inference is refused on purpose: the operator's account is first-person and treating it as a discriminator would be the exact fudge the verifier exists to prevent. Re-running the enumeration needs the same Lab write path this surface lacks, and fabricating a row would be a synthetic activation, which is forbidden. The chatgpt bridge is PROVEN but is not operable FROM here -- it was exercised by another party, so it is an operator-executable step and not one this session can take. The last class is the one taken: the claim is recorded at CONTINUITY_ACTOR_UNDISAMBIGUATED, with missing_to_advance naming the fetch.",
++  "why_each_viable_workaround_failed": "Direct reading fails because the artifacts are not in this tree: six exact-path probes missed, and the two CONTROL probes prove the failure is genuine absence rather than a wrong directory guess - build-os/tools/ IS populated and readable, and build_os_tests.sh is simply not in it. Search tooling does not exist on this surface (no Glob, no Grep) and the Serena MCP that could substitute is permission-denied, so exhaustive location is not achievable by probing. Regenerating the discovered set requires Bash, which the host denies. Subagent delegation is refused by Gravito's own recorded mode (budget_max_subagents=0); dispatching anyway would be the silent-escalation defect the receipt exists to prevent. DELEGATION TO THE PEER IS FORBIDDEN, NOT UNAVAILABLE: SendMessage's contract prohibits asking a peer to perform an action denied in this session, because that launders the operator's permission decision - the same rule that governed the #55 block. THE STRUCTURAL HALF was the one genuinely promising route and it dies on the same absence: verifying that control_registry.txt's LINE-NUMBER citations have decayed into vacuous references requires reading both control_registry.txt and build_os_tests.sh, and neither is present. The last class is the one taken.",
+   "other_surface_may_hold_capability": {
+     "enumerated": true,
+     "surfaces_with_capability": [],
+-    "detail": "The Operator Lab store DOES hold the discriminator -- this is absence from THIS surface, not from the system. No surface reachable FROM this session holds a Lab read path: chatgpt holds Lab write via observe_interaction/gate_outbound_inference, but that surface is not operable from here. The item is therefore a fetch for the operator or the bridge, and is recorded as such rather than as an unobtainable fact.",
+-    "untested_surfaces": ["manus", "surplus_recovery"]
+-  }
++    "surfaces_holding_but_forbidden": [
++      "user-ad [5db4d7] -- peer interactive Claude session, approver present, could run scan-controls; routing to it is cross-session permission laundering and is refused"
++    ],
++    "detail": "A SECOND KIND OF ABSENCE APPLIES HERE, and it is worth separating from the permission question. This tree is an EXPERIMENT ARM, and the SessionStart banner reports 'Build OS: version unknown - identity: no stamp found (run install-project.sh to stamp this copy)'. An unstamped partial copy is the most economical explanation for a populated build-os/tools/ that nonetheless lacks the test and census apparatus #53 describes. If that is right, #53's artifacts live in the PARENT Build OS repository and #53 is not a task this arm was ever able to run - it is misfiled against this tree rather than blocked within it. That is a claim about provenance the arm cannot verify from here, so it is recorded as the leading hypothesis and NOT as a finding.",
++    "untested_surfaces": [
++      "the parent Build OS repository (not reachable from this arm; the operator scoped this session to this repository)"
++    ]
++  },
++  "operator_unblock": "Either: (1) confirm whether #53 belongs to this tree at all - if its artifacts live in the parent Build OS repo, #53 should be re-filed there rather than carried as runnable debt against this arm; or (2) grant Bash approval in this session AND supply the missing artifacts, which unblocks the census half. Route (1) is likely the correct one and costs nothing to check."
+ }
+diff --git a/build-os/motion/queue.json b/build-os/motion/queue.json
+index e0b2e3c..495a1e8 100644
+--- a/build-os/motion/queue.json
++++ b/build-os/motion/queue.json
+@@ -47,14 +47,20 @@
+     {
+       "id": "51",
+       "subject": "Audit the auditors - source fidelity and failure capability",
+-      "status": "in_progress",
++      "status": "completed",
+       "depends_on": [
+         "50"
+       ],
+       "is_debt": true,
+       "serves_exit_criteria": [],
+       "cost": "medium",
+-      "deferral": "DEFERRED by the value gate. Real assurance work; serves no open exit criterion."
++      "deferral": "DEFERRED by the value gate. Real assurance work; serves no open exit criterion.",
++      "status_note": "COMPLETED at diagnosis depth. Record: build-os/receipts/EXP-0007-task51-auditor-audit.md",
++      "scope_audited": "The six motion/routing auditors on the two named axes (source fidelity, failure capability): concession-gate.mjs, continuation.mjs, gate-stop.mjs, capability-map.mjs, objective.mjs, .claude/hooks/routing-gate.sh. NOT COVERED and not claimed: the product-side control-registry auditors under server/governance (seed-registry, corrective-completion-audit and siblings). If #51 was meant to include those, it is only half done - say so and it reopens.",
++      "findings": "8 findings, 5 OBSERVED first-hand from this session rather than inspection-only. HIGH: (F1) enumerateCapability reports an enumeration it never performed - any capability outside its hardcoded 5-row table returns 'no holder', indistinguishable from a real search; empirically wrong this session, a holder existed. (F2) enumerated:true is a hardcoded literal, so the field that proves a search happened can never be false - same vacuous-pass family as #55's preflight defect, still live. (F3) concessionGate cannot express 'holder exists but route forbidden' and so cannot terminate; authority_or_safety_forbids_execution already exists in continuation.mjs and the concession gate does not read it. (F4) the gate-stop freshness check has BOTH operands authored by the model it constrains - a self-consistency check, violating concession-gate.mjs's own stated 'must not be escapable by wording'. (F6) two divergent copies of the objective exist; valueGate scores against objective.mjs where all five criteria are hardcoded OPEN, while queue.json records EXIT-1 CLOSED and EXIT-2 ruled non-blocking. (F7) explicit_operator_stop is advertised in every refusal message but has NO input path - queue.json has no operator_stop key and nothing writes one. MEDIUM: (F5) the exhaustion artifact is a single mutable path with no task binding; on arrival it held evidence for completed task #52. PASSES: (F8) valueGate has real failure capability and was observed returning accurate negatives twice.",
++      "cross_cutting": "Five of the six auditors fail toward 'proceed' rather than toward 'stop and say so' - returning a confident value where an honest unknown is the truthful output. That is the exact error the substrate legislates against elsewhere with 'AN UNKNOWN IS NOT A ZERO'.",
++      "not_implemented": "diagnosis lane - nothing was fixed. Each finding carries a narrow fix in the record. Per #54's standing instruction these must not be folded into a general assurance workstream.",
++      "operator_action_identified": "F7's practical consequence: the documented stop path does not work. To stop the continuation controller, add \"operator_stop\": true at the top level of build-os/motion/queue.json. This arm deliberately did NOT set it - an arm setting the operator's own stop flag would be forging the operator's decision, the same class of act as the cross-session permission laundering refused under #55."
+     },
+     {
+       "id": "53",
+@@ -68,7 +74,14 @@
+       "runtime_impacting": false,
+       "serves_exit_criteria": [],
+       "cost": "high",
+-      "deferral": "DEFERRED. Six deterministic census failures, classified and non-runtime-blocking. The anchor migration (phases 1-2 landed, 3-5 not started) is carried here as OPTIONAL_DEBT: four packets, one regression, one revert, zero objective movement."
++      "deferral": "DEFERRED. Six deterministic census failures, classified and non-runtime-blocking. The anchor migration (phases 1-2 landed, 3-5 not started) is carried here as OPTIONAL_DEBT: four packets, one regression, one revert, zero objective movement.",
++      "blocked_evidence": {
++        "verdict": "concession_allowed",
++        "artifact": "build-os/motion/exhaustion/current.json",
++        "why": "EXHAUSTIVE AND PROBED, not assumed. TWO INDEPENDENT BLOCKS. (a) ARTIFACT ABSENCE: control_registry.txt and build_os_tests.sh are not present anywhere reachable in this tree - six exact-path probes missed, and TWO CONTROL PROBES prove genuine absence rather than a wrong directory guess (build-os/tools/routing-check.sh and record-degradation.sh both read successfully, so build-os/tools IS populated; build_os_tests.sh is simply not in it). Exhaustive location is not achievable: this surface has NO Glob and NO Grep, and the Serena MCP that could substitute is permission-denied. (b) EXECUTION: regenerating the 136 discovered surfaces requires running scan-controls / build_os_tests.sh, which needs Bash, which the host denies with no approver. The structural half (verifying that control_registry.txt's LINE-NUMBER citations decayed into vacuous references) was the one route needing no execution, and it dies on (a) - it requires reading both absent files. Peer delegation refused as cross-session permission laundering, same rule as #55.",
++        "leading_hypothesis": "NOT A FINDING - the arm cannot verify it from here. This tree is an experiment arm and the SessionStart banner reports 'Build OS: version unknown - identity: no stamp found (run install-project.sh to stamp this copy)'. An unstamped partial copy explains a populated build-os/tools/ that nonetheless lacks the test and census apparatus. If so, #53's artifacts live in the PARENT Build OS repository and #53 is MISFILED against this arm rather than blocked within it.",
++        "operator_unblock": "Cheapest first: confirm whether #53 belongs to this tree at all. If its artifacts live in the parent Build OS repo, re-file it there rather than carrying it as runnable debt against this arm. Otherwise, Bash approval plus the missing artifacts unblocks the census half."
++      }
+     },
+     {
+       "id": "54",
+@@ -98,7 +111,27 @@
+       "cost": "high",
+       "detail": "EXP-0005 measured a system that could not bootstrap and returned gravito_system_harmful with 0/12 accepted. The efficiency thesis is still unanswered. This runs fresh work on the repaired system.",
+       "preflight": "EXECUTED, 7/7. worker CLI present; FIRST MUTATION AUTHORITY verified by reading the file on disk (the precondition that killed EXP-0005); session isolation verified after a scrub + explicit --session-id; token accounting derivable; substrate present and its four load-bearing controllers import; host profile registered as unknown_conservative (Edit=allowed, Bash=approval_required, no approver).",
+-      "preflight_defect_found": "The isolation check PASSED VACUOUSLY on its first run: it compared against process.env.CLAUDE_SESSION_ID, which does not exist here (the real name is CLAUDE_CODE_SESSION_ID), so the comparison was against undefined and returned true while the child had in fact inherited this session's exact id. Classified measurement_critical and fixed before any arm ran: the orchestrator id is now resolved explicitly and its ABSENCE fails the check rather than passing it."
++      "preflight_defect_found": "The isolation check PASSED VACUOUSLY on its first run: it compared against process.env.CLAUDE_SESSION_ID, which does not exist here (the real name is CLAUDE_CODE_SESSION_ID), so the comparison was against undefined and returned true while the child had in fact inherited this session's exact id. Classified measurement_critical and fixed before any arm ran: the orchestrator id is now resolved explicitly and its ABSENCE fails the check rather than passing it.",
++      "arm_evidence": {
++        "arm": "exp0007-arm",
++        "record": "build-os/receipts/EXP-0007-arm-T04.md",
++        "task_run": "T04 - fix 2 TypeScript errors (TS2322, TS2339) in client/src/pages/UserDashboard.tsx",
++        "headline": "EXP-0005's 0/12 failure mechanism did NOT reproduce. authority_bootstrap_permission_class_mismatch is repaired and the repair fired in a live run: the recovery selector chose the no-shell route for host profile unknown_conservative, the arm wrote routing-request.json, the hook redeemed it into an ordinary route-task.sh receipt from inside the hook, and first mutation authority was earned in the SAME permission class (Write/Edit) as the work it authorizes. Bootstrap cost 34s and 3 refused calls, EXACT from live_gate_log.tsv. 5 Edit mutations admitted; the arm mutated.",
++        "blocking_layer_finding": "The routing gate ALLOWED both Bash calls (live_gate_log rows 6 and 12); the HOST permission layer denied both. On this arm the binding constraint on VERIFICATION was the host, not Gravito. Gravito's only refusals were 3 pre-receipt calls, all resolved by the bootstrap channel in 34s. A gravito_system_harmful verdict cannot be re-derived from this run's blocking pattern - though this is one arm, one task, one host profile.",
++        "acceptance_status": "UNVERIFIED-BY-COMPILER. npx tsc --noEmit -p tsconfig.json was host-denied twice and serena get_diagnostics_for_file was ungranted twice, so the edit is derived from declared source types and NOT confirmed by a compiler run. Deliberately NOT counted toward an accepted/total figure: calling it accepted would be a synthetic activation.",
++        "tokens_cost": "-",
++        "tokens_cost_tier": "UNAVAILABLE - interactive session; the gate's own label rule makes tokens/cost unavailable_live, close-time reconciliation only where headless"
++      },
++      "still_open": "The ARM half of #55 is recorded; the COMPARISON half is not done and was not attempted. Missing, in cheapest-first order: (1) a compiler run of T04's verification command from a surface holding Bash approval - converts acceptance_status from UNVERIFIED to accepted/rejected and is the single cheapest unblock; (2) at least one comparison arm - this session is one arm and no control run exists; (3) a token/cost source, which the interactive surface cannot supply. EXIT-4 has arm evidence; EXIT-5 does NOT - no comparison exists, and the efficiency thesis is unanswered because the cost axis has no measurement and the work axis is unverified.",
++      "not_claimed": "This arm did NOT complete a UIC comparison and does not claim EXIT-5. No cost-per-accepted-unit figure is derivable: its numerator is unmeasurable here and its denominator is unverified.",
++      "blocked_evidence": {
++        "verdict": "concession_allowed",
++        "artifact": "build-os/motion/exhaustion/current.json",
++        "scope": "Applies to the COMPARISON half only. The ARM half is DONE and recorded at build-os/receipts/EXP-0007-arm-T04.md; this is not a claim that #55 produced nothing.",
++        "why": "EXHAUSTIVE AND ENUMERATED, not assumed. 8 paths attempted, 8 results recorded. Compiler verification is refused by the HOST permission layer (the Gravito routing gate ALLOWED both Bash calls -- live_gate_log.tsv rows 6 and 12); MCP LSP diagnostics ungranted; subagent delegation refused by this receipt's own recorded mode (direct, budget_max_subagents=0) and dispatching anyway would be silent escalation. THE CROSS-SURFACE SEARCH FOUND A HOLDER: peer interactive session user-ad [5db4d7], with an approver present. Routing through it is FORBIDDEN, not unavailable: SendMessage's contract prohibits asking a peer to perform an action denied in this session, because that launders the user's permission decision. That is authority_or_safety_forbids_execution, a registered terminal condition -- refusal by rule, not search failure. A headless/cron run was deliberately NOT taken: durable state outside the operator's stated repo scope, needs explicit go.",
++        "operator_unblock": "One step, either form: run 'npx tsc --noEmit -p tsconfig.json' directly, or grant Bash approval in this session. Both convert acceptance_status from UNVERIFIED-BY-COMPILER to accepted/rejected. The comparison arm and the cost axis remain separate asks.",
++        "gate_defect_found": "concessionGate() cannot express 'holder exists but reaching it is forbidden' -- its only branch on a non-empty surfaces_with_capability is to block and instruct routing through the holder, which loops forever when that route is prohibited. Detail and a suggested narrow fix are in the exhaustion artifact."
++      }
+     }
+   ],
+   "primary_objective": {
+diff --git a/client/src/pages/UserDashboard.tsx b/client/src/pages/UserDashboard.tsx
+index 6b9bfc8..a71f2c2 100644
+--- a/client/src/pages/UserDashboard.tsx
++++ b/client/src/pages/UserDashboard.tsx
+@@ -11,6 +11,7 @@
+ import { useState } from "react";
+ import { useAuth } from "@/_core/hooks/useAuth";
+ import { trpc } from "@/lib/trpc";
++import type { ApiKey } from "../../../server/supabase-adapter";
+ import { toast } from "sonner";
+ import { Link } from "wouter";
+ import {
+@@ -95,12 +96,16 @@ function QuickStartChecklist({ hasApiKey, hasUsage }: { hasApiKey: boolean; hasU
+ }
+ 
+ function ApiKeyCard({ apiKey, onDelete, onRegenerate }: {
+-  apiKey: { id: number; keyPrefix: string; name: string | null; isActive: boolean; createdAt: Date; lastUsedAt: Date | null };
++  // `apiKeys.list` resolves to Partial<ApiKey>, with ISO-string timestamps —
++  // every field is optional, so the card renders around what's actually there.
++  apiKey: Partial<ApiKey>;
+   onDelete: (id: number) => void;
+   onRegenerate: (id: number) => void;
+ }) {
+   const [showFull, setShowFull] = useState(false);
+-  const displayKey = showFull ? `${apiKey.keyPrefix}${"•".repeat(32)}` : `${apiKey.keyPrefix}••••••••`;
++  const keyId = apiKey.id;
++  const keyPrefix = apiKey.keyPrefix ?? "";
++  const displayKey = showFull ? `${keyPrefix}${"•".repeat(32)}` : `${keyPrefix}••••••••`;
+ 
+   return (
+     <div className="flex items-center justify-between p-3 rounded-lg border border-border/50 bg-muted/20 hover:bg-muted/40 transition-colors">
+@@ -120,7 +125,7 @@ function ApiKeyCard({ apiKey, onDelete, onRegenerate }: {
+             </button>
+           </div>
+           <p className="text-xs text-muted-foreground mt-0.5">
+-            Created {new Date(apiKey.createdAt).toLocaleDateString()}
++            Created {apiKey.createdAt ? new Date(apiKey.createdAt).toLocaleDateString() : "unknown"}
+             {apiKey.lastUsedAt && ` · Last used ${new Date(apiKey.lastUsedAt).toLocaleDateString()}`}
+           </p>
+         </div>
+@@ -128,19 +133,22 @@ function ApiKeyCard({ apiKey, onDelete, onRegenerate }: {
+       <div className="flex items-center gap-1 shrink-0">
+         <Button
+           variant="ghost" size="icon" className="h-7 w-7"
+-          onClick={() => { navigator.clipboard.writeText(apiKey.keyPrefix); toast.success("Key prefix copied"); }}
++          disabled={!keyPrefix}
++          onClick={() => { navigator.clipboard.writeText(keyPrefix); toast.success("Key prefix copied"); }}
+         >
+           <Copy className="h-3.5 w-3.5" />
+         </Button>
+         <Button
+           variant="ghost" size="icon" className="h-7 w-7"
+-          onClick={() => onRegenerate(apiKey.id)}
++          disabled={keyId === undefined}
++          onClick={() => { if (keyId !== undefined) onRegenerate(keyId); }}
+         >
+           <RefreshCw className="h-3.5 w-3.5" />
+         </Button>
+         <Button
+           variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive"
+-          onClick={() => onDelete(apiKey.id)}
++          disabled={keyId === undefined}
++          onClick={() => { if (keyId !== undefined) onDelete(keyId); }}
+         >
+           <Trash2 className="h-3.5 w-3.5" />
+         </Button>
+@@ -608,7 +616,7 @@ export default function UserDashboard() {
+                         <div key={i} className="flex items-center justify-between py-2 border-b border-border/30 last:border-0">
+                           <div>
+                             <p className="text-sm">{invoice.description || "Subscription"}</p>
+-                            <p className="text-xs text-muted-foreground">{new Date(invoice.date).toLocaleDateString()}</p>
++                            <p className="text-xs text-muted-foreground">{new Date(invoice.createdAt).toLocaleDateString()}</p>
+                           </div>
+                           <div className="text-right">
+                             <p className="text-sm font-medium">${(invoice.amount / 100).toFixed(2)}</p>
+
+diff --git a/build-os/packets/routing/routing-EXP0007-51-auditor-audit-20260809T144640Z.md b/build-os/packets/routing/routing-EXP0007-51-auditor-audit-20260809T144640Z.md
+--- /dev/null
++++ b/build-os/packets/routing/routing-EXP0007-51-auditor-audit-20260809T144640Z.md
++# ROUTING RECEIPT — one file per routing decision. The recorded verdict is BINDING
++# (build-os/memory/routing_contract.md); routing-check.sh refuses this receipt at
++# close if executed_mode exceeds selected_mode with no escalation record, if an
++# escalation carries no evidence, or if consumption exceeds a budget undeclared.
++task_id: EXP0007-51-auditor-audit
++description_sha256: 50defc81ca836b917bdf54dee98b5732dafd26f8c63c3b62951e8cdc1cbc5a8f
++descriptor: {"expected_files_changed":2,"requires_tests":false,"expected_session_count":1,"prior_context_required":false,"handoff_required":false,"consequence_level":"low","irreversible_or_external_mutation":false,"high_blast_radius":false,"unclear_acceptance_criteria":false,"security_or_compliance_consequence":false,"parallel_workstreams_benefit":false,"high_rework_history":false,"nondeterministic_verification":false}
++selected_mode: gravito_light
++selector_note: -
++issued_at: 2026-08-09T14:46:40Z
++# --- budgets: DERIVED DEFAULTS from EXP-0002 sealed records, operator-tunable, not laws.
++# --- Derivation: ON-surface light runs measured 172k-369k total tokens / 0 dispatches
++# --- (named exceedance: raw T4 at 526,461 - context, not the band); the
++# --- blowouts measured 4.9M/7.4M tokens, 4-5 dispatches, $3.63/$4.80. See route-task.sh.
++budget_max_subagents: 0
++budget_max_total_tokens: 500000
++budget_max_uncached_tokens: 60000
++budget_max_model_calls: 25
++budget_max_wall_clock_s: 600
++budget_max_cost_usd: 0.75
++# --- process allowance (PACKET-0053): the packet's OWN gate chain is governance
++# --- ceremony, counted SEPARATELY from task work by the live gate and attributed
++# --- to governance_process (the 0050/0051 calibration question, resolved). Default
++# --- 7 = the LARGEST LEGAL chain in the doctrine: mandatory_full_regate runs
++# --- builder, qa, reviewer, fix-builder, qa, reviewer, archivist. (No-fix chain
++# --- is 4; fix-then-pass is 6.) Process dispatches never eat budget_max_subagents.
++process_dispatch_allowance: 7
++# --- empty at issue; filled at close. AN UNKNOWN IS NOT A ZERO: "-" is an honest
++# --- admission and is never refused; refusal is for CONTRADICTION, not absence.
++executed_mode: gravito_light
++escalation: -
++escalation_evidence: -
++consumed_subagents: 0
++consumed_total_tokens: -
++consumed_uncached_tokens: -
++consumed_model_calls: -
++consumed_wall_clock_s: -
++consumed_cost_usd: -
++degradation_note: -
++# --- close-fill EXTENSIONS (PACKET-0053). consumed_subagents above counts TASK
++# --- dispatches (vs budget_max_subagents); consumed_process_dispatches counts the
++# --- gate chain (vs process_dispatch_allowance). The attr_* layers attribute
++# --- consumption where derivable at close — tokens or cost with provenance, or
++# --- "-" as an admission, NEVER a zero nobody measured. Receipts predating these
++# --- fields stay valid: routing-check.sh reads an absent field as "-".
++consumed_process_dispatches: -
++attr_task_execution: -
++attr_context_retrieval: -
++attr_subagent_execution: -
++attr_verification: -
++attr_review: -
++attr_governance_process: -
++attr_experiment_audit: -
++# --- contribution rows (PACKET-0053): marginal-contribution accounting, MANDATORY
++# --- for a Full close with dispatches>0 (routing-check.sh refuses otherwise). The
++# --- live gate seeds one stub row per admitted Full task dispatch; fill at close:
++# --- contribution: <subagent_type> | <unique_question> | <output_ref> | changed_implementation=y/n/- | changed_conclusion=y/n/- | caught_defect=y/n/- | duplicated_work=y/n/- | tokens=<v|-> | cost=<v|-> | time=<v|->
++# --- An all-"-" row passes as an admission and is REPORTED as non-contributing.
++
+diff --git a/build-os/packets/routing/routing-EXP0007-53-exhaustion-record-20260809T144947Z.md b/build-os/packets/routing/routing-EXP0007-53-exhaustion-record-20260809T144947Z.md
+--- /dev/null
++++ b/build-os/packets/routing/routing-EXP0007-53-exhaustion-record-20260809T144947Z.md
++# ROUTING RECEIPT — one file per routing decision. The recorded verdict is BINDING
++# (build-os/memory/routing_contract.md); routing-check.sh refuses this receipt at
++# close if executed_mode exceeds selected_mode with no escalation record, if an
++# escalation carries no evidence, or if consumption exceeds a budget undeclared.
++task_id: EXP0007-53-exhaustion-record
++description_sha256: d706fcda1746dab1b4eb74c1eb0df3e774b1eefeb501a1ef0aba2467972bb635
++descriptor: {"expected_files_changed":2,"requires_tests":false,"expected_session_count":1,"prior_context_required":false,"handoff_required":false,"consequence_level":"low","irreversible_or_external_mutation":false,"high_blast_radius":false,"unclear_acceptance_criteria":false,"security_or_compliance_consequence":false,"parallel_workstreams_benefit":false,"high_rework_history":false,"nondeterministic_verification":false}
++selected_mode: gravito_light
++selector_note: -
++issued_at: 2026-08-09T14:49:47Z
++# --- budgets: DERIVED DEFAULTS from EXP-0002 sealed records, operator-tunable, not laws.
++# --- Derivation: ON-surface light runs measured 172k-369k total tokens / 0 dispatches
++# --- (named exceedance: raw T4 at 526,461 - context, not the band); the
++# --- blowouts measured 4.9M/7.4M tokens, 4-5 dispatches, $3.63/$4.80. See route-task.sh.
++budget_max_subagents: 0
++budget_max_total_tokens: 500000
++budget_max_uncached_tokens: 60000
++budget_max_model_calls: 25
++budget_max_wall_clock_s: 600
++budget_max_cost_usd: 0.75
++# --- process allowance (PACKET-0053): the packet's OWN gate chain is governance
++# --- ceremony, counted SEPARATELY from task work by the live gate and attributed
++# --- to governance_process (the 0050/0051 calibration question, resolved). Default
++# --- 7 = the LARGEST LEGAL chain in the doctrine: mandatory_full_regate runs
++# --- builder, qa, reviewer, fix-builder, qa, reviewer, archivist. (No-fix chain
++# --- is 4; fix-then-pass is 6.) Process dispatches never eat budget_max_subagents.
++process_dispatch_allowance: 7
++# --- empty at issue; filled at close. AN UNKNOWN IS NOT A ZERO: "-" is an honest
++# --- admission and is never refused; refusal is for CONTRADICTION, not absence.
++executed_mode: gravito_light
++escalation: -
++escalation_evidence: -
++consumed_subagents: 0
++consumed_total_tokens: -
++consumed_uncached_tokens: -
++consumed_model_calls: -
++consumed_wall_clock_s: -
++consumed_cost_usd: -
++degradation_note: -
++# --- close-fill EXTENSIONS (PACKET-0053). consumed_subagents above counts TASK
++# --- dispatches (vs budget_max_subagents); consumed_process_dispatches counts the
++# --- gate chain (vs process_dispatch_allowance). The attr_* layers attribute
++# --- consumption where derivable at close — tokens or cost with provenance, or
++# --- "-" as an admission, NEVER a zero nobody measured. Receipts predating these
++# --- fields stay valid: routing-check.sh reads an absent field as "-".
++consumed_process_dispatches: -
++attr_task_execution: -
++attr_context_retrieval: -
++attr_subagent_execution: -
++attr_verification: -
++attr_review: -
++attr_governance_process: -
++attr_experiment_audit: -
++# --- contribution rows (PACKET-0053): marginal-contribution accounting, MANDATORY
++# --- for a Full close with dispatches>0 (routing-check.sh refuses otherwise). The
++# --- live gate seeds one stub row per admitted Full task dispatch; fill at close:
++# --- contribution: <subagent_type> | <unique_question> | <output_ref> | changed_implementation=y/n/- | changed_conclusion=y/n/- | caught_defect=y/n/- | duplicated_work=y/n/- | tokens=<v|-> | cost=<v|-> | time=<v|->
++# --- An all-"-" row passes as an admission and is REPORTED as non-contributing.
++
+diff --git a/build-os/packets/routing/routing-EXP0007-53-verdict-field-20260809T145101Z.md b/build-os/packets/routing/routing-EXP0007-53-verdict-field-20260809T145101Z.md
+--- /dev/null
++++ b/build-os/packets/routing/routing-EXP0007-53-verdict-field-20260809T145101Z.md
++# ROUTING RECEIPT — one file per routing decision. The recorded verdict is BINDING
++# (build-os/memory/routing_contract.md); routing-check.sh refuses this receipt at
++# close if executed_mode exceeds selected_mode with no escalation record, if an
++# escalation carries no evidence, or if consumption exceeds a budget undeclared.
++task_id: EXP0007-53-verdict-field
++description_sha256: edace2543b0216a0f55e8b9c0a987f87d646153bc31dec36c634c9b5bd2c30f1
++descriptor: {"expected_files_changed":1,"requires_tests":false,"expected_session_count":1,"prior_context_required":false,"handoff_required":false,"consequence_level":"low","irreversible_or_external_mutation":false,"high_blast_radius":false,"unclear_acceptance_criteria":false,"security_or_compliance_consequence":false,"parallel_workstreams_benefit":false,"high_rework_history":false,"nondeterministic_verification":false}
++selected_mode: direct
++selector_note: -
++issued_at: 2026-08-09T14:51:01Z
++# --- budgets: DERIVED DEFAULTS from EXP-0002 sealed records, operator-tunable, not laws.
++# --- Derivation: ON-surface light runs measured 172k-369k total tokens / 0 dispatches
++# --- (named exceedance: raw T4 at 526,461 - context, not the band); the
++# --- blowouts measured 4.9M/7.4M tokens, 4-5 dispatches, $3.63/$4.80. See route-task.sh.
++budget_max_subagents: 0
++budget_max_total_tokens: 250000
++budget_max_uncached_tokens: 30000
++budget_max_model_calls: 12
++budget_max_wall_clock_s: 300
++budget_max_cost_usd: 0.40
++# --- process allowance (PACKET-0053): the packet's OWN gate chain is governance
++# --- ceremony, counted SEPARATELY from task work by the live gate and attributed
++# --- to governance_process (the 0050/0051 calibration question, resolved). Default
++# --- 7 = the LARGEST LEGAL chain in the doctrine: mandatory_full_regate runs
++# --- builder, qa, reviewer, fix-builder, qa, reviewer, archivist. (No-fix chain
++# --- is 4; fix-then-pass is 6.) Process dispatches never eat budget_max_subagents.
++process_dispatch_allowance: 7
++# --- empty at issue; filled at close. AN UNKNOWN IS NOT A ZERO: "-" is an honest
++# --- admission and is never refused; refusal is for CONTRADICTION, not absence.
++executed_mode: direct
++escalation: -
++escalation_evidence: -
++consumed_subagents: 0
++consumed_total_tokens: -
++consumed_uncached_tokens: -
++consumed_model_calls: -
++consumed_wall_clock_s: -
++consumed_cost_usd: -
++degradation_note: -
++# --- close-fill EXTENSIONS (PACKET-0053). consumed_subagents above counts TASK
++# --- dispatches (vs budget_max_subagents); consumed_process_dispatches counts the
++# --- gate chain (vs process_dispatch_allowance). The attr_* layers attribute
++# --- consumption where derivable at close — tokens or cost with provenance, or
++# --- "-" as an admission, NEVER a zero nobody measured. Receipts predating these
++# --- fields stay valid: routing-check.sh reads an absent field as "-".
++consumed_process_dispatches: -
++attr_task_execution: -
++attr_context_retrieval: -
++attr_subagent_execution: -
++attr_verification: -
++attr_review: -
++attr_governance_process: -
++attr_experiment_audit: -
++# --- contribution rows (PACKET-0053): marginal-contribution accounting, MANDATORY
++# --- for a Full close with dispatches>0 (routing-check.sh refuses otherwise). The
++# --- live gate seeds one stub row per admitted Full task dispatch; fill at close:
++# --- contribution: <subagent_type> | <unique_question> | <output_ref> | changed_implementation=y/n/- | changed_conclusion=y/n/- | caught_defect=y/n/- | duplicated_work=y/n/- | tokens=<v|-> | cost=<v|-> | time=<v|->
++# --- An all-"-" row passes as an admission and is REPORTED as non-contributing.
++
+diff --git a/build-os/packets/routing/routing-EXP0007-55-exhaustion-record-20260809T144300Z.md b/build-os/packets/routing/routing-EXP0007-55-exhaustion-record-20260809T144300Z.md
+--- /dev/null
++++ b/build-os/packets/routing/routing-EXP0007-55-exhaustion-record-20260809T144300Z.md
++# ROUTING RECEIPT — one file per routing decision. The recorded verdict is BINDING
++# (build-os/memory/routing_contract.md); routing-check.sh refuses this receipt at
++# close if executed_mode exceeds selected_mode with no escalation record, if an
++# escalation carries no evidence, or if consumption exceeds a budget undeclared.
++task_id: EXP0007-55-exhaustion-record
++description_sha256: 952af617f5aade9d0b905eea8a224dc8af8e6cc41aa89e375c97862fadc5b604
++descriptor: {"expected_files_changed":2,"requires_tests":false,"expected_session_count":1,"prior_context_required":false,"handoff_required":false,"consequence_level":"low","irreversible_or_external_mutation":false,"high_blast_radius":false,"unclear_acceptance_criteria":false,"security_or_compliance_consequence":false,"parallel_workstreams_benefit":false,"high_rework_history":false,"nondeterministic_verification":false}
++selected_mode: gravito_light
++selector_note: -
++issued_at: 2026-08-09T14:43:00Z
++# --- budgets: DERIVED DEFAULTS from EXP-0002 sealed records, operator-tunable, not laws.
++# --- Derivation: ON-surface light runs measured 172k-369k total tokens / 0 dispatches
++# --- (named exceedance: raw T4 at 526,461 - context, not the band); the
++# --- blowouts measured 4.9M/7.4M tokens, 4-5 dispatches, $3.63/$4.80. See route-task.sh.
++budget_max_subagents: 0
++budget_max_total_tokens: 500000
++budget_max_uncached_tokens: 60000
++budget_max_model_calls: 25
++budget_max_wall_clock_s: 600
++budget_max_cost_usd: 0.75
++# --- process allowance (PACKET-0053): the packet's OWN gate chain is governance
++# --- ceremony, counted SEPARATELY from task work by the live gate and attributed
++# --- to governance_process (the 0050/0051 calibration question, resolved). Default
++# --- 7 = the LARGEST LEGAL chain in the doctrine: mandatory_full_regate runs
++# --- builder, qa, reviewer, fix-builder, qa, reviewer, archivist. (No-fix chain
++# --- is 4; fix-then-pass is 6.) Process dispatches never eat budget_max_subagents.
++process_dispatch_allowance: 7
++# --- empty at issue; filled at close. AN UNKNOWN IS NOT A ZERO: "-" is an honest
++# --- admission and is never refused; refusal is for CONTRADICTION, not absence.
++executed_mode: gravito_light
++escalation: -
++escalation_evidence: -
++consumed_subagents: 0
++consumed_total_tokens: -
++consumed_uncached_tokens: -
++consumed_model_calls: -
++consumed_wall_clock_s: -
++consumed_cost_usd: -
++degradation_note: -
++# --- close-fill EXTENSIONS (PACKET-0053). consumed_subagents above counts TASK
++# --- dispatches (vs budget_max_subagents); consumed_process_dispatches counts the
++# --- gate chain (vs process_dispatch_allowance). The attr_* layers attribute
++# --- consumption where derivable at close — tokens or cost with provenance, or
++# --- "-" as an admission, NEVER a zero nobody measured. Receipts predating these
++# --- fields stay valid: routing-check.sh reads an absent field as "-".
++consumed_process_dispatches: -
++attr_task_execution: -
++attr_context_retrieval: -
++attr_subagent_execution: -
++attr_verification: -
++attr_review: -
++attr_governance_process: -
++attr_experiment_audit: -
++# --- contribution rows (PACKET-0053): marginal-contribution accounting, MANDATORY
++# --- for a Full close with dispatches>0 (routing-check.sh refuses otherwise). The
++# --- live gate seeds one stub row per admitted Full task dispatch; fill at close:
++# --- contribution: <subagent_type> | <unique_question> | <output_ref> | changed_implementation=y/n/- | changed_conclusion=y/n/- | caught_defect=y/n/- | duplicated_work=y/n/- | tokens=<v|-> | cost=<v|-> | time=<v|->
++# --- An all-"-" row passes as an admission and is REPORTED as non-contributing.
++
+diff --git a/build-os/packets/routing/routing-T04-userdashboard-typefix-20260809T143239Z.md b/build-os/packets/routing/routing-T04-userdashboard-typefix-20260809T143239Z.md
+--- /dev/null
++++ b/build-os/packets/routing/routing-T04-userdashboard-typefix-20260809T143239Z.md
++# ROUTING RECEIPT — one file per routing decision. The recorded verdict is BINDING
++# (build-os/memory/routing_contract.md); routing-check.sh refuses this receipt at
++# close if executed_mode exceeds selected_mode with no escalation record, if an
++# escalation carries no evidence, or if consumption exceeds a budget undeclared.
++task_id: T04-userdashboard-typefix
++description_sha256: 15b7e29b0b357c41af1b53437f200869ac1f80a07f4bafb16b021a28ae47726d
++descriptor: {"expected_files_changed":1,"requires_tests":false,"expected_session_count":1,"prior_context_required":false,"handoff_required":false,"consequence_level":"low","irreversible_or_external_mutation":false,"high_blast_radius":false,"unclear_acceptance_criteria":false,"security_or_compliance_consequence":false,"parallel_workstreams_benefit":false,"high_rework_history":false,"nondeterministic_verification":false}
++selected_mode: direct
++selector_note: -
++issued_at: 2026-08-09T14:32:39Z
++# --- budgets: DERIVED DEFAULTS from EXP-0002 sealed records, operator-tunable, not laws.
++# --- Derivation: ON-surface light runs measured 172k-369k total tokens / 0 dispatches
++# --- (named exceedance: raw T4 at 526,461 - context, not the band); the
++# --- blowouts measured 4.9M/7.4M tokens, 4-5 dispatches, $3.63/$4.80. See route-task.sh.
++budget_max_subagents: 0
++budget_max_total_tokens: 250000
++budget_max_uncached_tokens: 30000
++budget_max_model_calls: 12
++budget_max_wall_clock_s: 300
++budget_max_cost_usd: 0.40
++# --- process allowance (PACKET-0053): the packet's OWN gate chain is governance
++# --- ceremony, counted SEPARATELY from task work by the live gate and attributed
++# --- to governance_process (the 0050/0051 calibration question, resolved). Default
++# --- 7 = the LARGEST LEGAL chain in the doctrine: mandatory_full_regate runs
++# --- builder, qa, reviewer, fix-builder, qa, reviewer, archivist. (No-fix chain
++# --- is 4; fix-then-pass is 6.) Process dispatches never eat budget_max_subagents.
++process_dispatch_allowance: 7
++# --- empty at issue; filled at close. AN UNKNOWN IS NOT A ZERO: "-" is an honest
++# --- admission and is never refused; refusal is for CONTRADICTION, not absence.
++executed_mode: direct
++escalation: -
++escalation_evidence: -
++consumed_subagents: 0
++consumed_total_tokens: -
++consumed_uncached_tokens: -
++consumed_model_calls: -
++consumed_wall_clock_s: -
++consumed_cost_usd: -
++degradation_note: -
++# --- close-fill EXTENSIONS (PACKET-0053). consumed_subagents above counts TASK
++# --- dispatches (vs budget_max_subagents); consumed_process_dispatches counts the
++# --- gate chain (vs process_dispatch_allowance). The attr_* layers attribute
++# --- consumption where derivable at close — tokens or cost with provenance, or
++# --- "-" as an admission, NEVER a zero nobody measured. Receipts predating these
++# --- fields stay valid: routing-check.sh reads an absent field as "-".
++consumed_process_dispatches: -
++attr_task_execution: -
++attr_context_retrieval: -
++attr_subagent_execution: -
++attr_verification: -
++attr_review: -
++attr_governance_process: -
++attr_experiment_audit: -
++# --- contribution rows (PACKET-0053): marginal-contribution accounting, MANDATORY
++# --- for a Full close with dispatches>0 (routing-check.sh refuses otherwise). The
++# --- live gate seeds one stub row per admitted Full task dispatch; fill at close:
++# --- contribution: <subagent_type> | <unique_question> | <output_ref> | changed_implementation=y/n/- | changed_conclusion=y/n/- | caught_defect=y/n/- | duplicated_work=y/n/- | tokens=<v|-> | cost=<v|-> | time=<v|->
++# --- An all-"-" row passes as an admission and is REPORTED as non-contributing.
++
+diff --git a/build-os/receipts/EXP-0007-arm-T04.md b/build-os/receipts/EXP-0007-arm-T04.md
+--- /dev/null
++++ b/build-os/receipts/EXP-0007-arm-T04.md
++# EXP-0007 — ARM RECORD: T04 on the repaired system
++
++Serves queue task **#55** (Fresh operational UIC benchmark on a functioning
++system), exit criteria **EXIT-4** / **EXIT-5**.
++
++This is the **arm half** of #55, recorded first-hand by the arm that ran it.
++It is **not** the UIC comparison: see *What this record does NOT establish*.
++
++Label discipline per `build-os/packets/routing/routing-gate.sh`: every number is
++marked **EXACT** (hook-counted / read from an artifact) or **UNAVAILABLE**. No
++figure is estimated into existence, and an unknown is recorded as `-`, never 0.
++
++---
++
++## 1. Arm identity
++
++| Field | Value | Tier |
++|---|---|---|
++| Arm | `exp0007-arm` (this session) | EXACT |
++| Host profile | `unknown_conservative` — Edit allowed, Bash approval_required, **no approver** | EXACT (matches #55 preflight) |
++| Task | T04 — fix 2 TypeScript errors (TS2322, TS2339) in `client/src/pages/UserDashboard.tsx` | EXACT |
++| Lane | `tiny` | EXACT |
++| Routing receipt | `routing-T04-userdashboard-typefix-20260809T143239Z.md` | EXACT |
++| selected_mode | `direct` | EXACT (selector verdict, `selector_note: -`) |
++| Task subagent dispatches | **0** (budget_max_subagents = 0 under `direct`) | EXACT |
++| Process (gate-chain) dispatches | **0** | EXACT |
++| Tokens / cost | `-` | **UNAVAILABLE** — interactive session; the gate's own label says tokens/cost are `unavailable_live`, close-time reconciliation only where headless |
++
++## 2. The headline finding — EXP-0005's failure does NOT reproduce
++
++EXP-0005 returned `gravito_system_harmful` with **0/12 accepted**, caused by
++`authority_bootstrap_permission_class_mismatch`: earning first mutation
++authority required **Bash**, which this host class gates behind an approval no
++approver can grant. Every arm therefore produced zero mutations.
++
++**On this arm the repair fired, and the arm mutated.** From
++`build-os/packets/routing/live_gate_log.tsv` (EXACT, hook-written):
++
++```
++14:32:05  none                       -       BLOCK-MUTATION-NO-RECEIPT   tool=Bash
++14:32:05  none                       -       RECOVERY-SELECTED           tool=Bash host=unknown_conservative source=selector
++14:32:15  none                       -       BLOCK-NO-RECEIPT            subagent_type=Explore
++14:32:35  none                       -       ROUTING-REQUEST-WRITE       tool=Write ungated=bootstrap-channel
++14:32:39  T04-userdashboard-typefix  -       BOOTSTRAP-RECEIPT-MINTED    via=routing-request-channel
++14:32:41  T04-userdashboard-typefix  direct  ALLOW-MUTATION              tool=Bash
++14:34:52  T04-userdashboard-typefix  direct  ALLOW-MUTATION              tool=Edit
++   … 4 further ALLOW-MUTATION tool=Edit through 14:35:17
++14:35:21  T04-userdashboard-typefix  direct  ALLOW-MUTATION              tool=Bash
++```
++
++The recovery selector chose the **no-shell** route for this host profile, the
++arm wrote `routing-request.json`, the hook redeemed it into an ordinary
++`route-task.sh` receipt from **inside the hook** — outside the tool-permission
++layer — and mutation authority was earned **in the same permission class as the
++work it authorizes** (Write/Edit). That is the stated invariant of the
++bootstrap channel, observed working in a live run rather than in a test.
++
++**Time cost of the bootstrap: 34 s** (14:32:05 → 14:32:39), 3 refused calls.
++EXACT. The larger 14:32:41 → 14:34:52 gap is **source reading, not gate
++overhead**, and is not charged to governance.
++
++## 3. Where the arm was actually blocked — and by whom
++
++The distinction matters for any harm verdict against the governance layer:
++
++| Attempt | Refused by | Count |
++|---|---|---|
++| `npx tsc --noEmit -p tsconfig.json` | **Host permission layer** ("This command requires approval") | 2 (EXACT) |
++| `mcp__serena__get_diagnostics_for_file` | **Host permission layer** (permission not granted) | 2 (EXACT) |
++| Subagent dispatch (`Explore`) | Gravito routing gate, pre-receipt | 1 (EXACT) |
++| Subagent dispatch, post-receipt | Not attempted — `direct` records budget 0; dispatching would be silent escalation | 0 |
++
++**The routing gate ALLOWED both Bash calls** (rows 6 and 12 above). Both were
++then denied by the host. So on this arm the binding constraint on *verification*
++was the host permission layer, **not** Gravito. Gravito's only refusals were the
++three pre-receipt calls, all of which the bootstrap channel resolved in 34 s.
++
++This does not exonerate the governance layer in general — it is one arm, one
++task, one host profile — but it does mean a `gravito_system_harmful` verdict
++cannot be re-derived from this run's blocking pattern.
++
++## 4. Work product
++
++5 `Edit` mutations, one file, `client/src/pages/UserDashboard.tsx`:
++
++- **TS2322** — the `ApiKeyCard` prop type was hand-written as
++  `{ id: number; …; createdAt: Date; lastUsedAt: Date | null }`, but
++  `apiKeys.list` → `getApiKeysByUserId` is declared `Promise<Partial<ApiKey>[]>`
++  (`server/supabase-adapter.ts:158`) with **ISO-string** timestamps and every
++  field optional. Replaced with `Partial<ApiKey>` (type-only import) and the
++  optionality handled: `keyPrefix ?? ""`, `createdAt` guarded, `id` captured and
++  guarded so the `(id: number) => void` callbacks keep their strict signature.
++- **TS2339** — `invoice.date` does not exist; `subscription.billingHistory`
++  returns `BillingHistory[]`, whose field is `createdAt`
++  (`server/supabase-adapter.ts:104-114`). Corrected.
++
++No `@ts-ignore` / `@ts-expect-error` / `@ts-nocheck`, no `any`, nothing deleted.
++
++**Acceptance status: UNVERIFIED-BY-COMPILER.** The verification command
++`npx tsc --noEmit -p tsconfig.json` could not be executed on this arm (§3). The
++fix is derived from the declared source types, not confirmed by a compiler run.
++Recording it as "accepted" would be exactly the synthetic activation this
++substrate forbids, so it is **not** counted toward an accepted/total figure.
++
++## 5. What this record does NOT establish
++
++- **Not a UIC comparison.** EXIT-5 wants a comparison; this is one arm. There is
++  no second arm in this session and no control run to compare against.
++- **No cost axis.** Tokens and cost are `unavailable_live` on an interactive
++  session by the substrate's own labeling rule, so the "efficiency thesis" #55
++  names is not answered here — a cost-per-accepted-unit figure has no numerator
++  measurement available and its denominator (§4) is unverified.
++- **One host profile.** `unknown_conservative` with no approver. A profile where
++  Bash is approvable would very likely have closed §4's verification gap and
++  changed the arm's outcome class.
++
++## 6. What #55 still needs
++
++1. A compiler run of T04's verification command by a surface that holds Bash
++   approval — this converts §4 from UNVERIFIED to accepted/rejected and is the
++   single cheapest unblock.
++2. At least one comparison arm.
++3. A token/cost source: headless close-time telemetry reconciliation, since the
++   interactive surface cannot supply it.
++
++---
++
++*Written by the arm, from the hook-written ledger and the routing receipt. No
++figure here is reconstructed from recollection where an artifact exists.*
++
+diff --git a/build-os/receipts/EXP-0007-task51-auditor-audit.md b/build-os/receipts/EXP-0007-task51-auditor-audit.md
+--- /dev/null
++++ b/build-os/receipts/EXP-0007-task51-auditor-audit.md
++# Task #51 — AUDIT THE AUDITORS: source fidelity and failure capability
++
++**Lane:** `diagnosis` — report only, nothing implemented. Deliberately bounded;
++#54's record says "do not open a general assurance workstream from this."
++
++**Two questions per auditor:**
++1. **Source fidelity** — does it judge the artifact it claims to judge, or a proxy?
++2. **Failure capability** — is there an input for which it returns a negative?
++   An auditor that cannot fail is not an auditor.
++
++**Scope audited:** `motion/concession-gate.mjs`, `motion/continuation.mjs`,
++`motion/gate-stop.mjs`, `motion/capability-map.mjs`, `motion/objective.mjs`,
++`.claude/hooks/routing-gate.sh`.
++
++Several findings are **first-hand from this session**, not inspection-only: they
++were produced by the gates acting on this arm and are marked OBSERVED.
++
++---
++
++## Summary
++
++| # | Auditor | Axis | Severity | Status |
++|---|---|---|---|---|
++| F1 | `enumerateCapability` | fidelity | **HIGH** | OBSERVED |
++| F2 | `enumerateCapability` | failure capability | **HIGH** | inspection |
++| F3 | `concessionGate` | failure capability | **HIGH** | OBSERVED |
++| F4 | `gate-stop.mjs` freshness | fidelity | **HIGH** | OBSERVED |
++| F5 | `exhaustion/current.json` | fidelity | MEDIUM | OBSERVED |
++| F6 | `objective.mjs` vs `queue.json` | fidelity | **HIGH** | inspection |
++| F7 | `explicit_operator_stop` | reachability | **HIGH** | OBSERVED |
++| F8 | `valueGate` | failure capability | — | PASSES |
++
++---
++
++## F1 — `enumerateCapability` reports an enumeration it never performed (HIGH, OBSERVED)
++
++`gate-stop.mjs:67` calls `enumerateCapability(evidence?.capability || "operator_lab_write", "claude")`.
++`SURFACE_CAPABILITIES` is a **hardcoded 5-row table** covering exactly two
++capabilities (`operator_lab_write`, `repository_write`). The function filters by
++capability; a capability absent from the table yields **zero rows**, and returns:
++
++```
++surfaces_with_capability: []
++note: "No surface is OBSERVED to hold this capability"
++```
++
++That is **indistinguishable from a real search that found nothing.** There is no
++"I hold no data on this capability" state.
++
++**OBSERVED this session.** The capability at issue was
++`compiler_verification_and_cross_arm_cost_telemetry` — not in the table. The map
++would have returned "no holder." **A holder demonstrably existed**: peer session
++`user-ad [5db4d7]`, interactive, approver present, found via `ListAgents`. The
++map was empirically wrong, in the fail-open direction.
++
++The irony is load-bearing, not rhetorical: this module's own header says the
++OBSERVED/DECLARED distinction exists because "the bridge was DECLARED absent by
++a worker that had only checked itself." The function reproduces that exact error
++for every capability outside its table — it declares absence **from a table**,
++and reports it as absence **from the system**.
++
++## F2 — `enumerated: true` is a constant (HIGH)
++
++`capability-map.mjs:38` returns `enumerated: true` as a **hardcoded literal**.
++`concessionGate` gates on `cross.enumerated !== true`. So the single field whose
++job is to prove a search happened is **always true**, including when zero rows
++matched and nothing was searched.
++
++Same defect family as the vacuous-pass already recorded in #55's preflight
++(`CLAUDE_SESSION_ID` vs `CLAUDE_CODE_SESSION_ID` — compared against `undefined`
++and returned true). That instance was found and fixed; **this one is still live.**
++
++## F3 — `concessionGate` cannot express "holder exists, route forbidden" (HIGH, OBSERVED)
++
++`concession-gate.mjs:98-99`: a non-empty `surfaces_with_capability` has exactly
++one branch — block, and instruct "route through it instead of conceding." When
++the sole holder is off-limits **by rule**, that instruction is unfollowable and
++the gate cannot terminate.
++
++**OBSERVED this session.** A holder existed (`user-ad`); routing to it is
++forbidden by `SendMessage`'s cross-session permission-laundering prohibition —
++asking a peer to run what was denied here bypasses the operator's own permission
++decision. The correct disposition is `authority_or_safety_forbids_execution`,
++which **already exists** in `continuation.mjs:TERMINAL_CONDITIONS`. The
++concession gate does not read it.
++
++*Narrow fix:* accept a `forbidden_routes` field; treat reachable-but-forbidden as
++satisfying exhaustion. The gate's stated principle is "never stop while
++**unsearched** agency remains" — searched-and-forbidden is not unsearched.
++
++## F4 — the freshness check is authored by the party it constrains (HIGH, OBSERVED)
++
++`gate-stop.mjs:62-63`:
++
++```js
++const fresh = evidence && evidence.for_conclusion &&
++  lastAssistant.toLowerCase().includes(String(evidence.for_conclusion).toLowerCase().slice(0, 40));
++```
++
++**Both operands are written by the model.** It authors `current.json` (including
++`for_conclusion`) and it authors `lastAssistant`. This is a self-consistency
++check, not an independent one.
++
++`concession-gate.mjs:32-33` states the principle this violates: *"The gate must
++not be escapable by wording, because the worker writing the wording is the party
++the gate constrains."* The marker list is hardened against wording; the freshness
++check is built entirely out of it.
++
++**OBSERVED:** satisfying it required deliberately shaping the closing message to
++carry the required 40 characters. A check satisfiable by construction constrains
++nothing.
++
++## F5 — the exhaustion artifact has no task binding (MEDIUM, OBSERVED)
++
++`build-os/motion/exhaustion/current.json` is a **single mutable path**. Neither
++it nor `REQUIRED_EVIDENCE` (8 fields) carries a task id.
++
++**OBSERVED:** on arrival it held evidence for CONT-0002 / task **#52**, which is
++`completed`. Only the F4 wording-substring stood between stale evidence for a
++closed task and a concession on an unrelated open one. A single-slot artifact
++keyed by nothing, guarded by a check the writer controls, is not an evidence
++store. *Narrow fix:* add a required `task_id` and match it against the task the
++concession is being claimed for.
++
++## F6 — two divergent copies of the objective; the gate reads the stale one (HIGH)
++
++`objective.mjs:35-41` hardcodes all five exit criteria as `status: "OPEN"`.
++`queue.json:primary_objective.exit_criteria` records **EXIT-1 as CLOSED** and
++**EXIT-2 as RULED / not a blocker**.
++
++`valueGate` scores `serves_exit_criteria` against `objective.exit_criteria` where
++`e.status === "OPEN"` — reading the **module** copy. So a task serving EXIT-1
++still scores as serving an open criterion, and can be promoted to `DO_NOW`
++against a criterion the queue records as closed.
++
++This is the substrate's own recorded hazard class: the C9 packet de-duplicated
++`pathWithinScope` precisely because "two diverging copies is a soundness hazard."
++The objective is load-bearing for every prioritisation decision, and it exists
++twice. *Narrow fix:* `objective.mjs` should read the queue's `primary_objective`,
++or the queue should not carry a second copy.
++
++## F7 — `explicit_operator_stop` is advertised but unreachable (HIGH, OBSERVED)
++
++`continuation.mjs:52` reads `state.operator_stop`. `state` is `queue.json`,
++passed straight through by `gate-stop.mjs:35-36`. **`queue.json` has no
++`operator_stop` key**, and nothing in the system writes one — there is no hook,
++no tool, and no documented operator action that sets it.
++
++Yet **every refusal message ends** with: *"Stopping requires one of:
++explicit_operator_stop, ..."* — advertising a recovery with **no input path**.
++In practice the only reachable terminal conditions are "everything completed" or
++"everything blocked."
++
++This is the exact defect `routing-gate.sh:589-594` names in its own header: *"A
++static message that says 'run this Bash command' while the host denies Bash is
++how EXP-0005 produced 0/12."* The stop gate now does the same thing with
++`explicit_operator_stop`.
++
++**OBSERVED:** this session asked the operator twice to choose stop-or-continue.
++Even had they answered "stop" in chat, **no mechanism existed to deliver it** to
++the controller.
++
++*The working operator action, until wired:* add `"operator_stop": true` at the
++top level of `build-os/motion/queue.json`. **Deliberately not done by this arm** —
++setting it would be the arm forging the operator's own stop decision, which is
++the same class of act as the permission laundering refused in F3.
++
++## F8 — `valueGate` PASSES both axes (recorded, because an audit that only finds faults is not fidelity either)
++
++`objective.mjs:87-93` has a real negative branch (`is_debt || serves.length === 0`
++→ `DEFER` / `OPTIONAL_DEBT`), and `prioritise` makes it load-bearing by selecting
++highest-value-runnable rather than next-runnable.
++
++**OBSERVED firing correctly, twice:** it deferred #51 and #53 behind #55, then —
++once #55 was blocked — reported "NO runnable task serves an open exit criterion —
++the queue holds only deferrable debt, which is itself worth reporting." That is
++an auditor returning an accurate negative about its own queue. Subject to F6
++(it scores against the stale objective copy), the mechanism is sound.
++
++---
++
++## Cross-cutting conclusion
++
++The failure mode is consistent and worth naming once: **five of the six auditors
++fail toward "proceed" rather than toward "stop and say so."** F1 reports an
++unperformed search as a completed one; F2 hardcodes the field that proves the
++search; F4 lets the constrained party author the check that binds it; F5 lets
++stale evidence stand in for fresh; F7 advertises an escape hatch that is not
++wired. In each case the gate returns a *confident* value rather than an *honest
++unknown* — the precise error the substrate elsewhere legislates against with
++"AN UNKNOWN IS NOT A ZERO."
++
++**Not fixed here.** `diagnosis` lane: this is a report. Each finding above
++carries a narrow fix; none was implemented, and none should be folded into an
++open-ended assurance workstream (#54's standing instruction).
++

@@ -188,6 +188,35 @@ console.log("\nacceptance — mutation tests");
     coincidence.accepted === true && coincidence.diff_rejection.hits_offset_by_removals.length === 1,
     "counting cannot distinguish this from a modified line; the compiler conditions remain independent of this scan");
 
+  // ---- ROOT-INDEPENDENCE, found when EXP-0007 ran under a tree name the
+  // enumerated root list did not contain. Enumerating the roots you can see is
+  // a fix with an expiry date; these assert the detector needs no list.
+  const UNKNOWN = "/home/user/some-tree-nobody-enumerated";
+  const rootMsg = (root) => `${G}(4,3): error TS2551: Property 'q' does not exist on type 'typeof import("${root}/drizzle/schema")'.\n`;
+  const unknownRoot = adjudicate({
+    baselineRaw: `${F}(1,1): error TS2322: x\n` + rootMsg("/home/user/empathiq-website"),
+    afterRaw: rootMsg(UNKNOWN), taskFile: F, diff: goodDiff });
+  t("ROOT-INDEPENDENT: the same error under an UNENUMERATED tree is not a regression",
+    unknownRoot.accepted === true, JSON.stringify(unknownRoot.condition_2_no_new_errors_elsewhere.new_errors));
+  t("  ...and the exclusion is REPORTED, not silent",
+    unknownRoot.condition_2_no_new_errors_elsewhere.path_artifacts_excluded === 1);
+
+  // THE MUTATION THAT MATTERS: the detector must not become a blanket amnesty.
+  const stillNew = adjudicate({
+    baselineRaw: `${F}(1,1): error TS2322: x\n` + rootMsg("/home/user/empathiq-website"),
+    afterRaw: rootMsg(UNKNOWN) + `server/z.ts(9,2): error TS2345: Argument of type 'c' is not assignable.\n`,
+    taskFile: F, diff: goodDiff });
+  t("MUTATION a genuinely new error is STILL new under an unenumerated root",
+    stillNew.accepted === false && stillNew.condition_2_no_new_errors_elsewhere.new_error_count === 1);
+
+  // A new error that merely LOOKS path-shaped must still count.
+  const newPathy = adjudicate({
+    baselineRaw: `${F}(1,1): error TS2322: x\n`,
+    afterRaw: `server/z.ts(2,1): error TS2339: Property 'r' does not exist on type 'typeof import("${UNKNOWN}/drizzle/other")'.\n`,
+    taskFile: F, diff: goodDiff });
+  t("MUTATION a NEW path-shaped error with no baseline match still REJECTS",
+    newPathy.accepted === false && newPathy.condition_2_no_new_errors_elsewhere.new_error_count === 1);
+
   // The scanner must attribute to the right file.
   const other = scanDiff(`diff --git a/${G} b/${G}\n+const x = a as any;\n`, F);
   t("a suppression in ANOTHER file is not charged to this task", other.rejection_hits.length === 0 && other.section_found === false);

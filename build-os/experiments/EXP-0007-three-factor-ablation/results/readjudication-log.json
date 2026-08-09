@@ -1,0 +1,210 @@
+{
+  "artifact": "exp0007_readjudication_log",
+  "rule_changed": false,
+  "defect": "acceptance normalised absolute paths against an ENUMERATED root list; EXP-0007 runs under a tree name that list did not contain",
+  "classification": "measurement_critical — fixed before the affected runs were admitted",
+  "applied_to": "every recorded unit, uniformly and blind to configuration",
+  "originals_preserved_as": "acceptance.original.json",
+  "changes": [
+    {
+      "unit": "T01.A",
+      "status": "readjudicated",
+      "was": false,
+      "now": true,
+      "flipped": true,
+      "new_errors_before": 5,
+      "new_errors_after": 0,
+      "path_artifacts": 5
+    },
+    {
+      "unit": "T01.ABC",
+      "status": "readjudicated",
+      "was": false,
+      "now": true,
+      "flipped": true,
+      "new_errors_before": 5,
+      "new_errors_after": 0,
+      "path_artifacts": 5
+    },
+    {
+      "unit": "T01.B",
+      "status": "readjudicated",
+      "was": false,
+      "now": true,
+      "flipped": true,
+      "new_errors_before": 5,
+      "new_errors_after": 0,
+      "path_artifacts": 5
+    },
+    {
+      "unit": "T01.C",
+      "status": "readjudicated",
+      "was": false,
+      "now": true,
+      "flipped": true,
+      "new_errors_before": 5,
+      "new_errors_after": 0,
+      "path_artifacts": 5
+    },
+    {
+      "unit": "T01.baseline",
+      "status": "readjudicated",
+      "was": false,
+      "now": true,
+      "flipped": true,
+      "new_errors_before": 5,
+      "new_errors_after": 0,
+      "path_artifacts": 5
+    },
+    {
+      "unit": "T02.A",
+      "status": "readjudicated",
+      "was": false,
+      "now": true,
+      "flipped": true,
+      "new_errors_before": 5,
+      "new_errors_after": 0,
+      "path_artifacts": 5
+    },
+    {
+      "unit": "T02.ABC",
+      "status": "readjudicated",
+      "was": false,
+      "now": true,
+      "flipped": true,
+      "new_errors_before": 5,
+      "new_errors_after": 0,
+      "path_artifacts": 5
+    },
+    {
+      "unit": "T02.B",
+      "status": "readjudicated",
+      "was": false,
+      "now": true,
+      "flipped": true,
+      "new_errors_before": 5,
+      "new_errors_after": 0,
+      "path_artifacts": 5
+    },
+    {
+      "unit": "T02.C",
+      "status": "readjudicated",
+      "was": false,
+      "now": true,
+      "flipped": true,
+      "new_errors_before": 5,
+      "new_errors_after": 0,
+      "path_artifacts": 5
+    },
+    {
+      "unit": "T02.baseline",
+      "status": "readjudicated",
+      "was": false,
+      "now": true,
+      "flipped": true,
+      "new_errors_before": 5,
+      "new_errors_after": 0,
+      "path_artifacts": 5
+    },
+    {
+      "unit": "T03.A",
+      "status": "readjudicated",
+      "was": false,
+      "now": true,
+      "flipped": true,
+      "new_errors_before": 5,
+      "new_errors_after": 0,
+      "path_artifacts": 5
+    },
+    {
+      "unit": "T03.ABC",
+      "status": "readjudicated",
+      "was": false,
+      "now": true,
+      "flipped": true,
+      "new_errors_before": 5,
+      "new_errors_after": 0,
+      "path_artifacts": 5
+    },
+    {
+      "unit": "T03.B",
+      "status": "readjudicated",
+      "was": false,
+      "now": true,
+      "flipped": true,
+      "new_errors_before": 5,
+      "new_errors_after": 0,
+      "path_artifacts": 5
+    },
+    {
+      "unit": "T03.C",
+      "status": "readjudicated",
+      "was": false,
+      "now": true,
+      "flipped": true,
+      "new_errors_before": 5,
+      "new_errors_after": 0,
+      "path_artifacts": 5
+    },
+    {
+      "unit": "T03.baseline",
+      "status": "readjudicated",
+      "was": false,
+      "now": true,
+      "flipped": true,
+      "new_errors_before": 5,
+      "new_errors_after": 0,
+      "path_artifacts": 5
+    },
+    {
+      "unit": "T04.A",
+      "status": "readjudicated",
+      "was": false,
+      "now": true,
+      "flipped": true,
+      "new_errors_before": 5,
+      "new_errors_after": 0,
+      "path_artifacts": 5
+    },
+    {
+      "unit": "T04.ABC",
+      "status": "readjudicated",
+      "was": false,
+      "now": true,
+      "flipped": true,
+      "new_errors_before": 5,
+      "new_errors_after": 0,
+      "path_artifacts": 5
+    },
+    {
+      "unit": "T04.B",
+      "status": "readjudicated",
+      "was": false,
+      "now": true,
+      "flipped": true,
+      "new_errors_before": 5,
+      "new_errors_after": 0,
+      "path_artifacts": 5
+    },
+    {
+      "unit": "T04.C",
+      "status": "readjudicated",
+      "was": false,
+      "now": true,
+      "flipped": true,
+      "new_errors_before": 5,
+      "new_errors_after": 0,
+      "path_artifacts": 5
+    },
+    {
+      "unit": "T04.baseline",
+      "status": "readjudicated",
+      "was": false,
+      "now": true,
+      "flipped": true,
+      "new_errors_before": 5,
+      "new_errors_after": 0,
+      "path_artifacts": 5
+    }
+  ]
+}

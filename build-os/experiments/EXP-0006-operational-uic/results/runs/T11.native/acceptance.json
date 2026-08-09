@@ -12,6 +12,8 @@
   "condition_2_no_new_errors_elsewhere": {
     "pass": true,
     "new_error_count": 0,
+    "path_artifacts_excluded": 0,
+    "path_artifact_note": "errors identical to a baseline error once every absolute path is erased — the same pre-existing error seen under a different tree name. Reported, never silently dropped.",
     "new_errors": []
   },
   "diff_rejection": {
