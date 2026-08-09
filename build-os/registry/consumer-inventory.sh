@@ -35,9 +35,21 @@ cd "$REPO" || { echo "no such repo: $REPO" >&2; exit 2; }
 # the colon is a line number".
 DECODE_RE='\$\{[A-Za-z_]+%:\*\}|\$\{[A-Za-z_]+##\*:\}|cut -d: -f|:\[0-9\]|\(\.\*\):\(\[0-9\]|sub\(/:\[0-9\]|split\([^)]*":"|FS="?:"?|:\$\{?[A-Za-z_]*line'
 
-# A file is only a CONSUMER if it also touches the evidence/registry domain.
+# A file is only a CANDIDATE if it also touches the evidence/registry domain.
 # Splitting on a colon is common; splitting a CITATION on a colon is the thing.
 DOMAIN_RE='evidence_refs|control_registry|mutator_registry|VACUOUS|allrefs|evid|citation'
+
+# CONFIRMED vs CANDIDATE, because the first inventory over-reported and the
+# count was stated as fact. DOMAIN_RE is deliberately loose so nothing is
+# missed — but `evid` also matches `evidence_axis`, and four files that merely
+# split config pairs or a compiler location were counted as citation consumers.
+# None of them reads evidence_refs at all.
+#
+# The loose net is KEPT, because a false negative is what reverted attempt 1
+# and a false positive only costs a review. What changes is that the two are no
+# longer added together: CONFIRMED files actually handle a citation field,
+# CANDIDATE files matched heuristically and are carried for review.
+CONFIRM_RE='evidence_refs|allrefs|VACUOUS-REF|ANCHOR-|#c:'
 
 classify(){ # <file> — what KIND of consumer, so an update plan can be ordered
   local f="$1"
@@ -51,8 +63,8 @@ classify(){ # <file> — what KIND of consumer, so an update plan can be ordered
   echo "parser"
 }
 
-FOUND=0; UNCLASSIFIED=0
-[ "$MODE" = "tsv" ] && printf 'file\tkind\tdecode_hits\tdomain_hits\n'
+FOUND=0; UNCLASSIFIED=0; CONFIRMED=0; CANDIDATE=0
+[ "$MODE" = "tsv" ] && printf 'file\tkind\tconfirmed\tdecode_hits\tdomain_hits\n'
 [ "$MODE" = "human" ] && echo "CONSUMERS of the positional path:line evidence format"
 
 # SELF-EXCLUSION, by EXACT PATH and nothing wider. This script necessarily
@@ -69,19 +81,38 @@ while IFS= read -r f; do
   dh="$(grep -cE "$DECODE_RE" "$f" 2>/dev/null || echo 0)"
   mh="$(grep -cE "$DOMAIN_RE" "$f" 2>/dev/null || echo 0)"
   k="$(classify "$f")"
+  if grep -qE "$CONFIRM_RE" "$f" 2>/dev/null; then conf="CONFIRMED"; CONFIRMED=$((CONFIRMED+1))
+  else conf="CANDIDATE"; CANDIDATE=$((CANDIDATE+1)); fi
   [ "$k" = "parser" ] && UNCLASSIFIED=$((UNCLASSIFIED+1))
   FOUND=$((FOUND+1))
-  if [ "$MODE" = "tsv" ]; then printf '%s\t%s\t%s\t%s\n' "$f" "$k" "$dh" "$mh"
-  else printf '  %-14s %-52s decode=%s domain=%s\n' "$k" "$f" "$dh" "$mh"; fi
+  if [ "$MODE" = "tsv" ]; then printf '%s\t%s\t%s\t%s\t%s\n' "$f" "$k" "$conf" "$dh" "$mh"
+  else printf '  %-9s %-14s %-52s decode=%s domain=%s\n' "$conf" "$k" "$f" "$dh" "$mh"; fi
 done < <(grep -rlE "$DECODE_RE" --include="*.sh" --include="*.mjs" build-os tests 2>/dev/null | sort)
 
 if [ "$MODE" = "human" ]; then
   echo
-  echo "total consumers: $FOUND"
+  echo "CONFIRMED consumers: $CONFIRMED   (handle a citation field)"
+  echo "CANDIDATES:         $CANDIDATE   (heuristic match, carried for review — a false positive costs a review, a false negative reverted attempt 1)"
+  echo "total scanned:      $FOUND"
   # An empty inventory is not "nothing to migrate" — it is a broken detector,
   # and the migration must not read it as a green light.
   [ "$FOUND" -eq 0 ] && echo "REFUSED: zero consumers found. The detector is broken, not the tree clean."
 fi
+# THE DATA SIDE, enumerated for the same reason as the code side. Attempt 1
+# migrated control_registry.txt and nothing else, because "the registry" was
+# assumed to be one file. It is four: control_registry, mutator_registry,
+# defect_classes and findings all carry path:line citations. Phase 4 converts
+# what this lists, not what anyone remembers.
+if [ "$MODE" = "human" ]; then
+  echo
+  echo "CITATION-BEARING STORES"
+  for st in build-os/registry/*.txt; do
+    [ -f "$st" ] || continue
+    n="$(grep -coE '[a-z0-9_/.-]+\.(sh|mjs|md|txt):[0-9]+' "$st" 2>/dev/null | head -n1)"
+    [ "${n:-0}" -gt 0 ] 2>/dev/null && printf '  %-46s %4s positional citations\n' "$st" "$n"
+  done
+fi
+
 [ "$FOUND" -eq 0 ] && exit 3
 [ "$STRICT" = 1 ] && [ "$UNCLASSIFIED" -gt 0 ] && exit 4
 exit 0

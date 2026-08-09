@@ -84,6 +84,43 @@ case "$KINDS" in *registry_scanner*) ok "the scanners are identified separately 
 case "$KINDS" in *suite_assertion*) ok "the suite assertions are identified — attempt 1 died on exactly these" ;;
                  *) no "no suite_assertion kind in the inventory" ;; esac
 
+echo "== CONFIRMED and CANDIDATE are not added together =="
+# The first inventory reported "18 consumers" as fact. Four were config-pair
+# splitters that never read a citation: `evid` in DOMAIN_RE also matches
+# `evidence_axis`. The loose net is KEPT — a false negative reverted attempt 1,
+# a false positive costs a review — but the two counts are now separate.
+CONF="$(bash "$INV" --tsv | tail -n +2 | awk -F'\t' '$3=="CONFIRMED"' | grep -c . || true)"
+CAND="$(bash "$INV" --tsv | tail -n +2 | awk -F'\t' '$3=="CANDIDATE"' | grep -c . || true)"
+[ "${CONF:-0}" -ge 6 ] && ok "$CONF CONFIRMED consumers actually handle a citation field" || no "only ${CONF:-0} confirmed"
+[ "${CAND:-0}" -ge 1 ] && ok "  and $CAND CANDIDATES are carried for review, not counted as consumers" || no "no candidates carried"
+for f in build-os/tools/evidence-policy.sh build-os/metrics/rank-candidates.sh; do
+  bash "$INV" --tsv | awk -F'\t' -v f="$f" '$1==f && $3=="CANDIDATE"' | grep -q . \
+    && ok "  $f is a CANDIDATE — it splits config pairs, not citations" \
+    || no "$f is still counted as a confirmed consumer"
+done
+# The confirmed set must still contain the one that reverted attempt 1.
+bash "$INV" --tsv | awk -F'\t' '$1=="tests/control_registry_tests.sh" && $3=="CONFIRMED"' | grep -q . \
+  && ok "  and control_registry_tests.sh is CONFIRMED, not downgraded by the tightening" \
+  || no "the consumer that reverted attempt 1 was downgraded to a candidate"
+
+echo "== the DATA side is enumerated too — the registry is four files, not one =="
+# Attempt 1 converted control_registry.txt and nothing else, because "the
+# registry" was assumed singular.
+# CAPTURED ONCE, then matched in-shell. `inventory | grep -q` SIGPIPEs the
+# producer the moment grep finds a match, and under `set -o pipefail` that 141
+# turns a PASSING assertion into a FAIL. This is DEFECT-0013, already on record
+# here, and it bit this same suite twice: only the LAST store matched, because
+# grep read to EOF and never closed the pipe early.
+INV_OUT="$(bash "$INV" 2>/dev/null)"
+STORES="$(printf '%s\n' "$INV_OUT" | grep -c 'positional citations' || true)"
+[ "${STORES:-0}" -ge 4 ] && ok "$STORES citation-bearing stores enumerated (attempt 1 migrated 1)" || no "only ${STORES:-0} stores enumerated"
+for st in control_registry mutator_registry defect_classes findings; do
+  case "$INV_OUT" in
+    *"$st.txt"*"positional citations"*) ok "  $st.txt is on the phase-4 list" ;;
+    *) no "$st.txt is MISSING from the store list" ;;
+  esac
+done
+
 echo "== the inventory does not exempt itself by pattern =="
 # Self-exclusion is by EXACT PATH. A pattern-based exemption could silently
 # hide other consumers, which is the failure mode this whole suite guards.
