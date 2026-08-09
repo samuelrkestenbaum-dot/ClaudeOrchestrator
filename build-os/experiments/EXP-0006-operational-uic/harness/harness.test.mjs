@@ -117,6 +117,40 @@ console.log("\nacceptance — mutation tests");
   t("a pre-existing `any` on a CONTEXT line does not reject", preexisting.accepted === true,
     "patterns match added lines only; matching the whole file would score the seed instead of the work");
 
+  // ---- path normalisation, found by the pilot on the FIRST arm ------------
+  // The danger of a fix like this is that it widens the rule while looking like
+  // it narrows an artifact. So the pair below is the whole point: the same
+  // error under a different tree root must NOT count, and a genuinely new error
+  // under the arm's tree root MUST still count.
+  const B_ROOT = "/home/user/empathiq-website", A_ROOT = "/home/user/exp0006-arm";
+  const withRoot = (root, extra = "") =>
+    `${G}(4,3): error TS2551: Property 'q' does not exist on type 'typeof import("${root}/drizzle/schema")'.\n` + extra;
+
+  const artifact = adjudicate({ baselineRaw: `${F}(1,1): error TS2322: x\n` + withRoot(B_ROOT), afterRaw: withRoot(A_ROOT), taskFile: F, diff: goodDiff });
+  t("SAME error under a different tree root is NOT a regression", artifact.accepted === true &&
+    artifact.condition_2_no_new_errors_elsewhere.new_error_count === 0);
+  t("the normalisation is REPORTED, not silent", artifact.path_normalisations_applied >= 2,
+    `counted ${artifact.path_normalisations_applied}`);
+
+  // MUTATION E — the regression detector must survive its own fix.
+  const stillCaught = adjudicate({
+    baselineRaw: `${F}(1,1): error TS2322: x\n` + withRoot(B_ROOT),
+    afterRaw: withRoot(A_ROOT, `server/z.ts(9,2): error TS2345: Argument of type 'c' is not assignable.\n`),
+    taskFile: F, diff: goodDiff,
+  });
+  t("MUTATION a genuinely new error still REJECTS after normalisation", stillCaught.accepted === false &&
+    stillCaught.condition_2_no_new_errors_elsewhere.new_error_count === 1);
+
+  // And a new error whose message CONTAINS the arm root is still new — the
+  // normaliser must not become a blanket amnesty for anything path-shaped.
+  const newUnderRoot = adjudicate({
+    baselineRaw: `${F}(1,1): error TS2322: x\n` + withRoot(B_ROOT),
+    afterRaw: withRoot(A_ROOT) + `server/z.ts(2,1): error TS2339: Property 'r' does not exist on type 'typeof import("${A_ROOT}/drizzle/schema")'.\n`,
+    taskFile: F, diff: goodDiff,
+  });
+  t("MUTATION a NEW error that also carries the arm root still REJECTS", newUnderRoot.accepted === false &&
+    newUnderRoot.condition_2_no_new_errors_elsewhere.new_error_count === 1);
+
   // The scanner must attribute to the right file.
   const other = scanDiff(`diff --git a/${G} b/${G}\n+const x = a as any;\n`, F);
   t("a suppression in ANOTHER file is not charged to this task", other.rejection_hits.length === 0 && other.section_found === false);
