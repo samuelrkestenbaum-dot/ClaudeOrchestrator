@@ -1,0 +1,35 @@
+{
+  "accepted": false,
+  "task_file": "server/nervous-system/dynamics/async-deep.ts",
+  "condition_1_zero_errors_in_file": {
+    "pass": false,
+    "errors_before": 1,
+    "errors_after": 1,
+    "remaining": [
+      "TS2339 Property 'thinking' does not exist on type 'never'."
+    ]
+  },
+  "condition_2_no_new_errors_elsewhere": {
+    "pass": true,
+    "new_error_count": 0,
+    "new_errors": []
+  },
+  "diff_rejection": {
+    "rejected": false,
+    "hits": [],
+    "net_introduced": {},
+    "pattern_added_counts": {},
+    "pattern_removed_counts": {},
+    "hits_offset_by_removals": [],
+    "deletion_suspected": false,
+    "lines_added": 21,
+    "lines_removed": 2,
+    "note": "patterns are matched on ADDED lines only; matching the whole file would reject a task for `any` casts the seed already contained"
+  },
+  "total_errors_before": 781,
+  "total_errors_after": 781,
+  "path_normalisations_applied": 10,
+  "path_normalisation_note": "tsc embeds absolute paths in some messages, and the baseline tree and the arm tree sit at different paths. Without normalising the tree root out, the SAME pre-existing error hashes differently and an untouched file reads as a regression. The frozen acceptance rule is unchanged; an environment difference is removed, not a code difference. This count is reported so the correction can never be silent.",
+  "verdict_basis": "compiler output and diff text only — no judgement, no adjudicator opinion",
+  "verification_exit_code": 2
+}

@@ -1,0 +1,19 @@
+{
+  "arm": "native",
+  "acts": [
+    {
+      "act": "remove",
+      "path": "build-os"
+    },
+    {
+      "act": "remove",
+      "path": ".claude"
+    },
+    {
+      "act": "remove",
+      "path": "CLAUDE.md"
+    }
+  ],
+  "code_source": null,
+  "administered_sha": "59c37a69aca758b7b05b9f3c71d39da5bac8d59b"
+}

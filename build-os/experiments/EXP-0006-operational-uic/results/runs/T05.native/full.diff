@@ -1,0 +1,18 @@
+diff --git a/server/replay/router.ts b/server/replay/router.ts
+index 158fc61..972b97e 100644
+--- a/server/replay/router.ts
++++ b/server/replay/router.ts
+@@ -74,10 +74,10 @@ export const replayRouter = router({
+     }))
+     .query(({ input }) => {
+       try {
+-        const analysis = (replayEngine as unknown as Record<string, unknown>).analyzeConversation?.(input.conversationId);
++        const analysis = replayEngine.analyzeConversation(input.conversationId);
+         return {
+           success: true,
+-          data: analysis || null,
++          data: analysis,
+           error: null
+         };
+       } catch (error) {
+

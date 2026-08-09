@@ -1,0 +1,8 @@
+{
+  "base_commit": "df9c3c4bf63534650f1d31cd6ef0a04b28c695d5",
+  "product_paths": [
+    "server/replay/router.ts"
+  ],
+  "governance_paths": [],
+  "note": "governance paths are DENOMINATOR COST and receive no numerator credit; measured against the administered commit, so substrate administration is not attributed to the arm"
+}

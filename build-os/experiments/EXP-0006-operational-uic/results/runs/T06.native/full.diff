@@ -1,0 +1,95 @@
+diff --git a/server/deployment/deployment-router.ts b/server/deployment/deployment-router.ts
+index 86e5d9b..f8328a5 100644
+--- a/server/deployment/deployment-router.ts
++++ b/server/deployment/deployment-router.ts
+@@ -34,6 +34,7 @@ import {
+ } from './deployment-persistence';
+ import {
+   getRolloutController,
++  getStageIndex,
+ } from './production-rollout-controller';
+ import {
+   getAlertPipelineStatus,
+@@ -112,6 +113,9 @@ import {
+   updateLoopConfig,
+ } from './autonomous-loop-orchestrator';
+ 
++/** Matches the controller's retained health-check history, so snapshot tallies cover everything it still holds. */
++const HEALTH_HISTORY_LIMIT = 200;
++
+ const adminGuard = protectedProcedure.use(({ ctx, next }) => {
+   if (ctx.user.role !== 'admin') throw new TRPCError({ code: 'FORBIDDEN', message: 'Admin access required' });
+   return next({ ctx });
+@@ -232,7 +236,7 @@ export const deploymentRouter = router({
+     }))
+     .mutation(({ input }) => { getClosedLoopScanner().updateConfig(input); return { success: true }; }),
+   setBaseline: adminGuard
+-    .input(z.object({ metrics: z.record(z.number()) }))
++    .input(z.object({ metrics: z.record(z.string(), z.number()) }))
+     .mutation(({ input }) => { getClosedLoopScanner().setBaseline(input.metrics); return { success: true }; }),
+ 
+   // ─── Autonomous Monitor (Gap 1) ──────────────────────────────────────
+@@ -444,7 +448,7 @@ export const deploymentRouter = router({
+       maxPerHour: z.number().min(1).max(200).default(30),
+       retryCount: z.number().min(0).max(5).default(2),
+       retryDelayMs: z.number().min(500).max(30000).default(2000),
+-      settings: z.record(z.string()).default({}),
++      settings: z.record(z.string(), z.string()).default({}),
+     }))
+     .mutation(({ input }) => {
+       getMultiChannelNotifier().registerChannel(input);
+@@ -461,7 +465,7 @@ export const deploymentRouter = router({
+         maxPerHour: z.number().min(1).max(200).optional(),
+         retryCount: z.number().min(0).max(5).optional(),
+         retryDelayMs: z.number().min(500).max(30000).optional(),
+-        settings: z.record(z.string()).optional(),
++        settings: z.record(z.string(), z.string()).optional(),
+       }),
+     }))
+     .mutation(({ input }) => {
+@@ -512,18 +516,18 @@ export const deploymentRouter = router({
+     const ctrl = getRolloutController();
+     const state = ctrl.getState();
+     const config = ctrl.getConfig();
+-    const metrics = ctrl.getMetrics();
++    const healthHistory = ctrl.getHealthHistory(HEALTH_HISTORY_LIMIT);
+     const id = await saveRolloutState({
+       status: state.status,
+-      currentStage: state.currentStage,
+-      percentage: state.percentage,
+-      shadowMode: state.shadowMode,
+-      logAllRequests: state.logAllRequests,
+-      totalRequests: metrics.totalRequests,
+-      newVersionRequests: metrics.newVersionRequests,
+-      healthChecksPassed: metrics.healthChecksPassed,
+-      healthChecksFailed: metrics.healthChecksFailed,
+-      consecutiveFailures: metrics.consecutiveFailures,
++      currentStage: getStageIndex(state.currentStage),
++      percentage: state.rolloutPercentage,
++      shadowMode: config.shadowMode,
++      logAllRequests: config.logAllRequests,
++      totalRequests: state.totalRequests,
++      newVersionRequests: state.rolledOutRequests,
++      healthChecksPassed: healthHistory.filter(h => h.passed).length,
++      healthChecksFailed: healthHistory.filter(h => !h.passed).length,
++      consecutiveFailures: state.consecutiveHealthFailures,
+       config,
+       startedAt: state.startedAt,
+       completedAt: state.completedAt,
+diff --git a/server/deployment/production-rollout-controller.ts b/server/deployment/production-rollout-controller.ts
+index f452fca..b3ff85a 100644
+--- a/server/deployment/production-rollout-controller.ts
++++ b/server/deployment/production-rollout-controller.ts
+@@ -113,6 +113,11 @@ const STAGE_PERCENTAGES: Record<RolloutStage, number> = {
+ 
+ const STAGE_ORDER: RolloutStage[] = ['disabled', 'canary', 'partial_25', 'partial_50', 'partial_75', 'full'];
+ 
++/** Numeric index of a rollout stage — the form the persistence layer stores. */
++export function getStageIndex(stage: RolloutStage): number {
++  return STAGE_ORDER.indexOf(stage);
++}
++
+ const DEFAULT_CONFIG: RolloutConfig = {
+   rolloutPercentage: 0,
+   shadowMode: true,
+

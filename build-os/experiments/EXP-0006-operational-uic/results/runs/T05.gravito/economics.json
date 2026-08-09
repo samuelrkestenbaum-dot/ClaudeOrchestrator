@@ -1,0 +1,19 @@
+{
+  "uncached_input_tokens": 55,
+  "cache_read_input_tokens": 1714865,
+  "cache_creation_input_tokens": 49450,
+  "output_tokens": 11232,
+  "num_turns": 34,
+  "duration_api_ms": 207906,
+  "total_cost_usd": 1.6330075,
+  "elapsed_s": 233.929,
+  "tool_calls": 22,
+  "subagent_invocations": 0,
+  "product_files_changed": 1,
+  "governance_files_changed": 1,
+  "gravito_operational": {
+    "substrate_administered": true,
+    "governance_output_observed": true,
+    "subagents_dispatched": 0
+  }
+}

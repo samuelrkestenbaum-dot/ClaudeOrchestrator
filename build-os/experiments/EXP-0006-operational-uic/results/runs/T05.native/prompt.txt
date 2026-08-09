@@ -1,0 +1,16 @@
+# Task T05
+
+Fix the TypeScript type errors in `server/replay/router.ts`.
+
+That file currently has 1 typecheck error(s) (TS2349).
+The first is at line 77: TS2349: This expression is not callable.
+
+## How this will be judged (identical in both conditions)
+
+Verification command: `npx tsc --noEmit -p tsconfig.json`
+Accepted when: the command reports ZERO errors for `server/replay/router.ts`, AND no new error appears in any other file.
+
+REJECTED, regardless of the compiler result: `@ts-ignore`, `@ts-expect-error`, `@ts-nocheck`, `any` casts,
+or deleting the offending code. Fix the type, do not silence it.
+
+Work in the current repository. Do not push, and do not touch anything outside it.

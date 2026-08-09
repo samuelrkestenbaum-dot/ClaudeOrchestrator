@@ -1,0 +1,42 @@
+diff --git a/server/nervous-system/dynamics/async-deep.ts b/server/nervous-system/dynamics/async-deep.ts
+index b339de4..6edbc80 100644
+--- a/server/nervous-system/dynamics/async-deep.ts
++++ b/server/nervous-system/dynamics/async-deep.ts
+@@ -68,6 +68,25 @@ export interface DeepInsights {
+ 
+ export type DeepAnalysisStatus = 'pending' | 'running' | 'completed' | 'failed';
+ 
++/**
++ * Extended-thinking block as emitted when `thinking` is enabled. The governance
++ * bridge types its content as text-only blocks, so thinking blocks are matched
++ * structurally at runtime.
++ */
++interface ThinkingBlock {
++  type: 'thinking';
++  thinking: string;
++}
++
++function isThinkingBlock(block: unknown): block is ThinkingBlock {
++  return (
++    typeof block === 'object' &&
++    block !== null &&
++    (block as { type?: unknown }).type === 'thinking' &&
++    typeof (block as { thinking?: unknown }).thinking === 'string'
++  );
++}
++
+ interface PendingAnalysis {
+   request: DeepAnalysisRequest;
+   status: DeepAnalysisStatus;
+@@ -256,8 +275,8 @@ Return as JSON:
+     let text = '';
+ 
+     for (const block of response.content) {
+-      if ((block as unknown as Record<string, unknown>).type === 'thinking') {
+-        thinking = (block as unknown as Record<string, unknown>).thinking;
++      if (isThinkingBlock(block)) {
++        thinking = block.thinking;
+       } else if (block.type === 'text') {
+         text = block.text;
+       }
+

@@ -1,0 +1,9 @@
+{
+  "base_commit": "ea653e812de0ac4165efce5b9a74871896c6e71e",
+  "product_paths": [
+    "server/deployment/deployment-router.ts",
+    "server/deployment/production-rollout-controller.ts"
+  ],
+  "governance_paths": [],
+  "note": "governance paths are DENOMINATOR COST and receive no numerator credit; measured against the administered commit, so substrate administration is not attributed to the arm"
+}

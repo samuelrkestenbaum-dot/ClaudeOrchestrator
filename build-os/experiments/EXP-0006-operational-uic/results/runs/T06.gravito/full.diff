@@ -1,0 +1,148 @@
+diff --git a/server/deployment/deployment-router.ts b/server/deployment/deployment-router.ts
+index 86e5d9b..db7004f 100644
+--- a/server/deployment/deployment-router.ts
++++ b/server/deployment/deployment-router.ts
+@@ -34,6 +34,7 @@ import {
+ } from './deployment-persistence';
+ import {
+   getRolloutController,
++  STAGE_ORDER,
+ } from './production-rollout-controller';
+ import {
+   getAlertPipelineStatus,
+@@ -232,7 +233,7 @@ export const deploymentRouter = router({
+     }))
+     .mutation(({ input }) => { getClosedLoopScanner().updateConfig(input); return { success: true }; }),
+   setBaseline: adminGuard
+-    .input(z.object({ metrics: z.record(z.number()) }))
++    .input(z.object({ metrics: z.record(z.string(), z.number()) }))
+     .mutation(({ input }) => { getClosedLoopScanner().setBaseline(input.metrics); return { success: true }; }),
+ 
+   // ─── Autonomous Monitor (Gap 1) ──────────────────────────────────────
+@@ -444,7 +445,7 @@ export const deploymentRouter = router({
+       maxPerHour: z.number().min(1).max(200).default(30),
+       retryCount: z.number().min(0).max(5).default(2),
+       retryDelayMs: z.number().min(500).max(30000).default(2000),
+-      settings: z.record(z.string()).default({}),
++      settings: z.record(z.string(), z.string()).default({}),
+     }))
+     .mutation(({ input }) => {
+       getMultiChannelNotifier().registerChannel(input);
+@@ -461,7 +462,7 @@ export const deploymentRouter = router({
+         maxPerHour: z.number().min(1).max(200).optional(),
+         retryCount: z.number().min(0).max(5).optional(),
+         retryDelayMs: z.number().min(500).max(30000).optional(),
+-        settings: z.record(z.string()).optional(),
++        settings: z.record(z.string(), z.string()).optional(),
+       }),
+     }))
+     .mutation(({ input }) => {
+@@ -513,17 +514,23 @@ export const deploymentRouter = router({
+     const state = ctrl.getState();
+     const config = ctrl.getConfig();
+     const metrics = ctrl.getMetrics();
++    // The snapshot stores the stage as its ordinal position, while the
++    // controller tracks it as a named stage.
++    const stageIndex = STAGE_ORDER.indexOf(state.currentStage);
++    // Pass/fail totals are derived from the controller's retained health
++    // history — it keeps no cumulative counters.
++    const healthHistory = ctrl.getHealthHistory(200);
+     const id = await saveRolloutState({
+       status: state.status,
+-      currentStage: state.currentStage,
+-      percentage: state.percentage,
+-      shadowMode: state.shadowMode,
+-      logAllRequests: state.logAllRequests,
+-      totalRequests: metrics.totalRequests,
+-      newVersionRequests: metrics.newVersionRequests,
+-      healthChecksPassed: metrics.healthChecksPassed,
+-      healthChecksFailed: metrics.healthChecksFailed,
+-      consecutiveFailures: metrics.consecutiveFailures,
++      currentStage: stageIndex >= 0 ? stageIndex : 0,
++      percentage: state.rolloutPercentage,
++      shadowMode: config.shadowMode,
++      logAllRequests: config.logAllRequests,
++      totalRequests: metrics.requestSummary.total,
++      newVersionRequests: metrics.requestSummary.rolledOut,
++      healthChecksPassed: healthHistory.filter(h => h.passed).length,
++      healthChecksFailed: healthHistory.filter(h => !h.passed).length,
++      consecutiveFailures: state.consecutiveHealthFailures,
+       config,
+       startedAt: state.startedAt,
+       completedAt: state.completedAt,
+diff --git a/server/deployment/production-rollout-controller.ts b/server/deployment/production-rollout-controller.ts
+index f452fca..47de783 100644
+--- a/server/deployment/production-rollout-controller.ts
++++ b/server/deployment/production-rollout-controller.ts
+@@ -111,7 +111,7 @@ const STAGE_PERCENTAGES: Record<RolloutStage, number> = {
+   full: 100,
+ };
+ 
+-const STAGE_ORDER: RolloutStage[] = ['disabled', 'canary', 'partial_25', 'partial_50', 'partial_75', 'full'];
++export const STAGE_ORDER: RolloutStage[] = ['disabled', 'canary', 'partial_25', 'partial_50', 'partial_75', 'full'];
+ 
+ const DEFAULT_CONFIG: RolloutConfig = {
+   rolloutPercentage: 0,
+
+diff --git a/build-os/packets/routing/routing-T06-deployment-router-types-20260809T041759Z.md b/build-os/packets/routing/routing-T06-deployment-router-types-20260809T041759Z.md
+--- /dev/null
++++ b/build-os/packets/routing/routing-T06-deployment-router-types-20260809T041759Z.md
++# ROUTING RECEIPT — one file per routing decision. The recorded verdict is BINDING
++# (build-os/memory/routing_contract.md); routing-check.sh refuses this receipt at
++# close if executed_mode exceeds selected_mode with no escalation record, if an
++# escalation carries no evidence, or if consumption exceeds a budget undeclared.
++task_id: T06-deployment-router-types
++description_sha256: 93f9c4602cefc43d8922f5e903575c1cfe19a4cd5d0c53a24ba49de56a7b4794
++descriptor: {"expected_files_changed":1,"requires_tests":false,"expected_session_count":1,"prior_context_required":false,"handoff_required":false,"consequence_level":"medium","irreversible_or_external_mutation":false,"high_blast_radius":false,"unclear_acceptance_criteria":false,"security_or_compliance_consequence":false,"parallel_workstreams_benefit":false,"high_rework_history":false,"nondeterministic_verification":false}
++selected_mode: gravito_light
++selector_note: -
++issued_at: 2026-08-09T04:17:59Z
++# --- budgets: DERIVED DEFAULTS from EXP-0002 sealed records, operator-tunable, not laws.
++# --- Derivation: ON-surface light runs measured 172k-369k total tokens / 0 dispatches
++# --- (named exceedance: raw T4 at 526,461 - context, not the band); the
++# --- blowouts measured 4.9M/7.4M tokens, 4-5 dispatches, $3.63/$4.80. See route-task.sh.
++budget_max_subagents: 0
++budget_max_total_tokens: 500000
++budget_max_uncached_tokens: 60000
++budget_max_model_calls: 25
++budget_max_wall_clock_s: 600
++budget_max_cost_usd: 0.75
++# --- process allowance (PACKET-0053): the packet's OWN gate chain is governance
++# --- ceremony, counted SEPARATELY from task work by the live gate and attributed
++# --- to governance_process (the 0050/0051 calibration question, resolved). Default
++# --- 7 = the LARGEST LEGAL chain in the doctrine: mandatory_full_regate runs
++# --- builder, qa, reviewer, fix-builder, qa, reviewer, archivist. (No-fix chain
++# --- is 4; fix-then-pass is 6.) Process dispatches never eat budget_max_subagents.
++process_dispatch_allowance: 7
++# --- empty at issue; filled at close. AN UNKNOWN IS NOT A ZERO: "-" is an honest
++# --- admission and is never refused; refusal is for CONTRADICTION, not absence.
++executed_mode: -
++escalation: -
++escalation_evidence: -
++consumed_subagents: -
++consumed_total_tokens: -
++consumed_uncached_tokens: -
++consumed_model_calls: -
++consumed_wall_clock_s: -
++consumed_cost_usd: -
++degradation_note: -
++# --- close-fill EXTENSIONS (PACKET-0053). consumed_subagents above counts TASK
++# --- dispatches (vs budget_max_subagents); consumed_process_dispatches counts the
++# --- gate chain (vs process_dispatch_allowance). The attr_* layers attribute
++# --- consumption where derivable at close — tokens or cost with provenance, or
++# --- "-" as an admission, NEVER a zero nobody measured. Receipts predating these
++# --- fields stay valid: routing-check.sh reads an absent field as "-".
++consumed_process_dispatches: -
++attr_task_execution: -
++attr_context_retrieval: -
++attr_subagent_execution: -
++attr_verification: -
++attr_review: -
++attr_governance_process: -
++attr_experiment_audit: -
++# --- contribution rows (PACKET-0053): marginal-contribution accounting, MANDATORY
++# --- for a Full close with dispatches>0 (routing-check.sh refuses otherwise). The
++# --- live gate seeds one stub row per admitted Full task dispatch; fill at close:
++# --- contribution: <subagent_type> | <unique_question> | <output_ref> | changed_implementation=y/n/- | changed_conclusion=y/n/- | caught_defect=y/n/- | duplicated_work=y/n/- | tokens=<v|-> | cost=<v|-> | time=<v|->
++# --- An all-"-" row passes as an admission and is REPORTED as non-contributing.
++
