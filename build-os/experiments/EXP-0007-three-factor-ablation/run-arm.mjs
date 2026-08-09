@@ -24,6 +24,11 @@ const HERE = path.dirname(new URL(import.meta.url).pathname);
 const EXP6 = path.join(HERE, "../EXP-0006-operational-uic");
 const RESULTS = path.join(HERE, "results");
 const TASK_ID = arg("task"), CONFIG = arg("config"), DRY = process.argv.includes("dry-run") || process.argv.includes("--dry-run");
+// REPLICATION. Repeats of the same (task, config) must not overwrite each
+// other -- the whole point of a replication is that the spread between repeats
+// IS the measurement. Rep 1 keeps the original directory name so the screening
+// run remains addressable and is not silently renamed under the analysis.
+const REP = Number(arg("rep", "1"));
 
 const CEILING_S = 1200;                       // identical to EXP-0006, so elapsed is comparable
 const SEED = "2543c873141fa64653a7993d326465d5e0dd1006";
@@ -85,13 +90,13 @@ if (lockOk) {
 }
 
 const failed = pre.filter((p) => !p.ok);
-console.log(`PRE-FLIGHT ${TASK_ID}/${CONFIG}`);
+console.log(`PRE-FLIGHT ${TASK_ID}/${CONFIG} rep${REP}`);
 for (const p of pre) console.log(`  ${p.ok ? "ok  " : "FAIL"} ${p.name}: ${p.detail}`);
 if (failed.length) { console.error(`REFUSED — ${failed.length} pre-flight condition(s) failed.`); releaseLock(); process.exit(1); }
 if (DRY) { console.log("dry-run: pre-flight only"); releaseLock(); process.exit(0); }
 
 const sessionId = newSessionId();
-const runDir = path.join(RESULTS, "runs", `${TASK_ID}.${CONFIG}`);
+const runDir = path.join(RESULTS, "runs", REP > 1 ? `${TASK_ID}.${CONFIG}.r${REP}` : `${TASK_ID}.${CONFIG}`);
 fs.mkdirSync(runDir, { recursive: true });
 const streamPath = path.join(runDir, "stream.jsonl");
 openRun(runDir, { task_id: TASK_ID, arm: CONFIG, launched_at: new Date().toISOString(),
@@ -184,6 +189,6 @@ child.on("exit", (code, signal) => {
   const isolation = verifyIsolation({ streamPath, expectedSessionId: sessionId, orchestratorSessionId: process.env.CLAUDE_CODE_SESSION_ID || null });
   const closed = closeRun(runDir, { ...verdict, elapsed_s: elapsedS, exit_code: code, signal }, isolation);
   releaseLock();
-  console.log(`UNIT ${TASK_ID}/${CONFIG}: terminal=${verdict.terminal_reason} admissible=${closed.admissible === true} accepted=${acceptance ? acceptance.accepted : "uncaptured"} elapsed=${elapsedS.toFixed(1)}s`);
+  console.log(`UNIT ${TASK_ID}/${CONFIG} rep${REP}: terminal=${verdict.terminal_reason} admissible=${closed.admissible === true} accepted=${acceptance ? acceptance.accepted : "uncaptured"} elapsed=${elapsedS.toFixed(1)}s`);
   process.exit(0);
 });
