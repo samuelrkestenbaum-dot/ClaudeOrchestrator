@@ -75,13 +75,56 @@ next design: a pointer invites the worker to fetch whatever it thinks it needs;
 microcontext pushes a derived answer and never lets the worker near the
 implementation. Only the first has been tested.
 
+## CORRECTION — the gate-refusal figure quoted throughout this work was wrong
+
+An earlier version of this section named the gate-refusal path as the largest
+context item: *"17 refusals, 107,278 characters, 23.8% of tool-result volume,
+~6.3 KB each."* **That figure was contaminated and is withdrawn.**
+
+It came from a marker regex that matched the gate FILE'S OWN COMMENTS whenever
+the worker read `routing-gate.sh` with the Read tool. The largest "refusal" it
+counted was 47,787 characters of shell source. The flaw was identified when it
+first appeared and the number was still quoted afterwards — in this document, in
+the prototype rationale, and in discussion — which is how a known-suspect
+measurement ends up load-bearing.
+
+Recomputed by pairing every tool_result with its originating tool_use and
+excluding Read results:
+
+| | tool-result volume | gate refusals | Read results |
+|---|---|---|---|
+| native | 204,243 | **0** | 18 = 125,295 |
+| gravito | 451,271 | **15 = 11,704 chars (2.6%), median 645** | 61 = 431,176 |
+
+Gate refusals are **2.6% of volume at a median 645 characters**, not 23.8% at
+6.3 KB. Replacing all of them with a 30–100 token ACTION STATE would save ~730
+tokens per arm against arms costing ~90,000 — **under 1%**. As a prototype
+target it was not worth building.
+
+## What the real target is
+
+Read volume, split by what is being read:
+
+| | read volume | product code | **Gravito substrate** |
+|---|---|---|---|
+| native | 125,295 | 125,295 (100%) | — |
+| gravito | 431,176 | 235,821 (55%) | **195,355 (45%)** |
+
+**The Gravito worker spends 45% of its read volume reading Gravito's own
+implementation** — ~49,000 characters per arm, roughly 12,000 tokens. That is
+~16× the gate-refusal item, and it is the architectural principle stated as a
+measurement: the worker should receive the answer derived from Gravito state,
+never the implementation used to derive it.
+
+A second effect is recorded but unexplained: gravito also reads **1.9× more
+PRODUCT code** than native for the same tasks (235,821 vs 125,295). Whether the
+substrate induces broader exploration, or something else does, is not
+established here and should not be assumed.
+
 ## Next
 
-The gate-refusal path, which is the largest measured context item in the system:
-**17 refusals, 107,278 characters, 23.8% of the Gravito arm's entire
-tool-result volume, ~6.3 KB each.** Replacing that with a 30–100 token derived
-ACTION STATE is a ~60× reduction on one known item.
-
-**And it must be measured with ≥3 reps per cell from the start.** This
-replication is the argument for that: n=1 produced a confident, wrong answer,
-and cost two full experiment cycles to unwind.
+Target the substrate-read volume, not the gate's output. And measure it with
+**≥3 reps per cell from the start**: this replication is the argument, since n=1
+produced a confident wrong answer that cost two full experiment cycles to
+unwind — and the metric that pointed at the wrong target was itself never
+re-derived after being flagged.
