@@ -67,10 +67,6 @@
 set -uo pipefail
 
 SELF_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# The anchor resolver is node; a missing node must FAIL CLOSED rather than
-# silently skip anchored citations, because "the resolver was unavailable" and
-# "the evidence resolves" are not the same statement.
-NODE_BIN="$(command -v node || true)"
 REPO="$(cd "$SELF_DIR/../.." && pwd)"
 REGISTRY=""
 MISMATCHES=""
@@ -376,45 +372,12 @@ while IFS= read -r id; do
   for ref in $(printf '%s' "$evid" | tr ';' ' '); do
     [ -n "$ref" ] || continue
     nref=$((nref+1))
-    # ANCHORED FORM: path#c:<hex>, resolved by CONTENT rather than position.
-    # A line number is a position and positions move; an anchor survives
-    # insertion elsewhere in the file and goes stale precisely when the cited
-    # text itself changes, which is the only movement that touches the evidence.
-    case "$ref" in
-      *'#c:'*)
-        rf="${ref%%#c:*}"
-        if [ ! -f "$REPO/$rf" ]; then
-          viol "NO-EVIDENCE $id cites $ref, but $rf is not a file under $REPO"
-          continue
-        fi
-        if [ -z "$NODE_BIN" ]; then
-          viol "ANCHOR-UNRESOLVABLE $id cites $ref but node is unavailable, so the anchor cannot be resolved. Failing closed: an unresolvable citation is not a resolved one."
-          continue
-        fi
-        _res="$("$NODE_BIN" "$SELF_DIR/anchor-resolve.mjs" "$REPO" "$ref" 2>/dev/null | head -n1)"
-        _st="$(printf '%s' "$_res" | cut -f2)"; rl="$(printf '%s' "$_res" | cut -f3)"
-        case "$_st" in
-          RESOLVED) ;;   # falls through to the SAME vacuity check as a positional ref
-          AMBIGUOUS)
-            viol "ANCHOR-AMBIGUOUS $id cites $ref, whose content occurs $(printf '%s' "$_res" | cut -f4) times in $rf. Content naming more than one line identifies no object, so it does not identify evidence."
-            continue ;;
-          STALE)
-            viol "ANCHOR-STALE $id cites $ref, but no line in $rf carries that content any more. The cited text was edited or removed, so the evidentiary basis is gone — this is the anchor working, not drifting: re-read the evidence and re-cite it."
-            continue ;;
-          *)
-            viol "ANCHOR-UNRESOLVED $id cites $ref and the resolver returned \"$_st\""
-            continue ;;
-        esac
-        ;;
-      *)
-        rf="${ref%:*}"; rl="${ref##*:}"
-        if [ ! -f "$REPO/$rf" ]; then
-          viol "NO-EVIDENCE $id cites $ref, but $rf is not a file under $REPO"
-          continue
-        fi
-        case "$rl" in ''|*[!0-9]*) viol "NO-EVIDENCE $id cites \"$ref\", which carries no line number — a control is classified by the line that exercises it, not by the file it lives in"; continue ;; esac
-        ;;
-    esac
+    rf="${ref%:*}"; rl="${ref##*:}"
+    if [ ! -f "$REPO/$rf" ]; then
+      viol "NO-EVIDENCE $id cites $ref, but $rf is not a file under $REPO"
+      continue
+    fi
+    case "$rl" in ''|*[!0-9]*) viol "NO-EVIDENCE $id cites \"$ref\", which carries no line number — a control is classified by the line that exercises it, not by the file it lives in"; continue ;; esac
     tot="$(wc -l < "$REPO/$rf" | tr -d ' ')"
     if { [ "$rl" -ge 1 ] && [ "$rl" -le "${tot:-0}" ]; }; then
       # ...and the line must DO something. Being inside the file is not evidence.
