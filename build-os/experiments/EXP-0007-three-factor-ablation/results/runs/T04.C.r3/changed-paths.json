@@ -1,0 +1,10 @@
+{
+  "base_commit": "215eeed47730f6b31a9c889842daa32f51cfe328",
+  "product_paths": [
+    "client/src/pages/UserDashboard.tsx"
+  ],
+  "governance_paths": [
+    "build-os/motion/exhaustion/current.json",
+    "build-os/packets/routing/routing-T04-20260809T205838Z.md"
+  ]
+}

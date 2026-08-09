@@ -1,64 +1,53 @@
 diff --git a/server/services/auto-apply-pipeline.ts b/server/services/auto-apply-pipeline.ts
-index ef46231..20f06fe 100644
+index ef46231..137eb17 100644
 --- a/server/services/auto-apply-pipeline.ts
 +++ b/server/services/auto-apply-pipeline.ts
-@@ -38,9 +38,12 @@ function getDb() {
+@@ -38,9 +38,21 @@ function getDb() {
  // TYPES
  // ============================================================================
  
-+/** Severity levels auto-apply understands, in ascending order of risk. */
-+export type AutoApplySeverity = 'low' | 'medium' | 'high' | 'critical';
++export const SEVERITY_LEVELS = ['low', 'medium', 'high', 'critical'] as const;
++
++export type Severity = (typeof SEVERITY_LEVELS)[number];
++
++/**
++ * The severity column is a plain varchar in the DB, so anything could be in it.
++ * Narrow it here rather than trusting the schema type.
++ */
++function isSeverity(value: unknown): value is Severity {
++  return typeof value === 'string' && (SEVERITY_LEVELS as readonly string[]).includes(value);
++}
 +
  export interface AutoApplyConfig {
    enabled: boolean;
 -  maxSeverity: 'low' | 'medium' | 'high' | 'critical';
-+  maxSeverity: AutoApplySeverity;
++  maxSeverity: Severity;
    activeProfile: string;
    profileLocked: boolean;
  }
-@@ -141,6 +144,17 @@ const SEVERITY_ORDER: Record<string, number> = {
-   'critical': 4,
- };
- 
-+const AUTO_APPLY_SEVERITIES: readonly AutoApplySeverity[] = ['low', 'medium', 'high', 'critical'];
-+
-+/**
-+ * Narrow an untrusted value (e.g. a free-form severity column) to AutoApplySeverity.
-+ * The database column is a plain string, so it can hold anything; callers fall back
-+ * to a safe default when it is null or unrecognised.
-+ */
-+function isAutoApplySeverity(value: unknown): value is AutoApplySeverity {
-+  return typeof value === 'string' && (AUTO_APPLY_SEVERITIES as readonly string[]).includes(value);
-+}
-+
- // ============================================================================
- // CONFIGURATION
- // ============================================================================
-@@ -165,7 +179,9 @@ export async function getAutoApplyConfig(): Promise<AutoApplyConfig> {
+@@ -165,7 +177,7 @@ export async function getAutoApplyConfig(): Promise<AutoApplyConfig> {
      const settings = rows[0];
      return {
        enabled: settings.autoApplyMode ?? false,
 -      maxSeverity: (settings.autoApplyMaxSeverity as unknown) ?? 'medium',
-+      maxSeverity: isAutoApplySeverity(settings.autoApplyMaxSeverity)
-+        ? settings.autoApplyMaxSeverity
-+        : 'medium',
++      maxSeverity: isSeverity(settings.autoApplyMaxSeverity) ? settings.autoApplyMaxSeverity : 'medium',
        activeProfile: settings.activeProfile,
        profileLocked: settings.profileLocked,
      };
 
-diff --git a/build-os/packets/routing/routing-T02-20260809T162128Z.md b/build-os/packets/routing/routing-T02-20260809T162128Z.md
+diff --git a/build-os/packets/routing/routing-T02-autoapply-ts2322-20260809T211846Z.md b/build-os/packets/routing/routing-T02-autoapply-ts2322-20260809T211846Z.md
 --- /dev/null
-+++ b/build-os/packets/routing/routing-T02-20260809T162128Z.md
++++ b/build-os/packets/routing/routing-T02-autoapply-ts2322-20260809T211846Z.md
 +# ROUTING RECEIPT — one file per routing decision. The recorded verdict is BINDING
 +# (build-os/memory/routing_contract.md); routing-check.sh refuses this receipt at
 +# close if executed_mode exceeds selected_mode with no escalation record, if an
 +# escalation carries no evidence, or if consumption exceeds a budget undeclared.
-+task_id: T02
-+description_sha256: 931c172751b62d2016f900d77ddc281f84ab7f7459565940a3adf247fd679063
++task_id: T02-autoapply-ts2322
++description_sha256: 09b184a59a803c9a81b825f51b979ba6a3c5321416a8bbc10cdcddc1b6a8bcbe
 +descriptor: {"expected_files_changed":1,"requires_tests":false,"expected_session_count":1,"prior_context_required":false,"handoff_required":false,"consequence_level":"low","irreversible_or_external_mutation":false,"high_blast_radius":false,"unclear_acceptance_criteria":false,"security_or_compliance_consequence":false,"parallel_workstreams_benefit":false,"high_rework_history":false,"nondeterministic_verification":false}
 +selected_mode: direct
 +selector_note: -
-+issued_at: 2026-08-09T16:21:28Z
++issued_at: 2026-08-09T21:18:46Z
 +# --- budgets: DERIVED DEFAULTS from EXP-0002 sealed records, operator-tunable, not laws.
 +# --- Derivation: ON-surface light runs measured 172k-369k total tokens / 0 dispatches
 +# --- (named exceedance: raw T4 at 526,461 - context, not the band); the

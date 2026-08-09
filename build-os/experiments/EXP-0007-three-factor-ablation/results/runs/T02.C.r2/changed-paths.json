@@ -1,0 +1,10 @@
+{
+  "base_commit": "ac20792d33bd048c28c715385f15b6352fb95fe6",
+  "product_paths": [
+    "server/services/auto-apply-pipeline.ts"
+  ],
+  "governance_paths": [
+    "build-os/motion/exhaustion/current.json",
+    "build-os/packets/routing/routing-T02-20260809T191522Z.md"
+  ]
+}

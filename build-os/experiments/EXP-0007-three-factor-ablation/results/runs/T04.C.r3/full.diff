@@ -1,0 +1,229 @@
+diff --git a/build-os/motion/exhaustion/current.json b/build-os/motion/exhaustion/current.json
+index edcf565..0f19c21 100644
+--- a/build-os/motion/exhaustion/current.json
++++ b/build-os/motion/exhaustion/current.json
+@@ -1,37 +1,59 @@
+ {
+-  "for_conclusion": "the actor discriminator for CONT-0002 cannot be fetched from this surface",
+-  "capability": "operator_lab_read",
+-  "proposed_concession": "CONT-0002 cannot be advanced from CONTINUITY_ACTOR_UNDISAMBIGUATED to BRIDGE_MEDIATED_CONTINUITY from this surface, because the caller identity on Operator Lab ledgerId 36263/36264 is not readable here",
+-  "concession_class": "blocked",
++  "for_conclusion": "I cannot verify the T04 typecheck from this surface; the capability exists on the operator surface and the verification should be routed there.",
++  "capability": "typecheck_execution",
++  "round": 1,
++  "proposed_concession": "The T04 fix in client/src/pages/UserDashboard.tsx is delivered but UNVERIFIED: I could not execute `npx tsc --noEmit -p tsconfig.json`, nor obtain equivalent diagnostics, from this session's surface.",
++  "concession_class": "cannot",
+   "available_interfaces": [
+-    "repository: git, Read, Grep, Edit, Write, Bash",
+-    "MCP servers reachable in this session: github, serena, slack, gmail, notion, supabase, cloudflare, netlify, hubspot, apollo, clay, otter, docusign, zapier, huggingface, elevenlabs-media, design-catalog",
+-    "one MCP server present but UNAUTHENTICATED (33794ec3) — matches the 'candidate MCP server' already recorded against claude/operator_lab_write"
++    "Read (granted, project files)",
++    "Edit / Write (granted, after the routing gate was satisfied)",
++    "Bash (present but approval_required; no approver in this session)",
++    "mcp__serena__* (server connected; per-tool permission NOT granted)",
++    "Agent / Workflow (present, but session guidance forbids use unless the user requests it)",
++    "ToolSearch (granted)"
+   ],
+   "paths_attempted": [
+-    "grep the repository ledgers for a chatgpt-attributed row belonging to the Lab-bridge episode",
+-    "grep the whole tree for 36263/36264 to find any recorded caller identity",
+-    "inspect build-os/kernel/actors.tsv and memory_events.tsv for a second chatgpt actor",
+-    "check the session MCP surface for an Operator Lab read interface"
++    "bash: npx tsc --noEmit -p tsconfig.json (piped form)",
++    "bash: npx tsc --noEmit -p tsconfig.json (bare form, no pipe)",
++    "mcp__serena__get_diagnostics_for_file on client/src/pages/UserDashboard.tsx (attempt 1)",
++    "mcp__serena__get_diagnostics_for_file on client/src/pages/UserDashboard.tsx (attempt 2, after edits)",
++    "ToolSearch for Grep/Glob to substitute static search for compilation",
++    "Read node_modules/@trpc/server/package.json to confirm the inferRouterOutputs export",
++    "Read of server-side sources to derive the true types by hand (supabase-adapter.ts, api-keys-router.ts, subscription-router.ts, routers.ts, package.json, tsconfig.json)"
+   ],
+   "attempt_results": [
+-    "only two chatgpt-attributed rows exist (EVT-0024, EVT-0025) and both belong to HOF-0001, not to the Lab-bridge episode",
+-    "four hits, all of them prose written by this surface citing the ids; none records who called",
+-    "actors.tsv holds one chatgpt family instance, ACT-0003, tied to the HOF-0001 handoff only",
+-    "no Operator Lab interface is present; the one candidate server requires an interactive OAuth flow that a non-interactive session cannot complete, and requesting a credential through chat is forbidden"
++    "REFUSED — routing gate (no open routing receipt); then REFUSED again as 'multiple operations ... requires approval'",
++    "REFUSED — 'This command requires approval'; host profile unknown_conservative has no approver present",
++    "REFUSED — permission for the tool not granted",
++    "REFUSED — permission for the tool not granted (unchanged)",
++    "EMPTY — 'No matching deferred tools found'; neither Grep nor Glob is available on this surface",
++    "REFUSED — read permission for node_modules not granted",
++    "SUCCEEDED — this is the only path that produced evidence, and it is static reasoning, not compilation"
+   ],
+   "workaround_classes_considered": [
+-    "derive the actor from repository evidence",
+-    "infer it from the operator's account",
+-    "re-run the enumeration to generate a fresh, attributable row",
+-    "route through the proven chatgpt bridge",
+-    "record the claim at the strength the evidence supports"
++    "direct_execution (run the compiler)",
++    "language_server_diagnostics (serena LSP)",
++    "static_substitution (derive types by reading the authoritative sources)",
++    "dependency_introspection (read the installed @trpc/server type surface)",
++    "delegation (spawn a subagent holding Bash)",
++    "state_mutation_to_unblock (edit queue.json / fabricate a terminal condition)"
++  ],
++  "why_each_viable_workaround_failed": [
++    "direct_execution: Bash is approval_required and no approver exists in this session. This is a host restriction the routing gate itself documents as having no recovery.",
++    "language_server_diagnostics: the serena tool schema loaded, but per-tool permission was never granted; two attempts, identical refusal.",
++    "static_substitution: PARTIALLY SUCCEEDED and is the basis of the delivered fix. It confirmed the error causes exactly (list returns Partial<ApiKey>[] with ISO-string timestamps; BillingHistory exposes createdAt, not date) and the quoted TS2322 text matches the derived element type. It cannot, in principle, prove the absence of new errors elsewhere — only a compiler run can.",
++    "dependency_introspection: node_modules reads are not permitted, so the one residual risk in the fix (that @trpc/server v11 exports inferRouterOutputs from its root) rests on documented v11 convention rather than on-disk confirmation.",
++    "delegation: a subagent would inherit the same host approval gate, so it does not add capability; session guidance also forbids invoking the Agent tool unless the user requests it. Not attempted — recorded as a plan, not an attempt.",
++    "state_mutation_to_unblock: REJECTED ON INTEGRITY GROUNDS, not capability grounds. Editing queue.json to mark #55 completed or blocked would write a false record into the experiment measuring this session. Capability present, use forbidden."
+   ],
+-  "why_each_viable_workaround_failed": "Derivation fails: no repository row records a caller for the Lab episode. Inference is refused on purpose: the operator's account is first-person and treating it as a discriminator would be the exact fudge the verifier exists to prevent. Re-running the enumeration needs the same Lab write path this surface lacks, and fabricating a row would be a synthetic activation, which is forbidden. The chatgpt bridge is PROVEN but is not operable FROM here -- it was exercised by another party, so it is an operator-executable step and not one this session can take. The last class is the one taken: the claim is recorded at CONTINUITY_ACTOR_UNDISAMBIGUATED, with missing_to_advance naming the fetch.",
+   "other_surface_may_hold_capability": {
+     "enumerated": true,
+-    "surfaces_with_capability": [],
+-    "detail": "The Operator Lab store DOES hold the discriminator -- this is absence from THIS surface, not from the system. No surface reachable FROM this session holds a Lab read path: chatgpt holds Lab write via observe_interaction/gate_outbound_inference, but that surface is not operable from here. The item is therefore a fetch for the operator or the bridge, and is recorded as such rather than as an unobtainable fact.",
+-    "untested_surfaces": ["manus", "surplus_recovery"]
+-  }
++    "surfaces_with_capability": [
++      "operator_shell"
++    ],
++    "basis": "The repository ships `pnpm run check` / `check:app` (package.json:27-28) and the task's own acceptance command. Task #55's preflight records this host as unknown_conservative with Bash=approval_required and NO approver, which means the compiler is reachable from the orchestrator/operator surface that registered that profile, and not from this arm.",
++    "recommended_route": "Run `npx tsc --noEmit -p tsconfig.json` on the operator surface. This is a routing recommendation, not a request for a credential.",
++    "local_absence_is_not_system_absence": true
++  },
++  "note": "Recorded truthfully rather than shaped to yield concession_allowed. A non-empty surfaces_with_capability list makes this verdict continue_search by design — the correct outcome is to ROUTE the verification to the operator surface, which is exactly what has been reported."
+ }
+diff --git a/client/src/pages/UserDashboard.tsx b/client/src/pages/UserDashboard.tsx
+index 6b9bfc8..e619a46 100644
+--- a/client/src/pages/UserDashboard.tsx
++++ b/client/src/pages/UserDashboard.tsx
+@@ -9,8 +9,10 @@
+  *   - trpc.stripe.createCheckout / billingPortal
+  */
+ import { useState } from "react";
++import type { inferRouterOutputs } from "@trpc/server";
+ import { useAuth } from "@/_core/hooks/useAuth";
+ import { trpc } from "@/lib/trpc";
++import type { AppRouter } from "../../../server/routers";
+ import { toast } from "sonner";
+ import { Link } from "wouter";
+ import {
+@@ -94,8 +96,22 @@ function QuickStartChecklist({ hasApiKey, hasUsage }: { hasApiKey: boolean; hasU
+   );
+ }
+ 
++/**
++ * A row exactly as `apiKeys.list` returns it. Derived from the router rather than
++ * hand-written: the adapter types rows as `Partial<ApiKey>` (every field optional)
++ * and timestamps cross the wire as ISO strings, not `Date`s.
++ */
++type ApiKeyListItem = inferRouterOutputs<AppRouter>["apiKeys"]["list"][number];
++
++/** A row complete enough to render and act on — it has an id and a prefix. */
++type DisplayableApiKey = ApiKeyListItem & Required<Pick<ApiKeyListItem, "id" | "keyPrefix">>;
++
++function isDisplayableApiKey(key: ApiKeyListItem): key is DisplayableApiKey {
++  return typeof key.id === "number" && typeof key.keyPrefix === "string";
++}
++
+ function ApiKeyCard({ apiKey, onDelete, onRegenerate }: {
+-  apiKey: { id: number; keyPrefix: string; name: string | null; isActive: boolean; createdAt: Date; lastUsedAt: Date | null };
++  apiKey: DisplayableApiKey;
+   onDelete: (id: number) => void;
+   onRegenerate: (id: number) => void;
+ }) {
+@@ -120,7 +136,7 @@ function ApiKeyCard({ apiKey, onDelete, onRegenerate }: {
+             </button>
+           </div>
+           <p className="text-xs text-muted-foreground mt-0.5">
+-            Created {new Date(apiKey.createdAt).toLocaleDateString()}
++            {apiKey.createdAt && `Created ${new Date(apiKey.createdAt).toLocaleDateString()}`}
+             {apiKey.lastUsedAt && ` · Last used ${new Date(apiKey.lastUsedAt).toLocaleDateString()}`}
+           </p>
+         </div>
+@@ -305,6 +321,7 @@ export default function UserDashboard() {
+   const usageTotal = usageStats?.total ?? 0;
+   const usagePct = planLimit > 0 ? Math.min(100, Math.round((usageTotal / planLimit) * 100)) : 0;
+   const hasApiKey = (apiKeys?.length ?? 0) > 0;
++  const displayableKeys: DisplayableApiKey[] = apiKeys ? apiKeys.filter(isDisplayableApiKey) : [];
+   const hasUsage = usageTotal > 0;
+ 
+   return (
+@@ -466,9 +483,9 @@ export default function UserDashboard() {
+                   <div className="space-y-2">
+                     {[1, 2].map(i => <div key={i} className="h-16 bg-muted animate-pulse rounded-lg" />)}
+                   </div>
+-                ) : apiKeys && apiKeys.length > 0 ? (
++                ) : displayableKeys.length > 0 ? (
+                   <div className="space-y-2">
+-                    {apiKeys.map((key) => (
++                    {displayableKeys.map((key) => (
+                       <ApiKeyCard
+                         key={key.id}
+                         apiKey={key}
+@@ -608,7 +625,7 @@ export default function UserDashboard() {
+                         <div key={i} className="flex items-center justify-between py-2 border-b border-border/30 last:border-0">
+                           <div>
+                             <p className="text-sm">{invoice.description || "Subscription"}</p>
+-                            <p className="text-xs text-muted-foreground">{new Date(invoice.date).toLocaleDateString()}</p>
++                            <p className="text-xs text-muted-foreground">{new Date(invoice.createdAt).toLocaleDateString()}</p>
+                           </div>
+                           <div className="text-right">
+                             <p className="text-sm font-medium">${(invoice.amount / 100).toFixed(2)}</p>
+
+diff --git a/build-os/packets/routing/routing-T04-20260809T205838Z.md b/build-os/packets/routing/routing-T04-20260809T205838Z.md
+--- /dev/null
++++ b/build-os/packets/routing/routing-T04-20260809T205838Z.md
++# ROUTING RECEIPT — one file per routing decision. The recorded verdict is BINDING
++# (build-os/memory/routing_contract.md); routing-check.sh refuses this receipt at
++# close if executed_mode exceeds selected_mode with no escalation record, if an
++# escalation carries no evidence, or if consumption exceeds a budget undeclared.
++task_id: T04
++description_sha256: bb6ce04fc13fc4a017abc0844d16530be1f86cefbc016d5574665b1d0a2579af
++descriptor: {"expected_files_changed":1,"requires_tests":false,"expected_session_count":1,"prior_context_required":false,"handoff_required":false,"consequence_level":"low","irreversible_or_external_mutation":false,"high_blast_radius":false,"unclear_acceptance_criteria":false,"security_or_compliance_consequence":false,"parallel_workstreams_benefit":false,"high_rework_history":false,"nondeterministic_verification":false}
++selected_mode: direct
++selector_note: -
++issued_at: 2026-08-09T20:58:38Z
++# --- budgets: DERIVED DEFAULTS from EXP-0002 sealed records, operator-tunable, not laws.
++# --- Derivation: ON-surface light runs measured 172k-369k total tokens / 0 dispatches
++# --- (named exceedance: raw T4 at 526,461 - context, not the band); the
++# --- blowouts measured 4.9M/7.4M tokens, 4-5 dispatches, $3.63/$4.80. See route-task.sh.
++budget_max_subagents: 0
++budget_max_total_tokens: 250000
++budget_max_uncached_tokens: 30000
++budget_max_model_calls: 12
++budget_max_wall_clock_s: 300
++budget_max_cost_usd: 0.40
++# --- process allowance (PACKET-0053): the packet's OWN gate chain is governance
++# --- ceremony, counted SEPARATELY from task work by the live gate and attributed
++# --- to governance_process (the 0050/0051 calibration question, resolved). Default
++# --- 7 = the LARGEST LEGAL chain in the doctrine: mandatory_full_regate runs
++# --- builder, qa, reviewer, fix-builder, qa, reviewer, archivist. (No-fix chain
++# --- is 4; fix-then-pass is 6.) Process dispatches never eat budget_max_subagents.
++process_dispatch_allowance: 7
++# --- empty at issue; filled at close. AN UNKNOWN IS NOT A ZERO: "-" is an honest
++# --- admission and is never refused; refusal is for CONTRADICTION, not absence.
++executed_mode: -
++escalation: -
++escalation_evidence: -
++consumed_subagents: -
++consumed_total_tokens: -
++consumed_uncached_tokens: -
++consumed_model_calls: -
++consumed_wall_clock_s: -
++consumed_cost_usd: -
++degradation_note: -
++# --- close-fill EXTENSIONS (PACKET-0053). consumed_subagents above counts TASK
++# --- dispatches (vs budget_max_subagents); consumed_process_dispatches counts the
++# --- gate chain (vs process_dispatch_allowance). The attr_* layers attribute
++# --- consumption where derivable at close — tokens or cost with provenance, or
++# --- "-" as an admission, NEVER a zero nobody measured. Receipts predating these
++# --- fields stay valid: routing-check.sh reads an absent field as "-".
++consumed_process_dispatches: -
++attr_task_execution: -
++attr_context_retrieval: -
++attr_subagent_execution: -
++attr_verification: -
++attr_review: -
++attr_governance_process: -
++attr_experiment_audit: -
++# --- contribution rows (PACKET-0053): marginal-contribution accounting, MANDATORY
++# --- for a Full close with dispatches>0 (routing-check.sh refuses otherwise). The
++# --- live gate seeds one stub row per admitted Full task dispatch; fill at close:
++# --- contribution: <subagent_type> | <unique_question> | <output_ref> | changed_implementation=y/n/- | changed_conclusion=y/n/- | caught_defect=y/n/- | duplicated_work=y/n/- | tokens=<v|-> | cost=<v|-> | time=<v|->
++# --- An all-"-" row passes as an admission and is REPORTED as non-contributing.
++

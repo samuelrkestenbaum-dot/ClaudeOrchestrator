@@ -1,0 +1,10 @@
+{
+  "base_commit": "75647f9bccfc1c7018c07c86d8e8b30f4bbcb3a7",
+  "product_paths": [
+    "client/src/lib/trpc.ts",
+    "client/src/pages/UserDashboard.tsx"
+  ],
+  "governance_paths": [
+    "build-os/packets/routing/routing-T04-20260809T195523Z.md"
+  ]
+}

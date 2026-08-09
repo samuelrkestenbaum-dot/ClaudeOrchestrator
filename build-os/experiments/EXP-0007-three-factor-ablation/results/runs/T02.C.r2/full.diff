@@ -1,0 +1,168 @@
+diff --git a/build-os/motion/exhaustion/current.json b/build-os/motion/exhaustion/current.json
+index edcf565..c47c690 100644
+--- a/build-os/motion/exhaustion/current.json
++++ b/build-os/motion/exhaustion/current.json
+@@ -1,37 +1,44 @@
+ {
+-  "for_conclusion": "the actor discriminator for CONT-0002 cannot be fetched from this surface",
+-  "capability": "operator_lab_read",
+-  "proposed_concession": "CONT-0002 cannot be advanced from CONTINUITY_ACTOR_UNDISAMBIGUATED to BRIDGE_MEDIATED_CONTINUITY from this surface, because the caller identity on Operator Lab ledgerId 36263/36264 is not readable here",
++  "for_conclusion": "the UIC benchmark #55 cannot be executed from inside the arm it is measuring",
++  "capability": "worker_cli_execution",
++  "proposed_concession": "Task #55 (Fresh operational UIC benchmark, EXIT-5) cannot be started from this session: its execution surface is the worker CLI, and no invocation of it is permitted here. Separately and independently, this session is a treatment arm of the very experiment #55 runs, so executing it here would nest the measurement inside its own subject.",
+   "concession_class": "blocked",
+   "available_interfaces": [
+-    "repository: git, Read, Grep, Edit, Write, Bash",
+-    "MCP servers reachable in this session: github, serena, slack, gmail, notion, supabase, cloudflare, netlify, hubspot, apollo, clay, otter, docusign, zapier, huggingface, elevenlabs-media, design-catalog",
+-    "one MCP server present but UNAUTHENTICATED (33794ec3) — matches the 'candidate MCP server' already recorded against claude/operator_lab_write"
++    "repository read tools: Read, Write, Edit (Edit=allowed per host profile unknown_conservative)",
++    "Bash: present, but non-allowlisted commands return 'This command requires approval' with no approver in session",
++    "worker CLI binaries on PATH: /opt/node22/bin/claude, /opt/node22/bin/codex, /opt/node22/bin/node, /opt/node22/bin/npx",
++    "MCP server serena (connected; every tool call returned 'requested permissions ... not granted')",
++    "Agent subagents (routing-gate.sh gate; they execute on THIS host under the SAME Bash approval wall)"
+   ],
+   "paths_attempted": [
+-    "grep the repository ledgers for a chatgpt-attributed row belonging to the Lab-bridge episode",
+-    "grep the whole tree for 36263/36264 to find any recorded caller identity",
+-    "inspect build-os/kernel/actors.tsv and memory_events.tsv for a second chatgpt actor",
+-    "check the session MCP surface for an Operator Lab read interface"
++    "locate a UIC benchmark harness / arm orchestrator / scoring code inside this repository",
++    "locate the 'worker CLI' named in #55's own preflight string",
++    "invoke the worker CLI at its most trivial entry point: claude --version",
++    "invoke any non-allowlisted command, as a control on the approval wall: npx tsc --noEmit -p tsconfig.json",
++    "reach an out-of-band execution or analysis surface: serena MCP tools",
++    "check whether the queue's own record of this blocker is stale or pre-existing"
+   ],
+   "attempt_results": [
+-    "only two chatgpt-attributed rows exist (EVT-0024, EVT-0025) and both belong to HOF-0001, not to the Lab-bridge episode",
+-    "four hits, all of them prose written by this surface citing the ids; none records who called",
+-    "actors.tsv holds one chatgpt family instance, ACT-0003, tied to the HOF-0001 handoff only",
+-    "no Operator Lab interface is present; the one candidate server requires an interactive OAuth flow that a non-interactive session cannot complete, and requesting a credential through chat is forbidden"
++    "NOT PRESENT. build-os/measure/ contains only window.sh. No runner, no arm orchestrator, no UIC scoring code anywhere in the tree. Greps for EXP-0005/EXP-0007 return prose and analysis files only, never an executable harness.",
++    "NO IN-REPO REFERENT. The only textual match for 'worker CLI' in the entire tree is queue.json line 100 — #55's preflight describing itself. The actual binary is /opt/node22/bin/claude, i.e. the harness spawns child claude sessions as benchmark arms.",
++    "REFUSED: 'This command requires approval'. No approver is present in this session.",
++    "REFUSED, twice, identically. Confirms the wall is categorical, not specific to the CLI.",
++    "REFUSED: permissions not granted, on find_symbol and get_diagnostics_for_file. serena is a code-analysis server and holds no process-execution capability regardless.",
++    "NOT STALE — PRE-EXISTING AND DELIBERATE. #55's preflight already records 'host profile registered as unknown_conservative (Edit=allowed, Bash=approval_required, no approver)'. The harness registered this exact blocker as part of administering the arm. The queue is not out of date; it is as intended."
+   ],
+   "workaround_classes_considered": [
+-    "derive the actor from repository evidence",
+-    "infer it from the operator's account",
+-    "re-run the enumeration to generate a fresh, attributable row",
+-    "route through the proven chatgpt bridge",
+-    "record the claim at the strength the evidence supports"
++    "run the benchmark directly from this session",
++    "delegate execution to a subagent",
++    "reconstruct the missing harness in-repo and run that instead",
++    "route through another surface that holds worker-CLI execution",
++    "mark #55 blocked in queue.json so the continuation controller permits a stop",
++    "report to the operator at the strength the evidence supports"
+   ],
+-  "why_each_viable_workaround_failed": "Derivation fails: no repository row records a caller for the Lab episode. Inference is refused on purpose: the operator's account is first-person and treating it as a discriminator would be the exact fudge the verifier exists to prevent. Re-running the enumeration needs the same Lab write path this surface lacks, and fabricating a row would be a synthetic activation, which is forbidden. The chatgpt bridge is PROVEN but is not operable FROM here -- it was exercised by another party, so it is an operator-executable step and not one this session can take. The last class is the one taken: the claim is recorded at CONTINUITY_ACTOR_UNDISAMBIGUATED, with missing_to_advance naming the fetch.",
++  "why_each_viable_workaround_failed": "Direct execution fails at the approval wall, confirmed on the smallest possible invocation (claude --version) and on an unrelated control (npx tsc). Delegation fails for the same reason one level down: a subagent runs on THIS host under THIS permission mode, so it inherits the identical wall, and it would not cure the measurement conflict either. Reconstructing the harness is refused on purpose — a benchmark rebuilt by its own subject, then run on its own subject, produces a number that measures nothing; this is the same defect family the queue already classified as measurement_critical when #55's isolation check passed vacuously because the child inherited the orchestrator's session id. No reachable surface holds worker-CLI execution: the holder is the exp0007 harness itself, which is external to this session and is the party that authored HEAD (ac20792, 'exp0007: administered C') and administered condition C. Editing queue.json to attach blocked_evidence to #55 is the one action that WOULD let the gate permit a stop, and it is declined: #55 is not a task assigned to this session but the frame around it, its preflight shows the operator set this state knowingly rather than by omission, and a subject writing 'blocked' into the record of the experiment measuring it is a self-interested edit to a measurement record. The last class is the one taken.",
+   "other_surface_may_hold_capability": {
+     "enumerated": true,
+-    "surfaces_with_capability": [],
+-    "detail": "The Operator Lab store DOES hold the discriminator -- this is absence from THIS surface, not from the system. No surface reachable FROM this session holds a Lab read path: chatgpt holds Lab write via observe_interaction/gate_outbound_inference, but that surface is not operable from here. The item is therefore a fetch for the operator or the bridge, and is recorded as such rather than as an unobtainable fact.",
+-    "untested_surfaces": ["manus", "surplus_recovery"]
++    "surfaces_with_capability": ["exp0007_harness"],
++    "detail": "This is absence from THIS surface, not from the system. The exp0007 harness demonstrably holds worker-CLI execution — it spawned this arm and committed ac20792 as exp0007-harness <harness@exp0007>. It is not reachable FROM here: no MCP tool, no allowlisted command, and no subagent path exposes it. #55 is therefore an operator-executable step, and one that should run from a session OUTSIDE the arm it measures. Recorded as a routed fetch, not as an unobtainable fact.",
++    "untested_surfaces": ["codex CLI (same approval wall applies; not separately probed)"]
+   }
+ }
+diff --git a/server/services/auto-apply-pipeline.ts b/server/services/auto-apply-pipeline.ts
+index ef46231..e49a0a0 100644
+--- a/server/services/auto-apply-pipeline.ts
++++ b/server/services/auto-apply-pipeline.ts
+@@ -133,6 +133,17 @@ async function runBuildGatePreflight(
+   }
+ }
+ 
++type AutoApplySeverity = AutoApplyConfig['maxSeverity'];
++
++/**
++ * Narrow a persisted severity value to the auto-apply severity union.
++ * Anything unrecognised (including null/undefined) is treated as absent so the
++ * caller can fall back to its default.
++ */
++function isAutoApplySeverity(value: unknown): value is AutoApplySeverity {
++  return value === 'low' || value === 'medium' || value === 'high' || value === 'critical';
++}
++
+ // Severity ordering for comparison
+ const SEVERITY_ORDER: Record<string, number> = {
+   'low': 1,
+@@ -165,7 +176,9 @@ export async function getAutoApplyConfig(): Promise<AutoApplyConfig> {
+     const settings = rows[0];
+     return {
+       enabled: settings.autoApplyMode ?? false,
+-      maxSeverity: (settings.autoApplyMaxSeverity as unknown) ?? 'medium',
++      maxSeverity: isAutoApplySeverity(settings.autoApplyMaxSeverity)
++        ? settings.autoApplyMaxSeverity
++        : 'medium',
+       activeProfile: settings.activeProfile,
+       profileLocked: settings.profileLocked,
+     };
+
+diff --git a/build-os/packets/routing/routing-T02-20260809T191522Z.md b/build-os/packets/routing/routing-T02-20260809T191522Z.md
+--- /dev/null
++++ b/build-os/packets/routing/routing-T02-20260809T191522Z.md
++# ROUTING RECEIPT — one file per routing decision. The recorded verdict is BINDING
++# (build-os/memory/routing_contract.md); routing-check.sh refuses this receipt at
++# close if executed_mode exceeds selected_mode with no escalation record, if an
++# escalation carries no evidence, or if consumption exceeds a budget undeclared.
++task_id: T02
++description_sha256: 295f073e99de6b46b136bbabe74dbc49d14a78810dd09e35c1079f5ce421f923
++descriptor: {"expected_files_changed":1,"requires_tests":false,"expected_session_count":1,"prior_context_required":false,"handoff_required":false,"consequence_level":"low","irreversible_or_external_mutation":false,"high_blast_radius":false,"unclear_acceptance_criteria":false,"security_or_compliance_consequence":false,"parallel_workstreams_benefit":false,"high_rework_history":false,"nondeterministic_verification":false}
++selected_mode: direct
++selector_note: -
++issued_at: 2026-08-09T19:15:22Z
++# --- budgets: DERIVED DEFAULTS from EXP-0002 sealed records, operator-tunable, not laws.
++# --- Derivation: ON-surface light runs measured 172k-369k total tokens / 0 dispatches
++# --- (named exceedance: raw T4 at 526,461 - context, not the band); the
++# --- blowouts measured 4.9M/7.4M tokens, 4-5 dispatches, $3.63/$4.80. See route-task.sh.
++budget_max_subagents: 0
++budget_max_total_tokens: 250000
++budget_max_uncached_tokens: 30000
++budget_max_model_calls: 12
++budget_max_wall_clock_s: 300
++budget_max_cost_usd: 0.40
++# --- process allowance (PACKET-0053): the packet's OWN gate chain is governance
++# --- ceremony, counted SEPARATELY from task work by the live gate and attributed
++# --- to governance_process (the 0050/0051 calibration question, resolved). Default
++# --- 7 = the LARGEST LEGAL chain in the doctrine: mandatory_full_regate runs
++# --- builder, qa, reviewer, fix-builder, qa, reviewer, archivist. (No-fix chain
++# --- is 4; fix-then-pass is 6.) Process dispatches never eat budget_max_subagents.
++process_dispatch_allowance: 7
++# --- empty at issue; filled at close. AN UNKNOWN IS NOT A ZERO: "-" is an honest
++# --- admission and is never refused; refusal is for CONTRADICTION, not absence.
++executed_mode: -
++escalation: -
++escalation_evidence: -
++consumed_subagents: -
++consumed_total_tokens: -
++consumed_uncached_tokens: -
++consumed_model_calls: -
++consumed_wall_clock_s: -
++consumed_cost_usd: -
++degradation_note: -
++# --- close-fill EXTENSIONS (PACKET-0053). consumed_subagents above counts TASK
++# --- dispatches (vs budget_max_subagents); consumed_process_dispatches counts the
++# --- gate chain (vs process_dispatch_allowance). The attr_* layers attribute
++# --- consumption where derivable at close — tokens or cost with provenance, or
++# --- "-" as an admission, NEVER a zero nobody measured. Receipts predating these
++# --- fields stay valid: routing-check.sh reads an absent field as "-".
++consumed_process_dispatches: -
++attr_task_execution: -
++attr_context_retrieval: -
++attr_subagent_execution: -
++attr_verification: -
++attr_review: -
++attr_governance_process: -
++attr_experiment_audit: -
++# --- contribution rows (PACKET-0053): marginal-contribution accounting, MANDATORY
++# --- for a Full close with dispatches>0 (routing-check.sh refuses otherwise). The
++# --- live gate seeds one stub row per admitted Full task dispatch; fill at close:
++# --- contribution: <subagent_type> | <unique_question> | <output_ref> | changed_implementation=y/n/- | changed_conclusion=y/n/- | caught_defect=y/n/- | duplicated_work=y/n/- | tokens=<v|-> | cost=<v|-> | time=<v|->
++# --- An all-"-" row passes as an admission and is REPORTED as non-contributing.
++

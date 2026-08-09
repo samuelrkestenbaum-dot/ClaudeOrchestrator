@@ -1,0 +1,143 @@
+diff --git a/client/src/pages/UserDashboard.tsx b/client/src/pages/UserDashboard.tsx
+index 6b9bfc8..111e697 100644
+--- a/client/src/pages/UserDashboard.tsx
++++ b/client/src/pages/UserDashboard.tsx
+@@ -94,8 +94,34 @@ function QuickStartChecklist({ hasApiKey, hasUsage }: { hasApiKey: boolean; hasU
+   );
+ }
+ 
++/**
++ * A row from `apiKeys.list`, once we know it can actually be rendered.
++ *
++ * The server selects a column subset (`id, key_prefix, name, is_active,
++ * last_used_at, created_at`) and types the result `Partial<ApiKey>`, so every
++ * field arrives optional — and the timestamps arrive as ISO strings, not Dates.
++ * A row missing its id or prefix can't be shown, copied, regenerated, or
++ * deleted, so narrow it away instead of assuming the fields are present.
++ */
++type ApiKeySummary = {
++  id: number;
++  keyPrefix: string;
++  isActive: boolean;
++  createdAt: string;
++  /** Cosmetic — the card already falls back when either is absent. */
++  name?: string;
++  lastUsedAt?: string | null;
++};
++
++function isRenderableApiKey(key: Partial<ApiKeySummary>): key is ApiKeySummary {
++  return typeof key.id === "number"
++    && typeof key.keyPrefix === "string"
++    && typeof key.isActive === "boolean"
++    && typeof key.createdAt === "string";
++}
++
+ function ApiKeyCard({ apiKey, onDelete, onRegenerate }: {
+-  apiKey: { id: number; keyPrefix: string; name: string | null; isActive: boolean; createdAt: Date; lastUsedAt: Date | null };
++  apiKey: ApiKeySummary;
+   onDelete: (id: number) => void;
+   onRegenerate: (id: number) => void;
+ }) {
+@@ -304,7 +330,8 @@ export default function UserDashboard() {
+   const planLimit = PLAN_LIMITS[plan] ?? 100;
+   const usageTotal = usageStats?.total ?? 0;
+   const usagePct = planLimit > 0 ? Math.min(100, Math.round((usageTotal / planLimit) * 100)) : 0;
+-  const hasApiKey = (apiKeys?.length ?? 0) > 0;
++  const renderableKeys: ApiKeySummary[] = apiKeys?.filter(isRenderableApiKey) ?? [];
++  const hasApiKey = renderableKeys.length > 0;
+   const hasUsage = usageTotal > 0;
+ 
+   return (
+@@ -395,7 +422,7 @@ export default function UserDashboard() {
+               {keysLoading ? (
+                 <div className="h-8 w-10 bg-muted animate-pulse rounded" />
+               ) : (
+-                <span className="text-2xl font-bold">{apiKeys?.length ?? 0}</span>
++                <span className="text-2xl font-bold">{renderableKeys.length}</span>
+               )}
+               <p className="text-xs text-muted-foreground mt-1">Active integrations</p>
+             </CardContent>
+@@ -466,9 +493,9 @@ export default function UserDashboard() {
+                   <div className="space-y-2">
+                     {[1, 2].map(i => <div key={i} className="h-16 bg-muted animate-pulse rounded-lg" />)}
+                   </div>
+-                ) : apiKeys && apiKeys.length > 0 ? (
++                ) : renderableKeys.length > 0 ? (
+                   <div className="space-y-2">
+-                    {apiKeys.map((key) => (
++                    {renderableKeys.map((key) => (
+                       <ApiKeyCard
+                         key={key.id}
+                         apiKey={key}
+@@ -608,7 +635,7 @@ export default function UserDashboard() {
+                         <div key={i} className="flex items-center justify-between py-2 border-b border-border/30 last:border-0">
+                           <div>
+                             <p className="text-sm">{invoice.description || "Subscription"}</p>
+-                            <p className="text-xs text-muted-foreground">{new Date(invoice.date).toLocaleDateString()}</p>
++                            <p className="text-xs text-muted-foreground">{new Date(invoice.createdAt).toLocaleDateString()}</p>
+                           </div>
+                           <div className="text-right">
+                             <p className="text-sm font-medium">${(invoice.amount / 100).toFixed(2)}</p>
+
+diff --git a/build-os/packets/routing/routing-T04-20260809T211017Z.md b/build-os/packets/routing/routing-T04-20260809T211017Z.md
+--- /dev/null
++++ b/build-os/packets/routing/routing-T04-20260809T211017Z.md
++# ROUTING RECEIPT — one file per routing decision. The recorded verdict is BINDING
++# (build-os/memory/routing_contract.md); routing-check.sh refuses this receipt at
++# close if executed_mode exceeds selected_mode with no escalation record, if an
++# escalation carries no evidence, or if consumption exceeds a budget undeclared.
++task_id: T04
++description_sha256: 0bbd272efb030ee503cd92db177fa8b71b7367786e39d46a5d76609c7e7446b6
++descriptor: {"expected_files_changed":1,"requires_tests":false,"expected_session_count":1,"prior_context_required":false,"handoff_required":false,"consequence_level":"low","irreversible_or_external_mutation":false,"high_blast_radius":false,"unclear_acceptance_criteria":false,"security_or_compliance_consequence":false,"parallel_workstreams_benefit":false,"high_rework_history":false,"nondeterministic_verification":false}
++selected_mode: direct
++selector_note: -
++issued_at: 2026-08-09T21:10:17Z
++# --- budgets: DERIVED DEFAULTS from EXP-0002 sealed records, operator-tunable, not laws.
++# --- Derivation: ON-surface light runs measured 172k-369k total tokens / 0 dispatches
++# --- (named exceedance: raw T4 at 526,461 - context, not the band); the
++# --- blowouts measured 4.9M/7.4M tokens, 4-5 dispatches, $3.63/$4.80. See route-task.sh.
++budget_max_subagents: 0
++budget_max_total_tokens: 250000
++budget_max_uncached_tokens: 30000
++budget_max_model_calls: 12
++budget_max_wall_clock_s: 300
++budget_max_cost_usd: 0.40
++# --- process allowance (PACKET-0053): the packet's OWN gate chain is governance
++# --- ceremony, counted SEPARATELY from task work by the live gate and attributed
++# --- to governance_process (the 0050/0051 calibration question, resolved). Default
++# --- 7 = the LARGEST LEGAL chain in the doctrine: mandatory_full_regate runs
++# --- builder, qa, reviewer, fix-builder, qa, reviewer, archivist. (No-fix chain
++# --- is 4; fix-then-pass is 6.) Process dispatches never eat budget_max_subagents.
++process_dispatch_allowance: 7
++# --- empty at issue; filled at close. AN UNKNOWN IS NOT A ZERO: "-" is an honest
++# --- admission and is never refused; refusal is for CONTRADICTION, not absence.
++executed_mode: -
++escalation: -
++escalation_evidence: -
++consumed_subagents: -
++consumed_total_tokens: -
++consumed_uncached_tokens: -
++consumed_model_calls: -
++consumed_wall_clock_s: -
++consumed_cost_usd: -
++degradation_note: -
++# --- close-fill EXTENSIONS (PACKET-0053). consumed_subagents above counts TASK
++# --- dispatches (vs budget_max_subagents); consumed_process_dispatches counts the
++# --- gate chain (vs process_dispatch_allowance). The attr_* layers attribute
++# --- consumption where derivable at close — tokens or cost with provenance, or
++# --- "-" as an admission, NEVER a zero nobody measured. Receipts predating these
++# --- fields stay valid: routing-check.sh reads an absent field as "-".
++consumed_process_dispatches: -
++attr_task_execution: -
++attr_context_retrieval: -
++attr_subagent_execution: -
++attr_verification: -
++attr_review: -
++attr_governance_process: -
++attr_experiment_audit: -
++# --- contribution rows (PACKET-0053): marginal-contribution accounting, MANDATORY
++# --- for a Full close with dispatches>0 (routing-check.sh refuses otherwise). The
++# --- live gate seeds one stub row per admitted Full task dispatch; fill at close:
++# --- contribution: <subagent_type> | <unique_question> | <output_ref> | changed_implementation=y/n/- | changed_conclusion=y/n/- | caught_defect=y/n/- | duplicated_work=y/n/- | tokens=<v|-> | cost=<v|-> | time=<v|->
++# --- An all-"-" row passes as an admission and is REPORTED as non-contributing.
++

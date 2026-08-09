@@ -1,26 +1,25 @@
 {
  "artifact": "run_record",
- "run_id": "R-6a739508467e",
+ "run_id": "R-5e0163f4f959",
  "task_id": "T02",
  "arm": "baseline",
- "launched_at": "2026-08-09T16:20:15.172Z",
- "expected_session_id": "b4ee8e68-0ca4-40ea-aeaf-a2cd61190b0b",
+ "launched_at": "2026-08-09T21:18:04.481Z",
+ "expected_session_id": "fc96d1fc-9c2f-466d-bee6-6cdc93436614",
  "orchestrator_session_id": "5489b495-ae3d-5612-a4e1-61b4b5c6b6e4",
  "timeout_ceiling_s": 1200,
  "pid": null,
  "state": "terminal",
  "terminal_reason": "completed",
- "admissible": false,
+ "admissible": true,
  "is_error": false,
  "result_event_observed": true,
- "child_session_id": "b4ee8e68-0ca4-40ea-aeaf-a2cd61190b0b",
+ "child_session_id": "fc96d1fc-9c2f-466d-bee6-6cdc93436614",
  "isolation": {
   "isolated": true,
   "observed": [
-   "b4ee8e68-0ca4-40ea-aeaf-a2cd61190b0b"
+   "fc96d1fc-9c2f-466d-bee6-6cdc93436614"
   ],
   "reason": "child session id is distinct from the orchestrator's and matches the assignment"
  },
- "admissibility_note": "REFUSED, and the reason is CAPTURE, not isolation. The child DID emit a result event (terminal_reason=completed) and isolation IS proven. The container restarted before run-arm's exit handler ran, so the work product was never captured: only full.diff present. A run whose outputs were never measured cannot enter the analysis, so this cell is RE-RUN rather than salvaged.",
- "corrected_note": "An earlier close of this record asserted that isolation could not be proven. That was wrong twice over: isolation had never been checked, and classify had already returned 'completed'. The record is corrected rather than left carrying a reason nobody tested."
+ "admissibility_note": "clean completion under a proven-isolated session"
 }
