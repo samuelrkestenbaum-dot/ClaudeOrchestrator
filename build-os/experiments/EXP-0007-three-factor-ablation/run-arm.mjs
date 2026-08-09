@@ -54,7 +54,28 @@ let lockOk = true;
 try { fs.mkdirSync(path.dirname(LOCK), { recursive: true }); const fd = fs.openSync(LOCK, "wx"); fs.writeFileSync(fd, String(process.pid)); fs.closeSync(fd); }
 catch { lockOk = false; }
 gate("no_concurrent_measured_arm", lockOk, lockOk ? "acquired" : `another arm holds ${LOCK} — elapsed is a registered metric`);
-const releaseLock = () => { try { fs.unlinkSync(LOCK); } catch {} };
+// RELEASE ONLY WHAT WE ACQUIRED. The refusal path used to call releaseLock()
+// unconditionally, so an arm refused FOR lock contention deleted the lock it had
+// just been refused by. Sequentially that is merely self-healing; with real
+// concurrency it is the sequential guarantee quietly disappearing -- B is
+// refused, deletes A's lock, C starts alongside A, and elapsed time stops
+// meaning anything. Found when a container restart left a stale lock and cost a
+// measured cell.
+const releaseLock = () => { if (!lockOk) return; try { fs.unlinkSync(LOCK); } catch {} };
+
+// A lock whose owning process is gone is STALE, not held. Recorded as a
+// distinct outcome rather than silently reclaimed, because "the previous run
+// died" and "another arm is running" need different responses.
+if (!lockOk) {
+  let ownerAlive = false, owner = null;
+  try { owner = Number(fs.readFileSync(LOCK, "utf8").trim()); process.kill(owner, 0); ownerAlive = true; } catch {}
+  if (!ownerAlive) {
+    try { fs.unlinkSync(LOCK); const fd = fs.openSync(LOCK, "wx"); fs.writeFileSync(fd, String(process.pid)); fs.closeSync(fd); lockOk = true; } catch {}
+    pre[pre.length - 1] = { name: "no_concurrent_measured_arm", ok: lockOk,
+      detail: lockOk ? `stale lock from dead pid ${owner} reclaimed — the owning process no longer exists`
+                     : `lock held by pid ${owner} and could not be reclaimed` };
+  }
+}
 
 let variant = null, administeredSha = null;
 if (lockOk) {

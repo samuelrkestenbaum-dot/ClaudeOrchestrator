@@ -11,15 +11,20 @@
       "task": "T01",
       "config": "baseline",
       "rep": 2,
-      "exit": 0,
-      "wall_s": 386
+      "skipped": true
     },
     {
       "task": "T01",
       "config": "C",
       "rep": 2,
-      "exit": 0,
-      "wall_s": 280
+      "skipped": true
+    },
+    {
+      "task": "T02",
+      "config": "baseline",
+      "rep": 2,
+      "exit": 1,
+      "wall_s": 0
     }
   ]
 }
