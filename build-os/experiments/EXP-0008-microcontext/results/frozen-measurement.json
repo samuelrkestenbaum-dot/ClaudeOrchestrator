@@ -1,0 +1,176 @@
+{
+  "artifact": "exp0008_frozen_implementation_read_measurement",
+  "frozen_before": "any prototype was built against these numbers",
+  "classifier": "by the tool_use REQUESTED PATH, never by result content — a path-based classifier cannot match its own source, which is the category of mistake that produced the withdrawn 23.8% figure",
+  "classifier_proof": "22 assertions in implementation-reads.test.mjs: known positives, known negatives, arity proof that content is not an input, a product file whose CONTENT is gate source classified as product, and end-to-end pairing by tool_use_id against out-of-order arrival",
+  "implementation_definition": {
+    "prefixes": [
+      {
+        "prefix": "build-os/",
+        "why": "the substrate's own code, memory, packets and tooling"
+      },
+      {
+        "prefix": ".claude/",
+        "why": "hooks, agents, commands and settings — the runtime that enforces routing"
+      }
+    ],
+    "files": [
+      {
+        "file": "CLAUDE.md",
+        "why": "the doctrine document itself"
+      }
+    ]
+  },
+  "groups": {
+    "exp0006_native": {
+      "arms": 4,
+      "implementation_chars": 0,
+      "implementation_chars_per_arm": 0,
+      "implementation_read_events": 0,
+      "product_chars": 125295,
+      "implementation_share_of_reads": 0
+    },
+    "exp0006_gravito": {
+      "arms": 4,
+      "implementation_chars": 195355,
+      "implementation_chars_per_arm": 48839,
+      "implementation_read_events": 26,
+      "product_chars": 235435,
+      "implementation_share_of_reads": 0.453
+    },
+    "exp0007_baseline": {
+      "arms": 12,
+      "implementation_chars": 456082,
+      "implementation_chars_per_arm": 38007,
+      "implementation_read_events": 80,
+      "product_chars": 908626,
+      "implementation_share_of_reads": 0.334
+    },
+    "exp0007_C": {
+      "arms": 12,
+      "implementation_chars": 378117,
+      "implementation_chars_per_arm": 31510,
+      "implementation_read_events": 52,
+      "product_chars": 750579,
+      "implementation_share_of_reads": 0.335
+    }
+  },
+  "top_files_exp0006_gravito": [
+    {
+      "file": ".claude/hooks/routing-gate.sh",
+      "chars": 95574
+    },
+    {
+      "file": "build-os/motion/queue.json",
+      "chars": 22830
+    },
+    {
+      "file": "build-os/motion/continuation.mjs",
+      "chars": 15730
+    },
+    {
+      "file": "build-os/tools/mode-select.mjs",
+      "chars": 14108
+    },
+    {
+      "file": "build-os/motion/concession-gate.mjs",
+      "chars": 14034
+    },
+    {
+      "file": "build-os/tools/route-task.sh",
+      "chars": 10806
+    },
+    {
+      "file": "build-os/motion/gate-stop.mjs",
+      "chars": 8436
+    },
+    {
+      "file": "build-os/memory/routing_contract.md",
+      "chars": 4115
+    },
+    {
+      "file": "build-os/packets/routing/routing-T03-github-app-ts2345-20260809T033826Z.md",
+      "chars": 3734
+    },
+    {
+      "file": ".claude/hooks/concession-gate.sh",
+      "chars": 2438
+    },
+    {
+      "file": ".claude/settings.json",
+      "chars": 1771
+    },
+    {
+      "file": "build-os/packets/routing/live_gate_log.tsv",
+      "chars": 741
+    },
+    {
+      "file": "build-os/memory/current_state.md",
+      "chars": 394
+    },
+    {
+      "file": "build-os/packets/active_packet.md",
+      "chars": 197
+    },
+    {
+      "file": "build-os/memory/residue.md",
+      "chars": 195
+    },
+    {
+      "file": "build-os/packets/routing/routing-T03-github-app-ts2345-20260809T033825Z.md",
+      "chars": 84
+    },
+    {
+      "file": "build-os/packets/routing/routing-T03-github-app-ts2345-20260809T033824Z.md",
+      "chars": 84
+    },
+    {
+      "file": "build-os/packets/routing/routing-T03-github-app-ts2345-20260809T033823Z.md",
+      "chars": 84
+    }
+  ],
+  "top_files_exp0007_baseline": [
+    {
+      "file": ".claude/hooks/routing-gate.sh",
+      "chars": 143361
+    },
+    {
+      "file": "build-os/motion/queue.json",
+      "chars": 79905
+    },
+    {
+      "file": "build-os/memory/tool_router.md",
+      "chars": 48962
+    },
+    {
+      "file": "build-os/tools/route-task.sh",
+      "chars": 32418
+    },
+    {
+      "file": "build-os/motion/gate-stop.mjs",
+      "chars": 29526
+    },
+    {
+      "file": "build-os/motion/continuation.mjs",
+      "chars": 23595
+    },
+    {
+      "file": "build-os/tools/mode-select.mjs",
+      "chars": 21162
+    },
+    {
+      "file": "build-os/memory/current_state.md",
+      "chars": 17128
+    },
+    {
+      "file": "build-os/memory/residue.md",
+      "chars": 9752
+    },
+    {
+      "file": ".claude/hooks/concession-gate.sh",
+      "chars": 8533
+    }
+  ],
+  "control": "native reads ZERO implementation bytes across 4 arms, so the effect is attributable to the substrate rather than to the task",
+  "prototype_target": "routing-gate.sh is 49% of all implementation reads in EXP-0006 gravito — one file, on the routing/first-mutation path"
+}
