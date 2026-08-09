@@ -39,11 +39,25 @@ export const DRAFT_MARKERS = [
 // Claims that a status has already been conferred. If an incidental ancestor
 // asserts one of these, publishing it DOES effect a state transition, and that
 // needs its own authorisation.
+// DESCRIBING A STATE IS NOT PERFORMING A TRANSITION. Every pattern below must
+// match an ASSERTION FORM — a status field being set, or a sentence whose
+// subject is the artifact declaring its own status — never ordinary prose that
+// merely mentions a state.
+//
+// The distinction, in the operator's words: "record frozen experiment result",
+// "experiment execution complete", "capture executed arm telemetry" and
+// "document accepted result" are DESCRIPTIONS and must pass. "Status: FROZEN",
+// "this packet is closed" and "authorisation granted" are ASSERTIONS and must
+// carry their own authority.
+//
+// `packet closed` was previously matched as a bare phrase, so the sentence
+// "the packet closed successfully" — a description of history — was treated as
+// performing a closure. It now requires the assertion form.
 export const STATUS_CLAIMS = [
-  { pattern: /\bstatus:\s*(frozen|approved|final|executed)\b/i, claim: "declares itself frozen/approved/final/executed" },
+  { pattern: /(^|\n)\s*[*_>\s-]*status[*_\s]*:\s*(frozen|approved|final|executed)\b/i, claim: "sets a Status field to frozen/approved/final/executed" },
   { pattern: /\bthis preregistration is frozen\b/i, claim: "declares a preregistration frozen" },
   { pattern: /\bauthoris(?:ed|ation) granted\b/i, claim: "declares an authorisation granted" },
-  { pattern: /\bpacket\s+closed\b/i, claim: "declares a packet closed" },
+  { pattern: /(^|\n)\s*[*_>\s-]*status[*_\s]*:\s*closed\b|\bthis packet is (?:now )?closed\b/i, claim: "declares a packet closed" },
   { pattern: /\bready to execute\b/i, claim: "declares readiness to execute" },
 ];
 
@@ -105,7 +119,24 @@ export function publicationCheck(req) {
     } else if (a.text === undefined || a.text === null) {
       blocking.push(`incidental '${a.ref}': content not supplied, so its status cannot be checked — an unchecked ancestor is not a cleared one`);
     } else {
-      blocking.push(`incidental '${a.ref}': neither clearly draft nor status-free — cannot be published as a side effect`);
+      // STATUS-FREE PROCEEDS. This branch used to BLOCK, with the message
+      // "neither clearly draft nor status-free" — a contradiction, because
+      // control only reaches here when `claims` is empty, which is exactly what
+      // status-free means. The effect was that anything not explicitly stamped
+      // DRAFT was refused, so the status-free case the message named was
+      // unreachable.
+      //
+      // It surfaced when EXP-0006 was published: eleven ordinary commits
+      // carrying experiment data and harness code were refused as state
+      // transitions because none of them said DRAFT. The authority model was
+      // right and its proxy was wrong — a control implemented as "does this
+      // text look finished?" rather than "does this artifact assert a governed
+      // transition?".
+      //
+      // Nothing is weakened. An artifact asserting a status still blocks
+      // (branch 1), and an ancestor whose content could not be read still
+      // blocks (branch 3) — unchecked is still not cleared.
+      reasons.push(`incidental '${a.ref}': asserts no governed status transition, so publishing it changes no state`);
     }
   }
 
