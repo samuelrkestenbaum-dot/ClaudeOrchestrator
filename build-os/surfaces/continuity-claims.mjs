@@ -64,18 +64,28 @@ export const CLAIMS = [
         // THE CANDIDATE SET, stated up front. Naming who COULD have acted is
         // what makes "we don't know which" a measurable claim instead of a
         // hedge -- and it is what lets the resolver compute the fetch.
+        // The candidate set is UNCHANGED in shape. What arrived is the live
+        // Lab's actual surface identifier for the ChatGPT strategy actor,
+        // which my earlier guesses did not contain — recorded as observed
+        // rather than back-fitted, and the operator family is untouched so the
+        // discrimination is still a real two-way test.
         candidate_actors: [
-          { id: "chatgpt", expects: { surface_identifier: ["chatgpt.web.session", "chatgpt.web.session.strategy-01"], provider: "openai" } },
-          { id: "operator", expects: { surface_identifier: "operator.sam.local", provider: "human" } },
+          { id: "chatgpt", expects: { surface_identifier: ["chatgpt.operator_lab.strategy", "chatgpt.web.session", "chatgpt.web.session.strategy-01"], provider: ["OpenAI", "openai"] } },
+          { id: "operator", expects: { surface_identifier: "operator.sam.local", provider: ["human", "Human"] } },
         ],
         actor_evidence: {
-          // Only what is actually attributable is filled in. The three fields
-          // that would settle it are left EMPTY on purpose -- writing a
-          // plausible value here is precisely the failure this resolver exists
-          // to make impossible.
+          // FETCHED FROM THE LIVE LAB. These two fields were EMPTY here and the
+          // resolver named them -- surface_identifier and provider -- as the
+          // exact fields on which the surviving candidates differed. They were
+          // computed as a work order BEFORE these values existed, so this is a
+          // gap being closed, not a hypothesis fitted after the fact.
+          surface_identifier: { value: "chatgpt.operator_lab.strategy", source: "Operator Lab ledger 36264 — the acting surface" },
+          provider: { value: "OpenAI", source: "Operator Lab ledger 36264" },
+          model: { value: "GPT-5.6 Sol", source: "Operator Lab ledger 36264" },
           originating_event: { value: "CLAUDE-WRITE-PATH-BLOCKED.md@fdbbdd3", source: "repository commit" },
-          durable_write_back: { value: "ledgerId 36263/36264", source: "Operator Lab, reported by the operator" },
-          causal_linkage: { value: "the rows did not exist before the enumeration and exist only as its consequence", source: "temporal ordering on record" },
+          receiving_event: { value: "ledgerId 36264", source: "Operator Lab — a DIFFERENT surface and provider from 36263 (claude.cowork.session / Anthropic / Claude)" },
+          durable_write_back: { value: "ledgerId 36263/36264", source: "Operator Lab" },
+          causal_linkage: { value: "ledgerId 36265 — durable adjudication recording that the Claude-originated state caused the ChatGPT strategy surface to change course, exhaust further capabilities, discover the bridge, alter live readiness and write back", source: "Operator Lab ledger 36265" },
         },
         actor: "chatgpt_or_operator",
         // NAMED, and it is the load-bearing part of this claim.

@@ -37,14 +37,37 @@ Promise.all([import("./build-os/surfaces/continuity.mjs"),import("./build-os/sur
 .then(([m,c])=>{const g=m.gradeContinuity(c.CLAIMS.find(x=>x.id===process.argv[1]));
 console.log(process.argv[2]==="w"?g.weakest_link:(process.argv[2]==="a"?String(!!g.missing_to_advance):g.verdict));});' "$1" "${2:-v}"; }
 t "CONT-0001 (HOF-0001) grades CONSUMPTION_ONLY — receipt is not continuity" "$(r CONT-0001)" "CONSUMPTION_ONLY"
-t "CONT-0002 (Lab bridge) does NOT reach proven continuity" "$(r CONT-0002)" "BEHAVIOR_CHANGE_OBSERVED_ACTOR_UNDISAMBIGUATED"
-t "  and every unfinished grade names what would advance it" "$(r CONT-0002 a)" "true"
+
+# DIFFERENTIAL, NOT A SNAPSHOT. These three assertions used to pin CONT-0002 at
+# BEHAVIOR_CHANGE_OBSERVED_ACTOR_UNDISAMBIGUATED, which was true until the live
+# Lab supplied the identity evidence — then they failed for the RIGHT reason and
+# would have been "repaired" by typing the new verdict, converting a guard into
+# a transcription. The invariant is not which rung CONT-0002 sits on; it is that
+# the ACTOR EVIDENCE IS LOAD-BEARING. So: grade it as it stands, then grade it
+# again with that evidence stripped, and require the two to differ.
+d(){ node -e '
+Promise.all([import("./build-os/surfaces/continuity.mjs"),import("./build-os/surfaces/continuity-claims.mjs")]).then(([m,c])=>{
+ const cl=JSON.parse(JSON.stringify(c.CLAIMS.find(x=>x.id==="CONT-0002")));
+ if(process.argv[1]==="strip"){ const e=cl.links.behavioral_divergence.actor_evidence;
+   delete e.surface_identifier; delete e.provider; delete e.model; }
+ const g=m.gradeContinuity(cl);
+ console.log(process.argv[2]==="f"?g.links.behavioral_divergence.actor_resolution.discriminating_evidence.join(","):g.verdict);});' "$1" "${2:-v}"; }
+t "CONT-0002 WITH the live identity evidence reaches proven continuity" "$(d keep)" "CROSS_SURFACE_BEHAVIORAL_CONTINUITY_PROVEN"
+t "  and WITHOUT it falls back to the middle rung — the evidence is load-bearing" "$(d strip)" "BEHAVIOR_CHANGE_OBSERVED_ACTOR_UNDISAMBIGUATED"
+t "  stripped, the resolver again names the exact fields it needs" "$(d strip f)" "surface_identifier,provider"
+t "  and the proven grade still demands NATIVE access to advance — bridge is not native" \
+  "$(node -e 'Promise.all([import("./build-os/surfaces/continuity.mjs"),import("./build-os/surfaces/continuity-claims.mjs")]).then(([m,c])=>{const g=m.gradeContinuity(c.CLAIMS.find(x=>x.id==="CONT-0002"));console.log(String(/NATIVE/.test(g.missing_to_advance||"")))})')" "true"
 
 echo "== the live gate reads the graded state, and cannot be told the answer =="
 s(){ node -e '
 import("./build-os/surfaces/readiness.mjs").then(m=>{const r=m.behavioralContinuity(JSON.parse(process.argv[1]||"{}"));
 console.log(process.argv[2]==="d"?String(r.downgrades.length):r.state);});' "${1:-{\}}" "${2:-s}"; }
-t "the shipped state is the strongest verdict any claim earns" "$(s)" "BEHAVIOR_CHANGE_OBSERVED_ACTOR_UNDISAMBIGUATED"
+# Also a differential: the shipped state must EQUAL the strongest single claim,
+# whatever that is, rather than a hardcoded rung.
+t "the shipped state equals the strongest verdict any claim earns" \
+  "$(node -e 'Promise.all([import("./build-os/surfaces/readiness.mjs"),import("./build-os/surfaces/continuity.mjs"),import("./build-os/surfaces/continuity-claims.mjs")]).then(([r,m,c])=>{
+const best=c.CLAIMS.map(x=>m.gradeContinuity(x).verdict).reduce((a,b)=>m.VERDICTS.indexOf(b)>m.VERDICTS.indexOf(a)?b:a,"NO_TRANSFER");
+console.log(String(r.behavioralContinuity({}).state===best))})')" "true"
 # THE REGRESSION THAT MATTERS. The old gate took {behaviour_changed:true,
 # result_written_back:true} and reported DEMONSTRATED. Handing the new gate the
 # same self-assertion must NOT buy a verdict.
@@ -100,12 +123,16 @@ t "an incompatible value reports NO_COMPATIBLE_CANDIDATE" "$(ri "$NONE" "$CANDS"
 NOSRC='{"provider":{"value":"openai"}}'
 t "a value with NO SOURCE is not observed evidence" "$(ri "$NOSRC" "$CANDS")" "UNDISAMBIGUATED"
 
-echo "== CONT-0002's work order is computed, not hand-written =="
+echo "== the work order is COMPUTED, and only while it is still needed =="
+# Superseded by the differential above: with the live evidence present the
+# resolver correctly names NO outstanding fields, because there are none. The
+# invariant is that the work order tracks the gap — present when the gap is,
+# absent when it is not — which the strip/keep pair proves in both directions.
 w(){ node -e '
 Promise.all([import("./build-os/surfaces/continuity.mjs"),import("./build-os/surfaces/continuity-claims.mjs")]).then(([m,c])=>{
 const g=m.gradeContinuity(c.CLAIMS.find(x=>x.id==="CONT-0002"));
-console.log(g.links.behavioral_divergence.actor_resolution.discriminating_evidence.join(","));});'; }
-t "it names surface_identifier and provider as the fetch" "$(w)" "surface_identifier,provider"
+console.log(String(g.links.behavioral_divergence.actor_resolution.discriminating_evidence.length));});'; }
+t "with the gap closed, no field is still demanded" "$(w)" "0"
 
 echo "==== RESULT: $P passed, $F failed ===="
 [ "$F" -eq 0 ]

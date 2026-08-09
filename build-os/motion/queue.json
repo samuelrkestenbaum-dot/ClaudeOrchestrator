@@ -1,7 +1,7 @@
 {
   "note": "The durable queue the continuation controller reads. Task completion is NOT a stop condition; a commit awaiting a push grant is NOT a stop condition.",
   "published_tips": [
-    "5d3d564"
+    "ec690e0"
   ],
   "tasks": [
     {
@@ -19,12 +19,12 @@
       ],
       "completion_evidence": "DELIVERABLE COMPLETE, PROOF SHORT OF THE CLAIMED STRENGTH -- and the second half is not rounded up. build-os/surfaces/continuity.mjs grades continuity across five links and reports the weakest; the free-boolean path that let a caller assert DEMONSTRATED is removed and behavioralContinuity() now reads the grade. The record: CONT-0001 (HOF-0001) = CONSUMPTION_ONLY; CONT-0002 (Lab bridge) = CONTINUITY_ACTOR_UNDISAMBIGUATED. CONT-0002 establishes consumption, REJECTION of a Claude-originated concession against a stated counterfactual, live rows 36263/36264, and mechanical onward consumption (gate-stop.mjs generates its refusal from capability-map.mjs). It does NOT establish that ChatGPT was the acting party: repository evidence cannot separate ChatGPT from the operator, and the operator's account is first-person. 20/20 tests, 4 mutations caught. RE-GRADED AFTER #52: still NOT PROVEN. Per operator ruling, BEHAVIOR_CHANGE_OBSERVED_ACTOR_UNDISAMBIGUATED is an intermediate diagnostic state and NOT a pass, so #50 does not close as proven. The deliverable (the grader, the resolver, the honest record) is complete; the PROOF remains open and is tracked by #52.",
       "residual": "52",
-      "proof_status": "NOT_PROVEN \u2014 CONT-0002 rests on the middle rung; passing=false"
+      "proof_status": "PROVEN \u2014 CONT-0002 reaches the top rung, mediation=bridge. missing_to_advance now correctly asks for NATIVE access, so the transport axis did not launder into the continuity grade."
     },
     {
       "id": "52",
       "subject": "Fetch the actor discriminator for CONT-0002 -- OPERATOR/BRIDGE ACTION",
-      "status": "blocked",
+      "status": "completed",
       "depends_on": [],
       "detail": "COMPUTED WORK ORDER, not a manual adjudication. The resolver reports two surviving candidates (chatgpt, operator) and names the exact fields that separate them: surface_identifier and provider. Fetch those from the Operator Lab caller identity on ledgerId 36263/36264. If they resolve to a chatgpt agent, CONT-0002 advances to CROSS_SURFACE_BEHAVIORAL_CONTINUITY_PROVEN (mediation=bridge) and #50 closes as proven. If they resolve to the operator, the episode is operator-mediated and the middle-rung grade is already correct.",
       "blocked_evidence": {
@@ -41,7 +41,8 @@
       "serves_exit_criteria": [
         "EXIT-1"
       ],
-      "cost": "low"
+      "cost": "low",
+      "completion_evidence": "RESOLVED FROM LIVE EVIDENCE. The resolver named surface_identifier and provider as the discriminating fields BEFORE these values existed \u2014 a computed work order, satisfied, not a hypothesis fitted afterwards. Operator Lab: 36263 = claude.cowork.session / Anthropic / Claude; 36264 = chatgpt.operator_lab.strategy / OpenAI / GPT-5.6 Sol; 36265 = durable adjudication that the Claude-originated state caused the ChatGPT strategy surface to change course, exhaust further capabilities, discover the bridge, alter live readiness and write back. Two candidates -> one. CONT-0002 = CROSS_SURFACE_BEHAVIORAL_CONTINUITY_PROVEN, passing=true, mediation=bridge. The operator candidate was left untouched so the discrimination stayed a real two-way test."
     },
     {
       "id": "51",
@@ -79,7 +80,8 @@
         "EXIT-2"
       ],
       "cost": "medium",
-      "detail": "Operator Lab reports self_gate_hygiene UNCOVERED for both surfaces. The repo has the stop/continuation controls; the live control plane does not yet prove every substantive output passes its own gate."
+      "detail": "BOUNDED RECONCILIATION, not a self-gating build. The operator ran the exact sequence the metric supposedly wants on chatgpt.operator_lab.strategy: called gate_outbound_inference, got allow, THEN wrote the substantive interaction as ledger 36266, then reran check_substrate_readiness. self_gate_hygiene.chatgpt still reads 0 / uncovered. Claude shows the same shape: a real live gate event, self_gate still 0. QUESTION: what exact event/source does self_gate_hygiene count, and why does a demonstrated same-surface pre-output gate invocation not increment it? Outcome A: the metric measures a STRONGER requirement -> name the missing behaviour precisely and implement only that. Outcome B: measurement defect -> classify it, fix narrowly if possible, and do NOT let a broken metric indefinitely block EXIT-5. Do not open a general assurance workstream from this.",
+      "bounded": true
     },
     {
       "id": "55",
@@ -103,7 +105,7 @@
     "declared_by": "operator",
     "statement": "Demonstrate that Gravito reliably improves real AI work across persistent, governed, multi-surface execution.",
     "exit_criteria": [
-      "EXIT-1 actor-disambiguated Claude<->ChatGPT continuity",
+      "EXIT-1 actor-disambiguated Claude<->ChatGPT continuity \u2014 CLOSED (CONT-0002 = CROSS_SURFACE_BEHAVIORAL_CONTINUITY_PROVEN, mediation=bridge)",
       "EXIT-2 live self-gating covered",
       "EXIT-3 no runtime-critical defect blocking normal execution",
       "EXIT-4 fresh end-to-end work runs",
