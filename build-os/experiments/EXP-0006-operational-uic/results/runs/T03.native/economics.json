@@ -1,0 +1,15 @@
+{
+  "uncached_input_tokens": 38,
+  "cache_read_input_tokens": 794197,
+  "cache_creation_input_tokens": 27574,
+  "output_tokens": 7496,
+  "num_turns": 25,
+  "duration_api_ms": 115773,
+  "total_cost_usd": 0.8612885,
+  "elapsed_s": 122.11,
+  "tool_calls": 24,
+  "subagent_invocations": 0,
+  "product_files_changed": 1,
+  "governance_files_changed": 0,
+  "gravito_operational": null
+}
