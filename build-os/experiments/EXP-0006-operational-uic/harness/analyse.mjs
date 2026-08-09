@@ -17,6 +17,33 @@
 // 2. A MISSING TOKEN FIELD IS NULL, NEVER ZERO. A denominator built from
 //    coerced nulls reads as spectacular efficiency.
 //
+// 2b. UNCACHED = input_tokens + cache_creation_input_tokens.
+//
+//    Found on the pilot's second arm. run-arm.mjs records the result event's
+//    `input_tokens` under the name `uncached_input_tokens`, and on this workload
+//    that field is 42 and 51 — a rounding-level quantity, because essentially
+//    all input arrives as cache reads or cache creations. A UIC built on it
+//    would have reported a 20% efficiency gap manufactured out of a nine-token
+//    difference. The metric would have been noise wearing a decimal point.
+//
+//    The correct reading is forced by the WORD "uncached" in the frozen metric,
+//    not by the numbers: a cache-READ token was not processed fresh, and an
+//    input token and a cache-CREATION token both were. The preflight recorded
+//    the same derivation in advance -- "input_tokens and cache_read_input_tokens
+//    present, so uncached is derivable" -- i.e. total input minus cache reads,
+//    which includes cache creation. Calling 44,350 freshly-processed tokens
+//    "cached" would simply be false.
+//
+//    STATED BECAUSE IT CUTS AGAINST THE AUTHOR: this correction RAISES the
+//    Gravito arm's denominator (51 -> 75,292) and LOWERS its UIC. It is not the
+//    choice that flatters the substrate. It is also corroborated by two
+//    quantities nobody had to choose -- cost and output tokens -- which agree
+//    with the corrected denominator at ~1.6-1.7x and disagree with the
+//    uncorrected one.
+//
+//    Computed here from the raw components, which every unit already records,
+//    so no arm is re-run to fix a labelling error.
+//
 // 3. THE COMPARISON IS REPORTED OVER MATCHED PAIRS ONLY. If one arm of a task
 //    is inadmissible, the task contributes to neither side — otherwise the
 //    surviving arm's task mix differs from its opponent's, and the difference
@@ -56,7 +83,13 @@ for (const dir of (fs.existsSync(RUNS) ? fs.readdirSync(RUNS).sort() : [])) {
         : !acc.condition_2_no_new_errors_elsewhere.pass ? "regression_elsewhere"
         : acc.diff_rejection.rejected ? "suppressed_rather_than_fixed" : "unknown")
       : null,
-    uncached_tokens: eco?.uncached_input_tokens ?? null,
+    // See rule 2b. Both components must be present, or the denominator is
+    // UNKNOWN for this unit — a missing component is never treated as zero,
+    // because zero cache-creation would read as a free run.
+    uncached_tokens: (typeof eco?.uncached_input_tokens === "number" && typeof eco?.cache_creation_input_tokens === "number")
+      ? eco.uncached_input_tokens + eco.cache_creation_input_tokens : null,
+    fresh_input_tokens: eco?.uncached_input_tokens ?? null,        // the result event's raw `input_tokens`
+    cache_creation_tokens: eco?.cache_creation_input_tokens ?? null,
     output_tokens: eco?.output_tokens ?? null,
     cache_read: eco?.cache_read_input_tokens ?? null,
     cost_usd: eco?.total_cost_usd ?? null,
@@ -95,7 +128,13 @@ const arm = (name) => {
   const withTokens = rows.filter((r) => typeof r.uncached_tokens === "number");
   const uncached = withTokens.reduce((s, r) => s + r.uncached_tokens, 0);
   const millions = uncached / 1_000_000;
+  const cacheCreation = withTokens.reduce((s, r) => s + (r.cache_creation_tokens ?? 0), 0);
+  const freshInput = withTokens.reduce((s, r) => s + (r.fresh_input_tokens ?? 0), 0);
   return {
+    // The denominator is shown in PARTS. The defect this guards against was a
+    // denominator that looked plausible until someone asked what was in it.
+    denominator_composition: { fresh_input_tokens: freshInput, cache_creation_tokens: cacheCreation, uncached_total: uncached },
+    denominator_includes_cache_creation: uncached >= cacheCreation && cacheCreation > 0,
     n_units: rows.length,
     accepted,
     acceptance_rate: rows.length ? accepted / rows.length : null,
