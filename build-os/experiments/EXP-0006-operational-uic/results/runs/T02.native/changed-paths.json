@@ -1,0 +1,8 @@
+{
+  "base_commit": "94810be8944307917bcb188ecc2073a49f8723bf",
+  "product_paths": [
+    "server/services/auto-apply-pipeline.ts"
+  ],
+  "governance_paths": [],
+  "note": "governance paths are DENOMINATOR COST and receive no numerator credit; measured against the administered commit, so substrate administration is not attributed to the arm"
+}

@@ -1,0 +1,54 @@
+diff --git a/server/services/auto-apply-pipeline.ts b/server/services/auto-apply-pipeline.ts
+index ef46231..e67d19e 100644
+--- a/server/services/auto-apply-pipeline.ts
++++ b/server/services/auto-apply-pipeline.ts
+@@ -38,9 +38,29 @@ function getDb() {
+ // TYPES
+ // ============================================================================
+ 
++export type AutoApplySeverity = 'low' | 'medium' | 'high' | 'critical';
++
++const DEFAULT_MAX_SEVERITY: AutoApplySeverity = 'medium';
++
++/**
++ * The DB stores autoApplyMaxSeverity as a free-form varchar, so narrow it here
++ * rather than trusting the column. Unrecognised values fall back to the default.
++ */
++function isAutoApplySeverity(value: unknown): value is AutoApplySeverity {
++  return value === 'low' || value === 'medium' || value === 'high' || value === 'critical';
++}
++
++function toAutoApplySeverity(value: unknown): AutoApplySeverity {
++  if (isAutoApplySeverity(value)) return value;
++  if (value != null && value !== '') {
++    generalLog.warn(`[AutoApply] Unrecognised maxSeverity "${String(value)}" — falling back to ${DEFAULT_MAX_SEVERITY}`);
++  }
++  return DEFAULT_MAX_SEVERITY;
++}
++
+ export interface AutoApplyConfig {
+   enabled: boolean;
+-  maxSeverity: 'low' | 'medium' | 'high' | 'critical';
++  maxSeverity: AutoApplySeverity;
+   activeProfile: string;
+   profileLocked: boolean;
+ }
+@@ -165,7 +185,7 @@ export async function getAutoApplyConfig(): Promise<AutoApplyConfig> {
+     const settings = rows[0];
+     return {
+       enabled: settings.autoApplyMode ?? false,
+-      maxSeverity: (settings.autoApplyMaxSeverity as unknown) ?? 'medium',
++      maxSeverity: toAutoApplySeverity(settings.autoApplyMaxSeverity),
+       activeProfile: settings.activeProfile,
+       profileLocked: settings.profileLocked,
+     };
+@@ -185,7 +205,7 @@ export async function getAutoApplyConfig(): Promise<AutoApplyConfig> {
+  */
+ export async function setAutoApplyMode(
+   enabled: boolean,
+-  maxSeverity?: 'low' | 'medium' | 'high' | 'critical',
++  maxSeverity?: AutoApplySeverity,
+   actor?: string,
+ ): Promise<void> {
+   const db = getDb();
+

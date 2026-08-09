@@ -1,0 +1,10 @@
+{
+  "base_commit": "b70bb333b4a198b79201f5202b891dfc622f4a64",
+  "product_paths": [
+    "server/services/auto-apply-pipeline.ts"
+  ],
+  "governance_paths": [
+    "build-os/packets/routing/routing-T02-auto-apply-pipeline-typefix-20260809T032453Z.md"
+  ],
+  "note": "governance paths are DENOMINATOR COST and receive no numerator credit; measured against the administered commit, so substrate administration is not attributed to the arm"
+}
