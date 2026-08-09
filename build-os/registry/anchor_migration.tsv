@@ -1,0 +1,54 @@
+# ANCHOR MIGRATION LEDGER — old positional ref -> content anchor.
+#
+# provenance=mechanical_migration means the FORM was converted and the
+# evidence was NOT re-reviewed. reviewed stays false until a human reads the
+# citation and says it points at the right thing. A migration that silently
+# set reviewed=true would be re-authorising historical evidence by script,
+# which is the one thing this migration was told not to do.
+#
+# REFUSED rows were left in positional form on purpose: AMBIGUOUS_CONTENT
+# names more than one line and so identifies no object; OUT_OF_RANGE and
+# BLANK_LINE were already broken before the migration and anchoring them
+# would pin them to whatever happens to sit there now.
+#
+# FIELDS: control_id	old_ref	new_ref	status	provenance	old_line	content	reviewed	migrated_at
+	build-os/tools/swarm-merge.sh:329	-	REFUSED	AMBIGUOUS_CONTENT	3	if overlap "$g" "$g2" "$re" "$re2"; then	false	2026-08-09
+	build-os/tools/swarm-merge.sh:381	-	REFUSED	AMBIGUOUS_CONTENT	2	if [ "$VIOL" -gt 0 ]; then	false	2026-08-09
+	build-os/tools/swarm-merge.sh:507	-	REFUSED	AMBIGUOUS_CONTENT	2	if [ "$VIOL" -gt 0 ]; then	false	2026-08-09
+	build-os/maintenance/source-scan.mjs:131	-	REFUSED	AMBIGUOUS_CONTENT	2	throw new Error(	false	2026-08-09
+	build-os/maintenance/source-scan.mjs:217	-	REFUSED	AMBIGUOUS_CONTENT	2	throw new Error(	false	2026-08-09
+	build-os/maintenance/rotate-memory.mjs:326	-	REFUSED	AMBIGUOUS_CONTENT	17	throw new RotateError(	false	2026-08-09
+	build-os/maintenance/rotate-memory.mjs:2217	-	REFUSED	AMBIGUOUS_CONTENT	17	throw new RotateError(	false	2026-08-09
+	build-os/maintenance/rotate-memory.rootscan.test.mjs:1606	-	REFUSED	AMBIGUOUS_CONTENT	14	assert.deepEqual(	false	2026-08-09
+	tests/gate_depth_tests.sh:238	-	REFUSED	AMBIGUOUS_CONTENT	2	for pair in "CLAUDE.md:$WORK/depth.claude" "global-claude-md.md:$WORK/depth.guidance"; do	false	2026-08-09
+	build-os/registry/scan-controls.sh:403	-	REFUSED	AMBIGUOUS_CONTENT	3	continue ;;	false	2026-08-09
+	build-os/tools/evidence-policy.sh:525	-	REFUSED	AMBIGUOUS_CONTENT	2	exit 0	false	2026-08-09
+	tests/evidence_policy_tests.sh:459	-	REFUSED	AMBIGUOUS_CONTENT	4	[ "$RC" = "0" ] \	false	2026-08-09
+	tests/evidence_policy_tests.sh:473	-	REFUSED	AMBIGUOUS_CONTENT	4	[ "$RC" = "0" ] \	false	2026-08-09
+	build-os/metrics/record-decision.sh:360	-	REFUSED	AMBIGUOUS_CONTENT	2	case "$line" in ''|'#'*) continue ;; esac	false	2026-08-09
+	tests/claim_evidence_tests.sh:192	-	REFUSED	AMBIGUOUS_CONTENT	12	[ "$RC" = "2" ] \	false	2026-08-09
+	tests/claim_evidence_tests.sh:214	-	REFUSED	AMBIGUOUS_CONTENT	12	[ "$RC" = "2" ] \	false	2026-08-09
+	build-os/registry/scan-controls.sh:826	-	REFUSED	AMBIGUOUS_CONTENT	2	printf 'projection: %s:%s#%s\n' "$art" "$line" "$aid"	false	2026-08-09
+	init-build-os.sh:30	-	REFUSED	AMBIGUOUS_CONTENT	2	exit 1	false	2026-08-09
+	init-build-os.sh:46	-	REFUSED	AMBIGUOUS_CONTENT	2	exit 1	false	2026-08-09
+	.claude/hooks/routing-gate.sh:483	-	REFUSED	AMBIGUOUS_CONTENT	20	}	false	2026-08-09
+	.claude/hooks/routing-gate.sh:513	-	REFUSED	BLANK_LINE	-	-	false	2026-08-09
+	.claude/hooks/routing-gate.sh:479	-	REFUSED	AMBIGUOUS_CONTENT	28	fi	false	2026-08-09
+	build-os/intake/install-preflight.sh:37	-	REFUSED	AMBIGUOUS_CONTENT	2	exit 2	false	2026-08-09
+	build-os/intake/install-preflight.sh:66	-	REFUSED	AMBIGUOUS_CONTENT	3	NREFUSE=$((NREFUSE+1))	false	2026-08-09
+	build-os/intake/install-preflight.sh:157	-	REFUSED	AMBIGUOUS_CONTENT	2	exit 2	false	2026-08-09
+	build-os/compiler/compile/compile-task.mjs:132	-	REFUSED	AMBIGUOUS_CONTENT	51	}	false	2026-08-09
+	build-os/compiler/compile/compile-task.mjs:280	-	REFUSED	AMBIGUOUS_CONTENT	2	const t = line.trim();	false	2026-08-09
+	build-os/compiler/compile/render-capsule.mjs:192	-	REFUSED	AMBIGUOUS_CONTENT	37	out.push("");	false	2026-08-09
+	build-os/compiler/compile/render-capsule.mjs:199	-	REFUSED	AMBIGUOUS_CONTENT	37	out.push("");	false	2026-08-09
+	build-os/compiler/compile/capsule-stats.mjs:165	-	REFUSED	AMBIGUOUS_CONTENT	3	return 2;	false	2026-08-09
+	build-os/compiler/compile/capsule-stats.mjs:172	-	REFUSED	AMBIGUOUS_CONTENT	3	return 2;	false	2026-08-09
+	build-os/compiler/runtime/expand.mjs:132	-	REFUSED	AMBIGUOUS_CONTENT	2	if (!entry) return deny(request, `unknown_symbol: ${symbol}`);	false	2026-08-09
+	build-os/compiler/runtime/artifacts.mjs:140	-	REFUSED	AMBIGUOUS_CONTENT	3	return 2;	false	2026-08-09
+	build-os/compiler/runtime/artifacts.mjs:159	-	REFUSED	AMBIGUOUS_CONTENT	2	return 1;	false	2026-08-09
+	build-os/compiler/runtime/compact-trace.mjs:194	-	REFUSED	AMBIGUOUS_CONTENT	3	return 2;	false	2026-08-09
+	build-os/experiments/EXP-0004-context-compiler/harness/prereg-thresholds.mjs:83	-	REFUSED	AMBIGUOUS_CONTENT	4	throw new Error(	false	2026-08-09
+	build-os/experiments/EXP-0004-context-compiler/harness/prereg-thresholds.mjs:95	-	REFUSED	AMBIGUOUS_CONTENT	4	throw new Error(	false	2026-08-09
+	build-os/experiments/EXP-0004-context-compiler/harness/prereg-thresholds.mjs:102	-	REFUSED	AMBIGUOUS_CONTENT	4	throw new Error(	false	2026-08-09
+	build-os/experiments/EXP-0004-context-compiler/harness/prereg-thresholds.mjs:114	-	REFUSED	AMBIGUOUS_CONTENT	4	throw new Error(	false	2026-08-09
+	tests/exp0004_harness_tests.sh:370	-	REFUSED	AMBIGUOUS_CONTENT	3	fs.writeFileSync(f,JSON.stringify(j,null,2));	false	2026-08-09
