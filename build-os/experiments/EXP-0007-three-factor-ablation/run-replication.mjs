@@ -17,6 +17,16 @@ import { spawn } from "node:child_process";
 import fs from "node:fs"; import path from "node:path";
 const HERE = path.dirname(new URL(import.meta.url).pathname);
 const TASKS = ["T01","T02","T03","T04"], CONFIGS = ["baseline","C"], REPS = [2,3];
+// RESUMABLE. The container restarted mid-run and killed the driver at arm 2 of
+// 16. Completed arms survived on disk, so re-running them would burn compute to
+// reproduce measurements that already exist -- and would also overwrite them,
+// which is worse. A cell is skipped only when its record is ADMISSIBLE; a
+// launcher_died or timed_out record is not a result and is re-run.
+function alreadyDone(t,c,r){
+  const dir = path.join(HERE,"results/runs", r>1?`${t}.${c}.r${r}`:`${t}.${c}`);
+  try { return JSON.parse(fs.readFileSync(path.join(dir,"run-record.json"),"utf8")).admissible === true; }
+  catch { return false; }
+}
 const run = (t,c,r) => new Promise(res =>
   spawn("node",[path.join(HERE,"run-arm.mjs"),"--task",t,"--config",c,"--rep",String(r)],{stdio:"inherit"}).on("exit",res));
 const log = [];
@@ -25,6 +35,7 @@ console.log(`rep 1 reused from the screening run (same harness, same seed, same 
 for (const r of REPS) for (const t of TASKS) {
   const order = r % 2 === 0 ? CONFIGS : [...CONFIGS].reverse();
   for (const c of order) {
+    if (alreadyDone(t,c,r)) { console.log(`SKIP ${t}/${c} rep${r} — admissible result already on disk`); log.push({task:t,config:c,rep:r,skipped:true}); continue; }
     const t0 = Date.now(); const code = await run(t,c,r);
     log.push({task:t,config:c,rep:r,exit:code,wall_s:Math.round((Date.now()-t0)/1000)});
     if (code !== 0) console.log(`  (arm ${t}/${c} rep${r} exited ${code} — recorded, continuing)`);
