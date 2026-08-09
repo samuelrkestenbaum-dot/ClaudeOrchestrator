@@ -1,7 +1,7 @@
 {
   "note": "The durable queue the continuation controller reads. Task completion is NOT a stop condition; a commit awaiting a push grant is NOT a stop condition.",
   "published_tips": [
-    "d8a85d7"
+    "5d3d564"
   ],
   "tasks": [
     {
@@ -35,7 +35,13 @@
       "discriminating_fields": [
         "surface_identifier",
         "provider"
-      ]
+      ],
+      "blocks_objective": true,
+      "produces_required_evidence": true,
+      "serves_exit_criteria": [
+        "EXIT-1"
+      ],
+      "cost": "low"
     },
     {
       "id": "51",
@@ -43,7 +49,11 @@
       "status": "in_progress",
       "depends_on": [
         "50"
-      ]
+      ],
+      "is_debt": true,
+      "serves_exit_criteria": [],
+      "cost": "medium",
+      "deferral": "DEFERRED by the value gate. Real assurance work; serves no open exit criterion."
     },
     {
       "id": "53",
@@ -52,7 +62,53 @@
       "depends_on": [],
       "detail": "The 6 build_os_tests.sh failures remaining after RC-A, RC-B and the EXP-0005 allow-list. scan-controls: 179 registered controls vs 136 discovered surfaces; 23 over-authorised entries never reach mismatch_dispositions.txt; 19 unregistered surfaces; 2 fitted floors gate but are unregistered; 2 registered refs match no floor; 6 evidence_refs resolve to lines that exercise nothing; publish-check.test.sh performs durable writes and is uncensused in the mutator registry.",
       "structural_finding": "control_registry.txt cites LINE NUMBERS. Inserting four chain_suite calls into build_os_tests.sh silently converted two citations into vacuous references pointing at comments. A guard that decays whenever anything is inserted above it should cite an ANCHOR, not a line -- this is the same defect family as the sentinel work in #36/#37.",
-      "why_separate": "Real, fixable debt. Deliberately not folded into the timeout packet rather than silently absorbed."
+      "why_separate": "Real, fixable debt. Deliberately not folded into the timeout packet rather than silently absorbed.",
+      "is_debt": true,
+      "runtime_impacting": false,
+      "serves_exit_criteria": [],
+      "cost": "high",
+      "deferral": "DEFERRED. Six deterministic census failures, classified and non-runtime-blocking. The anchor migration (phases 1-2 landed, 3-5 not started) is carried here as OPTIONAL_DEBT: four packets, one regression, one revert, zero objective movement."
+    },
+    {
+      "id": "54",
+      "subject": "Live self-gate coverage for Claude and ChatGPT (EXIT-2)",
+      "status": "pending",
+      "depends_on": [],
+      "blocks_objective": true,
+      "serves_exit_criteria": [
+        "EXIT-2"
+      ],
+      "cost": "medium",
+      "detail": "Operator Lab reports self_gate_hygiene UNCOVERED for both surfaces. The repo has the stop/continuation controls; the live control plane does not yet prove every substantive output passes its own gate."
+    },
+    {
+      "id": "55",
+      "subject": "Fresh operational UIC benchmark on a functioning system (EXIT-5)",
+      "status": "pending",
+      "depends_on": [
+        "54"
+      ],
+      "blocks_objective": true,
+      "produces_required_evidence": true,
+      "serves_exit_criteria": [
+        "EXIT-4",
+        "EXIT-5"
+      ],
+      "cost": "high",
+      "detail": "EXP-0005 measured a system that could not bootstrap and returned gravito_system_harmful with 0/12 accepted. The efficiency thesis is still unanswered. This runs fresh work on the repaired system."
     }
-  ]
+  ],
+  "primary_objective": {
+    "id": "core-operational-proof",
+    "declared_by": "operator",
+    "statement": "Demonstrate that Gravito reliably improves real AI work across persistent, governed, multi-surface execution.",
+    "exit_criteria": [
+      "EXIT-1 actor-disambiguated Claude<->ChatGPT continuity",
+      "EXIT-2 live self-gating covered",
+      "EXIT-3 no runtime-critical defect blocking normal execution",
+      "EXIT-4 fresh end-to-end work runs",
+      "EXIT-5 fresh UIC comparison completed"
+    ],
+    "note": "Everything not serving one of these is backlog unless it demonstrably blocks one. Manus and surplus_recovery are PORTABILITY, not proof."
+  }
 }

@@ -15,6 +15,8 @@
 // commit blocks publication, not work. Downstream work that does not require
 // publication first proceeds locally, with the commit preserved.
 
+import { prioritise } from "./objective.mjs";
+
 export const TERMINAL_CONDITIONS = [
   "explicit_operator_stop",
   "no_remaining_queued_work",
@@ -104,7 +106,17 @@ export function continuationDecision(state = {}) {
   // LOOP CONTROL. Repeatedly selecting the same task without state changing is
   // not progress; escalate through exhaustion rather than cycling.
   const log = state.transition_log || [];
-  const next = runnable[0];
+
+  // VALUE ORDERING, not queue order. The controller used to take runnable[0] —
+  // the next runnable task — which is why it could refuse to stop and still
+  // spend four packets on an anchor migration that moved the objective by
+  // nothing. Every step was correct; nothing asked whether the task was still
+  // worth doing. Deferral here is a statement about ORDER, not validity.
+  const ordered = prioritise(runnable.map((e) => ({ ...(tasks.find((t) => t.id === e.id) || {}), id: e.id })));
+  const byValue = ordered.do_now.length
+    ? runnable.filter((e) => ordered.do_now.includes(e.id))
+    : runnable;
+  const next = byValue[0] ?? runnable[0];
   const repeats = log.filter((l) => l.next_task === next.id && l.state_changed === false).length;
   if (repeats >= 2) {
     return {
@@ -126,7 +138,11 @@ export function continuationDecision(state = {}) {
     reasons: [
       `${runnable.length} runnable task(s); task completion is NOT a stop condition`,
       `selected ${next.id} — dependencies satisfied, no unmet publication prerequisite`,
+      ordered.do_now.length
+        ? `value gate: DO_NOW ${ordered.do_now.join(", ")}; DEFERRED ${ordered.deferred.join(", ") || "(none)"} — deferred work stays real, it is simply not next`
+        : "value gate: NO runnable task serves an open exit criterion — the queue holds only deferrable debt, which is itself worth reporting",
     ],
+    value_ordering: ordered,
     evaluated,
     binding: "STOP REFUSED — begin the next task.",
   };
