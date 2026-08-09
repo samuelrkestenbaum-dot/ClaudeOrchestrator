@@ -21,9 +21,16 @@
 // A variant that drops a behaviour is a FAILED variant, not a cheap one.
 
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
+import { execFileSync } from "node:child_process";
 
-export const CONFIGS = ["baseline", "A", "B", "C", "ABC"];
+export const CONFIGS = ["baseline", "A", "B", "C", "ABC", "microcontext"];
+
+// Where the ACTION STATE wrapper is sourced from. Resolved relative to THIS
+// file rather than imported from substrate.mjs, so a variant cannot silently
+// depend on the administration module's notion of a code root.
+const ORCHESTRATOR_ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), "../../..");
 
 const has = (cfg, f) => cfg === "ABC" || cfg === f;
 
@@ -137,9 +144,33 @@ function applyC(tree, acts) {
 }
 
 /** Apply a configuration to an already-administered gravito arm tree. */
+// EXP-0008 MICROCONTEXT. The measured target: across 28 gravito arms the worker
+// read 31,000-49,000 chars of Gravito's own implementation per arm, 33-45% of
+// all read volume, against native's ZERO. routing-gate.sh alone is ~half.
+//
+// The gate refuses by naming a CONDITION; the worker needs an ACTION, so it
+// opens 47 KB of shell to derive one fact the gate already knew. This installs
+// a wrapper that derives the next action and emits it in ~61 tokens. The real
+// gate still decides -- it is renamed, not replaced.
+//
+// NOT variant B. B handed out a pointer and let the worker fetch; this emits no
+// path to read and no invitation to explore.
+function applyMicrocontext(tree, acts) {
+  const gate = path.join(tree, ".claude/hooks/routing-gate.sh");
+  const real = path.join(tree, ".claude/hooks/routing-gate-real.sh");
+  const src = path.join(ORCHESTRATOR_ROOT, "build-os/experiments/EXP-0008-microcontext/action-state.sh");
+  if (!fs.existsSync(gate) || fs.existsSync(real)) return;
+  fs.renameSync(gate, real);
+  fs.copyFileSync(src, gate);
+  fs.chmodSync(gate, 0o755);
+  acts.push({ factor: "microcontext", act: "action_state_wrapper",
+    detail: "the gate's decision is unchanged and authoritative; the worker receives the derived next action (~61 tokens) instead of the source that produces it" });
+}
+
 export function applyVariant(tree, config) {
   if (!CONFIGS.includes(config)) throw new Error(`unknown config '${config}'`);
   const acts = [];
+  if (config === "microcontext") { applyMicrocontext(tree, acts); return { config, acts, baseline: false }; }
   if (has(config, "A")) applyA(tree, acts);
   if (has(config, "B")) applyB(tree, acts);
   if (has(config, "C")) applyC(tree, acts);
@@ -187,6 +218,38 @@ export function verifyVariant(tree, config) {
     ck("C.no_contradictory_announce_requirement", contradictions.length === 0,
       contradictions.length ? `doctrine still DEMANDS an announcement it also forbids: ${contradictions.map(String).join(", ")}`
         : "no surviving instruction demands the narration the addendum forbids");
+  }
+  if (config === "microcontext") {
+    const real = fs.existsSync(path.join(tree, ".claude/hooks/routing-gate-real.sh"));
+    ck("mc.real_gate_preserved", real, "the real gate is renamed, not replaced — its decision still governs");
+    const w = real ? fs.readFileSync(path.join(tree, ".claude/hooks/routing-gate.sh"), "utf8") : "";
+    ck("mc.wrapper_installed", /GRAVITO ACTION STATE/.test(w), "the wrapper emits derived state");
+
+    // THE CHECK THAT DISTINGUISHES THIS FROM VARIANT B: no pointer may survive
+    // into the payload THE WORKER RECEIVES.
+    //
+    // The first version scanned the wrapper's SOURCE and failed on its own
+    // comment -- which contains the words `for details` precisely because it is
+    // explaining that the payload must not contain them. That is the fourth
+    // self-matching detector in this session: a content pattern applied to a
+    // file that talks about the pattern. So this EXECUTES the wrapper against a
+    // simulated refusal and inspects the emitted payload. Measure the artifact,
+    // never the implementation that produces it -- the same correction the read
+    // classifier needed.
+    let payload = "", ranOk = false;
+    try {
+      const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "mc-probe-"));
+      const fake = path.join(tmp, "fake-gate.sh");
+      fs.writeFileSync(fake, "#!/usr/bin/env bash\necho 'routing-gate: MUTATION BLOCKED — NO OPEN routing receipt exists' >&2\nexit 2\n", { mode: 0o755 });
+      payload = execFileSync("bash", [path.join(tree, ".claude/hooks/routing-gate.sh"), "mutgate", "Bash"],
+        { encoding: "utf8", env: { ...process.env, CLAUDE_PROJECT_DIR: tmp, GRAVITO_REAL_GATE: fake }, stdio: ["ignore", "pipe", "pipe"] });
+      ranOk = true;
+    } catch (e) { payload = String(e.stderr || e.stdout || ""); ranOk = payload.includes("GRAVITO ACTION STATE"); fs.rmSync; }
+    ck("mc.payload_emitted", ranOk && /GRAVITO ACTION STATE/.test(payload), payload.slice(0, 120).replace(/\n/g, " | "));
+    ck("mc.no_pointer_in_payload", ranOk && !/\bsee \S+\.(sh|mjs|json|md)\b|\brefer to\b|\bfor details\b|\bread \S+\.(sh|mjs)\b/i.test(payload),
+      "the EMITTED payload sends the worker nowhere to read");
+    ck("mc.payload_within_budget", ranOk && payload.length <= 500,
+      `${payload.length} chars (~${Math.round(payload.length / 4)} tokens), budget <=500 chars`);
   }
   if (config === "baseline") {
     const cm = fs.readFileSync(path.join(tree, "CLAUDE.md"), "utf8");

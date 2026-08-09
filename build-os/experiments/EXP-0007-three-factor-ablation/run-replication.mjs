@@ -16,7 +16,10 @@
 import { spawn } from "node:child_process";
 import fs from "node:fs"; import path from "node:path";
 const HERE = path.dirname(new URL(import.meta.url).pathname);
-const TASKS = ["T01","T02","T03","T04"], CONFIGS = ["baseline","C"], REPS = [2,3];
+const arg=(n,d)=>{const i=process.argv.indexOf(`--${n}`);return i>0&&process.argv[i+1]?process.argv[i+1]:d;};
+const TASKS = (arg("tasks","T01,T02,T03,T04")).split(",");
+const CONFIGS = (arg("configs","baseline,C")).split(",");
+const REPS = (arg("reps","2,3")).split(",").map(Number);
 // RESUMABLE. The container restarted mid-run and killed the driver at arm 2 of
 // 16. Completed arms survived on disk, so re-running them would burn compute to
 // reproduce measurements that already exist -- and would also overwrite them,
