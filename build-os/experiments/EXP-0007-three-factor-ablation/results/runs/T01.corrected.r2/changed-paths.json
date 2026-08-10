@@ -1,0 +1,10 @@
+{
+  "base_commit": "615973f0e4a249a9b013694a888583c0e51414af",
+  "product_paths": [
+    "server/services/organizational-memory.ts"
+  ],
+  "governance_paths": [
+    "build-os/motion/exhaustion/current.json",
+    "build-os/packets/routing/routing-T01-20260810T025832Z.md"
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "base_commit": "8c827c27e3e46c28c1b5a9732f9416b2ea445e6a",
+  "product_paths": [
+    "client/src/pages/UserDashboard.tsx"
+  ],
+  "governance_paths": [
+    "build-os/motion/exhaustion/current.json",
+    "build-os/packets/routing/routing-T04-20260810T040150Z.md",
+    "build-os/packets/routing/routing-T04-exhaustion-20260810T040811Z.md"
+  ]
+}

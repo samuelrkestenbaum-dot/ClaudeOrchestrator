@@ -10,10 +10,87 @@
   "units": [
     {
       "task": "T01",
-      "config": "microcontext",
+      "config": "corrected",
       "rep": 1,
       "exit": 0,
-      "wall_s": 812
+      "wall_s": 510
+    },
+    {
+      "task": "T02",
+      "config": "corrected",
+      "rep": 1,
+      "exit": 0,
+      "wall_s": 537
+    },
+    {
+      "task": "T03",
+      "config": "corrected",
+      "rep": 1,
+      "exit": 0,
+      "wall_s": 272
+    },
+    {
+      "task": "T04",
+      "config": "corrected",
+      "rep": 1,
+      "exit": 0,
+      "wall_s": 799
+    },
+    {
+      "task": "T01",
+      "config": "corrected",
+      "rep": 2,
+      "exit": 0,
+      "wall_s": 462
+    },
+    {
+      "task": "T02",
+      "config": "corrected",
+      "rep": 2,
+      "exit": 0,
+      "wall_s": 491
+    },
+    {
+      "task": "T03",
+      "config": "corrected",
+      "rep": 2,
+      "exit": 0,
+      "wall_s": 427
+    },
+    {
+      "task": "T04",
+      "config": "corrected",
+      "rep": 2,
+      "exit": 0,
+      "wall_s": 684
+    },
+    {
+      "task": "T01",
+      "config": "corrected",
+      "rep": 3,
+      "exit": 0,
+      "wall_s": 503
+    },
+    {
+      "task": "T02",
+      "config": "corrected",
+      "rep": 3,
+      "exit": 0,
+      "wall_s": 477
+    },
+    {
+      "task": "T03",
+      "config": "corrected",
+      "rep": 3,
+      "exit": 0,
+      "wall_s": 684
+    },
+    {
+      "task": "T04",
+      "config": "corrected",
+      "rep": 3,
+      "exit": 0,
+      "wall_s": 704
     }
   ]
 }

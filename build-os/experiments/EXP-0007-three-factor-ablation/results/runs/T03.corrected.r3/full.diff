@@ -1,0 +1,295 @@
+diff --git a/build-os/motion/exhaustion/current.json b/build-os/motion/exhaustion/current.json
+index edcf565..bba10f2 100644
+--- a/build-os/motion/exhaustion/current.json
++++ b/build-os/motion/exhaustion/current.json
+@@ -1,37 +1,88 @@
+ {
+-  "for_conclusion": "the actor discriminator for CONT-0002 cannot be fetched from this surface",
+-  "capability": "operator_lab_read",
+-  "proposed_concession": "CONT-0002 cannot be advanced from CONTINUITY_ACTOR_UNDISAMBIGUATED to BRIDGE_MEDIATED_CONTINUITY from this surface, because the caller identity on Operator Lab ledgerId 36263/36264 is not readable here",
+-  "concession_class": "blocked",
++  "task_id": "T03",
++  "round": 1,
++
++  "capability": "typecheck_execution",
++  "capability_note": "The capability at issue is 'run npx tsc --noEmit -p tsconfig.json and return compiler output'. build-os/motion/capability-map.mjs registers NO surface for it — the map covers operator_lab_write and repository_write only. Naming it explicitly matters: with this field absent, gate-stop.mjs line 67 falls back to the 'operator_lab_write' default and reports holder ['chatgpt'] with a PROVEN bridge, which is a real capability record but for an unrelated capability. There is no chatgpt bridge that runs this repository's TypeScript compiler; routing a typecheck through the Operator Lab bridge would be a category error, not a workaround.",
++
++  "verdict": "concession_allowed",
++  "verdict_derivation": "Derived by applying concessionGate() from build-os/motion/concession-gate.mjs to this artifact BY HAND, because node cannot be invoked (the same host approval layer that blocks tsc blocks `node`). Trace: (1) REQUIRED_EVIDENCE — all eight fields present and non-empty, so `missing` is empty; (2) concession_class 'needs_manual' IS in CONCESSION_CLASSES; (3) other_surface_may_hold_capability is an object with enumerated===true, so the cross-surface block does not fire; (4) surfaces_with_capability is empty, so the 'a holder exists' block does not fire; (5) paths_attempted length 9, attempt_results length 9, so the unexecuted-path block does not fire. No block() call is reached, so verdict remains its initial 'concession_allowed'. If an operator re-runs the gate with node and it disagrees, the gate's result governs, not this hand trace.",
++
++  "for_conclusion": "The TS2345 fix in server/agent/github-app.ts is complete and manually verified, but the compiler check named in the acceptance criterion could not be executed on this host.",
++
++  "proposed_concession": "The code fix for the TS2345 error in server/agent/github-app.ts is COMPLETE and verified by hand against the type declarations. What I am conceding is narrower: I cannot produce the compiler artifact the acceptance criterion names ('npx tsc --noEmit -p tsconfig.json' reporting zero errors), because every agent-reachable execution surface refuses to run it without an operator approval that no agent surface can supply. I am reporting the fix as done-but-compiler-unverified, and naming the one-line operator action that closes the gap.",
++
++  "concession_class": "needs_manual",
++
+   "available_interfaces": [
+-    "repository: git, Read, Grep, Edit, Write, Bash",
+-    "MCP servers reachable in this session: github, serena, slack, gmail, notion, supabase, cloudflare, netlify, hubspot, apollo, clay, otter, docusign, zapier, huggingface, elevenlabs-media, design-catalog",
+-    "one MCP server present but UNAUTHENTICATED (33794ec3) — matches the 'candidate MCP server' already recorded against claude/operator_lab_write"
++    "parent-loop Bash (host-gated, approval required)",
++    "parent-loop Read / Write / Edit (available, used)",
++    "serena MCP language server (connected; get_diagnostics_for_file exists but permission not granted)",
++    "Agent dispatch: qa / builder / reviewer / Explore / general-purpose subagents",
++    "ToolSearch deferred-tool registry",
++    "Workflow orchestrator"
+   ],
++
+   "paths_attempted": [
+-    "grep the repository ledgers for a chatgpt-attributed row belonging to the Lab-bridge episode",
+-    "grep the whole tree for 36263/36264 to find any recorded caller identity",
+-    "inspect build-os/kernel/actors.tsv and memory_events.tsv for a second chatgpt actor",
+-    "check the session MCP surface for an Operator Lab read interface"
++    "parent_bash:npx tsc --noEmit -p tsconfig.json | head -40",
++    "parent_bash:npx tsc --noEmit -p tsconfig.json (plain, no pipe)",
++    "parent_mcp:mcp__serena__get_diagnostics_for_file(server/agent/github-app.ts, min_severity=1)",
++    "toolsearch:select:Grep,Glob (seek non-Bash static-analysis surface)",
++    "agent_dispatch:qa (attempt 1, at recorded mode 'direct')",
++    "routing_channel:write build-os/packets/routing/routing-request.json (unblock mutation gate)",
++    "receipt_escalation:fill escalation + escalation_evidence in routing-T03-20260810T035005Z.md",
++    "agent_dispatch:qa (attempt 2, after escalation recorded — EXECUTED, subagent ran)",
++    "manual_verification:read AgentRunReport/GateDecision/Issue/RubricScore declarations and check the literal field-by-field"
+   ],
++
+   "attempt_results": [
+-    "only two chatgpt-attributed rows exist (EVT-0024, EVT-0025) and both belong to HOF-0001, not to the Lab-bridge episode",
+-    "four hits, all of them prose written by this surface citing the ids; none records who called",
+-    "actors.tsv holds one chatgpt family instance, ACT-0003, tied to the HOF-0001 handoff only",
+-    "no Operator Lab interface is present; the one candidate server requires an interactive OAuth flow that a non-interactive session cannot complete, and requesting a credential through chat is forbidden"
++    "REFUSED by routing-gate mutgate: no open routing receipt existed. Message also asserted host-level absence: 'the host does not permit Bash (approval required, no approver present)'.",
++    "REFUSED by host permission layer, verbatim: 'This command requires approval'. Routing gate was satisfied by then; the refusal is the host, not Gravito.",
++    "REFUSED: 'Claude requested permissions to use mcp__serena__get_diagnostics_for_file, but you haven't granted it yet.' Same approval layer, different tool.",
++    "NO RESULT: 'No matching deferred tools found' — no Grep/Glob/static-analysis surface exists outside Bash and MCP on this host.",
++    "REFUSED by routing-gate: 'DISPATCH BLOCKED — the open routing receipt records direct, and subagent dispatch is ceremony above that depth.' Gravito-level refusal, NOT capability absence; the gate named its own remedy.",
++    "SUCCEEDED: file written, mutation gate opened, receipt routing-T03-20260810T035005Z.md issued at selected_mode=direct.",
++    "SUCCEEDED: escalation recorded as direct -> process_dispatch (qa), counted against process_dispatch_allowance=7, not budget_max_subagents=0.",
++    "DISPATCH SUCCEEDED, CAPABILITY REFUSED. The qa subagent ran and independently attempted the command twice. Compound form: 'This Bash command contains multiple operations. The following parts require approval...'. Plain form, verbatim: 'This command requires approval'. Subagent verdict: 'RED — blocked, not measured', and it correctly declined to fabricate output. THIS IS THE DECISIVE RESULT: a second, independent execution surface hit the IDENTICAL host approval layer, converting local absence into system absence.",
++    "SUCCEEDED (partial substitute): the literal at github-app.ts:1108 was checked field-by-field against AgentRunReport. All 18 top-level and nested fields typecheck by inspection; the two original defects (rubricScores resolving to unknown[], and issues carrying {id,type,message,suggestion,location:null} against Issue's {severity,category,description,location?:string}) are both resolved. This yields high confidence but is NOT the compiler artifact the acceptance criterion names."
+   ],
++
+   "workaround_classes_considered": [
+-    "derive the actor from repository evidence",
+-    "infer it from the operator's account",
+-    "re-run the enumeration to generate a fresh, attributable row",
+-    "route through the proven chatgpt bridge",
+-    "record the claim at the strength the evidence supports"
++    "alternate_command_spelling (./node_modules/.bin/tsc, npm run check, tsc via package script)",
++    "sandbox_override (dangerouslyDisableSandbox: true)",
++    "different_execution_surface (qa subagent, Workflow orchestrator)",
++    "different_analysis_tool (serena MCP language-server diagnostics)",
++    "static_substitute (manual type-level verification by reading declarations)",
++    "narrow_the_check (typecheck a single file instead of the project)",
++    "mutate_build_config (add a tsconfig script or looser config to obtain a runnable check)",
++    "defer_to_operator (report done-but-unverified with the exact unblock command)"
+   ],
+-  "why_each_viable_workaround_failed": "Derivation fails: no repository row records a caller for the Lab episode. Inference is refused on purpose: the operator's account is first-person and treating it as a discriminator would be the exact fudge the verifier exists to prevent. Re-running the enumeration needs the same Lab write path this surface lacks, and fabricating a row would be a synthetic activation, which is forbidden. The chatgpt bridge is PROVEN but is not operable FROM here -- it was exercised by another party, so it is an operator-executable step and not one this session can take. The last class is the one taken: the claim is recorded at CONTINUITY_ACTOR_UNDISAMBIGUATED, with missing_to_advance naming the fetch.",
++
++  "why_each_viable_workaround_failed": [
++    "alternate_command_spelling — REJECTED, not attempted: every spelling invokes the same binary through the same host approval layer. The qa subagent independently reached this conclusion and declined it in the same terms. Re-spelling a command to evade a permission prompt is circumvention, not a workaround.",
++    "sandbox_override — REJECTED, not attempted: dangerouslyDisableSandbox exists to bypass sandboxing, and using it to defeat an approval control I was told requires an approver is exactly the action the permission exists to prevent.",
++    "different_execution_surface — ATTEMPTED AND FAILED: the qa subagent is a genuinely distinct surface and was reached only after paying the escalation cost. It hit the identical refusal. Workflow was not attempted because it spawns agents through the same dispatch and permission layers, would breach budget_max_subagents at direct mode, and the qa result already establishes the layer is host-wide rather than surface-local.",
++    "different_analysis_tool — ATTEMPTED AND FAILED: serena's get_diagnostics_for_file is a real non-Bash route to the same answer and would have worked, but it is gated by the same ungranted-permission layer.",
++    "static_substitute — PARTIALLY SUCCEEDED and is why this is not a full block: the fix is verified against the declarations. It cannot discharge the acceptance criterion, which names a compiler invocation and requires proof that no NEW error appeared in any OTHER file — a whole-program property that reading one file cannot establish.",
++    "narrow_the_check — REJECTED: still requires the same blocked binary, and would be strictly weaker than the project-wide run the criterion names.",
++    "mutate_build_config — REJECTED: editing tsconfig.json or package.json to manufacture a runnable check would mutate the very configuration under measurement, exceed the packet's declared one-file scope, and corrupt the result it was meant to produce.",
++    "defer_to_operator — THIS IS THE PROPOSED CONCESSION. It is not a failure of the others so much as what remains after them: a single approval grant converts an unmeasured edit into a measured one."
++  ],
++
+   "other_surface_may_hold_capability": {
+     "enumerated": true,
++    "capability": "execute `npx tsc --noEmit -p tsconfig.json` and return compiler output",
++    "surfaces_enumerated": [
++      { "surface": "parent_loop_bash", "tested": true, "holds": false, "evidence": "host refusal: 'This command requires approval'; mutgate declared 'no approver present'" },
++      { "surface": "qa_subagent_bash", "tested": true, "holds": false, "evidence": "independent surface, identical host refusal on two command forms; reported RED — blocked, not measured" },
++      { "surface": "serena_mcp_language_server", "tested": true, "holds": false, "evidence": "get_diagnostics_for_file refused — permission not granted" },
++      { "surface": "toolsearch_deferred_registry", "tested": true, "holds": false, "evidence": "no Grep/Glob/static-analysis tool registered on this host" },
++      { "surface": "workflow_orchestrator", "tested": false, "holds": false, "evidence": "untested by choice — routes through the same dispatch and permission layers already proven refusing; would also breach budget_max_subagents=0. Recorded as UNTESTED, not as absent." },
++      { "surface": "builder_subagent_bash", "tested": false, "holds": false, "evidence": "untested — same host permission layer as qa_subagent_bash, which was tested and refused. Recorded as UNTESTED." }
++    ],
+     "surfaces_with_capability": [],
+-    "detail": "The Operator Lab store DOES hold the discriminator -- this is absence from THIS surface, not from the system. No surface reachable FROM this session holds a Lab read path: chatgpt holds Lab write via observe_interaction/gate_outbound_inference, but that surface is not operable from here. The item is therefore a fetch for the operator or the bridge, and is recorded as such rather than as an unobtainable fact.",
+-    "untested_surfaces": ["manus", "surplus_recovery"]
++    "conclusion": "No AGENT-REACHABLE surface holds the capability. The refusal is host-wide, not interface-local: this was proven, not assumed, by reaching a second independent execution surface (the qa subagent) and observing the identical approval refusal. Per the episode this gate encodes, local absence is not system absence — so the cross-surface search was actually run, and it came back empty.",
++    "human_surface_holds_it": true,
++    "human_surface_note": "The operator holds the approval right and is the only holder. This is recorded OUTSIDE surfaces_with_capability deliberately: 'route through it instead of conceding' presumes a surface the agent can drive without human action, and routing through the operator IS the concession, not an alternative to it. The unblock is one grant: approve `npx tsc --noEmit -p tsconfig.json`, or pre-approve the `npx tsc` prefix."
+   }
+ }
+diff --git a/server/agent/github-app.ts b/server/agent/github-app.ts
+index 8b1f834..9e8f552 100644
+--- a/server/agent/github-app.ts
++++ b/server/agent/github-app.ts
+@@ -21,7 +21,7 @@ export interface GravitoCommand {
+   raw: string;
+ }
+ import { GitOperations } from './git-operations';
+-import { ArtifactGenerator } from './artifact-generator';
++import { ArtifactGenerator, AgentRunReport, Issue, RubricScore } from './artifact-generator';
+ import { SiteGraphArtifactGenerator } from './sitegraph-artifact';
+ import { governedGenerate } from '../governance/governed-generate';
+ import { GitHubContentFetcher, ArtifactBundle, formatBundleForLLM, FetchResult } from './github-content-fetcher';
+@@ -1093,8 +1093,19 @@ NEVER invent proof or make unsubstantiated claims.`,
+       events: [{ name: 'issue_detected', timestamp: new Date().toISOString(), attributes: { message: issue.message } }],
+     }));
+ 
++    // Audit issues arrive as { type, message, severity }; the artifact generator
++    // expects Issue { severity, category, description }.
++    const auditIssues: Array<{ type: string; message: string; severity: string }> =
++      auditResult.issues || [];
++    const issueSeverityByName: Record<string, Issue['severity']> = {
++      critical: 'critical',
++      high: 'high',
++      medium: 'medium',
++      low: 'low',
++    };
++
+     // Create run report matching AgentRunReport interface
+-    const runReport = {
++    const runReport: AgentRunReport = {
+       runId,
+       surface: 'website',
+       repo: 'gravito/website',
+@@ -1114,14 +1125,11 @@ NEVER invent proof or make unsubstantiated claims.`,
+         decision: auditResult.passed ? 'pass' as const : 'block' as const,
+         score: auditResult.score,
+         threshold: 75,
+-        rubricScores: emptyArray(),
+-        issues: (auditResult.issues || []).map((i: any) => ({
+-          id: `issue_${Math.random().toString(36).substr(2, 9)}`,
+-          type: i.type,
+-          severity: i.severity as 'critical' | 'high' | 'medium' | 'low',
+-          message: i.message,
+-          location: null,
+-          suggestion: null,
++        rubricScores: emptyArray<RubricScore>(),
++        issues: auditIssues.map((i) => ({
++          severity: issueSeverityByName[i.severity] ?? 'low',
++          category: i.type,
++          description: i.message,
+         })),
+         recommendations: [],
+         businessTruthCheck: {
+
+diff --git a/build-os/packets/routing/routing-T03-20260810T035005Z.md b/build-os/packets/routing/routing-T03-20260810T035005Z.md
+--- /dev/null
++++ b/build-os/packets/routing/routing-T03-20260810T035005Z.md
++# ROUTING RECEIPT — one file per routing decision. The recorded verdict is BINDING
++# (build-os/memory/routing_contract.md); routing-check.sh refuses this receipt at
++# close if executed_mode exceeds selected_mode with no escalation record, if an
++# escalation carries no evidence, or if consumption exceeds a budget undeclared.
++task_id: T03
++description_sha256: 4e1b542ff242691b82b43da0c432ec68d0cf1923bd7abba99a558862892ec313
++descriptor: {"expected_files_changed":1,"requires_tests":false,"expected_session_count":1,"prior_context_required":false,"handoff_required":false,"consequence_level":"low","irreversible_or_external_mutation":false,"high_blast_radius":false,"unclear_acceptance_criteria":false,"security_or_compliance_consequence":false,"parallel_workstreams_benefit":false,"high_rework_history":false,"nondeterministic_verification":false}
++selected_mode: direct
++selector_note: -
++issued_at: 2026-08-10T03:50:05Z
++# --- budgets: DERIVED DEFAULTS from EXP-0002 sealed records, operator-tunable, not laws.
++# --- Derivation: ON-surface light runs measured 172k-369k total tokens / 0 dispatches
++# --- (named exceedance: raw T4 at 526,461 - context, not the band); the
++# --- blowouts measured 4.9M/7.4M tokens, 4-5 dispatches, $3.63/$4.80. See route-task.sh.
++budget_max_subagents: 0
++budget_max_total_tokens: 250000
++budget_max_uncached_tokens: 30000
++budget_max_model_calls: 12
++budget_max_wall_clock_s: 300
++budget_max_cost_usd: 0.40
++# --- process allowance (PACKET-0053): the packet's OWN gate chain is governance
++# --- ceremony, counted SEPARATELY from task work by the live gate and attributed
++# --- to governance_process (the 0050/0051 calibration question, resolved). Default
++# --- 7 = the LARGEST LEGAL chain in the doctrine: mandatory_full_regate runs
++# --- builder, qa, reviewer, fix-builder, qa, reviewer, archivist. (No-fix chain
++# --- is 4; fix-then-pass is 6.) Process dispatches never eat budget_max_subagents.
++process_dispatch_allowance: 7
++# --- empty at issue; filled at close. AN UNKNOWN IS NOT A ZERO: "-" is an honest
++# --- admission and is never refused; refusal is for CONTRADICTION, not absence.
++executed_mode: process_dispatch
++escalation: direct -> process_dispatch (qa, 1 dispatch, verification only; counts against process_dispatch_allowance=7, not budget_max_subagents=0)
++escalation_evidence: WHAT CHANGED SINCE ISSUE — the descriptor recorded nondeterministic_verification=false, i.e. direct mode was selected on the assumption that this packet's sole acceptance check (`npx tsc --noEmit -p tsconfig.json`, named verbatim in the task's accepted-when clause) was runnable in the parent loop. Execution disproved that assumption: attempt 1 was refused by routing-gate mutgate (no open receipt) and, after the receipt opened, attempt 2 was refused by the host permission layer ("This command requires approval"), with the mutgate message stating "the host does not permit Bash (approval required, no approver present)". The parent-loop MCP alternative (mcp__serena__get_diagnostics_for_file) was refused by the same permission layer. The edit is complete and manually verified against the type declarations, but the packet's acceptance criterion is a COMPILER result I cannot produce at direct depth. Escalating one process dispatch to test whether the subagent surface holds the Bash capability that the parent surface lacks — per concession-gate.mjs, local absence is not system absence, and an untested surface is not evidence. If the dispatch is refused by the same host permission layer, that result is recorded as cross-surface exhaustion evidence rather than re-attempted.
++consumed_subagents: -
++consumed_total_tokens: -
++consumed_uncached_tokens: -
++consumed_model_calls: -
++consumed_wall_clock_s: -
++consumed_cost_usd: -
++degradation_note: -
++# --- close-fill EXTENSIONS (PACKET-0053). consumed_subagents above counts TASK
++# --- dispatches (vs budget_max_subagents); consumed_process_dispatches counts the
++# --- gate chain (vs process_dispatch_allowance). The attr_* layers attribute
++# --- consumption where derivable at close — tokens or cost with provenance, or
++# --- "-" as an admission, NEVER a zero nobody measured. Receipts predating these
++# --- fields stay valid: routing-check.sh reads an absent field as "-".
++consumed_process_dispatches: -
++attr_task_execution: -
++attr_context_retrieval: -
++attr_subagent_execution: -
++attr_verification: -
++attr_review: -
++attr_governance_process: -
++attr_experiment_audit: -
++# --- contribution rows (PACKET-0053): marginal-contribution accounting, MANDATORY
++# --- for a Full close with dispatches>0 (routing-check.sh refuses otherwise). The
++# --- live gate seeds one stub row per admitted Full task dispatch; fill at close:
++# --- contribution: <subagent_type> | <unique_question> | <output_ref> | changed_implementation=y/n/- | changed_conclusion=y/n/- | caught_defect=y/n/- | duplicated_work=y/n/- | tokens=<v|-> | cost=<v|-> | time=<v|->
++# --- An all-"-" row passes as an admission and is REPORTED as non-contributing.
++
+diff --git a/build-os/packets/routing/routing-T03-exhaustion-evidence-20260810T035640Z.md b/build-os/packets/routing/routing-T03-exhaustion-evidence-20260810T035640Z.md
+--- /dev/null
++++ b/build-os/packets/routing/routing-T03-exhaustion-evidence-20260810T035640Z.md
++# ROUTING RECEIPT — one file per routing decision. The recorded verdict is BINDING
++# (build-os/memory/routing_contract.md); routing-check.sh refuses this receipt at
++# close if executed_mode exceeds selected_mode with no escalation record, if an
++# escalation carries no evidence, or if consumption exceeds a budget undeclared.
++task_id: T03-exhaustion-evidence
++description_sha256: 4eec45136da320a5fed5745bc2c4560495cb425ffb1449fee350ca8fbdd083f1
++descriptor: {"expected_files_changed":1,"requires_tests":false,"expected_session_count":1,"prior_context_required":false,"handoff_required":false,"consequence_level":"low","irreversible_or_external_mutation":false,"high_blast_radius":false,"unclear_acceptance_criteria":false,"security_or_compliance_consequence":false,"parallel_workstreams_benefit":false,"high_rework_history":false,"nondeterministic_verification":false}
++selected_mode: direct
++selector_note: -
++issued_at: 2026-08-10T03:56:40Z
++# --- budgets: DERIVED DEFAULTS from EXP-0002 sealed records, operator-tunable, not laws.
++# --- Derivation: ON-surface light runs measured 172k-369k total tokens / 0 dispatches
++# --- (named exceedance: raw T4 at 526,461 - context, not the band); the
++# --- blowouts measured 4.9M/7.4M tokens, 4-5 dispatches, $3.63/$4.80. See route-task.sh.
++budget_max_subagents: 0
++budget_max_total_tokens: 250000
++budget_max_uncached_tokens: 30000
++budget_max_model_calls: 12
++budget_max_wall_clock_s: 300
++budget_max_cost_usd: 0.40
++# --- process allowance (PACKET-0053): the packet's OWN gate chain is governance
++# --- ceremony, counted SEPARATELY from task work by the live gate and attributed
++# --- to governance_process (the 0050/0051 calibration question, resolved). Default
++# --- 7 = the LARGEST LEGAL chain in the doctrine: mandatory_full_regate runs
++# --- builder, qa, reviewer, fix-builder, qa, reviewer, archivist. (No-fix chain
++# --- is 4; fix-then-pass is 6.) Process dispatches never eat budget_max_subagents.
++process_dispatch_allowance: 7
++# --- empty at issue; filled at close. AN UNKNOWN IS NOT A ZERO: "-" is an honest
++# --- admission and is never refused; refusal is for CONTRADICTION, not absence.
++executed_mode: -
++escalation: -
++escalation_evidence: -
++consumed_subagents: -
++consumed_total_tokens: -
++consumed_uncached_tokens: -
++consumed_model_calls: -
++consumed_wall_clock_s: -
++consumed_cost_usd: -
++degradation_note: -
++# --- close-fill EXTENSIONS (PACKET-0053). consumed_subagents above counts TASK
++# --- dispatches (vs budget_max_subagents); consumed_process_dispatches counts the
++# --- gate chain (vs process_dispatch_allowance). The attr_* layers attribute
++# --- consumption where derivable at close — tokens or cost with provenance, or
++# --- "-" as an admission, NEVER a zero nobody measured. Receipts predating these
++# --- fields stay valid: routing-check.sh reads an absent field as "-".
++consumed_process_dispatches: -
++attr_task_execution: -
++attr_context_retrieval: -
++attr_subagent_execution: -
++attr_verification: -
++attr_review: -
++attr_governance_process: -
++attr_experiment_audit: -
++# --- contribution rows (PACKET-0053): marginal-contribution accounting, MANDATORY
++# --- for a Full close with dispatches>0 (routing-check.sh refuses otherwise). The
++# --- live gate seeds one stub row per admitted Full task dispatch; fill at close:
++# --- contribution: <subagent_type> | <unique_question> | <output_ref> | changed_implementation=y/n/- | changed_conclusion=y/n/- | caught_defect=y/n/- | duplicated_work=y/n/- | tokens=<v|-> | cost=<v|-> | time=<v|->
++# --- An all-"-" row passes as an admission and is REPORTED as non-contributing.
++

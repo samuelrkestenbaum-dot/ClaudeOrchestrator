@@ -1,0 +1,166 @@
+=== PER-ARM (every cell, no aggregation) ===
+
+-- native (n=4) --
+arm                   acc turns tools txtOnly  ctx/t  out/t   cost  srch impl bkkp wait qref
+T01.native            Y      28    27       4  44759    345   1.29     0    0    0    0    0
+T02.native            Y      20    19       4  41292    305   0.88     0    0    0    0    0
+T03.native            Y      25    24       5  32872    300   0.86     0    0    0    0    0
+T04.native            Y      49    48       5  57173    386   2.47     1    0    0    0    0
+
+-- contaminated (n=12) --
+arm                   acc turns tools txtOnly  ctx/t  out/t   cost  srch impl bkkp wait qref
+T01.baseline          Y      37    25      21  62329    330   2.33     0    2    4    5    6
+T01.baseline.r2       Y      35    24      16  61024    362   2.06     0    1    5    4    5
+T01.baseline.r3       Y      44    31      24 103088    432   4.07     0    0    3    0    6
+T02.baseline          Y      35    23      17  57910    394   1.92     0    5    3    6    4
+T02.baseline.r2       Y      42    30      24  85866    432   3.25     0    9    3    0    4
+T02.baseline.r3       Y      52    40      20  46781    379   2.41     0    4    4    0    8
+T03.baseline          Y      45    33      22  58819    455   2.53     0    6    4    4    6
+T03.baseline.r2       Y      42    29      19  46675    323   1.82     0    2    7    3    7
+T03.baseline.r3       Y      53    41      15  72539    356   3.28     1    8    5    2    6
+T04.baseline          Y      91    86      30 139342    875  10.35     0   35   22    0   12
+T04.baseline.r2       Y      43    31      19  83415    627   3.38     0    4    4    0   11
+T04.baseline.r3       Y      46    34      19  77973    713   3.57     0    4    3    0    5
+
+-- corrected (n=12) --
+arm                   acc turns tools txtOnly  ctx/t  out/t   cost  srch impl bkkp wait qref
+T01.corrected         Y      36    33      13  67153    776   2.97     0    5    7    0    0
+T01.corrected.r2      Y      36    34      17  64632    673   2.67     0    4    7    0    0
+T01.corrected.r3      Y      45    42      18  71203    597   3.19     7    4    7    0    1
+T02.corrected         Y      46    43      17  74903    556   3.34     3    9    5    0    1
+T02.corrected.r2      Y      42    39      16  59704    605   2.60     2    5    8    0    0
+T02.corrected.r3      Y      77    75      13  25941    365   3.21     0    3    5    0    0
+T03.corrected         Y      23    22       7  37695    512   1.10     0    0    4    0    0
+T03.corrected.r2      Y      32    29      14  51527    674   1.99     0    2    6    0    0
+T03.corrected.r3      Y      43    43      19  76610    811   3.54     0    5   11    0    0
+T04.corrected         Y      75    76      18 113692    597   6.91     0   10   18    0    0
+T04.corrected.r2      Y      55    66      22  72264    621   4.09     0    5    7    0    0
+T04.corrected.r3      Y      56    56      22  83735    682   4.47     0    6   12    0    0
+
+=== WITHIN-CELL SPREAD (identical task+config, reps differ) ===
+
+-- contaminated --
+cell  metric              min     max   ratio    CV
+T01    turns              35.00   44.00    1.26    12%
+T01    tool calls         24.00   31.00    1.29    14%
+T01    impl reads          0.00    2.00Infinity   100%
+T01    cost                2.06    4.07    1.98    39%
+T01    text-only          16.00   24.00    1.50    20%
+T02    turns              35.00   52.00    1.49    20%
+T02    tool calls         23.00   40.00    1.74    28%
+T02    impl reads          4.00    9.00    2.25    44%
+T02    cost                1.92    3.25    1.69    26%
+T02    text-only          17.00   24.00    1.41    17%
+T03    turns              42.00   53.00    1.26    12%
+T03    tool calls         29.00   41.00    1.41    18%
+T03    impl reads          2.00    8.00    4.00    57%
+T03    cost                1.82    3.28    1.80    29%
+T03    text-only          15.00   22.00    1.47    19%
+T04    turns              43.00   91.00    2.12    45%
+T04    tool calls         31.00   86.00    2.77    61%
+T04    impl reads          4.00   35.00    8.75   125%
+T04    cost                3.38   10.35    3.06    69%
+T04    text-only          19.00   30.00    1.58    28%
+
+-- corrected --
+cell  metric              min     max   ratio    CV
+T01    turns              36.00   45.00    1.25    13%
+T01    tool calls         33.00   42.00    1.27    14%
+T01    impl reads          4.00    5.00    1.25    13%
+T01    cost                2.67    3.19    1.19     9%
+T01    text-only          13.00   18.00    1.38    17%
+T02    turns              42.00   77.00    1.83    35%
+T02    tool calls         39.00   75.00    1.92    38%
+T02    impl reads          3.00    9.00    3.00    54%
+T02    cost                2.60    3.34    1.29    13%
+T02    text-only          13.00   17.00    1.31    14%
+T03    turns              23.00   43.00    1.87    31%
+T03    tool calls         22.00   43.00    1.95    34%
+T03    impl reads          0.00    5.00Infinity   108%
+T03    cost                1.10    3.54    3.21    56%
+T03    text-only           7.00   19.00    2.71    45%
+T04    turns              55.00   75.00    1.36    18%
+T04    tool calls         56.00   76.00    1.36    15%
+T04    impl reads          5.00   10.00    2.00    38%
+T04    cost                4.09    6.91    1.69    30%
+T04    text-only          18.00   22.00    1.22    11%
+
+=== AGGREGATE MEANS (with the range each mean conceals) ===
+
+metric                            native          contaminated             corrected
+turns                   30.5 [20.0-49.0]      47.1 [35.0-91.0]      47.2 [23.0-77.0]
+tool calls              29.5 [19.0-48.0]      35.6 [23.0-86.0]      46.5 [22.0-76.0]
+text-only turns            4.5 [4.0-5.0]      20.5 [15.0-30.0]       16.3 [7.0-22.0]
+context/turn (tok)   44024 [32872-57173]  74647 [46675-139342]  66588 [25941-113692]
+output/turn (tok)          334 [300-386]         473 [323-875]         622 [365-811]
+cost USD             1.375 [0.861-2.471]  3.415 [1.824-10.353]   3.340 [1.102-6.915]
+uncached tok         41854 [27612-62816]  97510 [53154-212955] 101342 [39352-159132]
+gravito_search             0.3 [0.0-1.0]         0.1 [0.0-1.0]         1.0 [0.0-7.0]
+impl reads                 0.0 [0.0-0.0]        6.7 [0.0-35.0]        4.8 [0.0-10.0]
+routing+authority          0.0 [0.0-0.0]        5.6 [3.0-22.0]        8.1 [4.0-18.0]
+waiting-posture            0.0 [0.0-0.0]         2.0 [0.0-6.0]         0.0 [0.0-0.0]
+queue refs                 0.0 [0.0-0.0]        6.7 [4.0-12.0]         0.2 [0.0-1.0]
+
+=== PAIRED BY TASK — corrected vs contaminated (task-matched means) ===
+
+metric                task-mean contam  task-mean corr   ratio  tasks improved
+turns                             47.1            47.2    1.00  1/4
+tool calls                        35.6            46.5    1.31  1/4
+text-only turns                   20.5            16.3    0.80  4/4
+context/turn (tok)               74647           66588    0.89  4/4
+output/turn (tok)                  473             622    1.32  1/4
+cost USD                         3.415           3.340    0.98  2/4
+uncached tok                     97510          101342    1.04  2/4
+gravito_search                     0.1             1.0   12.00  1/4
+impl reads                         6.7             4.8    0.73  3/4
+routing+authority                  5.6             8.1    1.45  0/4
+waiting-posture                    2.0             0.0    0.00  3/4
+queue refs                         6.7             0.2    0.03  4/4
+
+=== SEPARATION BY TASK — corrected reps vs contaminated reps ===
+
+metric                T01     T02     T03     T04     tasks separated (direction)
+turns                overlap overlap overlap overlap  none — inside the noise
+tool calls            HIGHER overlap overlap overlap  0 lower, 1 higher — NOT consistent
+text-only turns      overlap overlap overlap overlap  none — inside the noise
+context/turn (tok)   overlap overlap overlap overlap  none — inside the noise
+output/turn (tok)     HIGHER overlap  HIGHER overlap  0 lower, 2 higher — NOT consistent
+cost USD             overlap overlap overlap overlap  none — inside the noise
+uncached tok         overlap overlap overlap overlap  none — inside the noise
+gravito_search       overlap overlap overlap overlap  none — inside the noise
+impl reads            HIGHER overlap overlap overlap  0 lower, 1 higher — NOT consistent
+routing+authority     HIGHER  HIGHER overlap overlap  0 lower, 2 higher — NOT consistent
+waiting-posture      overlap overlap   LOWER overlap  1 lower, 0 higher — NOT consistent
+queue refs             LOWER   LOWER   LOWER   LOWER  4/4 LOWER  p=1.3e-5
+
+=== PAIRED BY TASK — corrected vs native (task-matched, native n=1/task) ===
+
+metric                    native   corrected   ratio
+turns                       30.5        47.2    1.55
+tool calls                  29.5        46.5    1.58
+text-only turns              4.5        16.3    3.63
+context/turn (tok)         44024       66588    1.51
+output/turn (tok)            334         622    1.86
+cost USD                   1.375       3.340    2.43
+uncached tok               41854      101342    2.42
+gravito_search               0.3         1.0    4.00
+impl reads                   0.0         4.8       —
+routing+authority            0.0         8.1       —
+waiting-posture              0.0         0.0       —
+queue refs                   0.0         0.2       —
+
+=== BOTH GRAVITO GROUPS vs NATIVE (task-matched) — did the fix move the headline? ===
+
+metric                    native  contam/nat  corr/nat  change
+turns                       30.5        1.54      1.55  WORSE
+tool calls                  29.5        1.21      1.58  WORSE
+text-only turns              4.5        4.56      3.63  improved
+context/turn (tok)         44024        1.70      1.51  improved
+output/turn (tok)            334        1.42      1.86  WORSE
+cost USD                   1.375        2.48      2.43  improved
+uncached tok               41854        2.33      2.42  WORSE
+gravito_search               0.3        0.33      4.00  WORSE
+impl reads             (native is 0 — ratio undefined)
+routing+authority      (native is 0 — ratio undefined)
+waiting-posture        (native is 0 — ratio undefined)
+queue refs             (native is 0 — ratio undefined)

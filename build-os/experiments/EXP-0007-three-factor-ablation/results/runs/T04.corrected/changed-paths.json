@@ -1,0 +1,13 @@
+{
+  "base_commit": "9de33279128155aceb0d3512c8da2245923e3e4c",
+  "product_paths": [
+    "client/src/pages/UserDashboard.tsx"
+  ],
+  "governance_paths": [
+    "build-os/motion/capability-map.mjs",
+    "build-os/motion/exhaustion/current.json",
+    "build-os/packets/routing/routing-T04-exhaustion-evidence-fields-20260810T025415Z.md",
+    "build-os/packets/routing/routing-T04-receipt-consumption-fill-20260810T025215Z.md",
+    "build-os/packets/routing/routing-T04-userdashboard-typefix-20260810T024712Z.md"
+  ]
+}

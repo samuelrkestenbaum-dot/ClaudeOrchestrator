@@ -1,0 +1,11 @@
+{
+  "base_commit": "fb0fd725c5dde5daa7553c1f9e691f36398638d6",
+  "product_paths": [
+    "server/agent/github-app.ts"
+  ],
+  "governance_paths": [
+    "build-os/motion/exhaustion/current.json",
+    "build-os/packets/routing/routing-T03-20260810T035005Z.md",
+    "build-os/packets/routing/routing-T03-exhaustion-evidence-20260810T035640Z.md"
+  ]
+}

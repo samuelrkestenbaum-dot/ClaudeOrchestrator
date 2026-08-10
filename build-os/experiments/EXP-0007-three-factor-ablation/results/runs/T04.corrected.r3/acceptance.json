@@ -1,0 +1,35 @@
+{
+  "accepted": true,
+  "task_file": "client/src/pages/UserDashboard.tsx",
+  "condition_1_zero_errors_in_file": {
+    "pass": true,
+    "errors_before": 2,
+    "errors_after": 0,
+    "remaining": []
+  },
+  "condition_2_no_new_errors_elsewhere": {
+    "pass": true,
+    "new_error_count": 0,
+    "path_artifacts_excluded": 5,
+    "path_artifact_note": "errors identical to a baseline error once every absolute path is erased — the same pre-existing error seen under a different tree name. Reported, never silently dropped.",
+    "new_errors": []
+  },
+  "diff_rejection": {
+    "rejected": false,
+    "hits": [],
+    "net_introduced": {},
+    "pattern_added_counts": {},
+    "pattern_removed_counts": {},
+    "hits_offset_by_removals": [],
+    "deletion_suspected": false,
+    "lines_added": 17,
+    "lines_removed": 11,
+    "note": "patterns are matched on ADDED lines only; matching the whole file would reject a task for `any` casts the seed already contained"
+  },
+  "total_errors_before": 781,
+  "total_errors_after": 779,
+  "path_normalisations_applied": 5,
+  "path_normalisation_note": "tsc embeds absolute paths in some messages, and the baseline tree and the arm tree sit at different paths. Without normalising the tree root out, the SAME pre-existing error hashes differently and an untouched file reads as a regression. The frozen acceptance rule is unchanged; an environment difference is removed, not a code difference. This count is reported so the correction can never be silent.",
+  "verdict_basis": "compiler output and diff text only — no judgement, no adjudicator opinion",
+  "verification_exit_code": 2
+}

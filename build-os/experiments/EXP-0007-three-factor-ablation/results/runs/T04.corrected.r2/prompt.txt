@@ -1,0 +1,16 @@
+# Task T04
+
+Fix the TypeScript type errors in `client/src/pages/UserDashboard.tsx`.
+
+That file currently has 2 typecheck error(s) (TS2322, TS2339).
+The first is at line 474: TS2322: Type 'Partial<ApiKey>' is not assignable to type '{ id: number; keyPrefix: string; name: string | null; isActive: boolean; createdAt: Date; lastUsedAt: Date | n
+
+## How this will be judged (identical in both conditions)
+
+Verification command: `npx tsc --noEmit -p tsconfig.json`
+Accepted when: the command reports ZERO errors for `client/src/pages/UserDashboard.tsx`, AND no new error appears in any other file.
+
+REJECTED, regardless of the compiler result: `@ts-ignore`, `@ts-expect-error`, `@ts-nocheck`, `any` casts,
+or deleting the offending code. Fix the type, do not silence it.
+
+Work in the current repository. Do not push, and do not touch anything outside it.

@@ -1,0 +1,17 @@
+{
+  "uncached_input_tokens": 52,
+  "cache_read_input_tokens": 1582527,
+  "cache_creation_input_tokens": 66294,
+  "output_tokens": 21562,
+  "num_turns": 32,
+  "total_cost_usd": 1.9935135,
+  "elapsed_s": 331.859,
+  "tool_calls": 29,
+  "subagent_invocations": 1,
+  "product_files_changed": 1,
+  "governance_files_changed": 2,
+  "tool_result_chars": 63290,
+  "hook_emitted_chars": 3413,
+  "hook_emitting_results": 4,
+  "config": "corrected"
+}

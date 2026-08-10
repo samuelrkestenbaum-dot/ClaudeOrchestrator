@@ -1,0 +1,10 @@
+{
+  "base_commit": "a3851f635927017d6be7023a1ab57806f126c8fa",
+  "product_paths": [
+    "server/agent/github-app.ts"
+  ],
+  "governance_paths": [
+    "build-os/motion/exhaustion/current.json",
+    "build-os/packets/routing/routing-T03-20260810T031359Z.md"
+  ]
+}
