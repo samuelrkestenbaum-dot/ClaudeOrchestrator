@@ -521,6 +521,46 @@ redeem_routing_request(){
   return 0
 }
 
+# LEAN L2 (LEAN-MANIFEST.md) — THE RECEIPT MINTS ITSELF.
+#
+# The measured interaction this removes: routing_bookkeeping at 2.0 text-turns
+# per arm plus the write-request-and-retry round-trips inside the 4.6-vs-0.0
+# control-call gap. Every field of the worker-authored routing request was
+# always derivable here — this gate already runs the selector and already mints
+# receipts from the request file. The only thing the worker was adding was the
+# typing.
+#
+# THE FLOOR DESCRIPTOR. The auto-derived descriptor deliberately claims the
+# MINIMUM on all thirteen fields, so the selector grants its lowest mode
+# (direct). That is the manifest's cap-by-construction: a task that outgrows
+# the floor trips the existing reassess/escalation machinery unchanged, and any
+# mode above the floor still requires an explicit, worker-visible routing act.
+# Deriving a "truer" richer descriptor here would be guessing scope on the
+# worker's behalf — the one thing a floor never does.
+auto_route_first_mutation(){ # <raw-json> <tool> -> rc 0 iff a receipt was minted
+  command -v node >/dev/null 2>&1 || { logrow "none" "-" "AUTO-ROUTE-SKIPPED" "reason=node-unavailable"; return 1; }
+  local rt tid fp exc desc descr out
+  # DATA_ROOT ONLY — no CODE_ROOT fallback, and the reason is a demonstrated
+  # defect, not caution: route-task.sh writes its receipt under ITS OWN tree,
+  # so minting via the code tree plants a receipt in the ORCHESTRATOR repo when
+  # the worker's data tree merely lacks tools. The first run of lean-l2.test.sh
+  # did exactly that. A data tree without route-task falls through to the
+  # preserved BLOCK; administered arm trees always carry it.
+  rt="$DATA_ROOT/build-os/tools/route-task.sh"
+  [ -f "$rt" ] || { logrow "none" "-" "AUTO-ROUTE-SKIPPED" "reason=route-task-missing-in-data-tree"; return 1; }
+  tid="auto-$(date -u +%Y%m%dT%H%M%SZ 2>/dev/null || printf 'x')-$$"
+  fp="$(extract_file_path "$1")" || fp=""
+  exc="$(printf '%s' "${fp:-$2}" | tr -d '\t\r\n"' | cut -c1-60)"
+  desc="auto-routed at first mutation: $2${exc:+ -> $exc}"
+  descr='{"expected_files_changed":1,"requires_tests":false,"expected_session_count":1,"prior_context_required":false,"handoff_required":false,"consequence_level":"low","irreversible_or_external_mutation":false,"high_blast_radius":false,"unclear_acceptance_criteria":false,"security_or_compliance_consequence":false,"parallel_workstreams_benefit":false,"high_rework_history":false,"nondeterministic_verification":false}'
+  out="$(bash "$rt" --task-id "$tid" --description "$desc" --descriptor "$descr" 2>&1)" || {
+    logrow "none" "-" "AUTO-ROUTE-FAILED" "tool=$2 detail=$(printf '%s' "$out" | tr -d '\t\r\n' | cut -c1-120)"
+    return 1
+  }
+  logrow "$tid" "-" "AUTO-RECEIPT-MINTED" "via=lean-l2 authored_by=runtime tool=$2 target=${exc:--}"
+  return 0
+}
+
 mutgate_decide(){ # <stdin-json> — protocol on stdout: ALLOW or BLOCK + message
   local in="$1" tool cls rec tid="none" mode="-" v act rtool rcmd sha exc
   tool="$(printf '%s' "$in" | sed -n 's/.*"tool_name"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | head -n1)"
@@ -583,6 +623,18 @@ mutgate_decide(){ # <stdin-json> — protocol on stdout: ALLOW or BLOCK + messag
       logrow "none" "-" "FAIL-OPEN-STORE-UNAVAILABLE" "tool=$tool store unreadable and uncreatable: recovery cannot succeed, so blocking would be a dead end"
       printf 'ALLOW\n'
       return 0
+    fi
+    # LEAN L2: with the store available and no pending request, the runtime
+    # performs the deterministic administration itself instead of refusing and
+    # dictating the schema. The BLOCK below survives as the fallback for hosts
+    # where route-task itself cannot run — the worker-visible refusal is now
+    # the exception path, not the default first-mutation experience.
+    if auto_route_first_mutation "$in" "$tool"; then
+      rec="$(open_receipt)" || rec=""
+      if [ -n "$rec" ]; then
+        tid="$(fval "$rec" task_id)"; mode="$(fval "$rec" selected_mode)"
+        printf 'ALLOW\n'; return 0
+      fi
     fi
     logrow "none" "-" "BLOCK-MUTATION-NO-RECEIPT" "tool=$tool"
     printf 'BLOCK\n'
