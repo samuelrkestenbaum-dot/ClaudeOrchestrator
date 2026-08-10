@@ -1,0 +1,82 @@
+diff --git a/client/src/pages/UserDashboard.tsx b/client/src/pages/UserDashboard.tsx
+index 6b9bfc8..27959c9 100644
+--- a/client/src/pages/UserDashboard.tsx
++++ b/client/src/pages/UserDashboard.tsx
+@@ -30,6 +30,16 @@ import {
+ } from "@/components/ui/dialog";
+ import { Input } from "@/components/ui/input";
+ import { Label } from "@/components/ui/label";
++import type { ApiKey } from "../../../server/supabase-adapter";
++
++/**
++ * What `apiKeys.list` actually returns: the query selects a column subset
++ * (no userId/keyHash), so every field is optional and timestamps arrive as
++ * ISO strings, not Dates.
++ */
++type ApiKeySummary = Partial<Pick<ApiKey,
++  "id" | "keyPrefix" | "name" | "isActive" | "createdAt" | "lastUsedAt"
++>>;
+ 
+ const PLAN_COLORS: Record<string, string> = {
+   free: "bg-slate-100 text-slate-700",
+@@ -95,12 +105,13 @@ function QuickStartChecklist({ hasApiKey, hasUsage }: { hasApiKey: boolean; hasU
+ }
+ 
+ function ApiKeyCard({ apiKey, onDelete, onRegenerate }: {
+-  apiKey: { id: number; keyPrefix: string; name: string | null; isActive: boolean; createdAt: Date; lastUsedAt: Date | null };
++  apiKey: ApiKeySummary;
+   onDelete: (id: number) => void;
+   onRegenerate: (id: number) => void;
+ }) {
+   const [showFull, setShowFull] = useState(false);
+-  const displayKey = showFull ? `${apiKey.keyPrefix}${"•".repeat(32)}` : `${apiKey.keyPrefix}••••••••`;
++  const { id, keyPrefix = "", createdAt, lastUsedAt } = apiKey;
++  const displayKey = showFull ? `${keyPrefix}${"•".repeat(32)}` : `${keyPrefix}••••••••`;
+ 
+   return (
+     <div className="flex items-center justify-between p-3 rounded-lg border border-border/50 bg-muted/20 hover:bg-muted/40 transition-colors">
+@@ -120,27 +131,29 @@ function ApiKeyCard({ apiKey, onDelete, onRegenerate }: {
+             </button>
+           </div>
+           <p className="text-xs text-muted-foreground mt-0.5">
+-            Created {new Date(apiKey.createdAt).toLocaleDateString()}
+-            {apiKey.lastUsedAt && ` · Last used ${new Date(apiKey.lastUsedAt).toLocaleDateString()}`}
++            {createdAt && `Created ${new Date(createdAt).toLocaleDateString()}`}
++            {lastUsedAt && ` · Last used ${new Date(lastUsedAt).toLocaleDateString()}`}
+           </p>
+         </div>
+       </div>
+       <div className="flex items-center gap-1 shrink-0">
+         <Button
+           variant="ghost" size="icon" className="h-7 w-7"
+-          onClick={() => { navigator.clipboard.writeText(apiKey.keyPrefix); toast.success("Key prefix copied"); }}
++          onClick={() => { navigator.clipboard.writeText(keyPrefix); toast.success("Key prefix copied"); }}
+         >
+           <Copy className="h-3.5 w-3.5" />
+         </Button>
+         <Button
+           variant="ghost" size="icon" className="h-7 w-7"
+-          onClick={() => onRegenerate(apiKey.id)}
++          disabled={id === undefined}
++          onClick={() => { if (id !== undefined) onRegenerate(id); }}
+         >
+           <RefreshCw className="h-3.5 w-3.5" />
+         </Button>
+         <Button
+           variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive"
+-          onClick={() => onDelete(apiKey.id)}
++          disabled={id === undefined}
++          onClick={() => { if (id !== undefined) onDelete(id); }}
+         >
+           <Trash2 className="h-3.5 w-3.5" />
+         </Button>
+@@ -608,7 +621,7 @@ export default function UserDashboard() {
+                         <div key={i} className="flex items-center justify-between py-2 border-b border-border/30 last:border-0">
+                           <div>
+                             <p className="text-sm">{invoice.description || "Subscription"}</p>
+-                            <p className="text-xs text-muted-foreground">{new Date(invoice.date).toLocaleDateString()}</p>
++                            <p className="text-xs text-muted-foreground">{new Date(invoice.createdAt).toLocaleDateString()}</p>
+                           </div>
+                           <div className="text-right">
+                             <p className="text-sm font-medium">${(invoice.amount / 100).toFixed(2)}</p>
+

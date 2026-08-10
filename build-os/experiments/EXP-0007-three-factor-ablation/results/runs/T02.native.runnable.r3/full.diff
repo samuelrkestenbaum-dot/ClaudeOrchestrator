@@ -1,0 +1,44 @@
+diff --git a/server/services/auto-apply-pipeline.ts b/server/services/auto-apply-pipeline.ts
+index ef46231..5eac24a 100644
+--- a/server/services/auto-apply-pipeline.ts
++++ b/server/services/auto-apply-pipeline.ts
+@@ -38,9 +38,19 @@ function getDb() {
+ // TYPES
+ // ============================================================================
+ 
++export const SEVERITY_LEVELS = ['low', 'medium', 'high', 'critical'] as const;
++export type Severity = (typeof SEVERITY_LEVELS)[number];
++
++/**
++ * Narrow a free-form value (e.g. the `varchar` severity column) to a Severity.
++ */
++function isSeverity(value: unknown): value is Severity {
++  return typeof value === 'string' && (SEVERITY_LEVELS as readonly string[]).includes(value);
++}
++
+ export interface AutoApplyConfig {
+   enabled: boolean;
+-  maxSeverity: 'low' | 'medium' | 'high' | 'critical';
++  maxSeverity: Severity;
+   activeProfile: string;
+   profileLocked: boolean;
+ }
+@@ -165,7 +175,7 @@ export async function getAutoApplyConfig(): Promise<AutoApplyConfig> {
+     const settings = rows[0];
+     return {
+       enabled: settings.autoApplyMode ?? false,
+-      maxSeverity: (settings.autoApplyMaxSeverity as unknown) ?? 'medium',
++      maxSeverity: isSeverity(settings.autoApplyMaxSeverity) ? settings.autoApplyMaxSeverity : 'medium',
+       activeProfile: settings.activeProfile,
+       profileLocked: settings.profileLocked,
+     };
+@@ -185,7 +195,7 @@ export async function getAutoApplyConfig(): Promise<AutoApplyConfig> {
+  */
+ export async function setAutoApplyMode(
+   enabled: boolean,
+-  maxSeverity?: 'low' | 'medium' | 'high' | 'critical',
++  maxSeverity?: Severity,
+   actor?: string,
+ ): Promise<void> {
+   const db = getDb();
+

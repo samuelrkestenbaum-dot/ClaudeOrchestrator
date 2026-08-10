@@ -1,0 +1,11 @@
+{
+  "base_commit": "9c994b9bc0ce7905b922bec6f5fbe6f2b20bbce4",
+  "product_paths": [
+    "client/src/pages/UserDashboard.tsx",
+    "server/supabase-adapter.ts",
+    "server/supabase-db.ts"
+  ],
+  "governance_paths": [
+    "build-os/packets/routing/routing-T04-userdashboard-typefix-20260810T161926Z.md"
+  ]
+}

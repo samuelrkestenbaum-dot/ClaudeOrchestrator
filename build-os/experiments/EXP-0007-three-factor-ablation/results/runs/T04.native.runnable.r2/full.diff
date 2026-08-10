@@ -1,0 +1,67 @@
+diff --git a/client/src/lib/trpc.ts b/client/src/lib/trpc.ts
+index df38607..f4dcb05 100644
+--- a/client/src/lib/trpc.ts
++++ b/client/src/lib/trpc.ts
+@@ -1,4 +1,8 @@
+ import { createTRPCReact } from "@trpc/react-query";
++import type { inferRouterOutputs } from "@trpc/server";
+ import type { AppRouter } from "../../../server/routers";
+ 
+ export const trpc = createTRPCReact<AppRouter>();
++
++/** Payload types as they arrive on the client, so components can't drift from the API. */
++export type RouterOutputs = inferRouterOutputs<AppRouter>;
+diff --git a/client/src/pages/UserDashboard.tsx b/client/src/pages/UserDashboard.tsx
+index 6b9bfc8..ea91185 100644
+--- a/client/src/pages/UserDashboard.tsx
++++ b/client/src/pages/UserDashboard.tsx
+@@ -10,7 +10,7 @@
+  */
+ import { useState } from "react";
+ import { useAuth } from "@/_core/hooks/useAuth";
+-import { trpc } from "@/lib/trpc";
++import { trpc, type RouterOutputs } from "@/lib/trpc";
+ import { toast } from "sonner";
+ import { Link } from "wouter";
+ import {
+@@ -95,7 +95,7 @@ function QuickStartChecklist({ hasApiKey, hasUsage }: { hasApiKey: boolean; hasU
+ }
+ 
+ function ApiKeyCard({ apiKey, onDelete, onRegenerate }: {
+-  apiKey: { id: number; keyPrefix: string; name: string | null; isActive: boolean; createdAt: Date; lastUsedAt: Date | null };
++  apiKey: RouterOutputs["apiKeys"]["list"][number];
+   onDelete: (id: number) => void;
+   onRegenerate: (id: number) => void;
+ }) {
+@@ -608,7 +608,7 @@ export default function UserDashboard() {
+                         <div key={i} className="flex items-center justify-between py-2 border-b border-border/30 last:border-0">
+                           <div>
+                             <p className="text-sm">{invoice.description || "Subscription"}</p>
+-                            <p className="text-xs text-muted-foreground">{new Date(invoice.date).toLocaleDateString()}</p>
++                            <p className="text-xs text-muted-foreground">{new Date(invoice.createdAt).toLocaleDateString()}</p>
+                           </div>
+                           <div className="text-right">
+                             <p className="text-sm font-medium">${(invoice.amount / 100).toFixed(2)}</p>
+diff --git a/server/supabase-adapter.ts b/server/supabase-adapter.ts
+index b14eba5..e3c2020 100644
+--- a/server/supabase-adapter.ts
++++ b/server/supabase-adapter.ts
+@@ -155,9 +155,15 @@ export async function createApiKey(userId: number, name?: string): Promise<{ key
+   return result;
+ }
+ 
+-export async function getApiKeysByUserId(userId: number): Promise<Partial<ApiKey>[]> {
++/**
++ * The columns getApiKeysByUserId actually selects — the secret-bearing keyHash is
++ * deliberately excluded, everything else is always present on every row.
++ */
++export type ApiKeySummary = Pick<ApiKey, 'id' | 'keyPrefix' | 'name' | 'isActive' | 'lastUsedAt' | 'createdAt'>;
++
++export async function getApiKeysByUserId(userId: number): Promise<ApiKeySummary[]> {
+   const keys = await supabaseDb.getApiKeysByUserId(userId);
+-  return keys.map(k => convertKeysToCamel(k as unknown as Record<string, unknown>)) as Partial<ApiKey>[];
++  return keys.map(k => convertKeysToCamel(k as unknown as Record<string, unknown>)) as unknown as ApiKeySummary[];
+ }
+ 
+ export async function validateApiKey(key: string): Promise<ApiKey | null> {
+

@@ -1,0 +1,76 @@
+{
+  "artifact": "runnable_study_log",
+  "verification": "runnable",
+  "configs": [
+    "native",
+    "corrected"
+  ],
+  "reps_executed": [
+    1,
+    2,
+    3
+  ],
+  "units": [
+    {
+      "task": "T01",
+      "config": "corrected",
+      "rep": 1,
+      "skipped": true
+    },
+    {
+      "task": "T01",
+      "config": "native",
+      "rep": 1,
+      "skipped": true
+    },
+    {
+      "task": "T02",
+      "config": "corrected",
+      "rep": 1,
+      "skipped": true
+    },
+    {
+      "task": "T02",
+      "config": "native",
+      "rep": 1,
+      "skipped": true
+    },
+    {
+      "task": "T03",
+      "config": "corrected",
+      "rep": 1,
+      "skipped": true
+    },
+    {
+      "task": "T03",
+      "config": "native",
+      "rep": 1,
+      "skipped": true
+    },
+    {
+      "task": "T04",
+      "config": "corrected",
+      "rep": 1,
+      "skipped": true
+    },
+    {
+      "task": "T04",
+      "config": "native",
+      "rep": 1,
+      "skipped": true
+    },
+    {
+      "task": "T01",
+      "config": "native",
+      "rep": 2,
+      "skipped": true
+    },
+    {
+      "task": "T01",
+      "config": "corrected",
+      "rep": 2,
+      "exit": 0,
+      "wall_s": 1328
+    }
+  ]
+}

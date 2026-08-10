@@ -1,0 +1,93 @@
+diff --git a/client/src/pages/UserDashboard.tsx b/client/src/pages/UserDashboard.tsx
+index 6b9bfc8..ac8de7b 100644
+--- a/client/src/pages/UserDashboard.tsx
++++ b/client/src/pages/UserDashboard.tsx
+@@ -9,6 +9,8 @@
+  *   - trpc.stripe.createCheckout / billingPortal
+  */
+ import { useState } from "react";
++import type { inferRouterOutputs } from "@trpc/server";
++import type { AppRouter } from "../../../server/routers";
+ import { useAuth } from "@/_core/hooks/useAuth";
+ import { trpc } from "@/lib/trpc";
+ import { toast } from "sonner";
+@@ -94,8 +96,10 @@ function QuickStartChecklist({ hasApiKey, hasUsage }: { hasApiKey: boolean; hasU
+   );
+ }
+ 
++type ApiKeyListItem = inferRouterOutputs<AppRouter>["apiKeys"]["list"][number];
++
+ function ApiKeyCard({ apiKey, onDelete, onRegenerate }: {
+-  apiKey: { id: number; keyPrefix: string; name: string | null; isActive: boolean; createdAt: Date; lastUsedAt: Date | null };
++  apiKey: ApiKeyListItem;
+   onDelete: (id: number) => void;
+   onRegenerate: (id: number) => void;
+ }) {
+@@ -608,7 +612,7 @@ export default function UserDashboard() {
+                         <div key={i} className="flex items-center justify-between py-2 border-b border-border/30 last:border-0">
+                           <div>
+                             <p className="text-sm">{invoice.description || "Subscription"}</p>
+-                            <p className="text-xs text-muted-foreground">{new Date(invoice.date).toLocaleDateString()}</p>
++                            <p className="text-xs text-muted-foreground">{new Date(invoice.createdAt).toLocaleDateString()}</p>
+                           </div>
+                           <div className="text-right">
+                             <p className="text-sm font-medium">${(invoice.amount / 100).toFixed(2)}</p>
+diff --git a/server/supabase-adapter.ts b/server/supabase-adapter.ts
+index b14eba5..1fcd03e 100644
+--- a/server/supabase-adapter.ts
++++ b/server/supabase-adapter.ts
+@@ -50,6 +50,12 @@ export interface ApiKey {
+   createdAt: string;
+ }
+ 
++/** camelCase mirror of supabaseDb.ApiKeySummary — what key listings return. */
++export type ApiKeySummary = Pick<
++  ApiKey,
++  'id' | 'keyPrefix' | 'name' | 'isActive' | 'lastUsedAt' | 'createdAt'
++>;
++
+ export interface Subscription {
+   id: number;
+   userId: number;
+@@ -155,9 +161,9 @@ export async function createApiKey(userId: number, name?: string): Promise<{ key
+   return result;
+ }
+ 
+-export async function getApiKeysByUserId(userId: number): Promise<Partial<ApiKey>[]> {
++export async function getApiKeysByUserId(userId: number): Promise<ApiKeySummary[]> {
+   const keys = await supabaseDb.getApiKeysByUserId(userId);
+-  return keys.map(k => convertKeysToCamel(k as unknown as Record<string, unknown>)) as Partial<ApiKey>[];
++  return keys.map(k => convertKeysToCamel(k as unknown as Record<string, unknown>)) as unknown as ApiKeySummary[];
+ }
+ 
+ export async function validateApiKey(key: string): Promise<ApiKey | null> {
+diff --git a/server/supabase-db.ts b/server/supabase-db.ts
+index d7ce73e..963782c 100644
+--- a/server/supabase-db.ts
++++ b/server/supabase-db.ts
+@@ -41,6 +41,15 @@ export interface ApiKey {
+   created_at: string;
+ }
+ 
++/**
++ * The columns getApiKeysByUserId selects — every key is listed with all of
++ * these present. The secret key_hash is deliberately never selected.
++ */
++export type ApiKeySummary = Pick<
++  ApiKey,
++  'id' | 'key_prefix' | 'name' | 'is_active' | 'last_used_at' | 'created_at'
++>;
++
+ export interface Subscription {
+   id: number;
+   user_id: number;
+@@ -267,7 +276,7 @@ export async function createApiKey(userId: number, name?: string): Promise<{ key
+   return { key, prefix };
+ }
+ 
+-export async function getApiKeysByUserId(userId: number): Promise<Partial<ApiKey>[]> {
++export async function getApiKeysByUserId(userId: number): Promise<ApiKeySummary[]> {
+   const { data, error } = await supabase
+     .from('api_keys')
+     .select('id, key_prefix, name, is_active, last_used_at, created_at')
+

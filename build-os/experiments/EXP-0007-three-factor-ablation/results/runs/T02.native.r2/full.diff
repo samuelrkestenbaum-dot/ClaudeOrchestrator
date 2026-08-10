@@ -1,0 +1,33 @@
+diff --git a/server/services/auto-apply-pipeline.ts b/server/services/auto-apply-pipeline.ts
+index ef46231..9f49161 100644
+--- a/server/services/auto-apply-pipeline.ts
++++ b/server/services/auto-apply-pipeline.ts
+@@ -141,6 +141,18 @@ const SEVERITY_ORDER: Record<string, number> = {
+   'critical': 4,
+ };
+ 
++type Severity = AutoApplyConfig['maxSeverity'];
++
++const SEVERITY_LEVELS: readonly Severity[] = ['low', 'medium', 'high', 'critical'];
++
++/**
++ * The DB column is a plain varchar, so narrow it to the severity union at the
++ * boundary. Anything unrecognised (or null) falls back to the safe default.
++ */
++function toSeverity(value: string | null | undefined, fallback: Severity = 'medium'): Severity {
++  return SEVERITY_LEVELS.find(level => level === value) ?? fallback;
++}
++
+ // ============================================================================
+ // CONFIGURATION
+ // ============================================================================
+@@ -165,7 +177,7 @@ export async function getAutoApplyConfig(): Promise<AutoApplyConfig> {
+     const settings = rows[0];
+     return {
+       enabled: settings.autoApplyMode ?? false,
+-      maxSeverity: (settings.autoApplyMaxSeverity as unknown) ?? 'medium',
++      maxSeverity: toSeverity(settings.autoApplyMaxSeverity),
+       activeProfile: settings.activeProfile,
+       profileLocked: settings.profileLocked,
+     };
+

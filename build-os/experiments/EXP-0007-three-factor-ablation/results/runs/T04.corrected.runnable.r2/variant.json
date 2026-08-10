@@ -1,0 +1,18 @@
+{
+  "config": "corrected",
+  "acts": [],
+  "baseline": true,
+  "administered_sha": "9c994b9bc0ce7905b922bec6f5fbe6f2b20bbce4",
+  "arm": "gravito",
+  "verification": "runnable",
+  "allowed_tools": [
+    "Bash(npx tsc:*)",
+    "Bash(./node_modules/.bin/tsc:*)",
+    "Bash(node_modules/.bin/tsc:*)"
+  ],
+  "permission_mode": "acceptEdits",
+  "bash_timeouts": {
+    "BASH_DEFAULT_TIMEOUT_MS": "600000",
+    "BASH_MAX_TIMEOUT_MS": "600000"
+  }
+}

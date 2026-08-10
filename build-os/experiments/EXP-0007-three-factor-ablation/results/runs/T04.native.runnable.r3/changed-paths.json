@@ -1,0 +1,9 @@
+{
+  "base_commit": "d6e71adb401604bab9facc31429cc9bf68441bcd",
+  "product_paths": [
+    "client/src/pages/UserDashboard.tsx",
+    "server/supabase-adapter.ts",
+    "server/supabase-db.ts"
+  ],
+  "governance_paths": []
+}

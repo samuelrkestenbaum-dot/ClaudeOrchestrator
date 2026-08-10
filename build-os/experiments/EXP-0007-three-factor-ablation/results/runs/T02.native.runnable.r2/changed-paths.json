@@ -1,0 +1,7 @@
+{
+  "base_commit": "45a900c263eb337fcf55d2f1199db9df4ca85cf0",
+  "product_paths": [
+    "server/services/auto-apply-pipeline.ts"
+  ],
+  "governance_paths": []
+}

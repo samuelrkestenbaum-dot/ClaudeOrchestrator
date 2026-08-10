@@ -1,0 +1,19 @@
+{
+  "config": "native",
+  "acts": [],
+  "baseline": false,
+  "native": true,
+  "administered_sha": "acabba269607ef8e904a3c94485011a53ccd2230",
+  "arm": "native",
+  "verification": "runnable",
+  "allowed_tools": [
+    "Bash(npx tsc:*)",
+    "Bash(./node_modules/.bin/tsc:*)",
+    "Bash(node_modules/.bin/tsc:*)"
+  ],
+  "permission_mode": "acceptEdits",
+  "bash_timeouts": {
+    "BASH_DEFAULT_TIMEOUT_MS": "600000",
+    "BASH_MAX_TIMEOUT_MS": "600000"
+  }
+}

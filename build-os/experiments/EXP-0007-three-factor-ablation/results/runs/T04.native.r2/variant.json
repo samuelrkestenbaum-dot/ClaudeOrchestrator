@@ -1,0 +1,15 @@
+{
+  "config": "native",
+  "acts": [],
+  "baseline": false,
+  "native": true,
+  "administered_sha": "ab1be6d12da7f83318ab43b73eb1f088ed369ea6",
+  "arm": "native",
+  "verification": "starved",
+  "allowed_tools": [],
+  "permission_mode": "acceptEdits",
+  "bash_timeouts": {
+    "BASH_DEFAULT_TIMEOUT_MS": "600000",
+    "BASH_MAX_TIMEOUT_MS": "600000"
+  }
+}

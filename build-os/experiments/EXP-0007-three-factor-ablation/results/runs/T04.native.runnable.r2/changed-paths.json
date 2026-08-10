@@ -1,0 +1,9 @@
+{
+  "base_commit": "8253abb1a5c8e5fe5614eee5213859163e2719b7",
+  "product_paths": [
+    "client/src/lib/trpc.ts",
+    "client/src/pages/UserDashboard.tsx",
+    "server/supabase-adapter.ts"
+  ],
+  "governance_paths": []
+}

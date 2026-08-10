@@ -2,43 +2,74 @@
   "artifact": "program_state",
   "version": 1,
   "primary_objective": "Determine whether Gravito can preserve its substrate value while achieving competitive AI-work economics.",
-
   "established_facts": [
-    { "fact": "the substrate functions operationally", "evidence": "EXP-0006 24/24 arms admissible; clean-start authority, host-permission routing, continuation, objective prioritisation, session isolation all executing" },
-    { "fact": "current measured implementations cost more than native", "evidence": "EXP-0006 native UIC 18.15 vs gravito 10.36, 12/12 tasks, p=2.4e-4" },
-    { "fact": "naive context subtraction increases search rather than reducing cost", "evidence": "EXP-0007 variant B: gravito_search 0.1 -> 11.3 calls/arm, total tool calls 35.6 -> 64.5" },
-    { "fact": "narration suppression attacks 1% of the excess", "evidence": "STEP2: protocol_narration is 0.08 of 11.83 excess text-only turns/arm; variant C moved turns by 0.3" },
-    { "fact": "several earlier estimates were contaminated by environment or measurement defects", "evidence": "orchestrator queue administered as CODE; acceptance keyed on absolute paths; denominator excluded cache-creation tokens; publication-gate logic inverted" },
-    { "fact": "removing the foreign queue did not move the economics; the stop-refusal loop changed drivers", "evidence": "corrected re-baseline cost 2.48x -> 2.43x native, every metric overlapping; queue-dominant 23/24 contaminated arms vs exhaustion-dominant 11/12 uncontaminated" },
-    { "fact": "the measured host cannot execute the judged verification command", "evidence": "acceptEdits with no allowedTools, headless; 143 Bash calls in starved arms, 109 refused; native authority_blocked 1.00/arm" }
+    {
+      "fact": "the substrate functions operationally",
+      "evidence": "EXP-0006 24/24 arms admissible; clean-start authority, host-permission routing, continuation, objective prioritisation, session isolation all executing"
+    },
+    {
+      "fact": "current measured implementations cost more than native",
+      "evidence": "EXP-0006 native UIC 18.15 vs gravito 10.36, 12/12 tasks, p=2.4e-4"
+    },
+    {
+      "fact": "naive context subtraction increases search rather than reducing cost",
+      "evidence": "EXP-0007 variant B: gravito_search 0.1 -> 11.3 calls/arm, total tool calls 35.6 -> 64.5"
+    },
+    {
+      "fact": "narration suppression attacks 1% of the excess",
+      "evidence": "STEP2: protocol_narration is 0.08 of 11.83 excess text-only turns/arm; variant C moved turns by 0.3"
+    },
+    {
+      "fact": "several earlier estimates were contaminated by environment or measurement defects",
+      "evidence": "orchestrator queue administered as CODE; acceptance keyed on absolute paths; denominator excluded cache-creation tokens; publication-gate logic inverted"
+    },
+    {
+      "fact": "removing the foreign queue did not move the economics; the stop-refusal loop changed drivers",
+      "evidence": "corrected re-baseline cost 2.48x -> 2.43x native, every metric overlapping; queue-dominant 23/24 contaminated arms vs exhaustion-dominant 11/12 uncontaminated"
+    },
+    {
+      "fact": "the measured host cannot execute the judged verification command",
+      "evidence": "acceptEdits with no allowedTools, headless; 143 Bash calls in starved arms, 109 refused; native authority_blocked 1.00/arm"
+    },
+    {
+      "fact": "capability starvation amplified but did not cause the gap",
+      "evidence": "runnable verification: exhaustion refs 4.5->1.0/arm, bookkeeping 8.1->4.6, impl reads 4.8->2.0, text-only 16.3->11.5; cost gap 3.03x->2.44x"
+    },
+    {
+      "fact": "the clean normal-runtime gap is >=2.44x cost / 2.12x uncached, and these are FLOORS",
+      "evidence": "47/47 admissible arms accepted; 4/4 tasks fully separated on cost (p=1.3e-5); the only censored observations (2 timeouts of one cell, 2 more arms at 81-89% ceiling) are all gravito-runnable, so censoring shrinks the measured gap"
+    },
+    {
+      "fact": "even with verification runnable the worker still operates the substrate",
+      "evidence": "gravito.runnable vs native.runnable per arm: final reports 2.4 vs 0.7, text-only 11.5 vs 4.8, bookkeeping+gate 4.6 vs 0.0, exhaustion refs 1.0 vs 0.0"
+    }
   ],
-
   "open_decisions": [
     {
       "id": "D1",
       "decision": "Whether to redesign the interaction model, or to target only normal-runtime overhead.",
       "open_uncertainty": "Does runnable verification materially collapse the native-vs-Gravito cost gap?",
       "resolved_by": "one clean normal-runtime baseline, T01-T04, verification runnable, distribution inspected",
-      "status": "open",
+      "status": "resolved",
       "measurement_attempts": 3,
       "attempt_log": [
         "EXP-0006 operational UIC — contaminated by the administered queue",
         "EXP-0007 corrected re-baseline — clean of contamination, still capability-starved",
-        "runnable-verification re-baseline — in flight"
-      ]
+        "runnable-verification re-baseline — COMPLETE: the clean normal-runtime baseline; gap 2.44x cost / 2.12x uncached"
+      ],
+      "resolution": "REDESIGN THE INTERACTION MODEL. Runnable verification contracted the gap (cost 3.03x -> 2.44x, uncached 2.78x -> 2.12x) — capability starvation was a real amplifier — but the residual gap is materially >=2x with 4/4 tasks fully separated on cost (p=1.3e-5) and censoring biasing these numbers DOWN. Per the precommitted fork, LEAN_MANIFEST is the work; no further baseline refinement absent a measurement-invalidating defect."
     }
   ],
-
   "stop_conditions": [
     {
       "id": "S1",
       "applies_to": "D1",
       "rule": "Once ONE clean normal-runtime baseline exists with verification runnable, stop re-baselining. If Gravito remains materially more expensive than native, move to interaction-model redesign. Reopening measurement afterwards requires a MEASUREMENT-INVALIDATING defect — proof the test did not measure what it claimed. A new plausible causal hypothesis is NOT grounds: it is interesting, and redesign comes first. Without this distinction every negative result generates one more rescue experiment forever.",
       "declared_by": "operator, in-session, before the result was known",
-      "satisfied": false
+      "satisfied": true,
+      "satisfied_evidence": "the clean normal-runtime baseline exists: 47 admissible arms, 47/47 accepted, verification proven executable in both arms. Task-paired cost gap 2.44x (4/4 tasks fully separated, p=1.3e-5), uncached 2.12x — materially above native, with censoring making these floors. Per the precommitted fork: stop re-baselining, redesign the interaction model."
     }
   ],
-
   "policies": [
     {
       "id": "P-freeze-governance",

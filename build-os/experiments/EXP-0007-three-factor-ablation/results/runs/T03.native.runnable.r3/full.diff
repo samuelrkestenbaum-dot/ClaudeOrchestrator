@@ -1,0 +1,23 @@
+diff --git a/server/agent/github-app.ts b/server/agent/github-app.ts
+index 8b1f834..e74e961 100644
+--- a/server/agent/github-app.ts
++++ b/server/agent/github-app.ts
+@@ -21,7 +21,7 @@ export interface GravitoCommand {
+   raw: string;
+ }
+ import { GitOperations } from './git-operations';
+-import { ArtifactGenerator } from './artifact-generator';
++import { ArtifactGenerator, type RubricScore } from './artifact-generator';
+ import { SiteGraphArtifactGenerator } from './sitegraph-artifact';
+ import { governedGenerate } from '../governance/governed-generate';
+ import { GitHubContentFetcher, ArtifactBundle, formatBundleForLLM, FetchResult } from './github-content-fetcher';
+@@ -1114,7 +1114,7 @@ NEVER invent proof or make unsubstantiated claims.`,
+         decision: auditResult.passed ? 'pass' as const : 'block' as const,
+         score: auditResult.score,
+         threshold: 75,
+-        rubricScores: emptyArray(),
++        rubricScores: emptyArray<RubricScore>(),
+         issues: (auditResult.issues || []).map((i: any) => ({
+           id: `issue_${Math.random().toString(36).substr(2, 9)}`,
+           type: i.type,
+

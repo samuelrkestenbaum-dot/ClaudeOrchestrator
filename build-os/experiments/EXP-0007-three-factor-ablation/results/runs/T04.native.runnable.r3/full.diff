@@ -1,0 +1,102 @@
+diff --git a/client/src/pages/UserDashboard.tsx b/client/src/pages/UserDashboard.tsx
+index 6b9bfc8..2e4ed7a 100644
+--- a/client/src/pages/UserDashboard.tsx
++++ b/client/src/pages/UserDashboard.tsx
+@@ -9,6 +9,8 @@
+  *   - trpc.stripe.createCheckout / billingPortal
+  */
+ import { useState } from "react";
++import type { inferRouterOutputs } from "@trpc/server";
++import type { AppRouter } from "../../../server/routers";
+ import { useAuth } from "@/_core/hooks/useAuth";
+ import { trpc } from "@/lib/trpc";
+ import { toast } from "sonner";
+@@ -31,6 +33,10 @@ import {
+ import { Input } from "@/components/ui/input";
+ import { Label } from "@/components/ui/label";
+ 
++type RouterOutputs = inferRouterOutputs<AppRouter>;
++/** Exactly what trpc.apiKeys.list returns — keeps the card in sync with the API. */
++type ApiKeySummary = RouterOutputs["apiKeys"]["list"][number];
++
+ const PLAN_COLORS: Record<string, string> = {
+   free: "bg-slate-100 text-slate-700",
+   developer: "bg-blue-100 text-blue-700",
+@@ -95,7 +101,7 @@ function QuickStartChecklist({ hasApiKey, hasUsage }: { hasApiKey: boolean; hasU
+ }
+ 
+ function ApiKeyCard({ apiKey, onDelete, onRegenerate }: {
+-  apiKey: { id: number; keyPrefix: string; name: string | null; isActive: boolean; createdAt: Date; lastUsedAt: Date | null };
++  apiKey: ApiKeySummary;
+   onDelete: (id: number) => void;
+   onRegenerate: (id: number) => void;
+ }) {
+@@ -608,7 +614,7 @@ export default function UserDashboard() {
+                         <div key={i} className="flex items-center justify-between py-2 border-b border-border/30 last:border-0">
+                           <div>
+                             <p className="text-sm">{invoice.description || "Subscription"}</p>
+-                            <p className="text-xs text-muted-foreground">{new Date(invoice.date).toLocaleDateString()}</p>
++                            <p className="text-xs text-muted-foreground">{new Date(invoice.createdAt).toLocaleDateString()}</p>
+                           </div>
+                           <div className="text-right">
+                             <p className="text-sm font-medium">${(invoice.amount / 100).toFixed(2)}</p>
+diff --git a/server/supabase-adapter.ts b/server/supabase-adapter.ts
+index b14eba5..b6dfc9e 100644
+--- a/server/supabase-adapter.ts
++++ b/server/supabase-adapter.ts
+@@ -50,6 +50,12 @@ export interface ApiKey {
+   createdAt: string;
+ }
+ 
++/** camelCase mirror of supabaseDb.ApiKeySummary — everything but the key hash. */
++export type ApiKeySummary = Pick<
++  ApiKey,
++  'id' | 'keyPrefix' | 'name' | 'isActive' | 'lastUsedAt' | 'createdAt'
++>;
++
+ export interface Subscription {
+   id: number;
+   userId: number;
+@@ -155,9 +161,9 @@ export async function createApiKey(userId: number, name?: string): Promise<{ key
+   return result;
+ }
+ 
+-export async function getApiKeysByUserId(userId: number): Promise<Partial<ApiKey>[]> {
++export async function getApiKeysByUserId(userId: number): Promise<ApiKeySummary[]> {
+   const keys = await supabaseDb.getApiKeysByUserId(userId);
+-  return keys.map(k => convertKeysToCamel(k as unknown as Record<string, unknown>)) as Partial<ApiKey>[];
++  return keys.map(k => convertKeysToCamel(k as unknown as Record<string, unknown>)) as unknown as ApiKeySummary[];
+ }
+ 
+ export async function validateApiKey(key: string): Promise<ApiKey | null> {
+diff --git a/server/supabase-db.ts b/server/supabase-db.ts
+index d7ce73e..e9ee241 100644
+--- a/server/supabase-db.ts
++++ b/server/supabase-db.ts
+@@ -41,6 +41,16 @@ export interface ApiKey {
+   created_at: string;
+ }
+ 
++/**
++ * The subset of api_keys columns exposed to callers. The key hash is never
++ * selected, but every other listed column always comes back — so this is a
++ * Pick, not a Partial.
++ */
++export type ApiKeySummary = Pick<
++  ApiKey,
++  'id' | 'key_prefix' | 'name' | 'is_active' | 'last_used_at' | 'created_at'
++>;
++
+ export interface Subscription {
+   id: number;
+   user_id: number;
+@@ -267,7 +277,7 @@ export async function createApiKey(userId: number, name?: string): Promise<{ key
+   return { key, prefix };
+ }
+ 
+-export async function getApiKeysByUserId(userId: number): Promise<Partial<ApiKey>[]> {
++export async function getApiKeysByUserId(userId: number): Promise<ApiKeySummary[]> {
+   const { data, error } = await supabase
+     .from('api_keys')
+     .select('id, key_prefix, name, is_active, last_used_at, created_at')
+

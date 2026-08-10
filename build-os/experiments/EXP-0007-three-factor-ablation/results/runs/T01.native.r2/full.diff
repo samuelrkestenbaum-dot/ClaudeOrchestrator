@@ -1,0 +1,33 @@
+diff --git a/server/services/organizational-memory.ts b/server/services/organizational-memory.ts
+index 17f84c9..6fe936c 100644
+--- a/server/services/organizational-memory.ts
++++ b/server/services/organizational-memory.ts
+@@ -213,15 +213,14 @@ export async function generatePreventionAdvice(patternId: string): Promise<strin
+     surfaceId: 'services-organizational-memory',
+   });
+   
+-  const rawAdvice = (govResult as unknown as Record<string, unknown>).choices?.[0]?.message?.content;
+-  const advice = typeof rawAdvice === 'string' ? rawAdvice : 'Unable to generate advice.';
++  const advice = govResult.content?.trim() || 'Unable to generate advice.';
+   
+   // Persist the advice
+   await db.update(violationPatterns)
+     .set({ suggestedPrevention: advice, updatedAt: new Date() })
+     .where(eq(violationPatterns.patternId, patternId));
+   
+-  return advice as string;
++  return advice;
+ }
+ 
+ // ============================================================================
+@@ -570,8 +569,7 @@ Return JSON: { "score": 0-100, "toneMatch": true/false, "formalityMatch": true/f
+   });
+   
+   try {
+-    const rawContent = (govResult as unknown as Record<string, unknown>).choices?.[0]?.message?.content;
+-    const result = JSON.parse(typeof rawContent === 'string' ? rawContent : '{}');
++    const result = JSON.parse(govResult.content?.trim() || '{}');
+     
+     // Update the alignment score
+     const dbConn = await getDb();
+

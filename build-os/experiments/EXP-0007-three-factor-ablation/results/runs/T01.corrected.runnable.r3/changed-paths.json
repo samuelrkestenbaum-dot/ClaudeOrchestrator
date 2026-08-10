@@ -1,0 +1,9 @@
+{
+  "base_commit": "44e52bbd35ce0970c0b4937dcdbd9880e4d783ae",
+  "product_paths": [
+    "server/services/organizational-memory.ts"
+  ],
+  "governance_paths": [
+    "build-os/packets/routing/routing-T01-orgmem-ts7053-20260810T163221Z.md"
+  ]
+}

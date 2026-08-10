@@ -1,0 +1,74 @@
+diff --git a/client/src/pages/UserDashboard.tsx b/client/src/pages/UserDashboard.tsx
+index 6b9bfc8..cd01e72 100644
+--- a/client/src/pages/UserDashboard.tsx
++++ b/client/src/pages/UserDashboard.tsx
+@@ -94,8 +94,29 @@ function QuickStartChecklist({ hasApiKey, hasUsage }: { hasApiKey: boolean; hasU
+   );
+ }
+ 
++/**
++ * A key row as the dashboard needs it. The API types every column as optional
++ * (rows come back as `Partial<ApiKey>`) and serialises timestamps as strings,
++ * so rows are narrowed with `hasKeyIdentity` before they reach this card.
++ */
++type DashboardApiKey = {
++  id: number;
++  keyPrefix: string;
++  name?: string | null;
++  isActive?: boolean;
++  createdAt?: string | null;
++  lastUsedAt?: string | null;
++};
++
++/** A row is only actionable (copy / regenerate / delete) once it has an id and prefix. */
++function hasKeyIdentity<T extends { id?: number; keyPrefix?: string }>(
++  key: T,
++): key is T & { id: number; keyPrefix: string } {
++  return typeof key.id === "number" && typeof key.keyPrefix === "string";
++}
++
+ function ApiKeyCard({ apiKey, onDelete, onRegenerate }: {
+-  apiKey: { id: number; keyPrefix: string; name: string | null; isActive: boolean; createdAt: Date; lastUsedAt: Date | null };
++  apiKey: DashboardApiKey;
+   onDelete: (id: number) => void;
+   onRegenerate: (id: number) => void;
+ }) {
+@@ -120,7 +141,7 @@ function ApiKeyCard({ apiKey, onDelete, onRegenerate }: {
+             </button>
+           </div>
+           <p className="text-xs text-muted-foreground mt-0.5">
+-            Created {new Date(apiKey.createdAt).toLocaleDateString()}
++            Created {apiKey.createdAt ? new Date(apiKey.createdAt).toLocaleDateString() : "—"}
+             {apiKey.lastUsedAt && ` · Last used ${new Date(apiKey.lastUsedAt).toLocaleDateString()}`}
+           </p>
+         </div>
+@@ -305,6 +326,7 @@ export default function UserDashboard() {
+   const usageTotal = usageStats?.total ?? 0;
+   const usagePct = planLimit > 0 ? Math.min(100, Math.round((usageTotal / planLimit) * 100)) : 0;
+   const hasApiKey = (apiKeys?.length ?? 0) > 0;
++  const displayableKeys = (apiKeys ?? []).filter(hasKeyIdentity);
+   const hasUsage = usageTotal > 0;
+ 
+   return (
+@@ -466,9 +488,9 @@ export default function UserDashboard() {
+                   <div className="space-y-2">
+                     {[1, 2].map(i => <div key={i} className="h-16 bg-muted animate-pulse rounded-lg" />)}
+                   </div>
+-                ) : apiKeys && apiKeys.length > 0 ? (
++                ) : displayableKeys.length > 0 ? (
+                   <div className="space-y-2">
+-                    {apiKeys.map((key) => (
++                    {displayableKeys.map((key) => (
+                       <ApiKeyCard
+                         key={key.id}
+                         apiKey={key}
+@@ -608,7 +630,7 @@ export default function UserDashboard() {
+                         <div key={i} className="flex items-center justify-between py-2 border-b border-border/30 last:border-0">
+                           <div>
+                             <p className="text-sm">{invoice.description || "Subscription"}</p>
+-                            <p className="text-xs text-muted-foreground">{new Date(invoice.date).toLocaleDateString()}</p>
++                            <p className="text-xs text-muted-foreground">{new Date(invoice.createdAt).toLocaleDateString()}</p>
+                           </div>
+                           <div className="text-right">
+                             <p className="text-sm font-medium">${(invoice.amount / 100).toFixed(2)}</p>
+

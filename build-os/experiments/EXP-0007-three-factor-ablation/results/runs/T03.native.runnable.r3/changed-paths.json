@@ -1,0 +1,7 @@
+{
+  "base_commit": "acabba269607ef8e904a3c94485011a53ccd2230",
+  "product_paths": [
+    "server/agent/github-app.ts"
+  ],
+  "governance_paths": []
+}

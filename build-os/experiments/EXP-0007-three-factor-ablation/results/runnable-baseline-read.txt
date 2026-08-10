@@ -1,0 +1,117 @@
+=== 1. PER-ARM (all cells; ceiling proximity everywhere) ===
+
+-- native.starved (12 admissible of 12) --
+arm                       acc  cost  uncach(k) turns tools txt exh rpts impl srch bkkp vrfy  elap  %ceil
+T01.native                Y     0.83        28    21    20   3   0    1    0    0    0    5   100     8%
+T01.native.r2             Y     0.77        23    28    27   5   0    1    0    0    0    8   130    11%
+T01.native.r3             Y     0.84        35    18    17   5   0    1    0    0    0    4   100     8%
+T02.native                Y     0.78        31    18    17   5   0    1    0    0    0    7   123    10%
+T02.native.r2             Y     0.72        30    15    14   5   0    1    0    0    0    5    67     6%
+T02.native.r3             Y     0.61        31    12    11   3   0    1    0    0    0    3    78     6%
+T03.native                Y     1.29        55    30    29   4   0    1    0    1    0    8   183    15%
+T03.native.r2             Y     0.79        26    25    24   3   0    1    0    0    0    6   119    10%
+T03.native.r3             Y     1.13        33    30    29   6   0    1    0    0    0    8   217    18%
+T04.native                Y     2.06        57    36    35   5   0    1    0    1    0    8   281    23%
+T04.native.r2             Y     2.96        60    64    63   9   0    1    0    0    0    7   379    32%
+T04.native.r3             Y     2.30        57    54    53   3   0    1    0    0    0   10   358    30%
+
+-- native.runnable (12 admissible of 12) --
+arm                       acc  cost  uncach(k) turns tools txt exh rpts impl srch bkkp vrfy  elap  %ceil
+T01.native.runnable       Y     0.95        32    22    21   5   0    1    0    0    0    5   613    51%
+T01.native.runnable.r2    Y     0.90        35    19    18   4   0    1    0    0    0    6   618    52%
+T01.native.runnable.r3    Y     0.96        34    21    20   6   0    1    0    0    0    6   586    49%
+T02.native.runnable       Y     0.72        31    14    13   3   0    0    0    0    0    5   471    39%
+T02.native.runnable.r2    Y     0.67        30    12    11   5   0    0    0    0    0    6   480    40%
+T02.native.runnable.r3    Y     0.95        36    17    16   4   0    1    0    0    0    6   363    30%
+T03.native.runnable       Y     1.22        50    25    24   3   0    1    0    0    0    4   515    43%
+T03.native.runnable.r2    Y     0.59        22    14    13   3   0    0    0    0    0    5   580    48%
+T03.native.runnable.r3    Y     0.65        23    16    15   2   0    0    0    0    0    5   547    46%
+T04.native.runnable       Y     2.10        58    40    39   7   0    1    0    0    0    5   619    52%
+T04.native.runnable.r2    Y     1.39        46    33    32   5   0    1    0    0    0    4   437    36%
+T04.native.runnable.r3    Y     2.25        64    45    44  10   0    1    0    0    0    6   725    60%
+
+-- gravito.starved (12 admissible of 12) --
+arm                       acc  cost  uncach(k) turns tools txt exh rpts impl srch bkkp vrfy  elap  %ceil
+T01.corrected             Y     2.97       112    36    33  13   4    3    5    0    7    3   415    35%
+T01.corrected.r2          Y     2.67        95    36    34  17   3    2    4    0    7    3   364    30%
+T01.corrected.r3          Y     3.19        96    45    42  18   4    3    4    7    7    6   406    34%
+T02.corrected             Y     3.34       103    46    43  17   6    3    9    3    5    9   424    35%
+T02.corrected.r2          Y     2.60        74    42    39  16   5    3    5    2    8    4   394    33%
+T02.corrected.r3          Y     3.21       159    77    75  13   4    2    3    0    5    4   381    32%
+T03.corrected             Y     1.10        39    23    22   7   0    1    0    0    4    2   172    14%
+T03.corrected.r2          Y     1.99        66    32    29  14   4    3    2    0    6    3   332    28%
+T03.corrected.r3          Y     3.54        95    43    43  19   6    3    5    0   11    4   589    49%
+T04.corrected             Y     6.91       158    75    76  18   7    3   10    0   18    8   695    58%
+T04.corrected.r2          Y     4.09       105    55    66  22   5    2    5    0    7   15   584    49%
+T04.corrected.r3          Y     4.47       112    56    56  22   6    3    6    0   12    5   607    51%
+
+-- gravito.runnable (11 admissible of 12) --
+arm                       acc  cost  uncach(k) turns tools txt exh rpts impl srch bkkp vrfy  elap  %ceil
+T01.corrected.runnable    Y     2.86        92    35    33  16   3    2    1    4    3    6   915    76%
+T01.corrected.runnable.r2 INADMISSIBLE (timed_out)
+T01.corrected.runnable.r3 Y     2.89       100    39    36  12   2    3    4    0    4    7   667    56%
+T02.corrected.runnable    Y     2.14        80    28    25   7   1    3    4    3    2    6   827    69%
+T02.corrected.runnable.r2 Y     1.91        76    26    25   7   0    1    3    0    2    5   547    46%
+T02.corrected.runnable.r3 Y     2.00        63    29    26  13   1    3    1    0    4    8   750    63%
+T03.corrected.runnable    Y     2.03        50    48    46  10   0    2    1    2   14    7   903    75%
+T03.corrected.runnable.r2 Y     2.40        68    43    39  14   2    4    3    0    4    8  1069    89%
+T03.corrected.runnable.r3 Y     1.56        49    30    28  11   1    2    0    0    5    6   701    58%
+T04.corrected.runnable    Y     2.89        87    44    41  13   1    3    1    0    5    6   975    81%
+T04.corrected.runnable.r2 Y     3.01        97    41    40   6   0    1    4    1    4    4   634    53%
+T04.corrected.runnable.r3 Y     3.60        89    52    50  17   0    2    0    0    4    7   950    79%
+
+=== 2. WITHIN-CELL SPREAD (cost) ===
+
+cell              native.starved       native.runnable       gravito.starved      gravito.runnable
+T01               0.77-0.84 cv5%        0.90-0.96 cv4%        2.67-3.19 cv9%        2.86-2.89 cv1%
+T02              0.61-0.78 cv12%       0.67-0.95 cv20%       2.60-3.34 cv13%        1.91-2.14 cv6%
+T03              0.79-1.29 cv24%       0.59-1.22 cv42%       1.10-3.54 cv56%       1.56-2.40 cv21%
+T04              2.06-2.96 cv19%       1.39-2.25 cv24%       4.09-6.91 cv30%       2.89-3.60 cv12%
+
+=== 3. FORK METRICS — task-paired means, the 2x2 ===
+
+-- cost USD --
+task    nat.starv   nat.run  grav.starv   grav.run  gap.starved  gap.runnable
+T01         0.816     0.936       2.943      2.876        3.60x        3.07x
+T02         0.705     0.782       3.049      2.015        4.32x        2.58x
+T03         1.069     0.820       2.212      2.000        2.07x        2.44x
+T04         2.439     1.910       5.158      3.167        2.12x        1.66x
+MEAN                                                      3.03x        2.44x
+
+-- uncached tokens --
+task    nat.starv   nat.run  grav.starv   grav.run  gap.starved  gap.runnable
+T01         28661     33606      101034      95818        3.53x        2.85x
+T02         30614     32277      112082      72948        3.66x        2.26x
+T03         37724     31807       66988      55477        1.78x        1.74x
+T04         57998     56163      125263      90889        2.16x        1.62x
+MEAN                                                      2.78x        2.12x
+
+=== 4. SEPARATION — gravito.runnable vs native.runnable, per task ===
+
+cost          G.HIGHER  G.HIGHER  G.HIGHER  G.HIGHER   4/4 separated higher  p=1.3e-5 (two-sided)
+uncached      G.HIGHER  G.HIGHER   overlap  G.HIGHER   3/4 separated higher
+turns         G.HIGHER  G.HIGHER  G.HIGHER   overlap   3/4 separated higher
+text-only     G.HIGHER  G.HIGHER  G.HIGHER   overlap   3/4 separated higher
+
+=== 5. MECHANISM (per-arm means, runnable condition) ===
+
+metric                   nat.run  grav.run   (grav.starved for reference)
+text-only turns              4.8      11.5   (16.3)
+exhaustion refs              0.0       1.0   (4.5)
+final reports                0.7       2.4   (2.6)
+impl reads                   0.0       2.0   (4.8)
+gravito search               0.0       0.9   (1.0)
+bookkeeping+gate             0.0       4.6   (8.1)
+verification calls           5.3       6.4   (5.5)
+turns                       23.2      37.7   (47.2)
+tool calls                  22.2      35.4   (46.5)
+
+=== 6. ELAPSED (context only; runnable pays compiler round-trips in BOTH arms) ===
+
+native.starved    mean 178s  range 67-379s  arms >=80% of ceiling: 0
+native.runnable   mean 546s  range 363-725s  arms >=80% of ceiling: 0
+gravito.starved   mean 447s  range 172-695s  arms >=80% of ceiling: 0
+gravito.runnable  mean 812s  range 547-1069s  arms >=80% of ceiling: 2  (+1 timed out and was re-run)
+
+inadmissible arms in final set: 1 — T01.corrected.runnable.r2
+acceptance: 47/47 admissible arms accepted

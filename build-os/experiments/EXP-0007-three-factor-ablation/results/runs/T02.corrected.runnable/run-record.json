@@ -1,10 +1,10 @@
 {
  "artifact": "run_record",
- "run_id": "R-021b4dcc48fd",
+ "run_id": "R-a0656683316d",
  "task_id": "T02",
- "arm": "native",
- "launched_at": "2026-08-10T12:53:54.767Z",
- "expected_session_id": "96c6dd3c-9b1a-4633-b97e-c62c9c437c14",
+ "arm": "corrected",
+ "launched_at": "2026-08-10T13:45:10.403Z",
+ "expected_session_id": "71e7dd1c-5df2-4a98-a7d7-867cd1a8346f",
  "orchestrator_session_id": "5489b495-ae3d-5612-a4e1-61b4b5c6b6e4",
  "timeout_ceiling_s": 1200,
  "pid": null,
@@ -13,11 +13,11 @@
  "admissible": true,
  "is_error": false,
  "result_event_observed": true,
- "child_session_id": "96c6dd3c-9b1a-4633-b97e-c62c9c437c14",
+ "child_session_id": "71e7dd1c-5df2-4a98-a7d7-867cd1a8346f",
  "isolation": {
   "isolated": true,
   "observed": [
-   "96c6dd3c-9b1a-4633-b97e-c62c9c437c14"
+   "71e7dd1c-5df2-4a98-a7d7-867cd1a8346f"
   ],
   "reason": "child session id is distinct from the orchestrator's and matches the assignment"
  },

@@ -1,0 +1,7 @@
+{
+  "base_commit": "241c44f358da297fef59fcd7eed4bc0f6f468d69",
+  "product_paths": [
+    "server/services/organizational-memory.ts"
+  ],
+  "governance_paths": []
+}
