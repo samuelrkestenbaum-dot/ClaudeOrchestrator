@@ -156,15 +156,21 @@ function applyC(tree, acts) {
 // NOT variant B. B handed out a pointer and let the worker fetch; this emits no
 // path to read and no invitation to explore.
 function applyMicrocontext(tree, acts) {
+  // PREPEND, do not rename. The first attempt renamed the gate and thereby
+  // created routing-gate-real.sh -- an implementation file the baseline never
+  // had -- which the worker promptly read for 8,090 chars. A treatment that
+  // manufactures new implementation surface cannot measure the removal of
+  // implementation surface.
   const gate = path.join(tree, ".claude/hooks/routing-gate.sh");
-  const real = path.join(tree, ".claude/hooks/routing-gate-real.sh");
-  const src = path.join(ORCHESTRATOR_ROOT, "build-os/experiments/EXP-0008-microcontext/action-state.sh");
-  if (!fs.existsSync(gate) || fs.existsSync(real)) return;
-  fs.renameSync(gate, real);
-  fs.copyFileSync(src, gate);
-  fs.chmodSync(gate, 0o755);
-  acts.push({ factor: "microcontext", act: "action_state_wrapper",
-    detail: "the gate's decision is unchanged and authoritative; the worker receives the derived next action (~61 tokens) instead of the source that produces it" });
+  if (!fs.existsSync(gate)) return;
+  const src = fs.readFileSync(gate, "utf8");
+  if (src.includes("GRAVITO ACTION STATE")) return;
+  const shim = fs.readFileSync(path.join(ORCHESTRATOR_ROOT, "build-os/experiments/EXP-0008-microcontext/shim.sh"), "utf8");
+  const lines = src.split("\n");
+  const shebang = lines[0].startsWith("#!") ? lines.shift() + "\n" : "";
+  fs.writeFileSync(gate, shebang + shim + "\n" + lines.join("\n"), { mode: 0o755 });
+  acts.push({ factor: "microcontext", act: "action_state_shim_in_place",
+    detail: "prepended into the existing gate; no new file, no pointer, the complete receipt text inline, tool name from stdin" });
 }
 
 export function applyVariant(tree, config) {
@@ -220,8 +226,10 @@ export function verifyVariant(tree, config) {
         : "no surviving instruction demands the narration the addendum forbids");
   }
   if (config === "microcontext") {
-    const real = fs.existsSync(path.join(tree, ".claude/hooks/routing-gate-real.sh"));
-    ck("mc.real_gate_preserved", real, "the real gate is renamed, not replaced — its decision still governs");
+    const hooks = fs.readdirSync(path.join(tree, ".claude/hooks"));
+    ck("mc.no_new_implementation_file", !hooks.some((f) => /routing-gate-(real|full)\.sh/.test(f)),
+      `hooks: ${hooks.join(", ")} — the treatment must not manufacture surface it is measuring the removal of`);
+    const real = true;
     const w = real ? fs.readFileSync(path.join(tree, ".claude/hooks/routing-gate.sh"), "utf8") : "";
     ck("mc.wrapper_installed", /GRAVITO ACTION STATE/.test(w), "the wrapper emits derived state");
 
@@ -242,14 +250,18 @@ export function verifyVariant(tree, config) {
       const fake = path.join(tmp, "fake-gate.sh");
       fs.writeFileSync(fake, "#!/usr/bin/env bash\necho 'routing-gate: MUTATION BLOCKED — NO OPEN routing receipt exists' >&2\nexit 2\n", { mode: 0o755 });
       payload = execFileSync("bash", [path.join(tree, ".claude/hooks/routing-gate.sh"), "mutgate", "Bash"],
-        { encoding: "utf8", env: { ...process.env, CLAUDE_PROJECT_DIR: tmp, GRAVITO_REAL_GATE: fake }, stdio: ["ignore", "pipe", "pipe"] });
+        { encoding: "utf8", input: JSON.stringify({ tool_name: "Bash" }), env: { ...process.env, CLAUDE_PROJECT_DIR: tmp }, stdio: ["pipe", "pipe", "pipe"] });
       ranOk = true;
     } catch (e) { payload = String(e.stderr || e.stdout || ""); ranOk = payload.includes("GRAVITO ACTION STATE"); fs.rmSync; }
     ck("mc.payload_emitted", ranOk && /GRAVITO ACTION STATE/.test(payload), payload.slice(0, 120).replace(/\n/g, " | "));
     ck("mc.no_pointer_in_payload", ranOk && !/\bsee \S+\.(sh|mjs|json|md)\b|\brefer to\b|\bfor details\b|\bread \S+\.(sh|mjs)\b/i.test(payload),
       "the EMITTED payload sends the worker nowhere to read");
-    ck("mc.payload_within_budget", ranOk && payload.length <= 500,
-      `${payload.length} chars (~${Math.round(payload.length / 4)} tokens), budget <=500 chars`);
+    ck("mc.payload_is_self_contained", ranOk && /content:/.test(payload) && /executed_mode: -/.test(payload),
+      "the payload carries the COMPLETE text to write, not a filename to fill in from a schema found elsewhere");
+    ck("mc.action_resolved", ranOk && !/action: unknown/.test(payload),
+      "the tool name is read from the hook's stdin payload, not from an argv position the hook never uses");
+    ck("mc.payload_within_budget", ranOk && payload.length <= 700,
+      `${payload.length} chars (~${Math.round(payload.length / 4)} tokens), budget <=700 chars`);
   }
   if (config === "baseline") {
     const cm = fs.readFileSync(path.join(tree, "CLAUDE.md"), "utf8");

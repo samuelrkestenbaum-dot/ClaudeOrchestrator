@@ -1,0 +1,12 @@
+{
+  "config": "microcontext",
+  "acts": [
+    {
+      "factor": "microcontext",
+      "act": "action_state_wrapper",
+      "detail": "the gate's decision is unchanged and authoritative; the worker receives the derived next action (~61 tokens) instead of the source that produces it"
+    }
+  ],
+  "baseline": false,
+  "administered_sha": "7ffd134cdaec9773f938bbdcb80fd6f988a0ff24"
+}

@@ -2,6 +2,7 @@
   "artifact": "exp0007_replication_log",
   "question": "is C reliably better than baseline, or was the screening edge variance?",
   "reps_executed": [
+    1,
     2,
     3
   ],
@@ -9,22 +10,10 @@
   "units": [
     {
       "task": "T01",
-      "config": "baseline",
-      "rep": 2,
-      "skipped": true
-    },
-    {
-      "task": "T01",
-      "config": "C",
-      "rep": 2,
-      "skipped": true
-    },
-    {
-      "task": "T02",
-      "config": "baseline",
-      "rep": 2,
+      "config": "microcontext",
+      "rep": 1,
       "exit": 0,
-      "wall_s": 487
+      "wall_s": 383
     }
   ]
 }
