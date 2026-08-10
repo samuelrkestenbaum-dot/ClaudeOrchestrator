@@ -1,0 +1,14 @@
+{
+  "config": "corrected",
+  "acts": [],
+  "baseline": true,
+  "administered_sha": "6cbf8c73a544926cb40a62010da8898c4e8401f4",
+  "arm": "gravito",
+  "verification": "runnable",
+  "allowed_tools": [
+    "Bash(npx tsc:*)",
+    "Bash(./node_modules/.bin/tsc:*)",
+    "Bash(node_modules/.bin/tsc:*)"
+  ],
+  "permission_mode": "acceptEdits"
+}

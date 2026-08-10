@@ -60,6 +60,24 @@ const ALLOWED_WHEN_RUNNABLE = [
   "Bash(node_modules/.bin/tsc:*)",
 ];
 
+// PERMISSION WITHOUT TIME IS A HALF-CAPABILITY, and the first runnable probe
+// proved it. With the grant in place the compiler genuinely started -- and then
+// the Bash tool's 120s default expired and detached it, so the worker got
+// "moved to the background" instead of a compiler result and spent its turns
+// polling a file. The measured cold typecheck on this project is 126s: close
+// enough to the default that some arms would return synchronously and some
+// would not, injecting a coin-flip straight into the contrast.
+//
+// Raising the default is not a permission change and not a friendlier host; it
+// is what makes the granted capability actually deliver a result.
+//
+// APPLIED IN BOTH CONDITIONS, and it provably cannot disturb the starved cells:
+// across the 12 existing gravito-starved arms, 143 Bash calls were issued, 34
+// executed, and ZERO ran past the timeout. A limit that only bites a command
+// running longer than 120s cannot have acted where nothing ran that long, so
+// the historical starved data stays comparable rather than being re-run.
+const BASH_TIMEOUTS = { BASH_DEFAULT_TIMEOUT_MS: "600000", BASH_MAX_TIMEOUT_MS: "600000" };
+
 if (!TASK_ID || !CONFIGS.includes(CONFIG)) {
   console.error(`usage: run-arm.mjs --task T01 --config ${CONFIGS.join("|")} [--verification starved|runnable]`); process.exit(2);
 }
@@ -161,6 +179,7 @@ fs.writeFileSync(path.join(runDir, "variant.json"), JSON.stringify({
   // so a later reader can confirm both arms received the SAME grant.
   allowed_tools: VERIFICATION === "runnable" ? ALLOWED_WHEN_RUNNABLE : [],
   permission_mode: "acceptEdits",
+  bash_timeouts: BASH_TIMEOUTS,
 }, null, 2));
 
 // IDENTICAL to EXP-0006's prompt, character for character. A different prompt
@@ -190,7 +209,7 @@ const claudeArgs = ["-p", "--output-format", "stream-json", "--verbose", "--mode
   "--session-id", sessionId, "--permission-mode", "acceptEdits"];
 if (VERIFICATION === "runnable") claudeArgs.push("--allowedTools", ...ALLOWED_WHEN_RUNNABLE);
 const child = spawn("claude", claudeArgs,
-  { cwd: ARM_TREE, env: { ...scrubbedEnv(process.env), CI: "1" }, stdio: ["pipe", out, "pipe"], detached: true });
+  { cwd: ARM_TREE, env: { ...scrubbedEnv(process.env), CI: "1", ...BASH_TIMEOUTS }, stdio: ["pipe", out, "pipe"], detached: true });
 let stderr = ""; child.stderr.on("data", (b) => { if (stderr.length < 100_000) stderr += b.toString(); });
 child.stdin.write(prompt); child.stdin.end();
 const timer = setTimeout(() => { try { process.kill(-child.pid, "SIGKILL"); } catch {} try { process.kill(child.pid, "SIGKILL"); } catch {} }, CEILING_S * 1000);
