@@ -25,7 +25,14 @@ import os from "node:os";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
 
-export const CONFIGS = ["baseline", "A", "B", "C", "ABC", "microcontext"];
+export const CONFIGS = ["baseline", "A", "B", "C", "ABC", "microcontext", "corrected"];
+
+// `corrected` is BASELINE with no lean changes at all -- identical doctrine,
+// identical gate, identical controls. The only difference is that
+// administration now withholds session-local state, which the contaminated
+// baseline did not. It is a separate config name so the contaminated runs stay
+// on disk for comparison instead of being overwritten: the whole question is
+// how the two differ.
 
 // Where the ACTION STATE wrapper is sourced from. Resolved relative to THIS
 // file rather than imported from substrate.mjs, so a variant cannot silently
@@ -177,6 +184,7 @@ export function applyVariant(tree, config) {
   if (!CONFIGS.includes(config)) throw new Error(`unknown config '${config}'`);
   const acts = [];
   if (config === "microcontext") { applyMicrocontext(tree, acts); return { config, acts, baseline: false }; }
+  if (config === "corrected") return { config, acts, baseline: true };
   if (has(config, "A")) applyA(tree, acts);
   if (has(config, "B")) applyB(tree, acts);
   if (has(config, "C")) applyC(tree, acts);
@@ -262,6 +270,13 @@ export function verifyVariant(tree, config) {
       "the tool name is read from the hook's stdin payload, not from an argv position the hook never uses");
     ck("mc.payload_within_budget", ranOk && payload.length <= 700,
       `${payload.length} chars (~${Math.round(payload.length / 4)} tokens), budget <=700 chars`);
+  }
+  if (config === "corrected") {
+    const cm = fs.readFileSync(path.join(tree, "CLAUDE.md"), "utf8");
+    ck("corrected.doctrine_unmodified", cm.length > 3000 && !/do not narrate/i.test(cm),
+      "no lean change: the corrected baseline differs from the contaminated one ONLY in what administration withheld");
+    ck("corrected.gate_unmodified", !/GRAVITO ACTION STATE/.test(fs.readFileSync(path.join(tree, ".claude/hooks/routing-gate.sh"), "utf8")),
+      "the gate is the shipped one");
   }
   if (config === "baseline") {
     const cm = fs.readFileSync(path.join(tree, "CLAUDE.md"), "utf8");
