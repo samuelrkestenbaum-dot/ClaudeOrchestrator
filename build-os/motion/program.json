@@ -58,6 +58,15 @@
         "runnable-verification re-baseline — COMPLETE: the clean normal-runtime baseline; gap 2.44x cost / 2.12x uncached"
       ],
       "resolution": "REDESIGN THE INTERACTION MODEL. Runnable verification contracted the gap (cost 3.03x -> 2.44x, uncached 2.78x -> 2.12x) — capability starvation was a real amplifier — but the residual gap is materially >=2x with 4/4 tasks fully separated on cost (p=1.3e-5) and censoring biasing these numbers DOWN. Per the precommitted fork, LEAN_MANIFEST is the work; no further baseline refinement absent a measurement-invalidating defect."
+    },
+    {
+      "id": "D2",
+      "decision": "Did the Lean redesign preserve Gravito's control value while materially closing the economic gap?",
+      "open_uncertainty": "Lean vs Current vs Native under the runnable environment: economics AND TOM-class collapse, judged simultaneously",
+      "resolved_by": "12 lean arms (T01-T04 x 3, runnable) against the existing 12 current and 12 native cells; frozen classifier; acceptance intact",
+      "status": "open",
+      "measurement_attempts": 0,
+      "attempt_log": []
     }
   ],
   "stop_conditions": [

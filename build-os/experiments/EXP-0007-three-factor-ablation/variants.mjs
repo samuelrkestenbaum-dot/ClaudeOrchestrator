@@ -32,7 +32,7 @@ import { execFileSync } from "node:child_process";
 // measured by a different harness in a different ARM_TREE would confound the one
 // contrast the study exists to isolate. EXP-0006's native arms remain the frozen
 // reference and are untouched; this reproduces the condition, it does not replace it.
-export const CONFIGS = ["baseline", "A", "B", "C", "ABC", "microcontext", "corrected", "native"];
+export const CONFIGS = ["baseline", "A", "B", "C", "ABC", "microcontext", "corrected", "native", "current", "lean"];
 
 // `corrected` is BASELINE with no lean changes at all -- identical doctrine,
 // identical gate, identical controls. The only difference is that
@@ -195,6 +195,11 @@ export function applyVariant(tree, config) {
   if (config === "native") return { config, acts, baseline: false, native: true };
   if (config === "microcontext") { applyMicrocontext(tree, acts); return { config, acts, baseline: false }; }
   if (config === "corrected") return { config, acts, baseline: true };
+  // `current` and `lean` are PINNED-SOURCE treatments for the decisive test:
+  // no transform here — the treatment IS the administration source (run-arm
+  // pins current to the commit the measured 2.44x arms ran under, lean to the
+  // Lean tip), and verifyVariant proves which one actually landed in the tree.
+  if (config === "current" || config === "lean") return { config, acts, baseline: false, pinned: true };
   if (has(config, "A")) applyA(tree, acts);
   if (has(config, "B")) applyB(tree, acts);
   if (has(config, "C")) applyC(tree, acts);
@@ -292,6 +297,31 @@ export function verifyVariant(tree, config) {
     ck("mc.payload_within_budget", ranOk && payload.length <= 700,
       `${payload.length} chars (~${Math.round(payload.length / 4)} tokens), budget <=700 chars`);
   }
+  // The pinned treatments are verified by CONTENT, not by label — the exact
+  // failure this prevents is lean-vs-lean wearing two names. Each check reads
+  // the administered tree for the marker its treatment must (or must not) carry.
+  if (config === "current" || config === "lean") {
+    const gate = fs.readFileSync(path.join(tree, ".claude/hooks/routing-gate.sh"), "utf8");
+    const stop = fs.readFileSync(path.join(tree, "build-os/motion/gate-stop.mjs"), "utf8");
+    const cm = fs.readFileSync(path.join(tree, "CLAUDE.md"), "utf8");
+    const leanMarkers = {
+      auto_routing: /auto_route_first_mutation/.test(gate),
+      substrate_stop: /L1 PART 1/.test(stop),
+      worker_contract: /## Executing a routed task/.test(cm),
+    };
+    const present = Object.entries(leanMarkers).filter(([, v]) => v).map(([k]) => k);
+    if (config === "lean") {
+      ck("lean.all_lean_markers_present", present.length === 3,
+        present.length === 3 ? "auto-routing, substrate-side stop, worker contract all administered"
+                             : `MISSING lean marker(s): ${Object.keys(leanMarkers).filter((k) => !leanMarkers[k]).join(", ")}`);
+    } else {
+      ck("current.no_lean_marker_present", present.length === 0,
+        present.length === 0 ? "the administered tree carries the PRE-lean gate, stop driver, and doctrine"
+                             : `LEAN CONTENT IN THE CURRENT ARM: ${present.join(", ")} — this would be lean-vs-lean`);
+    }
+    return { ok: checks.every((c) => c.ok), checks };
+  }
+
   if (config === "corrected") {
     const cm = fs.readFileSync(path.join(tree, "CLAUDE.md"), "utf8");
     ck("corrected.doctrine_unmodified", cm.length > 3000 && !/do not narrate/i.test(cm),

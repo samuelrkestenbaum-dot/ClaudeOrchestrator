@@ -117,6 +117,8 @@ export const SESSION_LOCAL_FILES = [
     why: "current in-flight item; session-local by definition" },
   { file: "build-os/learning/dispositions/EXP-0004.json",
     why: "a prior experiment's live disposition record — run-local state, not reusable definition" },
+  { file: "build-os/motion/program.json",
+    why: "PROGRAM-LEVEL decision state — at current tips it carries the experiment's own conclusions ('the gap is 2.44x', S1 satisfied). Handing that to a measured worker is the queue contamination's cousin. Zero measured workers ever read it (verified across all runnable arms), so withholding changes no measured behaviour — it closes the door before anything walks through." },
 ];
 
 const isData = (d) => DATA_DIRS.some((x) => x.dir === d);

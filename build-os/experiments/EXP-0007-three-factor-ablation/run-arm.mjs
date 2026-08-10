@@ -88,6 +88,37 @@ if (!["starved", "runnable"].includes(VERIFICATION)) {
 // native config cannot be administered as gravito by a stray flag.
 const ARM = CONFIG === "native" ? "native" : "gravito";
 
+// PINNED ADMINISTRATION SOURCES — the decisive test's treatments are commits,
+// not labels. `current` pins to 241ac45: the commit whose administered CODE is
+// byte-identical to what the measured 2.44x arms actually received (dfdee0e
+// differs from it in exactly one administered file, program.json — which at
+// dfdee0e carries the experiment's own conclusions, so pinning there would
+// hand the treatment a copy of its verdict). `lean` pins to the Lean tip.
+// The pin is materialized via `git archive` (deterministic for a commit) into
+// a cached checkout, verified by ref file, and recorded in the run's
+// source-identity block below.
+const PINS = { current: "241ac45", lean: "78bedf1" };
+const ORCH = path.join(HERE, "../../..");
+let CODE_SRC = CODE_SOURCE, SOURCE_IDENTITY = null;
+if (PINS[CONFIG]) {
+  const psh = (c, a) => execFileSync(c, a, { encoding: "utf8" });
+  const ref = PINS[CONFIG];
+  const resolved = psh("git", ["-C", ORCH, "rev-parse", `${ref}^{commit}`]).trim();
+  const dir = `/home/user/.exp-pinned/${CONFIG}-${resolved.slice(0, 12)}`;
+  const refFile = path.join(dir, ".pinned-ref");
+  if (!fs.existsSync(refFile) || fs.readFileSync(refFile, "utf8").trim() !== resolved) {
+    fs.rmSync(dir, { recursive: true, force: true });
+    fs.mkdirSync(dir, { recursive: true });
+    execFileSync("bash", ["-c",
+      `git -C ${JSON.stringify(ORCH)} archive ${resolved} -- build-os .claude CLAUDE.md | tar -x -C ${JSON.stringify(dir)}`]);
+    fs.writeFileSync(refFile, resolved + "\n");
+  }
+  const archiveSha = psh("bash", ["-c",
+    `git -C ${JSON.stringify(ORCH)} archive ${resolved} -- build-os .claude CLAUDE.md | sha256sum | cut -c1-64`]).trim();
+  CODE_SRC = dir;
+  SOURCE_IDENTITY = { treatment: CONFIG, requested_ref: ref, resolved_commit: resolved, source_archive_sha256: archiveSha, source_dir: dir };
+}
+
 const sel = JSON.parse(fs.readFileSync(path.join(EXP6, "results/task-selection.json"), "utf8"));
 const task = sel.selected.find((t) => t.task_id === TASK_ID);
 if (!task) { console.error(`REFUSED: unknown task ${TASK_ID}`); process.exit(2); }
@@ -134,9 +165,17 @@ if (lockOk) {
   gate("exact_seed_restored", restoreOk, detail);
 
   if (restoreOk) {
-    administer(ARM_TREE, ARM, CODE_SOURCE);
+    administer(ARM_TREE, ARM, CODE_SRC);
     const va = verifyAdministration(ARM_TREE, ARM);
     for (const c of va.checks) gate(`administration.${c.name}`, c.ok, c.detail);
+    // Hash of the ADMINISTERED CODE as it actually sits in the arm tree —
+    // the source-identity record proves treatments by bytes, not labels.
+    if (SOURCE_IDENTITY) {
+      SOURCE_IDENTITY.administered_tree_sha256 = sh("bash", ["-c",
+        `cd ${JSON.stringify(ARM_TREE)} && find build-os .claude CLAUDE.md -type f ! -path 'build-os/memory/*' ! -path 'build-os/receipts/*' ! -path 'build-os/packets/*' ! -path 'build-os/design/*' ! -path 'build-os/graph/*' 2>/dev/null | LC_ALL=C sort | xargs sha256sum | sha256sum | cut -c1-64`]).trim();
+      gate("pinned_source_administered", true,
+        `${CONFIG} <- ${SOURCE_IDENTITY.resolved_commit.slice(0, 12)} administered bytes ${SOURCE_IDENTITY.administered_tree_sha256.slice(0, 16)}…`);
+    }
 
     variant = applyVariant(ARM_TREE, CONFIG);
     const vv = verifyVariant(ARM_TREE, CONFIG);
@@ -174,6 +213,7 @@ openRun(runDir, { task_id: TASK_ID, arm: CONFIG, launched_at: new Date().toISOSt
   expected_session_id: sessionId, orchestrator_session_id: process.env.CLAUDE_CODE_SESSION_ID || null, timeout_ceiling_s: CEILING_S });
 fs.writeFileSync(path.join(runDir, "variant.json"), JSON.stringify({
   ...variant, administered_sha: administeredSha, arm: ARM,
+  source_identity: SOURCE_IDENTITY,
   verification: VERIFICATION,
   // Recorded verbatim so the grant is auditable from the run record alone, and
   // so a later reader can confirm both arms received the SAME grant.

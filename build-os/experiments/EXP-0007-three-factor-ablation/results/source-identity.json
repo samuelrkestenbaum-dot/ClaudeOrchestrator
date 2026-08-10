@@ -1,0 +1,58 @@
+{
+  "artifact": "three_way_source_identity",
+  "generated_by": "three-way-identity.mjs",
+  "treatments": {
+    "current": {
+      "requested_ref": "241ac45",
+      "resolved_commit": "241ac4511012cdbc1ab588aab7f4890f9d0628f0",
+      "source_archive_sha256": "c047634495f17daf158c1613eabb5ea7b68e8d166b5474410a7cffdfbca018ae",
+      "administered_tree_sha256": "f83d179a3864bdd807bee244c3bec8d5638f18226412a0279f3ce2f4e9ef6620",
+      "variant_applied": "current",
+      "content_checks": [
+        {
+          "name": "behaviours_preserved",
+          "ok": true,
+          "detail": "6 load-bearing paths intact"
+        },
+        {
+          "name": "current.no_lean_marker_present",
+          "ok": true,
+          "detail": "the administered tree carries the PRE-lean gate, stop driver, and doctrine"
+        }
+      ],
+      "content_checks_ok": true
+    },
+    "lean": {
+      "requested_ref": "78bedf1",
+      "resolved_commit": "78bedf187124fbb37f934f763b62cd805017ee41",
+      "source_archive_sha256": "f17eebdfd220dc0ae76e8c19b2e807fdc7638eb9002ff10dd40184c3b9be01ae",
+      "administered_tree_sha256": "3646f488f6851251ef9d825eb830fe7adf4b977b70abc5a0b7815a1794001842",
+      "variant_applied": "lean",
+      "content_checks": [
+        {
+          "name": "behaviours_preserved",
+          "ok": true,
+          "detail": "6 load-bearing paths intact"
+        },
+        {
+          "name": "lean.all_lean_markers_present",
+          "ok": true,
+          "detail": "auto-routing, substrate-side stop, worker contract all administered"
+        }
+      ],
+      "content_checks_ok": true
+    }
+  },
+  "distinct": true,
+  "differing_files": [
+    "Files tree-current/.claude/hooks/routing-gate.sh and tree-lean/.claude/hooks/routing-gate.sh differ",
+    "Files tree-current/.claude/hooks/session-start-build-os.sh and tree-lean/.claude/hooks/session-start-build-os.sh differ",
+    "Files tree-current/CLAUDE.md and tree-lean/CLAUDE.md differ",
+    "Files tree-current/build-os/motion/capability-map.mjs and tree-lean/build-os/motion/capability-map.mjs differ",
+    "Files tree-current/build-os/motion/gate-stop.mjs and tree-lean/build-os/motion/gate-stop.mjs differ",
+    "Only in tree-lean/build-os/motion: lean-l1.test.mjs",
+    "Only in tree-lean/build-os/motion: lean-l3.test.mjs",
+    "Only in tree-lean/build-os/motion: lean-l4.test.mjs",
+    "Only in tree-lean/build-os/tools: lean-l2.test.sh"
+  ]
+}

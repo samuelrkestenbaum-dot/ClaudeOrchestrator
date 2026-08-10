@@ -1,0 +1,16 @@
+{
+  "work": "decisive test: 12 lean arms, T01-T04 x 3 reps, runnable, against the existing current and native cells",
+  "decision_id": "D2",
+  "hypothesis_id": "H-lean-interaction-model",
+  "differs_from_prior": "first attempt for D2 - the treatment under test did not exist before the four manifest rows landed",
+  "possible_results": [
+    { "result": "cheaper AND TOM classes collapse AND acceptance intact",
+      "next_action": "architectural win - proceed to hardening and the broader vision on the lean interaction model" },
+    { "result": "cheaper but TOM classes remain",
+      "next_action": "treat as optimization, not the redesign - locate which control transaction survived and why" },
+    { "result": "TOM classes collapse but economics barely improve",
+      "next_action": "a deeper tax exists - characterize it before any further redesign" },
+    { "result": "acceptance deteriorates",
+      "next_action": "Gravito was weakened, not leaned - revert the offending row and re-measure" }
+  ]
+}
