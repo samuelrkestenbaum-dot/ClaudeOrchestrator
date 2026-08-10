@@ -1,0 +1,11 @@
+{
+  "config": "native",
+  "acts": [],
+  "baseline": false,
+  "native": true,
+  "administered_sha": "299ca7e041a923a1d79d1a6d9f4a1fed3bed0ff8",
+  "arm": "native",
+  "verification": "starved",
+  "allowed_tools": [],
+  "permission_mode": "acceptEdits"
+}

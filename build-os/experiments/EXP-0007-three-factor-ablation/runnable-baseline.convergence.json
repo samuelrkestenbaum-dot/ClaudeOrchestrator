@@ -1,0 +1,12 @@
+{
+  "work": "runnable-verification re-baseline, T01-T04 x 3 reps, native and gravito",
+  "decision_id": "D1",
+  "hypothesis_id": "H-normal-runtime-economics",
+  "differs_from_prior": "the judged verification command is executable by the worker for the first time",
+  "possible_results": [
+    { "result": "the cost gap contracts materially with verification runnable",
+      "next_action": "target the remaining normal-runtime overhead; do not redesign against the starved loop" },
+    { "result": "Gravito remains materially above native despite runnable verification",
+      "next_action": "stop re-baselining and redesign the interaction model against this clean baseline" }
+  ]
+}

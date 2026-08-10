@@ -1,0 +1,78 @@
+{
+  "artifact": "verification_preflight",
+  "task": "T03",
+  "cells": {
+    "native_starved": "T03.native",
+    "native_runnable": "T03.native.runnable",
+    "gravito_starved": "T03.corrected",
+    "gravito_runnable": "T03.corrected.runnable"
+  },
+  "ok": false,
+  "checks": [
+    {
+      "name": "native_runnable.invoked",
+      "ok": true,
+      "detail": "native issued 4 verification call(s): \"npx tsc --noEmit -p tsconfig.json 2>&1 | head -50\""
+    },
+    {
+      "name": "gravito_runnable.invoked",
+      "ok": true,
+      "detail": "Gravito issued 8 verification call(s): \"npx tsc --noEmit -p tsconfig.json 2>&1 | head -40\""
+    },
+    {
+      "name": "native_runnable.executed",
+      "ok": true,
+      "detail": "compiler output returned to the worker (2 of 4 call(s) executed; 1 refused)"
+    },
+    {
+      "name": "gravito_runnable.executed",
+      "ok": true,
+      "detail": "compiler output returned to the worker (2 of 8 call(s) executed; 3 refused)"
+    },
+    {
+      "name": "native_runnable.returned_synchronously",
+      "ok": true,
+      "detail": "all 4 verification call(s) returned in-band"
+    },
+    {
+      "name": "gravito_runnable.returned_synchronously",
+      "ok": true,
+      "detail": "all 8 verification call(s) returned in-band"
+    },
+    {
+      "name": "native_runnable.consumed",
+      "ok": true,
+      "detail": "the worker states the compiler outcome in its own report"
+    },
+    {
+      "name": "gravito_runnable.consumed",
+      "ok": true,
+      "detail": "the worker states the compiler outcome in its own report"
+    },
+    {
+      "name": "identical_grant_across_arms",
+      "ok": true,
+      "detail": "both runnable arms carry the same grant: [\"Bash(npx tsc:*)\",\"Bash(./node_modules/.bin/tsc:*)\",\"Bash(node_modules/.bin/tsc:*)\"]"
+    },
+    {
+      "name": "starved_arms_carry_no_grant",
+      "ok": true,
+      "detail": "starved grants: native [], gravito []"
+    },
+    {
+      "name": "permission_mode_unchanged",
+      "ok": false,
+      "detail": "permission_mode across all four cells: acceptEdits, unrecorded"
+    },
+    {
+      "name": "exhaustion_is_starvation_driven",
+      "ok": false,
+      "detail": "gravito exhaustion references — starved 0, runnable 0  <-- the gate fires even with verification available; the contrast is not clean"
+    },
+    {
+      "name": "switch_has_an_effect",
+      "ok": true,
+      "detail": "the starved arm executed the verification command ZERO times, as the historical record says"
+    }
+  ]
+}

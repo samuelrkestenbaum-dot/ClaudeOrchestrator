@@ -15,7 +15,31 @@
 // every time.
 import { spawn } from "node:child_process";
 import fs from "node:fs"; import path from "node:path";
+import { assess, loadProgram } from "../../motion/convergence.mjs";
 const HERE = path.dirname(new URL(import.meta.url).pathname);
+
+// PROGRAM CONVERGENCE GATE — wired here because this is the cheapest place to
+// spend six hours of compute on a result that cannot change a decision. A gate
+// that only advises is the same defect as a check that never fails, so this one
+// EXITS NON-ZERO: an experiment whose every outcome leads to the same next
+// action does not run, and once the stop condition for its decision is
+// satisfied, no further re-baselining runs at all.
+//
+// The proposal must be supplied by the caller in --convergence <file>, so the
+// possible results are stated BEFORE the data exists rather than after.
+{
+  const cf = (() => { const i = process.argv.indexOf("--convergence"); return i > 0 ? process.argv[i + 1] : null; })();
+  if (!cf) {
+    console.error("REFUSED — no --convergence <proposal.json>. State the decision this run serves,");
+    console.error("and what each possible result would make us do next, before spending the compute.");
+    process.exit(3);
+  }
+  const proposal = JSON.parse(fs.readFileSync(cf, "utf8"));
+  const v = assess(proposal, loadProgram());
+  console.log(`CONVERGENCE ${v.verdict}: ${v.code}\n  ${v.why}`);
+  for (const r of v.reasons) console.log(`  · ${r}`);
+  if (v.verdict !== "PROCEED") { console.error("\nNot running. Evidence sufficient, or result cannot move the decision."); process.exit(3); }
+}
 const arg=(n,d)=>{const i=process.argv.indexOf(`--${n}`);return i>0&&process.argv[i+1]?process.argv[i+1]:d;};
 const TASKS = (arg("tasks","T01,T02,T03,T04")).split(",");
 const CONFIGS = (arg("configs","baseline,C")).split(",");
