@@ -34,14 +34,25 @@ export function enumerateCapability(capability, askingSurface) {
   const holders = rows.filter((r) => r.status === "OBSERVED" && r.surface !== askingSurface).map((r) => r.surface);
   const own = rows.find((r) => r.surface === askingSurface);
   const bridges = rows.filter((r) => r.surface === askingSurface && r.bridge?.status === "PROVEN").map((r) => r.bridge);
+  // LEAN L3 — AN UNREGISTERED CAPABILITY IS SAID TO BE UNREGISTERED. The old
+  // behaviour at the CALL SITE (gate-stop passing `|| "operator_lab_write"`)
+  // made this function answer about a different capability than the one the
+  // worker lacked, so the gate cited a ChatGPT bridge irrelevant to the task
+  // and every measured arm spent a diagnosis loop discovering the citation was
+  // a fallback misfire. The call-site default is gone (L1); this makes the
+  // remaining case self-describing rather than silent.
+  const registered = rows.length > 0;
   return {
     enumerated: true,
+    registered,
     capability, asking_surface: askingSurface,
     local_status: own?.status ?? "UNKNOWN",
     surfaces_with_capability: holders,
     proven_bridges: bridges,
     untested_surfaces: rows.filter((r) => r.status === "UNTESTED").map((r) => r.surface),
-    note: holders.length
+    note: !registered
+      ? `no registered holder for '${capability}' — the map has no row for it, so it is treated as absent from the system; this is a statement about the registry, never a route`
+      : holders.length
       ? "The capability EXISTS in the system. Local absence is not system absence — route through a holder."
       : "No surface is OBSERVED to hold this capability; untested surfaces are not evidence of absence either way.",
   };
