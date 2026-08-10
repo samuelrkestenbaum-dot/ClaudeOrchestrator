@@ -11,6 +11,16 @@ HOOK_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$HOOK_DIR/hook-once.sh"
 build_os_hook_once "SessionStart" || exit 0
 
+# LEAN L4 — derived state FIRST, ceremony after. One line of resolved certainty
+# for task workers: routing needs nothing from them, and the receipt state is
+# stated rather than discoverable.
+_OPEN_RECEIPT="none"
+for _r in "$ROOT"/build-os/packets/routing/routing-*.md; do
+  [ -f "$_r" ] && grep -q '^- \*\*executed_mode:\*\* -$' "$_r" 2>/dev/null && { _OPEN_RECEIPT="$(basename "$_r")"; break; }
+done
+echo "Task state: routing is AUTOMATIC (first edit opens a floor receipt; open receipt now: $_OPEN_RECEIPT). Workers on a routed task: your contract is the top section of CLAUDE.md; no lane, budget, or evidence ceremony is expected from you."
+echo
+
 echo "Orchestrator: ON — Build OS wired. Reminder: invoke the build-orchestrator subagent PROACTIVELY before any build packet (architecture, next steps, tool routing, \"keep going\"). It will announce its routing line 'Orchestrator: ON — routing from <file|embedded>' when it runs."
 echo
 

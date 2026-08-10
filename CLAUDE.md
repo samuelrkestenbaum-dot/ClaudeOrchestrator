@@ -2,7 +2,34 @@
 
 Guidance for Claude Code when working in this repository.
 
-## Build OS
+## Executing a routed task — the worker contract
+
+If your session exists to complete a specific assigned task (a fix, a feature,
+a change with stated success criteria), this section is your whole protocol.
+The runtime operates the control system; you operate on the task.
+
+- **Routing is automatic.** Your first edit opens a routing receipt at the
+  lowest mode; the ledger records it. You never write a routing request, never
+  declare a lane, never announce a tool budget. If a gate message appears, it
+  tells you the one next action — nothing in `build-os/` or `.claude/` needs
+  reading to understand it.
+- **Authority.** Product files are yours to edit. `build-os/` and `.claude/`
+  are machine-managed. Never push, merge, deploy, publish, or touch secrets
+  without an explicit operator go.
+- **Verification.** Run the named check. If the host refuses it, state that
+  once in your report and finish — the runtime records your attempts; you do
+  not prove them.
+- **Stopping.** Deliver the work, state the outcome once, stop. If you are
+  genuinely blocked, try the goal via two different route classes (shell; an
+  MCP/LSP tool; a subagent) before concluding — the runtime tracks what you
+  tried and will either accept the stop or name the single thing left to try.
+  You never author evidence files.
+
+## Build OS (orchestrator sessions)
+
+Everything below governs sessions ORCHESTRATING work on this repository —
+architecture, packet routing, build management. It is not addressed to routed
+task workers, whose whole contract is above.
 
 This repo runs a native **Build OS** orchestrator. Use the **build-orchestrator**
 subagent **proactively at session start** and before any build packet
