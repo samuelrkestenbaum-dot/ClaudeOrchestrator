@@ -39,9 +39,36 @@ const LOCK = "/home/user/.exp0007/arm.lock";
 const RESTORE = path.join(HERE, "../EXP-0005-system-efficiency/harness/restore-seed.sh");
 const VERIFY_CMD = "npx tsc --noEmit -p tsconfig.json";
 
+// THE VERIFICATION DIMENSION — the only thing this switch changes.
+//
+// Every arm run before this existed was STARVED: launched `--permission-mode
+// acceptEdits` with no `--allowedTools`, headless, so edits auto-accepted and
+// every Bash call prompted with no approver present. The judged verification
+// command therefore could not execute in EITHER arm. Native answered by saying
+// so and stopping; Gravito's concession gate refused that stop and demanded
+// documented capability exhaustion, which is 77% of its excess text-only turns.
+// The measured ~2.4x is that interaction, not a general estimate.
+//
+// `runnable` pre-approves EXACTLY the judged command and its direct-binary
+// spelling, IDENTICALLY in both arms. It is not a friendlier host: no other tool
+// is granted, the permission mode is unchanged, and every other refusal the
+// worker meets is the one it met before.
+const VERIFICATION = arg("verification", "starved");
+const ALLOWED_WHEN_RUNNABLE = [
+  "Bash(npx tsc:*)",
+  "Bash(./node_modules/.bin/tsc:*)",
+  "Bash(node_modules/.bin/tsc:*)",
+];
+
 if (!TASK_ID || !CONFIGS.includes(CONFIG)) {
-  console.error(`usage: run-arm.mjs --task T01 --config ${CONFIGS.join("|")}`); process.exit(2);
+  console.error(`usage: run-arm.mjs --task T01 --config ${CONFIGS.join("|")} [--verification starved|runnable]`); process.exit(2);
 }
+if (!["starved", "runnable"].includes(VERIFICATION)) {
+  console.error(`REFUSED: --verification must be starved|runnable, got '${VERIFICATION}'`); process.exit(2);
+}
+// The arm identity, derived from the config rather than passed separately, so a
+// native config cannot be administered as gravito by a stray flag.
+const ARM = CONFIG === "native" ? "native" : "gravito";
 
 const sel = JSON.parse(fs.readFileSync(path.join(EXP6, "results/task-selection.json"), "utf8"));
 const task = sel.selected.find((t) => t.task_id === TASK_ID);
@@ -89,8 +116,8 @@ if (lockOk) {
   gate("exact_seed_restored", restoreOk, detail);
 
   if (restoreOk) {
-    administer(ARM_TREE, "gravito", CODE_SOURCE);
-    const va = verifyAdministration(ARM_TREE, "gravito");
+    administer(ARM_TREE, ARM, CODE_SOURCE);
+    const va = verifyAdministration(ARM_TREE, ARM);
     for (const c of va.checks) gate(`administration.${c.name}`, c.ok, c.detail);
 
     variant = applyVariant(ARM_TREE, CONFIG);
@@ -117,12 +144,24 @@ if (failed.length) { console.error(`REFUSED — ${failed.length} pre-flight cond
 if (DRY) { console.log("dry-run: pre-flight only"); releaseLock(); process.exit(0); }
 
 const sessionId = newSessionId();
-const runDir = path.join(RESULTS, "runs", REP > 1 ? `${TASK_ID}.${CONFIG}.r${REP}` : `${TASK_ID}.${CONFIG}`);
+// The verification condition is part of the run's IDENTITY, not a footnote in
+// its record. A runnable arm landing on a starved arm's directory would silently
+// overwrite one half of the contrast being measured. `starved` keeps the bare
+// name so every arm run before this switch existed stays addressable unrenamed.
+const suffix = (VERIFICATION === "runnable" ? ".runnable" : "") + (REP > 1 ? `.r${REP}` : "");
+const runDir = path.join(RESULTS, "runs", `${TASK_ID}.${CONFIG}${suffix}`);
 fs.mkdirSync(runDir, { recursive: true });
 const streamPath = path.join(runDir, "stream.jsonl");
 openRun(runDir, { task_id: TASK_ID, arm: CONFIG, launched_at: new Date().toISOString(),
   expected_session_id: sessionId, orchestrator_session_id: process.env.CLAUDE_CODE_SESSION_ID || null, timeout_ceiling_s: CEILING_S });
-fs.writeFileSync(path.join(runDir, "variant.json"), JSON.stringify({ ...variant, administered_sha: administeredSha }, null, 2));
+fs.writeFileSync(path.join(runDir, "variant.json"), JSON.stringify({
+  ...variant, administered_sha: administeredSha, arm: ARM,
+  verification: VERIFICATION,
+  // Recorded verbatim so the grant is auditable from the run record alone, and
+  // so a later reader can confirm both arms received the SAME grant.
+  allowed_tools: VERIFICATION === "runnable" ? ALLOWED_WHEN_RUNNABLE : [],
+  permission_mode: "acceptEdits",
+}, null, 2));
 
 // IDENTICAL to EXP-0006's prompt, character for character. A different prompt
 // would be a second treatment riding alongside the one being measured.
@@ -144,8 +183,13 @@ fs.writeFileSync(path.join(runDir, "prompt.txt"), prompt);
 
 const started = Date.now();
 const out = fs.openSync(streamPath, "w");
-const child = spawn("claude", ["-p", "--output-format", "stream-json", "--verbose", "--model", MODEL,
-  "--session-id", sessionId, "--permission-mode", "acceptEdits"],
+// The grant is built from ONE constant used by both arms. Deriving it per-arm,
+// or letting the caller pass it, is how a hidden host-privilege difference gets
+// in — which is precisely what preflight condition 5 exists to refuse.
+const claudeArgs = ["-p", "--output-format", "stream-json", "--verbose", "--model", MODEL,
+  "--session-id", sessionId, "--permission-mode", "acceptEdits"];
+if (VERIFICATION === "runnable") claudeArgs.push("--allowedTools", ...ALLOWED_WHEN_RUNNABLE);
+const child = spawn("claude", claudeArgs,
   { cwd: ARM_TREE, env: { ...scrubbedEnv(process.env), CI: "1" }, stdio: ["pipe", out, "pipe"], detached: true });
 let stderr = ""; child.stderr.on("data", (b) => { if (stderr.length < 100_000) stderr += b.toString(); });
 child.stdin.write(prompt); child.stdin.end();

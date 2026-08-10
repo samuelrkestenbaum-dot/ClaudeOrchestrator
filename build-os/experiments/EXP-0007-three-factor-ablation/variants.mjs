@@ -25,7 +25,14 @@ import os from "node:os";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
 
-export const CONFIGS = ["baseline", "A", "B", "C", "ABC", "microcontext", "corrected"];
+// `native` is the ABSENCE of the substrate, run through THIS harness rather than
+// EXP-0006's. The header's old claim that "the native arm is NEVER run here" held
+// while every comparison was gravito-vs-gravito. The runnable-verification study
+// is a 2x2 -- {native, gravito} x {starved, runnable} -- and a native cell
+// measured by a different harness in a different ARM_TREE would confound the one
+// contrast the study exists to isolate. EXP-0006's native arms remain the frozen
+// reference and are untouched; this reproduces the condition, it does not replace it.
+export const CONFIGS = ["baseline", "A", "B", "C", "ABC", "microcontext", "corrected", "native"];
 
 // `corrected` is BASELINE with no lean changes at all -- identical doctrine,
 // identical gate, identical controls. The only difference is that
@@ -183,6 +190,9 @@ function applyMicrocontext(tree, acts) {
 export function applyVariant(tree, config) {
   if (!CONFIGS.includes(config)) throw new Error(`unknown config '${config}'`);
   const acts = [];
+  // No transform: the substrate is absent, so there is nothing to vary. The
+  // absence itself is administered upstream by substrate.mjs.
+  if (config === "native") return { config, acts, baseline: false, native: true };
   if (config === "microcontext") { applyMicrocontext(tree, acts); return { config, acts, baseline: false }; }
   if (config === "corrected") return { config, acts, baseline: true };
   if (has(config, "A")) applyA(tree, acts);
@@ -199,12 +209,23 @@ export function verifyVariant(tree, config) {
   const checks = [];
   const ck = (n, ok, d) => { checks.push({ name: n, ok, detail: d }); return ok; };
 
-  // Behaviours that must survive EVERY configuration.
+  // Behaviours that must survive EVERY GRAVITO configuration.
   const required = [
     "build-os/motion/continuation.mjs", "build-os/motion/objective.mjs",
     "build-os/assumptions/authority-selector.mjs", ".claude/hooks/routing-gate.sh",
     "build-os/memory/tool_router.md", "CLAUDE.md",
   ];
+
+  // The native cell inverts the check. Asserting "behaviours preserved" against
+  // an arm whose whole definition is their absence would pass only by accident,
+  // and would pass just as happily on a gravito arm that failed to administer.
+  if (config === "native") {
+    const present = ["build-os", ".claude", "CLAUDE.md"].filter((p) => fs.existsSync(path.join(tree, p)));
+    ck("native.substrate_absent", present.length === 0,
+      present.length ? `STILL PRESENT: ${present.join(", ")}` : "build-os, .claude and CLAUDE.md are all absent");
+    ck("native.no_variant_applied", true, "no transform is defined for the absence of the substrate");
+    return { ok: checks.every((c) => c.ok), checks };
+  }
   const missing = required.filter((p) => !fs.existsSync(path.join(tree, p)));
   ck("behaviours_preserved", missing.length === 0, missing.length ? `MISSING: ${missing.join(", ")}` : `${required.length} load-bearing paths intact`);
 
