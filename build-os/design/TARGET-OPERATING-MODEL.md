@@ -103,6 +103,20 @@ governors: (1) State. (2) Authority. (3) Cognition compilation. (4) Execution
 control. (5) Learning/convergence. Everything else becomes an implementation
 detail of those five.
 
+## The manifest acceptance rule
+
+Every proposed LEAN_MANIFEST change must identify **which measured
+worker-control interaction it removes** (by Step 2 class: gate_mechanism_diagnosis,
+capability_search, routing_bookkeeping, repeat final_report, gate_challenge_response,
+authority_blocked round-trips) **and what substrate-side mechanism replaces that
+interaction**. A row that only says "reduce context", "simplify prompt", or
+"make the gate shorter" fails the TOM test and does not ship.
+
+The post-Lean compliance check is the existing frozen instrument — no new
+measurement framework: did gate_mechanism_diagnosis collapse, did
+capability_search collapse, did routing_bookkeeping collapse, did repeat
+final_report collapse, did acceptance remain intact, did total cost improve.
+
 ## Placement note
 
 This file lives in `build-os/design/` deliberately: design records are
