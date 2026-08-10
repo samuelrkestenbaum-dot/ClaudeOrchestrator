@@ -1,0 +1,9 @@
+{
+  "base_commit": "d31c5771fda8038a227f4159e803ba4ed87805f5",
+  "product_paths": [
+    "client/src/pages/UserDashboard.tsx"
+  ],
+  "governance_paths": [
+    "build-os/packets/routing/routing-auto-20260810T210708Z-30598-20260810T210708Z.md"
+  ]
+}

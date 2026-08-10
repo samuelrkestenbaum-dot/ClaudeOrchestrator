@@ -1,0 +1,16 @@
+# Task T03
+
+Fix the TypeScript type errors in `server/agent/github-app.ts`.
+
+That file currently has 1 typecheck error(s) (TS2345).
+The first is at line 1147: TS2345: Argument of type '{ runId: string; surface: string; repo: string; prNumber: number; triggeredBy: string; triggerType: "webhook"; startedAt: string; finishedAt: 
+
+## How this will be judged (identical in both conditions)
+
+Verification command: `npx tsc --noEmit -p tsconfig.json`
+Accepted when: the command reports ZERO errors for `server/agent/github-app.ts`, AND no new error appears in any other file.
+
+REJECTED, regardless of the compiler result: `@ts-ignore`, `@ts-expect-error`, `@ts-nocheck`, `any` casts,
+or deleting the offending code. Fix the type, do not silence it.
+
+Work in the current repository. Do not push, and do not touch anything outside it.

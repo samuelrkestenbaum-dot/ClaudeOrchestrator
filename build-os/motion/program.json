@@ -42,6 +42,10 @@
     {
       "fact": "even with verification runnable the worker still operates the substrate",
       "evidence": "gravito.runnable vs native.runnable per arm: final reports 2.4 vs 0.7, text-only 11.5 vs 4.8, bookkeeping+gate 4.6 vs 0.0, exhaustion refs 1.0 vs 0.0"
+    },
+    {
+      "fact": "removing the worker from the control transaction removes the economic gap",
+      "evidence": "lean (78bedf1) vs current (241ac45) vs native, runnable, frozen classifier: cost 2.26x -> 1.10x native, uncached 2.05x -> 1.10x, TOM classes 0 or near-0, acceptance 12/12, verification executed in-band 12/12"
     }
   ],
   "open_decisions": [
@@ -64,9 +68,12 @@
       "decision": "Did the Lean redesign preserve Gravito's control value while materially closing the economic gap?",
       "open_uncertainty": "Lean vs Current vs Native under the runnable environment: economics AND TOM-class collapse, judged simultaneously",
       "resolved_by": "12 lean arms (T01-T04 x 3, runnable) against the existing 12 current and 12 native cells; frozen classifier; acceptance intact",
-      "status": "open",
-      "measurement_attempts": 0,
-      "attempt_log": []
+      "status": "resolved",
+      "measurement_attempts": 1,
+      "attempt_log": [
+        "decisive Native/Current/Lean, runnable, 12 lean arms — COMPLETE, 12/12 accepted"
+      ],
+      "resolution": "ARCHITECTURAL WIN (branch 1 of the precommitted fork). Lean: cost 1.10x native (current 2.26x), uncached 1.10x (2.05x), turns 1.09x. Uncached and control round-trips fully separated lean-below-current on 4/4 tasks; cost and turns on 3/4. Every TOM violation class collapsed to zero or near-zero: control round-trips 4.5->0.0, gate diagnosis 0.29->0, capability search 0.13->0, impl reads 2.0->0, gravito search 1.0->0, routing bookkeeping 1.17->0.08; repeat final reports 2.38->0.58 and text-only turns 11.7->4.5, both BELOW native. Acceptance 12/12 with verification executed in-band in every arm; zero timeouts. PROVISIONAL per P-provisional-measurement until adversarially validated."
     }
   ],
   "stop_conditions": [

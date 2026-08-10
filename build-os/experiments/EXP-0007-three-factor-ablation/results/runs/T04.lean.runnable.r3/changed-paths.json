@@ -1,0 +1,12 @@
+{
+  "base_commit": "6c7b2135148f614ee22f781400ffd029093d51ba",
+  "product_paths": [
+    "client/src/lib/trpc.ts",
+    "client/src/pages/UserDashboard.tsx",
+    "server/supabase-adapter.ts",
+    "server/supabase-db.ts"
+  ],
+  "governance_paths": [
+    "build-os/packets/routing/routing-auto-20260810T222756Z-26899-20260810T222756Z.md"
+  ]
+}

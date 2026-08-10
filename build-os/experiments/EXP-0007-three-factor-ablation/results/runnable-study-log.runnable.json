@@ -2,8 +2,7 @@
   "artifact": "runnable_study_log",
   "verification": "runnable",
   "configs": [
-    "native",
-    "corrected"
+    "lean"
   ],
   "reps_executed": [
     1,
@@ -13,64 +12,87 @@
   "units": [
     {
       "task": "T01",
-      "config": "corrected",
+      "config": "lean",
       "rep": 1,
-      "skipped": true
-    },
-    {
-      "task": "T01",
-      "config": "native",
-      "rep": 1,
-      "skipped": true
+      "exit": 0,
+      "wall_s": 866
     },
     {
       "task": "T02",
-      "config": "corrected",
+      "config": "lean",
       "rep": 1,
-      "skipped": true
-    },
-    {
-      "task": "T02",
-      "config": "native",
-      "rep": 1,
-      "skipped": true
+      "exit": 0,
+      "wall_s": 677
     },
     {
       "task": "T03",
-      "config": "corrected",
+      "config": "lean",
       "rep": 1,
-      "skipped": true
-    },
-    {
-      "task": "T03",
-      "config": "native",
-      "rep": 1,
-      "skipped": true
+      "exit": 0,
+      "wall_s": 686
     },
     {
       "task": "T04",
-      "config": "corrected",
+      "config": "lean",
       "rep": 1,
-      "skipped": true
-    },
-    {
-      "task": "T04",
-      "config": "native",
-      "rep": 1,
-      "skipped": true
+      "exit": 0,
+      "wall_s": 566
     },
     {
       "task": "T01",
-      "config": "native",
-      "rep": 2,
-      "skipped": true
-    },
-    {
-      "task": "T01",
-      "config": "corrected",
+      "config": "lean",
       "rep": 2,
       "exit": 0,
-      "wall_s": 1328
+      "wall_s": 697
+    },
+    {
+      "task": "T02",
+      "config": "lean",
+      "rep": 2,
+      "exit": 0,
+      "wall_s": 485
+    },
+    {
+      "task": "T03",
+      "config": "lean",
+      "rep": 2,
+      "exit": 0,
+      "wall_s": 639
+    },
+    {
+      "task": "T04",
+      "config": "lean",
+      "rep": 2,
+      "exit": 0,
+      "wall_s": 671
+    },
+    {
+      "task": "T01",
+      "config": "lean",
+      "rep": 3,
+      "exit": 0,
+      "wall_s": 513
+    },
+    {
+      "task": "T02",
+      "config": "lean",
+      "rep": 3,
+      "exit": 0,
+      "wall_s": 460
+    },
+    {
+      "task": "T03",
+      "config": "lean",
+      "rep": 3,
+      "exit": 0,
+      "wall_s": 817
+    },
+    {
+      "task": "T04",
+      "config": "lean",
+      "rep": 3,
+      "exit": 0,
+      "wall_s": 859
     }
   ]
 }
