@@ -88,6 +88,37 @@ export const LOAD_BEARING = [
   "build-os/memory/tool_router.md",   // DATA — must survive administration, not be replaced
 ];
 
+/**
+ * SESSION-LOCAL STATE — excluded by LIFECYCLE, not by directory.
+ *
+ * THE DEFECT THIS EXISTS FOR. `build-os/motion` was classified CODE, so every
+ * measured Gravito arm received `queue.json` — THIS orchestrator's live work
+ * queue, carrying tasks #49-#55 of the experiment session that was measuring
+ * them. Workers read it (11,415-22,830 chars/arm) and adopted the posture it
+ * implied: 19 turns of "Holding.", plus "Stopping.", "Standing by." and
+ * "T04 complete. #55 needs your go." A worker asked to fix two type errors was
+ * waiting for operator authorisation on the experiment queue. Native arms
+ * produced ZERO such turns.
+ *
+ * The directory convention was the failure. `motion` holds both controllers
+ * (reusable implementation) and a live queue (session state), and a rule that
+ * classifies by folder cannot tell them apart. So classification is now by what
+ * a file IS, enumerated per file with a reason, and the regression below proves
+ * a sentinel cannot cross.
+ *
+ * THE RULE: state crosses into worker cognition only when its relevance and
+ * authority class permit it. Reusable substrate implementation is administered;
+ * orchestrator-, session- and run-local state is not, wherever it lives.
+ */
+export const SESSION_LOCAL_FILES = [
+  { file: "build-os/motion/queue.json",
+    why: "the orchestrator's LIVE work queue — the measured worker's agenda is its task, never the measurer's" },
+  { file: "build-os/motion/current.json",
+    why: "current in-flight item; session-local by definition" },
+  { file: "build-os/learning/dispositions/EXP-0004.json",
+    why: "a prior experiment's live disposition record — run-local state, not reusable definition" },
+];
+
 const isData = (d) => DATA_DIRS.some((x) => x.dir === d);
 const isWithheld = (d) => WITHHELD_DIRS.some((x) => x.dir === d);
 
@@ -128,6 +159,12 @@ export function administer(armTree, arm, source = CODE_SOURCE) {
   for (const d of dirs) {
     cp(path.join(source, d), path.join(armTree, d));
     acts.push({ act: "administer_code", path: d });
+  }
+  // Session-local state is removed AFTER the copy, so the exclusion holds no
+  // matter which CODE directory a live file is hiding inside.
+  for (const { file, why } of SESSION_LOCAL_FILES) {
+    const t = path.join(armTree, file);
+    if (fs.existsSync(t)) { fs.rmSync(t, { force: true }); acts.push({ act: "withhold_session_state", path: file, why }); }
   }
   for (const { p } of ROOT_CODE) {
     cp(path.join(source, p), path.join(armTree, p));
@@ -172,6 +209,10 @@ export function verifyAdministration(armTree, arm) {
     }
     ck("data_retained_not_overwritten", ownMemory, memDetail);
 
+    const sessionLeak = SESSION_LOCAL_FILES.filter((f) => fs.existsSync(path.join(armTree, f.file))).map((f) => f.file);
+    ck("no_session_local_state", sessionLeak.length === 0,
+      sessionLeak.length ? `the worker can read the orchestrator's own state: ${sessionLeak.join(", ")}`
+                         : `${SESSION_LOCAL_FILES.length} session-local files withheld by lifecycle, not by directory`);
     const leaked = WITHHELD_DIRS.filter((w) => fs.existsSync(path.join(armTree, w.dir))).map((w) => w.dir);
     ck("benchmark_withheld_from_arm", leaked.length === 0,
       leaked.length ? `the arm can read: ${leaked.join(", ")}` : "experiments and pilots absent from the arm tree");
