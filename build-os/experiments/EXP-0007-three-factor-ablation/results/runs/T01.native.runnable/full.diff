@@ -1,0 +1,50 @@
+diff --git a/server/services/organizational-memory.ts b/server/services/organizational-memory.ts
+index 17f84c9..6282ac3 100644
+--- a/server/services/organizational-memory.ts
++++ b/server/services/organizational-memory.ts
+@@ -213,15 +213,15 @@ export async function generatePreventionAdvice(patternId: string): Promise<strin
+     surfaceId: 'services-organizational-memory',
+   });
+   
+-  const rawAdvice = (govResult as unknown as Record<string, unknown>).choices?.[0]?.message?.content;
+-  const advice = typeof rawAdvice === 'string' ? rawAdvice : 'Unable to generate advice.';
++  const rawAdvice = govResult.content.trim();
++  const advice = rawAdvice.length > 0 ? rawAdvice : 'Unable to generate advice.';
+   
+   // Persist the advice
+   await db.update(violationPatterns)
+     .set({ suggestedPrevention: advice, updatedAt: new Date() })
+     .where(eq(violationPatterns.patternId, patternId));
+   
+-  return advice as string;
++  return advice;
+ }
+ 
+ // ============================================================================
+@@ -496,6 +496,14 @@ export async function getPersonaAlignment(
+   }));
+ }
+ 
++/** Shape requested from the model via the `persona_evaluation` JSON schema below. */
++interface PersonaEvaluation {
++  score?: number;
++  toneMatch?: boolean;
++  formalityMatch?: boolean;
++  feedback?: string;
++}
++
+ /**
+  * Evaluate content against persona alignment using Claude.
+  */
+@@ -570,8 +578,8 @@ Return JSON: { "score": 0-100, "toneMatch": true/false, "formalityMatch": true/f
+   });
+   
+   try {
+-    const rawContent = (govResult as unknown as Record<string, unknown>).choices?.[0]?.message?.content;
+-    const result = JSON.parse(typeof rawContent === 'string' ? rawContent : '{}');
++    const rawContent = govResult.content;
++    const result: PersonaEvaluation = JSON.parse(rawContent || '{}');
+     
+     // Update the alignment score
+     const dbConn = await getDb();
+

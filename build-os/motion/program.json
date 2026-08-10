@@ -33,11 +33,24 @@
     {
       "id": "S1",
       "applies_to": "D1",
-      "rule": "Once ONE clean normal-runtime baseline exists with verification runnable, stop re-baselining. If Gravito remains materially more expensive than native, move to interaction-model redesign. No further measurement refinement unless the redesign itself exposes a measurement-critical defect.",
+      "rule": "Once ONE clean normal-runtime baseline exists with verification runnable, stop re-baselining. If Gravito remains materially more expensive than native, move to interaction-model redesign. Reopening measurement afterwards requires a MEASUREMENT-INVALIDATING defect — proof the test did not measure what it claimed. A new plausible causal hypothesis is NOT grounds: it is interesting, and redesign comes first. Without this distinction every negative result generates one more rescue experiment forever.",
       "declared_by": "operator, in-session, before the result was known",
       "satisfied": false
     }
   ],
 
+  "policies": [
+    {
+      "id": "P-freeze-governance",
+      "rule": "Governance-feature expansion is FROZEN. No new controls unless they directly solve a measured blocker. The highest-value work is making what Gravito already knows cheap to use, not making it know more.",
+      "declared_by": "operator, in-session, 2026-08-10",
+      "note": "The convergence gate predates this freeze and is the last controller admitted under it."
+    },
+    {
+      "id": "P-provisional-measurement",
+      "rule": "A first clean measurement is PROVISIONAL until adversarially validated. Grounds: five findings this program were overturned or materially reinterpreted by instrument or environment defects (EXP-0005 host asymmetry, vacuous isolation check, unstable implementation-read metric, administered queue contamination, capability starvation).",
+      "declared_by": "operator assessment, adopted as policy; not yet a wired control — wiring one would violate P-freeze-governance unless a measured blocker demands it"
+    }
+  ],
   "deferred_by_convergence": []
 }

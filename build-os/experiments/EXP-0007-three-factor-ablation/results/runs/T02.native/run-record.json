@@ -1,0 +1,14 @@
+{
+ "artifact": "run_record",
+ "run_id": "R-021b4dcc48fd",
+ "task_id": "T02",
+ "arm": "native",
+ "launched_at": "2026-08-10T12:53:54.767Z",
+ "expected_session_id": "96c6dd3c-9b1a-4633-b97e-c62c9c437c14",
+ "orchestrator_session_id": "5489b495-ae3d-5612-a4e1-61b4b5c6b6e4",
+ "timeout_ceiling_s": 1200,
+ "pid": null,
+ "state": "launched",
+ "terminal_reason": null,
+ "admissible": false
+}
