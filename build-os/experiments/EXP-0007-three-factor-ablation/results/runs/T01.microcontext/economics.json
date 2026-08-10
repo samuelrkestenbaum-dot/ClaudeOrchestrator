@@ -1,0 +1,17 @@
+{
+  "uncached_input_tokens": 82,
+  "cache_read_input_tokens": 4569271,
+  "cache_creation_input_tokens": 153007,
+  "output_tokens": 28126,
+  "num_turns": 45,
+  "total_cost_usd": 4.518265500000001,
+  "elapsed_s": 523.121,
+  "tool_calls": 33,
+  "subagent_invocations": 0,
+  "product_files_changed": 1,
+  "governance_files_changed": 2,
+  "tool_result_chars": 194215,
+  "hook_emitted_chars": 53418,
+  "hook_emitting_results": 7,
+  "config": "microcontext"
+}
