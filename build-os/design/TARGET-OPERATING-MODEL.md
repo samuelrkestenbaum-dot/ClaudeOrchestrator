@@ -117,6 +117,48 @@ measurement framework: did gate_mechanism_diagnosis collapse, did
 capability_search collapse, did routing_bookkeeping collapse, did repeat
 final_report collapse, did acceptance remain intact, did total cost improve.
 
+## The full model — seven layers (operator, recorded at phase close)
+
+What the closed phase proved is **Layer 1**. The destination is larger:
+
+> Models are replaceable workers. Gravito owns the company/repository's durable
+> cognition, state, authority, evidence, learning, coordination, and improvement
+> loop — while workers receive only the smallest sufficient task state and
+> largely never think about Gravito itself.
+
+| Layer | Target | Status |
+|---|---|---|
+| 1. Control plane | authority, evidence, continuation, recovery, routing substrate-side | **PROVEN** — 2.26× → 1.10–1.26× native with controls intact, replicated |
+| 2. Cognition compiler | each worker gets only task-relevant objective/state/history/constraints | next |
+| 3. Organizational memory | facts, attempts, outcomes, learned procedures persist beyond any model/session | next |
+| 4. Workforce orchestration | Claude/GPT/Manus interchangeable, selected by capability/economics | plumbing incomplete (Operator Lab sees ChatGPT only) |
+| 5. Program operating system | goals, priorities, dependencies, convergence owned by Gravito | partial (program.json, convergence gate) |
+| 6. Learning / self-improvement | outcomes improve memory, skills, routing, compilation, bounded harness pieces — by evidence, never uncontrolled self-editing | future |
+| 7. Business outcomes | optimize completed useful work per dollar/time/human attention | the measure of everything above |
+
+## The roadmap — five phases
+
+1. **Control without tax — DONE.** D1 → D2 → independent audit → D2v.
+2. **Compounding advantage** — does organizational cognition make sustained
+   work outperform native? Proof order fixed by the operator: (1) persistent
+   memory beats rediscovery; (2) a procedure learned on task 1 makes tasks 2–10
+   cheaper/better; (3) outcome history reduces retries and rework; (4) compiled
+   smallest-sufficient state without triggering search; (5) routing to
+   cheaper/specialized workers with outcomes maintained. The signature to look
+   for: **native stays flat per task; Gravito's curve falls as experience
+   accumulates.**
+3. **Replaceable workforce** — any model plugs into the same substrate.
+4. **Organizational OS** — objectives, dependencies, evidence, resources,
+   multi-agent work over long periods.
+5. **Self-improving company substrate** — execute → measure outcome → learn →
+   update substrate → next worker starts smarter, under bounded evidence and
+   authority, without the base model changing.
+
+The end-state worker experience: a request arrives; Gravito compiles 50,000
+organizational facts into the right 20; the worker executes; Gravito governs,
+verifies, records, learns, and decides what comes next. The worker never knows
+how much sits underneath.
+
 ## Placement note
 
 This file lives in `build-os/design/` deliberately: design records are
