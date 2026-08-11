@@ -1,0 +1,18 @@
+{
+  "work": "EXP-0009 rep of both sequences: 2 sequences x 5 positions x 2 arms, ordered positions, per-sequence-per-rep memory stores, frozen runnable environment; fork applied only when both reps exist",
+  "decision_id": "D3",
+  "hypothesis_id": "H-memory-beats-rediscovery",
+  "differs_from_prior": "first attempt for D3 — the first curve-across-tasks measurement in the program; nothing prior measured accumulation",
+  "possible_results": [
+    { "result": "position-matched Gravito-vs-Native gap becomes more favorable as experience accumulates, acceptance held, >=1 reused-memory event in the arms that got cheaper",
+      "next_action": "CONFIRM memory compounding — proceed to Phase 2 proof 2 (reusable learned skills)" },
+    { "result": "flat position-matched gap — memory exists but creates no economic value",
+      "next_action": "fix memory retrieval/selection before adding more memory; no rescue variants of this experiment" },
+    { "result": "gap becomes LESS favorable — memory causes context drag or stale-state interference",
+      "next_action": "redesign memory delivery before any further Phase 2 proof" },
+    { "result": "acceptance or quality loss in lean-mem arms",
+      "next_action": "the memory-advantage claim FAILS at this proof regardless of cost — record the failure and stop Phase 2 proof 1" },
+    { "result": "favorable curve but ZERO reused-memory events in the arms that got cheaper",
+      "next_action": "report as a CONFOUND, not a confirmation — locate the actual driver before any memory claim" }
+  ]
+}

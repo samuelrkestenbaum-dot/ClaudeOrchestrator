@@ -1,0 +1,200 @@
+{
+  "artifact": "exp0009_sequences",
+  "derivation": "rule stated in PREREGISTRATION.md: exact-message clusters spanning most files; top-5 files by in-cluster error count desc, tie alphabetical",
+  "sequences": {
+    "A": [
+      {
+        "task_id": "A1",
+        "sequence": "A",
+        "position": 1,
+        "file": "server/emotional-geometry-runtime/alert-analytics.ts",
+        "cluster": {
+          "code": "TS18047",
+          "msg": "'db' is possibly 'null'."
+        },
+        "error_count": 16,
+        "first_error": {
+          "line": 94,
+          "code": "TS18047",
+          "msg": "'db' is possibly 'null'."
+        },
+        "codes": [
+          "TS18047"
+        ]
+      },
+      {
+        "task_id": "A2",
+        "sequence": "A",
+        "position": 2,
+        "file": "server/infrastructure/data-retention.ts",
+        "cluster": {
+          "code": "TS18047",
+          "msg": "'db' is possibly 'null'."
+        },
+        "error_count": 16,
+        "first_error": {
+          "line": 377,
+          "code": "TS18047",
+          "msg": "'db' is possibly 'null'."
+        },
+        "codes": [
+          "TS18047"
+        ]
+      },
+      {
+        "task_id": "A3",
+        "sequence": "A",
+        "position": 3,
+        "file": "server/deployment/deployment-persistence.ts",
+        "cluster": {
+          "code": "TS18047",
+          "msg": "'db' is possibly 'null'."
+        },
+        "error_count": 14,
+        "first_error": {
+          "line": 21,
+          "code": "TS18047",
+          "msg": "'db' is possibly 'null'."
+        },
+        "codes": [
+          "TS18047"
+        ]
+      },
+      {
+        "task_id": "A4",
+        "sequence": "A",
+        "position": 4,
+        "file": "server/emotional-geometry-runtime/geometry-alerting.ts",
+        "cluster": {
+          "code": "TS18047",
+          "msg": "'db' is possibly 'null'."
+        },
+        "error_count": 14,
+        "first_error": {
+          "line": 202,
+          "code": "TS18047",
+          "msg": "'db' is possibly 'null'."
+        },
+        "codes": [
+          "TS18047"
+        ]
+      },
+      {
+        "task_id": "A5",
+        "sequence": "A",
+        "position": 5,
+        "file": "server/router-groups/geometry-admin-router.ts",
+        "cluster": {
+          "code": "TS18047",
+          "msg": "'db' is possibly 'null'."
+        },
+        "error_count": 13,
+        "first_error": {
+          "line": 115,
+          "code": "TS18047",
+          "msg": "'db' is possibly 'null'."
+        },
+        "codes": [
+          "TS18047"
+        ]
+      }
+    ],
+    "B": [
+      {
+        "task_id": "B1",
+        "sequence": "B",
+        "position": 1,
+        "file": "server/governance/control-tower-router.ts",
+        "cluster": {
+          "code": "TS18046",
+          "msg": "'error' is of type 'unknown'."
+        },
+        "error_count": 6,
+        "first_error": {
+          "line": 1969,
+          "code": "TS18046",
+          "msg": "'error' is of type 'unknown'."
+        },
+        "codes": [
+          "TS18046"
+        ]
+      },
+      {
+        "task_id": "B2",
+        "sequence": "B",
+        "position": 2,
+        "file": "server/governance/behavioral-correctness-audit.ts",
+        "cluster": {
+          "code": "TS18046",
+          "msg": "'error' is of type 'unknown'."
+        },
+        "error_count": 5,
+        "first_error": {
+          "line": 537,
+          "code": "TS18046",
+          "msg": "'error' is of type 'unknown'."
+        },
+        "codes": [
+          "TS18046"
+        ]
+      },
+      {
+        "task_id": "B3",
+        "sequence": "B",
+        "position": 3,
+        "file": "server/planes/router.ts",
+        "cluster": {
+          "code": "TS18046",
+          "msg": "'error' is of type 'unknown'."
+        },
+        "error_count": 3,
+        "first_error": {
+          "line": 39,
+          "code": "TS18046",
+          "msg": "'error' is of type 'unknown'."
+        },
+        "codes": [
+          "TS18046"
+        ]
+      },
+      {
+        "task_id": "B4",
+        "sequence": "B",
+        "position": 4,
+        "file": "server/copilot/batch-page-updater.ts",
+        "cluster": {
+          "code": "TS18046",
+          "msg": "'error' is of type 'unknown'."
+        },
+        "error_count": 2,
+        "first_error": {
+          "line": 147,
+          "code": "TS18046",
+          "msg": "'error' is of type 'unknown'."
+        },
+        "codes": [
+          "TS18046"
+        ]
+      },
+      {
+        "task_id": "B5",
+        "sequence": "B",
+        "position": 5,
+        "file": "server/governance/model-router.ts",
+        "cluster": {
+          "code": "TS18046",
+          "msg": "'error' is of type 'unknown'."
+        },
+        "error_count": 2,
+        "first_error": {
+          "line": 294,
+          "code": "TS18046",
+          "msg": "'error' is of type 'unknown'."
+        },
+        "codes": [
+          "TS18046"
+        ]
+      }
+    ]
+  }
+}
