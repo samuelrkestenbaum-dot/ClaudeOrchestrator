@@ -1,0 +1,9 @@
+{
+  "base_commit": "89dc9ee17c0c35186872a91413ea0dfd65dc09f8",
+  "product_paths": [
+    "server/services/auto-apply-pipeline.ts"
+  ],
+  "governance_paths": [
+    "build-os/packets/routing/routing-auto-20260811T014005Z-19378-20260811T014005Z.md"
+  ]
+}

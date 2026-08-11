@@ -1,0 +1,11 @@
+{
+  "base_commit": "6084293d76e67cad734c46ae2efd02e6eae878d7",
+  "product_paths": [
+    "client/src/pages/UserDashboard.tsx",
+    "server/supabase-adapter.ts",
+    "server/supabase-db.ts"
+  ],
+  "governance_paths": [
+    "build-os/packets/routing/routing-auto-20260811T113438Z-16162-20260811T113438Z.md"
+  ]
+}

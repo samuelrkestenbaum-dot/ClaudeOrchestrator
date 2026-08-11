@@ -1,0 +1,9 @@
+{
+  "base_commit": "d1006a88b1c6073f36a4d6759af13f56cbcab378",
+  "product_paths": [
+    "server/agent/github-app.ts"
+  ],
+  "governance_paths": [
+    "build-os/packets/routing/routing-auto-20260811T112040Z-7022-20260811T112040Z.md"
+  ]
+}

@@ -5,94 +5,92 @@
     "lean"
   ],
   "reps_executed": [
-    1,
-    2,
-    3
+    4,
+    5,
+    6
   ],
   "units": [
     {
       "task": "T01",
       "config": "lean",
-      "rep": 1,
-      "exit": 0,
-      "wall_s": 866
+      "rep": 4,
+      "skipped": true
     },
     {
       "task": "T02",
       "config": "lean",
-      "rep": 1,
-      "exit": 0,
-      "wall_s": 677
+      "rep": 4,
+      "skipped": true
     },
     {
       "task": "T03",
       "config": "lean",
-      "rep": 1,
+      "rep": 4,
       "exit": 0,
-      "wall_s": 686
+      "wall_s": 857
     },
     {
       "task": "T04",
       "config": "lean",
-      "rep": 1,
+      "rep": 4,
       "exit": 0,
-      "wall_s": 566
+      "wall_s": 690
     },
     {
       "task": "T01",
       "config": "lean",
-      "rep": 2,
+      "rep": 5,
       "exit": 0,
-      "wall_s": 697
+      "wall_s": 796
     },
     {
       "task": "T02",
       "config": "lean",
-      "rep": 2,
+      "rep": 5,
       "exit": 0,
-      "wall_s": 485
+      "wall_s": 586
     },
     {
       "task": "T03",
       "config": "lean",
-      "rep": 2,
+      "rep": 5,
       "exit": 0,
-      "wall_s": 639
+      "wall_s": 837
     },
     {
       "task": "T04",
       "config": "lean",
-      "rep": 2,
+      "rep": 5,
       "exit": 0,
-      "wall_s": 671
+      "wall_s": 912
     },
     {
       "task": "T01",
       "config": "lean",
-      "rep": 3,
+      "rep": 6,
       "exit": 0,
-      "wall_s": 513
+      "wall_s": 793
     },
     {
       "task": "T02",
       "config": "lean",
-      "rep": 3,
+      "rep": 6,
       "exit": 0,
-      "wall_s": 460
+      "wall_s": 478
     },
     {
       "task": "T03",
       "config": "lean",
-      "rep": 3,
+      "rep": 6,
       "exit": 0,
-      "wall_s": 817
+      "wall_s": 1021
     },
     {
       "task": "T04",
       "config": "lean",
-      "rep": 3,
+      "rep": 6,
       "exit": 0,
-      "wall_s": 859
+      "wall_s": 924
     }
   ]
 }

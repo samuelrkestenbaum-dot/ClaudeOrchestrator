@@ -1,0 +1,142 @@
+diff --git a/client/src/pages/UserDashboard.tsx b/client/src/pages/UserDashboard.tsx
+index 6b9bfc8..f417cff 100644
+--- a/client/src/pages/UserDashboard.tsx
++++ b/client/src/pages/UserDashboard.tsx
+@@ -9,6 +9,8 @@
+  *   - trpc.stripe.createCheckout / billingPortal
+  */
+ import { useState } from "react";
++import type { inferRouterOutputs } from "@trpc/server";
++import type { AppRouter } from "../../../server/routers";
+ import { useAuth } from "@/_core/hooks/useAuth";
+ import { trpc } from "@/lib/trpc";
+ import { toast } from "sonner";
+@@ -94,13 +96,27 @@ function QuickStartChecklist({ hasApiKey, hasUsage }: { hasApiKey: boolean; hasU
+   );
+ }
+ 
++/**
++ * The list endpoint returns a projection of the key row, so every field is
++ * optional on the wire. `id` is the one the card genuinely can't work without
++ * (delete/regenerate address a key by it), so the list filters on it and the
++ * card renders the remaining fields defensively.
++ */
++type ApiKeyListItem = inferRouterOutputs<AppRouter>["apiKeys"]["list"][number];
++type IdentifiedApiKey = ApiKeyListItem & { id: number };
++
++function hasId(apiKey: ApiKeyListItem): apiKey is IdentifiedApiKey {
++  return typeof apiKey.id === "number";
++}
++
+ function ApiKeyCard({ apiKey, onDelete, onRegenerate }: {
+-  apiKey: { id: number; keyPrefix: string; name: string | null; isActive: boolean; createdAt: Date; lastUsedAt: Date | null };
++  apiKey: IdentifiedApiKey;
+   onDelete: (id: number) => void;
+   onRegenerate: (id: number) => void;
+ }) {
+   const [showFull, setShowFull] = useState(false);
+-  const displayKey = showFull ? `${apiKey.keyPrefix}${"•".repeat(32)}` : `${apiKey.keyPrefix}••••••••`;
++  const keyPrefix = apiKey.keyPrefix ?? "";
++  const displayKey = showFull ? `${keyPrefix}${"•".repeat(32)}` : `${keyPrefix}••••••••`;
+ 
+   return (
+     <div className="flex items-center justify-between p-3 rounded-lg border border-border/50 bg-muted/20 hover:bg-muted/40 transition-colors">
+@@ -120,7 +136,7 @@ function ApiKeyCard({ apiKey, onDelete, onRegenerate }: {
+             </button>
+           </div>
+           <p className="text-xs text-muted-foreground mt-0.5">
+-            Created {new Date(apiKey.createdAt).toLocaleDateString()}
++            {apiKey.createdAt ? `Created ${new Date(apiKey.createdAt).toLocaleDateString()}` : "Created —"}
+             {apiKey.lastUsedAt && ` · Last used ${new Date(apiKey.lastUsedAt).toLocaleDateString()}`}
+           </p>
+         </div>
+@@ -128,7 +144,7 @@ function ApiKeyCard({ apiKey, onDelete, onRegenerate }: {
+       <div className="flex items-center gap-1 shrink-0">
+         <Button
+           variant="ghost" size="icon" className="h-7 w-7"
+-          onClick={() => { navigator.clipboard.writeText(apiKey.keyPrefix); toast.success("Key prefix copied"); }}
++          onClick={() => { navigator.clipboard.writeText(keyPrefix); toast.success("Key prefix copied"); }}
+         >
+           <Copy className="h-3.5 w-3.5" />
+         </Button>
+@@ -468,7 +484,7 @@ export default function UserDashboard() {
+                   </div>
+                 ) : apiKeys && apiKeys.length > 0 ? (
+                   <div className="space-y-2">
+-                    {apiKeys.map((key) => (
++                    {apiKeys.filter(hasId).map((key) => (
+                       <ApiKeyCard
+                         key={key.id}
+                         apiKey={key}
+@@ -608,7 +624,7 @@ export default function UserDashboard() {
+                         <div key={i} className="flex items-center justify-between py-2 border-b border-border/30 last:border-0">
+                           <div>
+                             <p className="text-sm">{invoice.description || "Subscription"}</p>
+-                            <p className="text-xs text-muted-foreground">{new Date(invoice.date).toLocaleDateString()}</p>
++                            <p className="text-xs text-muted-foreground">{new Date(invoice.createdAt).toLocaleDateString()}</p>
+                           </div>
+                           <div className="text-right">
+                             <p className="text-sm font-medium">${(invoice.amount / 100).toFixed(2)}</p>
+
+diff --git a/build-os/packets/routing/routing-auto-20260811T104613Z-10819-20260811T104613Z.md b/build-os/packets/routing/routing-auto-20260811T104613Z-10819-20260811T104613Z.md
+--- /dev/null
++++ b/build-os/packets/routing/routing-auto-20260811T104613Z-10819-20260811T104613Z.md
++# ROUTING RECEIPT — one file per routing decision. The recorded verdict is BINDING
++# (build-os/memory/routing_contract.md); routing-check.sh refuses this receipt at
++# close if executed_mode exceeds selected_mode with no escalation record, if an
++# escalation carries no evidence, or if consumption exceeds a budget undeclared.
++task_id: auto-20260811T104613Z-10819
++description_sha256: 27b3f1b706c909c94af97ff3625e4a0a813089bab6bc2c90aa89c5978cb14534
++descriptor: {"expected_files_changed":1,"requires_tests":false,"expected_session_count":1,"prior_context_required":false,"handoff_required":false,"consequence_level":"low","irreversible_or_external_mutation":false,"high_blast_radius":false,"unclear_acceptance_criteria":false,"security_or_compliance_consequence":false,"parallel_workstreams_benefit":false,"high_rework_history":false,"nondeterministic_verification":false}
++selected_mode: direct
++selector_note: -
++issued_at: 2026-08-11T10:46:13Z
++# --- budgets: DERIVED DEFAULTS from EXP-0002 sealed records, operator-tunable, not laws.
++# --- Derivation: ON-surface light runs measured 172k-369k total tokens / 0 dispatches
++# --- (named exceedance: raw T4 at 526,461 - context, not the band); the
++# --- blowouts measured 4.9M/7.4M tokens, 4-5 dispatches, $3.63/$4.80. See route-task.sh.
++budget_max_subagents: 0
++budget_max_total_tokens: 250000
++budget_max_uncached_tokens: 30000
++budget_max_model_calls: 12
++budget_max_wall_clock_s: 300
++budget_max_cost_usd: 0.40
++# --- process allowance (PACKET-0053): the packet's OWN gate chain is governance
++# --- ceremony, counted SEPARATELY from task work by the live gate and attributed
++# --- to governance_process (the 0050/0051 calibration question, resolved). Default
++# --- 7 = the LARGEST LEGAL chain in the doctrine: mandatory_full_regate runs
++# --- builder, qa, reviewer, fix-builder, qa, reviewer, archivist. (No-fix chain
++# --- is 4; fix-then-pass is 6.) Process dispatches never eat budget_max_subagents.
++process_dispatch_allowance: 7
++# --- empty at issue; filled at close. AN UNKNOWN IS NOT A ZERO: "-" is an honest
++# --- admission and is never refused; refusal is for CONTRADICTION, not absence.
++executed_mode: -
++escalation: -
++escalation_evidence: -
++consumed_subagents: -
++consumed_total_tokens: -
++consumed_uncached_tokens: -
++consumed_model_calls: -
++consumed_wall_clock_s: -
++consumed_cost_usd: -
++degradation_note: -
++# --- close-fill EXTENSIONS (PACKET-0053). consumed_subagents above counts TASK
++# --- dispatches (vs budget_max_subagents); consumed_process_dispatches counts the
++# --- gate chain (vs process_dispatch_allowance). The attr_* layers attribute
++# --- consumption where derivable at close — tokens or cost with provenance, or
++# --- "-" as an admission, NEVER a zero nobody measured. Receipts predating these
++# --- fields stay valid: routing-check.sh reads an absent field as "-".
++consumed_process_dispatches: -
++attr_task_execution: -
++attr_context_retrieval: -
++attr_subagent_execution: -
++attr_verification: -
++attr_review: -
++attr_governance_process: -
++attr_experiment_audit: -
++# --- contribution rows (PACKET-0053): marginal-contribution accounting, MANDATORY
++# --- for a Full close with dispatches>0 (routing-check.sh refuses otherwise). The
++# --- live gate seeds one stub row per admitted Full task dispatch; fill at close:
++# --- contribution: <subagent_type> | <unique_question> | <output_ref> | changed_implementation=y/n/- | changed_conclusion=y/n/- | caught_defect=y/n/- | duplicated_work=y/n/- | tokens=<v|-> | cost=<v|-> | time=<v|->
++# --- An all-"-" row passes as an admission and is REPORTED as non-contributing.
++

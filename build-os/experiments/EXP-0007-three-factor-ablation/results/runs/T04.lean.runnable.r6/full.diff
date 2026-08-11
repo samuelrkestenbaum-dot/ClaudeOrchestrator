@@ -1,0 +1,172 @@
+diff --git a/client/src/lib/trpc.ts b/client/src/lib/trpc.ts
+index df38607..4421a0e 100644
+--- a/client/src/lib/trpc.ts
++++ b/client/src/lib/trpc.ts
+@@ -1,4 +1,8 @@
+ import { createTRPCReact } from "@trpc/react-query";
++import type { inferRouterOutputs } from "@trpc/server";
+ import type { AppRouter } from "../../../server/routers";
+ 
+ export const trpc = createTRPCReact<AppRouter>();
++
++/** Payload types the API actually returns, so components can't drift from it. */
++export type RouterOutputs = inferRouterOutputs<AppRouter>;
+diff --git a/client/src/pages/UserDashboard.tsx b/client/src/pages/UserDashboard.tsx
+index 6b9bfc8..f502782 100644
+--- a/client/src/pages/UserDashboard.tsx
++++ b/client/src/pages/UserDashboard.tsx
+@@ -10,7 +10,7 @@
+  */
+ import { useState } from "react";
+ import { useAuth } from "@/_core/hooks/useAuth";
+-import { trpc } from "@/lib/trpc";
++import { trpc, type RouterOutputs } from "@/lib/trpc";
+ import { toast } from "sonner";
+ import { Link } from "wouter";
+ import {
+@@ -94,13 +94,23 @@ function QuickStartChecklist({ hasApiKey, hasUsage }: { hasApiKey: boolean; hasU
+   );
+ }
+ 
++/** A row as `apiKeys.list` returns it — every field is optional on the wire. */
++type ApiKeyListItem = RouterOutputs["apiKeys"]["list"][number];
++
++/** A row that carries the `id` the delete/regenerate actions need. */
++type IdentifiedApiKey = ApiKeyListItem & { id: number };
++
++/** An invoice as `subscription.billingHistory` returns it. */
++type BillingHistoryItem = RouterOutputs["subscription"]["billingHistory"][number];
++
+ function ApiKeyCard({ apiKey, onDelete, onRegenerate }: {
+-  apiKey: { id: number; keyPrefix: string; name: string | null; isActive: boolean; createdAt: Date; lastUsedAt: Date | null };
++  apiKey: IdentifiedApiKey;
+   onDelete: (id: number) => void;
+   onRegenerate: (id: number) => void;
+ }) {
+   const [showFull, setShowFull] = useState(false);
+-  const displayKey = showFull ? `${apiKey.keyPrefix}${"•".repeat(32)}` : `${apiKey.keyPrefix}••••••••`;
++  const keyPrefix = apiKey.keyPrefix ?? "";
++  const displayKey = showFull ? `${keyPrefix}${"•".repeat(32)}` : `${keyPrefix}••••••••`;
+ 
+   return (
+     <div className="flex items-center justify-between p-3 rounded-lg border border-border/50 bg-muted/20 hover:bg-muted/40 transition-colors">
+@@ -120,7 +130,7 @@ function ApiKeyCard({ apiKey, onDelete, onRegenerate }: {
+             </button>
+           </div>
+           <p className="text-xs text-muted-foreground mt-0.5">
+-            Created {new Date(apiKey.createdAt).toLocaleDateString()}
++            {apiKey.createdAt ? `Created ${new Date(apiKey.createdAt).toLocaleDateString()}` : "Creation date unavailable"}
+             {apiKey.lastUsedAt && ` · Last used ${new Date(apiKey.lastUsedAt).toLocaleDateString()}`}
+           </p>
+         </div>
+@@ -128,7 +138,7 @@ function ApiKeyCard({ apiKey, onDelete, onRegenerate }: {
+       <div className="flex items-center gap-1 shrink-0">
+         <Button
+           variant="ghost" size="icon" className="h-7 w-7"
+-          onClick={() => { navigator.clipboard.writeText(apiKey.keyPrefix); toast.success("Key prefix copied"); }}
++          onClick={() => { navigator.clipboard.writeText(keyPrefix); toast.success("Key prefix copied"); }}
+         >
+           <Copy className="h-3.5 w-3.5" />
+         </Button>
+@@ -468,14 +478,16 @@ export default function UserDashboard() {
+                   </div>
+                 ) : apiKeys && apiKeys.length > 0 ? (
+                   <div className="space-y-2">
+-                    {apiKeys.map((key) => (
+-                      <ApiKeyCard
+-                        key={key.id}
+-                        apiKey={key}
+-                        onDelete={(id) => deleteKey.mutate({ keyId: id })}
+-                        onRegenerate={(id) => regenerateKey.mutate({ keyId: id })}
+-                      />
+-                    ))}
++                    {apiKeys
++                      .filter((key): key is IdentifiedApiKey => key.id !== undefined)
++                      .map((key) => (
++                        <ApiKeyCard
++                          key={key.id}
++                          apiKey={key}
++                          onDelete={(id) => deleteKey.mutate({ keyId: id })}
++                          onRegenerate={(id) => regenerateKey.mutate({ keyId: id })}
++                        />
++                      ))}
+                   </div>
+                 ) : (
+                   <div className="text-center py-10 border border-dashed border-border rounded-lg">
+@@ -604,11 +616,11 @@ export default function UserDashboard() {
+                   <div>
+                     <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">Payment history</p>
+                     <div className="space-y-1">
+-                      {billingHistory.slice(0, 10).map((invoice, i: number) => (
++                      {billingHistory.slice(0, 10).map((invoice: BillingHistoryItem, i: number) => (
+                         <div key={i} className="flex items-center justify-between py-2 border-b border-border/30 last:border-0">
+                           <div>
+                             <p className="text-sm">{invoice.description || "Subscription"}</p>
+-                            <p className="text-xs text-muted-foreground">{new Date(invoice.date).toLocaleDateString()}</p>
++                            <p className="text-xs text-muted-foreground">{new Date(invoice.createdAt).toLocaleDateString()}</p>
+                           </div>
+                           <div className="text-right">
+                             <p className="text-sm font-medium">${(invoice.amount / 100).toFixed(2)}</p>
+
+diff --git a/build-os/packets/routing/routing-auto-20260811T122805Z-25448-20260811T122805Z.md b/build-os/packets/routing/routing-auto-20260811T122805Z-25448-20260811T122805Z.md
+--- /dev/null
++++ b/build-os/packets/routing/routing-auto-20260811T122805Z-25448-20260811T122805Z.md
++# ROUTING RECEIPT — one file per routing decision. The recorded verdict is BINDING
++# (build-os/memory/routing_contract.md); routing-check.sh refuses this receipt at
++# close if executed_mode exceeds selected_mode with no escalation record, if an
++# escalation carries no evidence, or if consumption exceeds a budget undeclared.
++task_id: auto-20260811T122805Z-25448
++description_sha256: 27b3f1b706c909c94af97ff3625e4a0a813089bab6bc2c90aa89c5978cb14534
++descriptor: {"expected_files_changed":1,"requires_tests":false,"expected_session_count":1,"prior_context_required":false,"handoff_required":false,"consequence_level":"low","irreversible_or_external_mutation":false,"high_blast_radius":false,"unclear_acceptance_criteria":false,"security_or_compliance_consequence":false,"parallel_workstreams_benefit":false,"high_rework_history":false,"nondeterministic_verification":false}
++selected_mode: direct
++selector_note: -
++issued_at: 2026-08-11T12:28:05Z
++# --- budgets: DERIVED DEFAULTS from EXP-0002 sealed records, operator-tunable, not laws.
++# --- Derivation: ON-surface light runs measured 172k-369k total tokens / 0 dispatches
++# --- (named exceedance: raw T4 at 526,461 - context, not the band); the
++# --- blowouts measured 4.9M/7.4M tokens, 4-5 dispatches, $3.63/$4.80. See route-task.sh.
++budget_max_subagents: 0
++budget_max_total_tokens: 250000
++budget_max_uncached_tokens: 30000
++budget_max_model_calls: 12
++budget_max_wall_clock_s: 300
++budget_max_cost_usd: 0.40
++# --- process allowance (PACKET-0053): the packet's OWN gate chain is governance
++# --- ceremony, counted SEPARATELY from task work by the live gate and attributed
++# --- to governance_process (the 0050/0051 calibration question, resolved). Default
++# --- 7 = the LARGEST LEGAL chain in the doctrine: mandatory_full_regate runs
++# --- builder, qa, reviewer, fix-builder, qa, reviewer, archivist. (No-fix chain
++# --- is 4; fix-then-pass is 6.) Process dispatches never eat budget_max_subagents.
++process_dispatch_allowance: 7
++# --- empty at issue; filled at close. AN UNKNOWN IS NOT A ZERO: "-" is an honest
++# --- admission and is never refused; refusal is for CONTRADICTION, not absence.
++executed_mode: -
++escalation: -
++escalation_evidence: -
++consumed_subagents: -
++consumed_total_tokens: -
++consumed_uncached_tokens: -
++consumed_model_calls: -
++consumed_wall_clock_s: -
++consumed_cost_usd: -
++degradation_note: -
++# --- close-fill EXTENSIONS (PACKET-0053). consumed_subagents above counts TASK
++# --- dispatches (vs budget_max_subagents); consumed_process_dispatches counts the
++# --- gate chain (vs process_dispatch_allowance). The attr_* layers attribute
++# --- consumption where derivable at close — tokens or cost with provenance, or
++# --- "-" as an admission, NEVER a zero nobody measured. Receipts predating these
++# --- fields stay valid: routing-check.sh reads an absent field as "-".
++consumed_process_dispatches: -
++attr_task_execution: -
++attr_context_retrieval: -
++attr_subagent_execution: -
++attr_verification: -
++attr_review: -
++attr_governance_process: -
++attr_experiment_audit: -
++# --- contribution rows (PACKET-0053): marginal-contribution accounting, MANDATORY
++# --- for a Full close with dispatches>0 (routing-check.sh refuses otherwise). The
++# --- live gate seeds one stub row per admitted Full task dispatch; fill at close:
++# --- contribution: <subagent_type> | <unique_question> | <output_ref> | changed_implementation=y/n/- | changed_conclusion=y/n/- | caught_defect=y/n/- | duplicated_work=y/n/- | tokens=<v|-> | cost=<v|-> | time=<v|->
++# --- An all-"-" row passes as an admission and is REPORTED as non-contributing.
++

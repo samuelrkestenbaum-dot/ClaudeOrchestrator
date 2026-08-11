@@ -1,0 +1,27 @@
+{
+  "config": "lean",
+  "acts": [],
+  "baseline": false,
+  "pinned": true,
+  "administered_sha": "6084293d76e67cad734c46ae2efd02e6eae878d7",
+  "arm": "gravito",
+  "source_identity": {
+    "treatment": "lean",
+    "requested_ref": "78bedf1",
+    "resolved_commit": "78bedf187124fbb37f934f763b62cd805017ee41",
+    "source_archive_sha256": "f17eebdfd220dc0ae76e8c19b2e807fdc7638eb9002ff10dd40184c3b9be01ae",
+    "source_dir": "/home/user/.exp-pinned/lean-78bedf187124",
+    "administered_tree_sha256": "ecb038ddc9a81ddc1175671c9d84977a06f35a7a9aa2e703250e7166210b2a1f"
+  },
+  "verification": "runnable",
+  "allowed_tools": [
+    "Bash(npx tsc:*)",
+    "Bash(./node_modules/.bin/tsc:*)",
+    "Bash(node_modules/.bin/tsc:*)"
+  ],
+  "permission_mode": "acceptEdits",
+  "bash_timeouts": {
+    "BASH_DEFAULT_TIMEOUT_MS": "600000",
+    "BASH_MAX_TIMEOUT_MS": "600000"
+  }
+}
