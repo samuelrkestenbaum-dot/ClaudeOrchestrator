@@ -11,6 +11,26 @@ HOOK_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$HOOK_DIR/hook-once.sh"
 build_os_hook_once "SessionStart" || exit 0
 
+# EXP-0009 / TOM Layer 3 v0 — ORGANIZATIONAL MEMORY, DELIVERED BY PUSH.
+# If machine-distilled task records exist, they arrive inline (<=4KB) so the
+# worker never hunts for them: variant B proved subtraction causes search, and
+# memory that is discoverable-but-unannounced is subtraction wearing a memory
+# costume. Above 4KB a one-line pointer with the entry count is emitted instead.
+# The worker READS this; it never writes or administers it — the harness
+# distills. That boundary is the experiment's TOM regression guard.
+_MEMLOG="$ROOT/build-os/memory/task-log.md"
+if [ -f "$_MEMLOG" ]; then
+  _MEMSZ=$(wc -c < "$_MEMLOG" 2>/dev/null || echo 0)
+  if [ "$_MEMSZ" -le 4096 ]; then
+    echo "Organizational memory — prior task records for this repository (machine-distilled; read-only for you):"
+    cat "$_MEMLOG"
+  else
+    _MEMN=$(grep -c '^## ' "$_MEMLOG" 2>/dev/null || echo '?')
+    echo "Organizational memory: $_MEMN prior task records at build-os/memory/task-log.md (read it before rediscovering)."
+  fi
+  echo
+fi
+
 # LEAN L4 — derived state FIRST, ceremony after. One line of resolved certainty
 # for task workers: routing needs nothing from them, and the receipt state is
 # stated rather than discoverable.
