@@ -1,7 +1,7 @@
 {
   "artifact": "program_state",
   "version": 1,
-  "primary_objective": "Determine whether Gravito can preserve its substrate value while achieving competitive AI-work economics.",
+  "primary_objective": "Phase 2: Can Gravito produce a positive advantage over native on sustained work by reusing organizational cognition?",
   "established_facts": [
     {
       "fact": "the substrate functions operationally",
@@ -95,6 +95,15 @@
         "replication round, 12 lean arms reps 4-6 — COMPLETE, 12/12 accepted, 12/12 verified in-band"
       ],
       "resolution": "CONFIRMED, by the precommitted criteria applied mechanically: (1) acceptance 12/12 and verification executed in-band 12/12; (2) control interactions stayed collapsed — control round-trips 0.0 (4/4 tasks fully separated below current), gate diagnosis 0, capability search 0, routing bookkeeping 0.00, impl reads 0, gravito search 0; (3) economics near native — cost 1.26x (inside the operator's pre-declared 1.18-1.3x confirm band), uncached 1.18x, with cost separating lean-below-current on 4/4 tasks (stronger than the original draw's 3/4). No reversion toward 1.8-2x. The PROVISIONAL marker on D2 is LIFTED."
+    },
+    {
+      "id": "D3",
+      "decision": "Does persistent memory beat rediscovery over a task sequence? (Phase 2, proof 1 of 5)",
+      "open_uncertainty": "Whether lean-mem's cost/turns curve falls across sequence positions while native stays flat, with acceptance held and >=1 reused-memory event in the arms that got cheaper",
+      "resolved_by": "EXP-0009 per its frozen preregistration: 2 rule-derived sequences x 5 positions x 2 arms x 2 reps; fork applied only when both reps exist",
+      "status": "open",
+      "measurement_attempts": 0,
+      "attempt_log": []
     }
   ],
   "stop_conditions": [
