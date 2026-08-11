@@ -79,6 +79,15 @@
         "audit_caveat": "the audit brief's two literal lean marker strings occur 0/36 times (AUTO-RECEIPT-MINTED is a ledger row, not stream content); the auditor established identity from fingerprints it found itself: routing-auto-*.md receipt references (6/12 lean, 0/24 others), the lean-only SessionStart hook (12/12 lean, 0/24 others), and the current-only routing-request ceremony (12/12 current, 0/24 others). Lean is near-zero rather than absolutely zero on hook events: 2 total across 12 arms",
         "remaining": "one bounded replication (task #54) before the PROVISIONAL marker lifts"
       }
+    },
+    {
+      "id": "D2v",
+      "decision": "Does the bounded replication CONFIRM the lean architectural result, or reopen it?",
+      "open_uncertainty": "Whether lean's 1.10x + mechanism collapse survives an independent draw under the exact frozen environment",
+      "resolved_by": "one replication round: 12 lean arms, T01-T04 x reps 4-6, same pins, same classifier, same acceptance. Criteria precommitted by the operator: CONFIRM if acceptance/verification hold AND control interactions stay collapsed AND economics stay materially near native (1.18x or 1.25x still confirms); REOPEN only on reversion toward 1.8-2x+, returning control interactions, weakened acceptance, or wrong treatment identity",
+      "status": "open",
+      "measurement_attempts": 0,
+      "attempt_log": []
     }
   ],
   "stop_conditions": [

@@ -1,0 +1,12 @@
+{
+  "work": "bounded lean replication: 12 arms, T01-T04 x reps 4-6, exact frozen environment, no changes of any kind",
+  "decision_id": "D2v",
+  "hypothesis_id": "H-lean-interaction-model",
+  "differs_from_prior": "first attempt for D2v - an independent draw of the already-measured lean treatment, validating rather than re-deciding D2",
+  "possible_results": [
+    { "result": "acceptance/verification hold, control interactions stay collapsed, economics near native",
+      "next_action": "CONFIRM - close the lean phase and move to the outperform-native objective" },
+    { "result": "economics revert toward 1.8-2x, or control interactions return, or acceptance/verification weakened",
+      "next_action": "REOPEN the lean claim and locate what changed between the draws" }
+  ]
+}
