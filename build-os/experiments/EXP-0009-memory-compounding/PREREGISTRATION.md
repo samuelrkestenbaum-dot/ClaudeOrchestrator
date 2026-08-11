@@ -113,6 +113,31 @@ A confirming result must also show ≥1 reused-memory event in the arms that got
 cheaper — a falling curve with zero memory consultation is a confound, not a
 confirmation, and is reported as such.
 
+## Operator amendments at freeze (locked before implementation, before any arm)
+
+1. **Memory isolation.** Every sequence × rep gets its OWN memory store —
+   no carryover across reps, no cross-sequence leakage. Otherwise rep 2 is
+   not an independent replication; it inherits rep 1's experience. Enforced
+   by construction (per-`SEQ.rep` store paths) and checked by the provenance
+   preflight: every entry's provenance must name the same sequence and rep,
+   and a position strictly earlier than the current arm.
+2. **Primary interpretation is the POSITION-MATCHED TREATMENT ADVANTAGE, not
+   the absolute curve.** Later positions may simply be easier files. Since
+   both arms see the same ordered tasks, the load-bearing signal is whether
+   the per-position Gravito-vs-Native gap (cost, uncached, turns,
+   rediscovery/search, acceptance) becomes MORE FAVORABLE as experience
+   accumulates. The absolute lean-mem curve is reported as secondary context.
+3. **The TOM regression guard.** Memory must arrive as useful cognition, not
+   as another system the worker operates. If the worker starts discussing the
+   memory framework, searching memory infrastructure, or administering memory
+   bookkeeping, that is a TOM regression EVEN IF tokens improve. Measured
+   structurally with the frozen classifiers: worker Writes under
+   `build-os/memory/` must be 0 (the harness distills; workers never do), and
+   the lean TOM classes (control round-trips, gate diagnosis, capability
+   search, bookkeeping) must remain at their lean-proven zeros. Reads of the
+   delivered memory are reuse — the desired behaviour — and are counted as
+   such, not as regression.
+
 ## What this experiment is not
 
 Not a Lean validation (closed), not a baseline (S1 refuses), not proof 2–5.
