@@ -18,8 +18,23 @@ build_os_hook_once "SessionStart" || exit 0
 # costume. Above 4KB a one-line pointer with the entry count is emitted instead.
 # The worker READS this; it never writes or administers it — the harness
 # distills. That boundary is the experiment's TOM regression guard.
+# PKT-R0-1 — NAMESPACE GUARD, default closed. Memory is emitted only when
+# the project-identity stamp matches this repo (or is adopted now, with a
+# receipt line). A store carried in from another project is QUARANTINED:
+# named, never read.
+_NS_VERDICT="MATCH"
+if [ -r "$HOOK_DIR/project-identity.sh" ]; then
+  # shellcheck source=project-identity.sh
+  source "$HOOK_DIR/project-identity.sh"
+  _NS_VERDICT="$(bosi_namespace_verdict "$ROOT")"
+  case "$_NS_VERDICT" in
+    ADOPTED)    echo "Namespace: existing build-os/memory ADOPTED into project $(bosi_project_id "$ROOT") (stamp written; receipt: this line)."; echo ;;
+    QUARANTINE) echo "Namespace: QUARANTINE — build-os/memory carries another project's identity stamp. Memory will NOT be read this session. Resolve by moving that build-os/ back to its own repo, or by a human deleting build-os/memory/.project-identity to re-adopt."; echo ;;
+  esac
+fi
+
 _MEMLOG="$ROOT/build-os/memory/task-log.md"
-if [ -f "$_MEMLOG" ]; then
+if [ "$_NS_VERDICT" != "QUARANTINE" ] && [ -f "$_MEMLOG" ]; then
   _MEMSZ=$(wc -c < "$_MEMLOG" 2>/dev/null || echo 0)
   if [ "$_MEMSZ" -le 4096 ]; then
     echo "Organizational memory — prior task records for this repository (machine-distilled; read-only for you):"
@@ -69,7 +84,9 @@ if [ -x "$ROOT/install-accelerators.sh" ]; then
 fi
 
 echo "Memory: project build-os/memory → user ~/build-os/memory → embedded lanes."
-if [ -d "$ROOT/build-os/memory" ]; then
+if [ "$_NS_VERDICT" = "QUARANTINE" ]; then
+  echo "Project memory QUARANTINED by the namespace guard — treat this session as memoryless for this repo."
+elif [ -d "$ROOT/build-os/memory" ]; then
   echo "Project memory present; build-orchestrator reads current_state.md, residue.md, and tool_router.md on demand."
   # ROTATED MEMORY IS NOT THE WHOLE RECORD, AND THIS IS THE POINT WHERE THAT
   # HAS TO BE SAID. Before rotation an over-size memory file fails to Read and

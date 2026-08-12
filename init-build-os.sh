@@ -33,6 +33,15 @@ fi
 echo "Build OS — scaffold build-os/ into: $DEST"
 mkdir -p "$DEST/build-os/memory" "$DEST/build-os/packets" "$DEST/build-os/receipts"
 
+# PKT-R0-1: stamp the project namespace at scaffold time (deterministic id;
+# see .claude/hooks/project-identity.sh). Never overwrites an existing stamp.
+if [ ! -f "$DEST/build-os/memory/.project-identity" ]; then
+  _src_id="$(git -C "$DEST" config --get remote.origin.url 2>/dev/null || true)"
+  [ -n "$_src_id" ] || _src_id="$(git -C "$DEST" rev-parse --show-toplevel 2>/dev/null || echo "$DEST")"
+  printf 'project_id: %s\nadopted_at: %s\nderivation: remote-url-or-path sha256/16\n'     "$(printf '%s' "$_src_id" | sha256sum | cut -c1-16)" "$(date -u +%FT%TZ)"     > "$DEST/build-os/memory/.project-identity"
+  echo "  + build-os/memory/.project-identity (namespace stamp)"
+fi
+
 # Never-clobber seeding. $rel is the path in the DESTINATION repo; the source is
 # always "$TEMPLATES/$rel" (templates/ mirrors the destination layout), never a
 # live file from this repo.
