@@ -16,6 +16,7 @@
 #   gravito goal <file> [DIR]      validate + install the goal contract (PKT-R0-4)
 #   gravito run [DIR]              gate + dispatch ONE worker session; meters spend into the ledger
 #   gravito review [DIR]           diff summary + acceptance (acceptance_cmd runs; prose is shown)
+#   gravito diagnose [DIR]         support bundle: identity, wiring, goal, ledger, receipts
 #   gravito stop [DIR]             halt the worker at a safe boundary; state durable
 set -euo pipefail
 SRC="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -36,7 +37,7 @@ latest_manifest(){ ls -1 "$(manifest_dir "$1")"/install-manifest-*.txt 2>/dev/nu
 # Engine file inventory: exactly what install-project.sh copies.
 engine_files(){ # <dest> -> repo-relative paths that ARE engine (not user data)
   local d="$1" f
-  for f in "$d"/.claude/agents/*.md "$d"/.claude/commands/*.md "$d"/.claude/hooks/*.sh "$d"/build-os/tools/goal-check.sh "$d"/build-os/tools/route-task.sh "$d"/build-os/tools/mode-select.mjs "$d"/CLAUDE.md; do
+  for f in "$d"/.claude/agents/*.md "$d"/.claude/commands/*.md "$d"/.claude/hooks/*.sh "$d"/.claude/hooks/mcp-readonly-allowlist.txt "$d"/build-os/tools/goal-check.sh "$d"/build-os/tools/route-task.sh "$d"/build-os/tools/mode-select.mjs "$d"/CLAUDE.md; do
     [ -f "$f" ] && printf '%s\n' "${f#"$d"/}"
   done
 }
@@ -237,6 +238,67 @@ cmd_review(){
   fi
 }
 
+cmd_diagnose(){
+  # R1-P3 — one support bundle: everything needed to debug a target repo
+  # without expert archaeology. Read-only except the bundle receipt itself.
+  local d; d="$(resolve_dir "${1:-}")"
+  local ts out
+  ts="$(date -u +%Y%m%dT%H%M%SZ)"
+  mkdir -p "$d/build-os/receipts"
+  out="$d/build-os/receipts/diagnose-$ts.txt"
+  {
+    echo "=== gravito diagnose — $d @ $(now) ==="
+    echo "engine source: $SRC"
+    if [ -r "$SRC/.claude/hooks/project-identity.sh" ]; then
+      source "$SRC/.claude/hooks/project-identity.sh"
+      echo "namespace: $(bosi_namespace_verdict "$d") (id $(bosi_project_id "$d"))"
+    fi
+    echo "-- engine files (missing = broken install; fix: gravito update)"
+    local rel missing=0
+    for rel in .claude/hooks/routing-gate.sh .claude/hooks/session-start-build-os.sh .claude/hooks/mcp-readonly-allowlist.txt build-os/tools/goal-check.sh build-os/tools/route-task.sh CLAUDE.md; do
+      [ -f "$d/$rel" ] || { echo "  MISSING: $rel"; missing=1; }
+    done
+    [ "$missing" -eq 0 ] && echo "  all present"
+    echo "-- tool-gate wiring in .claude/settings.json (unwired = enforcement is NOT live)"
+    if [ -f "$d/.claude/settings.json" ] && command -v python3 >/dev/null 2>&1; then
+      python3 - "$d/.claude/settings.json" <<'PY'
+import json, sys
+s = json.load(open(sys.argv[1]))
+pt = s.get("hooks", {}).get("PreToolUse", [])
+want = {"Edit|Write|NotebookEdit|Bash": "mutgate", "mcp__.*": "mcpgate", "Task|Agent": "gate"}
+for m, mode in want.items():
+    ok = any(g.get("matcher") == m and any(("routing-gate.sh " + mode) in h.get("command", "") for h in g.get("hooks", [])) for g in pt)
+    print("  %s %s -> %s" % ("wired  " if ok else "UNWIRED", m, mode))
+PY
+    else
+      echo "  cannot inspect (no settings.json or no python3)"
+    fi
+    echo "-- goal"
+    if [ -f "$d/gravito.goal" ]; then
+      bash "$SRC/build-os/tools/goal-check.sh" --status "$d/gravito.goal" || true
+    else
+      echo "  none installed"
+    fi
+    echo "-- spend ledger"
+    local ledger="$d/build-os/memory/spend-ledger.jsonl"
+    if [ -f "$ledger" ]; then
+      echo "  $(grep -c . "$ledger") entries; last: $(tail -1 "$ledger" | cut -c1-160)"
+    else
+      echo "  no metered runs recorded"
+    fi
+    echo "-- last refusals (empty = nothing was ever blocked)"
+    { tail -3 "$d/build-os/receipts/refusals.log" 2>/dev/null || true; } | sed 's/^/  /'
+    echo "-- last receipts"
+    { ls -1t "$d"/build-os/receipts/install-manifest-*.txt "$d"/build-os/receipts/run-*.jsonl 2>/dev/null || true; } | head -3 | sed 's/^/  /'
+    echo "-- residue quarantine (empty = none)"
+    { ls -1d "$d"/build-os/residue/*/ 2>/dev/null || true; } | sed 's/^/  /'
+    local nw; nw="$(pgrep -fc 'claude -p' 2>/dev/null)" || nw=0
+    echo "-- workers on this host: ${nw:-0}"
+  } | tee "$out"
+  say ""
+  say "diagnose bundle written: ${out#"$d"/}"
+}
+
 cmd_stop(){
   local d; d="$(resolve_dir "${1:-}")"
   if [ -f "$d/build-os/receipts/run.pid" ] && kill -0 "$(cat "$d/build-os/receipts/run.pid")" 2>/dev/null; then
@@ -259,6 +321,7 @@ case "$CMD" in
   goal)      cmd_goal "$@" ;;
   run)       cmd_run "$@" ;;
   review)    cmd_review "$@" ;;
+  diagnose)  cmd_diagnose "$@" ;;
   stop)      cmd_stop "$@" ;;
-  help|*)    sed -n '2,18p' "$0" ;;
+  help|*)    sed -n '2,20p' "$0" ;;
 esac

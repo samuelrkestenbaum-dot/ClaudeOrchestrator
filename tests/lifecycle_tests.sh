@@ -80,6 +80,28 @@ ok '[ "$(sha256sum "$R3/.gitignore" | cut -d" " -f1)" = "$sha_gi" ]' "purge rest
 ok '! grep -q "test:build-os-memory" "$R3/package.json"' "purge removed the package.json script entry"
 ok 'grep -q "\"test\": \"true\"" "$R3/package.json"' "user's own package.json scripts preserved"
 
+echo "== 9. gravito diagnose names the ACTUAL fault (R1-P3) =="
+R5="$WORK/repo5"; mkdir -p "$R5"; git -C "$R5" init -q; git -C "$R5" remote add origin https://x/lc5.git
+echo hi > "$R5/app.txt"; git -C "$R5" -c user.email=t@t -c user.name=t add -A; git -C "$R5" -c user.email=t@t -c user.name=t commit -qm s
+"$G" init "$R5" >/dev/null 2>&1
+"$G" goal "$SRC/templates/gravito.goal.example" "$R5" >/dev/null
+ok '"$G" diagnose "$R5" >/dev/null 2>&1' "diagnose exits 0 on a healthy repo (no partial bundles)"
+DOUT="$("$G" diagnose "$R5" 2>/dev/null)"
+ok 'printf "%s" "$DOUT" | grep -q "namespace: MATCH"' "healthy repo: diagnose reports namespace MATCH"
+ok 'printf "%s" "$DOUT" | grep -q "all present"' "healthy repo: engine files all present"
+ok 'printf "%s" "$DOUT" | grep -qc "wired" && ! printf "%s" "$DOUT" | grep -q "UNWIRED"' "healthy repo: all three tool gates report wired"
+ok 'ls "$R5"/build-os/receipts/diagnose-*.txt >/dev/null 2>&1' "diagnose bundle receipt written"
+rm "$R5/build-os/tools/goal-check.sh"
+python3 - "$R5/.claude/settings.json" <<'PY'
+import json,sys
+p=sys.argv[1]; s=json.load(open(p))
+s["hooks"]["PreToolUse"]=[g for g in s["hooks"]["PreToolUse"] if g.get("matcher")!="mcp__.*"]
+json.dump(s,open(p,"w"),indent=2)
+PY
+DOUT2="$("$G" diagnose "$R5" 2>/dev/null)"
+ok 'printf "%s" "$DOUT2" | grep -q "MISSING: build-os/tools/goal-check.sh"' "broken repo: missing engine file named exactly"
+ok 'printf "%s" "$DOUT2" | grep -q "UNWIRED mcp__"' "broken repo: unwired MCP gate named exactly"
+
 echo
 echo "==== RESULT: $PASS passed, $FAIL failed ===="
 [ "$FAIL" -eq 0 ]
