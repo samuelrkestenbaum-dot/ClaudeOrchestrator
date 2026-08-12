@@ -575,9 +575,24 @@ goal_gate_or_block(){ # <tool-name>
   # the tool-boundary member of the H0 entry-point inventory; cmd_run carries
   # the full-surface member. A corrupt ledger MUST block here too: goal-check's
   # sums silently skip bad lines, so a corrupt ledger undercounts spend.
+  # LEGACY POLICY (versioned, chosen 2026-08-12): this hook running proves the
+  # target is Gravito-managed (only registered matchers invoke it). For a
+  # managed target, a MISSING or UNREADABLE H0 component is itself a Class-A
+  # enforcement-integrity failure — absence of the enforcer is never evidence
+  # of protection. Supported mutations FAIL CLOSED with an actionable receipt
+  # until `gravito update` restores the component; reads stay available
+  # (Read/Grep/Glob and allowlisted MCP reads never reach this path).
+  # Pre-R1 targets with NO registered matchers never invoke this hook at all:
+  # they are UNPROTECTED by wiring absence — named in diagnose, not claimable.
   _h0="$DATA_ROOT/build-os/tools/h0-check.sh"
   [ -x "$_h0" ] || _h0="$(dirname "${BASH_SOURCE[0]}")/../../build-os/tools/h0-check.sh"
-  if [ -x "$_h0" ] && ! _h0out="$(bash "$_h0" --gate "$DATA_ROOT" 2>&1)"; then
+  if [ ! -x "$_h0" ]; then
+    mkdir -p "$DATA_ROOT/build-os/receipts"
+    printf '%s tool=%s BLOCKED H0-enforcement-component-missing (UPDATE_REQUIRED)\n' "$(date -u +%FT%TZ)" "$_gtool" >> "$DATA_ROOT/build-os/receipts/refusals.log"
+    printf 'BLOCK\nH0 HALT (fail closed): this Gravito-managed target is missing its H0 enforcement component (build-os/tools/h0-check.sh). A missing enforcer is a Class-A integrity failure, not a pass. Next action: run gravito update on this repository. Reads remain available.\n'
+    return 1
+  fi
+  if ! _h0out="$(bash "$_h0" --gate "$DATA_ROOT" 2>&1)"; then
     mkdir -p "$DATA_ROOT/build-os/receipts"
     printf '%s tool=%s BLOCKED %s\n' "$(date -u +%FT%TZ)" "$_gtool" "$_h0out" >> "$DATA_ROOT/build-os/receipts/refusals.log"
     printf 'BLOCK\nH0 HALT (fail closed, before authority): %s\nThis mutation was refused BEFORE any side effect. Receipt: build-os/receipts/refusals.log.\n' "$_h0out"
