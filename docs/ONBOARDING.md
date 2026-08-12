@@ -77,6 +77,21 @@ And three exits, none of which touch your product files:
 
 Destructive verbs default to dry-run; `--force` is always explicit.
 
+## What runs before and after your worker (translated, no math)
+
+`gravito run` checks system health first (`gravito health` shows the same
+facts any time): a genuinely broken substrate — unreadable repository,
+corrupt spend ledger, an installed contract with no enforcer — refuses
+before anything happens; lesser problems (a stale worker record, low disk)
+are named and narrow what runs, never a vague universal stop. It then
+computes which actions are actually available right now and dispatches only
+if running is one of them; every attempt leaves an ordered trace receipt.
+Optionally, `gravito predict PASS` before a run records your honest
+forecast; `gravito review` then records what actually happened next to it —
+if you didn't forecast, it says so rather than inventing one. Review also
+prints a few program-health numbers; they are informational only and never
+gate anything.
+
 ## When something looks wrong
 
 `gravito diagnose "$REPO"` is the support surface: namespace verdict,

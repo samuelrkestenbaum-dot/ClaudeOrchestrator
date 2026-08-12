@@ -9,12 +9,22 @@ A wired-* status requires a caller path that exists and references the
 implementation. `outcome-proven` names the LEVEL of the proof (event / cell /
 task / sequence / experiment / subsystem / program) per the scale rule.
 
-TRACING NOTE (2026-08-12): the "historical coherence-field implementation"
-(attention curvature, correction mass, attractor basins, entropy gradient)
-described in prior program records does NOT exist in this repository — no
-implementation file, no caller. It is presumed Mac-local Core (#40,
-unreachable). In this tree those entries are `theoretical`, whatever the
-docs remember.
+TRACING NOTE (2026-08-12, corrected by the P-5 bounded search): the
+"historical coherence-field implementation" does NOT exist in this
+repository (confirmed: pickaxe over all local refs, remote branch list —
+never in this history). It was LOCATED read-only in the SIBLING repository
+samuelrkestenbaum-dot/empathiq-website at
+`server/emotional-geometry-runtime/` (attention_curvature /
+correction_mass / entropy_gradient in field/UnifiedFieldSnapshot.ts;
+introduced there by commit 08a76c6, behind a default-OFF feature flag per
+its own commit message; statically routed in that server's routes; live
+invocation NOT verified — that would require running their server, outside
+this bounded search). The prior program-memory claim that it carried
+"explicit confidence and falsification boundaries" is NOT confirmed for
+that file (0 matches). DISPOSITION: not copied, not wired, no authority
+granted; in THIS repository the curvature/mass/attractor/entropy entries
+remain `theoretical`, and that code is another codebase's Class-C
+challenger material at best.
 
 ## Ontology N = (R, M, nu, g, A, En, H0, D, B, Et, I, Q, S_latent)
 - equation: N = (R, M, nu, g, A, En, H0, D, B, Et, I, Q, S_latent)
@@ -244,14 +254,14 @@ docs remember.
 - equation: H0_system = runtime and substrate health; H0 down => A_safe down
 - class: A
 - zone: 2
-- implementation: partial and SCATTERED — bin/gravito cmd_preflight (repo validity, secrets); bin/gravito cmd_diagnose (engine files, wiring, ledger); .claude/hooks/session-start-build-os.sh (namespace guard, GOAL HALT announce); build-os/delivery/calibrate-noload.mjs + build-os/experiments/EXP-0012-parallel-infra/calibrate.mjs (lock refusal: calibration must not contend)
-- caller: bin/gravito (preflight before init; diagnose on demand); .claude/settings.json SessionStart hook
+- implementation: build-os/tools/h0-check.sh — ONE canonical surface (full mode: typed facts + agency full/narrowed/blocked; --gate mode: Class-A facts only for per-mutation boundaries). preflight/diagnose keep their distinct verbs (install-eligibility / support bundle)
+- caller: bin/gravito cmd_run (full, exactly once per dispatch attempt, first step, traced) + cmd_health; .claude/hooks/routing-gate.sh goal_gate_or_block (--gate, once per mutation, BEFORE authority). Entry-point inventory: cmd_run, tool-gate (direct/nested/resumed sessions), bare human shell = explicit unsupported boundary
 - inputs: git validity, secret files, engine file presence, matcher wiring, ledger, locks (all B-observable)
 - decision: preflight refuses init; diagnose reports; NO unified pre-work gate exists yet
-- receipt: preflight output; diagnose bundle build-os/receipts/diagnose-*.txt
+- receipt: build-os/receipts/h0-latest.json; refusals.log (tool boundary); run-trace.jsonl step h0
 - baseline: n/a (Boolean conditions)
 - falsifier: n/a (Class A; each condition individually testable)
-- outcome-test: preflight/diagnose behavior tests green (lifecycle suite, task level)
+- outcome-test: E2E disposable-repo proof at BOTH entry points: corrupt ledger blocks run and Edit before side effects; stale pid narrows without blocking (tests/control_primitives_tests.sh, task level). No real-outcome test yet
 - status: wired-unproven
 
 ## Agency composition A(t) = f(R, En, H0, I, Q)
@@ -272,14 +282,14 @@ docs remember.
 - equation: R_t = {a executable, authorized, feasible}; R_t+ = {a in R_t : E(a)=1}
 - class: A
 - zone: 3
-- implementation: experiment side: build-os/experiments/EXP-0011-reusable-skills/executor.mjs (authorized+runnable+predecessor_complete+no_blocker => launch; SEALED evidence). Product side: gate-shaped only — .claude/hooks/routing-gate.sh (goal_gate_or_block, mcpgate, mutgate) blocks inadmissible mutations; no explicit R_t SET is constructed before planning
-- caller: executor.mjs (sealed, ran 38 cells); routing-gate.sh via .claude/settings.json PreToolUse matchers
+- implementation: experiment side: sealed executor.mjs predicate. Product side: build-os/tools/reachability.mjs — explicit R_t/R_t+ construction with per-action reasons; the authority gate (goal-check --gate) is invoked ONCE inside the construction, so admission and authority are one evaluation, not two controls
+- caller: bin/gravito cmd_run — R_t+ membership is the REAL dispatch admission (refuse before side effects if run outside R_t+); bin/gravito cmd_health (operator surface); sealed executor.mjs (38 cells). Planning/SCORING consumer: ABSENT — reported dependency, selectAction() is the future planner entry (tests only)
 - inputs: run-records, locks, goal window, ledger, tool name, allowlist
 - decision: launch/refuse (experiments); allow/block mutation (product)
-- receipt: run-record.json admissibility fields; build-os/receipts/refusals.log
+- receipt: run-trace.jsonl (run_id, ordered steps h0->reachability->authority->admission); refusals.log; run-record admissibility (sealed)
 - baseline: n/a (Class A)
 - falsifier: n/a
-- outcome-test: experiment level: 38 admissible cells, zero partials (EXP-0011 termination manifest); product: real budget halt + real publish-gate block this program
+- outcome-test: gates: real budget halt + real publish block (experiment/program level). Product R_t construction: E2E admission proof + score-resurrection proof (task level); no real-outcome test yet for the construction itself
 - status: outcome-proven
 
 ## Ethics/authority as constraint, never penalty
@@ -356,14 +366,14 @@ docs remember.
 - equation: state -> H0 -> reachability -> authority -> planning -> cognition -> execution -> evidence -> learning
 - class: A
 - zone: 6
-- implementation: enforced piecewise: routing-gate.sh mutgate_decide (goal gate FIRST, then routing); bin/gravito cmd_run (gate before dispatch, meter+sweep after); executor.mjs (sealed event kernel); tests/neurocosmology_invariant_tests.sh pins the code-order
+- implementation: enforced and TRACED: bin/gravito cmd_run emits run-trace.jsonl (run_id, seq, steps h0->reachability->authority->admission->dispatch|refuse); routing-gate.sh goal_gate_or_block (H0 Class-A before authority per mutation); sealed executor.mjs; order pinned by tests/neurocosmology_invariant_tests.sh
 - caller: PreToolUse hooks; bin/gravito; sealed executor
 - inputs: code structure itself (order of operations)
 - decision: an out-of-order path is a defect
-- receipt: refusals.log (gate-first evidence); run receipts
+- receipt: build-os/receipts/run-trace.jsonl (correlation id per dispatch attempt); refusals.log
 - baseline: n/a
 - falsifier: n/a (Class A ordering)
-- outcome-test: invariant suite ordering checks (task level); live gate-before-dispatch demonstrated in golden paths
+- outcome-test: E2E ordered-trace proof with stable run_id and exactly-once h0 (task level)
 - status: wired-unproven
 
 ## Generative constraint (bounded autonomy)
@@ -384,15 +394,15 @@ docs remember.
 - equation: delta_t = y_t - yhat_t with recorded prediction, observation, mismatch, alternative, permitted consequence
 - class: B
 - zone: 7
-- implementation: NOT implemented as a per-run receipt. Nearest existing: experiment forks precommit predictions at DESIGN level (preregistrations); acceptance.json records observed outcome only
-- caller: none
+- implementation: build-os/tools/delta-receipt.sh — predictions.jsonl (optional pre-action forecasts: id, outcome_var, value, made_at, scale, provenance) + deltas.jsonl (observations, hash-chained). delta computed ONLY for a matched, pre-dated, commensurable prediction; else NOT_RECORDED / POST_HOC / INCOMPARABLE with delta=UNDEFINED. A success criterion is never yhat — predictions are never manufactured from the goal
+- caller: bin/gravito cmd_review (observe, one receipt per invocation) + cmd_predict (forecast surface)
 - inputs: predicted outcome (absent today), observed acceptance/verification
 - decision: would route learning consequences (confidence, selection weights)
-- receipt: proposed delta receipt — does not exist
+- receipt: build-os/receipts/predictions.jsonl + deltas.jsonl (both append-only, hash-chained, tamper/torn detection)
 - baseline: no-prediction (current state)
 - falsifier: n/a (B metric once predictions are recorded)
-- outcome-test: program-level exemplars exist (EXP-0009 expected-benefit/observed-drag; EXP-0010 expected-drag/observed-advantage) but were computed at design level, not runtime receipts
-- status: theoretical
+- outcome-test: E2E: absent/post-hoc/incomparable/unexplained-mismatch negative cases all enforced; crash + concurrency proven (task level). No real-outcome calibration yet
+- status: wired-unproven
 
 ## Narrative compression H -> K (distillation)
 - equation: N = C(M_1..M_n); H --distill--> K
@@ -650,43 +660,43 @@ docs remember.
 - equation: P_verified = delta observable progress / interpretive activity
 - class: B
 - zone: 9
-- implementation: none
-- caller: none
+- implementation: build-os/tools/convergence-counters.mjs (explicit denominators, UNDEFINED on zero, declared proxies)
+- caller: bin/gravito cmd_review (report block only — never a gate input, invariant-tested)
 - inputs: verified state changes vs interpretive tokens (both countable from ledgers/streams)
 - decision: program-health surfacing; convergence input
-- receipt: proposed
+- receipt: review output block; diagnose coverage row
 - baseline: n/a (B once defined)
 - falsifier: n/a; misuse falsifier: becoming a target
-- outcome-test: unbuilt
-- status: theoretical
+- outcome-test: negative case executed: doc-only activity reads P_verified=0 / R_meta UNDEFINED naming zero verified change (task level)
+- status: wired-unproven
 
 ## Rumination ratio R_rumination / R_meta
 - equation: R_rumination = semantic repetition / delta verified action-or-insight
 - class: B
 - zone: 9
-- implementation: none as a metric. Nearest wired relative: .claude/hooks/concession-gate.sh Stop hook (#55: STOP invalid while a specified+runnable+authorized task exists) — an anti-stall invariant, not this ratio
-- caller: concession-gate via settings.json Stop hook (that relative only)
+- implementation: build-os/tools/convergence-counters.mjs R_meta (declared proxy: interpretive/verified commits) — plus the unrelated wired relative concession-gate.sh (#55)
+- caller: bin/gravito cmd_review (report block); concession-gate via Stop hook (that relative only)
 - inputs: repetition detection vs verified-change ledger
 - decision: convergence warnings
 - receipt: proposed
 - baseline: repeated-topic count
 - falsifier: n/a (B once defined)
 - outcome-test: unbuilt
-- status: theoretical
+- status: wired-unproven
 
 ## False-positive load F_positive
 - equation: F_positive = sum 1[claimed progress AND NOT observed progress]
 - class: B
 - zone: 9
-- implementation: instances RECORDED when caught (e.g., the corrected false 15/20 status report is on record) but no counter exists
-- caller: none
+- implementation: build-os/tools/convergence-counters.mjs F_positive (claimed-success predictions that missed, from deltas.jsonl)
+- caller: bin/gravito cmd_review (report block)
 - inputs: claims vs proxies
 - decision: program-health surfacing
 - receipt: proposed
 - baseline: n/a
 - falsifier: n/a
 - outcome-test: unbuilt
-- status: theoretical
+- status: wired-unproven
 
 ## True success S_true
 - equation: S_true = arrival + durability + integrity + boundary-safety
