@@ -47,7 +47,8 @@ echo "== 5. status surface is honest =="
 SOUT="$("$G" status "$R" 2>/dev/null)"
 ok 'printf "%s" "$SOUT" | grep -q "namespace: MATCH"' "status shows namespace MATCH"
 ok 'printf "%s" "$SOUT" | grep -q "goal: Fix the flaky retry"' "status shows the installed goal"
-ok 'printf "%s" "$SOUT" | grep -q "NOT METERED in R0"' "unmetered numbers are declared, not invented"
+ok 'printf "%s" "$SOUT" | grep -q "NOT METERED (stated, not inferred)"' "unmetered paths are declared explicitly, not invented"
+ok 'printf "%s" "$SOUT" | grep -q "no metered runs recorded yet\|spend (committed ledger"' "metered spend surface reports the ledger honestly"
 ok 'printf "%s" "$SOUT" | grep -q "rollback: gravito rollback"' "exact stop/rollback commands shown"
 
 echo "== 6. destructive verbs default to dry-run =="
@@ -64,6 +65,20 @@ ok '[ -f "$R/build-os/memory/task-log.md" ]' "uninstall kept build-os user data"
 "$G" purge "$R" --force >/dev/null
 ok '[ ! -d "$R/build-os" ] && [ ! -d "$R/.claude" ] && [ ! -f "$R/gravito.goal" ]' "purge --force removed all Gravito state"
 ok '[ -f "$R/app.txt" ]' "product files untouched by purge"
+
+echo "== 8. purge restores installer-touched files byte-identically =="
+R3="$WORK/repo3"; mkdir -p "$R3"; git -C "$R3" init -q; git -C "$R3" remote add origin https://x/lc3.git
+printf 'node_modules/\n\n# my rules\narchive/\n' > "$R3/.gitignore"
+printf '{\n  "name": "t",\n  "scripts": {\n    "test": "true"\n  }\n}\n' > "$R3/package.json"
+echo hi > "$R3/app.txt"; git -C "$R3" -c user.email=t@t -c user.name=t add -A; git -C "$R3" -c user.email=t@t -c user.name=t commit -qm s
+sha_gi="$(sha256sum "$R3/.gitignore" | cut -d' ' -f1)"
+"$G" init "$R3" >/dev/null 2>&1
+ok 'grep -q "GRAVITO:MANAGED" "$R3/.gitignore"' "init appended the marked .gitignore block (precondition)"
+ok 'grep -q "test:build-os-memory" "$R3/package.json"' "init added the package.json script (precondition)"
+"$G" purge "$R3" --force >/dev/null
+ok '[ "$(sha256sum "$R3/.gitignore" | cut -d" " -f1)" = "$sha_gi" ]' "purge restored .gitignore BYTE-IDENTICAL to pre-init"
+ok '! grep -q "test:build-os-memory" "$R3/package.json"' "purge removed the package.json script entry"
+ok 'grep -q "\"test\": \"true\"" "$R3/package.json"' "user's own package.json scripts preserved"
 
 echo
 echo "==== RESULT: $PASS passed, $FAIL failed ===="

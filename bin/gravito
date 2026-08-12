@@ -36,7 +36,7 @@ latest_manifest(){ ls -1 "$(manifest_dir "$1")"/install-manifest-*.txt 2>/dev/nu
 # Engine file inventory: exactly what install-project.sh copies.
 engine_files(){ # <dest> -> repo-relative paths that ARE engine (not user data)
   local d="$1" f
-  for f in "$d"/.claude/agents/*.md "$d"/.claude/commands/*.md "$d"/.claude/hooks/*.sh "$d"/build-os/tools/goal-check.sh "$d"/CLAUDE.md; do
+  for f in "$d"/.claude/agents/*.md "$d"/.claude/commands/*.md "$d"/.claude/hooks/*.sh "$d"/build-os/tools/goal-check.sh "$d"/build-os/tools/route-task.sh "$d"/build-os/tools/mode-select.mjs "$d"/CLAUDE.md; do
     [ -f "$f" ] && printf '%s\n' "${f#"$d"/}"
   done
 }
@@ -119,9 +119,39 @@ cmd_purge(){
   local d; d="$(resolve_dir "${1:-}")"
   say "purge plan — COMPLETE local Gravito data removal for this repo:"
   say "  rm -rf .claude/  build-os/  gravito.goal (if present)"
+  say "  strip the GRAVITO:MANAGED block from .gitignore and the test:build-os-memory script from package.json (if present)"
   say "  (product files are never touched; this cannot be undone)"
   if [ "$FORCE" -ne 1 ]; then say "dry-run (default). Re-run with --force to execute."; return 0; fi
   rm -rf "$d/.claude" "$d/build-os" "$d/gravito.goal"
+  # The installer appends ONE marked block to .gitignore (archive visibility).
+  # With build-os/ gone that block is dead Gravito state: remove exactly it.
+  if [ -f "$d/.gitignore" ] && grep -q '^# GRAVITO:MANAGED' "$d/.gitignore"; then
+    awk '{a[NR]=$0}
+      END{
+        s=0; for(i=1;i<=NR;i++) if(a[i] ~ /^# GRAVITO:MANAGED/){s=i; break}
+        if(s==0){for(i=1;i<=NR;i++)print a[i]; exit}
+        e=s; while(e<=NR && a[e]!="!build-os/memory/archive/") e++
+        b=s; if(b>1 && a[b-1]=="") b--
+        for(i=1;i<b;i++)print a[i]
+        for(i=e+1;i<=NR;i++)print a[i]
+      }' "$d/.gitignore" > "$d/.gitignore.tmp"
+    mv "$d/.gitignore.tmp" "$d/.gitignore"
+    [ -s "$d/.gitignore" ] || rm -f "$d/.gitignore"
+    say "purge: GRAVITO:MANAGED block stripped from .gitignore"
+  fi
+  if [ -f "$d/package.json" ] && command -v python3 >/dev/null 2>&1; then
+    python3 - "$d/package.json" <<'PY'
+import json, sys
+path = sys.argv[1]
+with open(path) as f: pkg = json.load(f)
+s = pkg.get("scripts", {})
+if s.get("test:build-os-memory") == "./build-os/maintenance/run-tests.sh":
+    del s["test:build-os-memory"]
+    if not s: del pkg["scripts"]
+    with open(path, "w") as f: json.dump(pkg, f, indent=2); f.write("\n")
+    print("purge: test:build-os-memory script removed from package.json")
+PY
+  fi
   say "purge: all Gravito state removed at $(now)"
 }
 
@@ -149,12 +179,19 @@ cmd_status(){
     say "goal: none installed (gravito goal <file>)"
   fi
   say "state: $( [ -f "$d/build-os/packets/active_packet.md" ] && grep -m1 '^- \*\*Status:\*\*' "$d/build-os/packets/active_packet.md" || echo 'no active packet' )"
-  say "workers: $(pgrep -fc 'claude -p' 2>/dev/null || echo 0) headless worker session(s) on this host"
+  local nw; nw="$(pgrep -fc 'claude -p' 2>/dev/null)" || nw=0
+  say "workers: ${nw:-0} headless worker session(s) on this host"
   local mf; mf="$(latest_manifest "$d")"
   say "install: ${mf:+manifest $(basename "$mf")}${mf:-not installed via gravito init}"
   say "last receipts:"; ls -1t "$d"/build-os/receipts/*.md 2>/dev/null | head -3 | sed 's/^/  /' || true
-  say "tokens/cost/time: NOT METERED in R0 (provider-native metering ships with the R1 telemetry logger; no numbers are invented here)"
-  say "interventions: NOT METERED in R0 (same logger)"
+  local ledger="$d/build-os/memory/spend-ledger.jsonl"
+  if [ -f "$ledger" ]; then
+    say "spend (committed ledger, 'gravito run' streams only): $(awk -F'"tokens":' 'NF>1{split($2,a,/[,}]/); s+=a[1]} END{printf "%d", s}' "$ledger")tok \$$(awk -F'"usd":' 'NF>1{split($2,a,/[,}]/); s+=a[1]} END{printf "%.2f", s}' "$ledger") $(awk -F'"minutes":' 'NF>1{split($2,a,/[,}]/); s+=a[1]} END{printf "%d", s}' "$ledger")min across $(grep -c . "$ledger") run(s)"
+  else
+    say "spend: no metered runs recorded yet (the ledger is written by 'gravito run')"
+  fi
+  say "NOT METERED (stated, not inferred): operator interactive sessions, experiment harnesses, direct 'claude' invocations outside 'gravito run', MCP-side execution"
+  say "interventions: NOT METERED in R0.x (R1 telemetry logger)"
   say "pending approvals: check the conversation — external mutation always awaits an explicit operator go"
   say "stop:     interrupt the session or let the current step finish (state is durable; resume by re-invoking)"
   say "rollback: gravito rollback $d   |   uninstall: gravito uninstall $d [--force]   |   purge: gravito purge $d [--force]"
@@ -175,29 +212,14 @@ cmd_run(){
     "$(awk -F': ' '$1=="prohibited_actions"{sub(/^[^:]*: /,"");print;exit}' "$d/gravito.goal")" \
     "$(awk -F': ' '$1=="acceptance"{sub(/^[^:]*: /,"");print;exit}' "$d/gravito.goal")")"
   started="$(date +%s)"
+  local snap; snap="$(mktemp)"; bash "$SRC/build-os/tools/residue-sweep.sh" snapshot "$d" > "$snap"
   say "run: dispatching one worker session (stream → ${stream#"$d"/})"
   ( cd "$d" && printf '%s' "$prompt" | claude -p --output-format stream-json --verbose --permission-mode acceptEdits > "$stream" 2>"$d/build-os/receipts/run-$ts.err" ) &
   echo $! > "$d/build-os/receipts/run.pid"
   wait "$(cat "$d/build-os/receipts/run.pid")" || true
   rm -f "$d/build-os/receipts/run.pid"
-  # METER into the ledger the goal gate reads: provider-native usage + wall minutes.
-  python3 - "$stream" "$d" "$started" <<'PY'
-import json, sys, time
-stream, d, started = sys.argv[1], sys.argv[2], int(sys.argv[3])
-tok = usd = 0
-try:
-    for line in open(stream):
-        try: e = json.loads(line)
-        except Exception: continue
-        if e.get("type") == "result":
-            u = e.get("usage") or {}
-            tok = (u.get("input_tokens") or 0) + (u.get("output_tokens") or 0) + (u.get("cache_creation_input_tokens") or 0) + (u.get("cache_read_input_tokens") or 0)
-            usd = e.get("total_cost_usd") or 0
-except FileNotFoundError: pass
-mins = max(1, round((time.time() - started) / 60))
-open(f"{d}/build-os/memory/spend-ledger.jsonl", "a").write(json.dumps({"tokens": tok, "usd": round(usd, 4), "minutes": mins, "stream": stream.split("/")[-1]}) + "\n")
-print(f"run: metered {tok} tokens, ${usd:.4f}, {mins} min into spend-ledger.jsonl")
-PY
+  bash "$SRC/build-os/tools/meter-run.sh" "$stream" "$d" "$(( $(date +%s) - started ))"
+  bash "$SRC/build-os/tools/residue-sweep.sh" sweep "$d" "$snap"; rm -f "$snap"
   say "run: complete — 'gravito review $d' next"
 }
 
