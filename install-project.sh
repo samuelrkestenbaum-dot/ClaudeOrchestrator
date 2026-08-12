@@ -43,6 +43,7 @@ cp "$SRC/.claude/hooks/mcp-readonly-allowlist.txt" "$DEST/.claude/hooks/"
 # Engine tools the hooks gate on (PKT-R0-4): the goal contract validator.
 mkdir -p "$DEST/build-os/tools"
 cp "$SRC/build-os/tools/goal-check.sh" "$DEST/build-os/tools/"
+cp "$SRC/build-os/tools/h0-check.sh" "$DEST/build-os/tools/"
 # Routing tools the mutgate's auto-route mints with (DATA_ROOT-only by
 # design): without these every first mutation in a target repo falls to the
 # manual recovery path — found by R0.1's failure-first enforcement tests.

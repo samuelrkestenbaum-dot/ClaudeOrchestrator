@@ -568,7 +568,21 @@ auto_route_first_mutation(){ # <raw-json> <tool> -> rc 0 iff a receipt was minte
 # changes nothing (existing semantics). Returns 0 = proceed; on a halt it
 # prints the caller-protocol "BLOCK\n<message>" itself and returns 1.
 goal_gate_or_block(){ # <tool-name>
-  local _gtool="${1:-unknown}" _gc _gout _gstat
+  local _gtool="${1:-unknown}" _gc _gout _gstat _h0 _h0out
+  # H0_system Class-A contract — evaluated ONCE per mutation, BEFORE authority
+  # (canonical sequence: state -> H0 -> ... -> authority). Same named facts as
+  # the full surface (h0-check.sh --gate); fail closed with a receipt. This is
+  # the tool-boundary member of the H0 entry-point inventory; cmd_run carries
+  # the full-surface member. A corrupt ledger MUST block here too: goal-check's
+  # sums silently skip bad lines, so a corrupt ledger undercounts spend.
+  _h0="$DATA_ROOT/build-os/tools/h0-check.sh"
+  [ -x "$_h0" ] || _h0="$(dirname "${BASH_SOURCE[0]}")/../../build-os/tools/h0-check.sh"
+  if [ -x "$_h0" ] && ! _h0out="$(bash "$_h0" --gate "$DATA_ROOT" 2>&1)"; then
+    mkdir -p "$DATA_ROOT/build-os/receipts"
+    printf '%s tool=%s BLOCKED %s\n' "$(date -u +%FT%TZ)" "$_gtool" "$_h0out" >> "$DATA_ROOT/build-os/receipts/refusals.log"
+    printf 'BLOCK\nH0 HALT (fail closed, before authority): %s\nThis mutation was refused BEFORE any side effect. Receipt: build-os/receipts/refusals.log.\n' "$_h0out"
+    return 1
+  fi
   [ -f "$DATA_ROOT/gravito.goal" ] || return 0
   _gc="$DATA_ROOT/build-os/tools/goal-check.sh"
   [ -x "$_gc" ] || _gc="$(dirname "${BASH_SOURCE[0]}")/../../build-os/tools/goal-check.sh"
