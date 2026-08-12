@@ -1,0 +1,7 @@
+{
+  "base_commit": "ac2de27480fcf13cbca64ebdae93e6fcc2c9bff7",
+  "product_paths": [
+    "server/governance/model-router.ts"
+  ],
+  "governance_paths": []
+}

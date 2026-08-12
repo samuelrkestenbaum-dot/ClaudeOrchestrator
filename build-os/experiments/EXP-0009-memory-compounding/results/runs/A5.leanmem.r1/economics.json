@@ -1,0 +1,22 @@
+{
+  "uncached_input_tokens": 92,
+  "cache_read_input_tokens": 4472156,
+  "cache_creation_input_tokens": 92576,
+  "output_tokens": 24392,
+  "num_turns": 66,
+  "total_cost_usd": 3.772098,
+  "elapsed_s": 941.831,
+  "tool_calls": 65,
+  "subagent_invocations": 0,
+  "product_files_changed": 2,
+  "governance_files_changed": 1,
+  "tool_result_chars": 124651,
+  "hook_emitted_chars": 1810,
+  "hook_emitting_results": 2,
+  "memory_reads": 0,
+  "memory_writes_by_worker": 0,
+  "config": "leanmem",
+  "sequence": "A",
+  "position": 5,
+  "rep": 1
+}

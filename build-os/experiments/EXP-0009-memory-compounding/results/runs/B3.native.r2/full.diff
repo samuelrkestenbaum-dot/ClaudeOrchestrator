@@ -1,0 +1,32 @@
+diff --git a/server/planes/router.ts b/server/planes/router.ts
+index 283f163..90a8ba2 100644
+--- a/server/planes/router.ts
++++ b/server/planes/router.ts
+@@ -36,7 +36,7 @@ export const planesRouter = router({
+         return {
+           success: false,
+           data: null,
+-          error: error.message
++          error: error instanceof Error ? error.message : 'Failed to fetch control plane orgs'
+         };
+       }
+     }),
+@@ -66,7 +66,7 @@ export const planesRouter = router({
+         return {
+           success: false,
+           data: null,
+-          error: error.message
++          error: error instanceof Error ? error.message : 'Failed to fetch data plane stats'
+         };
+       }
+     }),
+@@ -100,7 +100,7 @@ export const planesRouter = router({
+         return {
+           success: false,
+           data: null,
+-          error: error.message
++          error: error instanceof Error ? error.message : 'Failed to fetch audit entries'
+         };
+       }
+     })
+

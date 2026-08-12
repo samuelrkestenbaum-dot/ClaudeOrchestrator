@@ -1,0 +1,10 @@
+{
+  "base_commit": "b22b010867a3babd04439611049b803f3bea23d9",
+  "product_paths": [
+    "server/governance/control-tower-router.ts",
+    "server/governance/policy/policySchema.ts"
+  ],
+  "governance_paths": [
+    "build-os/packets/routing/routing-auto-20260811T212622Z-18296-20260811T212622Z.md"
+  ]
+}

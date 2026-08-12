@@ -1,0 +1,107 @@
+diff --git a/server/deployment/deployment-persistence.ts b/server/deployment/deployment-persistence.ts
+index 1a79e00..ae1d0d9 100644
+--- a/server/deployment/deployment-persistence.ts
++++ b/server/deployment/deployment-persistence.ts
+@@ -18,6 +18,10 @@ export async function persistDeploymentRecord(record: {
+ }): Promise<void> {
+   try {
+     const db = await getDb();
++    if (!db) {
++      logger.warn({ operation: 'deploy', deploymentId: record.deploymentId }, 'Database not available: skipping deployment record persistence');
++      return;
++    }
+     await db.insert(deploymentRecords).values({
+       deploymentId: record.deploymentId,
+       status: record.status,
+@@ -37,6 +41,7 @@ export async function persistDeploymentRecord(record: {
+ export async function getDeploymentRecords(limit = 50) {
+   try {
+     const db = await getDb();
++    if (!db) return [];
+     return await db.select().from(deploymentRecords).orderBy(desc(deploymentRecords.createdAt)).limit(limit);
+   } catch { return []; }
+ }
+@@ -44,6 +49,7 @@ export async function getDeploymentRecords(limit = 50) {
+ export async function getDeploymentRecord(deploymentId: string) {
+   try {
+     const db = await getDb();
++    if (!db) return null;
+     const r = await db.select().from(deploymentRecords).where(eq(deploymentRecords.deploymentId, deploymentId)).limit(1);
+     return r[0] || null;
+   } catch { return null; }
+@@ -61,6 +67,10 @@ export async function persistScanResult(scan: {
+ }): Promise<void> {
+   try {
+     const db = await getDb();
++    if (!db) {
++      logger.warn({ operation: 'scan', scanId: scan.scanId }, 'Database not available: skipping scan result persistence');
++      return;
++    }
+     await db.insert(deploymentScans).values({
+       scanId: scan.scanId,
+       deploymentId: scan.deploymentId,
+@@ -80,6 +90,7 @@ export async function persistScanResult(scan: {
+ export async function getScanResults(limit = 50) {
+   try {
+     const db = await getDb();
++    if (!db) return [];
+     return await db.select().from(deploymentScans).orderBy(desc(deploymentScans.createdAt)).limit(limit);
+   } catch { return []; }
+ }
+@@ -87,6 +98,7 @@ export async function getScanResults(limit = 50) {
+ export async function getScansForDeployment(deploymentId: string) {
+   try {
+     const db = await getDb();
++    if (!db) return [];
+     return await db.select().from(deploymentScans).where(eq(deploymentScans.deploymentId, deploymentId));
+   } catch { return []; }
+ }
+@@ -94,6 +106,10 @@ export async function getScansForDeployment(deploymentId: string) {
+ export async function persistMonitorCycle(cycle: MonitorCycleResult): Promise<void> {
+   try {
+     const db = await getDb();
++    if (!db) {
++      logger.warn({ operation: 'monitor', cycleId: cycle.cycleId }, 'Database not available: skipping monitor cycle persistence');
++      return;
++    }
+     await db.insert(monitorCycles).values({
+       cycleId: cycle.cycleId,
+       startedAt: cycle.startedAt,
+@@ -113,6 +129,7 @@ export async function persistMonitorCycle(cycle: MonitorCycleResult): Promise<vo
+ export async function getMonitorCycles(limit = 50) {
+   try {
+     const db = await getDb();
++    if (!db) return [];
+     return await db.select().from(monitorCycles).orderBy(desc(monitorCycles.createdAt)).limit(limit);
+   } catch { return []; }
+ }
+@@ -127,6 +144,10 @@ export async function persistGovernanceSnapshot(snapshot: {
+ }): Promise<void> {
+   try {
+     const db = await getDb();
++    if (!db) {
++      logger.warn({ operation: 'governance', deploymentId: snapshot.deploymentId }, 'Database not available: skipping governance snapshot persistence');
++      return;
++    }
+     await db.insert(governanceDeploySnapshots).values({
+       deploymentId: snapshot.deploymentId,
+       phase: snapshot.phase,
+@@ -144,6 +165,7 @@ export async function persistGovernanceSnapshot(snapshot: {
+ export async function getGovernanceSnapshots(limit = 50) {
+   try {
+     const db = await getDb();
++    if (!db) return [];
+     return await db.select().from(governanceDeploySnapshots).orderBy(desc(governanceDeploySnapshots.createdAt)).limit(limit);
+   } catch { return []; }
+ }
+@@ -151,6 +173,9 @@ export async function getGovernanceSnapshots(limit = 50) {
+ export async function getDeploymentStats() {
+   try {
+     const db = await getDb();
++    if (!db) {
++      return { totalDeployments: 0, totalScans: 0, totalMonitorCycles: 0, totalGovernanceSnapshots: 0 };
++    }
+     const countQuery = sql<number>`COUNT(*)`;
+     const [d, s, c, g] = await Promise.all([
+       db.select({ count: countQuery }).from(deploymentRecords).then((r) => Number(r[0]?.count ?? 0)),
+

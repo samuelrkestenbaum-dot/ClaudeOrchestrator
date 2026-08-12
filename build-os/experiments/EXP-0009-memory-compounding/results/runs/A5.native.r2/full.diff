@@ -1,0 +1,281 @@
+diff --git a/server/router-groups/geometry-admin-router.ts b/server/router-groups/geometry-admin-router.ts
+index e00f347..e6251d5 100644
+--- a/server/router-groups/geometry-admin-router.ts
++++ b/server/router-groups/geometry-admin-router.ts
+@@ -13,12 +13,13 @@ import { z } from 'zod';
+ import { TRPCError } from '@trpc/server';
+ import { createLogger } from '../_core/logger';
+ 
+-const log = createLogger('geometry-admin-router');
++const log = createLogger('emotional-geometry', { module: 'geometry-admin-router' });
+ import { adminProcedure, router } from '../_core/trpc';
+ import { getDb } from '../db';
+ import { geometrySessions, geometrySnapshots, geometryEvents } from '../../drizzle/schema';
+ import { desc, eq, and, gte, count, avg, max, sql } from 'drizzle-orm';
+-import { createSafeDefaults, preGenerationHook, postGenerationHook } from '../emotional-geometry-runtime/geometry-runtime-bridge';
++import { createSafeDefaults, preGenerationHook, postGenerationHook, type GeometryPreGenerationResult, type GeometryPostGenerationResult } from '../emotional-geometry-runtime/geometry-runtime-bridge';
++import { createInitialState, updateBaseDimensions, type CanonicalEmotionalState } from '../emotional-geometry-runtime/state/EmotionalState';
+ import { getGeometryMetrics, resetGeometryMetrics, recordPreHook, recordPostHook } from '../emotional-geometry-runtime/geometry-metrics';
+ import { getFlags, getRuntimeMode, setGeometryFlag, setGeometryRuntimeMode, type GeometryFeatureFlags, type GeometryRuntimeMode } from '../emotional-geometry-runtime/feature-flags';
+ import { advancedPreGenerationHook, advancedPostGenerationHook } from '../neurocosmology-runtime-advanced/integration-hooks';
+@@ -108,7 +109,7 @@ export const geometryAdminRouter = router({
+       timeRangeHours: z.number().min(1).max(720).default(24),
+     }).optional())
+     .query(async ({ input }) => {
+-      const db = await getDb();
++      const db = await requireDb();
+       const hours = input?.timeRangeHours ?? 24;
+       const since = new Date(Date.now() - hours * 60 * 60 * 1000);
+ 
+@@ -180,7 +181,7 @@ export const geometryAdminRouter = router({
+       status: z.enum(["active", "completed", "error"]).optional(),
+     }).optional())
+     .query(async ({ input }) => {
+-      const db = await getDb();
++      const db = await requireDb();
+       const limit = input?.limit ?? 20;
+       const offset = input?.offset ?? 0;
+       const status = input?.status;
+@@ -212,7 +213,7 @@ export const geometryAdminRouter = router({
+       limit: z.number().min(1).max(500).default(100),
+     }))
+     .query(async ({ input }) => {
+-      const db = await getDb();
++      const db = await requireDb();
+       const snapshots = await db
+         .select()
+         .from(geometrySnapshots)
+@@ -236,7 +237,7 @@ export const geometryAdminRouter = router({
+       timeRangeHours: z.number().min(1).max(720).default(24),
+     }).optional())
+     .query(async ({ input }) => {
+-      const db = await getDb();
++      const db = await requireDb();
+       const limit = input?.limit ?? 50;
+       const offset = input?.offset ?? 0;
+       const since = new Date(Date.now() - (input?.timeRangeHours ?? 24) * 60 * 60 * 1000);
+@@ -302,7 +303,7 @@ export const geometryAdminRouter = router({
+       timeRangeHours: z.number().min(1).max(720).default(24),
+     }).optional())
+     .query(async ({ input }) => {
+-      const db = await getDb();
++      const db = await requireDb();
+       const since = new Date(Date.now() - (input?.timeRangeHours ?? 24) * 60 * 60 * 1000);
+ 
+       const distribution = await db
+@@ -324,7 +325,7 @@ export const geometryAdminRouter = router({
+   diagnosticGeneration: adminProcedure
+     .input(z.object({
+       prompt: z.string().min(1).max(500).default('What is emotional intelligence and why does it matter?'),
+-      currentState: z.record(z.number()).optional(),
++      currentState: z.record(z.string(), z.number()).optional(),
+     }).optional())
+     .mutation(async ({ input, ctx }) => {
+       const startTime = performance.now();
+@@ -332,6 +333,7 @@ export const geometryAdminRouter = router({
+       const flags = getFlags();
+       const mode = getRuntimeMode();
+       const advancedDiag = getAdvancedFlagDiagnostics();
++      const diagnosticSessionId = `diag_${Date.now()}`;
+ 
+       auditTrail.push(`[CONFIG] Runtime: ${flags.GEOMETRY_RUNTIME_ENABLED ? 'ENABLED' : 'DISABLED'}, Mode: ${mode}`);
+       auditTrail.push(`[CONFIG] Flags: ${JSON.stringify(flags)}`);
+@@ -356,7 +358,7 @@ export const geometryAdminRouter = router({
+       let preResult;
+       try {
+         preResult = await preGenerationHook({
+-          sessionId: `diag_${Date.now()}`,
++          sessionId: diagnosticSessionId,
+           userId: `admin-${ctx.user.id}`,
+           prompt: input?.prompt ?? 'What is emotional intelligence and why does it matter?',
+           currentState: testState,
+@@ -366,7 +368,13 @@ export const geometryAdminRouter = router({
+           auditTrail.push(`[PRE-HOOK] Constraints: ${preResult.constraintsInjected.join(', ')}`);
+         }
+         // Record metrics
+-        recordPreHook(preResult.fixationRisk, preResult.driftScore, preResult.computeTimeMs);
++        recordPreHook(
++          preResult.fixationRisk,
++          preResult.driftScore,
++          preResult.computeTimeMs,
++          preResult.shouldConstrain,
++          preResult.constraintsInjected.length,
++        );
+         auditTrail.push(`[METRICS] Pre-hook metrics recorded`);
+       } catch (err) {
+         auditTrail.push(`[PRE-HOOK] FAILED: ${err instanceof Error ? err.message : String(err)}`);
+@@ -376,7 +384,7 @@ export const geometryAdminRouter = router({
+       // Step 2: Advanced neurocosmology pre-hook
+       try {
+         const advPre = await advancedPreGenerationHook({
+-          currentState: testState,
++          currentState: buildCanonicalState(testState, diagnosticSessionId, `admin-${ctx.user.id}`),
+           stateHistory: [],
+         });
+         if (advPre.enabled) {
+@@ -396,13 +404,13 @@ export const geometryAdminRouter = router({
+       let postResult;
+       try {
+         postResult = await postGenerationHook({
+-          sessionId: `diag_${Date.now()}`,
++          sessionId: diagnosticSessionId,
+           output: simulatedOutput,
+           preResult,
+         });
+         auditTrail.push(`[POST-HOOK] Hash: ${postResult.postStateHash}, EntropyΔ: ${postResult.entropyDelta.toFixed(4)}, CurvatureΔ: ${postResult.curvatureDelta.toFixed(4)}, Loop: ${postResult.loopDetected}, Time: ${postResult.computeTimeMs.toFixed(2)}ms`);
+         // Record metrics
+-        recordPostHook(postResult.loopDetected, postResult.computeTimeMs);
++        recordPostHook(postResult.computeTimeMs, postResult.loopDetected);
+         auditTrail.push(`[METRICS] Post-hook metrics recorded`);
+       } catch (err) {
+         auditTrail.push(`[POST-HOOK] FAILED: ${err instanceof Error ? err.message : String(err)}`);
+@@ -411,7 +419,7 @@ export const geometryAdminRouter = router({
+       // Step 5: Advanced neurocosmology post-hook
+       try {
+         const advPost = await advancedPostGenerationHook({
+-          updatedState: testState,
++          updatedState: buildCanonicalState(testState, diagnosticSessionId, `admin-${ctx.user.id}`),
+           stateHistory: [],
+         });
+         if (advPost.enabled) {
+@@ -451,7 +459,7 @@ export const geometryAdminRouter = router({
+       bucketMinutes: z.number().min(1).max(60).default(5),
+     }).optional())
+     .query(async ({ input }) => {
+-      const db = await getDb();
++      const db = await requireDb();
+       const hours = input?.timeRangeHours ?? 24;
+       const bucketMin = input?.bucketMinutes ?? 5;
+       const since = new Date(Date.now() - hours * 60 * 60 * 1000);
+@@ -831,7 +839,7 @@ export const geometryAdminRouter = router({
+       sessionId: z.string(),
+     }))
+     .query(async ({ input }) => {
+-      const db = await getDb();
++      const db = await requireDb();
+ 
+       // Get session
+       const [session] = await db
+@@ -942,33 +950,60 @@ export const geometryAdminRouter = router({
+     .mutation(async ({ input }) => {
+       log.info({ alertType: input.alertType, channelId: input.channelId }, 'Firing test alert');
+ 
+-      // Build synthetic metrics that will trigger the specified alert type
+-      const syntheticPre = {
++      // Build synthetic results that will trigger the specified alert type.
++      // Detector inputs live on different results: fixation/drift/compute come from
++      // the pre-hook, loop detection from the post-hook, and the singularity /
++      // phase-transition / invariant counters from the neurocosmology block.
++      const testSessionId = `test_session_${Date.now()}`;
++
++      const syntheticPre: GeometryPreGenerationResult = {
++        ...createSafeDefaults(),
++        preStateHash: 'test-alert-pre',
+         fixationRisk: input.alertType === 'high_fixation_risk' ? 0.95 : 0.1,
+         driftScore: input.alertType === 'high_drift_score' ? 0.95 : 0.1,
+-        loopDetected: input.alertType === 'high_loop_rate',
+-        singularityDetected: input.alertType === 'singularity_burst',
+-        phaseTransition: input.alertType === 'phase_transition_burst',
+-        invariantViolations: input.alertType === 'invariant_violation_accumulation' ? 15 : 0,
++        computeTimeMs: input.alertType === 'compute_degradation' ? 500 : 10,
+       };
+ 
+-      const syntheticPost = {
+-        computeTimeMs: input.alertType === 'compute_degradation' ? 500 : 10,
+-        postComputeTimeMs: input.alertType === 'compute_degradation' ? 500 : 5,
++      const postComputeTimeMs = input.alertType === 'compute_degradation' ? 500 : 5;
++      const syntheticPost: GeometryPostGenerationResult = {
++        postStateHash: 'test-alert-post',
++        entropyDelta: 0,
++        curvatureDelta: 0,
++        loopDetected: input.alertType === 'high_loop_rate',
++        fieldSnapshot: {},
++        auditRecord: {
++          id: testSessionId,
++          timestamp: Date.now(),
++          preStateHash: syntheticPre.preStateHash,
++          postStateHash: 'test-alert-post',
++          eigenClassification: syntheticPre.eigenClassification,
++          driftScore: syntheticPre.driftScore,
++          fixationProbability: syntheticPre.fixationRisk,
++          constraintsInjected: syntheticPre.constraintsInjected,
++          canonMapping: {},
++          computeTimeMs: syntheticPre.computeTimeMs + postComputeTimeMs,
++          stabilityReport: {},
++        },
++        computeTimeMs: postComputeTimeMs,
+       };
+ 
+       try {
+-        const result = await evaluateAlerts(
+-          syntheticPre as any,
+-          syntheticPost as any,
+-          `test_session_${Date.now()}`,
+-        );
++        const alertsFired = await evaluateAlerts({
++          sessionId: testSessionId,
++          preResult: syntheticPre,
++          postResult: syntheticPost,
++          neuroAdvanced: {
++            singularityDetected: input.alertType === 'singularity_burst',
++            phaseTransitionDetected: input.alertType === 'phase_transition_burst',
++            invariantViolations: input.alertType === 'invariant_violation_accumulation' ? 15 : 0,
++          },
++        });
+ 
+         return {
+           success: true,
+-          alertsFired: result.alertsFired,
+-          message: result.alertsFired > 0
+-            ? `Test alert fired successfully (${result.alertsFired} alert(s))`
++          alertsFired,
++          message: alertsFired > 0
++            ? `Test alert fired successfully (${alertsFired} alert(s))`
+             : 'Alert was suppressed (check if enabled and cooldown is active)',
+           timestamp: Date.now(),
+         };
+@@ -1163,6 +1198,43 @@ export const geometryAdminRouter = router({
+ 
+ // ─── Helper Functions ──────────────────────────────────────────────
+ 
++/**
++ * Resolve the Drizzle handle for a DB-backed procedure.
++ *
++ * `getDb()` returns null when DATABASE_URL is unconfigured, so every procedure
++ * that reads geometry tables narrows through here and surfaces the outage as a
++ * tRPC error instead of dereferencing a null connection.
++ */
++async function requireDb(): Promise<NonNullable<Awaited<ReturnType<typeof getDb>>>> {
++  const db = await getDb();
++  if (!db) {
++    throw new TRPCError({
++      code: 'PRECONDITION_FAILED',
++      message: 'Database unavailable: geometry admin data requires a configured database',
++    });
++  }
++  return db;
++}
++
++/**
++ * Project a flat geometry state snapshot onto the canonical state the
++ * neurocosmology hooks consume. Mirrors the mapping used by the governed
++ * generation pipeline so diagnostic runs exercise the same code path.
++ */
++function buildCanonicalState(
++  snapshot: Record<string, number> | undefined,
++  sessionId: string,
++  userId: string,
++): CanonicalEmotionalState {
++  return updateBaseDimensions(createInitialState(sessionId, userId), {
++    emotionalMass: snapshot?.emotionalMass ?? 0,
++    valenceCharge: snapshot?.emotionalValence ?? snapshot?.emotionalCharge ?? 0,
++    attentionCurvature: snapshot?.attentionCurvature ?? 0,
++    memoryEntropy: snapshot?.memoryEntropy ?? 0.5,
++    relationalDistance: snapshot?.emotionalDistance ?? 1,
++  });
++}
++
+ interface TimelineEntry {
+   timestamp: number;
+   type: 'snapshot' | 'event';
+

@@ -1,0 +1,159 @@
+{
+  "artifact": "exp0009_sequence_log",
+  "rep": 1,
+  "configs": [
+    "native",
+    "leanmem"
+  ],
+  "units": [
+    {
+      "sequence": "A",
+      "position": 1,
+      "config": "native",
+      "rep": 1,
+      "skipped": true
+    },
+    {
+      "sequence": "A",
+      "position": 1,
+      "config": "leanmem",
+      "rep": 1,
+      "skipped": true
+    },
+    {
+      "sequence": "A",
+      "position": 2,
+      "config": "leanmem",
+      "rep": 1,
+      "skipped": true
+    },
+    {
+      "sequence": "A",
+      "position": 2,
+      "config": "native",
+      "rep": 1,
+      "skipped": true
+    },
+    {
+      "sequence": "A",
+      "position": 3,
+      "config": "native",
+      "rep": 1,
+      "skipped": true
+    },
+    {
+      "sequence": "A",
+      "position": 3,
+      "config": "leanmem",
+      "rep": 1,
+      "skipped": true
+    },
+    {
+      "sequence": "A",
+      "position": 4,
+      "config": "leanmem",
+      "rep": 1,
+      "skipped": true
+    },
+    {
+      "sequence": "A",
+      "position": 4,
+      "config": "native",
+      "rep": 1,
+      "skipped": true
+    },
+    {
+      "sequence": "A",
+      "position": 5,
+      "config": "native",
+      "rep": 1,
+      "skipped": true
+    },
+    {
+      "sequence": "A",
+      "position": 5,
+      "config": "leanmem",
+      "rep": 1,
+      "skipped": true
+    },
+    {
+      "sequence": "B",
+      "position": 1,
+      "config": "native",
+      "rep": 1,
+      "skipped": true
+    },
+    {
+      "sequence": "B",
+      "position": 1,
+      "config": "leanmem",
+      "rep": 1,
+      "skipped": true
+    },
+    {
+      "sequence": "B",
+      "position": 2,
+      "config": "leanmem",
+      "rep": 1,
+      "skipped": true
+    },
+    {
+      "sequence": "B",
+      "position": 2,
+      "config": "native",
+      "rep": 1,
+      "skipped": true
+    },
+    {
+      "sequence": "B",
+      "position": 3,
+      "config": "native",
+      "rep": 1,
+      "skipped": true
+    },
+    {
+      "sequence": "B",
+      "position": 3,
+      "config": "leanmem",
+      "rep": 1,
+      "skipped": true
+    },
+    {
+      "sequence": "B",
+      "position": 4,
+      "config": "leanmem",
+      "rep": 1,
+      "skipped": true
+    },
+    {
+      "sequence": "B",
+      "position": 4,
+      "config": "native",
+      "rep": 1,
+      "exit": 0,
+      "wall_s": 852,
+      "admissible": true,
+      "attempts": 1
+    },
+    {
+      "sequence": "B",
+      "position": 5,
+      "config": "native",
+      "rep": 1,
+      "exit": 0,
+      "wall_s": 627,
+      "admissible": true,
+      "attempts": 1
+    },
+    {
+      "sequence": "B",
+      "position": 5,
+      "config": "leanmem",
+      "rep": 1,
+      "exit": 0,
+      "wall_s": 466,
+      "admissible": true,
+      "attempts": 1
+    }
+  ]
+}

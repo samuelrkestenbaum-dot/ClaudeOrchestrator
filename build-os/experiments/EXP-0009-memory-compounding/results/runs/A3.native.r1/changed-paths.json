@@ -1,0 +1,7 @@
+{
+  "base_commit": "9d29fcbe9ce83b33a52ea109b1061cc2381455a4",
+  "product_paths": [
+    "server/deployment/deployment-persistence.ts"
+  ],
+  "governance_paths": []
+}

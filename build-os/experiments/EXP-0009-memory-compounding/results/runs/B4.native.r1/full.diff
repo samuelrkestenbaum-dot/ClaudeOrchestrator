@@ -1,0 +1,23 @@
+diff --git a/server/copilot/batch-page-updater.ts b/server/copilot/batch-page-updater.ts
+index 9f42753..1f1d669 100644
+--- a/server/copilot/batch-page-updater.ts
++++ b/server/copilot/batch-page-updater.ts
+@@ -144,7 +144,7 @@ If the page is already well-aligned, return it with minimal changes.`;
+       // If no code block, return the raw text (might be direct code)
+       return text.trim();
+     } catch (error: unknown) {
+-      generalLog.info(`[BatchUpdater] Attempt ${attempt}/${maxRetries} failed for ${pagePath}: ${error.message}`);
++      generalLog.info(`[BatchUpdater] Attempt ${attempt}/${maxRetries} failed for ${pagePath}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+       if (attempt < maxRetries) {
+         // Wait before retry with exponential backoff
+         await new Promise(resolve => setTimeout(resolve, 2000 * attempt));
+@@ -254,7 +254,7 @@ export async function updateSinglePage(
+     return {
+       pagePath,
+       status: 'failed',
+-      reason: error.message
++      reason: error instanceof Error ? error.message : 'Unknown error'
+     };
+   }
+ }
+

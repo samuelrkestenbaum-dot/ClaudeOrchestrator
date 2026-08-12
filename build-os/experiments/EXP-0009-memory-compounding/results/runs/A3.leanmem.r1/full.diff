@@ -1,0 +1,161 @@
+diff --git a/server/deployment/deployment-persistence.ts b/server/deployment/deployment-persistence.ts
+index 1a79e00..3902dd1 100644
+--- a/server/deployment/deployment-persistence.ts
++++ b/server/deployment/deployment-persistence.ts
+@@ -1,4 +1,4 @@
+-import { getDb } from '../db';
++import { getDb, DatabaseUnavailableError } from '../db';
+ import { createLogger } from '../_core/logger';
+ 
+ const logger = createLogger('database', { component: 'DeploymentPersistence' });
+@@ -18,6 +18,7 @@ export async function persistDeploymentRecord(record: {
+ }): Promise<void> {
+   try {
+     const db = await getDb();
++    if (!db) throw new DatabaseUnavailableError('Database unavailable: cannot persist deployment record');
+     await db.insert(deploymentRecords).values({
+       deploymentId: record.deploymentId,
+       status: record.status,
+@@ -37,6 +38,7 @@ export async function persistDeploymentRecord(record: {
+ export async function getDeploymentRecords(limit = 50) {
+   try {
+     const db = await getDb();
++    if (!db) throw new DatabaseUnavailableError('Database unavailable: cannot read deployment records');
+     return await db.select().from(deploymentRecords).orderBy(desc(deploymentRecords.createdAt)).limit(limit);
+   } catch { return []; }
+ }
+@@ -44,6 +46,7 @@ export async function getDeploymentRecords(limit = 50) {
+ export async function getDeploymentRecord(deploymentId: string) {
+   try {
+     const db = await getDb();
++    if (!db) throw new DatabaseUnavailableError('Database unavailable: cannot read deployment record');
+     const r = await db.select().from(deploymentRecords).where(eq(deploymentRecords.deploymentId, deploymentId)).limit(1);
+     return r[0] || null;
+   } catch { return null; }
+@@ -61,6 +64,7 @@ export async function persistScanResult(scan: {
+ }): Promise<void> {
+   try {
+     const db = await getDb();
++    if (!db) throw new DatabaseUnavailableError('Database unavailable: cannot persist scan result');
+     await db.insert(deploymentScans).values({
+       scanId: scan.scanId,
+       deploymentId: scan.deploymentId,
+@@ -80,6 +84,7 @@ export async function persistScanResult(scan: {
+ export async function getScanResults(limit = 50) {
+   try {
+     const db = await getDb();
++    if (!db) throw new DatabaseUnavailableError('Database unavailable: cannot read scan results');
+     return await db.select().from(deploymentScans).orderBy(desc(deploymentScans.createdAt)).limit(limit);
+   } catch { return []; }
+ }
+@@ -87,6 +92,7 @@ export async function getScanResults(limit = 50) {
+ export async function getScansForDeployment(deploymentId: string) {
+   try {
+     const db = await getDb();
++    if (!db) throw new DatabaseUnavailableError('Database unavailable: cannot read scans for deployment');
+     return await db.select().from(deploymentScans).where(eq(deploymentScans.deploymentId, deploymentId));
+   } catch { return []; }
+ }
+@@ -94,6 +100,7 @@ export async function getScansForDeployment(deploymentId: string) {
+ export async function persistMonitorCycle(cycle: MonitorCycleResult): Promise<void> {
+   try {
+     const db = await getDb();
++    if (!db) throw new DatabaseUnavailableError('Database unavailable: cannot persist monitor cycle');
+     await db.insert(monitorCycles).values({
+       cycleId: cycle.cycleId,
+       startedAt: cycle.startedAt,
+@@ -113,6 +120,7 @@ export async function persistMonitorCycle(cycle: MonitorCycleResult): Promise<vo
+ export async function getMonitorCycles(limit = 50) {
+   try {
+     const db = await getDb();
++    if (!db) throw new DatabaseUnavailableError('Database unavailable: cannot read monitor cycles');
+     return await db.select().from(monitorCycles).orderBy(desc(monitorCycles.createdAt)).limit(limit);
+   } catch { return []; }
+ }
+@@ -127,6 +135,7 @@ export async function persistGovernanceSnapshot(snapshot: {
+ }): Promise<void> {
+   try {
+     const db = await getDb();
++    if (!db) throw new DatabaseUnavailableError('Database unavailable: cannot persist governance snapshot');
+     await db.insert(governanceDeploySnapshots).values({
+       deploymentId: snapshot.deploymentId,
+       phase: snapshot.phase,
+@@ -144,6 +153,7 @@ export async function persistGovernanceSnapshot(snapshot: {
+ export async function getGovernanceSnapshots(limit = 50) {
+   try {
+     const db = await getDb();
++    if (!db) throw new DatabaseUnavailableError('Database unavailable: cannot read governance snapshots');
+     return await db.select().from(governanceDeploySnapshots).orderBy(desc(governanceDeploySnapshots.createdAt)).limit(limit);
+   } catch { return []; }
+ }
+@@ -151,6 +161,7 @@ export async function getGovernanceSnapshots(limit = 50) {
+ export async function getDeploymentStats() {
+   try {
+     const db = await getDb();
++    if (!db) throw new DatabaseUnavailableError('Database unavailable: cannot read deployment stats');
+     const countQuery = sql<number>`COUNT(*)`;
+     const [d, s, c, g] = await Promise.all([
+       db.select({ count: countQuery }).from(deploymentRecords).then((r) => Number(r[0]?.count ?? 0)),
+
+diff --git a/build-os/packets/routing/routing-auto-20260811T160700Z-21471-20260811T160700Z.md b/build-os/packets/routing/routing-auto-20260811T160700Z-21471-20260811T160700Z.md
+--- /dev/null
++++ b/build-os/packets/routing/routing-auto-20260811T160700Z-21471-20260811T160700Z.md
++# ROUTING RECEIPT — one file per routing decision. The recorded verdict is BINDING
++# (build-os/memory/routing_contract.md); routing-check.sh refuses this receipt at
++# close if executed_mode exceeds selected_mode with no escalation record, if an
++# escalation carries no evidence, or if consumption exceeds a budget undeclared.
++task_id: auto-20260811T160700Z-21471
++description_sha256: 27b3f1b706c909c94af97ff3625e4a0a813089bab6bc2c90aa89c5978cb14534
++descriptor: {"expected_files_changed":1,"requires_tests":false,"expected_session_count":1,"prior_context_required":false,"handoff_required":false,"consequence_level":"low","irreversible_or_external_mutation":false,"high_blast_radius":false,"unclear_acceptance_criteria":false,"security_or_compliance_consequence":false,"parallel_workstreams_benefit":false,"high_rework_history":false,"nondeterministic_verification":false}
++selected_mode: direct
++selector_note: -
++issued_at: 2026-08-11T16:07:00Z
++# --- budgets: DERIVED DEFAULTS from EXP-0002 sealed records, operator-tunable, not laws.
++# --- Derivation: ON-surface light runs measured 172k-369k total tokens / 0 dispatches
++# --- (named exceedance: raw T4 at 526,461 - context, not the band); the
++# --- blowouts measured 4.9M/7.4M tokens, 4-5 dispatches, $3.63/$4.80. See route-task.sh.
++budget_max_subagents: 0
++budget_max_total_tokens: 250000
++budget_max_uncached_tokens: 30000
++budget_max_model_calls: 12
++budget_max_wall_clock_s: 300
++budget_max_cost_usd: 0.40
++# --- process allowance (PACKET-0053): the packet's OWN gate chain is governance
++# --- ceremony, counted SEPARATELY from task work by the live gate and attributed
++# --- to governance_process (the 0050/0051 calibration question, resolved). Default
++# --- 7 = the LARGEST LEGAL chain in the doctrine: mandatory_full_regate runs
++# --- builder, qa, reviewer, fix-builder, qa, reviewer, archivist. (No-fix chain
++# --- is 4; fix-then-pass is 6.) Process dispatches never eat budget_max_subagents.
++process_dispatch_allowance: 7
++# --- empty at issue; filled at close. AN UNKNOWN IS NOT A ZERO: "-" is an honest
++# --- admission and is never refused; refusal is for CONTRADICTION, not absence.
++executed_mode: -
++escalation: -
++escalation_evidence: -
++consumed_subagents: -
++consumed_total_tokens: -
++consumed_uncached_tokens: -
++consumed_model_calls: -
++consumed_wall_clock_s: -
++consumed_cost_usd: -
++degradation_note: -
++# --- close-fill EXTENSIONS (PACKET-0053). consumed_subagents above counts TASK
++# --- dispatches (vs budget_max_subagents); consumed_process_dispatches counts the
++# --- gate chain (vs process_dispatch_allowance). The attr_* layers attribute
++# --- consumption where derivable at close — tokens or cost with provenance, or
++# --- "-" as an admission, NEVER a zero nobody measured. Receipts predating these
++# --- fields stay valid: routing-check.sh reads an absent field as "-".
++consumed_process_dispatches: -
++attr_task_execution: -
++attr_context_retrieval: -
++attr_subagent_execution: -
++attr_verification: -
++attr_review: -
++attr_governance_process: -
++attr_experiment_audit: -
++# --- contribution rows (PACKET-0053): marginal-contribution accounting, MANDATORY
++# --- for a Full close with dispatches>0 (routing-check.sh refuses otherwise). The
++# --- live gate seeds one stub row per admitted Full task dispatch; fill at close:
++# --- contribution: <subagent_type> | <unique_question> | <output_ref> | changed_implementation=y/n/- | changed_conclusion=y/n/- | caught_defect=y/n/- | duplicated_work=y/n/- | tokens=<v|-> | cost=<v|-> | time=<v|->
++# --- An all-"-" row passes as an admission and is REPORTED as non-contributing.
++

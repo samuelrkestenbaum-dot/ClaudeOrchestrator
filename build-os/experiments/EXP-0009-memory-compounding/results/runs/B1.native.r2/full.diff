@@ -1,0 +1,91 @@
+diff --git a/server/governance/control-tower-router.ts b/server/governance/control-tower-router.ts
+index 8473a32..e56c5c6 100644
+--- a/server/governance/control-tower-router.ts
++++ b/server/governance/control-tower-router.ts
+@@ -1505,7 +1505,7 @@ export const controlTowerRouter = router({
+     }))
+     .mutation(async ({ input, ctx }) => {
+       // Resolve user plan for gating
+-      const userId = (ctx as unknown as Record<string, unknown>).user?.id ?? null;
++      const userId = ctx.user?.id ?? null;
+       const planKey = await getUserPlanKey(userId);
+       const gates = getFeatureGates(planKey);
+       const usage = userId ? await getScanUsageInfo(userId) : null;
+@@ -1912,7 +1912,8 @@ export const controlTowerRouter = router({
+       const userId = ctx.user?.id;
+       if (!userId) throw new TRPCError({ code: 'UNAUTHORIZED' });
+       const prefs = await getDigestPreferences(userId);
+-      const frequency = prefs?.frequency || 'weekly';
++      // The stored frequency is a free-form varchar; narrow it to the supported union.
++      const frequency = prefs?.frequency === 'daily' ? 'daily' : 'weekly';
+       return sendDigestForUser(userId, frequency);
+     }),
+ 
+@@ -1966,7 +1967,7 @@ export const controlTowerRouter = router({
+         const result = await createOrganization(userId, input.name, input.slug);
+         return { success: true, orgId: result.orgId };
+       } catch (error: unknown) {
+-        throw new TRPCError({ code: 'BAD_REQUEST', message: error.message });
++        throw new TRPCError({ code: 'BAD_REQUEST', message: error instanceof Error ? error.message : 'Failed to create organization' });
+       }
+     }),
+ 
+@@ -1999,7 +2000,7 @@ export const controlTowerRouter = router({
+         await updateMemberRole(userOrg.org.id, input.targetUserId, input.newRole, userId);
+         return { success: true };
+       } catch (error: unknown) {
+-        throw new TRPCError({ code: 'BAD_REQUEST', message: error.message });
++        throw new TRPCError({ code: 'BAD_REQUEST', message: error instanceof Error ? error.message : 'Failed to update member role' });
+       }
+     }),
+ 
+@@ -2020,7 +2021,7 @@ export const controlTowerRouter = router({
+         await removeMember(userOrg.org.id, input.targetUserId, userId);
+         return { success: true };
+       } catch (error: unknown) {
+-        throw new TRPCError({ code: 'BAD_REQUEST', message: error.message });
++        throw new TRPCError({ code: 'BAD_REQUEST', message: error instanceof Error ? error.message : 'Failed to remove team member' });
+       }
+     }),
+ 
+@@ -2061,7 +2062,7 @@ export const controlTowerRouter = router({
+         
+         return { success: true, invitationId: result.invitationId };
+       } catch (error: unknown) {
+-        throw new TRPCError({ code: 'BAD_REQUEST', message: error.message });
++        throw new TRPCError({ code: 'BAD_REQUEST', message: error instanceof Error ? error.message : 'Failed to send invitation' });
+       }
+     }),
+ 
+@@ -2092,7 +2093,7 @@ export const controlTowerRouter = router({
+         await revokeInvitation(input.invitationId, userOrg.org.id, userId);
+         return { success: true };
+       } catch (error: unknown) {
+-        throw new TRPCError({ code: 'BAD_REQUEST', message: error.message });
++        throw new TRPCError({ code: 'BAD_REQUEST', message: error instanceof Error ? error.message : 'Failed to revoke invitation' });
+       }
+     }),
+ 
+@@ -2108,7 +2109,7 @@ export const controlTowerRouter = router({
+         const result = await acceptInvitation(input.token, userId);
+         return { success: true, orgId: result.orgId, role: result.role };
+       } catch (error: unknown) {
+-        throw new TRPCError({ code: 'BAD_REQUEST', message: error.message });
++        throw new TRPCError({ code: 'BAD_REQUEST', message: error instanceof Error ? error.message : 'Failed to accept invitation' });
+       }
+     }),
+ 
+diff --git a/server/governance/policy/policySchema.ts b/server/governance/policy/policySchema.ts
+index c221298..a91ba75 100644
+--- a/server/governance/policy/policySchema.ts
++++ b/server/governance/policy/policySchema.ts
+@@ -82,6 +82,8 @@ export type LogicalOperator = 'AND' | 'OR';
+ export interface PolicyDefinition {
+   /** Unique policy identifier */
+   id: string;
++  /** Short human-readable label (optional — built-in policies are identified by id) */
++  name?: string;
+   /** Human-readable description */
+   description: string;
+   /** Which surfaces this policy applies to (empty = all surfaces) */
+

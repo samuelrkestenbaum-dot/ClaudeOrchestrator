@@ -1,0 +1,14 @@
+{
+ "artifact": "run_record",
+ "run_id": "R-ac12300aaabf",
+ "task_id": "B2",
+ "arm": "leanmem",
+ "launched_at": "2026-08-11T21:39:49.566Z",
+ "expected_session_id": "068e7300-bc9a-4a0d-a87e-c4aa3aee105e",
+ "orchestrator_session_id": "5489b495-ae3d-5612-a4e1-61b4b5c6b6e4",
+ "timeout_ceiling_s": 1200,
+ "pid": null,
+ "state": "launched",
+ "terminal_reason": null,
+ "admissible": false
+}

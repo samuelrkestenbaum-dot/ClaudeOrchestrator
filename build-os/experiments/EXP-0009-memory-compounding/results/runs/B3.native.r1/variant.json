@@ -1,0 +1,21 @@
+{
+  "config": "native",
+  "sequence": "B",
+  "position": 3,
+  "rep": 1,
+  "source_identity": null,
+  "administered_sha": "0f130fa4f355f190e5b65599a1a9b8a8b4c0b968",
+  "prompt_sha256_16": "50bb091d0aeead9e",
+  "memory_store": null,
+  "verification": "runnable",
+  "allowed_tools": [
+    "Bash(npx tsc:*)",
+    "Bash(./node_modules/.bin/tsc:*)",
+    "Bash(node_modules/.bin/tsc:*)"
+  ],
+  "permission_mode": "acceptEdits",
+  "bash_timeouts": {
+    "BASH_DEFAULT_TIMEOUT_MS": "600000",
+    "BASH_MAX_TIMEOUT_MS": "600000"
+  }
+}

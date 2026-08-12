@@ -1,0 +1,52 @@
+diff --git a/server/governance/behavioral-correctness-audit.ts b/server/governance/behavioral-correctness-audit.ts
+index 65f4497..79aeb61 100644
+--- a/server/governance/behavioral-correctness-audit.ts
++++ b/server/governance/behavioral-correctness-audit.ts
+@@ -529,15 +529,16 @@ async function auditScenario(scenario: AuditScenario): Promise<AuditFinding[]> {
+ 
+       previousState = state;
+     } catch (error: unknown) {
++      const message = error instanceof Error ? error.message : String(error);
+       findings.push({
+         id: `${findingPrefix}-error`,
+         category: 'edge_cases',
+         severity: 'critical',
+         title: `Runtime error on message`,
+-        description: `processMessage() threw: ${error.message}`,
++        description: `processMessage() threw: ${message}`,
+         scenario: scenario.name,
+         expected: 'No errors',
+-        actual: error.message,
++        actual: message,
+         recommendation: `Add error handling for this scenario.`,
+         codeLocation: 'server/nervous-system/dynamics/runtime.ts:processMessage()',
+       });
+@@ -592,7 +593,7 @@ Be specific and actionable. Reference specific findings by category.`
+     return response.content[0].type === 'text' ? response.content[0].text : 'Assessment unavailable';
+   } catch (error: unknown) {
+     generalLog.error('[BehavioralAudit] Claude assessment failed:', error);
+-    return `Assessment unavailable: ${error.message}`;
++    return `Assessment unavailable: ${error instanceof Error ? error.message : String(error)}`;
+   }
+ }
+ 
+@@ -619,15 +620,16 @@ export async function runBehavioralAudit(
+       const findings = await auditScenario(scenario);
+       allFindings.push(...findings);
+     } catch (error: unknown) {
++      const message = error instanceof Error ? error.message : String(error);
+       allFindings.push({
+         id: `${scenario.id}-fatal`,
+         category: 'edge_cases',
+         severity: 'critical',
+         title: `Scenario "${scenario.name}" failed to complete`,
+-        description: error.message,
++        description: message,
+         scenario: scenario.name,
+         expected: 'Scenario completes without fatal errors',
+-        actual: `Fatal error: ${error.message}`,
++        actual: `Fatal error: ${message}`,
+         recommendation: 'Investigate runtime stability for this scenario type.',
+       });
+     }
+

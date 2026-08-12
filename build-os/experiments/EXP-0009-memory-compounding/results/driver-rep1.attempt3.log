@@ -1,0 +1,12 @@
+CONVERGENCE PROCEED: result_can_change_the_decision
+  a result here selects between: confirm memory compounding — proceed to phase 2 proof 2 (reusable learned skills) | fix memory retrieval/selection before adding more memory; no rescue variants of this experiment | redesign memory delivery before any further phase 2 proof | the memory-advantage claim fails at this proof regardless of cost — record the failure and stop phase 2 proof 1 | report as a confound, not a confirmation — locate the actual driver before any memory claim
+  · 5 distinct next action(s) across 5 possible result(s) — derived gain high
+EXP-0009 rep1 — sequences A,B x 5 positions x native,leanmem — ordered, serial
+PRE-FLIGHT A1/native rep1
+  ok   no_concurrent_measured_arm: acquired
+  ok   exact_seed_restored_before_every_position: 2543c873141f restored and verified
+  ok   administration.substrate_absent: build-os, .claude, CLAUDE.md all removed
+  ok   task_file_present: server/emotional-geometry-runtime/alert-analytics.ts
+  ok   administered_state_committed: b091c834adf9
+  ok   node_modules_available: shared, byte-identical across arms
+  ok   prompt_identity: sha256:58b8ad83799f35e5 — built from sequences.json only; identical across arms by construction

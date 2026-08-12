@@ -1,0 +1,8 @@
+{
+  "base_commit": "cfcd1e0993a97d8d49257950987f7de2d08e88fd",
+  "product_paths": [
+    "server/_core/logger.ts",
+    "server/emotional-geometry-runtime/geometry-alerting.ts"
+  ],
+  "governance_paths": []
+}

@@ -50,7 +50,8 @@
     {
       "fact": "the lean result replicates: an independent draw confirms the architecture",
       "evidence": "reps 4-6: cost 1.26x native (band: 1.18-1.3x confirms), uncached 1.18x, all TOM classes 0, acceptance 12/12, verification in-band 12/12, cost fully separated below current 4/4 tasks"
-    }
+    },
+    "EXP-0009: push-delivered machine-distilled task-report memory does NOT compound on self-contained fix tasks \u2014 the position-matched leanmem/native gap became LESS favorable as memory accumulated (largest advantage at P1, empty store); delivery worked, harm was zero, the value of the remembered content was the failure (branch 3)."
   ],
   "open_decisions": [
     {
@@ -61,11 +62,11 @@
       "status": "resolved",
       "measurement_attempts": 3,
       "attempt_log": [
-        "EXP-0006 operational UIC — contaminated by the administered queue",
-        "EXP-0007 corrected re-baseline — clean of contamination, still capability-starved",
-        "runnable-verification re-baseline — COMPLETE: the clean normal-runtime baseline; gap 2.44x cost / 2.12x uncached"
+        "EXP-0006 operational UIC \u2014 contaminated by the administered queue",
+        "EXP-0007 corrected re-baseline \u2014 clean of contamination, still capability-starved",
+        "runnable-verification re-baseline \u2014 COMPLETE: the clean normal-runtime baseline; gap 2.44x cost / 2.12x uncached"
       ],
-      "resolution": "REDESIGN THE INTERACTION MODEL. Runnable verification contracted the gap (cost 3.03x -> 2.44x, uncached 2.78x -> 2.12x) — capability starvation was a real amplifier — but the residual gap is materially >=2x with 4/4 tasks fully separated on cost (p=1.3e-5) and censoring biasing these numbers DOWN. Per the precommitted fork, LEAN_MANIFEST is the work; no further baseline refinement absent a measurement-invalidating defect."
+      "resolution": "REDESIGN THE INTERACTION MODEL. Runnable verification contracted the gap (cost 3.03x -> 2.44x, uncached 2.78x -> 2.12x) \u2014 capability starvation was a real amplifier \u2014 but the residual gap is materially >=2x with 4/4 tasks fully separated on cost (p=1.3e-5) and censoring biasing these numbers DOWN. Per the precommitted fork, LEAN_MANIFEST is the work; no further baseline refinement absent a measurement-invalidating defect."
     },
     {
       "id": "D2",
@@ -75,13 +76,13 @@
       "status": "resolved",
       "measurement_attempts": 1,
       "attempt_log": [
-        "decisive Native/Current/Lean, runnable, 12 lean arms — COMPLETE, 12/12 accepted"
+        "decisive Native/Current/Lean, runnable, 12 lean arms \u2014 COMPLETE, 12/12 accepted"
       ],
       "resolution": "ARCHITECTURAL WIN (branch 1 of the precommitted fork). Lean: cost 1.10x native (current 2.26x), uncached 1.10x (2.05x), turns 1.09x. Uncached and control round-trips fully separated lean-below-current on 4/4 tasks; cost and turns on 3/4. Every TOM violation class collapsed to zero or near-zero: control round-trips 4.5->0.0, gate diagnosis 0.29->0, capability search 0.13->0, impl reads 2.0->0, gravito search 1.0->0, routing bookkeeping 1.17->0.08; repeat final reports 2.38->0.58 and text-only turns 11.7->4.5, both BELOW native. Acceptance 12/12 with verification executed in-band in every arm; zero timeouts. PROVISIONAL per P-provisional-measurement until adversarially validated.",
       "validation": {
-        "independent_audit": "CLEAN 7/7 — separate agent, own extraction code, forbidden from reading the experiment's analysis scripts and result documents. Re-derived ratios independently: cost 2.261x/1.100x, uncached 2.048x/1.099x (agree to 3 decimals). Census complete with zero unaccounted dirs; treatment identity separated 12/0/0 on three mutually independent stream signals; economics.json exact vs streams (0 mismatches); acceptance 35/35 with verification.txt+diff checked exhaustively; compiler executed in-band in 12/12 lean arms (min 1, max 5); control-interaction counts independently reproduced (current 2.91 refusals/2.36 long-reports/2.00 substrate-reads vs lean 0.00/0.58/0.00); leakage grep 0 hits on all needles in all lean streams",
+        "independent_audit": "CLEAN 7/7 \u2014 separate agent, own extraction code, forbidden from reading the experiment's analysis scripts and result documents. Re-derived ratios independently: cost 2.261x/1.100x, uncached 2.048x/1.099x (agree to 3 decimals). Census complete with zero unaccounted dirs; treatment identity separated 12/0/0 on three mutually independent stream signals; economics.json exact vs streams (0 mismatches); acceptance 35/35 with verification.txt+diff checked exhaustively; compiler executed in-band in 12/12 lean arms (min 1, max 5); control-interaction counts independently reproduced (current 2.91 refusals/2.36 long-reports/2.00 substrate-reads vs lean 0.00/0.58/0.00); leakage grep 0 hits on all needles in all lean streams",
         "audit_caveat": "the audit brief's two literal lean marker strings occur 0/36 times (AUTO-RECEIPT-MINTED is a ledger row, not stream content); the auditor established identity from fingerprints it found itself: routing-auto-*.md receipt references (6/12 lean, 0/24 others), the lean-only SessionStart hook (12/12 lean, 0/24 others), and the current-only routing-request ceremony (12/12 current, 0/24 others). Lean is near-zero rather than absolutely zero on hook events: 2 total across 12 arms",
-        "remaining": "COMPLETE — replication confirmed (D2v); the provisional marker is lifted"
+        "remaining": "COMPLETE \u2014 replication confirmed (D2v); the provisional marker is lifted"
       }
     },
     {
@@ -92,9 +93,9 @@
       "status": "resolved",
       "measurement_attempts": 1,
       "attempt_log": [
-        "replication round, 12 lean arms reps 4-6 — COMPLETE, 12/12 accepted, 12/12 verified in-band"
+        "replication round, 12 lean arms reps 4-6 \u2014 COMPLETE, 12/12 accepted, 12/12 verified in-band"
       ],
-      "resolution": "CONFIRMED, by the precommitted criteria applied mechanically: (1) acceptance 12/12 and verification executed in-band 12/12; (2) control interactions stayed collapsed — control round-trips 0.0 (4/4 tasks fully separated below current), gate diagnosis 0, capability search 0, routing bookkeeping 0.00, impl reads 0, gravito search 0; (3) economics near native — cost 1.26x (inside the operator's pre-declared 1.18-1.3x confirm band), uncached 1.18x, with cost separating lean-below-current on 4/4 tasks (stronger than the original draw's 3/4). No reversion toward 1.8-2x. The PROVISIONAL marker on D2 is LIFTED."
+      "resolution": "CONFIRMED, by the precommitted criteria applied mechanically: (1) acceptance 12/12 and verification executed in-band 12/12; (2) control interactions stayed collapsed \u2014 control round-trips 0.0 (4/4 tasks fully separated below current), gate diagnosis 0, capability search 0, routing bookkeeping 0.00, impl reads 0, gravito search 0; (3) economics near native \u2014 cost 1.26x (inside the operator's pre-declared 1.18-1.3x confirm band), uncached 1.18x, with cost separating lean-below-current on 4/4 tasks (stronger than the original draw's 3/4). No reversion toward 1.8-2x. The PROVISIONAL marker on D2 is LIFTED."
     },
     {
       "id": "D3",
@@ -102,18 +103,21 @@
       "open_uncertainty": "Whether lean-mem's cost/turns curve falls across sequence positions while native stays flat, with acceptance held and >=1 reused-memory event in the arms that got cheaper",
       "resolved_by": "EXP-0009 per its frozen preregistration: 2 rule-derived sequences x 5 positions x 2 arms x 2 reps; fork applied only when both reps exist",
       "status": "open",
-      "measurement_attempts": 0,
-      "attempt_log": []
+      "measurement_attempts": 1,
+      "attempt_log": [
+        "EXP-0009 (40 arms, 2 seqs x 5 pos x 2 arms x 2 reps, position-matched, isolated per-rep stores): gap LESS favorable with position (cost 0.89->1.04, uncached 0.93->1.07, turns 0.85->0.97); acceptance 40/40 held; memory_reads=0 in all leanmem arms; TOM guard held. Branch 3 fired: distilled-report push-delivered memory is net context drag on self-contained tasks."
+      ],
+      "next_action": "redesign memory delivery/content before any further Phase 2 proof; a redesigned delivery is the stated difference a repeat attempt requires"
     }
   ],
   "stop_conditions": [
     {
       "id": "S1",
       "applies_to": "D1",
-      "rule": "Once ONE clean normal-runtime baseline exists with verification runnable, stop re-baselining. If Gravito remains materially more expensive than native, move to interaction-model redesign. Reopening measurement afterwards requires a MEASUREMENT-INVALIDATING defect — proof the test did not measure what it claimed. A new plausible causal hypothesis is NOT grounds: it is interesting, and redesign comes first. Without this distinction every negative result generates one more rescue experiment forever.",
+      "rule": "Once ONE clean normal-runtime baseline exists with verification runnable, stop re-baselining. If Gravito remains materially more expensive than native, move to interaction-model redesign. Reopening measurement afterwards requires a MEASUREMENT-INVALIDATING defect \u2014 proof the test did not measure what it claimed. A new plausible causal hypothesis is NOT grounds: it is interesting, and redesign comes first. Without this distinction every negative result generates one more rescue experiment forever.",
       "declared_by": "operator, in-session, before the result was known",
       "satisfied": true,
-      "satisfied_evidence": "the clean normal-runtime baseline exists: 47 admissible arms, 47/47 accepted, verification proven executable in both arms. Task-paired cost gap 2.44x (4/4 tasks fully separated, p=1.3e-5), uncached 2.12x — materially above native, with censoring making these floors. Per the precommitted fork: stop re-baselining, redesign the interaction model."
+      "satisfied_evidence": "the clean normal-runtime baseline exists: 47 admissible arms, 47/47 accepted, verification proven executable in both arms. Task-paired cost gap 2.44x (4/4 tasks fully separated, p=1.3e-5), uncached 2.12x \u2014 materially above native, with censoring making these floors. Per the precommitted fork: stop re-baselining, redesign the interaction model."
     }
   ],
   "policies": [
@@ -126,7 +130,7 @@
     {
       "id": "P-provisional-measurement",
       "rule": "A first clean measurement is PROVISIONAL until adversarially validated. Grounds: five findings this program were overturned or materially reinterpreted by instrument or environment defects (EXP-0005 host asymmetry, vacuous isolation check, unstable implementation-read metric, administered queue contamination, capability starvation).",
-      "declared_by": "operator assessment, adopted as policy; not yet a wired control — wiring one would violate P-freeze-governance unless a measured blocker demands it"
+      "declared_by": "operator assessment, adopted as policy; not yet a wired control \u2014 wiring one would violate P-freeze-governance unless a measured blocker demands it"
     }
   ],
   "deferred_by_convergence": [],

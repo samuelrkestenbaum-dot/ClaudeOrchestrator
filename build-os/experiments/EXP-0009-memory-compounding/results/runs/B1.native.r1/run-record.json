@@ -1,0 +1,25 @@
+{
+ "artifact": "run_record",
+ "run_id": "R-86e3b382bd2c",
+ "task_id": "B1",
+ "arm": "native",
+ "launched_at": "2026-08-11T17:11:29.278Z",
+ "expected_session_id": "3fb83845-3aa9-4490-9eb0-b1213d6df428",
+ "orchestrator_session_id": "5489b495-ae3d-5612-a4e1-61b4b5c6b6e4",
+ "timeout_ceiling_s": 1200,
+ "pid": null,
+ "state": "terminal",
+ "terminal_reason": "completed",
+ "admissible": true,
+ "is_error": false,
+ "result_event_observed": true,
+ "child_session_id": "3fb83845-3aa9-4490-9eb0-b1213d6df428",
+ "isolation": {
+  "isolated": true,
+  "observed": [
+   "3fb83845-3aa9-4490-9eb0-b1213d6df428"
+  ],
+  "reason": "child session id is distinct from the orchestrator's and matches the assignment"
+ },
+ "admissibility_note": "clean completion under a proven-isolated session"
+}

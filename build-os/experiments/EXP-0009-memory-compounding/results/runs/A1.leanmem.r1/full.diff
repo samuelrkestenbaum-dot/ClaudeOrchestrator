@@ -1,0 +1,144 @@
+diff --git a/server/_core/logger.ts b/server/_core/logger.ts
+index c59b823..9128a62 100644
+--- a/server/_core/logger.ts
++++ b/server/_core/logger.ts
+@@ -223,6 +223,7 @@ export type LogDomain =
+   | 'billing'
+   | 'emotional-geometry'
+   | 'alert-sse'
++  | 'alert-analytics'
+   | 'neurocosmology-advanced'
+   | 'tenant-analytics'
+   | 'tenant-governance'
+diff --git a/server/emotional-geometry-runtime/alert-analytics.ts b/server/emotional-geometry-runtime/alert-analytics.ts
+index b4e33cc..eef65cb 100644
+--- a/server/emotional-geometry-runtime/alert-analytics.ts
++++ b/server/emotional-geometry-runtime/alert-analytics.ts
+@@ -9,7 +9,7 @@
+  */
+ 
+ import { createLogger } from '../_core/logger';
+-import { getDb } from '../db';
++import { getDb, DatabaseUnavailableError } from '../db';
+ import { geometryAlertHistory, alertIncidents } from '../../drizzle/schema';
+ import { eq, and, gte, lte, desc, sql, count, avg, inArray } from 'drizzle-orm';
+ 
+@@ -88,6 +88,7 @@ export async function getAlertFrequencyByType(options: {
+ }): Promise<AlertTrend[]> {
+   try {
+     const db = await getDb();
++    if (!db) throw new DatabaseUnavailableError('Database unavailable: cannot read alert frequency');
+     const since = Date.now() - options.days * 24 * 60 * 60 * 1000;
+ 
+     // Query raw data from alert history
+@@ -150,6 +151,7 @@ export async function getAlertFrequencyByType(options: {
+ export async function getAlertSummaryStats(days: number = 30): Promise<AlertSummaryStats> {
+   try {
+     const db = await getDb();
++    if (!db) throw new DatabaseUnavailableError('Database unavailable: cannot read alert summary stats');
+     const since = Date.now() - days * 24 * 60 * 60 * 1000;
+ 
+     // Total alerts and unacknowledged
+@@ -288,6 +290,7 @@ export async function groupAlertIntoIncident(alert: {
+ }): Promise<{ incidentId: string; isNew: boolean; alertCount: number }> {
+   try {
+     const db = await getDb();
++    if (!db) throw new DatabaseUnavailableError('Database unavailable: cannot group alert into incident');
+     const windowStart = alert.firedAt - INCIDENT_GROUPING_WINDOW_MS;
+ 
+     // Find an existing open incident of the same type within the grouping window
+@@ -371,6 +374,7 @@ export async function getIncidents(options?: {
+ }): Promise<{ incidents: IncidentSummary[]; total: number }> {
+   try {
+     const db = await getDb();
++    if (!db) throw new DatabaseUnavailableError('Database unavailable: cannot read incidents');
+     const limit = options?.limit ?? 50;
+     const offset = options?.offset ?? 0;
+     const conditions: any[] = [];
+@@ -432,6 +436,7 @@ export async function getIncidents(options?: {
+ export async function getIncidentDetail(incidentId: string): Promise<IncidentDetail | null> {
+   try {
+     const db = await getDb();
++    if (!db) throw new DatabaseUnavailableError('Database unavailable: cannot read incident detail');
+ 
+     const [incident] = await db.select()
+       .from(alertIncidents)
+@@ -498,6 +503,7 @@ export async function resolveIncident(
+ ): Promise<boolean> {
+   try {
+     const db = await getDb();
++    if (!db) throw new DatabaseUnavailableError('Database unavailable: cannot resolve incident');
+     await db.update(alertIncidents)
+       .set({
+         status: 'resolved',
+@@ -523,6 +529,7 @@ export async function acknowledgeIncident(
+ ): Promise<boolean> {
+   try {
+     const db = await getDb();
++    if (!db) throw new DatabaseUnavailableError('Database unavailable: cannot acknowledge incident');
+     await db.update(alertIncidents)
+       .set({ status: 'acknowledged' })
+       .where(eq(alertIncidents.incidentId, incidentId));
+
+diff --git a/build-os/packets/routing/routing-auto-20260811T152653Z-22965-20260811T152654Z.md b/build-os/packets/routing/routing-auto-20260811T152653Z-22965-20260811T152654Z.md
+--- /dev/null
++++ b/build-os/packets/routing/routing-auto-20260811T152653Z-22965-20260811T152654Z.md
++# ROUTING RECEIPT — one file per routing decision. The recorded verdict is BINDING
++# (build-os/memory/routing_contract.md); routing-check.sh refuses this receipt at
++# close if executed_mode exceeds selected_mode with no escalation record, if an
++# escalation carries no evidence, or if consumption exceeds a budget undeclared.
++task_id: auto-20260811T152653Z-22965
++description_sha256: 27b3f1b706c909c94af97ff3625e4a0a813089bab6bc2c90aa89c5978cb14534
++descriptor: {"expected_files_changed":1,"requires_tests":false,"expected_session_count":1,"prior_context_required":false,"handoff_required":false,"consequence_level":"low","irreversible_or_external_mutation":false,"high_blast_radius":false,"unclear_acceptance_criteria":false,"security_or_compliance_consequence":false,"parallel_workstreams_benefit":false,"high_rework_history":false,"nondeterministic_verification":false}
++selected_mode: direct
++selector_note: -
++issued_at: 2026-08-11T15:26:54Z
++# --- budgets: DERIVED DEFAULTS from EXP-0002 sealed records, operator-tunable, not laws.
++# --- Derivation: ON-surface light runs measured 172k-369k total tokens / 0 dispatches
++# --- (named exceedance: raw T4 at 526,461 - context, not the band); the
++# --- blowouts measured 4.9M/7.4M tokens, 4-5 dispatches, $3.63/$4.80. See route-task.sh.
++budget_max_subagents: 0
++budget_max_total_tokens: 250000
++budget_max_uncached_tokens: 30000
++budget_max_model_calls: 12
++budget_max_wall_clock_s: 300
++budget_max_cost_usd: 0.40
++# --- process allowance (PACKET-0053): the packet's OWN gate chain is governance
++# --- ceremony, counted SEPARATELY from task work by the live gate and attributed
++# --- to governance_process (the 0050/0051 calibration question, resolved). Default
++# --- 7 = the LARGEST LEGAL chain in the doctrine: mandatory_full_regate runs
++# --- builder, qa, reviewer, fix-builder, qa, reviewer, archivist. (No-fix chain
++# --- is 4; fix-then-pass is 6.) Process dispatches never eat budget_max_subagents.
++process_dispatch_allowance: 7
++# --- empty at issue; filled at close. AN UNKNOWN IS NOT A ZERO: "-" is an honest
++# --- admission and is never refused; refusal is for CONTRADICTION, not absence.
++executed_mode: -
++escalation: -
++escalation_evidence: -
++consumed_subagents: -
++consumed_total_tokens: -
++consumed_uncached_tokens: -
++consumed_model_calls: -
++consumed_wall_clock_s: -
++consumed_cost_usd: -
++degradation_note: -
++# --- close-fill EXTENSIONS (PACKET-0053). consumed_subagents above counts TASK
++# --- dispatches (vs budget_max_subagents); consumed_process_dispatches counts the
++# --- gate chain (vs process_dispatch_allowance). The attr_* layers attribute
++# --- consumption where derivable at close — tokens or cost with provenance, or
++# --- "-" as an admission, NEVER a zero nobody measured. Receipts predating these
++# --- fields stay valid: routing-check.sh reads an absent field as "-".
++consumed_process_dispatches: -
++attr_task_execution: -
++attr_context_retrieval: -
++attr_subagent_execution: -
++attr_verification: -
++attr_review: -
++attr_governance_process: -
++attr_experiment_audit: -
++# --- contribution rows (PACKET-0053): marginal-contribution accounting, MANDATORY
++# --- for a Full close with dispatches>0 (routing-check.sh refuses otherwise). The
++# --- live gate seeds one stub row per admitted Full task dispatch; fill at close:
++# --- contribution: <subagent_type> | <unique_question> | <output_ref> | changed_implementation=y/n/- | changed_conclusion=y/n/- | caught_defect=y/n/- | duplicated_work=y/n/- | tokens=<v|-> | cost=<v|-> | time=<v|->
++# --- An all-"-" row passes as an admission and is REPORTED as non-contributing.
++

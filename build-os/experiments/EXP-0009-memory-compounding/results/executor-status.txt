@@ -1,0 +1,6 @@
+Current state:        - → study-complete
+Current action:       -
+Last meaningful event: 0.0s ago
+Next transition:      -
+Blocked on:           nothing
+Updated:              2026-08-12T00:23:01.742Z

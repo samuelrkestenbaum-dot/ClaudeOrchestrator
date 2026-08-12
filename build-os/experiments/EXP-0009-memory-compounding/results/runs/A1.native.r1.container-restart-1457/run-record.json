@@ -1,0 +1,14 @@
+{
+ "artifact": "run_record",
+ "run_id": "R-40b1788ea72e",
+ "task_id": "A1",
+ "arm": "native",
+ "launched_at": "2026-08-11T14:26:21.218Z",
+ "expected_session_id": "7bbd2b22-95c4-4410-ace4-638451b85602",
+ "orchestrator_session_id": "5489b495-ae3d-5612-a4e1-61b4b5c6b6e4",
+ "timeout_ceiling_s": 1200,
+ "pid": null,
+ "state": "launched",
+ "terminal_reason": null,
+ "admissible": false
+}

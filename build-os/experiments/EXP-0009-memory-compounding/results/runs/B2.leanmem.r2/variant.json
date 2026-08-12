@@ -1,0 +1,25 @@
+{
+  "config": "leanmem",
+  "sequence": "B",
+  "position": 2,
+  "rep": 2,
+  "source_identity": {
+    "treatment": "leanmem",
+    "requested_ref": "a530659",
+    "resolved_commit": "a53065939e9449ce5825e12e63878efa76c2c2ba"
+  },
+  "administered_sha": "b9e8dcc258f5467ee01e544c2774c5b1651ac063",
+  "prompt_sha256_16": "89e808afc3208df1",
+  "memory_store": "memory-stores/B.rep2/task-log.md",
+  "verification": "runnable",
+  "allowed_tools": [
+    "Bash(npx tsc:*)",
+    "Bash(./node_modules/.bin/tsc:*)",
+    "Bash(node_modules/.bin/tsc:*)"
+  ],
+  "permission_mode": "acceptEdits",
+  "bash_timeouts": {
+    "BASH_DEFAULT_TIMEOUT_MS": "600000",
+    "BASH_MAX_TIMEOUT_MS": "600000"
+  }
+}

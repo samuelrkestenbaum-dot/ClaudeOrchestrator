@@ -1,0 +1,1055 @@
+$ npx tsc --noEmit -p tsconfig.json
+(exit 2)
+
+client/src/components/CoCreateDemo.tsx(274,38): error TS2339: Property 'phases' does not exist on type '{}'.
+client/src/components/CoCreateDemo.tsx(276,28): error TS2339: Property 'phases' does not exist on type '{}'.
+client/src/components/CoCreateDemo.tsx(676,17): error TS2345: Argument of type '{ content: string; rawContent: string; context: { intent: { coreMessage: string; desiredAction: string; keyDifferentiator: string; }; audience: { primary: string; technicalLevel: "technical" | "business" | "mixed"; concerns: string[]; }; tone: { ...; }; constraints: { ...; }; brand: { ...; }; }; phases: { ...; }; to...' is not assignable to parameter of type 'SetStateAction<{ content: string; rawContent: string; context: ContextData; phases: PhaseData; totalDuration: number; } | null>'.
+  Type '{ content: string; rawContent: string; context: { intent: { coreMessage: string; desiredAction: string; keyDifferentiator: string; }; audience: { primary: string; technicalLevel: "technical" | "business" | "mixed"; concerns: string[]; }; tone: { ...; }; constraints: { ...; }; brand: { ...; }; }; phases: { ...; }; to...' is not assignable to type '{ content: string; rawContent: string; context: ContextData; phases: PhaseData; totalDuration: number; }'.
+    The types of 'phases.generate' are incompatible between these types.
+      Property 'continuousFlags' is missing in type '{ realtimeFlags: string[]; duration: number; }' but required in type '{ continuousFlags: string[]; duration: number; }'.
+client/src/pages/UserDashboard.tsx(474,25): error TS2322: Type 'Partial<ApiKey>' is not assignable to type '{ id: number; keyPrefix: string; name: string | null; isActive: boolean; createdAt: Date; lastUsedAt: Date | null; }'.
+  Types of property 'id' are incompatible.
+    Type 'number | undefined' is not assignable to type 'number'.
+      Type 'undefined' is not assignable to type 'number'.
+client/src/pages/UserDashboard.tsx(611,92): error TS2339: Property 'date' does not exist on type 'BillingHistory'.
+client/src/pages/admin/RecallProofPreflight.tsx(280,18): error TS2322: Type '{ children: string[]; label: string; ok: boolean; }' is not assignable to type '{ label: string; children: string; ok?: boolean | null | undefined; }'.
+  Types of property 'children' are incompatible.
+    Type 'string[]' is not assignable to type 'string'.
+client/src/pages/admin/RecallProofPreflight.tsx(283,18): error TS2322: Type '{ children: string[]; label: string; ok: boolean; }' is not assignable to type '{ label: string; children: string; ok?: boolean | null | undefined; }'.
+  Types of property 'children' are incompatible.
+    Type 'string[]' is not assignable to type 'string'.
+client/src/pages/admin/RecallProofPreflight.tsx(286,18): error TS2322: Type '{ children: string[]; label: string; ok: boolean; }' is not assignable to type '{ label: string; children: string; ok?: boolean | null | undefined; }'.
+  Types of property 'children' are incompatible.
+    Type 'string[]' is not assignable to type 'string'.
+client/src/pages/admin/RecallProofPreflight.tsx(289,18): error TS2322: Type '{ children: string[]; label: string; ok: boolean; }' is not assignable to type '{ label: string; children: string; ok?: boolean | null | undefined; }'.
+  Types of property 'children' are incompatible.
+    Type 'string[]' is not assignable to type 'string'.
+client/src/pages/admin/RecallProofPreflight.tsx(292,18): error TS2322: Type '{ children: string[]; label: string; ok: boolean; }' is not assignable to type '{ label: string; children: string; ok?: boolean | null | undefined; }'.
+  Types of property 'children' are incompatible.
+    Type 'string[]' is not assignable to type 'string'.
+client/src/pages/admin/RecallProofPreflight.tsx(296,18): error TS2322: Type '{ children: string[]; label: string; ok: boolean; }' is not assignable to type '{ label: string; children: string; ok?: boolean | null | undefined; }'.
+  Types of property 'children' are incompatible.
+    Type 'string[]' is not assignable to type 'string'.
+client/src/pages/admin/RecallProofPreflight.tsx(299,18): error TS2322: Type '{ children: string[]; label: string; ok: boolean; }' is not assignable to type '{ label: string; children: string; ok?: boolean | null | undefined; }'.
+  Types of property 'children' are incompatible.
+    Type 'string[]' is not assignable to type 'string'.
+client/src/pages/admin/RecallProofPreflight.tsx(308,18): error TS2322: Type '{ children: string[]; label: string; ok: boolean; }' is not assignable to type '{ label: string; children: string; ok?: boolean | null | undefined; }'.
+  Types of property 'children' are incompatible.
+    Type 'string[]' is not assignable to type 'string'.
+drizzle/schema.ts(7627,13): error TS2300: Duplicate identifier 'TenantGovernanceConfig'.
+drizzle/schema.ts(7628,13): error TS2300: Duplicate identifier 'InsertTenantGovernanceConfig'.
+drizzle/schema.ts(9774,13): error TS2300: Duplicate identifier 'TenantGovernanceConfig'.
+drizzle/schema.ts(9775,13): error TS2300: Duplicate identifier 'InsertTenantGovernanceConfig'.
+server/_core/index.ts(636,17): error TS2554: Expected 2-3 arguments, but got 1.
+server/abtest/manager.ts(169,34): error TS18046: 'r' is of type 'unknown'.
+server/abtest/manager.ts(170,32): error TS2339: Property 'impressions' does not exist on type '{}'.
+server/abtest/manager.ts(171,32): error TS2339: Property 'conversions' does not exist on type '{}'.
+server/abtest/manager.ts(176,22): error TS2339: Property 'clicks' does not exist on type '{}'.
+server/abtest/manager.ts(177,23): error TS2339: Property 'signups' does not exist on type '{}'.
+server/adversarial-resilience.ts(29,26): error TS2345: Argument of type '"adversarial-resilience"' is not assignable to parameter of type 'LogDomain'.
+server/adversarial-resilience.ts(362,19): error TS2339: Property 'rows' does not exist on type 'RowList<Record<string, unknown>[]>'.
+server/adversarial-resilience.ts(420,19): error TS2339: Property 'rows' does not exist on type 'RowList<Record<string, unknown>[]>'.
+server/agent/github-app.ts(1147,76): error TS2345: Argument of type '{ runId: string; surface: string; repo: string; prNumber: number; triggeredBy: string; triggerType: "webhook"; startedAt: string; finishedAt: string; status: "passed" | "blocked"; iterations: number; ... 7 more ...; metadata: {}; }' is not assignable to parameter of type 'AgentRunReport'.
+  The types of 'gateDecision.rubricScores' are incompatible between these types.
+    Type 'unknown[]' is not assignable to type 'RubricScore[]'.
+      Type 'unknown' is not assignable to type 'RubricScore'.
+server/agent/mcp/domains/enterprise.ts(155,32): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(value: { decisionId: string | SQL<unknown> | Placeholder<string, any>; appealId: string | SQL<unknown> | Placeholder<string, any>; originalOutcome: string | SQL<...> | Placeholder<...>; ... 15 more ...; requestedAt?: Date | ... 2 more ... | undefined; }): PgInsertBase<...>', gave the following error.
+    Argument of type '{ appealId: string; decisionId: string; originalOutcome: string; justification: string; requesterId: string; requesterRole: string; status: string; createdAt: Date; updatedAt: Date; }' is not assignable to parameter of type '{ decisionId: string | SQL<unknown> | Placeholder<string, any>; appealId: string | SQL<unknown> | Placeholder<string, any>; originalOutcome: string | SQL<...> | Placeholder<...>; ... 15 more ...; requestedAt?: Date | ... 2 more ... | undefined; }'.
+      Property 'auditTrailId' is missing in type '{ appealId: string; decisionId: string; originalOutcome: string; justification: string; requesterId: string; requesterRole: string; status: string; createdAt: Date; updatedAt: Date; }' but required in type '{ decisionId: string | SQL<unknown> | Placeholder<string, any>; appealId: string | SQL<unknown> | Placeholder<string, any>; originalOutcome: string | SQL<...> | Placeholder<...>; ... 15 more ...; requestedAt?: Date | ... 2 more ... | undefined; }'.
+  Overload 2 of 2, '(values: { decisionId: string | SQL<unknown> | Placeholder<string, any>; appealId: string | SQL<unknown> | Placeholder<string, any>; originalOutcome: string | SQL<...> | Placeholder<...>; ... 15 more ...; requestedAt?: Date | ... 2 more ... | undefined; }[]): PgInsertBase<...>', gave the following error.
+    Object literal may only specify known properties, and 'appealId' does not exist in type '{ decisionId: string | SQL<unknown> | Placeholder<string, any>; appealId: string | SQL<unknown> | Placeholder<string, any>; originalOutcome: string | SQL<...> | Placeholder<...>; ... 15 more ...; requestedAt?: Date | ... 2 more ... | undefined; }[]'.
+server/agent/mcp/domains/enterprise.ts(263,43): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(value: { policyVersion: string | SQL<unknown> | Placeholder<string, any>; signedAt: Date | SQL<unknown> | Placeholder<string, any>; signatureId: string | SQL<...> | Placeholder<...>; ... 12 more ...; signaturePayload?: string | ... 3 more ... | undefined; }): PgInsertBase<...>', gave the following error.
+    Object literal may only specify known properties, and 'updatedAt' does not exist in type '{ policyVersion: string | SQL<unknown> | Placeholder<string, any>; signedAt: Date | SQL<unknown> | Placeholder<string, any>; signatureId: string | SQL<...> | Placeholder<...>; ... 12 more ...; signaturePayload?: string | ... 3 more ... | undefined; }'.
+  Overload 2 of 2, '(values: { policyVersion: string | SQL<unknown> | Placeholder<string, any>; signedAt: Date | SQL<unknown> | Placeholder<string, any>; signatureId: string | SQL<...> | Placeholder<...>; ... 12 more ...; signaturePayload?: string | ... 3 more ... | undefined; }[]): PgInsertBase<...>', gave the following error.
+    Object literal may only specify known properties, and 'signatureId' does not exist in type '{ policyVersion: string | SQL<unknown> | Placeholder<string, any>; signedAt: Date | SQL<unknown> | Placeholder<string, any>; signatureId: string | SQL<...> | Placeholder<...>; ... 12 more ...; signaturePayload?: string | ... 3 more ... | undefined; }[]'.
+server/agent/mcp/domains/hitl.ts(193,30): error TS2339: Property 'active_items' does not exist on type 'never'.
+server/agent/mcp/domains/hitl.ts(264,40): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type '{ critical: number; high: number; medium: number; low: number; }'.
+server/agent/mcp/domains/hitl.ts(264,75): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type '{ critical: number; high: number; medium: number; low: number; }'.
+server/agent/mcp/domains/persistence.ts(681,45): error TS2339: Property 'userId' does not exist on type 'PgTableWithColumns<{ name: "agent_persona_states"; schema: undefined; columns: { id: PgColumn<{ name: "id"; tableName: "agent_persona_states"; dataType: "number"; columnType: "PgSerial"; data: number; driverParam: number; ... 8 more ...; generated: undefined; }, {}, {}>; ... 6 more ...; updatedAt: PgColumn<...>; }; ...'.
+server/agent/mcp/domains/persistence.ts(683,58): error TS2339: Property 'surfaceId' does not exist on type 'PgTableWithColumns<{ name: "agent_persona_states"; schema: undefined; columns: { id: PgColumn<{ name: "id"; tableName: "agent_persona_states"; dataType: "number"; columnType: "PgSerial"; data: number; driverParam: number; ... 8 more ...; generated: undefined; }, {}, {}>; ... 6 more ...; updatedAt: PgColumn<...>; }; ...'.
+server/agent/mcp/domains/persistence.ts(692,20): error TS2339: Property 'userId' does not exist on type '{ id: number; agentId: string; currentMood: string | null; energyLevel: string | null; focusArea: string | null; recentTopics: unknown; interactionCount: number; updatedAt: Date; }'.
+server/agent/mcp/domains/persistence.ts(693,23): error TS2339: Property 'surfaceId' does not exist on type '{ id: number; agentId: string; currentMood: string | null; energyLevel: string | null; focusArea: string | null; recentTopics: unknown; interactionCount: number; updatedAt: Date; }'.
+server/agent/mcp/domains/persistence.ts(694,19): error TS2339: Property 'traits' does not exist on type '{ id: number; agentId: string; currentMood: string | null; energyLevel: string | null; focusArea: string | null; recentTopics: unknown; interactionCount: number; updatedAt: Date; }'.
+server/agent/mcp/domains/persistence.ts(695,24): error TS2339: Property 'preferences' does not exist on type '{ id: number; agentId: string; currentMood: string | null; energyLevel: string | null; focusArea: string | null; recentTopics: unknown; interactionCount: number; updatedAt: Date; }'.
+server/agent/mcp/domains/persistence.ts(1103,37): error TS2345: Argument of type '{}' is not assignable to parameter of type 'SQLWrapper'.
+  Property 'getSQL' is missing in type '{}' but required in type 'SQLWrapper'.
+server/agent/mcp/domains/persistence.ts(1106,16): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'SQL<unknown> | ((aliases: { id: PgColumn<{ name: "id"; tableName: "economic_revenue_events"; dataType: "number"; columnType: "PgSerial"; data: number; driverParam: number; notNull: true; hasDefault: true; isPrimaryKey: true; ... 5 more ...; generated: undefined; }, {}, {}>; ... 7 more ...; createdAt: PgColumn<...>; ...'.
+server/agent/mcp/unified-gravito-api.ts(374,24): error TS2571: Object is of type 'unknown'.
+server/agent/mcp/unified-gravito-api.ts(393,20): error TS2571: Object is of type 'unknown'.
+server/agent/mcp/unified-gravito-api.ts(394,51): error TS2571: Object is of type 'unknown'.
+server/agent/mcp/unified-gravito.ts(55,15): error TS2305: Module '"./outbound-pack"' has no exported member 'BrandVoice'.
+server/agent/mcp/unified-gravito.ts(420,9): error TS2740: Type '{ variants: { id: string; content: string; angle: "risk_reversal" | "status_authority" | "competitor_contrast" | "time_to_value" | "social_proof" | "urgency_scarcity" | "benefit_focused" | "simplicity_drop_in" | "problem_agitation" | "feature_focused"; angle_label: string; governance_score?: number | undefined; gove...' is missing the following properties from type '{ id: string; content: string; angle: string; predicted_lift: number; }[]': length, pop, push, concat, and 35 more.
+server/agent/mcp/unified-gravito.ts(420,74): error TS2554: Expected 1 arguments, but got 2.
+server/agent/mcp/unified-gravito.ts(621,54): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(predicate: (value: { text: string; type: "percentage" | "dollar_amount" | "multiplier" | "absolute_statement" | "time_metric"; classification: "verified" | "unclassified" | "estimated" | "illustrative" | "hypothetical"; severity: "low" | ... 1 more ... | "high"; requires_evidence: boolean; }, index: number, array: { ...; }[]) => value is { ...; }, thisArg?: any): { ...; }[]', gave the following error.
+    Argument of type '(c: Claim) => boolean' is not assignable to parameter of type '(value: { text: string; type: "percentage" | "dollar_amount" | "multiplier" | "absolute_statement" | "time_metric"; classification: "verified" | "unclassified" | "estimated" | "illustrative" | "hypothetical"; severity: "low" | ... 1 more ... | "high"; requires_evidence: boolean; }, index: number, array: { ...; }[]) ...'.
+      Types of parameters 'c' and 'value' are incompatible.
+        Property 'claim' is missing in type '{ text: string; type: "percentage" | "dollar_amount" | "multiplier" | "absolute_statement" | "time_metric"; classification: "verified" | "unclassified" | "estimated" | "illustrative" | "hypothetical"; severity: "low" | ... 1 more ... | "high"; requires_evidence: boolean; }' but required in type 'Claim'.
+  Overload 2 of 2, '(predicate: (value: { text: string; type: "percentage" | "dollar_amount" | "multiplier" | "absolute_statement" | "time_metric"; classification: "verified" | "unclassified" | "estimated" | "illustrative" | "hypothetical"; severity: "low" | ... 1 more ... | "high"; requires_evidence: boolean; }, index: number, array: { ...; }[]) => unknown, thisArg?: any): { ...; }[]', gave the following error.
+    Argument of type '(c: Claim) => boolean' is not assignable to parameter of type '(value: { text: string; type: "percentage" | "dollar_amount" | "multiplier" | "absolute_statement" | "time_metric"; classification: "verified" | "unclassified" | "estimated" | "illustrative" | "hypothetical"; severity: "low" | ... 1 more ... | "high"; requires_evidence: boolean; }, index: number, array: { ...; }[]) ...'.
+      Types of parameters 'c' and 'value' are incompatible.
+        Property 'claim' is missing in type '{ text: string; type: "percentage" | "dollar_amount" | "multiplier" | "absolute_statement" | "time_metric"; classification: "verified" | "unclassified" | "estimated" | "illustrative" | "hypothetical"; severity: "low" | ... 1 more ... | "high"; requires_evidence: boolean; }' but required in type 'Claim'.
+server/agent/mcp/unified-gravito.ts(622,56): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(predicate: (value: { text: string; type: "percentage" | "dollar_amount" | "multiplier" | "absolute_statement" | "time_metric"; classification: "verified" | "unclassified" | "estimated" | "illustrative" | "hypothetical"; severity: "low" | ... 1 more ... | "high"; requires_evidence: boolean; }, index: number, array: { ...; }[]) => value is { ...; }, thisArg?: any): { ...; }[]', gave the following error.
+    Argument of type '(c: Claim) => boolean' is not assignable to parameter of type '(value: { text: string; type: "percentage" | "dollar_amount" | "multiplier" | "absolute_statement" | "time_metric"; classification: "verified" | "unclassified" | "estimated" | "illustrative" | "hypothetical"; severity: "low" | ... 1 more ... | "high"; requires_evidence: boolean; }, index: number, array: { ...; }[]) ...'.
+      Types of parameters 'c' and 'value' are incompatible.
+        Property 'claim' is missing in type '{ text: string; type: "percentage" | "dollar_amount" | "multiplier" | "absolute_statement" | "time_metric"; classification: "verified" | "unclassified" | "estimated" | "illustrative" | "hypothetical"; severity: "low" | ... 1 more ... | "high"; requires_evidence: boolean; }' but required in type 'Claim'.
+  Overload 2 of 2, '(predicate: (value: { text: string; type: "percentage" | "dollar_amount" | "multiplier" | "absolute_statement" | "time_metric"; classification: "verified" | "unclassified" | "estimated" | "illustrative" | "hypothetical"; severity: "low" | ... 1 more ... | "high"; requires_evidence: boolean; }, index: number, array: { ...; }[]) => unknown, thisArg?: any): { ...; }[]', gave the following error.
+    Argument of type '(c: Claim) => boolean' is not assignable to parameter of type '(value: { text: string; type: "percentage" | "dollar_amount" | "multiplier" | "absolute_statement" | "time_metric"; classification: "verified" | "unclassified" | "estimated" | "illustrative" | "hypothetical"; severity: "low" | ... 1 more ... | "high"; requires_evidence: boolean; }, index: number, array: { ...; }[]) ...'.
+      Types of parameters 'c' and 'value' are incompatible.
+        Property 'claim' is missing in type '{ text: string; type: "percentage" | "dollar_amount" | "multiplier" | "absolute_statement" | "time_metric"; classification: "verified" | "unclassified" | "estimated" | "illustrative" | "hypothetical"; severity: "low" | ... 1 more ... | "high"; requires_evidence: boolean; }' but required in type 'Claim'.
+server/agent/mcp/unified-gravito.ts(623,56): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(predicate: (value: { text: string; type: "percentage" | "dollar_amount" | "multiplier" | "absolute_statement" | "time_metric"; classification: "verified" | "unclassified" | "estimated" | "illustrative" | "hypothetical"; severity: "low" | ... 1 more ... | "high"; requires_evidence: boolean; }, index: number, array: { ...; }[]) => value is { ...; }, thisArg?: any): { ...; }[]', gave the following error.
+    Argument of type '(c: Claim) => boolean' is not assignable to parameter of type '(value: { text: string; type: "percentage" | "dollar_amount" | "multiplier" | "absolute_statement" | "time_metric"; classification: "verified" | "unclassified" | "estimated" | "illustrative" | "hypothetical"; severity: "low" | ... 1 more ... | "high"; requires_evidence: boolean; }, index: number, array: { ...; }[]) ...'.
+      Types of parameters 'c' and 'value' are incompatible.
+        Property 'claim' is missing in type '{ text: string; type: "percentage" | "dollar_amount" | "multiplier" | "absolute_statement" | "time_metric"; classification: "verified" | "unclassified" | "estimated" | "illustrative" | "hypothetical"; severity: "low" | ... 1 more ... | "high"; requires_evidence: boolean; }' but required in type 'Claim'.
+  Overload 2 of 2, '(predicate: (value: { text: string; type: "percentage" | "dollar_amount" | "multiplier" | "absolute_statement" | "time_metric"; classification: "verified" | "unclassified" | "estimated" | "illustrative" | "hypothetical"; severity: "low" | ... 1 more ... | "high"; requires_evidence: boolean; }, index: number, array: { ...; }[]) => unknown, thisArg?: any): { ...; }[]', gave the following error.
+    Argument of type '(c: Claim) => boolean' is not assignable to parameter of type '(value: { text: string; type: "percentage" | "dollar_amount" | "multiplier" | "absolute_statement" | "time_metric"; classification: "verified" | "unclassified" | "estimated" | "illustrative" | "hypothetical"; severity: "low" | ... 1 more ... | "high"; requires_evidence: boolean; }, index: number, array: { ...; }[]) ...'.
+      Types of parameters 'c' and 'value' are incompatible.
+        Property 'claim' is missing in type '{ text: string; type: "percentage" | "dollar_amount" | "multiplier" | "absolute_statement" | "time_metric"; classification: "verified" | "unclassified" | "estimated" | "illustrative" | "hypothetical"; severity: "low" | ... 1 more ... | "high"; requires_evidence: boolean; }' but required in type 'Claim'.
+server/agent/mcp/unified-gravito.ts(668,31): error TS2352: Conversion of type '{ abstraction_score: number; abstract_phrases: { phrase: string; suggestion: string; }[]; overall_clarity: number; gravito_run_id: string; }' to type 'AbstractionResult' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Property 'abstraction_level' is missing in type '{ abstraction_score: number; abstract_phrases: { phrase: string; suggestion: string; }[]; overall_clarity: number; gravito_run_id: string; }' but required in type 'AbstractionResult'.
+server/agent/mcp/unified-gravito.ts(694,30): error TS2352: Conversion of type '{ perceived_tone: string; perceived_intent: string; emotional_response: string; trust_score: number; clarity_score: number; suggestions: string[]; gravito_run_id: string; }' to type 'PerceptionResult' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Property 'consensus_score' is missing in type '{ perceived_tone: string; perceived_intent: string; emotional_response: string; trust_score: number; clarity_score: number; suggestions: string[]; gravito_run_id: string; }' but required in type 'PerceptionResult'.
+server/agent/mcp/unified-gravito.ts(726,10): error TS2352: Conversion of type '{ heatmap: { surface: string; risk_level: string; score: number; trend: string; }[]; period_days: number; gravito_run_id: string; }' to type 'RiskHeatmapResult' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Property 'total_blocks' is missing in type '{ heatmap: { surface: string; risk_level: string; score: number; trend: string; }[]; period_days: number; gravito_run_id: string; }' but required in type 'RiskHeatmapResult'.
+server/agent/mcp/unified-gravito.ts(728,17): error TS2352: Conversion of type '{ heatmap: { surface: string; risk_level: string; score: number; trend: string; }[]; period_days: number; gravito_run_id: string; }' to type 'RiskHeatmapResult' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Property 'total_blocks' is missing in type '{ heatmap: { surface: string; risk_level: string; score: number; trend: string; }[]; period_days: number; gravito_run_id: string; }' but required in type 'RiskHeatmapResult'.
+server/agent/mcp/unified-gravito.ts(734,27): error TS2352: Conversion of type '{ recorded: boolean; outcome_id: string; gravito_run_id: string; }' to type 'RecordOutcomeResult' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Property 'event_id' is missing in type '{ recorded: boolean; outcome_id: string; gravito_run_id: string; }' but required in type 'RecordOutcomeResult'.
+server/agent/mcp/unified-tool-bridge.ts(885,35): error TS2339: Property 'split' does not exist on type '{}'.
+server/agent/mcp/unified-tool-bridge.ts(912,35): error TS2339: Property 'split' does not exist on type '{}'.
+server/agent/mcp/unified-tool-bridge.ts(943,44): error TS2339: Property 'match' does not exist on type '{}'.
+server/agent/mcp/unified-tool-bridge.ts(944,42): error TS2339: Property 'match' does not exist on type '{}'.
+server/agent/mcp/unified-tool-bridge.ts(1001,35): error TS2339: Property 'split' does not exist on type '{}'.
+server/agent/mcp/unified-tool-bridge.ts(1070,57): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'string'.
+server/agent/mcp/unified-tool-bridge.ts(1071,50): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'string'.
+server/agent/mcp/unified-tool-bridge.ts(1087,42): error TS2339: Property 'toLowerCase' does not exist on type '{}'.
+server/agents/website-operator.ts(494,5): error TS2322: Type 'null' is not assignable to type 'string'.
+server/behavioral-profiler.ts(2,20): error TS2307: Cannot find module './_core/db' or its corresponding type declarations.
+server/behavioral-profiler.ts(5,26): error TS2345: Argument of type '"behavioral-profiler"' is not assignable to parameter of type 'LogDomain'.
+server/claims/router.ts(21,90): error TS2551: Property 'governanceClaims' does not exist on type 'typeof import("/home/user/exp0007-arm/drizzle/schema")'. Did you mean 'governanceScans'?
+server/claims/router.ts(51,17): error TS2339: Property 'governanceClaims' does not exist on type 'typeof import("/home/user/exp0007-arm/drizzle/schema")'.
+server/claims/router.ts(71,17): error TS2339: Property 'governanceClaims' does not exist on type 'typeof import("/home/user/exp0007-arm/drizzle/schema")'.
+server/claims/router.ts(85,17): error TS2339: Property 'governanceClaims' does not exist on type 'typeof import("/home/user/exp0007-arm/drizzle/schema")'.
+server/copilot/batch-page-updater.ts(147,98): error TS18046: 'error' is of type 'unknown'.
+server/copilot/batch-page-updater.ts(257,15): error TS18046: 'error' is of type 'unknown'.
+server/copilot/brand-truth-bridge.ts(95,9): error TS18046: 'p' is of type 'unknown'.
+server/copilot/brand-truth-bridge.ts(95,28): error TS18046: 'p' is of type 'unknown'.
+server/copilot/brand-truth-bridge.ts(95,69): error TS18046: 'p' is of type 'unknown'.
+server/copilot/copilot-router.ts(411,11): error TS2322: Type 'ConfusionRisk[]' is not assignable to type '{ [key: string]: unknown; severity: string; }[]'.
+  Type 'ConfusionRisk' is not assignable to type '{ [key: string]: unknown; severity: string; }'.
+    Index signature for type 'string' is missing in type 'ConfusionRisk'.
+server/copilot/copilot-service.ts(217,16): error TS2322: Type 'unknown' is not assignable to type 'string'.
+server/copilot/copilot-service.ts(252,52): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'string'.
+server/copilot/copilot-service.ts(276,23): error TS18046: 'content' is of type 'unknown'.
+server/copilot/copilot-service.ts(277,48): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'string'.
+server/copilot/copilot-service.ts(297,7): error TS2322: Type 'unknown' is not assignable to type 'string'.
+server/copilot/site-audit-service.ts(97,52): error TS18046: 'error' is of type 'unknown'.
+server/cron/cron-router.ts(607,7): error TS2322: Type 'ConfusionRisk[]' is not assignable to type '{ [key: string]: unknown; severity: string; }[]'.
+  Type 'ConfusionRisk' is not assignable to type '{ [key: string]: unknown; severity: string; }'.
+    Index signature for type 'string' is missing in type 'ConfusionRisk'.
+server/cron/cron-router.ts(1138,68): error TS2345: Argument of type '{}' is not assignable to parameter of type 'DiscoveryConfigData'.
+  Type '{}' is missing the following properties from type 'DiscoveryConfigData': customerId, adapters, coverageThresholds, exclusionPatterns
+server/cron/cron-router.ts(1233,58): error TS2345: Argument of type '"coverage_drop"' is not assignable to parameter of type '"manual" | "scheduled"'.
+server/cron/internal-scheduler.ts(17,32): error TS2307: Cannot find module '../db/types' or its corresponding type declarations.
+server/cron/internal-scheduler.ts(194,39): error TS2352: Conversion of type '{ score: number; totalIssues: number; issues: StructuralIssue[]; breakdown: Record<string, number>; surfaceBreakdown: Record<string, { score: number; issues: number; }>; }' to type '{ surfaceScores?: Record<string, number> | undefined; surfaceBreakdown?: Record<string, number> | undefined; }' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Types of property 'surfaceBreakdown' are incompatible.
+    Type 'Record<string, { score: number; issues: number; }>' is not comparable to type 'Record<string, number>'.
+      'string' index signatures are incompatible.
+        Type '{ score: number; issues: number; }' is not comparable to type 'number'.
+server/cron/internal-scheduler.ts(194,154): error TS2352: Conversion of type '{ score: number; totalIssues: number; issues: StructuralIssue[]; breakdown: Record<string, number>; surfaceBreakdown: Record<string, { score: number; issues: number; }>; }' to type '{ surfaceScores?: Record<string, number> | undefined; surfaceBreakdown?: Record<string, number> | undefined; }' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Types of property 'surfaceBreakdown' are incompatible.
+    Type 'Record<string, { score: number; issues: number; }>' is not comparable to type 'Record<string, number>'.
+      'string' index signatures are incompatible.
+        Type '{ score: number; issues: number; }' is not comparable to type 'number'.
+server/cron/internal-scheduler.ts(213,54): error TS2352: Conversion of type '{ score: number; totalIssues: number; issues: StructuralIssue[]; breakdown: Record<string, number>; surfaceBreakdown: Record<string, { score: number; issues: number; }>; }' to type '{ surfaceScores?: Record<string, number> | undefined; surfaceBreakdown?: Record<string, number> | undefined; }' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Types of property 'surfaceBreakdown' are incompatible.
+    Type 'Record<string, { score: number; issues: number; }>' is not comparable to type 'Record<string, number>'.
+      'string' index signatures are incompatible.
+        Type '{ score: number; issues: number; }' is not comparable to type 'number'.
+server/cron/internal-scheduler.ts(213,169): error TS2352: Conversion of type '{ score: number; totalIssues: number; issues: StructuralIssue[]; breakdown: Record<string, number>; surfaceBreakdown: Record<string, { score: number; issues: number; }>; }' to type '{ surfaceScores?: Record<string, number> | undefined; surfaceBreakdown?: Record<string, number> | undefined; }' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Types of property 'surfaceBreakdown' are incompatible.
+    Type 'Record<string, { score: number; issues: number; }>' is not comparable to type 'Record<string, number>'.
+      'string' index signatures are incompatible.
+        Type '{ score: number; issues: number; }' is not comparable to type 'number'.
+server/deployment/autonomous-experiment-monitor.ts(6,26): error TS2345: Argument of type '"experiment-monitor"' is not assignable to parameter of type 'LogDomain'.
+server/deployment/autonomous-experiment-monitor.ts(84,88): error TS2554: Expected 1 arguments, but got 2.
+server/deployment/autonomous-loop-orchestrator.ts(278,34): error TS2551: Property 'running' does not exist on type '{ isRunning: boolean; currentCycleId: string | null; totalCycles: number; totalFindings: number; consecutiveFailures: number; startedAt: number | null; lastCycleAt: number | null; nextCycleAt: number | null; config: ReviewSchedulerConfig; }'. Did you mean 'isRunning'?
+server/deployment/autonomous-loop-orchestrator.ts(279,34): error TS2339: Property 'lastReviewAt' does not exist on type '{ totalCycles: number; totalFindings: number; averageScore: number; averageDuration: number; findingsByCategory: Record<string, number>; findingsBySeverity: Record<string, number>; successRate: number; }'.
+server/deployment/autonomous-loop-orchestrator.ts(280,34): error TS2339: Property 'totalReviews' does not exist on type '{ totalCycles: number; totalFindings: number; averageScore: number; averageDuration: number; findingsByCategory: Record<string, number>; findingsBySeverity: Record<string, number>; successRate: number; }'.
+server/deployment/closed-loop-actions.ts(225,9): error TS2367: This comparison appears to be unintentional because the types 'RolloutStatus' and '"active"' have no overlap.
+server/deployment/closed-loop-actions.ts(226,18): error TS2339: Property 'pause' does not exist on type 'ProductionRolloutController'.
+server/deployment/closed-loop-actions.ts(254,9): error TS2367: This comparison appears to be unintentional because the types 'RolloutStatus' and '"active"' have no overlap.
+server/deployment/cms-content-layer.ts(76,26): error TS18047: 'db' is possibly 'null'.
+server/deployment/cms-content-layer.ts(79,11): error TS18047: 'db' is possibly 'null'.
+server/deployment/cms-content-layer.ts(87,21): error TS18047: 'db' is possibly 'null'.
+server/deployment/cms-content-layer.ts(93,9): error TS18047: 'db' is possibly 'null'.
+server/deployment/cms-content-layer.ts(104,19): error TS18047: 'db' is possibly 'null'.
+server/deployment/cms-content-layer.ts(115,24): error TS18047: 'db' is possibly 'null'.
+server/deployment/cms-content-layer.ts(131,13): error TS18047: 'db' is possibly 'null'.
+server/deployment/cms-content-layer.ts(145,11): error TS18047: 'db' is possibly 'null'.
+server/deployment/cms-content-layer.ts(154,11): error TS18047: 'db' is possibly 'null'.
+server/deployment/cms-content-layer.ts(163,11): error TS18047: 'db' is possibly 'null'.
+server/deployment/cms-content-layer.ts(186,24): error TS18047: 'db' is possibly 'null'.
+server/deployment/cms-content-layer.ts(189,13): error TS18047: 'db' is possibly 'null'.
+server/deployment/deployment-persistence.ts(21,11): error TS18047: 'db' is possibly 'null'.
+server/deployment/deployment-persistence.ts(40,18): error TS18047: 'db' is possibly 'null'.
+server/deployment/deployment-persistence.ts(47,21): error TS18047: 'db' is possibly 'null'.
+server/deployment/deployment-persistence.ts(64,11): error TS18047: 'db' is possibly 'null'.
+server/deployment/deployment-persistence.ts(83,18): error TS18047: 'db' is possibly 'null'.
+server/deployment/deployment-persistence.ts(90,18): error TS18047: 'db' is possibly 'null'.
+server/deployment/deployment-persistence.ts(97,11): error TS18047: 'db' is possibly 'null'.
+server/deployment/deployment-persistence.ts(116,18): error TS18047: 'db' is possibly 'null'.
+server/deployment/deployment-persistence.ts(130,11): error TS18047: 'db' is possibly 'null'.
+server/deployment/deployment-persistence.ts(147,18): error TS18047: 'db' is possibly 'null'.
+server/deployment/deployment-persistence.ts(156,7): error TS18047: 'db' is possibly 'null'.
+server/deployment/deployment-persistence.ts(157,7): error TS18047: 'db' is possibly 'null'.
+server/deployment/deployment-persistence.ts(158,7): error TS18047: 'db' is possibly 'null'.
+server/deployment/deployment-persistence.ts(159,7): error TS18047: 'db' is possibly 'null'.
+server/deployment/deployment-router.ts(235,34): error TS2554: Expected 2-3 arguments, but got 1.
+server/deployment/deployment-router.ts(236,67): error TS2345: Argument of type 'Record<number, unknown>' is not assignable to parameter of type 'Record<string, number>'.
+  'number' and 'string' index signatures are incompatible.
+    Type 'unknown' is not assignable to type 'number'.
+server/deployment/deployment-router.ts(447,19): error TS2554: Expected 2-3 arguments, but got 1.
+server/deployment/deployment-router.ts(450,49): error TS2345: Argument of type '{ id: string; type: "email" | "webhook" | "slack" | "sms" | "in_app"; name: string; enabled: boolean; minSeverity: "info" | "warning" | "critical"; maxPerHour: number; retryCount: number; retryDelayMs: number; settings: Record<...>; }' is not assignable to parameter of type 'ChannelConfig'.
+  Types of property 'settings' are incompatible.
+    Type 'Record<string, unknown>' is not assignable to type 'Record<string, string>'.
+      'string' index signatures are incompatible.
+        Type 'unknown' is not assignable to type 'string'.
+server/deployment/deployment-router.ts(464,21): error TS2554: Expected 2-3 arguments, but got 1.
+server/deployment/deployment-router.ts(468,80): error TS2345: Argument of type '{ name?: string | undefined; enabled?: boolean | undefined; minSeverity?: "info" | "warning" | "critical" | undefined; maxPerHour?: number | undefined; retryCount?: number | undefined; retryDelayMs?: number | undefined; settings?: Record<...> | undefined; }' is not assignable to parameter of type 'Partial<Omit<ChannelConfig, "type" | "id">>'.
+  Types of property 'settings' are incompatible.
+    Type 'Record<string, unknown> | undefined' is not assignable to type 'Record<string, string> | undefined'.
+      Type 'Record<string, unknown>' is not assignable to type 'Record<string, string>'.
+        'string' index signatures are incompatible.
+          Type 'unknown' is not assignable to type 'string'.
+server/deployment/deployment-router.ts(518,7): error TS2322: Type 'string' is not assignable to type 'number'.
+  Type 'string' is not assignable to type 'number'.
+server/deployment/deployment-router.ts(519,25): error TS2339: Property 'percentage' does not exist on type 'RolloutState'.
+server/deployment/deployment-router.ts(520,25): error TS2339: Property 'shadowMode' does not exist on type 'RolloutState'.
+server/deployment/deployment-router.ts(521,29): error TS2551: Property 'logAllRequests' does not exist on type 'RolloutState'. Did you mean 'totalRequests'?
+server/deployment/deployment-router.ts(522,30): error TS2339: Property 'totalRequests' does not exist on type '{ state: RolloutState; config: RolloutConfig; healthHistory: HealthCheckResult[]; recentEvents: RolloutEvent[]; requestSummary: { ...; }; }'.
+server/deployment/deployment-router.ts(523,35): error TS2339: Property 'newVersionRequests' does not exist on type '{ state: RolloutState; config: RolloutConfig; healthHistory: HealthCheckResult[]; recentEvents: RolloutEvent[]; requestSummary: { ...; }; }'.
+server/deployment/deployment-router.ts(524,35): error TS2339: Property 'healthChecksPassed' does not exist on type '{ state: RolloutState; config: RolloutConfig; healthHistory: HealthCheckResult[]; recentEvents: RolloutEvent[]; requestSummary: { ...; }; }'.
+server/deployment/deployment-router.ts(525,35): error TS2339: Property 'healthChecksFailed' does not exist on type '{ state: RolloutState; config: RolloutConfig; healthHistory: HealthCheckResult[]; recentEvents: RolloutEvent[]; requestSummary: { ...; }; }'.
+server/deployment/deployment-router.ts(526,36): error TS2339: Property 'consecutiveFailures' does not exist on type '{ state: RolloutState; config: RolloutConfig; healthHistory: HealthCheckResult[]; recentEvents: RolloutEvent[]; requestSummary: { ...; }; }'.
+server/deployment/rollout-persistence.ts(80,11): error TS18047: 'db' is possibly 'null'.
+server/deployment/rollout-persistence.ts(102,28): error TS18047: 'db' is possibly 'null'.
+server/deployment/rollout-persistence.ts(140,22): error TS18047: 'db' is possibly 'null'.
+server/deployment/rollout-persistence.ts(179,28): error TS18047: 'db' is possibly 'null'.
+server/deployment/rollout-persistence.ts(197,22): error TS18047: 'db' is possibly 'null'.
+server/deployment/rollout-persistence.ts(223,15): error TS18047: 'db' is possibly 'null'.
+server/deployment/rollout-persistence.ts(254,27): error TS18047: 'db' is possibly 'null'.
+server/deployment/rollout-persistence.ts(267,27): error TS18047: 'db' is possibly 'null'.
+server/deployment/round4plus-features.test.ts(40,7): error TS2353: Object literal may only specify known properties, and 'headerName' does not exist in type 'RolloutMiddlewareOptions'.
+server/deployment/round6-features.test.ts(143,7): error TS2353: Object literal may only specify known properties, and 'days' does not exist in type 'QuietHoursConfig'.
+server/distribution/router.ts(75,11): error TS2353: Object literal may only specify known properties, and 'createdAt' does not exist in type 'MarketplaceListing'.
+server/distribution/router.ts(136,11): error TS2353: Object literal may only specify known properties, and 'createdAt' does not exist in type 'DistributionAgent'.
+server/dogfooding/complete-site-verification.ts(253,39): error TS2339: Property 'match' does not exist on type '{}'.
+server/dogfooding/dogfooding-router.ts(175,33): error TS2322: Type 'Date' is not assignable to type 'number | SQL<unknown> | PgColumn<ColumnBaseConfig<ColumnDataType, string>, {}, {}> | null | undefined'.
+server/dogfooding/dogfooding-router.ts(213,9): error TS2322: Type 'Date' is not assignable to type 'number | SQL<unknown> | PgColumn<ColumnBaseConfig<ColumnDataType, string>, {}, {}> | null | undefined'.
+server/dogfooding/dogfooding-router.ts(234,9): error TS2322: Type 'Date' is not assignable to type 'number | SQL<unknown> | PgColumn<ColumnBaseConfig<ColumnDataType, string>, {}, {}> | null | undefined'.
+server/dogfooding/dogfooding-router.ts(298,10): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(value: { title: string | SQL<unknown> | Placeholder<string, any>; description: string | SQL<unknown> | Placeholder<string, any>; detectedAt: number | SQL<unknown> | Placeholder<...>; ... 16 more ...; duplicateOfId?: number | ... 3 more ... | undefined; }): PgInsertBase<...>', gave the following error.
+    Type 'Date' is not assignable to type 'number | SQL<unknown> | Placeholder<string, any>'.
+  Overload 2 of 2, '(values: { title: string | SQL<unknown> | Placeholder<string, any>; description: string | SQL<unknown> | Placeholder<string, any>; detectedAt: number | SQL<unknown> | Placeholder<...>; ... 16 more ...; duplicateOfId?: number | ... 3 more ... | undefined; }[]): PgInsertBase<...>', gave the following error.
+    Object literal may only specify known properties, and 'runId' does not exist in type '{ title: string | SQL<unknown> | Placeholder<string, any>; description: string | SQL<unknown> | Placeholder<string, any>; detectedAt: number | SQL<unknown> | Placeholder<...>; ... 16 more ...; duplicateOfId?: number | ... 3 more ... | undefined; }[]'.
+server/dogfooding/dogfooding-router.ts(311,10): error TS2551: Property '$returningId' does not exist on type 'PgInsertBase<PgTableWithColumns<{ name: "detected_issues"; schema: undefined; columns: { id: PgColumn<{ name: "id"; tableName: "detected_issues"; dataType: "number"; columnType: "PgInteger"; data: number; driverParam: string | number; ... 8 more ...; generated: undefined; }, {}, {}>; ... 19 more ...; updatedAt: PgCo...'. Did you mean 'returning'?
+server/dogfooding/dogfooding-router.ts(347,10): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(value: { title: string | SQL<unknown> | Placeholder<string, any>; description: string | SQL<unknown> | Placeholder<string, any>; generatedAt: number | SQL<...> | Placeholder<...>; ... 28 more ...; previousFixId?: number | ... 3 more ... | undefined; }): PgInsertBase<...>', gave the following error.
+    Object literal may only specify known properties, and 'filePath' does not exist in type '{ title: string | SQL<unknown> | Placeholder<string, any>; description: string | SQL<unknown> | Placeholder<string, any>; generatedAt: number | SQL<unknown> | Placeholder<...>; ... 28 more ...; previousFixId?: number | ... 3 more ... | undefined; }'.
+  Overload 2 of 2, '(values: { title: string | SQL<unknown> | Placeholder<string, any>; description: string | SQL<unknown> | Placeholder<string, any>; generatedAt: number | SQL<...> | Placeholder<...>; ... 28 more ...; previousFixId?: number | ... 3 more ... | undefined; }[]): PgInsertBase<...>', gave the following error.
+    Object literal may only specify known properties, and 'runId' does not exist in type '{ title: string | SQL<unknown> | Placeholder<string, any>; description: string | SQL<unknown> | Placeholder<string, any>; generatedAt: number | SQL<unknown> | Placeholder<...>; ... 28 more ...; previousFixId?: number | ... 3 more ... | undefined; }[]'.
+server/dogfooding/dogfooding-router.ts(357,10): error TS2551: Property '$returningId' does not exist on type 'PgInsertBase<PgTableWithColumns<{ name: "generated_fixes"; schema: undefined; columns: { id: PgColumn<{ name: "id"; tableName: "generated_fixes"; dataType: "number"; columnType: "PgInteger"; data: number; driverParam: string | number; ... 8 more ...; generated: undefined; }, {}, {}>; ... 31 more ...; updatedAt: PgCo...'. Did you mean 'returning'?
+server/dogfooding/dogfooding-router.ts(388,35): error TS2353: Object literal may only specify known properties, and 'appliedAt' does not exist in type '{ title?: string | SQL<unknown> | PgColumn<ColumnBaseConfig<ColumnDataType, string>, {}, {}> | undefined; description?: string | SQL<...> | PgColumn<...> | undefined; ... 29 more ...; previousFixId?: number | ... 3 more ... | undefined; }'.
+server/dogfooding/dogfooding-router.ts(413,41): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(value: { metricName: string | SQL<unknown> | Placeholder<string, any>; runId: number | SQL<unknown> | Placeholder<string, any>; issueId: number | SQL<unknown> | Placeholder<...>; ... 22 more ...; analysisNotes?: string | ... 3 more ... | undefined; }): PgInsertBase<...>', gave the following error.
+    Object literal may only specify known properties, and 'metricsBefore' does not exist in type '{ metricName: string | SQL<unknown> | Placeholder<string, any>; runId: number | SQL<unknown> | Placeholder<string, any>; issueId: number | SQL<unknown> | Placeholder<...>; ... 22 more ...; analysisNotes?: string | ... 3 more ... | undefined; }'.
+  Overload 2 of 2, '(values: { metricName: string | SQL<unknown> | Placeholder<string, any>; runId: number | SQL<unknown> | Placeholder<string, any>; issueId: number | SQL<unknown> | Placeholder<...>; ... 22 more ...; analysisNotes?: string | ... 3 more ... | undefined; }[]): PgInsertBase<...>', gave the following error.
+    Object literal may only specify known properties, and 'runId' does not exist in type '{ metricName: string | SQL<unknown> | Placeholder<string, any>; runId: number | SQL<unknown> | Placeholder<string, any>; issueId: number | SQL<unknown> | Placeholder<...>; ... 22 more ...; analysisNotes?: string | ... 3 more ... | undefined; }[]'.
+server/dogfooding/dogfooding-router.ts(440,39): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(value: { title: string | SQL<unknown> | Placeholder<string, any>; description: string | SQL<unknown> | Placeholder<string, any>; confidence: number | SQL<unknown> | Placeholder<...>; ... 21 more ...; relatedInsightIds?: unknown; }): PgInsertBase<...>', gave the following error.
+    Type 'Date' is not assignable to type 'number | SQL<unknown> | Placeholder<string, any>'.
+  Overload 2 of 2, '(values: { title: string | SQL<unknown> | Placeholder<string, any>; description: string | SQL<unknown> | Placeholder<string, any>; confidence: number | SQL<unknown> | Placeholder<...>; ... 21 more ...; relatedInsightIds?: unknown; }[]): PgInsertBase<...>', gave the following error.
+    Object literal may only specify known properties, and 'insightType' does not exist in type '{ title: string | SQL<unknown> | Placeholder<string, any>; description: string | SQL<unknown> | Placeholder<string, any>; confidence: number | SQL<unknown> | Placeholder<...>; ... 21 more ...; relatedInsightIds?: unknown; }[]'.
+server/dogfooding/dogfooding-router.ts(473,22): error TS2352: Conversion of type 'User' to type 'UserContext' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Types of property 'id' are incompatible.
+    Type 'number' is not comparable to type 'string'.
+server/dogfooding/dogfooding-router.ts(512,12): error TS2551: Property '$returningId' does not exist on type 'PgInsertBase<PgTableWithColumns<{ name: "dogfooding_runs"; schema: undefined; columns: { id: PgColumn<{ name: "id"; tableName: "dogfooding_runs"; dataType: "number"; columnType: "PgInteger"; data: number; driverParam: string | number; ... 8 more ...; generated: undefined; }, {}, {}>; ... 16 more ...; updatedAt: PgCo...'. Did you mean 'returning'?
+server/dogfooding/dogfooding-router.ts(632,22): error TS2352: Conversion of type 'User' to type 'UserContext' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Types of property 'id' are incompatible.
+    Type 'number' is not comparable to type 'string'.
+server/dogfooding/dogfooding-router.ts(645,39): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(value: { title: string | SQL<unknown> | Placeholder<string, any>; description: string | SQL<unknown> | Placeholder<string, any>; eventType: string | SQL<unknown> | Placeholder<...>; ... 21 more ...; relatedSafetyEventIds?: unknown; }): PgInsertBase<...>', gave the following error.
+    Type 'Date' is not assignable to type 'number | SQL<unknown> | Placeholder<string, any>'.
+  Overload 2 of 2, '(values: { title: string | SQL<unknown> | Placeholder<string, any>; description: string | SQL<unknown> | Placeholder<string, any>; eventType: string | SQL<unknown> | Placeholder<...>; ... 21 more ...; relatedSafetyEventIds?: unknown; }[]): PgInsertBase<...>', gave the following error.
+    Object literal may only specify known properties, and 'eventType' does not exist in type '{ title: string | SQL<unknown> | Placeholder<string, any>; description: string | SQL<unknown> | Placeholder<string, any>; eventType: string | SQL<unknown> | Placeholder<...>; ... 21 more ...; relatedSafetyEventIds?: unknown; }[]'.
+server/dogfooding/dogfooding-router.ts(666,15): error TS2322: Type 'Date' is not assignable to type 'number | SQL<unknown> | PgColumn<ColumnBaseConfig<ColumnDataType, string>, {}, {}> | null | undefined'.
+server/dogfooding/dogfooding-router.ts(694,22): error TS2352: Conversion of type 'User' to type 'UserContext' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Types of property 'id' are incompatible.
+    Type 'number' is not comparable to type 'string'.
+server/dogfooding/dogfooding-router.ts(753,9): error TS2322: Type '{ id: number; runId: number; category: string; severity: string | null; title: string; description: string; filePath: string | null; lineNumber: null; evidence: unknown; status: string; createdAt: Date; }[]' is not assignable to type 'DetectedIssue[]'.
+  Type '{ id: number; runId: number; category: string; severity: string | null; title: string; description: string; filePath: string | null; lineNumber: null; evidence: unknown; status: string; createdAt: Date; }' is not assignable to type 'DetectedIssue'.
+    Types of property 'severity' are incompatible.
+      Type 'string | null' is not assignable to type 'string'.
+        Type 'null' is not assignable to type 'string'.
+server/dogfooding/dogfooding-router.ts(796,25): error TS2339: Property 'filePath' does not exist on type '{ id: number; runId: number; issueId: number; status: string; fixType: string; title: string; description: string; reasoning: string; affectedFiles: unknown; diffPatch: string; generatedCode: unknown; testsPassed: boolean | null; ... 20 more ...; updatedAt: Date; }'.
+server/dogfooding/dogfooding-router.ts(797,21): error TS2339: Property 'diff' does not exist on type '{ id: number; runId: number; issueId: number; status: string; fixType: string; title: string; description: string; reasoning: string; affectedFiles: unknown; diffPatch: string; generatedCode: unknown; testsPassed: boolean | null; ... 20 more ...; updatedAt: Date; }'.
+server/dogfooding/dogfooding-router.ts(799,27): error TS2339: Property 'confidence' does not exist on type '{ id: number; runId: number; issueId: number; status: string; fixType: string; title: string; description: string; reasoning: string; affectedFiles: unknown; diffPatch: string; generatedCode: unknown; testsPassed: boolean | null; ... 20 more ...; updatedAt: Date; }'.
+server/dogfooding/dogfooding-router.ts(801,26): error TS2339: Property 'appliedAt' does not exist on type '{ id: number; runId: number; issueId: number; status: string; fixType: string; title: string; description: string; reasoning: string; affectedFiles: unknown; diffPatch: string; generatedCode: unknown; testsPassed: boolean | null; ... 20 more ...; updatedAt: Date; }'.
+server/dogfooding/dogfooding-router.ts(801,51): error TS2339: Property 'appliedAt' does not exist on type '{ id: number; runId: number; issueId: number; status: string; fixType: string; title: string; description: string; reasoning: string; affectedFiles: unknown; diffPatch: string; generatedCode: unknown; testsPassed: boolean | null; ... 20 more ...; updatedAt: Date; }'.
+server/dogfooding/dogfooding-router.ts(802,29): error TS2339: Property 'rollbackData' does not exist on type '{ id: number; runId: number; issueId: number; status: string; fixType: string; title: string; description: string; reasoning: string; affectedFiles: unknown; diffPatch: string; generatedCode: unknown; testsPassed: boolean | null; ... 20 more ...; updatedAt: Date; }'.
+server/dogfooding/dogfooding-router.ts(825,22): error TS2352: Conversion of type 'User' to type 'UserContext' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Types of property 'id' are incompatible.
+    Type 'number' is not comparable to type 'string'.
+server/dogfooding/dogfooding-router.ts(846,37): error TS2353: Object literal may only specify known properties, and 'appliedAt' does not exist in type '{ title?: string | SQL<unknown> | PgColumn<ColumnBaseConfig<ColumnDataType, string>, {}, {}> | undefined; description?: string | SQL<...> | PgColumn<...> | undefined; ... 29 more ...; previousFixId?: number | ... 3 more ... | undefined; }'.
+server/dogfooding/dogfooding-router.ts(871,22): error TS2352: Conversion of type 'User' to type 'UserContext' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Types of property 'id' are incompatible.
+    Type 'number' is not comparable to type 'string'.
+server/dogfooding/dogfooding-router.ts(891,35): error TS2339: Property 'rollbackData' does not exist on type '{ id: number; runId: number; issueId: number; status: string; fixType: string; title: string; description: string; reasoning: string; affectedFiles: unknown; diffPatch: string; generatedCode: unknown; testsPassed: boolean | null; ... 20 more ...; updatedAt: Date; }'.
+server/dogfooding/orchestrator.ts(637,13): error TS2322: Type '{}' is not assignable to type 'boolean'.
+server/dogfooding/surface-aware-router.ts(228,52): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'DogfoodingMode'.
+server/dx/router.ts(84,7): error TS2739: Type '{ p50_ms: number; p90_ms: number; }' is missing the following properties from type '{ p50_ms: number; p90_ms: number; p99_ms: number; max_ms: number; }': p99_ms, max_ms
+server/emotional-geometry-runtime/alert-analytics.ts(16,26): error TS2345: Argument of type '"alert-analytics"' is not assignable to parameter of type 'LogDomain'.
+server/emotional-geometry-runtime/alert-analytics.ts(94,17): error TS18047: 'db' is possibly 'null'.
+server/emotional-geometry-runtime/alert-analytics.ts(156,28): error TS18047: 'db' is possibly 'null'.
+server/emotional-geometry-runtime/alert-analytics.ts(164,36): error TS18047: 'db' is possibly 'null'.
+server/emotional-geometry-runtime/alert-analytics.ts(172,26): error TS18047: 'db' is possibly 'null'.
+server/emotional-geometry-runtime/alert-analytics.ts(182,30): error TS18047: 'db' is possibly 'null'.
+server/emotional-geometry-runtime/alert-analytics.ts(191,29): error TS18047: 'db' is possibly 'null'.
+server/emotional-geometry-runtime/alert-analytics.ts(212,29): error TS18047: 'db' is possibly 'null'.
+server/emotional-geometry-runtime/alert-analytics.ts(294,37): error TS18047: 'db' is possibly 'null'.
+server/emotional-geometry-runtime/alert-analytics.ts(314,13): error TS18047: 'db' is possibly 'null'.
+server/emotional-geometry-runtime/alert-analytics.ts(335,11): error TS18047: 'db' is possibly 'null'.
+server/emotional-geometry-runtime/alert-analytics.ts(394,33): error TS18047: 'db' is possibly 'null'.
+server/emotional-geometry-runtime/alert-analytics.ts(398,24): error TS18047: 'db' is possibly 'null'.
+server/emotional-geometry-runtime/alert-analytics.ts(436,30): error TS18047: 'db' is possibly 'null'.
+server/emotional-geometry-runtime/alert-analytics.ts(443,26): error TS18047: 'db' is possibly 'null'.
+server/emotional-geometry-runtime/alert-analytics.ts(501,11): error TS18047: 'db' is possibly 'null'.
+server/emotional-geometry-runtime/alert-analytics.ts(526,11): error TS18047: 'db' is possibly 'null'.
+server/emotional-geometry-runtime/detection/WarpShellMonitor.ts(36,41): error TS2345: Argument of type '"warp-shell-monitor"' is not assignable to parameter of type 'LogDomain'.
+server/emotional-geometry-runtime/escalation-engine.ts(32,26): error TS2345: Argument of type '"escalation-engine"' is not assignable to parameter of type 'LogDomain'.
+server/emotional-geometry-runtime/escalation-engine.ts(231,11): error TS18047: 'db' is possibly 'null'.
+server/emotional-geometry-runtime/escalation-engine.ts(236,11): error TS18047: 'db' is possibly 'null'.
+server/emotional-geometry-runtime/escalation-engine.ts(322,33): error TS18047: 'db' is possibly 'null'.
+server/emotional-geometry-runtime/escalation-engine.ts(446,24): error TS18047: 'db' is possibly 'null'.
+server/emotional-geometry-runtime/escalation-engine.ts(478,28): error TS18047: 'db' is possibly 'null'.
+server/emotional-geometry-runtime/escalation-engine.ts(508,11): error TS18047: 'db' is possibly 'null'.
+server/emotional-geometry-runtime/escalation-engine.ts(525,11): error TS18047: 'db' is possibly 'null'.
+server/emotional-geometry-runtime/escalation-engine.ts(540,17): error TS18047: 'db' is possibly 'null'.
+server/emotional-geometry-runtime/escalation-engine.ts(552,30): error TS18047: 'db' is possibly 'null'.
+server/emotional-geometry-runtime/geometry-alerting.ts(33,26): error TS2345: Argument of type '"geometry-alerting"' is not assignable to parameter of type 'LogDomain'.
+server/emotional-geometry-runtime/geometry-alerting.ts(202,24): error TS18047: 'db' is possibly 'null'.
+server/emotional-geometry-runtime/geometry-alerting.ts(252,13): error TS18047: 'db' is possibly 'null'.
+server/emotional-geometry-runtime/geometry-alerting.ts(257,15): error TS18047: 'db' is possibly 'null'.
+server/emotional-geometry-runtime/geometry-alerting.ts(260,15): error TS18047: 'db' is possibly 'null'.
+server/emotional-geometry-runtime/geometry-alerting.ts(274,11): error TS18047: 'db' is possibly 'null'.
+server/emotional-geometry-runtime/geometry-alerting.ts(332,28): error TS18047: 'db' is possibly 'null'.
+server/emotional-geometry-runtime/geometry-alerting.ts(567,11): error TS18047: 'db' is possibly 'null'.
+server/emotional-geometry-runtime/geometry-alerting.ts(957,24): error TS18047: 'db' is possibly 'null'.
+server/emotional-geometry-runtime/geometry-alerting.ts(1023,11): error TS18047: 'db' is possibly 'null'.
+server/emotional-geometry-runtime/geometry-alerting.ts(1074,26): error TS18047: 'db' is possibly 'null'.
+server/emotional-geometry-runtime/geometry-alerting.ts(1134,24): error TS18047: 'db' is possibly 'null'.
+server/emotional-geometry-runtime/geometry-alerting.ts(1162,28): error TS18047: 'db' is possibly 'null'.
+server/emotional-geometry-runtime/geometry-alerting.ts(1187,11): error TS18047: 'db' is possibly 'null'.
+server/emotional-geometry-runtime/geometry-alerting.ts(1204,11): error TS18047: 'db' is possibly 'null'.
+server/emotional-geometry-runtime/geometry-metrics.ts(340,5): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{ '0.5': number; '1': number; '2': number; '5': number; '10': number; '25': number; '50': number; '100': number; '+Inf': number; }'.
+  No index signature with a parameter of type 'string' was found on type '{ '0.5': number; '1': number; '2': number; '5': number; '10': number; '25': number; '50': number; '100': number; '+Inf': number; }'.
+server/emotional-geometry-runtime/manifold-session-state-accumulation.test.ts(172,72): error TS2352: Conversion of type 'number[]' to type 'ManifoldStateVector' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Target requires 5 element(s) but source may have fewer.
+server/emotional-geometry-runtime/manifold-session-state-accumulation.test.ts(173,72): error TS2352: Conversion of type 'number[]' to type 'ManifoldStateVector' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Target requires 5 element(s) but source may have fewer.
+server/emotional-geometry-runtime/session-persistence.ts(18,26): error TS2345: Argument of type '"geometry-session-persistence"' is not assignable to parameter of type 'LogDomain'.
+server/emotional-geometry-runtime/session-persistence.ts(57,26): error TS18047: 'db' is possibly 'null'.
+server/emotional-geometry-runtime/session-persistence.ts(66,13): error TS18047: 'db' is possibly 'null'.
+server/emotional-geometry-runtime/session-persistence.ts(90,30): error TS18047: 'db' is possibly 'null'.
+server/emotional-geometry-runtime/session-persistence.ts(121,9): error TS18047: 'db' is possibly 'null'.
+server/emotional-geometry-runtime/session-persistence.ts(154,9): error TS18047: 'db' is possibly 'null'.
+server/emotional-geometry-runtime/session-persistence.ts(299,11): error TS18047: 'db' is possibly 'null'.
+server/emotional-geometry-runtime/validation/calibrationMode.ts(337,13): error TS2339: Property 'fireAlert' does not exist on type 'typeof import("/home/user/exp0007-arm/server/emotional-geometry-runtime/geometry-alerting")'.
+server/emotional-geometry-runtime/validation/humanMapEvaluator.ts(204,27): error TS2352: Conversion of type 'HumanBenchmarkEntry' to type 'Record<string, unknown>' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Index signature for type 'string' is missing in type 'HumanBenchmarkEntry'.
+server/emotional-geometry-runtime/validation/invarianceEvaluator.ts(148,15): error TS2352: Conversion of type 'BaseDimensionsTrace' to type 'Record<string, number>' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Index signature for type 'string' is missing in type 'BaseDimensionsTrace'.
+server/emotional-geometry-runtime/validation/invarianceEvaluator.ts(152,15): error TS2352: Conversion of type 'DerivedDimensionsTrace' to type 'Record<string, number>' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Index signature for type 'string' is missing in type 'DerivedDimensionsTrace'.
+server/emotional-geometry-runtime/validation/invarianceEvaluator.ts(156,15): error TS2352: Conversion of type 'AdvancedFieldTrace' to type 'Record<string, number>' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Index signature for type 'string' is missing in type 'AdvancedFieldTrace'.
+server/emotional-geometry-runtime/validation/validationOrchestrator.ts(87,11): error TS2322: Type '{ version: string; description: string; emotionalMasses: string[]; intensityTiers: string[]; stimuli: ({ id: string; mass: string; intensity: string; prompt: string; expectedDominantDimensions: string[]; expectedValenceRange: number[]; adversarialNote?: undefined; } | { ...; })[]; metadata: { ...; }; }' is not assignable to type 'StimulusBattery'.
+  Types of property 'stimuli' are incompatible.
+    Type '({ id: string; mass: string; intensity: string; prompt: string; expectedDominantDimensions: string[]; expectedValenceRange: number[]; adversarialNote?: undefined; } | { id: string; mass: string; intensity: string; prompt: string; expectedDominantDimensions: string[]; expectedValenceRange: number[]; adversarialNote: ...' is not assignable to type 'StimulusPrompt[]'.
+      Type '{ id: string; mass: string; intensity: string; prompt: string; expectedDominantDimensions: string[]; expectedValenceRange: number[]; adversarialNote?: undefined; } | { id: string; mass: string; intensity: string; prompt: string; expectedDominantDimensions: string[]; expectedValenceRange: number[]; adversarialNote: s...' is not assignable to type 'StimulusPrompt'.
+        Type '{ id: string; mass: string; intensity: string; prompt: string; expectedDominantDimensions: string[]; expectedValenceRange: number[]; adversarialNote?: undefined; }' is not assignable to type 'StimulusPrompt'.
+          Types of property 'expectedValenceRange' are incompatible.
+            Type 'number[]' is not assignable to type '[number, number]'.
+              Target requires 2 element(s) but source may have fewer.
+server/emotional-geometry-runtime/validation/validationOrchestrator.ts(420,11): error TS2322: Type '{ version: string; description: string; emotionalMasses: string[]; intensityTiers: string[]; stimuli: ({ id: string; mass: string; intensity: string; prompt: string; expectedDominantDimensions: string[]; expectedValenceRange: number[]; adversarialNote?: undefined; } | { ...; })[]; metadata: { ...; }; }' is not assignable to type 'StimulusBattery'.
+  Types of property 'stimuli' are incompatible.
+    Type '({ id: string; mass: string; intensity: string; prompt: string; expectedDominantDimensions: string[]; expectedValenceRange: number[]; adversarialNote?: undefined; } | { id: string; mass: string; intensity: string; prompt: string; expectedDominantDimensions: string[]; expectedValenceRange: number[]; adversarialNote: ...' is not assignable to type 'StimulusPrompt[]'.
+      Type '{ id: string; mass: string; intensity: string; prompt: string; expectedDominantDimensions: string[]; expectedValenceRange: number[]; adversarialNote?: undefined; } | { id: string; mass: string; intensity: string; prompt: string; expectedDominantDimensions: string[]; expectedValenceRange: number[]; adversarialNote: s...' is not assignable to type 'StimulusPrompt'.
+        Type '{ id: string; mass: string; intensity: string; prompt: string; expectedDominantDimensions: string[]; expectedValenceRange: number[]; adversarialNote?: undefined; }' is not assignable to type 'StimulusPrompt'.
+          Types of property 'expectedValenceRange' are incompatible.
+            Type 'number[]' is not assignable to type '[number, number]'.
+              Target requires 2 element(s) but source may have fewer.
+server/governance-jet-engine.ts(400,7): error TS2322: Type 'string | (TextContent | ImageContent | FileContent)[] | null' is not assignable to type 'string | null'.
+  Type '(TextContent | ImageContent | FileContent)[]' is not assignable to type 'string'.
+server/governance/adapters/mcp-registry-integrity-adapter.ts(210,37): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'string'.
+server/governance/adapters/mcp-registry-integrity-adapter.ts(211,34): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'string'.
+server/governance/adapters/mcp-registry-integrity-adapter.ts(213,32): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'string'.
+server/governance/adapters/mcp-registry-integrity-adapter.ts(262,25): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'string'.
+server/governance/advanced-runtime-bridge.standalone-test.ts(6,3): error TS2305: Module '"../neurocosmology-runtime-advanced/feature-flags.ts"' has no exported member 'clearTenantRuntimeOverrides'.
+server/governance/advanced-runtime-bridge.standalone-test.ts(6,32): error TS2305: Module '"../neurocosmology-runtime-advanced/feature-flags.ts"' has no exported member 'setTenantRuntimeMode'.
+server/governance/advanced-runtime-bridge.ts(103,26): error TS2554: Expected 0 arguments, but got 1.
+server/governance/audit-trail-persistence.ts(27,15): error TS2614: Module '"../nervous-system/integrated-nervous-system"' has no exported member 'GovernanceRequest'. Did you mean to use 'import GovernanceRequest from "../nervous-system/integrated-nervous-system"' instead?
+server/governance/audit-trail-persistence.ts(27,34): error TS2614: Module '"../nervous-system/integrated-nervous-system"' has no exported member 'GovernanceResponse'. Did you mean to use 'import GovernanceResponse from "../nervous-system/integrated-nervous-system"' instead?
+server/governance/auto-fix.ts(84,17): error TS18046: 'r' is of type 'unknown'.
+server/governance/auto-fix.ts(125,19): error TS18046: 'r' is of type 'unknown'.
+server/governance/auto-fix.ts(126,21): error TS18046: 'r' is of type 'unknown'.
+server/governance/auto-fix.ts(154,16): error TS18046: 'r' is of type 'unknown'.
+server/governance/auto-fix.ts(155,18): error TS18046: 'r' is of type 'unknown'.
+server/governance/behavioral-correctness-audit.ts(537,49): error TS18046: 'error' is of type 'unknown'.
+server/governance/behavioral-correctness-audit.ts(540,17): error TS18046: 'error' is of type 'unknown'.
+server/governance/behavioral-correctness-audit.ts(595,39): error TS18046: 'error' is of type 'unknown'.
+server/governance/behavioral-correctness-audit.ts(627,22): error TS18046: 'error' is of type 'unknown'.
+server/governance/behavioral-correctness-audit.ts(630,33): error TS18046: 'error' is of type 'unknown'.
+server/governance/bridge-router.ts(129,30): error TS2345: Argument of type '"hmac-permissive"' is not assignable to parameter of type 'LogDomain'.
+server/governance/co-processor/review-health-telemetry.test.ts(82,76): error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
+server/governance/co-processor/session-log.ts(77,5): error TS2322: Type 'GravitoInvocationLog' is not assignable to type 'Record<string, unknown>'.
+  Index signature for type 'string' is missing in type 'GravitoInvocationLog'.
+server/governance/co-processor/session-log.ts(95,5): error TS2322: Type 'StageResult' is not assignable to type 'Record<string, unknown>'.
+  Index signature for type 'string' is missing in type 'StageResult'.
+server/governance/co-processor/session-log.ts(113,5): error TS2322: Type 'DriftEvent' is not assignable to type 'Record<string, unknown>'.
+  Index signature for type 'string' is missing in type 'DriftEvent'.
+server/governance/co-processor/session-log.ts(173,70): error TS18046: 'err' is of type 'unknown'.
+server/governance/co-processor/session-log.ts(198,65): error TS18046: 'err' is of type 'unknown'.
+server/governance/co-processor/session-log.ts(224,65): error TS18046: 'err' is of type 'unknown'.
+server/governance/co-processor/session-log.ts(260,73): error TS18046: 'err' is of type 'unknown'.
+server/governance/co-processor/session-log.ts(295,5): error TS2322: Type '{ sessionId: string; intent: {}; finalVerdict: {}; stageCount: {}; driftCount: {}; timestamp: number; }[]' is not assignable to type '{ sessionId: string; intent: string; finalVerdict: string; stageCount: number; driftCount: number; timestamp: number; }[]'.
+  Type '{ sessionId: string; intent: {}; finalVerdict: {}; stageCount: {}; driftCount: {}; timestamp: number; }' is not assignable to type '{ sessionId: string; intent: string; finalVerdict: string; stageCount: number; driftCount: number; timestamp: number; }'.
+    Types of property 'intent' are incompatible.
+      Type '{}' is not assignable to type 'string'.
+server/governance/co-processor/telemetry.ts(296,42): error TS2353: Object literal may only specify known properties, and 'passRate' does not exist in type 'TelemetrySummary'.
+server/governance/config-drizzle-adapter.ts(109,25): error TS2304: Cannot find name 'configType'.
+server/governance/content-intelligence.ts(509,37): error TS2345: Argument of type 'NarrativeCoherenceResult' is not assignable to parameter of type 'CoherenceAuditResult'.
+  Types of property 'confusion_risks' are incompatible.
+    Type 'ConfusionRisk[]' is not assignable to type '{ [key: string]: unknown; severity: string; }[]'.
+      Type 'ConfusionRisk' is not assignable to type '{ [key: string]: unknown; severity: string; }'.
+        Index signature for type 'string' is missing in type 'ConfusionRisk'.
+server/governance/content-surface-ingester.ts(580,19): error TS18046: 'details' is of type 'unknown'.
+server/governance/content-surface-ingester.ts(580,38): error TS18046: 'details' is of type 'unknown'.
+server/governance/content-surface-ingester.ts(581,64): error TS18046: 'details' is of type 'unknown'.
+server/governance/content-surface-ingester.ts(581,89): error TS18046: 'details' is of type 'unknown'.
+server/governance/continuous-self-audit.ts(204,7): error TS2322: Type '{}' is not assignable to type 'number'.
+server/governance/continuous-self-audit.ts(205,7): error TS2322: Type '{}' is not assignable to type 'number'.
+server/governance/control-tower-router.ts(1508,72): error TS2339: Property 'id' does not exist on type '{}'.
+server/governance/control-tower-router.ts(1916,40): error TS2345: Argument of type 'string' is not assignable to parameter of type '"weekly" | "daily"'.
+server/governance/control-tower-router.ts(1969,61): error TS18046: 'error' is of type 'unknown'.
+server/governance/control-tower-router.ts(2002,61): error TS18046: 'error' is of type 'unknown'.
+server/governance/control-tower-router.ts(2023,61): error TS18046: 'error' is of type 'unknown'.
+server/governance/control-tower-router.ts(2064,61): error TS18046: 'error' is of type 'unknown'.
+server/governance/control-tower-router.ts(2095,61): error TS18046: 'error' is of type 'unknown'.
+server/governance/control-tower-router.ts(2111,61): error TS18046: 'error' is of type 'unknown'.
+server/governance/control-tower-router.ts(2268,9): error TS2353: Object literal may only specify known properties, and 'name' does not exist in type 'PolicyDefinition'.
+server/governance/coverage-tracker.ts(13,24): error TS2614: Module '"../_core/logger"' has no exported member 'Logger'. Did you mean to use 'import Logger from "../_core/logger"' instead?
+server/governance/coverage-tracker.ts(62,14): error TS18047: '_governedGenerateModule' is possibly 'null'.
+server/governance/coverage-tracker.ts(69,10): error TS18047: '_governedGenerateModule' is possibly 'null'.
+server/governance/curiosity/curiosity-integration.ts(203,30): error TS2345: Argument of type '{}' is not assignable to parameter of type '"api" | "website" | "legal" | "marketing" | "config" | "sales" | "support" | "medical" | "financial" | "generic" | "agent" | "prompt" | "docs" | "strategy" | "trading" | "research" | "product_copy"'.
+server/governance/curiosity/curiosity-integration.ts(218,7): error TS2322: Type '{}' is not assignable to type 'string'.
+server/governance/curiosity/curiosity-integration.ts(221,7): error TS2322: Type 'unknown' is not assignable to type 'string'.
+server/governance/curiosity/curiosity-integration.ts(222,7): error TS2322: Type 'unknown' is not assignable to type 'string'.
+server/governance/curiosity/curiosity-integration.ts(223,7): error TS2322: Type '{}' is not assignable to type '"low" | "medium" | "high"'.
+server/governance/curiosity/curiosity-integration.ts(225,7): error TS2322: Type 'unknown' is not assignable to type 'string | undefined'.
+server/governance/curiosity/curiosity-integration.ts(320,40): error TS2345: Argument of type '{}' is not assignable to parameter of type 'number'.
+server/governance/curiosity/shadow-mode.ts(198,30): error TS2345: Argument of type 'string' is not assignable to parameter of type '"api" | "website" | "legal" | "marketing" | "config" | "sales" | "support" | "medical" | "financial" | "generic" | "agent" | "prompt" | "docs" | "strategy" | "trading" | "research" | "product_copy"'.
+server/governance/curiosity/shadow-mode.ts(532,24): error TS2339: Property 'pushenumCast' does not exist on type 'ShadowRunResult[]'.
+server/governance/demo-review-engine.ts(339,7): error TS2322: Type 'string' is not assignable to type '"website" | "legal" | "sales" | "support" | "medical" | "financial" | "generic" | undefined'.
+server/governance/demo-review-engine.ts(341,7): error TS2322: Type 'string' is not assignable to type '"enterprise" | "startup" | "healthcare" | "legal" | "marketing" | "regulated" | "financial" | "b2b_saas" | undefined'.
+server/governance/demo-review-engine.ts(587,43): error TS2339: Property 'map' does not exist on type '{}'.
+server/governance/demo-review-engine.ts(594,35): error TS2339: Property 'map' does not exist on type '{}'.
+server/governance/demo-review-engine.ts(601,39): error TS2339: Property 'score' does not exist on type '{}'.
+server/governance/demo-review-engine.ts(602,45): error TS2339: Property 'voice_match' does not exist on type '{}'.
+server/governance/demo-review-engine.ts(603,50): error TS2339: Property 'style_violations' does not exist on type '{}'.
+server/governance/demo-review-engine.ts(605,5): error TS2322: Type '{}' is not assignable to type 'string'.
+server/governance/demo-review-engine.ts(606,5): error TS2740: Type '{}' is missing the following properties from type 'string[]': length, pop, push, concat, and 35 more.
+server/governance/demo-review-engine.ts(607,5): error TS2322: Type '{}' is not assignable to type 'number'.
+server/governance/design-system-coherence.ts(232,7): error TS2322: Type '"design-system-coherence"' is not assignable to type 'CoherenceModuleId'.
+server/governance/design-system-coherence.ts(269,7): error TS2322: Type '"design-system-coherence"' is not assignable to type 'CoherenceModuleId'.
+server/governance/design-system-coherence.ts(356,5): error TS2322: Type '"design-system-coherence"' is not assignable to type 'CoherenceModuleId'.
+server/governance/design-system-coherence.ts(377,3): error TS2322: Type '"design-system-coherence"' is not assignable to type 'CoherenceModuleId'.
+server/governance/dogfooding-bridge.ts(86,11): error TS2322: Type '{ type: string; severity: "warning" | "critical"; description: string; field: string; }[]' is not assignable to type 'GovernanceViolation[]'.
+  Type '{ type: string; severity: "warning" | "critical"; description: string; field: string; }' is missing the following properties from type 'GovernanceViolation': id, category
+server/governance/enterprise-activation-readiness.test.ts(116,22): error TS2352: Conversion of type 'ProofLayer' to type 'Record<string, unknown>' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Index signature for type 'string' is missing in type 'ProofLayer'.
+server/governance/enterprise-activation-readiness.test.ts(121,20): error TS2352: Conversion of type 'ProofLayer' to type 'Record<string, unknown>' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Index signature for type 'string' is missing in type 'ProofLayer'.
+server/governance/enterprise-activation-readiness.test.ts(122,20): error TS2352: Conversion of type 'ProofLayer' to type 'Record<string, unknown>' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Index signature for type 'string' is missing in type 'ProofLayer'.
+server/governance/four-eyes-approval.standalone-test.ts(24,10): error TS2339: Property 'proposal' does not exist on type 'Result'.
+  Property 'proposal' does not exist on type 'Failure'.
+server/governance/four-eyes-approval.standalone-test.ts(26,39): error TS2339: Property 'proposal' does not exist on type 'Result'.
+  Property 'proposal' does not exist on type 'Failure'.
+server/governance/four-eyes-approval.standalone-test.ts(28,10): error TS2339: Property 'proposal' does not exist on type 'Result'.
+  Property 'proposal' does not exist on type 'Failure'.
+server/governance/four-eyes-approval.standalone-test.ts(30,39): error TS2339: Property 'proposal' does not exist on type 'Result'.
+  Property 'proposal' does not exist on type 'Failure'.
+server/governance/four-eyes-approval.standalone-test.ts(32,10): error TS2339: Property 'proposal' does not exist on type 'Result'.
+  Property 'proposal' does not exist on type 'Failure'.
+server/governance/four-eyes-approval.standalone-test.ts(43,39): error TS2339: Property 'proposal' does not exist on type 'Result'.
+  Property 'proposal' does not exist on type 'Failure'.
+server/governance/four-eyes-approval.standalone-test.ts(55,39): error TS2339: Property 'proposal' does not exist on type 'Result'.
+  Property 'proposal' does not exist on type 'Failure'.
+server/governance/four-eyes-approval.standalone-test.ts(64,40): error TS2339: Property 'proposal' does not exist on type 'Result'.
+  Property 'proposal' does not exist on type 'Failure'.
+server/governance/four-eyes-approval.standalone-test.ts(66,40): error TS2339: Property 'proposal' does not exist on type 'Result'.
+  Property 'proposal' does not exist on type 'Failure'.
+server/governance/four-eyes-approval.standalone-test.ts(74,29): error TS2339: Property 'proposal' does not exist on type 'Result'.
+  Property 'proposal' does not exist on type 'Failure'.
+server/governance/four-eyes-approval.standalone-test.ts(75,39): error TS2339: Property 'proposal' does not exist on type 'Result'.
+  Property 'proposal' does not exist on type 'Failure'.
+server/governance/four-eyes-approval.standalone-test.ts(84,38): error TS2339: Property 'proposal' does not exist on type 'Result'.
+  Property 'proposal' does not exist on type 'Failure'.
+server/governance/four-eyes-approval.standalone-test.ts(86,10): error TS2339: Property 'proposal' does not exist on type 'Result'.
+  Property 'proposal' does not exist on type 'Failure'.
+server/governance/four-eyes-approval.standalone-test.ts(87,39): error TS2339: Property 'proposal' does not exist on type 'Result'.
+  Property 'proposal' does not exist on type 'Failure'.
+server/governance/four-eyes-approval.standalone-test.ts(102,39): error TS2339: Property 'proposal' does not exist on type 'Result'.
+  Property 'proposal' does not exist on type 'Failure'.
+server/governance/four-eyes-approval.standalone-test.ts(112,30): error TS2339: Property 'proposal' does not exist on type 'Result'.
+  Property 'proposal' does not exist on type 'Failure'.
+server/governance/four-eyes-approval.standalone-test.ts(115,26): error TS2339: Property 'proposal' does not exist on type 'Result'.
+  Property 'proposal' does not exist on type 'Failure'.
+server/governance/geometry-memory.ts(230,21): error TS2339: Property 'shapeCast' does not exist on type '{ id: number; productId: string; surfaceId: string; snapshotType: string; overallScore: number; dimensionScores: string; conceptDensity: number | null; frameworkCount: number | null; clarityScore: number | null; ... 8 more ...; createdAt: number; }'.
+server/governance/geometry-memory.ts(230,31): error TS2304: Cannot find name 'snapshotType'.
+server/governance/governance-dashboard-router.ts(33,15): error TS2305: Module '"../../shared/governance-types"' has no exported member 'AuthorityAuditEntry'.
+server/governance/governance-dashboard-router.ts(33,36): error TS2305: Module '"../../shared/governance-types"' has no exported member 'TransportMetrics'.
+server/governance/governance-dashboard-router.ts(33,54): error TS2305: Module '"../../shared/governance-types"' has no exported member 'ExternalGravitoHealth'.
+server/governance/governance-dashboard-router.ts(33,77): error TS2305: Module '"../../shared/governance-types"' has no exported member 'SyncWrapperMetrics'.
+server/governance/governance-dashboard-router.ts(33,97): error TS2305: Module '"../../shared/governance-types"' has no exported member 'AuthorityLayerHealth'.
+server/governance/governance-dashboard-router.ts(33,119): error TS2305: Module '"../../shared/governance-types"' has no exported member 'InlineMetrics'.
+server/governance/governance-dashboard-router.ts(33,134): error TS2305: Module '"../../shared/governance-types"' has no exported member 'AuthorityAuditSummaryEntry'.
+server/governance/governance-dashboard-router.ts(58,27): error TS2339: Property 'totalCalls' does not exist on type 'TransportMetrics'.
+server/governance/governance-dashboard-router.ts(59,29): error TS2339: Property 'successCount' does not exist on type 'TransportMetrics'.
+server/governance/governance-dashboard-router.ts(60,29): error TS2339: Property 'failureCount' does not exist on type 'TransportMetrics'.
+server/governance/governance-dashboard-router.ts(61,28): error TS2339: Property 'totalCalls' does not exist on type 'TransportMetrics'.
+server/governance/governance-dashboard-router.ts(62,31): error TS2339: Property 'successCount' does not exist on type 'TransportMetrics'.
+server/governance/governance-dashboard-router.ts(62,54): error TS2339: Property 'totalCalls' does not exist on type 'TransportMetrics'.
+server/governance/governance-dashboard-router.ts(69,34): error TS2339: Property 'transportSwitches' does not exist on type 'TransportMetrics'.
+server/governance/governance-dashboard-router.ts(76,35): error TS2339: Property 'successRate' does not exist on type 'GravitoExternalHealthMetrics'.
+server/governance/governance-dashboard-router.ts(79,33): error TS2339: Property 'lastError' does not exist on type 'GravitoExternalHealthMetrics'.
+server/governance/governance-dashboard-router.ts(84,37): error TS2339: Property 'totalSubmissions' does not exist on type 'SyncWrapperMetrics'.
+server/governance/governance-dashboard-router.ts(85,33): error TS2339: Property 'syncResolved' does not exist on type 'SyncWrapperMetrics'.
+server/governance/governance-dashboard-router.ts(86,34): error TS2339: Property 'asyncReturned' does not exist on type 'SyncWrapperMetrics'.
+server/governance/governance-dashboard-router.ts(87,33): error TS2339: Property 'pollAttempts' does not exist on type 'SyncWrapperMetrics'.
+server/governance/governance-dashboard-router.ts(88,34): error TS2339: Property 'pollSuccesses' does not exist on type 'SyncWrapperMetrics'.
+server/governance/governance-dashboard-router.ts(89,33): error TS2339: Property 'pollTimeouts' does not exist on type 'SyncWrapperMetrics'.
+server/governance/governance-dashboard-router.ts(90,31): error TS2339: Property 'activeJobs' does not exist on type 'SyncWrapperMetrics'.
+server/governance/governance-dashboard-router.ts(147,34): error TS2339: Property 'enabled' does not exist on type 'AuthorityLayerHealth'.
+server/governance/governance-dashboard-router.ts(148,44): error TS2339: Property 'externalReachable' does not exist on type 'AuthorityLayerHealth'.
+server/governance/governance-dashboard-router.ts(149,44): error TS2339: Property 'internalReachable' does not exist on type 'AuthorityLayerHealth'.
+server/governance/governance-dashboard-router.ts(162,35): error TS2339: Property 'totalCalls' does not exist on type '{ totalInvocations: number; totalFallbacks: number; totalBlocks: number; totalPasses: number; avgLatencyMs: number; avgScore: number; latencyHistory: number[]; scoreHistory: number[]; gravitoInvocationRate: string; circuitBreakerState: string; }'.
+server/governance/governance-dashboard-router.ts(163,36): error TS2339: Property 'successRate' does not exist on type '{ totalInvocations: number; totalFallbacks: number; totalBlocks: number; totalPasses: number; avgLatencyMs: number; avgScore: number; latencyHistory: number[]; scoreHistory: number[]; gravitoInvocationRate: string; circuitBreakerState: string; }'.
+server/governance/governance-dashboard-router.ts(301,60): error TS2339: Property 'enabled' does not exist on type 'AuthorityLayerHealth'.
+server/governance/governance-dashboard-router.ts(302,55): error TS2339: Property 'internalReachable' does not exist on type 'AuthorityLayerHealth'.
+server/governance/governance-dashboard-router.ts(305,44): error TS2339: Property 'externalReachable' does not exist on type 'AuthorityLayerHealth'.
+server/governance/governance-dashboard-router.ts(306,44): error TS2339: Property 'internalReachable' does not exist on type 'AuthorityLayerHealth'.
+server/governance/governance-scan-scheduler.ts(196,18): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(left: Column<ColumnBaseConfig<ColumnDataType, string>, object, object>, right: unknown): SQL<unknown>', gave the following error.
+    Argument of type 'unknown' is not assignable to parameter of type 'Column<ColumnBaseConfig<ColumnDataType, string>, object, object>'.
+  Overload 2 of 3, '(left: Aliased<Date>, right: Date | SQLWrapper): SQL<unknown>', gave the following error.
+    Argument of type 'unknown' is not assignable to parameter of type 'Aliased<Date>'.
+  Overload 3 of 3, '(left: SQLWrapper, right: unknown): SQL<unknown>', gave the following error.
+    Argument of type 'unknown' is not assignable to parameter of type 'SQLWrapper'.
+server/governance/governance-scan-scheduler.ts(197,21): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'SQLWrapper | AnyColumn'.
+server/governance/governance-scan-scheduler.ts(214,21): error TS2339: Property 'results' does not exist on type '{}'.
+server/governance/governance-scan-scheduler.ts(215,39): error TS2339: Property 'results' does not exist on type '{}'.
+server/governance/governance-scan-scheduler.ts(231,23): error TS18046: 'f' is of type 'unknown'.
+server/governance/governance-scan-scheduler.ts(231,37): error TS18046: 'f' is of type 'unknown'.
+server/governance/governed-generate-manifold-influence.test.ts(126,63): error TS2352: Conversion of type 'number[]' to type 'ManifoldStateVector' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Target requires 5 element(s) but source may have fewer.
+server/governance/governed-openai.ts(98,12): error TS18046: 'params.shapeCast' is of type 'unknown'.
+server/governance/governed-openai.ts(98,29): error TS2304: Cannot find name 'model'.
+server/governance/gravito-authority-layer.ts(287,67): error TS2345: Argument of type '{ classification: { domain: string; isRegulated: boolean; }; }' is not assignable to parameter of type 'PreGenerationSignals'.
+  Type '{ classification: { domain: string; isRegulated: boolean; }; }' is missing the following properties from type 'PreGenerationSignals': truthConstraints, forbiddenClaims, toneCalibration, existenceAwareness, contextInjection
+server/governance/gravito-external-client.ts(529,9): error TS18046: 'err' is of type 'unknown'.
+server/governance/gravito-external-client.ts(529,23): error TS18046: 'err' is of type 'unknown'.
+server/governance/gravito-external-client.ts(532,9): error TS18046: 'err' is of type 'unknown'.
+server/governance/gravito-external-client.ts(536,37): error TS18046: 'err' is of type 'unknown'.
+server/governance/gravito-external-client.ts(584,9): error TS18046: 'err' is of type 'unknown'.
+server/governance/gravito-external-client.ts(587,37): error TS18046: 'err' is of type 'unknown'.
+server/governance/gravito-external-client.ts(1196,41): error TS18046: 'err' is of type 'unknown'.
+server/governance/internal-gravito-client.ts(423,20): error TS2571: Object is of type 'unknown'.
+server/governance/internal-gravito-client.ts(480,69): error TS2322: Type 'unknown' is not assignable to type 'string | undefined'.
+server/governance/journey-coherence.test.ts(23,9): error TS2322: Type '"healthy"' is not assignable to type '"broken" | "coherent" | "minor_friction" | "major_friction"'.
+server/governance/journey-coherence.test.ts(26,9): error TS2322: Type 'number' is not assignable to type 'string'.
+server/governance/journey-coherence.test.ts(36,9): error TS2322: Type '"healthy"' is not assignable to type '"broken" | "coherent" | "minor_friction" | "major_friction"'.
+server/governance/journey-coherence.test.ts(39,9): error TS2322: Type 'number' is not assignable to type 'string'.
+server/governance/journey-coherence.test.ts(46,22): error TS2339: Property 'overallScore' does not exist on type 'JourneyCoherenceResult'.
+server/governance/journey-coherence.test.ts(52,9): error TS2322: Type '"degraded"' is not assignable to type '"broken" | "coherent" | "minor_friction" | "major_friction"'.
+server/governance/journey-coherence.test.ts(55,9): error TS2322: Type 'number' is not assignable to type 'string'.
+server/governance/journey-coherence.test.ts(61,9): error TS2322: Type '"healthy"' is not assignable to type '"broken" | "coherent" | "minor_friction" | "major_friction"'.
+server/governance/journey-coherence.test.ts(64,9): error TS2322: Type 'number' is not assignable to type 'string'.
+server/governance/journey-coherence.test.ts(71,22): error TS2339: Property 'overallScore' does not exist on type 'JourneyCoherenceResult'.
+server/governance/journey-coherence.test.ts(99,9): error TS2322: Type '"healthy"' is not assignable to type '"broken" | "coherent" | "minor_friction" | "major_friction"'.
+server/governance/journey-coherence.test.ts(102,9): error TS2322: Type 'number' is not assignable to type 'string'.
+server/governance/journey-coherence.test.ts(109,29): error TS2339: Property 'overallScore' does not exist on type 'JourneyCoherenceResult'.
+server/governance/journey-coherence.test.ts(111,36): error TS2339: Property 'units' does not exist on type 'JourneyCoherenceResult'.
+server/governance/llm-circuit-breaker.ts(456,3): error TS2322: Type 'Record<string, unknown>' is not assignable to type 'Record<string, { state: string; failures: number; successes: number; deterministicFallbackCount: number; lastFailure: string; lastSuccess: string; }>'.
+  'string' index signatures are incompatible.
+    Type 'unknown' is not assignable to type '{ state: string; failures: number; successes: number; deterministicFallbackCount: number; lastFailure: string; lastSuccess: string; }'.
+server/governance/mcp-job-management.ts(244,44): error TS18046: 'err' is of type 'unknown'.
+server/governance/mcp-job-management.ts(257,44): error TS18046: 'err' is of type 'unknown'.
+server/governance/mcp-job-management.ts(272,44): error TS18046: 'err' is of type 'unknown'.
+server/governance/mcp-sync-wrapper.ts(563,9): error TS18046: 'err' is of type 'unknown'.
+server/governance/mcp-sync-wrapper.ts(563,23): error TS18046: 'err' is of type 'unknown'.
+server/governance/mcp-sync-wrapper.ts(566,37): error TS18046: 'err' is of type 'unknown'.
+server/governance/model-router.ts(294,19): error TS18046: 'error' is of type 'unknown'.
+server/governance/model-router.ts(320,19): error TS18046: 'error' is of type 'unknown'.
+server/governance/narrative-coherence-trend.ts(133,26): error TS2339: Property 'message' does not exist on type '{}'.
+server/governance/narrative-coherence-trend.ts(134,23): error TS2339: Property 'code' does not exist on type '{}'.
+server/governance/override-logger.ts(142,50): error TS2345: Argument of type 'unknown' is not assignable to parameter of type '"low" | "medium" | "high" | "critical"'.
+server/governance/pack-lifecycle.ts(304,18): error TS18046: 'error' is of type 'unknown'.
+server/governance/persistence.ts(291,5): error TS2322: Type '(() => Promise<number>) | undefined' is not assignable to type '() => Promise<number>'.
+  Type 'undefined' is not assignable to type '() => Promise<number>'.
+server/governance/policy-as-code.ts(179,17): error TS18046: 'v' is of type 'unknown'.
+server/governance/policy-as-code.ts(180,19): error TS18046: 'v' is of type 'unknown'.
+server/governance/policy-as-code.ts(181,26): error TS18046: 'v' is of type 'unknown'.
+server/governance/policy-as-code.ts(183,46): error TS18046: 'v' is of type 'unknown'.
+server/governance/policy-as-code.ts(184,21): error TS18046: 'v' is of type 'unknown'.
+server/governance/policy-as-code.ts(184,62): error TS18046: 'v' is of type 'unknown'.
+server/governance/policy-as-code.ts(185,22): error TS18046: 'v' is of type 'unknown'.
+server/governance/policy-as-code.ts(338,16): error TS18046: 'error' is of type 'unknown'.
+server/governance/policy-as-code.ts(386,45): error TS2339: Property 'includes' does not exist on type '{}'.
+server/governance/policy-as-code.ts(393,41): error TS2339: Property 'toLowerCase' does not exist on type '{}'.
+server/governance/policy-as-code.ts(403,25): error TS18047: 'input.score' is possibly 'null'.
+server/governance/policy-as-code.ts(403,25): error TS2365: Operator '<' cannot be applied to types '{}' and 'number'.
+server/governance/policy-as-code.ts(404,26): error TS18047: 'input.score' is possibly 'null'.
+server/governance/policy-as-code.ts(404,26): error TS2365: Operator '<=' cannot be applied to types '{}' and 'number'.
+server/governance/policy-as-code.ts(405,25): error TS18047: 'input.score' is possibly 'null'.
+server/governance/policy-as-code.ts(405,25): error TS2365: Operator '>' cannot be applied to types '{}' and 'number'.
+server/governance/policy-as-code.ts(406,26): error TS18047: 'input.score' is possibly 'null'.
+server/governance/policy-as-code.ts(406,26): error TS2365: Operator '>=' cannot be applied to types '{}' and 'number'.
+server/governance/prevention-layer.ts(183,7): error TS2322: Type 'EvaluationContext | undefined' is not assignable to type 'Record<string, unknown> | undefined'.
+  Type 'EvaluationContext' is not assignable to type 'Record<string, unknown>'.
+    Index signature for type 'string' is missing in type 'EvaluationContext'.
+server/governance/production-transport-selector.ts(215,39): error TS18046: 'err' is of type 'unknown'.
+server/governance/production-transport-selector.ts(215,94): error TS18046: 'err' is of type 'unknown'.
+server/governance/raw-sql-identifier-casing.standalone-test.ts(172,12): error TS2352: Conversion of type 'Row & Iterable<Row>' to type '{ v: unknown; }' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Property 'v' is missing in type 'Row & Iterable<Row>' but required in type '{ v: unknown; }'.
+server/governance/raw-sql-identifier-casing.standalone-test.ts(226,17): error TS2352: Conversion of type 'Row & Iterable<Row>' to type '{ v: unknown; }' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Property 'v' is missing in type 'Row & Iterable<Row>' but required in type '{ v: unknown; }'.
+server/governance/raw-sql-identifier-casing.standalone-test.ts(227,54): error TS2352: Conversion of type 'Row & Iterable<Row>' to type '{ v: unknown; }' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Property 'v' is missing in type 'Row & Iterable<Row>' but required in type '{ v: unknown; }'.
+server/governance/realtime-invariant-monitor.ts(273,9): error TS2345: Argument of type '{}' is not assignable to parameter of type 'string'.
+server/governance/regulated-surface-preapproval.ts(247,46): error TS18046: 'err' is of type 'unknown'.
+server/governance/regulator-export.standalone-test.ts(101,106): error TS2353: Object literal may only specify known properties, and 'rawContent' does not exist in type 'VerdictRecordedPayload | NegotiationResolvedPayload | ThresholdChangedPayload | AllowlistChangedPayload | ... 6 more ... | SnapshotSkippedPayload'.
+server/governance/router.ts(368,35): error TS2339: Property 'shapeCast' does not exist on type '{ content: string; context: { tenantId: string; userId: string; surface: string; contentType: string; mode: "runtime_observe" | "pr_review" | "release_gate"; }; route?: string | undefined; requestedOverrides?: { ...; }[] | undefined; }'.
+server/governance/router.ts(368,45): error TS2304: Cannot find name 'requestedOverrides'.
+server/governance/router.ts(410,15): error TS2339: Property 'shapeCast' does not exist on type '{ text: string; type: "security" | "capability" | "testimonial" | "integration" | "uplift" | "time_savings"; evidence: "none" | "case_study" | "product_demo" | "pilot_data" | "approved_claim_id" | "simulated_disclosure" | "documentation_link" | "certification_or_audit"; allowedSurfaces: string[]; evidenceUrl?: strin...'.
+server/governance/router.ts(410,25): error TS2304: Cannot find name 'evidence'.
+server/governance/router.ts(1032,15): error TS2339: Property 'shapeCast' does not exist on type '{ claimText: string; claimType: "security" | "customer_outcome" | "comparison" | "capability" | "integration" | "uplift" | "time_savings"; allowedSurfaces: string[]; requiredEvidenceType: "documentation" | ... 6 more ... | "architecture_review"; evidenceRefs?: string[] | undefined; }'.
+server/governance/router.ts(1032,25): error TS2304: Cannot find name 'claimType'.
+server/governance/router.ts(1033,15): error TS2339: Property 'shapeCast' does not exist on type '{ claimText: string; claimType: "security" | "customer_outcome" | "comparison" | "capability" | "integration" | "uplift" | "time_savings"; allowedSurfaces: string[]; requiredEvidenceType: "documentation" | ... 6 more ... | "architecture_review"; evidenceRefs?: string[] | undefined; }'.
+server/governance/router.ts(1033,25): error TS2304: Cannot find name 'requiredEvidenceType'.
+server/governance/router.ts(1292,52): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'ValidationIssue[]'.
+server/governance/router.ts(1892,58): error TS2554: Expected 1 arguments, but got 2.
+server/governance/slack-governance-alerts.ts(70,68): error TS18046: 'err' is of type 'unknown'.
+server/governance/structural-alert-channels.ts(269,22): error TS2339: Property 'message' does not exist on type '{}'.
+server/governance/structural-proof-audit.ts(53,88): error TS18046: 'e' is of type 'unknown'.
+server/governance/structural-proof-audit.ts(67,92): error TS18046: 'e' is of type 'unknown'.
+server/governance/structural-proof-audit.ts(81,94): error TS18046: 'e' is of type 'unknown'.
+server/governance/structural-proof-audit.ts(95,88): error TS18046: 'e' is of type 'unknown'.
+server/governance/structural-proof-audit.ts(109,89): error TS18046: 'e' is of type 'unknown'.
+server/governance/structural-proof-audit.ts(123,92): error TS18046: 'e' is of type 'unknown'.
+server/governance/structural-proof-audit.ts(137,103): error TS18046: 'e' is of type 'unknown'.
+server/governance/structural-proof-audit.ts(151,75): error TS18046: 'e' is of type 'unknown'.
+server/governance/structural-proof-audit.ts(165,80): error TS18046: 'e' is of type 'unknown'.
+server/governance/structural-proof-audit.ts(185,77): error TS18046: 'e' is of type 'unknown'.
+server/governance/structural-proof-audit.ts(198,73): error TS18046: 'e' is of type 'unknown'.
+server/governance/structural-proof-audit.ts(210,85): error TS18046: 'e' is of type 'unknown'.
+server/governance/structural-proof-audit.ts(240,69): error TS18046: 'e' is of type 'unknown'.
+server/governance/structural-proof-audit.ts(264,79): error TS18046: 'e' is of type 'unknown'.
+server/governance/structural-proof-audit.ts(288,78): error TS18046: 'e' is of type 'unknown'.
+server/governance/structural-proof-audit.ts(322,75): error TS18046: 'e' is of type 'unknown'.
+server/governance/structural-proof-audit.ts(354,77): error TS18046: 'e' is of type 'unknown'.
+server/governance/structural-proof-audit.ts(370,77): error TS18046: 'e' is of type 'unknown'.
+server/governance/structural-proof-audit.ts(386,66): error TS18046: 'e' is of type 'unknown'.
+server/governance/structural-proof-audit.ts(406,75): error TS18046: 'e' is of type 'unknown'.
+server/governance/structural-proof-audit.ts(422,69): error TS18046: 'e' is of type 'unknown'.
+server/governance/structural-proof-audit.ts(434,75): error TS18046: 'e' is of type 'unknown'.
+server/governance/structural-proof-audit.ts(462,83): error TS18046: 'e' is of type 'unknown'.
+server/governance/structural-proof-audit.ts(484,81): error TS18046: 'e' is of type 'unknown'.
+server/governance/structural-proof-audit.ts(507,83): error TS18046: 'e' is of type 'unknown'.
+server/governance/structural-proof-audit.ts(525,87): error TS18046: 'e' is of type 'unknown'.
+server/governance/structural-proof-audit.ts(558,91): error TS18046: 'e' is of type 'unknown'.
+server/governance/structural-proof-audit.ts(586,75): error TS18046: 'e' is of type 'unknown'.
+server/governance/structural-proof-audit.ts(636,75): error TS18046: 'e' is of type 'unknown'.
+server/governance/structural-proof-audit.ts(687,68): error TS18046: 'e' is of type 'unknown'.
+server/governance/structural-proof-audit.ts(719,70): error TS18046: 'e' is of type 'unknown'.
+server/governance/surface-discovery/guardian.ts(28,3): error TS2305: Module '"./types"' has no exported member 'BusinessTruth'.
+server/governance/surface-discovery/guardian.ts(66,34): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(value: { startedAt: number | SQL<unknown> | Placeholder<string, any>; runId: string | SQL<unknown> | Placeholder<string, any>; customerId: string | SQL<unknown> | Placeholder<...>; ... 10 more ...; surfacesDead?: number | ... 3 more ... | undefined; }): PgInsertBase<...>', gave the following error.
+    Type 'Date' is not assignable to type 'number | SQL<unknown> | Placeholder<string, any>'.
+  Overload 2 of 2, '(values: { startedAt: number | SQL<unknown> | Placeholder<string, any>; runId: string | SQL<unknown> | Placeholder<string, any>; customerId: string | SQL<unknown> | Placeholder<...>; ... 10 more ...; surfacesDead?: number | ... 3 more ... | undefined; }[]): PgInsertBase<...>', gave the following error.
+    Object literal may only specify known properties, and 'runId' does not exist in type '{ startedAt: number | SQL<unknown> | Placeholder<string, any>; runId: string | SQL<unknown> | Placeholder<string, any>; customerId: string | SQL<unknown> | Placeholder<...>; ... 10 more ...; surfacesDead?: number | ... 3 more ... | undefined; }[]'.
+server/governance/surface-discovery/guardian.ts(161,7): error TS2322: Type 'Date' is not assignable to type 'number | SQL<unknown> | PgColumn<ColumnBaseConfig<ColumnDataType, string>, {}, {}> | null | undefined'.
+server/governance/surface-discovery/guardian.ts(317,59): error TS2339: Property 'select' does not exist on type 'Promise<(PostgresJsDatabase<Record<string, unknown>> & { $client: Sql<{}>; }) | null>'.
+server/governance/surface-discovery/guardian.ts(317,198): error TS7006: Parameter 's' implicitly has an 'any' type.
+server/governance/surface-discovery/guardian.ts(340,5): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(value: { priority: string | SQL<unknown> | Placeholder<string, any>; triggerType: string | SQL<unknown> | Placeholder<string, any>; customerId: string | SQL<...> | Placeholder<...>; ... 9 more ...; surfacesRemediated?: number | ... 3 more ... | undefined; }): PgInsertBase<...>', gave the following error.
+    Object literal may only specify known properties, and 'sweepId' does not exist in type '{ priority: string | SQL<unknown> | Placeholder<string, any>; triggerType: string | SQL<unknown> | Placeholder<string, any>; customerId: string | SQL<unknown> | Placeholder<...>; ... 9 more ...; surfacesRemediated?: number | ... 3 more ... | undefined; }'.
+  Overload 2 of 2, '(values: { priority: string | SQL<unknown> | Placeholder<string, any>; triggerType: string | SQL<unknown> | Placeholder<string, any>; customerId: string | SQL<...> | Placeholder<...>; ... 9 more ...; surfacesRemediated?: number | ... 3 more ... | undefined; }[]): PgInsertBase<...>', gave the following error.
+    Object literal may only specify known properties, and 'sweepId' does not exist in type '{ priority: string | SQL<unknown> | Placeholder<string, any>; triggerType: string | SQL<unknown> | Placeholder<string, any>; customerId: string | SQL<unknown> | Placeholder<...>; ... 9 more ...; surfacesRemediated?: number | ... 3 more ... | undefined; }[]'.
+server/governance/surface-discovery/guardian.ts(361,35): error TS2322: Type 'string' is not assignable to type 'number'.
+server/governance/surface-discovery/guardian.ts(362,63): error TS2353: Object literal may only specify known properties, and 'result' does not exist in type '{ priority?: string | SQL<unknown> | PgColumn<ColumnBaseConfig<ColumnDataType, string>, {}, {}> | undefined; triggerType?: string | SQL<...> | PgColumn<...> | undefined; ... 10 more ...; surfacesRemediated?: number | ... 3 more ... | undefined; }'.
+server/governance/surface-discovery/guardian.ts(362,120): error TS2339: Property 'sweepId' does not exist on type 'PgTableWithColumns<{ name: "sweep_triggers"; schema: undefined; columns: { id: PgColumn<{ name: "id"; tableName: "sweep_triggers"; dataType: "number"; columnType: "PgSerial"; data: number; driverParam: number; notNull: true; ... 7 more ...; generated: undefined; }, {}, {}>; ... 11 more ...; createdAt: PgColumn<...>;...'.
+server/governance/surface-discovery/guardian.ts(376,54): error TS2554: Expected 0 arguments, but got 1.
+server/governance/surface-discovery/guardian.ts(382,30): error TS2454: Variable 'shieldResults' is used before being assigned.
+server/governance/surface-discovery/guardian.ts(382,44): error TS2339: Property 'map' does not exist on type '{ totalSurfaces: number; autoRewritten: number; patchesApplied: number; flaggedForReview: number; manualRequired: number; skipped: number; results: RemediationOutput[]; }'.
+server/governance/surface-discovery/guardian.ts(382,48): error TS7006: Parameter 'r' implicitly has an 'any' type.
+server/governance/surface-discovery/guardian.ts(383,5): error TS2739: Type '{ totalSurfaces: number; accepted: number; blocked: number; blockedUnavailable: number; passedWithWarnings: number; results: { surfaceId: string; accepted: boolean; gateDecision: GateDecision; gravitoRunId: string | null; attempts: number; }[]; }' is missing the following properties from type '{ totalSurfaces: number; autoRewritten: number; patchesApplied: number; flaggedForReview: number; manualRequired: number; skipped: number; results: RemediationOutput[]; }': autoRewritten, patchesApplied, flaggedForReview, manualRequired, skipped
+server/governance/surface-discovery/guardian.ts(383,27): error TS2554: Expected 3-5 arguments, but got 1.
+server/governance/surface-discovery/guardian.ts(388,35): error TS2322: Type 'string' is not assignable to type 'number'.
+server/governance/surface-discovery/guardian.ts(389,60): error TS2353: Object literal may only specify known properties, and 'result' does not exist in type '{ priority?: string | SQL<unknown> | PgColumn<ColumnBaseConfig<ColumnDataType, string>, {}, {}> | undefined; triggerType?: string | SQL<...> | PgColumn<...> | undefined; ... 10 more ...; surfacesRemediated?: number | ... 3 more ... | undefined; }'.
+server/governance/surface-discovery/guardian.ts(389,117): error TS2339: Property 'sweepId' does not exist on type 'PgTableWithColumns<{ name: "sweep_triggers"; schema: undefined; columns: { id: PgColumn<{ name: "id"; tableName: "sweep_triggers"; dataType: "number"; columnType: "PgSerial"; data: number; driverParam: number; notNull: true; ... 7 more ...; generated: undefined; }, {}, {}>; ... 11 more ...; createdAt: PgColumn<...>;...'.
+server/governance/surface-discovery/guardian.ts(395,21): error TS2488: Type '{ totalSurfaces: number; autoRewritten: number; patchesApplied: number; flaggedForReview: number; manualRequired: number; skipped: number; results: RemediationOutput[]; }' must have a '[Symbol.iterator]()' method that returns an iterator.
+server/governance/surface-discovery/guardian.ts(406,5): error TS2322: Type 'string' is not assignable to type 'number'.
+server/governance/surface-discovery/guardian.ts(413,55): error TS2339: Property 'status' does not exist on type 'SweepResult'.
+server/governance/surface-discovery/guardian.ts(413,63): error TS2353: Object literal may only specify known properties, and 'result' does not exist in type '{ priority?: string | SQL<unknown> | PgColumn<ColumnBaseConfig<ColumnDataType, string>, {}, {}> | undefined; triggerType?: string | SQL<...> | PgColumn<...> | undefined; ... 10 more ...; surfacesRemediated?: number | ... 3 more ... | undefined; }'.
+server/governance/surface-discovery/guardian.ts(413,120): error TS2339: Property 'sweepId' does not exist on type 'PgTableWithColumns<{ name: "sweep_triggers"; schema: undefined; columns: { id: PgColumn<{ name: "id"; tableName: "sweep_triggers"; dataType: "number"; columnType: "PgSerial"; data: number; driverParam: number; notNull: true; ... 7 more ...; generated: undefined; }, {}, {}>; ... 11 more ...; createdAt: PgColumn<...>;...'.
+server/governance/surface-discovery/guardian.ts(415,82): error TS2339: Property 'surfacesProcessed' does not exist on type 'SweepResult'.
+server/governance/surface-discovery/remediation.ts(293,24): error TS7053: Element implicitly has an 'any' type because expression of type '0' can't be used to index type '{}'.
+  Property '0' does not exist on type '{}'.
+server/governance/surface-discovery/remediation.ts(484,34): error TS2339: Property 'shapeCast' does not exist on type 'RemediationClassification'.
+server/governance/surface-discovery/remediation.ts(484,44): error TS2304: Cannot find name 'actionType'.
+server/governance/surface-discovery/remediation.ts(490,15): error TS2304: Cannot find name 'enumCast'.
+server/governance/surface-discovery/webhook-adapter.ts(19,66): error TS2724: '"./guardian"' has no exported member named 'ProactiveCoherencePipelineResult'. Did you mean 'runProactiveCoherencePipeline'?
+server/governance/trpc-governance-middleware.ts(314,23): error TS2339: Property 'code' does not exist on type '{}'.
+server/governance/trpc-governance-middleware.ts(316,28): error TS2339: Property 'message' does not exist on type '{}'.
+server/governance/trpc-governance-middleware.ts(325,20): error TS2339: Property 'code' does not exist on type '{}'.
+server/governance/trpc-governance-middleware.ts(328,23): error TS2339: Property 'code' does not exist on type '{}'.
+server/governance/trpc-governance-middleware.ts(329,23): error TS2339: Property 'message' does not exist on type '{}'.
+server/governance/trust-architecture-router.ts(237,61): error TS2345: Argument of type 'GovernanceReviewResult' is not assignable to parameter of type '{ overall_score: number; pass: boolean; violations: { type: string; severity: string; message: string; }[]; patterns_flagged: string[]; risk_level: string; core_systems?: Record<string, unknown> | undefined; }'.
+  Types of property 'core_systems' are incompatible.
+    Type 'CoreSystemsAnalysis | undefined' is not assignable to type 'Record<string, unknown> | undefined'.
+      Type 'CoreSystemsAnalysis' is not assignable to type 'Record<string, unknown>'.
+        Index signature for type 'string' is missing in type 'CoreSystemsAnalysis'.
+server/governance/trust-completeness-router.ts(245,43): error TS2339: Property 'store_raw_content' does not exist on type '{ mode: "STATELESS" | "METADATA_ONLY" | "FULL_LOGGING"; allow_content_hash: boolean; allow_metadata: boolean; allow_scores: boolean; allow_raw_content: boolean; audit_destination: "none" | ... 2 more ... | "customer_s3"; metadata_retention_days: number; deployment_type: "saas" | ... 1 more ... | "self_hosted"; audit...'.
+server/governance/trust-completeness-router.ts(740,17): error TS2339: Property 'type' does not exist on type 'UniversalSurfaceAdapter'.
+server/governance/trust-completeness-router.ts(742,24): error TS2339: Property 'description' does not exist on type 'UniversalSurfaceAdapter'.
+server/governance/trust-completeness-router.ts(743,20): error TS2339: Property 'version' does not exist on type 'UniversalSurfaceAdapter'.
+server/governance/trust-completeness-router.ts(817,11): error TS7034: Variable 'nextBatch' implicitly has type 'any[]' in some locations where its type cannot be determined.
+server/governance/trust-completeness-router.ts(837,31): error TS7005: Variable 'nextBatch' implicitly has an 'any[]' type.
+server/governance/usage-digest.ts(127,9): error TS2571: Object is of type 'unknown'.
+server/governance/watchdog.test.ts(116,35): error TS2339: Property 'alerts' does not exist on type 'WatchdogReport'.
+server/health/router.ts(31,57): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'HealthFactors'.
+server/human_interaction/router.ts(14,3): error TS2305: Module '"./state"' has no exported member 'Stability'.
+server/human_interaction/router.ts(104,11): error TS2322: Type 'unknown[]' is not assignable to type 'InteractionEvidence[]'.
+  Type 'unknown' is not assignable to type 'InteractionEvidence'.
+server/human_interaction/router.ts(291,15): error TS2322: Type '{ variant_id: string; content: string; interaction_state: null; metrics: { conversion_delta: number; trust_delta: number; boundary_violation_delta: number; escalation_delta: number; regret_rate: number; agency_delta: number; }; eligible_for_promotion: false; disqualification_reasons: string[]; human_outcome_score: n...' is not assignable to type 'VariantOutcome[]'.
+  Type '{ variant_id: string; content: string; interaction_state: null; metrics: { conversion_delta: number; trust_delta: number; boundary_violation_delta: number; escalation_delta: number; regret_rate: number; agency_delta: number; }; eligible_for_promotion: false; disqualification_reasons: string[]; human_outcome_score: n...' is not assignable to type 'VariantOutcome'.
+    Types of property 'interaction_state' are incompatible.
+      Type 'null' is not assignable to type 'HumanInteractionState'.
+server/jobs/check-ingest-key-validity.ts(23,26): error TS2307: Cannot find module '../gravito/supabase-db' or its corresponding type declarations.
+server/kill-switch/router.ts(151,38): error TS2367: This comparison appears to be unintentional because the types '"user"' and '"super_admin"' have no overlap.
+server/leads/router.ts(267,56): error TS2307: Cannot find module '../agent/mcp/orchestrator' or its corresponding type declarations.
+server/mcp/direct-dispatch-handlers.ts(299,81): error TS18046: 'e' is of type 'unknown'.
+server/mcp/direct-dispatch-handlers.ts(308,84): error TS18046: 'e' is of type 'unknown'.
+server/mcp/enterprise-middleware.ts(92,44): error TS2345: Argument of type 'any[]' is not assignable to parameter of type 'Record<string, unknown>'.
+  Index signature for type 'string' is missing in type 'any[]'.
+server/mcp/gate-enforcement.ts(286,51): error TS2345: Argument of type 'Surface' is not assignable to parameter of type 'RegulatedSurface'.
+  Type '"general"' is not assignable to type 'RegulatedSurface'.
+server/mcp/gate-enforcement.ts(287,49): error TS2345: Argument of type 'Surface' is not assignable to parameter of type 'AdvisorySurface'.
+  Type '"hr"' is not assignable to type 'AdvisorySurface'.
+server/mcp/mcp-handler-v2.ts(39,46): error TS2305: Module '"./async-job-queue"' has no exported member 'JobStatus'.
+server/mcp/mcp-handler-v2.ts(201,52): error TS2345: Argument of type 'string' is not assignable to parameter of type 'ZodType<unknown, unknown, $ZodTypeInternals<unknown, unknown>>'.
+server/mcp/mcp-handler-v2.ts(204,37): error TS2352: Conversion of type 'ZodEnum<Readonly<Record<string, EnumValue>>>' to type 'ZodEnum<[string, ...string[]]>' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Type 'Readonly<Record<string, EnumValue>>' is not comparable to type '[string, ...string[]]'.
+server/mcp/mcp-handler-v2.ts(204,57): error TS2344: Type '[string, ...string[]]' does not satisfy the constraint 'Readonly<Record<string, EnumValue>>'.
+  Index signature for type 'string' is missing in type '[string, ...string[]]'.
+server/mcp/mcp-handler-v2.ts(204,86): error TS2339: Property 'values' does not exist on type '$ZodEnumDef<[string, ...string[]]>'.
+server/mcp/mcp-handler-v2.ts(343,60): error TS2554: Expected 1 arguments, but got 2.
+server/mcp/mcp-handler-v2.ts(377,76): error TS2353: Object literal may only specify known properties, and 'correlationId' does not exist in type 'ExecutionContext'.
+server/mcp/mcp-handler-v2.ts(423,99): error TS2353: Object literal may only specify known properties, and 'correlationId' does not exist in type 'ExecutionContext'.
+server/mcp/mcp-handler-v2.ts(688,59): error TS2339: Property 'last5m' does not exist on type 'RewriteFrequencySnapshot'.
+server/mcp/mcp-http-handler.ts(1157,130): error TS2345: Argument of type 'Record<string, unknown>' is not assignable to parameter of type 'ZodType<any, unknown, $ZodTypeInternals<any, unknown>>'.
+  Type 'Record<string, unknown>' is missing the following properties from type 'ZodType<any, unknown, $ZodTypeInternals<any, unknown>>': def, type, _def, _output, and 40 more.
+server/mcp/mcp-http-handler.ts(1201,13): error TS2322: Type '{}' is not assignable to type 'string'.
+server/mcp/mcp-http-handler.ts(1202,13): error TS2322: Type '{} | undefined' is not assignable to type 'string | undefined'.
+  Type '{}' is not assignable to type 'string'.
+server/mcp/mcp-http-handler.ts(1391,54): error TS2345: Argument of type '{}' is not assignable to parameter of type 'number'.
+server/mcp/mcp-http-handler.ts(1762,45): error TS2345: Argument of type '{}' is not assignable to parameter of type 'number'.
+server/mcp/mcp-http-handler.ts(2401,50): error TS2345: Argument of type 'Record<string, unknown>' is not assignable to parameter of type 'ZodType<any, unknown, $ZodTypeInternals<any, unknown>>'.
+  Type 'Record<string, unknown>' is missing the following properties from type 'ZodType<any, unknown, $ZodTypeInternals<any, unknown>>': def, type, _def, _output, and 40 more.
+server/mcp/mcp-http-handler.ts(2427,12): error TS2339: Property 'type' does not exist on type '{}'.
+server/mcp/mcp-http-handler.ts(2427,36): error TS2339: Property 'entries' does not exist on type '{}'.
+server/mcp/mcp-http-handler.ts(2430,29): error TS2339: Property 'entries' does not exist on type '{}'.
+server/mcp/mcp-http-handler.ts(2436,12): error TS2339: Property 'typeName' does not exist on type '{}'.
+server/mcp/mcp-http-handler.ts(2439,17): error TS2339: Property 'values' does not exist on type '{}'.
+server/mcp/mcp-http-handler.ts(2439,43): error TS2339: Property 'entries' does not exist on type '{}'.
+server/mcp/mcp-http-handler.ts(2444,12): error TS2339: Property 'typeName' does not exist on type '{}'.
+server/mcp/mcp-http-handler.ts(2447,31): error TS2339: Property 'values' does not exist on type '{}'.
+server/mcp/mcp-http-handler.ts(2459,58): error TS2349: This expression is not callable.
+  Type '{}' has no call signatures.
+server/mcp/mcp-http-handler.ts(2487,30): error TS2571: Object is of type 'unknown'.
+server/mcp/mcp-http-handler.ts(2496,13): error TS2571: Object is of type 'unknown'.
+server/mcp/mcp-http-handler.ts(2502,35): error TS2571: Object is of type 'unknown'.
+server/mcp/mcp-http-handler.ts(2504,26): error TS2571: Object is of type 'unknown'.
+server/mcp/mcp-http-handler.ts(2513,28): error TS2571: Object is of type 'unknown'.
+server/mcp/mcp-sync-wrapper.ts(30,28): error TS2305: Module '"./tool-executor"' has no exported member 'ToolExecutionOptions'.
+server/mcp/mcp-sync-wrapper.ts(118,19): error TS2345: Argument of type '{ job: AsyncJob; headers: Record<string, string>; }' is not assignable to parameter of type 'AsyncJob'.
+  Type '{ job: AsyncJob; headers: Record<string, string>; }' is missing the following properties from type 'AsyncJob': id, toolName, args, status, and 5 more.
+server/mcp/mcp-sync-wrapper.ts(120,22): error TS2339: Property 'id' does not exist on type '{ job: AsyncJob; headers: Record<string, string>; }'.
+server/mcp/mcp-sync-wrapper.ts(124,55): error TS2339: Property 'id' does not exist on type '{ job: AsyncJob; headers: Record<string, string>; }'.
+server/mcp/mcp-sync-wrapper.ts(142,16): error TS2339: Property 'id' does not exist on type '{ job: AsyncJob; headers: Record<string, string>; }'.
+server/mcp/mcp-sync-wrapper.ts(143,35): error TS2339: Property 'id' does not exist on type '{ job: AsyncJob; headers: Record<string, string>; }'.
+server/mcp/nervous-system-stabilizer.ts(172,51): error TS2345: Argument of type 'Surface' is not assignable to parameter of type 'RegulatedSurface'.
+  Type '"general"' is not assignable to type 'RegulatedSurface'.
+server/mcp/nervous-system-stabilizer.ts(173,49): error TS2345: Argument of type 'Surface' is not assignable to parameter of type 'AdvisorySurface'.
+  Type '"hr"' is not assignable to type 'AdvisorySurface'.
+server/mcp/parabolic-fixes.test.ts(29,38): error TS2353: Object literal may only specify known properties, and 'resetTimeoutMs' does not exist in type 'CircuitBreakerConfig'.
+server/mcp/parabolic-fixes.test.ts(40,51): error TS2353: Object literal may only specify known properties, and 'resetTimeoutMs' does not exist in type 'CircuitBreakerConfig'.
+server/mcp/parabolic-fixes.test.ts(51,51): error TS2353: Object literal may only specify known properties, and 'resetTimeoutMs' does not exist in type 'CircuitBreakerConfig'.
+server/mcp/schema-normalizer.ts(63,38): error TS2339: Property '_def' does not exist on type '{}'.
+server/mcp/schema-normalizer.ts(71,23): error TS2339: Property 'shape' does not exist on type '{}'.
+server/mcp/schema-normalizer.ts(72,29): error TS2339: Property 'shape' does not exist on type '{}'.
+server/mcp/schema-normalizer.ts(73,30): error TS2339: Property '_def' does not exist on type '{}'.
+server/mcp/schema-normalizer.ts(74,36): error TS2339: Property '_def' does not exist on type '{}'.
+server/mcp/schema-normalizer.ts(75,25): error TS2339: Property '_def' does not exist on type '{}'.
+server/mcp/schema-normalizer.ts(76,25): error TS2339: Property '_def' does not exist on type '{}'.
+server/mcp/tool-executor.ts(250,11): error TS2345: Argument of type 'string' is not assignable to parameter of type 'Surface'.
+server/mcp/tool-executor.ts(523,47): error TS2538: Type 'unknown' cannot be used as an index type.
+server/mcp/tool-executor.ts(526,7): error TS2322: Type '{}' is not assignable to type 'string'.
+server/mcp/tool-executor.ts(528,7): error TS2322: Type '{}' is not assignable to type 'Record<string, unknown>'.
+  Index signature for type 'string' is missing in type '{}'.
+server/mcp/tool-executor.ts(688,37): error TS2345: Argument of type '{}' is not assignable to parameter of type 'number'.
+server/mcp/tool-executor.ts(708,51): error TS2345: Argument of type '{}' is not assignable to parameter of type 'string'.
+server/mcp/tool-executor.ts(728,49): error TS2345: Argument of type '{ messages: ({ role: "system"; content: {}; } | { role: "user"; content: {}; })[]; }' is not assignable to parameter of type 'InvokeParams'.
+  Types of property 'messages' are incompatible.
+    Type '({ role: "system"; content: {}; } | { role: "user"; content: {}; })[]' is not assignable to type 'Message[]'.
+      Type '{ role: "system"; content: {}; } | { role: "user"; content: {}; }' is not assignable to type 'Message'.
+        Type '{ role: "system"; content: {}; }' is not assignable to type 'Message'.
+          Types of property 'content' are incompatible.
+            Type '{}' is not assignable to type 'MessageContent | MessageContent[]'.
+server/mcp/tool-executor.ts(795,47): error TS2345: Argument of type '{}' is not assignable to parameter of type 'string'.
+server/mcp/tool-executor.ts(800,30): error TS2339: Property 'length' does not exist on type '{}'.
+server/mcp/tool-executor.ts(801,47): error TS2345: Argument of type '{}' is not assignable to parameter of type 'string[]'.
+  Type '{}' is missing the following properties from type 'string[]': length, pop, push, concat, and 35 more.
+server/mcp/tool-executor.ts(809,25): error TS2345: Argument of type '{}' is not assignable to parameter of type 'string'.
+server/mcp/tool-executor.ts(817,25): error TS2345: Argument of type '{}' is not assignable to parameter of type 'string'.
+server/mcp/tool-executor.ts(827,45): error TS2345: Argument of type '{}' is not assignable to parameter of type 'string'.
+server/mcp/tool-executor.ts(840,39): error TS2345: Argument of type '{}' is not assignable to parameter of type 'string'.
+server/mcp/tool-executor.ts(1268,12): error TS2552: Cannot find name 'json'. Did you mean 'JSON'?
+server/mcp/tool-executor.ts(1279,17): error TS2339: Property 'file' does not exist on type 'SurfaceFinding'.
+server/mcp/tool-executor.ts(1286,12): error TS2552: Cannot find name 'json'. Did you mean 'JSON'?
+server/mcp/tool-executor.ts(1291,12): error TS2304: Cannot find name 'json'.
+server/mcp/tool-executor.ts(1301,12): error TS2304: Cannot find name 'json'.
+server/mcp/tool-executor.ts(1306,23): error TS2304: Cannot find name 'json'.
+server/mcp/tool-executor.ts(1307,12): error TS2304: Cannot find name 'json'.
+server/mcp/tool-executor.ts(1323,23): error TS2304: Cannot find name 'json'.
+server/mcp/tool-executor.ts(1324,12): error TS2304: Cannot find name 'json'.
+server/mcp/tool-executor.ts(1337,23): error TS2304: Cannot find name 'json'.
+server/mcp/tool-executor.ts(1339,12): error TS2304: Cannot find name 'json'.
+server/mcp/tool-executor.ts(1343,12): error TS2304: Cannot find name 'json'.
+server/mcp/tool-executor.ts(1412,20): error TS2339: Property 'userId' does not exist on type 'ExecutionContext'.
+server/mcp/tool-executor.ts(1415,7): error TS2353: Object literal may only specify known properties, and 'surface' does not exist in type 'EnforceRequest'.
+server/mcp/tool-executor.ts(1421,18): error TS2339: Property 'blocked' does not exist on type 'EnforceResult'.
+server/mcp/tool-input-validator.ts(40,38): error TS2339: Property 'properties' does not exist on type '{}'.
+server/mcp/tool-input-validator.ts(51,35): error TS2339: Property 'required' does not exist on type '{}'.
+server/mcp/tool-input-validator.ts(52,47): error TS2339: Property 'properties' does not exist on type '{}'.
+server/mcp/tool-input-validator.ts(56,59): error TS2339: Property 'properties' does not exist on type '{}'.
+server/mcp/tool-input-validator.ts(57,63): error TS2339: Property 'type' does not exist on type '{}'.
+server/mcp/tracing-middleware.ts(173,3): error TS2322: Type '(this: Response, chunk: any, encoding?: BufferEncoding | undefined, cb?: (() => void) | undefined) => Response<any, Record<string, any>>' is not assignable to type '{ (cb?: (() => void) | undefined): Response<any, Record<string, any>>; (chunk: any, cb?: (() => void) | undefined): Response<any, Record<string, any>>; (chunk: any, encoding: BufferEncoding, cb?: (() => void) | undefined): Response<...>; }'.
+  Types of parameters 'encoding' and 'cb' are incompatible.
+    Type '(() => void) | undefined' is not assignable to type 'BufferEncoding | undefined'.
+      Type '() => void' is not assignable to type 'BufferEncoding | undefined'.
+server/mcp/tracing-middleware.ts(183,24): error TS2345: Argument of type 'BufferEncoding | undefined' is not assignable to parameter of type 'BufferEncoding'.
+  Type 'undefined' is not assignable to type 'BufferEncoding'.
+server/multimodal-gateway.ts(34,26): error TS2345: Argument of type '"multimodal-gateway"' is not assignable to parameter of type 'LogDomain'.
+server/nervous-system/dynamics/async-deep.ts(260,9): error TS2322: Type 'unknown' is not assignable to type 'string'.
+server/nervous-system/dynamics/claude-llm.ts(179,7): error TS2322: Type 'unknown' is not assignable to type 'string'.
+server/nervous-system/dynamics/runtime.ts(939,7): error TS2322: Type 'unknown' is not assignable to type 'string'.
+server/nervous-system/enhanced-system.ts(289,11): error TS2345: Argument of type '{}' is not assignable to parameter of type '"thumbs_up" | "thumbs_down" | "escalation" | "resolution" | "churn" | "conversion" | "satisfaction_score"'.
+server/nervous-system/integrated-nervous-system.ts(264,7): error TS2741: Property 'circuitBreakerState' is missing in type '{ totalCalls: number; successRate: number; averageLatency: number; degradedModeRate: number; fallbackRate: number; blockRate: number; avgRiskScore: number; circuitBreakerTripCount: number; rateLimitUtilization: number; }' but required in type '{ totalCalls: number; successRate: number; averageLatency: number; degradedModeRate: number; circuitBreakerState: string; rateLimitUtilization: number; fallbackRate: number; blockRate: number; avgRiskScore: number; circuitBreakerTripCount: number; }'.
+server/nervous-system/integrated-router.ts(301,26): error TS18046: 'state' is of type 'unknown'.
+server/nervous-system/integrated-router.ts(302,24): error TS18046: 'state' is of type 'unknown'.
+server/nervous-system/integrated-router.ts(303,27): error TS18046: 'state' is of type 'unknown'.
+server/nervous-system/integrated-router.ts(304,31): error TS18046: 'state' is of type 'unknown'.
+server/nervous-system/integrated-router.ts(307,26): error TS18046: 'state' is of type 'unknown'.
+server/nervous-system/integrated-router.ts(308,24): error TS18046: 'state' is of type 'unknown'.
+server/nervous-system/integrated-router.ts(309,27): error TS18046: 'state' is of type 'unknown'.
+server/nervous-system/integrated-router.ts(310,31): error TS18046: 'state' is of type 'unknown'.
+server/nervous-system/memory/persistence-bridge.ts(12,67): error TS2614: Module '"../storage/persistence"' has no exported member 'PersistedSensorySignal'. Did you mean to use 'import PersistedSensorySignal from "../storage/persistence"' instead?
+server/nervous-system/memory/persistence-bridge.ts(225,11): error TS2559: Type 'PersistedSensorySignal[]' has no properties in common with type '{ textual?: any; temporal?: any; relational?: any; contextual?: any; behavioral?: any; integrated?: any; }'.
+server/neuro-metrics-router.ts(21,20): error TS2307: Cannot find module './_core/db' or its corresponding type declarations.
+server/neuro-metrics-router.ts(25,26): error TS2345: Argument of type '"neuro-metrics"' is not assignable to parameter of type 'LogDomain'.
+server/neurocosmology-runtime-advanced/feature-flags.standalone-test.ts(17,3): error TS2305: Module '"./feature-flags.ts"' has no exported member 'shouldEnforce'.
+server/neurocosmology-runtime-advanced/feature-flags.standalone-test.ts(18,3): error TS2305: Module '"./feature-flags.ts"' has no exported member 'getTenantRuntimeMode'.
+server/neurocosmology-runtime-advanced/feature-flags.standalone-test.ts(19,3): error TS2305: Module '"./feature-flags.ts"' has no exported member 'setTenantRuntimeMode'.
+server/neurocosmology-runtime-advanced/feature-flags.standalone-test.ts(20,3): error TS2305: Module '"./feature-flags.ts"' has no exported member 'clearTenantRuntimeOverrides'.
+server/neurocosmology-runtime-advanced/feature-flags.standalone-test.ts(21,3): error TS2305: Module '"./feature-flags.ts"' has no exported member 'getTenantRuntimeOverrides'.
+server/neurocosmology-runtime-advanced/feature-flags.standalone-test.ts(128,24): error TS2554: Expected 0 arguments, but got 1.
+server/neurocosmology-runtime-advanced/startup-init.ts(20,44): error TS2345: Argument of type '"neurocosmology-startup"' is not assignable to parameter of type 'LogDomain'.
+server/nexus-command/router.ts(125,33): error TS2339: Property 'eventType' does not exist on type 'PgTableWithColumns<{ name: "mcp_audit_trail"; schema: undefined; columns: { id: PgColumn<{ name: "id"; tableName: "mcp_audit_trail"; dataType: "number"; columnType: "PgSerial"; data: number; driverParam: number; notNull: true; ... 7 more ...; generated: undefined; }, {}, {}>; ... 14 more ...; createdAt: PgColumn<......'.
+server/nexus-command/router.ts(422,35): error TS7053: Element implicitly has an 'any' type because expression of type '0' can't be used to index type '{}'.
+  Property '0' does not exist on type '{}'.
+server/nexus-command/router.ts(432,92): error TS2339: Property 'map' does not exist on type '{}'.
+server/nexus-command/router.ts(455,97): error TS2339: Property 'map' does not exist on type '{}'.
+server/nexus-command/router.ts(506,82): error TS2339: Property 'map' does not exist on type '{}'.
+server/observability/prometheus-metrics.ts(955,35): error TS2551: Property 'histogram' does not exist on type '{ counters: Record<string, { name: string; help: string; value: number; }>; gauges: Record<string, { name: string; help: string; value: number; lastUpdated: number; }>; histograms: Record<...>; }'. Did you mean 'histograms'?
+server/planes/router.ts(39,18): error TS18046: 'error' is of type 'unknown'.
+server/planes/router.ts(69,18): error TS18046: 'error' is of type 'unknown'.
+server/planes/router.ts(103,18): error TS18046: 'error' is of type 'unknown'.
+server/replay/router.ts(77,79): error TS2349: This expression is not callable.
+  Type '{}' has no call signatures.
+server/reviewer/alignment/business-truth.ts(186,25): error TS2339: Property 'forbidden_identities' does not exist on type '{}'.
+server/reviewer/alignment/business-truth.ts(187,46): error TS2339: Property 'forbidden_identities' does not exist on type '{}'.
+server/reviewer/alignment/business-truth.ts(201,25): error TS2339: Property 'drift_indicators' does not exist on type '{}'.
+server/reviewer/alignment/business-truth.ts(202,46): error TS2339: Property 'drift_indicators' does not exist on type '{}'.
+server/reviewer/audit/router.ts(255,47): error TS2339: Property 'pack_id' does not exist on type '{}'.
+server/reviewer/auto-experiment.ts(389,5): error TS2322: Type '{}' is not assignable to type 'string'.
+server/reviewer/auto-experiment.ts(389,14): error TS7053: Element implicitly has an 'any' type because expression of type '0' can't be used to index type '{}'.
+  Property '0' does not exist on type '{}'.
+server/reviewer/autopilot.ts(143,22): error TS2352: Conversion of type 'RowList<Record<string, unknown>[]>' to type '[{ guardrails: string | object; notifications: string | object; mode: AutopilotMode; surface_id: string; }[]]' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Property '0' is missing in type 'Record<string, unknown>[] & Iterable<Record<string, unknown>> & ResultQueryMeta<number, string>' but required in type '[{ guardrails: string | object; notifications: string | object; mode: AutopilotMode; surface_id: string; }[]]'.
+server/reviewer/autopilot.ts(206,27): error TS2352: Conversion of type 'RowList<Record<string, unknown>[]>' to type '[{ count: number; }[]]' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Property '0' is missing in type 'Record<string, unknown>[] & Iterable<Record<string, unknown>> & ResultQueryMeta<number, string>' but required in type '[{ count: number; }[]]'.
+server/reviewer/autopilot.ts(213,27): error TS2352: Conversion of type 'RowList<Record<string, unknown>[]>' to type '[{ experiments: number; promoted: number; guardrails: number; }[]]' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Property '0' is missing in type 'Record<string, unknown>[] & Iterable<Record<string, unknown>> & ResultQueryMeta<number, string>' but required in type '[{ experiments: number; promoted: number; guardrails: number; }[]]'.
+server/reviewer/autopilot.ts(232,29): error TS2352: Conversion of type 'RowList<Record<string, unknown>[]>' to type '[{ action: "experiment_created" | "experiment_promoted" | "experiment_stopped" | "guardrail_triggered"; details: string; created_at: string; }[]]' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Property '0' is missing in type 'Record<string, unknown>[] & Iterable<Record<string, unknown>> & ResultQueryMeta<number, string>' but required in type '[{ action: "experiment_created" | "experiment_promoted" | "experiment_stopped" | "guardrail_triggered"; details: string; created_at: string; }[]]'.
+server/reviewer/governance-enforced-audit.ts(707,72): error TS2339: Property 'surfaces' does not exist on type '{}'.
+server/reviewer/governed-reviewer.ts(376,50): error TS2345: Argument of type 'PolicyVersion' is not assignable to parameter of type 'Record<string, unknown>'.
+  Index signature for type 'string' is missing in type 'PolicyVersion'.
+server/reviewer/lattice/drift-detection.ts(193,17): error TS2352: Conversion of type 'RowList<Record<string, unknown>[]>' to type '[DriftTrackingRow[]]' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Property '0' is missing in type 'Record<string, unknown>[] & Iterable<Record<string, unknown>> & ResultQueryMeta<number, string>' but required in type '[DriftTrackingRow[]]'.
+server/reviewer/outcome-tracking.ts(146,10): error TS2352: Conversion of type 'RowList<Record<string, unknown>[]>' to type '[unknown[]]' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Property '0' is missing in type 'Record<string, unknown>[] & Iterable<Record<string, unknown>> & ResultQueryMeta<number, string>' but required in type '[unknown[]]'.
+server/reviewer/outcome-tracking.ts(207,19): error TS2352: Conversion of type 'RowList<Record<string, unknown>[]>' to type '[PatchOutcomeRow[]]' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Property '0' is missing in type 'Record<string, unknown>[] & Iterable<Record<string, unknown>> & ResultQueryMeta<number, string>' but required in type '[PatchOutcomeRow[]]'.
+server/reviewer/outcome-tracking.ts(250,21): error TS2352: Conversion of type 'RowList<Record<string, unknown>[]>' to type '[TotalsRow[]]' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Property '0' is missing in type 'Record<string, unknown>[] & Iterable<Record<string, unknown>> & ResultQueryMeta<number, string>' but required in type '[TotalsRow[]]'.
+server/reviewer/outcome-tracking.ts(265,25): error TS2352: Conversion of type 'RowList<Record<string, unknown>[]>' to type '[CategoryRow[]]' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Property '0' is missing in type 'Record<string, unknown>[] & Iterable<Record<string, unknown>> & ResultQueryMeta<number, string>' but required in type '[CategoryRow[]]'.
+server/reviewer/outcome-tracking.ts(279,25): error TS2352: Conversion of type 'RowList<Record<string, unknown>[]>' to type '[FeedbackRow[]]' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Property '0' is missing in type 'Record<string, unknown>[] & Iterable<Record<string, unknown>> & ResultQueryMeta<number, string>' but required in type '[FeedbackRow[]]'.
+server/reviewer/outcome-tracking.ts(394,14): error TS2352: Conversion of type 'RowList<Record<string, unknown>[]>' to type '[{ patch_id: string; }[]]' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Property '0' is missing in type 'Record<string, unknown>[] & Iterable<Record<string, unknown>> & ResultQueryMeta<number, string>' but required in type '[{ patch_id: string; }[]]'.
+server/reviewer/product-gaps-integration.ts(177,12): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(left: Column<ColumnBaseConfig<ColumnDataType, string>, object, object>, right: unknown): SQL<unknown>', gave the following error.
+    Argument of type 'unknown' is not assignable to parameter of type 'Column<ColumnBaseConfig<ColumnDataType, string>, object, object>'.
+  Overload 2 of 3, '(left: Aliased<string>, right: string | SQLWrapper): SQL<unknown>', gave the following error.
+    Argument of type 'unknown' is not assignable to parameter of type 'Aliased<string>'.
+  Overload 3 of 3, '(left: SQLWrapper, right: unknown): SQL<unknown>', gave the following error.
+    Argument of type 'unknown' is not assignable to parameter of type 'SQLWrapper'.
+server/reviewer/product-gaps-integration.ts(181,19): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'SQLWrapper | AnyColumn'.
+server/reviewer/product-gaps-integration.ts(204,7): error TS2322: Type 'unknown' is not assignable to type 'string'.
+server/reviewer/product-gaps-integration.ts(206,7): error TS2322: Type 'unknown' is not assignable to type 'number'.
+server/reviewer/product-gaps-integration.ts(254,14): error TS2769: No overload matches this call.
+  Overload 1 of 3, '(left: Column<ColumnBaseConfig<ColumnDataType, string>, object, object>, right: unknown): SQL<unknown>', gave the following error.
+    Argument of type 'unknown' is not assignable to parameter of type 'Column<ColumnBaseConfig<ColumnDataType, string>, object, object>'.
+  Overload 2 of 3, '(left: Aliased<boolean>, right: boolean | SQLWrapper): SQL<unknown>', gave the following error.
+    Argument of type 'unknown' is not assignable to parameter of type 'Aliased<boolean>'.
+  Overload 3 of 3, '(left: SQLWrapper, right: unknown): SQL<unknown>', gave the following error.
+    Argument of type 'unknown' is not assignable to parameter of type 'SQLWrapper'.
+server/reviewer/product-gaps-integration.ts(265,5): error TS2322: Type 'unknown' is not assignable to type 'number'.
+server/reviewer/product-gaps-integration.ts(266,103): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'string'.
+server/reviewer/router.ts(679,9): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'BusinessTruth | undefined'.
+server/reviewer/router.ts(704,9): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'BusinessTruth | undefined'.
+server/reviewer/router.ts(731,9): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'BusinessTruth'.
+server/router-groups/geometry-admin-router.ts(16,26): error TS2345: Argument of type '"geometry-admin-router"' is not assignable to parameter of type 'LogDomain'.
+server/router-groups/geometry-admin-router.ts(115,36): error TS18047: 'db' is possibly 'null'.
+server/router-groups/geometry-admin-router.ts(127,37): error TS18047: 'db' is possibly 'null'.
+server/router-groups/geometry-admin-router.ts(138,34): error TS18047: 'db' is possibly 'null'.
+server/router-groups/geometry-admin-router.ts(190,30): error TS18047: 'db' is possibly 'null'.
+server/router-groups/geometry-admin-router.ts(198,33): error TS18047: 'db' is possibly 'null'.
+server/router-groups/geometry-admin-router.ts(216,31): error TS18047: 'db' is possibly 'null'.
+server/router-groups/geometry-admin-router.ts(248,28): error TS18047: 'db' is possibly 'null'.
+server/router-groups/geometry-admin-router.ts(256,33): error TS18047: 'db' is possibly 'null'.
+server/router-groups/geometry-admin-router.ts(308,34): error TS18047: 'db' is possibly 'null'.
+server/router-groups/geometry-admin-router.ts(327,23): error TS2554: Expected 2-3 arguments, but got 1.
+server/router-groups/geometry-admin-router.ts(362,11): error TS2322: Type 'Record<number, unknown> | { emotionalMass: number; emotionalCharge: number; emotionalDistance: number; attentionCurvature: number; memoryEntropy: number; emotionalEnergy: number; ... 5 more ...; coherenceScore: number; }' is not assignable to type 'Record<string, number> | undefined'.
+  Type 'Record<number, unknown>' is not assignable to type 'Record<string, number>'.
+    'number' and 'string' index signatures are incompatible.
+      Type 'unknown' is not assignable to type 'number'.
+server/router-groups/geometry-admin-router.ts(369,9): error TS2554: Expected 5 arguments, but got 3.
+server/router-groups/geometry-admin-router.ts(379,11): error TS2322: Type 'Record<number, unknown> | { emotionalMass: number; emotionalCharge: number; emotionalDistance: number; attentionCurvature: number; memoryEntropy: number; emotionalEnergy: number; ... 5 more ...; coherenceScore: number; }' is not assignable to type 'CanonicalEmotionalState'.
+  Type 'Record<number, unknown>' is missing the following properties from type 'CanonicalEmotionalState': id, sessionId, userId, stateVersion, and 4 more.
+server/router-groups/geometry-admin-router.ts(405,24): error TS2345: Argument of type 'boolean' is not assignable to parameter of type 'number'.
+server/router-groups/geometry-admin-router.ts(414,11): error TS2322: Type 'Record<number, unknown> | { emotionalMass: number; emotionalCharge: number; emotionalDistance: number; attentionCurvature: number; memoryEntropy: number; emotionalEnergy: number; ... 5 more ...; coherenceScore: number; }' is not assignable to type 'CanonicalEmotionalState'.
+  Type 'Record<number, unknown>' is missing the following properties from type 'CanonicalEmotionalState': id, sessionId, userId, stateVersion, and 4 more.
+server/router-groups/geometry-admin-router.ts(459,32): error TS18047: 'db' is possibly 'null'.
+server/router-groups/geometry-admin-router.ts(837,31): error TS18047: 'db' is possibly 'null'.
+server/router-groups/geometry-admin-router.ts(848,31): error TS18047: 'db' is possibly 'null'.
+server/router-groups/geometry-admin-router.ts(855,28): error TS18047: 'db' is possibly 'null'.
+server/router-groups/geometry-admin-router.ts(963,11): error TS2554: Expected 1 arguments, but got 3.
+server/router-groups/geometry-admin-router.ts(969,31): error TS2339: Property 'alertsFired' does not exist on type 'number'.
+server/router-groups/geometry-admin-router.ts(970,27): error TS2339: Property 'alertsFired' does not exist on type 'number'.
+server/router-groups/geometry-admin-router.ts(971,56): error TS2339: Property 'alertsFired' does not exist on type 'number'.
+server/routers/admin-audit-dashboard.ts(17,31): error TS2724: '"../mcp/slo-tracker"' has no exported member named 'SLOSnapshotSLO'. Did you mean 'SLOSnapshot'?
+server/routers/admin-audit-dashboard.ts(18,42): error TS2305: Module '"../mcp/circuit-breaker-metrics"' has no exported member 'Breaker'.
+server/routers/monitoring-dashboards.ts(16,52): error TS2305: Module '"../nervous-system/operationalization"' has no exported member 'AdaptationType'.
+server/routers/monitoring-dashboards.ts(19,101): error TS2305: Module '"../governance/structural-auto-remediation"' has no exported member 'RemediationProposal'.
+server/routers/monitoring-dashboards.ts(216,9): error TS2322: Type 'Record<string, unknown>' is not assignable to type 'Record<string, { before: number; after?: number | undefined; fixed: number; }>'.
+  'string' index signatures are incompatible.
+    Type 'unknown' is not assignable to type '{ before: number; after?: number | undefined; fixed: number; }'.
+server/routers/self-scan-router.ts(178,25): error TS2339: Property 'message' does not exist on type '{}'.
+server/routers/self-scan-router.ts(233,35): error TS2339: Property 'flatMapenumCast' does not exist on type 'DeepAuditPageResult[]'.
+server/routers/self-scan-router.ts(233,51): error TS7006: Parameter 'p' implicitly has an 'any' type.
+server/routers/status-router.ts(19,37): error TS2724: '"../mcp/circuit-breaker-metrics"' has no exported member named 'CircuitBreakerSummary'. Did you mean 'getCircuitBreakerSummary'?
+server/routers/status-router.ts(20,29): error TS2724: '"../mcp/production-audit"' has no exported member named 'ProductionAuditRun'. Did you mean 'runProductionAudit'?
+server/routers/status-router.ts(22,75): error TS2724: '"../mcp/tool-rate-limiter"' has no exported member named 'ToolUsageSummary'. Did you mean 'getToolUsageSummary'?
+server/routers/status-router.ts(22,93): error TS2724: '"../mcp/tool-rate-limiter"' has no exported member named 'RateLimiterHealth'. Did you mean 'getRateLimiterHealth'?
+server/routes/gravito-absence-detector.ts(26,26): error TS2307: Cannot find module '../gravito/supabase-db' or its corresponding type declarations.
+server/routes/gravito-absence-detector.ts(112,14): error TS7006: Parameter 'r' implicitly has an 'any' type.
+server/routes/gravito-admin-check-integrity.ts(92,11): error TS2322: Type '"output"' is not assignable to type '"unknown" | "internal" | "external" | undefined'.
+server/routes/gravito-admin-check-integrity.ts(93,11): error TS2322: Type '"gravito_admin"' is not assignable to type '"dev" | "prod" | "staging" | undefined'.
+server/routes/gravito-admin-check-integrity.ts(113,11): error TS2322: Type '"output"' is not assignable to type '"unknown" | "internal" | "external" | undefined'.
+server/routes/gravito-admin-check-integrity.ts(114,11): error TS2322: Type '"gravito_admin"' is not assignable to type '"dev" | "prod" | "staging" | undefined'.
+server/routes/gravito-admin-mint.ts(19,26): error TS2307: Cannot find module '../gravito/supabase-db' or its corresponding type declarations.
+server/routes/gravito-admin-mint.ts(178,9): error TS2322: Type '"output"' is not assignable to type '"unknown" | "internal" | "external" | undefined'.
+server/routes/gravito-admin-mint.ts(179,9): error TS2322: Type '"gravito_admin"' is not assignable to type '"dev" | "prod" | "staging" | undefined'.
+server/routes/gravito-coverage-routes.ts(174,7): error TS2304: Cannot find name 'handleError'.
+server/routes/gravito-customer-probe.ts(93,11): error TS2322: Type '"output"' is not assignable to type '"unknown" | "internal" | "external" | undefined'.
+server/routes/gravito-customer-probe.ts(94,11): error TS2322: Type '"gravito_probe"' is not assignable to type '"dev" | "prod" | "staging" | undefined'.
+server/routes/gravito-integrity-history.ts(19,26): error TS2307: Cannot find module '../gravito/supabase-db' or its corresponding type declarations.
+server/routes/gravito-integrity-history.ts(108,56): error TS7006: Parameter 'r' implicitly has an 'any' type.
+server/routes/gravito-mcp-routes.ts(1449,9): error TS2322: Type 'string' is not assignable to type '"dev" | "prod" | "staging" | undefined'.
+server/sdk/router.ts(33,11): error TS2322: Type '"api"' is not assignable to type '"email" | "website" | "sales" | "support" | "agent" | undefined'.
+server/sdk/router.ts(39,11): error TS2322: Type '"html" | "text" | "json" | "markdown"' is not assignable to type 'ArtifactType'.
+  Type '"json"' is not assignable to type 'ArtifactType'.
+server/sdk/router.ts(61,11): error TS2322: Type '"api"' is not assignable to type '"email" | "website" | "sales" | "support" | "agent" | undefined'.
+server/sdk/router.ts(65,11): error TS2322: Type 'string' is not assignable to type 'EventType'.
+server/sdk/router.ts(88,11): error TS2322: Type '"api"' is not assignable to type '"email" | "website" | "sales" | "support" | "agent" | undefined'.
+server/sdk/router.ts(91,32): error TS2345: Argument of type '{ artifactId: string; success: boolean; metrics: Record<string, number> | undefined; }' is not assignable to parameter of type 'Outcome'.
+  Property 'type' is missing in type '{ artifactId: string; success: boolean; metrics: Record<string, number> | undefined; }' but required in type 'Outcome'.
+server/services/auto-apply-pipeline.ts(168,7): error TS2322: Type '{}' is not assignable to type '"low" | "medium" | "high" | "critical"'.
+server/services/auto-rewrite-pipeline.ts(182,17): error TS18046: 'r' is of type 'unknown'.
+server/services/auto-rewrite-pipeline.ts(242,40): error TS2339: Property 'verified' does not exist on type '{}'.
+server/services/auto-rewrite-pipeline.ts(243,24): error TS2339: Property 'confidence' does not exist on type '{}'.
+server/services/auto-rewrite-pipeline.ts(281,16): error TS18046: 'r' is of type 'unknown'.
+server/services/auto-rewrite-pipeline.ts(282,24): error TS18046: 'r' is of type 'unknown'.
+server/services/auto-rewrite-pipeline.ts(283,18): error TS18046: 'r' is of type 'unknown'.
+server/services/auto-rewrite-pipeline.ts(414,24): error TS7053: Element implicitly has an 'any' type because expression of type '0' can't be used to index type '{}'.
+  Property '0' does not exist on type '{}'.
+server/services/document-governance.ts(275,32): error TS7053: Element implicitly has an 'any' type because expression of type '0' can't be used to index type '{}'.
+  Property '0' does not exist on type '{}'.
+server/services/organizational-memory.ts(216,21): error TS7053: Element implicitly has an 'any' type because expression of type '0' can't be used to index type '{}'.
+  Property '0' does not exist on type '{}'.
+server/services/organizational-memory.ts(573,24): error TS7053: Element implicitly has an 'any' type because expression of type '0' can't be used to index type '{}'.
+  Property '0' does not exist on type '{}'.
+server/storage.ts(60,19): error TS2322: Type 'Uint8Array<ArrayBufferLike>' is not assignable to type 'BlobPart'.
+  Type 'Uint8Array<ArrayBufferLike>' is not assignable to type 'ArrayBufferView<ArrayBuffer>'.
+    Types of property 'buffer' are incompatible.
+      Type 'ArrayBufferLike' is not assignable to type 'ArrayBuffer'.
+        Type 'SharedArrayBuffer' is missing the following properties from type 'ArrayBuffer': resizable, resize, detached, transfer, transferToFixedLength
+server/surface-intelligence/recommendations-generator.ts(284,110): error TS2339: Property 'page' does not exist on type '{}'.
+server/surface-intelligence/router.ts(269,9): error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'Signal[]'.
+server/surface-scoring/router.ts(5,80): error TS2305: Module '"./integration"' has no exported member 'EmotionalDynamics'.
+server/workflows/engine.ts(391,68): error TS2554: Expected 1 arguments, but got 3.
+server/workflows/engine.ts(395,30): error TS2339: Property 'trim' does not exist on type 'InvokeResult'.
+server/workflows/engine.ts(427,5): error TS2322: Type 'string' is not assignable to type 'T & string'.
+  Type 'string' is not assignable to type 'T'.
+    'T' could be instantiated with an arbitrary type which could be unrelated to 'string'.

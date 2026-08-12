@@ -1,0 +1,237 @@
+diff --git a/server/_core/logger.ts b/server/_core/logger.ts
+index c59b823..c8487b2 100644
+--- a/server/_core/logger.ts
++++ b/server/_core/logger.ts
+@@ -222,6 +222,7 @@ export type LogDomain =
+   | 'promotion-readiness-gate'
+   | 'billing'
+   | 'emotional-geometry'
++  | 'geometry-admin-router'
+   | 'alert-sse'
+   | 'neurocosmology-advanced'
+   | 'tenant-analytics'
+diff --git a/server/router-groups/geometry-admin-router.ts b/server/router-groups/geometry-admin-router.ts
+index e00f347..1f59502 100644
+--- a/server/router-groups/geometry-admin-router.ts
++++ b/server/router-groups/geometry-admin-router.ts
+@@ -18,7 +18,8 @@ import { adminProcedure, router } from '../_core/trpc';
+ import { getDb } from '../db';
+ import { geometrySessions, geometrySnapshots, geometryEvents } from '../../drizzle/schema';
+ import { desc, eq, and, gte, count, avg, max, sql } from 'drizzle-orm';
+-import { createSafeDefaults, preGenerationHook, postGenerationHook } from '../emotional-geometry-runtime/geometry-runtime-bridge';
++import { createSafeDefaults, preGenerationHook, postGenerationHook, type GeometryPreGenerationResult, type GeometryPostGenerationResult } from '../emotional-geometry-runtime/geometry-runtime-bridge';
++import { createInitialState, updateBaseDimensions, type CanonicalEmotionalState } from '../emotional-geometry-runtime/state/EmotionalState';
+ import { getGeometryMetrics, resetGeometryMetrics, recordPreHook, recordPostHook } from '../emotional-geometry-runtime/geometry-metrics';
+ import { getFlags, getRuntimeMode, setGeometryFlag, setGeometryRuntimeMode, type GeometryFeatureFlags, type GeometryRuntimeMode } from '../emotional-geometry-runtime/feature-flags';
+ import { advancedPreGenerationHook, advancedPostGenerationHook } from '../neurocosmology-runtime-advanced/integration-hooks';
+@@ -109,6 +110,7 @@ export const geometryAdminRouter = router({
+     }).optional())
+     .query(async ({ input }) => {
+       const db = await getDb();
++      if (!db) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Database not available' });
+       const hours = input?.timeRangeHours ?? 24;
+       const since = new Date(Date.now() - hours * 60 * 60 * 1000);
+ 
+@@ -181,6 +183,7 @@ export const geometryAdminRouter = router({
+     }).optional())
+     .query(async ({ input }) => {
+       const db = await getDb();
++      if (!db) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Database not available' });
+       const limit = input?.limit ?? 20;
+       const offset = input?.offset ?? 0;
+       const status = input?.status;
+@@ -213,6 +216,7 @@ export const geometryAdminRouter = router({
+     }))
+     .query(async ({ input }) => {
+       const db = await getDb();
++      if (!db) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Database not available' });
+       const snapshots = await db
+         .select()
+         .from(geometrySnapshots)
+@@ -237,6 +241,7 @@ export const geometryAdminRouter = router({
+     }).optional())
+     .query(async ({ input }) => {
+       const db = await getDb();
++      if (!db) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Database not available' });
+       const limit = input?.limit ?? 50;
+       const offset = input?.offset ?? 0;
+       const since = new Date(Date.now() - (input?.timeRangeHours ?? 24) * 60 * 60 * 1000);
+@@ -303,6 +308,7 @@ export const geometryAdminRouter = router({
+     }).optional())
+     .query(async ({ input }) => {
+       const db = await getDb();
++      if (!db) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Database not available' });
+       const since = new Date(Date.now() - (input?.timeRangeHours ?? 24) * 60 * 60 * 1000);
+ 
+       const distribution = await db
+@@ -324,7 +330,7 @@ export const geometryAdminRouter = router({
+   diagnosticGeneration: adminProcedure
+     .input(z.object({
+       prompt: z.string().min(1).max(500).default('What is emotional intelligence and why does it matter?'),
+-      currentState: z.record(z.number()).optional(),
++      currentState: z.record(z.string(), z.number()).optional(),
+     }).optional())
+     .mutation(async ({ input, ctx }) => {
+       const startTime = performance.now();
+@@ -366,7 +372,13 @@ export const geometryAdminRouter = router({
+           auditTrail.push(`[PRE-HOOK] Constraints: ${preResult.constraintsInjected.join(', ')}`);
+         }
+         // Record metrics
+-        recordPreHook(preResult.fixationRisk, preResult.driftScore, preResult.computeTimeMs);
++        recordPreHook(
++          preResult.fixationRisk,
++          preResult.driftScore,
++          preResult.computeTimeMs,
++          preResult.shouldConstrain,
++          preResult.constraintsInjected.length,
++        );
+         auditTrail.push(`[METRICS] Pre-hook metrics recorded`);
+       } catch (err) {
+         auditTrail.push(`[PRE-HOOK] FAILED: ${err instanceof Error ? err.message : String(err)}`);
+@@ -376,7 +388,7 @@ export const geometryAdminRouter = router({
+       // Step 2: Advanced neurocosmology pre-hook
+       try {
+         const advPre = await advancedPreGenerationHook({
+-          currentState: testState,
++          currentState: buildCanonicalState(testState, `diag_${Date.now()}`, `admin-${ctx.user.id}`),
+           stateHistory: [],
+         });
+         if (advPre.enabled) {
+@@ -402,7 +414,7 @@ export const geometryAdminRouter = router({
+         });
+         auditTrail.push(`[POST-HOOK] Hash: ${postResult.postStateHash}, EntropyΔ: ${postResult.entropyDelta.toFixed(4)}, CurvatureΔ: ${postResult.curvatureDelta.toFixed(4)}, Loop: ${postResult.loopDetected}, Time: ${postResult.computeTimeMs.toFixed(2)}ms`);
+         // Record metrics
+-        recordPostHook(postResult.loopDetected, postResult.computeTimeMs);
++        recordPostHook(postResult.computeTimeMs, postResult.loopDetected);
+         auditTrail.push(`[METRICS] Post-hook metrics recorded`);
+       } catch (err) {
+         auditTrail.push(`[POST-HOOK] FAILED: ${err instanceof Error ? err.message : String(err)}`);
+@@ -411,7 +423,7 @@ export const geometryAdminRouter = router({
+       // Step 5: Advanced neurocosmology post-hook
+       try {
+         const advPost = await advancedPostGenerationHook({
+-          updatedState: testState,
++          updatedState: buildCanonicalState(testState, `diag_${Date.now()}`, `admin-${ctx.user.id}`),
+           stateHistory: [],
+         });
+         if (advPost.enabled) {
+@@ -452,6 +464,7 @@ export const geometryAdminRouter = router({
+     }).optional())
+     .query(async ({ input }) => {
+       const db = await getDb();
++      if (!db) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Database not available' });
+       const hours = input?.timeRangeHours ?? 24;
+       const bucketMin = input?.bucketMinutes ?? 5;
+       const since = new Date(Date.now() - hours * 60 * 60 * 1000);
+@@ -832,6 +845,7 @@ export const geometryAdminRouter = router({
+     }))
+     .query(async ({ input }) => {
+       const db = await getDb();
++      if (!db) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Database not available' });
+ 
+       // Get session
+       const [session] = await db
+@@ -943,32 +957,60 @@ export const geometryAdminRouter = router({
+       log.info({ alertType: input.alertType, channelId: input.channelId }, 'Firing test alert');
+ 
+       // Build synthetic metrics that will trigger the specified alert type
+-      const syntheticPre = {
++      const sessionId = `test_session_${Date.now()}`;
++      const degraded = input.alertType === 'compute_degradation';
++
++      const syntheticPre: GeometryPreGenerationResult = {
++        stateSnapshot: {},
++        preStateHash: `test_pre_${sessionId}`,
+         fixationRisk: input.alertType === 'high_fixation_risk' ? 0.95 : 0.1,
++        stabilityClass: 'synthetic',
+         driftScore: input.alertType === 'high_drift_score' ? 0.95 : 0.1,
+-        loopDetected: input.alertType === 'high_loop_rate',
+-        singularityDetected: input.alertType === 'singularity_burst',
+-        phaseTransition: input.alertType === 'phase_transition_burst',
+-        invariantViolations: input.alertType === 'invariant_violation_accumulation' ? 15 : 0,
++        constraintsInjected: [],
++        shouldConstrain: false,
++        computeTimeMs: degraded ? 500 : 10,
++        eigenClassification: null,
+       };
+ 
+-      const syntheticPost = {
+-        computeTimeMs: input.alertType === 'compute_degradation' ? 500 : 10,
+-        postComputeTimeMs: input.alertType === 'compute_degradation' ? 500 : 5,
++      const syntheticPost: GeometryPostGenerationResult = {
++        postStateHash: `test_post_${sessionId}`,
++        entropyDelta: 0,
++        curvatureDelta: 0,
++        loopDetected: input.alertType === 'high_loop_rate',
++        fieldSnapshot: {},
++        auditRecord: {
++          id: sessionId,
++          timestamp: Date.now(),
++          preStateHash: syntheticPre.preStateHash,
++          postStateHash: `test_post_${sessionId}`,
++          eigenClassification: null,
++          driftScore: syntheticPre.driftScore,
++          fixationProbability: syntheticPre.fixationRisk,
++          constraintsInjected: [],
++          canonMapping: {},
++          computeTimeMs: degraded ? 500 : 5,
++          stabilityReport: {},
++        },
++        computeTimeMs: degraded ? 500 : 5,
+       };
+ 
+       try {
+-        const result = await evaluateAlerts(
+-          syntheticPre as any,
+-          syntheticPost as any,
+-          `test_session_${Date.now()}`,
+-        );
++        const alertsFired = await evaluateAlerts({
++          sessionId,
++          preResult: syntheticPre,
++          postResult: syntheticPost,
++          neuroAdvanced: {
++            singularityDetected: input.alertType === 'singularity_burst',
++            phaseTransitionDetected: input.alertType === 'phase_transition_burst',
++            invariantViolations: input.alertType === 'invariant_violation_accumulation' ? 15 : 0,
++          },
++        });
+ 
+         return {
+           success: true,
+-          alertsFired: result.alertsFired,
+-          message: result.alertsFired > 0
+-            ? `Test alert fired successfully (${result.alertsFired} alert(s))`
++          alertsFired,
++          message: alertsFired > 0
++            ? `Test alert fired successfully (${alertsFired} alert(s))`
+             : 'Alert was suppressed (check if enabled and cooldown is active)',
+           timestamp: Date.now(),
+         };
+@@ -1163,6 +1205,25 @@ export const geometryAdminRouter = router({
+ 
+ // ─── Helper Functions ──────────────────────────────────────────────
+ 
++/**
++ * Project a flat geometry state snapshot onto the canonical emotional state
++ * shape expected by the neurocosmology hooks. Only the base dimensions carry
++ * over; derived dimensions are recomputed by updateBaseDimensions.
++ */
++function buildCanonicalState(
++  snapshot: Record<string, number> | undefined,
++  sessionId: string,
++  userId: string,
++): CanonicalEmotionalState {
++  return updateBaseDimensions(createInitialState(sessionId, userId), {
++    emotionalMass: snapshot?.emotionalMass ?? 0,
++    valenceCharge: snapshot?.emotionalValence ?? snapshot?.emotionalCharge ?? 0,
++    attentionCurvature: snapshot?.attentionCurvature ?? 0,
++    memoryEntropy: snapshot?.memoryEntropy ?? 0.5,
++    relationalDistance: snapshot?.emotionalDistance ?? 1,
++  });
++}
++
+ interface TimelineEntry {
+   timestamp: number;
+   type: 'snapshot' | 'event';
+

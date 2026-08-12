@@ -165,3 +165,31 @@ This file lives in `build-os/design/` deliberately: design records are
 retained-DATA, never administered as CODE into measured arm trees. A worker
 must not carry doctrine about how little workers should know — that would be a
 self-referential contamination of the kind this program has repeatedly caught.
+
+## Runtime doctrine (added at EXP-0009 close, operator-dictated)
+
+**Events drive work. Continuous execution state drives liveness. Timers do
+neither.** Invariants: `dependency_complete + authorized + runnable => launch
+immediately`; `running + heartbeat/progress => continue`; `running +
+no_progress + no_known_long_operation => diagnose/recover immediately`. No
+scheduled watchdogs, no fallback timers, no wake-up whose purpose is to
+discover whether work is alive. Time's one legitimate role is a bounded
+no-progress timeout attached to an active state.
+
+**Event-driven sequencing is not enough — Gravito itself is an active
+event-processing runtime.** Not a foreman watching workers but a kernel
+advancing process state: event arrives → state changes → next transition
+decided → action dispatched. It subscribes to execution events (never
+periodic polls), exposes real-time state (current state / current action /
+last-event age / next transition / blocked-on), and replaces observer stacks
+rather than layering on them. Reference implementation:
+`build-os/experiments/EXP-0009-memory-compounding/executor.mjs` (attached
+live mid-study under the recorded isolation proof — see
+MID-RUN-INTERVENTION.md there; retired predecessors: run-study.mjs,
+stall-watch.sh, and the scheduled-watchdog Routines, all cancelled).
+
+Learned defect boundary, recorded honestly: an event cannot cross a dead
+container while the session is idle — restart notifications arrive only on
+next session activity. Closing that residual window (push notification on
+milestone/failure, or running work outside the reclaimable container) is
+#53's territory.

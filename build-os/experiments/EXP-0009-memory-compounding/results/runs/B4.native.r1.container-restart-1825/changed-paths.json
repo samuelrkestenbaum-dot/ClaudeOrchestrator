@@ -1,0 +1,7 @@
+{
+  "base_commit": "b36d6653bec03c5f9082ec0ff9adcc0a8f962a4f",
+  "product_paths": [
+    "server/copilot/batch-page-updater.ts"
+  ],
+  "governance_paths": []
+}

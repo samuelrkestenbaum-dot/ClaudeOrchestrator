@@ -1,0 +1,26 @@
+[exec 2026-08-11T19:51:50.635Z] executor online — 17 of 40 cells remaining
+[exec 2026-08-11T19:51:50.636Z] adopting in-flight arm A2/native rep2 (pid 17951) — observing its events to completion
+[exec 2026-08-11T19:52:31.838Z] executor online — 17 of 40 cells remaining
+[exec 2026-08-11T19:52:31.839Z] adopting in-flight arm A2/native rep2 (pid 17951) — observing its events to completion
+[exec 2026-08-11T19:52:51.877Z] adopted arm handed back: A2/native rep2 admissible=true
+[exec 2026-08-11T19:52:51.882Z] dispatch A3/native rep2 (attempt 1, pid 27404)
+[exec 2026-08-11T20:03:20.684Z] dispatch A3/leanmem rep2 (attempt 1, pid 2359)
+[exec 2026-08-11T20:11:36.838Z] dispatch A4/leanmem rep2 (attempt 1, pid 9445)
+[exec 2026-08-11T20:23:20.930Z] dispatch A4/native rep2 (attempt 1, pid 23372)
+[exec 2026-08-11T20:38:12.737Z] dispatch A5/native rep2 (attempt 1, pid 3080)
+[exec 2026-08-11T20:53:19.258Z] dispatch A5/leanmem rep2 (attempt 1, pid 15220)
+[exec 2026-08-11T21:14:26.302Z] dispatch B1/native rep2 (attempt 1, pid 5804)
+[exec 2026-08-11T21:26:12.118Z] dispatch B1/leanmem rep2 (attempt 1, pid 17153)
+[exec 2026-08-11T21:39:46.712Z] dispatch B2/leanmem rep2 (attempt 1, pid 30612)
+[exec 2026-08-11T22:45:21.628Z] executor online — 8 of 40 cells remaining
+[exec 2026-08-11T22:45:21.635Z] dispatch B2/leanmem rep2 (attempt 1, pid 4083)
+[exec 2026-08-11T22:59:07.646Z] dispatch B2/native rep2 (attempt 1, pid 10072)
+[exec 2026-08-11T23:11:52.112Z] dispatch B3/native rep2 (attempt 1, pid 14853)
+[exec 2026-08-11T23:19:53.216Z] dispatch B3/leanmem rep2 (attempt 1, pid 21367)
+[exec 2026-08-11T23:30:15.255Z] dispatch B4/leanmem rep2 (attempt 1, pid 28638)
+[exec 2026-08-11T23:42:26.747Z] dispatch B4/native rep2 (attempt 1, pid 1715)
+[exec 2026-08-11T23:51:58.842Z] dispatch B5/native rep2 (attempt 1, pid 6130)
+[exec 2026-08-12T00:03:13.259Z] dispatch B5/leanmem rep2 (attempt 1, pid 10571)
+[exec 2026-08-12T00:14:20.297Z] executor online — 1 of 40 cells remaining
+[exec 2026-08-12T00:14:20.319Z] dispatch B5/leanmem rep2 (attempt 1, pid 3295)
+[exec 2026-08-12T00:23:01.743Z] STUDY COMPLETE

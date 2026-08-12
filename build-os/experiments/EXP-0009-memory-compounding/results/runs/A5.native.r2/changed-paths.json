@@ -1,0 +1,7 @@
+{
+  "base_commit": "f3cefc2477a0d7f1e6424670e75935302a504333",
+  "product_paths": [
+    "server/router-groups/geometry-admin-router.ts"
+  ],
+  "governance_paths": []
+}

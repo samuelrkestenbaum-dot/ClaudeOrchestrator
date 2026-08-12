@@ -1,0 +1,7 @@
+{
+  "base_commit": "14b6851fb676a41c85261c965e7f26ff65c5fdf2",
+  "product_paths": [
+    "server/infrastructure/data-retention.ts"
+  ],
+  "governance_paths": []
+}

@@ -1,0 +1,9 @@
+{
+  "base_commit": "b8a024d15a67867e751acae748875491c146a098",
+  "product_paths": [
+    "server/deployment/deployment-persistence.ts"
+  ],
+  "governance_paths": [
+    "build-os/packets/routing/routing-auto-20260811T160700Z-21471-20260811T160700Z.md"
+  ]
+}

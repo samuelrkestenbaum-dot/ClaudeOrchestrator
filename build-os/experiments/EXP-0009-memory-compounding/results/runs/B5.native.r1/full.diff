@@ -1,0 +1,23 @@
+diff --git a/server/governance/model-router.ts b/server/governance/model-router.ts
+index 41733a6..723a5b4 100644
+--- a/server/governance/model-router.ts
++++ b/server/governance/model-router.ts
+@@ -291,7 +291,7 @@ export async function routeModelInvocation<T>(
+         latencyMs,
+       };
+     } catch (error: unknown) {
+-      lastError = error.message;
++      lastError = error instanceof Error ? error.message : String(error);
+       recordModelResult(primaryModel.id, false, Date.now() - startTime);
+     }
+   }
+@@ -317,7 +317,7 @@ export async function routeModelInvocation<T>(
+         latencyMs,
+       };
+     } catch (error: unknown) {
+-      lastError = error.message;
++      lastError = error instanceof Error ? error.message : String(error);
+       recordModelResult(fallbackModel.id, false, Date.now() - startTime);
+     }
+     
+

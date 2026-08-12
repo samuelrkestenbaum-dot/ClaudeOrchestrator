@@ -1,0 +1,63 @@
+=== EXP-0009 READ — 2 seqs x 5 positions x native/leanmem x 2 reps ===
+
+--- 1. ADMISSIBILITY & ACCEPTANCE (gate: acceptance loss => claim FAILS) ---
+admissible: 40/40  missing/inadmissible: none
+native   accepted 20/20
+leanmem  accepted 20/20
+
+--- 2. TOM GUARD (all must be zero for leanmem) ---
+memory_writes_by_worker: 0 total (per-arm max 0)
+capability_search=2 gate_diagnosis=0 routing_bookkeeping=1 gate_challenge=0 control_calls=2
+
+--- 3. REUSE EVIDENCE (per leanmem arm) ---
+arm               delivery   chars memReads  consulted
+A1.leanmem.r1     none           0        0      no
+A2.leanmem.r1     inline      2944        0      YES
+A3.leanmem.r1     inline      4196        0      YES
+A4.leanmem.r1     inline      5452        0      YES
+A5.leanmem.r1     pointer     1683        0      no
+B1.leanmem.r1     none           0        0      no
+B2.leanmem.r1     inline      2936        0      YES
+B3.leanmem.r1     inline      4202        0      YES
+B4.leanmem.r1     inline      5442        0      YES
+B5.leanmem.r1     pointer     1683        0      no
+A1.leanmem.r2     none           0        0      no
+A2.leanmem.r2     inline      2944        0      YES
+A3.leanmem.r2     inline      4196        0      YES
+A4.leanmem.r2     inline      5452        0      YES
+A5.leanmem.r2     pointer     1683        0      no
+B1.leanmem.r2     none           0        0      no
+B2.leanmem.r2     inline      2937        0      YES
+B3.leanmem.r2     inline      4202        0      YES
+B4.leanmem.r2     inline      5442        0      YES
+B5.leanmem.r2     pointer     1683        0      no
+consulted arms: 12/20 (position-1 arms have empty stores by design)
+
+--- 4. PRIMARY: POSITION-MATCHED GAP (leanmem/native ratio per position; paired, admissible both sides) ---
+
+cost: position ->  P1      P2      P3      P4      P5    | trend = P1-ratio vs mean(P4,P5)-ratio
+  ratio           0.89    1.14    1.04    0.93    1.14
+  P1=0.89  late(P4,P5)=1.04  => gap LESS favorable with position
+
+uncached: position ->  P1      P2      P3      P4      P5    | trend = P1-ratio vs mean(P4,P5)-ratio
+  ratio           0.93    1.32    1.18    0.98    1.17
+  P1=0.93  late(P4,P5)=1.07  => gap LESS favorable with position
+
+turns: position ->  P1      P2      P3      P4      P5    | trend = P1-ratio vs mean(P4,P5)-ratio
+  ratio           0.85    0.98    0.92    0.94    1.00
+  P1=0.85  late(P4,P5)=0.97  => gap LESS favorable with position
+
+--- 5. SECONDARY: ABSOLUTE POSITION CURVES (context only) ---
+cost     native        1.67     0.79     0.79     1.27     1.74
+cost     leanmem       1.48     0.87     0.80     1.12     2.19
+uncached native       45104    28515    27852    40680    50846
+uncached leanmem      41300    34818    31534    38431    60058
+turns    native          42       20       24       31       36
+turns    leanmem         36       20       22       29       40
+
+--- 6. STALE/INCORRECT-MEMORY HARM ---
+memory-consulted arms not accepted: 0/12
+
+--- 7. REDISCOVERY (product reads outside task file / search calls) per position, mean across seqs+reps ---
+native    outsideReads    1.5   0.5   0.5   0.8   1.0   searches    0.0   0.0   0.0   0.0   0.0
+leanmem   outsideReads    0.5   0.0   0.0   0.3   0.5   searches    0.0   0.0   0.0   0.0   0.0

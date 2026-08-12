@@ -1,0 +1,186 @@
+diff --git a/server/_core/logger.ts b/server/_core/logger.ts
+index c59b823..46a0be2 100644
+--- a/server/_core/logger.ts
++++ b/server/_core/logger.ts
+@@ -273,7 +273,8 @@ export type LogDomain =
+   | 'scheduler-tuner'
+   | 'anomaly-test-gen'
+   | 'inference-gateway'
+-  | 'voice-stream-gateway';
++  | 'voice-stream-gateway'
++  | 'geometry-alerting';
+ 
+ /**
+  * Create a domain-specific child logger.
+diff --git a/server/emotional-geometry-runtime/geometry-alerting.ts b/server/emotional-geometry-runtime/geometry-alerting.ts
+index 837c5aa..823c6f3 100644
+--- a/server/emotional-geometry-runtime/geometry-alerting.ts
++++ b/server/emotional-geometry-runtime/geometry-alerting.ts
+@@ -24,7 +24,7 @@
+ 
+ import { createLogger } from '../_core/logger';
+ import { notifyOwner } from '../_core/notification';
+-import { getDb } from '../db';
++import { getDb, DatabaseUnavailableError } from '../db';
+ import { geometryEvents, geometryAlertConfigs, geometryAlertHistory, notificationChannels } from '../../drizzle/schema';
+ import { eq, desc, and, sql } from 'drizzle-orm';
+ import { groupAlertIntoIncident } from './alert-analytics';
+@@ -199,6 +199,7 @@ let alertIdCounter = 0;
+ export async function loadConfigsFromDb(): Promise<void> {
+   try {
+     const db = await getDb();
++    if (!db) throw new DatabaseUnavailableError('Database unavailable: cannot load alert configs');
+     const rows = await db.select().from(geometryAlertConfigs);
+ 
+     for (const row of rows) {
+@@ -228,6 +229,7 @@ export async function loadConfigsFromDb(): Promise<void> {
+ async function persistConfigToDb(alertType: AlertType, config: AlertConfig, updatedBy?: string): Promise<void> {
+   try {
+     const db = await getDb();
++    if (!db) throw new DatabaseUnavailableError('Database unavailable: cannot persist alert config');
+     // Upsert: try INSERT ... ON DUPLICATE KEY UPDATE (MySQL/TiDB compatible)
+     // If the method is unavailable, fall back to separate SELECT + INSERT/UPDATE
+     const values = {
+@@ -271,6 +273,7 @@ async function persistConfigToDb(alertType: AlertType, config: AlertConfig, upda
+ async function persistAlertToHistory(entry: AlertHistoryEntry): Promise<void> {
+   try {
+     const db = await getDb();
++    if (!db) throw new DatabaseUnavailableError('Database unavailable: cannot persist alert to history');
+     await db.insert(geometryAlertHistory).values({
+       alertId: entry.id,
+       alertType: entry.alertType,
+@@ -329,6 +332,7 @@ async function dispatchToChannels(
+   // Load additional channels from DB
+   try {
+     const db = await getDb();
++    if (!db) throw new DatabaseUnavailableError('Database unavailable: cannot load notification channels');
+     const channels = await db.select().from(notificationChannels).where(eq(notificationChannels.enabled, true));
+ 
+     for (const channel of channels) {
+@@ -564,6 +568,7 @@ async function fireAlert(
+   // Persist to geometry_events table (non-blocking)
+   try {
+     const db = await getDb();
++    if (!db) throw new DatabaseUnavailableError('Database unavailable: cannot persist geometry alert event');
+     await db.insert(geometryEvents).values({
+       sessionId: sessionId ?? 'system',
+       eventType: mapAlertTypeToEventType(alertType),
+@@ -939,6 +944,7 @@ export async function getAlertHistoryFromDb(options?: {
+ }): Promise<AlertHistoryEntry[]> {
+   try {
+     const db = await getDb();
++    if (!db) throw new DatabaseUnavailableError('Database unavailable: cannot read alert history');
+     const conditions = [];
+ 
+     if (options?.alertType) {
+@@ -1020,6 +1026,7 @@ export async function acknowledgeAlertPersistent(alertId: string, acknowledgedBy
+   // Update in database
+   try {
+     const db = await getDb();
++    if (!db) throw new DatabaseUnavailableError('Database unavailable: cannot acknowledge alert');
+     await db.update(geometryAlertHistory)
+       .set({
+         acknowledged: true,
+@@ -1071,6 +1078,7 @@ export function acknowledgeAlert(alertId: string, acknowledgedBy: string): boole
+ export async function getUnacknowledgedCount(): Promise<number> {
+   try {
+     const db = await getDb();
++    if (!db) throw new DatabaseUnavailableError('Database unavailable: cannot count unacknowledged alerts');
+     const result = await db.select({ count: sql<number>`count(*)` })
+       .from(geometryAlertHistory)
+       .where(eq(geometryAlertHistory.acknowledged, false));
+@@ -1131,6 +1139,7 @@ export function getAlertSummary(): {
+ export async function getNotificationChannels(): Promise<NotificationChannelConfig[]> {
+   try {
+     const db = await getDb();
++    if (!db) throw new DatabaseUnavailableError('Database unavailable: cannot read notification channels');
+     const rows = await db.select().from(notificationChannels);
+     return rows.map(r => ({
+       id: r.id,
+@@ -1159,6 +1168,7 @@ export async function createNotificationChannel(channel: {
+   minSeverity?: 'warning' | 'critical';
+ }): Promise<number> {
+   const db = await getDb();
++  if (!db) throw new DatabaseUnavailableError('Database unavailable: cannot create notification channel');
+   const [inserted] = await db.insert(notificationChannels).values({
+     name: channel.name,
+     channelType: channel.channelType,
+@@ -1184,6 +1194,7 @@ export async function updateNotificationChannel(id: number, updates: {
+ }): Promise<boolean> {
+   try {
+     const db = await getDb();
++    if (!db) throw new DatabaseUnavailableError('Database unavailable: cannot update notification channel');
+     await db.update(notificationChannels)
+       .set(updates)
+       .where(eq(notificationChannels.id, id));
+@@ -1201,6 +1212,7 @@ export async function updateNotificationChannel(id: number, updates: {
+ export async function deleteNotificationChannel(id: number): Promise<boolean> {
+   try {
+     const db = await getDb();
++    if (!db) throw new DatabaseUnavailableError('Database unavailable: cannot delete notification channel');
+     await db.delete(notificationChannels).where(eq(notificationChannels.id, id));
+     log.info({ channelId: id }, 'Notification channel deleted');
+     return true;
+
+diff --git a/build-os/packets/routing/routing-auto-20260811T161825Z-28141-20260811T161825Z.md b/build-os/packets/routing/routing-auto-20260811T161825Z-28141-20260811T161825Z.md
+--- /dev/null
++++ b/build-os/packets/routing/routing-auto-20260811T161825Z-28141-20260811T161825Z.md
++# ROUTING RECEIPT — one file per routing decision. The recorded verdict is BINDING
++# (build-os/memory/routing_contract.md); routing-check.sh refuses this receipt at
++# close if executed_mode exceeds selected_mode with no escalation record, if an
++# escalation carries no evidence, or if consumption exceeds a budget undeclared.
++task_id: auto-20260811T161825Z-28141
++description_sha256: 27b3f1b706c909c94af97ff3625e4a0a813089bab6bc2c90aa89c5978cb14534
++descriptor: {"expected_files_changed":1,"requires_tests":false,"expected_session_count":1,"prior_context_required":false,"handoff_required":false,"consequence_level":"low","irreversible_or_external_mutation":false,"high_blast_radius":false,"unclear_acceptance_criteria":false,"security_or_compliance_consequence":false,"parallel_workstreams_benefit":false,"high_rework_history":false,"nondeterministic_verification":false}
++selected_mode: direct
++selector_note: -
++issued_at: 2026-08-11T16:18:25Z
++# --- budgets: DERIVED DEFAULTS from EXP-0002 sealed records, operator-tunable, not laws.
++# --- Derivation: ON-surface light runs measured 172k-369k total tokens / 0 dispatches
++# --- (named exceedance: raw T4 at 526,461 - context, not the band); the
++# --- blowouts measured 4.9M/7.4M tokens, 4-5 dispatches, $3.63/$4.80. See route-task.sh.
++budget_max_subagents: 0
++budget_max_total_tokens: 250000
++budget_max_uncached_tokens: 30000
++budget_max_model_calls: 12
++budget_max_wall_clock_s: 300
++budget_max_cost_usd: 0.40
++# --- process allowance (PACKET-0053): the packet's OWN gate chain is governance
++# --- ceremony, counted SEPARATELY from task work by the live gate and attributed
++# --- to governance_process (the 0050/0051 calibration question, resolved). Default
++# --- 7 = the LARGEST LEGAL chain in the doctrine: mandatory_full_regate runs
++# --- builder, qa, reviewer, fix-builder, qa, reviewer, archivist. (No-fix chain
++# --- is 4; fix-then-pass is 6.) Process dispatches never eat budget_max_subagents.
++process_dispatch_allowance: 7
++# --- empty at issue; filled at close. AN UNKNOWN IS NOT A ZERO: "-" is an honest
++# --- admission and is never refused; refusal is for CONTRADICTION, not absence.
++executed_mode: -
++escalation: -
++escalation_evidence: -
++consumed_subagents: -
++consumed_total_tokens: -
++consumed_uncached_tokens: -
++consumed_model_calls: -
++consumed_wall_clock_s: -
++consumed_cost_usd: -
++degradation_note: -
++# --- close-fill EXTENSIONS (PACKET-0053). consumed_subagents above counts TASK
++# --- dispatches (vs budget_max_subagents); consumed_process_dispatches counts the
++# --- gate chain (vs process_dispatch_allowance). The attr_* layers attribute
++# --- consumption where derivable at close — tokens or cost with provenance, or
++# --- "-" as an admission, NEVER a zero nobody measured. Receipts predating these
++# --- fields stay valid: routing-check.sh reads an absent field as "-".
++consumed_process_dispatches: -
++attr_task_execution: -
++attr_context_retrieval: -
++attr_subagent_execution: -
++attr_verification: -
++attr_review: -
++attr_governance_process: -
++attr_experiment_audit: -
++# --- contribution rows (PACKET-0053): marginal-contribution accounting, MANDATORY
++# --- for a Full close with dispatches>0 (routing-check.sh refuses otherwise). The
++# --- live gate seeds one stub row per admitted Full task dispatch; fill at close:
++# --- contribution: <subagent_type> | <unique_question> | <output_ref> | changed_implementation=y/n/- | changed_conclusion=y/n/- | caught_defect=y/n/- | duplicated_work=y/n/- | tokens=<v|-> | cost=<v|-> | time=<v|->
++# --- An all-"-" row passes as an admission and is REPORTED as non-contributing.
++

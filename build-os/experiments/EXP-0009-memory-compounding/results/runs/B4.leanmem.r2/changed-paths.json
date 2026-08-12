@@ -1,0 +1,9 @@
+{
+  "base_commit": "da8f790b7488390bbb304fa7da39bb43f95bc7fa",
+  "product_paths": [
+    "server/copilot/batch-page-updater.ts"
+  ],
+  "governance_paths": [
+    "build-os/packets/routing/routing-auto-20260811T233028Z-29783-20260811T233028Z.md"
+  ]
+}

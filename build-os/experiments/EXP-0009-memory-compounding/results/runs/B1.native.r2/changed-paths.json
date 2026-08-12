@@ -1,0 +1,8 @@
+{
+  "base_commit": "5c193747598e97a4b481a5a26d79a2fa54e4ffee",
+  "product_paths": [
+    "server/governance/control-tower-router.ts",
+    "server/governance/policy/policySchema.ts"
+  ],
+  "governance_paths": []
+}

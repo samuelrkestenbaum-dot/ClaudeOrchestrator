@@ -1,0 +1,190 @@
+diff --git a/server/_core/logger.ts b/server/_core/logger.ts
+index c59b823..0cfe266 100644
+--- a/server/_core/logger.ts
++++ b/server/_core/logger.ts
+@@ -222,6 +222,7 @@ export type LogDomain =
+   | 'promotion-readiness-gate'
+   | 'billing'
+   | 'emotional-geometry'
++  | 'geometry-alerting'
+   | 'alert-sse'
+   | 'neurocosmology-advanced'
+   | 'tenant-analytics'
+diff --git a/server/emotional-geometry-runtime/geometry-alerting.ts b/server/emotional-geometry-runtime/geometry-alerting.ts
+index 837c5aa..8b1ddc3 100644
+--- a/server/emotional-geometry-runtime/geometry-alerting.ts
++++ b/server/emotional-geometry-runtime/geometry-alerting.ts
+@@ -24,7 +24,7 @@
+ 
+ import { createLogger } from '../_core/logger';
+ import { notifyOwner } from '../_core/notification';
+-import { getDb } from '../db';
++import { getDb, DatabaseUnavailableError } from '../db';
+ import { geometryEvents, geometryAlertConfigs, geometryAlertHistory, notificationChannels } from '../../drizzle/schema';
+ import { eq, desc, and, sql } from 'drizzle-orm';
+ import { groupAlertIntoIncident } from './alert-analytics';
+@@ -199,6 +199,11 @@ let alertIdCounter = 0;
+ export async function loadConfigsFromDb(): Promise<void> {
+   try {
+     const db = await getDb();
++    if (!db) {
++      log.warn('Database unavailable — using default alert configs');
++      configsLoaded = true; // Avoid retrying on every call
++      return;
++    }
+     const rows = await db.select().from(geometryAlertConfigs);
+ 
+     for (const row of rows) {
+@@ -228,6 +233,10 @@ export async function loadConfigsFromDb(): Promise<void> {
+ async function persistConfigToDb(alertType: AlertType, config: AlertConfig, updatedBy?: string): Promise<void> {
+   try {
+     const db = await getDb();
++    if (!db) {
++      log.warn({ alertType }, 'Database unavailable — alert config not persisted');
++      return;
++    }
+     // Upsert: try INSERT ... ON DUPLICATE KEY UPDATE (MySQL/TiDB compatible)
+     // If the method is unavailable, fall back to separate SELECT + INSERT/UPDATE
+     const values = {
+@@ -271,6 +280,10 @@ async function persistConfigToDb(alertType: AlertType, config: AlertConfig, upda
+ async function persistAlertToHistory(entry: AlertHistoryEntry): Promise<void> {
+   try {
+     const db = await getDb();
++    if (!db) {
++      log.warn({ alertId: entry.id }, 'Database unavailable — alert not persisted to history table');
++      return;
++    }
+     await db.insert(geometryAlertHistory).values({
+       alertId: entry.id,
+       alertType: entry.alertType,
+@@ -329,6 +342,10 @@ async function dispatchToChannels(
+   // Load additional channels from DB
+   try {
+     const db = await getDb();
++    if (!db) {
++      log.warn({ alertType }, 'Database unavailable — skipping additional notification channels');
++      return;
++    }
+     const channels = await db.select().from(notificationChannels).where(eq(notificationChannels.enabled, true));
+ 
+     for (const channel of channels) {
+@@ -564,22 +581,26 @@ async function fireAlert(
+   // Persist to geometry_events table (non-blocking)
+   try {
+     const db = await getDb();
+-    await db.insert(geometryEvents).values({
+-      sessionId: sessionId ?? 'system',
+-      eventType: mapAlertTypeToEventType(alertType),
+-      severity: config.severity,
+-      message: `[ALERT] ${contextMessage}`,
+-      metadata: {
+-        alertType,
+-        value,
+-        threshold: config.threshold,
+-        cooldownMs: config.cooldownMs,
+-        alertId: entry.id,
+-      },
+-      generationIndex: null,
+-      fixationRisk: alertType === 'high_fixation_risk' ? value : null,
+-      driftScore: alertType === 'high_drift_score' ? value : null,
+-    });
++    if (!db) {
++      log.warn({ alertType }, 'Database unavailable — alert not persisted to events table');
++    } else {
++      await db.insert(geometryEvents).values({
++        sessionId: sessionId ?? 'system',
++        eventType: mapAlertTypeToEventType(alertType),
++        severity: config.severity,
++        message: `[ALERT] ${contextMessage}`,
++        metadata: {
++          alertType,
++          value,
++          threshold: config.threshold,
++          cooldownMs: config.cooldownMs,
++          alertId: entry.id,
++        },
++        generationIndex: null,
++        fixationRisk: alertType === 'high_fixation_risk' ? value : null,
++        driftScore: alertType === 'high_drift_score' ? value : null,
++      });
++    }
+   } catch (dbError) {
+     log.error({ alertType, error: dbError instanceof Error ? dbError.message : String(dbError) }, 'Failed to persist alert to events table');
+   }
+@@ -939,6 +960,10 @@ export async function getAlertHistoryFromDb(options?: {
+ }): Promise<AlertHistoryEntry[]> {
+   try {
+     const db = await getDb();
++    if (!db) {
++      log.warn('Database unavailable — falling back to in-memory alert history');
++      return getAlertHistory(options);
++    }
+     const conditions = [];
+ 
+     if (options?.alertType) {
+@@ -1020,6 +1045,10 @@ export async function acknowledgeAlertPersistent(alertId: string, acknowledgedBy
+   // Update in database
+   try {
+     const db = await getDb();
++    if (!db) {
++      log.warn({ alertId }, 'Database unavailable — alert acknowledged in memory only');
++      return !!entry;
++    }
+     await db.update(geometryAlertHistory)
+       .set({
+         acknowledged: true,
+@@ -1071,6 +1100,10 @@ export function acknowledgeAlert(alertId: string, acknowledgedBy: string): boole
+ export async function getUnacknowledgedCount(): Promise<number> {
+   try {
+     const db = await getDb();
++    if (!db) {
++      log.warn('[Alerting] Database unavailable for unacknowledged count, falling back to in-memory');
++      return alertHistory.filter(a => !a.acknowledged).length;
++    }
+     const result = await db.select({ count: sql<number>`count(*)` })
+       .from(geometryAlertHistory)
+       .where(eq(geometryAlertHistory.acknowledged, false));
+@@ -1131,6 +1164,10 @@ export function getAlertSummary(): {
+ export async function getNotificationChannels(): Promise<NotificationChannelConfig[]> {
+   try {
+     const db = await getDb();
++    if (!db) {
++      log.warn('Database unavailable — no notification channels loaded');
++      return [];
++    }
+     const rows = await db.select().from(notificationChannels);
+     return rows.map(r => ({
+       id: r.id,
+@@ -1159,6 +1196,9 @@ export async function createNotificationChannel(channel: {
+   minSeverity?: 'warning' | 'critical';
+ }): Promise<number> {
+   const db = await getDb();
++  if (!db) {
++    throw new DatabaseUnavailableError('Database unavailable: cannot create notification channel');
++  }
+   const [inserted] = await db.insert(notificationChannels).values({
+     name: channel.name,
+     channelType: channel.channelType,
+@@ -1184,6 +1224,10 @@ export async function updateNotificationChannel(id: number, updates: {
+ }): Promise<boolean> {
+   try {
+     const db = await getDb();
++    if (!db) {
++      log.warn({ channelId: id }, 'Database unavailable — notification channel not updated');
++      return false;
++    }
+     await db.update(notificationChannels)
+       .set(updates)
+       .where(eq(notificationChannels.id, id));
+@@ -1201,6 +1245,10 @@ export async function updateNotificationChannel(id: number, updates: {
+ export async function deleteNotificationChannel(id: number): Promise<boolean> {
+   try {
+     const db = await getDb();
++    if (!db) {
++      log.warn({ channelId: id }, 'Database unavailable — notification channel not deleted');
++      return false;
++    }
+     await db.delete(notificationChannels).where(eq(notificationChannels.id, id));
+     log.info({ channelId: id }, 'Notification channel deleted');
+     return true;
+

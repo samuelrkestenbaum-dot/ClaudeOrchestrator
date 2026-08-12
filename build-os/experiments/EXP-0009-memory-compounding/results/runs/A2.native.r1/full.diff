@@ -1,0 +1,46 @@
+diff --git a/server/infrastructure/data-retention.ts b/server/infrastructure/data-retention.ts
+index f7b8323..f27ba8a 100644
+--- a/server/infrastructure/data-retention.ts
++++ b/server/infrastructure/data-retention.ts
+@@ -12,7 +12,7 @@
+  */
+ 
+ import crypto from "crypto";
+-import { getDb } from "../db";
++import { getDb, DatabaseUnavailableError } from "../db";
+ import { eq, and } from "drizzle-orm";
+ import {
+   dataSubjectRequests,
+@@ -374,6 +374,7 @@ export class DataRetentionService {
+     // Persist to database
+     try {
+       const db = await getDb();
++      if (!db) throw new DatabaseUnavailableError("Database unavailable: cannot persist DSR");
+       await db.insert(dataSubjectRequests).values({
+         id: request.requestId,
+         orgId: request.orgId,
+@@ -468,6 +469,7 @@ export class DataRetentionService {
+ 
+     try {
+       const db = await getDb();
++      if (!db) throw new DatabaseUnavailableError("Database unavailable: cannot query subject data for export");
+ 
+       // User profile data (match by email or openId)
+       dbUserData = await db
+@@ -542,6 +544,7 @@ export class DataRetentionService {
+     // ----- Delete from real DB tables -----
+     try {
+       const db = await getDb();
++      if (!db) throw new DatabaseUnavailableError("Database unavailable: cannot delete subject data");
+ 
+       // Find the user by email
+       const userRows = await db
+@@ -797,6 +800,7 @@ export class DataRetentionService {
+   ): Promise<void> {
+     try {
+       const db = await getDb();
++      if (!db) throw new DatabaseUnavailableError(`Database unavailable: cannot update DSR ${requestId}`);
+       await db
+         .update(dataSubjectRequests)
+         .set({
+

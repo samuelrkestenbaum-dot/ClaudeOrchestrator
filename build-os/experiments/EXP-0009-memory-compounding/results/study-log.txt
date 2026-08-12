@@ -1,0 +1,7 @@
+[study 2026-08-11T15:36:22.865Z] a rep driver (pid 6746) is already in flight — waiting for it to hand back, then chaining
+[study 2026-08-11T18:27:17.932Z] rep 1, pass 1: 17/20 admissible — launching driver now
+[study 2026-08-11T18:28:25.729Z] rep 1, pass 1: 17/20 admissible — launching driver now
+[study 2026-08-11T19:00:50.718Z] rep 1, pass 1: driver exited 0; 20/20 admissible
+[study 2026-08-11T19:00:50.723Z] rep 1 COMPLETE — 20/20 cells admissible
+[study 2026-08-11T19:00:50.725Z] rep 2, pass 1: 0/20 admissible — launching driver now
+[study 2026-08-12T00:23:01.678Z] STUDY COMPLETE — reps 1,2 all cells admissible. The fork may now be applied.

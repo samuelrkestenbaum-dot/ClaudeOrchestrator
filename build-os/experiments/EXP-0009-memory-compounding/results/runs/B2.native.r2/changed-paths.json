@@ -1,0 +1,7 @@
+{
+  "base_commit": "c4675ee290643ac0082b7f6b642cfcab94665def",
+  "product_paths": [
+    "server/governance/behavioral-correctness-audit.ts"
+  ],
+  "governance_paths": []
+}

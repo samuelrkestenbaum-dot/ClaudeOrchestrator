@@ -1,0 +1,276 @@
+diff --git a/server/infrastructure/data-retention.ts b/server/infrastructure/data-retention.ts
+index f7b8323..ceb0d8e 100644
+--- a/server/infrastructure/data-retention.ts
++++ b/server/infrastructure/data-retention.ts
+@@ -374,16 +374,21 @@ export class DataRetentionService {
+     // Persist to database
+     try {
+       const db = await getDb();
+-      await db.insert(dataSubjectRequests).values({
+-        id: request.requestId,
+-        orgId: request.orgId,
+-        subjectId: request.subjectId,
+-        subjectEmail: request.subjectEmail,
+-        requestType: request.requestType,
+-        status: request.status,
+-        deadline: request.deadline,
+-        notes: request.notes,
+-      });
++      if (!db) {
++        // No DATABASE_URL configured — keep the in-memory fallback below.
++        this.logAudit("DSR_DB_UNAVAILABLE", "system", "Database not configured — DSR kept in memory only", params.subjectId);
++      } else {
++        await db.insert(dataSubjectRequests).values({
++          id: request.requestId,
++          orgId: request.orgId,
++          subjectId: request.subjectId,
++          subjectEmail: request.subjectEmail,
++          requestType: request.requestType,
++          status: request.status,
++          deadline: request.deadline,
++          notes: request.notes,
++        });
++      }
+     } catch (err) {
+       // Log but don't fail — keep in-memory fallback
+       this.logAudit("DSR_DB_WRITE_FAILED", "system", `Failed to persist DSR to DB: ${(err as Error).message}`, params.subjectId);
+@@ -469,29 +474,34 @@ export class DataRetentionService {
+     try {
+       const db = await getDb();
+ 
+-      // User profile data (match by email or openId)
+-      dbUserData = await db
+-        .select()
+-        .from(users)
+-        .where(eq(users.email, request.subjectEmail));
+-
+-      // Governance audit log entries for the subject
+-      if (dbUserData.length > 0) {
+-        const userId = (dbUserData[0] as any).id;
+-        dbAuditData = await db
++      if (!db) {
++        // No DATABASE_URL configured — export the in-memory data only.
++        this.logAudit("DSR_EXPORT_DB_PARTIAL", "system", "Database not configured — export contains in-memory data only", request.subjectId);
++      } else {
++        // User profile data (match by email or openId)
++        dbUserData = await db
+           .select()
+-          .from(governanceAuditLog)
+-          .where(eq(governanceAuditLog.actorId, userId));
++          .from(users)
++          .where(eq(users.email, request.subjectEmail));
++
++        // Governance audit log entries for the subject
++        if (dbUserData.length > 0) {
++          const userId = (dbUserData[0] as any).id;
++          dbAuditData = await db
++            .select()
++            .from(governanceAuditLog)
++            .where(eq(governanceAuditLog.actorId, userId));
+ 
+-        dbConversationData = await db
+-          .select()
+-          .from(conversationSessions)
+-          .where(eq(conversationSessions.userId, userId));
++          dbConversationData = await db
++            .select()
++            .from(conversationSessions)
++            .where(eq(conversationSessions.userId, userId));
+ 
+-        dbEmotionalData = await db
+-          .select()
+-          .from(emotionalHistory)
+-          .where(eq(emotionalHistory.userId, userId));
++          dbEmotionalData = await db
++            .select()
++            .from(emotionalHistory)
++            .where(eq(emotionalHistory.userId, userId));
++        }
+       }
+     } catch (err) {
+       // DB unavailable — proceed with in-memory data only
+@@ -543,56 +553,62 @@ export class DataRetentionService {
+     try {
+       const db = await getDb();
+ 
+-      // Find the user by email
+-      const userRows = await db
+-        .select()
+-        .from(users)
+-        .where(eq(users.email, request.subjectEmail));
+-
+-      if (userRows.length > 0) {
+-        const userId = userRows[0].id;
+-
+-        // Delete emotional history
+-        const emotionalDel = await db.delete(emotionalHistory).where(eq(emotionalHistory.userId, userId));
+-        deletedCount += (emotionalDel as any).rowCount ?? 0;
+-
+-        // Delete emotional patterns
+-        const patternDel = await db.delete(emotionalPatterns).where(eq(emotionalPatterns.userId, userId));
+-        deletedCount += (patternDel as any).rowCount ?? 0;
+-
+-        // Delete conversation turns for user's sessions
+-        const userSessions = await db.select().from(conversationSessions).where(eq(conversationSessions.userId, userId));
+-        for (const session of userSessions) {
+-          const turnDel = await db.delete(conversationTurns).where(eq(conversationTurns.sessionId, session.sessionId));
+-          deletedCount += (turnDel as any).rowCount ?? 0;
+-        }
+-
+-        // Delete conversation sessions
+-        const sessionDel = await db.delete(conversationSessions).where(eq(conversationSessions.userId, userId));
+-        deletedCount += (sessionDel as any).rowCount ?? 0;
+-
+-        // Delete API usage records
+-        const usageDel = await db.delete(apiUsage).where(eq(apiUsage.userId, userId));
+-        deletedCount += (usageDel as any).rowCount ?? 0;
+-
+-        // Governance audit log: retain for compliance but anonymize
+-        const auditRows = await db
++      if (!db) {
++        // No DATABASE_URL configured — only the in-memory records below can be deleted.
++        this.logAudit("DSR_DELETE_DB_UNAVAILABLE", "system", "Database not configured — DB deletion skipped", request.subjectId);
++        retentionReasons.push("DB deletion skipped: database not configured");
++      } else {
++        // Find the user by email
++        const userRows = await db
+           .select()
+-          .from(governanceAuditLog)
+-          .where(eq(governanceAuditLog.actorId, userId));
+-        if (auditRows.length > 0) {
+-          retainedCount += auditRows.length;
+-          retentionReasons.push(`${auditRows.length} governance audit log entries: Compliance requirement — anonymized`);
+-          // Anonymize the actor field
+-          await db
+-            .update(governanceAuditLog)
+-            .set({ actor: "[DELETED_USER]" } as any)
++          .from(users)
++          .where(eq(users.email, request.subjectEmail));
++
++        if (userRows.length > 0) {
++          const userId = userRows[0].id;
++
++          // Delete emotional history
++          const emotionalDel = await db.delete(emotionalHistory).where(eq(emotionalHistory.userId, userId));
++          deletedCount += (emotionalDel as any).rowCount ?? 0;
++
++          // Delete emotional patterns
++          const patternDel = await db.delete(emotionalPatterns).where(eq(emotionalPatterns.userId, userId));
++          deletedCount += (patternDel as any).rowCount ?? 0;
++
++          // Delete conversation turns for user's sessions
++          const userSessions = await db.select().from(conversationSessions).where(eq(conversationSessions.userId, userId));
++          for (const session of userSessions) {
++            const turnDel = await db.delete(conversationTurns).where(eq(conversationTurns.sessionId, session.sessionId));
++            deletedCount += (turnDel as any).rowCount ?? 0;
++          }
++
++          // Delete conversation sessions
++          const sessionDel = await db.delete(conversationSessions).where(eq(conversationSessions.userId, userId));
++          deletedCount += (sessionDel as any).rowCount ?? 0;
++
++          // Delete API usage records
++          const usageDel = await db.delete(apiUsage).where(eq(apiUsage.userId, userId));
++          deletedCount += (usageDel as any).rowCount ?? 0;
++
++          // Governance audit log: retain for compliance but anonymize
++          const auditRows = await db
++            .select()
++            .from(governanceAuditLog)
+             .where(eq(governanceAuditLog.actorId, userId));
++          if (auditRows.length > 0) {
++            retainedCount += auditRows.length;
++            retentionReasons.push(`${auditRows.length} governance audit log entries: Compliance requirement — anonymized`);
++            // Anonymize the actor field
++            await db
++              .update(governanceAuditLog)
++              .set({ actor: "[DELETED_USER]" } as any)
++              .where(eq(governanceAuditLog.actorId, userId));
++          }
++
++          // Delete the user record itself
++          await db.delete(users).where(eq(users.id, userId));
++          deletedCount += 1;
+         }
+-
+-        // Delete the user record itself
+-        await db.delete(users).where(eq(users.id, userId));
+-        deletedCount += 1;
+       }
+     } catch (err) {
+       this.logAudit("DSR_DELETE_DB_ERROR", "system", `DB deletion failed: ${(err as Error).message}`, request.subjectId);
+@@ -797,6 +813,11 @@ export class DataRetentionService {
+   ): Promise<void> {
+     try {
+       const db = await getDb();
++      if (!db) {
++        // No DATABASE_URL configured — the in-memory DSR remains the source of truth.
++        this.logAudit("DSR_DB_UNAVAILABLE", "system", `Database not configured — DSR ${requestId} update kept in memory only`, null);
++        return;
++      }
+       await db
+         .update(dataSubjectRequests)
+         .set({
+
+diff --git a/build-os/packets/routing/routing-auto-20260811T192950Z-9680-20260811T192950Z.md b/build-os/packets/routing/routing-auto-20260811T192950Z-9680-20260811T192950Z.md
+--- /dev/null
++++ b/build-os/packets/routing/routing-auto-20260811T192950Z-9680-20260811T192950Z.md
++# ROUTING RECEIPT — one file per routing decision. The recorded verdict is BINDING
++# (build-os/memory/routing_contract.md); routing-check.sh refuses this receipt at
++# close if executed_mode exceeds selected_mode with no escalation record, if an
++# escalation carries no evidence, or if consumption exceeds a budget undeclared.
++task_id: auto-20260811T192950Z-9680
++description_sha256: 27b3f1b706c909c94af97ff3625e4a0a813089bab6bc2c90aa89c5978cb14534
++descriptor: {"expected_files_changed":1,"requires_tests":false,"expected_session_count":1,"prior_context_required":false,"handoff_required":false,"consequence_level":"low","irreversible_or_external_mutation":false,"high_blast_radius":false,"unclear_acceptance_criteria":false,"security_or_compliance_consequence":false,"parallel_workstreams_benefit":false,"high_rework_history":false,"nondeterministic_verification":false}
++selected_mode: direct
++selector_note: -
++issued_at: 2026-08-11T19:29:50Z
++# --- budgets: DERIVED DEFAULTS from EXP-0002 sealed records, operator-tunable, not laws.
++# --- Derivation: ON-surface light runs measured 172k-369k total tokens / 0 dispatches
++# --- (named exceedance: raw T4 at 526,461 - context, not the band); the
++# --- blowouts measured 4.9M/7.4M tokens, 4-5 dispatches, $3.63/$4.80. See route-task.sh.
++budget_max_subagents: 0
++budget_max_total_tokens: 250000
++budget_max_uncached_tokens: 30000
++budget_max_model_calls: 12
++budget_max_wall_clock_s: 300
++budget_max_cost_usd: 0.40
++# --- process allowance (PACKET-0053): the packet's OWN gate chain is governance
++# --- ceremony, counted SEPARATELY from task work by the live gate and attributed
++# --- to governance_process (the 0050/0051 calibration question, resolved). Default
++# --- 7 = the LARGEST LEGAL chain in the doctrine: mandatory_full_regate runs
++# --- builder, qa, reviewer, fix-builder, qa, reviewer, archivist. (No-fix chain
++# --- is 4; fix-then-pass is 6.) Process dispatches never eat budget_max_subagents.
++process_dispatch_allowance: 7
++# --- empty at issue; filled at close. AN UNKNOWN IS NOT A ZERO: "-" is an honest
++# --- admission and is never refused; refusal is for CONTRADICTION, not absence.
++executed_mode: -
++escalation: -
++escalation_evidence: -
++consumed_subagents: -
++consumed_total_tokens: -
++consumed_uncached_tokens: -
++consumed_model_calls: -
++consumed_wall_clock_s: -
++consumed_cost_usd: -
++degradation_note: -
++# --- close-fill EXTENSIONS (PACKET-0053). consumed_subagents above counts TASK
++# --- dispatches (vs budget_max_subagents); consumed_process_dispatches counts the
++# --- gate chain (vs process_dispatch_allowance). The attr_* layers attribute
++# --- consumption where derivable at close — tokens or cost with provenance, or
++# --- "-" as an admission, NEVER a zero nobody measured. Receipts predating these
++# --- fields stay valid: routing-check.sh reads an absent field as "-".
++consumed_process_dispatches: -
++attr_task_execution: -
++attr_context_retrieval: -
++attr_subagent_execution: -
++attr_verification: -
++attr_review: -
++attr_governance_process: -
++attr_experiment_audit: -
++# --- contribution rows (PACKET-0053): marginal-contribution accounting, MANDATORY
++# --- for a Full close with dispatches>0 (routing-check.sh refuses otherwise). The
++# --- live gate seeds one stub row per admitted Full task dispatch; fill at close:
++# --- contribution: <subagent_type> | <unique_question> | <output_ref> | changed_implementation=y/n/- | changed_conclusion=y/n/- | caught_defect=y/n/- | duplicated_work=y/n/- | tokens=<v|-> | cost=<v|-> | time=<v|->
++# --- An all-"-" row passes as an admission and is REPORTED as non-contributing.
++

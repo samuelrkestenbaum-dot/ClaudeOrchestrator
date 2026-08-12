@@ -1,0 +1,40 @@
+{
+  "artifact": "exp0009_sequence_log",
+  "rep": 2,
+  "configs": [
+    "native",
+    "leanmem"
+  ],
+  "units": [
+    {
+      "sequence": "A",
+      "position": 1,
+      "config": "native",
+      "rep": 2,
+      "exit": 0,
+      "wall_s": 883,
+      "admissible": true,
+      "attempts": 1
+    },
+    {
+      "sequence": "A",
+      "position": 1,
+      "config": "leanmem",
+      "rep": 2,
+      "exit": 0,
+      "wall_s": 842,
+      "admissible": true,
+      "attempts": 1
+    },
+    {
+      "sequence": "A",
+      "position": 2,
+      "config": "leanmem",
+      "rep": 2,
+      "exit": 0,
+      "wall_s": 669,
+      "admissible": true,
+      "attempts": 1
+    }
+  ]
+}

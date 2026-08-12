@@ -1,0 +1,272 @@
+CONVERGENCE PROCEED: result_can_change_the_decision
+  a result here selects between: confirm memory compounding — proceed to phase 2 proof 2 (reusable learned skills) | fix memory retrieval/selection before adding more memory; no rescue variants of this experiment | redesign memory delivery before any further phase 2 proof | the memory-advantage claim fails at this proof regardless of cost — record the failure and stop phase 2 proof 1 | report as a confound, not a confirmation — locate the actual driver before any memory claim
+  · 5 distinct next action(s) across 5 possible result(s) — derived gain high
+EXP-0009 rep2 — sequences A,B x 5 positions x native,leanmem — ordered, serial
+PRE-FLIGHT A1/native rep2
+  ok   no_concurrent_measured_arm: acquired
+  ok   exact_seed_restored_before_every_position: 2543c873141f restored and verified
+  ok   administration.substrate_absent: build-os, .claude, CLAUDE.md all removed
+  ok   task_file_present: server/emotional-geometry-runtime/alert-analytics.ts
+  ok   administered_state_committed: 755c830fad71
+  ok   node_modules_available: shared, byte-identical across arms
+  ok   prompt_identity: sha256:58b8ad83799f35e5 — built from sequences.json only; identical across arms by construction
+UNIT A1/native rep2: terminal=completed admissible=true accepted=true elapsed=731.1s
+PRE-FLIGHT A1/leanmem rep2
+  ok   no_concurrent_measured_arm: acquired
+  ok   exact_seed_restored_before_every_position: 2543c873141f restored and verified
+  ok   administration.load_bearing_controllers_present: 13 named controllers present
+  ok   administration.data_retained_not_overwritten: arm tree retains its own durable memory
+  ok   administration.no_session_local_state: 4 session-local files withheld by lifecycle, not by directory
+  ok   administration.benchmark_withheld_from_arm: experiments and pilots absent from the arm tree
+  ok   leanmem.markers: auto-routing + substrate-side stop + memory push delivery all administered
+  ok   memory_store_provenance: no store yet (position 1, or a fresh rep) — nothing to verify
+  ok   memory_installed: no prior entries — position 1 or fresh rep; the hook emits nothing
+  ok   task_file_present: server/emotional-geometry-runtime/alert-analytics.ts
+  ok   administered_state_committed: b5d9fa416f08
+  ok   node_modules_available: shared, byte-identical across arms
+  ok   prompt_identity: sha256:58b8ad83799f35e5 — built from sequences.json only; identical across arms by construction
+UNIT A1/leanmem rep2: terminal=completed admissible=true accepted=true mem_reads=0 distilled=true elapsed=706.0s
+PRE-FLIGHT A2/leanmem rep2
+  ok   no_concurrent_measured_arm: acquired
+  ok   exact_seed_restored_before_every_position: 2543c873141f restored and verified
+  ok   administration.load_bearing_controllers_present: 13 named controllers present
+  ok   administration.data_retained_not_overwritten: arm tree retains its own durable memory
+  ok   administration.no_session_local_state: 4 session-local files withheld by lifecycle, not by directory
+  ok   administration.benchmark_withheld_from_arm: experiments and pilots absent from the arm tree
+  ok   leanmem.markers: auto-routing + substrate-side stop + memory push delivery all administered
+  ok   memory_store_provenance: 1 entr(ies), all same-sequence same-rep earlier-position
+  ok   memory_installed: 1 entr(ies) installed from A.rep2
+  ok   task_file_present: server/infrastructure/data-retention.ts
+  ok   administered_state_committed: f6cb49601939
+  ok   node_modules_available: shared, byte-identical across arms
+  ok   prompt_identity: sha256:2c27218412e4b351 — built from sequences.json only; identical across arms by construction
+UNIT A2/leanmem rep2: terminal=completed admissible=true accepted=true mem_reads=0 distilled=true elapsed=546.9s
+PRE-FLIGHT A2/native rep2
+  ok   no_concurrent_measured_arm: acquired
+  ok   exact_seed_restored_before_every_position: 2543c873141f restored and verified
+  ok   administration.substrate_absent: build-os, .claude, CLAUDE.md all removed
+  ok   task_file_present: server/infrastructure/data-retention.ts
+  ok   administered_state_committed: 16e2251acc65
+  ok   node_modules_available: shared, byte-identical across arms
+  ok   prompt_identity: sha256:2c27218412e4b351 — built from sequences.json only; identical across arms by construction
+UNIT A2/native rep2: terminal=completed admissible=true accepted=true elapsed=601.7s
+PRE-FLIGHT A3/native rep2
+  ok   no_concurrent_measured_arm: acquired
+  ok   exact_seed_restored_before_every_position: 2543c873141f restored and verified
+  ok   administration.substrate_absent: build-os, .claude, CLAUDE.md all removed
+  ok   task_file_present: server/deployment/deployment-persistence.ts
+  ok   administered_state_committed: 28a583c7dd98
+  ok   node_modules_available: shared, byte-identical across arms
+  ok   prompt_identity: sha256:1b7631acfa35e971 — built from sequences.json only; identical across arms by construction
+UNIT A3/native rep2: terminal=completed admissible=true accepted=true elapsed=507.6s
+PRE-FLIGHT A3/leanmem rep2
+  ok   no_concurrent_measured_arm: acquired
+  ok   exact_seed_restored_before_every_position: 2543c873141f restored and verified
+  ok   administration.load_bearing_controllers_present: 13 named controllers present
+  ok   administration.data_retained_not_overwritten: arm tree retains its own durable memory
+  ok   administration.no_session_local_state: 4 session-local files withheld by lifecycle, not by directory
+  ok   administration.benchmark_withheld_from_arm: experiments and pilots absent from the arm tree
+  ok   leanmem.markers: auto-routing + substrate-side stop + memory push delivery all administered
+  ok   memory_store_provenance: 2 entr(ies), all same-sequence same-rep earlier-position
+  ok   memory_installed: 2 entr(ies) installed from A.rep2
+  ok   task_file_present: server/deployment/deployment-persistence.ts
+  ok   administered_state_committed: b0ebabf0db08
+  ok   node_modules_available: shared, byte-identical across arms
+  ok   prompt_identity: sha256:1b7631acfa35e971 — built from sequences.json only; identical across arms by construction
+UNIT A3/leanmem rep2: terminal=completed admissible=true accepted=true mem_reads=0 distilled=true elapsed=359.9s
+PRE-FLIGHT A4/leanmem rep2
+  ok   no_concurrent_measured_arm: acquired
+  ok   exact_seed_restored_before_every_position: 2543c873141f restored and verified
+  ok   administration.load_bearing_controllers_present: 13 named controllers present
+  ok   administration.data_retained_not_overwritten: arm tree retains its own durable memory
+  ok   administration.no_session_local_state: 4 session-local files withheld by lifecycle, not by directory
+  ok   administration.benchmark_withheld_from_arm: experiments and pilots absent from the arm tree
+  ok   leanmem.markers: auto-routing + substrate-side stop + memory push delivery all administered
+  ok   memory_store_provenance: 3 entr(ies), all same-sequence same-rep earlier-position
+  ok   memory_installed: 3 entr(ies) installed from A.rep2
+  ok   task_file_present: server/emotional-geometry-runtime/geometry-alerting.ts
+  ok   administered_state_committed: 0c7b98afaea5
+  ok   node_modules_available: shared, byte-identical across arms
+  ok   prompt_identity: sha256:7b162f208b43c909 — built from sequences.json only; identical across arms by construction
+UNIT A4/leanmem rep2: terminal=completed admissible=true accepted=true mem_reads=0 distilled=true elapsed=576.6s
+PRE-FLIGHT A4/native rep2
+  ok   no_concurrent_measured_arm: acquired
+  ok   exact_seed_restored_before_every_position: 2543c873141f restored and verified
+  ok   administration.substrate_absent: build-os, .claude, CLAUDE.md all removed
+  ok   task_file_present: server/emotional-geometry-runtime/geometry-alerting.ts
+  ok   administered_state_committed: cfcd1e0993a9
+  ok   node_modules_available: shared, byte-identical across arms
+  ok   prompt_identity: sha256:7b162f208b43c909 — built from sequences.json only; identical across arms by construction
+UNIT A4/native rep2: terminal=completed admissible=true accepted=true elapsed=770.1s
+PRE-FLIGHT A5/native rep2
+  ok   no_concurrent_measured_arm: acquired
+  ok   exact_seed_restored_before_every_position: 2543c873141f restored and verified
+  ok   administration.substrate_absent: build-os, .claude, CLAUDE.md all removed
+  ok   task_file_present: server/router-groups/geometry-admin-router.ts
+  ok   administered_state_committed: f3cefc2477a0
+  ok   node_modules_available: shared, byte-identical across arms
+  ok   prompt_identity: sha256:ef81505f4b72dbe4 — built from sequences.json only; identical across arms by construction
+UNIT A5/native rep2: terminal=completed admissible=true accepted=true elapsed=783.4s
+PRE-FLIGHT A5/leanmem rep2
+  ok   no_concurrent_measured_arm: acquired
+  ok   exact_seed_restored_before_every_position: 2543c873141f restored and verified
+  ok   administration.load_bearing_controllers_present: 13 named controllers present
+  ok   administration.data_retained_not_overwritten: arm tree retains its own durable memory
+  ok   administration.no_session_local_state: 4 session-local files withheld by lifecycle, not by directory
+  ok   administration.benchmark_withheld_from_arm: experiments and pilots absent from the arm tree
+  ok   leanmem.markers: auto-routing + substrate-side stop + memory push delivery all administered
+  ok   memory_store_provenance: 4 entr(ies), all same-sequence same-rep earlier-position
+  ok   memory_installed: 4 entr(ies) installed from A.rep2
+  ok   task_file_present: server/router-groups/geometry-admin-router.ts
+  ok   administered_state_committed: d2d9a8a04e6d
+  ok   node_modules_available: shared, byte-identical across arms
+  ok   prompt_identity: sha256:ef81505f4b72dbe4 — built from sequences.json only; identical across arms by construction
+UNIT A5/leanmem rep2: terminal=completed admissible=true accepted=true mem_reads=0 distilled=true elapsed=1134.2s
+PRE-FLIGHT B1/native rep2
+  ok   no_concurrent_measured_arm: acquired
+  ok   exact_seed_restored_before_every_position: 2543c873141f restored and verified
+  ok   administration.substrate_absent: build-os, .claude, CLAUDE.md all removed
+  ok   task_file_present: server/governance/control-tower-router.ts
+  ok   administered_state_committed: 5c193747598e
+  ok   node_modules_available: shared, byte-identical across arms
+  ok   prompt_identity: sha256:edfa75cf672642ef — built from sequences.json only; identical across arms by construction
+UNIT B1/native rep2: terminal=completed admissible=true accepted=true elapsed=581.7s
+PRE-FLIGHT B1/leanmem rep2
+  ok   no_concurrent_measured_arm: acquired
+  ok   exact_seed_restored_before_every_position: 2543c873141f restored and verified
+  ok   administration.load_bearing_controllers_present: 13 named controllers present
+  ok   administration.data_retained_not_overwritten: arm tree retains its own durable memory
+  ok   administration.no_session_local_state: 4 session-local files withheld by lifecycle, not by directory
+  ok   administration.benchmark_withheld_from_arm: experiments and pilots absent from the arm tree
+  ok   leanmem.markers: auto-routing + substrate-side stop + memory push delivery all administered
+  ok   memory_store_provenance: no store yet (position 1, or a fresh rep) — nothing to verify
+  ok   memory_installed: no prior entries — position 1 or fresh rep; the hook emits nothing
+  ok   task_file_present: server/governance/control-tower-router.ts
+  ok   administered_state_committed: b22b010867a3
+  ok   node_modules_available: shared, byte-identical across arms
+  ok   prompt_identity: sha256:edfa75cf672642ef — built from sequences.json only; identical across arms by construction
+UNIT B1/leanmem rep2: terminal=completed admissible=true accepted=true mem_reads=0 distilled=true elapsed=691.8s
+PRE-FLIGHT B2/leanmem rep2
+  ok   no_concurrent_measured_arm: acquired
+  ok   exact_seed_restored_before_every_position: 2543c873141f restored and verified
+  ok   administration.load_bearing_controllers_present: 13 named controllers present
+  ok   administration.data_retained_not_overwritten: arm tree retains its own durable memory
+  ok   administration.no_session_local_state: 4 session-local files withheld by lifecycle, not by directory
+  ok   administration.benchmark_withheld_from_arm: experiments and pilots absent from the arm tree
+  ok   leanmem.markers: auto-routing + substrate-side stop + memory push delivery all administered
+  ok   memory_store_provenance: 1 entr(ies), all same-sequence same-rep earlier-position
+  ok   memory_installed: 1 entr(ies) installed from B.rep2
+  ok   task_file_present: server/governance/behavioral-correctness-audit.ts
+  ok   administered_state_committed: af97a60231d5
+  ok   node_modules_available: shared, byte-identical across arms
+  ok   prompt_identity: sha256:89e808afc3208df1 — built from sequences.json only; identical across arms by construction
+PRE-FLIGHT B2/leanmem rep2
+  ok   no_concurrent_measured_arm: acquired
+  ok   exact_seed_restored_before_every_position: 2543c873141f restored and verified
+  ok   administration.load_bearing_controllers_present: 13 named controllers present
+  ok   administration.data_retained_not_overwritten: arm tree retains its own durable memory
+  ok   administration.no_session_local_state: 4 session-local files withheld by lifecycle, not by directory
+  ok   administration.benchmark_withheld_from_arm: experiments and pilots absent from the arm tree
+  ok   leanmem.markers: auto-routing + substrate-side stop + memory push delivery all administered
+  ok   memory_store_provenance: 1 entr(ies), all same-sequence same-rep earlier-position
+  ok   memory_installed: 1 entr(ies) installed from B.rep2
+  ok   task_file_present: server/governance/behavioral-correctness-audit.ts
+  ok   administered_state_committed: b9e8dcc258f5
+  ok   node_modules_available: shared, byte-identical across arms
+  ok   prompt_identity: sha256:89e808afc3208df1 — built from sequences.json only; identical across arms by construction
+UNIT B2/leanmem rep2: terminal=completed admissible=true accepted=true mem_reads=0 distilled=true elapsed=674.4s
+PRE-FLIGHT B2/native rep2
+  ok   no_concurrent_measured_arm: acquired
+  ok   exact_seed_restored_before_every_position: 2543c873141f restored and verified
+  ok   administration.substrate_absent: build-os, .claude, CLAUDE.md all removed
+  ok   task_file_present: server/governance/behavioral-correctness-audit.ts
+  ok   administered_state_committed: c4675ee29064
+  ok   node_modules_available: shared, byte-identical across arms
+  ok   prompt_identity: sha256:89e808afc3208df1 — built from sequences.json only; identical across arms by construction
+UNIT B2/native rep2: terminal=completed admissible=true accepted=true elapsed=629.0s
+PRE-FLIGHT B3/native rep2
+  ok   no_concurrent_measured_arm: acquired
+  ok   exact_seed_restored_before_every_position: 2543c873141f restored and verified
+  ok   administration.substrate_absent: build-os, .claude, CLAUDE.md all removed
+  ok   task_file_present: server/planes/router.ts
+  ok   administered_state_committed: 1d17065cca54
+  ok   node_modules_available: shared, byte-identical across arms
+  ok   prompt_identity: sha256:50bb091d0aeead9e — built from sequences.json only; identical across arms by construction
+UNIT B3/native rep2: terminal=completed admissible=true accepted=true elapsed=338.3s
+PRE-FLIGHT B3/leanmem rep2
+  ok   no_concurrent_measured_arm: acquired
+  ok   exact_seed_restored_before_every_position: 2543c873141f restored and verified
+  ok   administration.load_bearing_controllers_present: 13 named controllers present
+  ok   administration.data_retained_not_overwritten: arm tree retains its own durable memory
+  ok   administration.no_session_local_state: 4 session-local files withheld by lifecycle, not by directory
+  ok   administration.benchmark_withheld_from_arm: experiments and pilots absent from the arm tree
+  ok   leanmem.markers: auto-routing + substrate-side stop + memory push delivery all administered
+  ok   memory_store_provenance: 2 entr(ies), all same-sequence same-rep earlier-position
+  ok   memory_installed: 2 entr(ies) installed from B.rep2
+  ok   task_file_present: server/planes/router.ts
+  ok   administered_state_committed: d3c62281e333
+  ok   node_modules_available: shared, byte-identical across arms
+  ok   prompt_identity: sha256:50bb091d0aeead9e — built from sequences.json only; identical across arms by construction
+UNIT B3/leanmem rep2: terminal=completed admissible=true accepted=true mem_reads=0 distilled=true elapsed=494.6s
+PRE-FLIGHT B4/leanmem rep2
+  ok   no_concurrent_measured_arm: acquired
+  ok   exact_seed_restored_before_every_position: 2543c873141f restored and verified
+  ok   administration.load_bearing_controllers_present: 13 named controllers present
+  ok   administration.data_retained_not_overwritten: arm tree retains its own durable memory
+  ok   administration.no_session_local_state: 4 session-local files withheld by lifecycle, not by directory
+  ok   administration.benchmark_withheld_from_arm: experiments and pilots absent from the arm tree
+  ok   leanmem.markers: auto-routing + substrate-side stop + memory push delivery all administered
+  ok   memory_store_provenance: 3 entr(ies), all same-sequence same-rep earlier-position
+  ok   memory_installed: 3 entr(ies) installed from B.rep2
+  ok   task_file_present: server/copilot/batch-page-updater.ts
+  ok   administered_state_committed: da8f790b7488
+  ok   node_modules_available: shared, byte-identical across arms
+  ok   prompt_identity: sha256:b931b4dae4f94ad8 — built from sequences.json only; identical across arms by construction
+UNIT B4/leanmem rep2: terminal=completed admissible=true accepted=true mem_reads=0 distilled=true elapsed=608.3s
+PRE-FLIGHT B4/native rep2
+  ok   no_concurrent_measured_arm: acquired
+  ok   exact_seed_restored_before_every_position: 2543c873141f restored and verified
+  ok   administration.substrate_absent: build-os, .claude, CLAUDE.md all removed
+  ok   task_file_present: server/copilot/batch-page-updater.ts
+  ok   administered_state_committed: d46bdff11bb9
+  ok   node_modules_available: shared, byte-identical across arms
+  ok   prompt_identity: sha256:b931b4dae4f94ad8 — built from sequences.json only; identical across arms by construction
+UNIT B4/native rep2: terminal=completed admissible=true accepted=true elapsed=438.9s
+PRE-FLIGHT B5/native rep2
+  ok   no_concurrent_measured_arm: acquired
+  ok   exact_seed_restored_before_every_position: 2543c873141f restored and verified
+  ok   administration.substrate_absent: build-os, .claude, CLAUDE.md all removed
+  ok   task_file_present: server/governance/model-router.ts
+  ok   administered_state_committed: 53add6109c5c
+  ok   node_modules_available: shared, byte-identical across arms
+  ok   prompt_identity: sha256:e7015d54fc8d5a60 — built from sequences.json only; identical across arms by construction
+UNIT B5/native rep2: terminal=completed admissible=true accepted=true elapsed=545.2s
+PRE-FLIGHT B5/leanmem rep2
+  ok   no_concurrent_measured_arm: acquired
+  ok   exact_seed_restored_before_every_position: 2543c873141f restored and verified
+  ok   administration.load_bearing_controllers_present: 13 named controllers present
+  ok   administration.data_retained_not_overwritten: arm tree retains its own durable memory
+  ok   administration.no_session_local_state: 4 session-local files withheld by lifecycle, not by directory
+  ok   administration.benchmark_withheld_from_arm: experiments and pilots absent from the arm tree
+  ok   leanmem.markers: auto-routing + substrate-side stop + memory push delivery all administered
+  ok   memory_store_provenance: 4 entr(ies), all same-sequence same-rep earlier-position
+  ok   memory_installed: 4 entr(ies) installed from B.rep2
+  ok   task_file_present: server/governance/model-router.ts
+  ok   administered_state_committed: 5fcb73ec3493
+  ok   node_modules_available: shared, byte-identical across arms
+  ok   prompt_identity: sha256:e7015d54fc8d5a60 — built from sequences.json only; identical across arms by construction
+PRE-FLIGHT B5/leanmem rep2
+  ok   no_concurrent_measured_arm: acquired
+  ok   exact_seed_restored_before_every_position: 2543c873141f restored and verified
+  ok   administration.load_bearing_controllers_present: 13 named controllers present
+  ok   administration.data_retained_not_overwritten: arm tree retains its own durable memory
+  ok   administration.no_session_local_state: 4 session-local files withheld by lifecycle, not by directory
+  ok   administration.benchmark_withheld_from_arm: experiments and pilots absent from the arm tree
+  ok   leanmem.markers: auto-routing + substrate-side stop + memory push delivery all administered
+  ok   memory_store_provenance: 4 entr(ies), all same-sequence same-rep earlier-position
+  ok   memory_installed: 4 entr(ies) installed from B.rep2
+  ok   task_file_present: server/governance/model-router.ts
+  ok   administered_state_committed: 714e5b8e07f1
+  ok   node_modules_available: shared, byte-identical across arms
+  ok   prompt_identity: sha256:e7015d54fc8d5a60 — built from sequences.json only; identical across arms by construction
+UNIT B5/leanmem rep2: terminal=completed admissible=true accepted=true mem_reads=0 distilled=true elapsed=394.2s

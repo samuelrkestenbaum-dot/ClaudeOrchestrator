@@ -1,0 +1,2 @@
+[liveness 18:17:51] watcher armed: supervisor=800 stall_bound=300s poll=60s
+[liveness 18:28:52] watcher armed: supervisor=6380 stall_bound=300s poll=60s
