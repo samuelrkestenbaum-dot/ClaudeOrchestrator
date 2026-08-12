@@ -147,13 +147,13 @@ ok 'grep -q "no wall clock" "$SRC/build-os/delivery/ucdl.mjs" || grep -q "byte-i
   "delivery receipts are deterministic derivations of inputs — never retro-edited truth"
 
 echo "== 12b. reachability status is SPLIT by decision boundary — no collapse =="
-ok 'grep -q "^## Reachability: run/dispatch admission" "$REG" && grep -q "^## Reachability: general planning/scoring selection" "$REG"' \
-  "registry carries BOTH reachability capabilities as separate entries"
-ok '! grep -q "^## Reachability set R_t and admissible R_t+$" "$REG"' "the old combined entry is gone (statuses cannot re-merge)"
-PLST=$(awk '/^## Reachability: general planning\/scoring selection/,/^## [^R]/' "$REG" | grep '^- status:' | head -1)
-ok '[ "$PLST" = "- status: implemented-unwired" ]' "planner selection stays implemented-unwired without a real caller ($PLST)"
-ok 'grep -A40 "^## Reachability: general planning/scoring selection" "$REG" | grep -q "superficial caller must NOT be created"' \
-  "the no-superficial-caller rule is recorded in the entry itself"
+ok 'grep -q "^## Reachability: run/dispatch admission" "$REG" && grep -q "^## Zone-4 deterministic planner" "$REG"' \
+  "registry carries admission and planner as SEPARATE entries (statuses cannot re-merge)"
+ok '! grep -q "^## Reachability set R_t and admissible R_t+$" "$REG"' "the old combined entry is gone"
+ok 'grep -A20 "^## Zone-4 deterministic planner" "$REG" | grep "^- caller:" | grep -q "cmd_run"' \
+  "planner wired status is backed by a NAMED production caller, never source presence"
+ok 'grep -A30 "^## Zone-4 deterministic planner" "$REG" | grep -q "OUTCOME VALUE: UNPROVEN"' \
+  "planner outcome value explicitly UNPROVEN (E2E tests prove wiring, not benefit)"
 
 echo "== 12. sealed experiment evidence untouched by this packet =="
 ok '[ -z "$(cd "$SRC" && git status --porcelain -- build-os/experiments/EXP-0011-reusable-skills build-os/experiments/EXP-0010* 2>/dev/null)" ]' \

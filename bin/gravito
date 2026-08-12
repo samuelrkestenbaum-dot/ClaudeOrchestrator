@@ -18,6 +18,7 @@
 #   gravito review [DIR]           diff summary + acceptance (acceptance_cmd runs; prose is shown)
 #   gravito health [DIR]           H0 system health facts + reachable actions (pre-work surface)
 #   gravito predict <value> [DIR]  record a pre-run acceptance forecast (optional; enables delta)
+#   gravito plan [DIR]             deterministic plan over the admitted action set (inspection)
 #   gravito diagnose [DIR]         support bundle: identity, wiring, goal, ledger, receipts
 #   gravito stop [DIR]             halt the worker at a safe boundary; state durable
 set -euo pipefail
@@ -237,8 +238,27 @@ cmd_run(){
     tr_step 4 refuse "$(printf '%s' "$reason" | python3 -c 'import json,sys;print(json.dumps(sys.stdin.read()))')"
     die "not dispatching — 'run' is outside R_t+: $reason"
   fi
-  [ "$DRY" -eq 1 ] && { tr_step 4 dry-run "\"admitted, no dispatch\""; say "dry-run: gate open; would dispatch one worker session"; return 0; }
-  tr_step 4 dispatch "\"worker session\""
+  # Zone 4 — deterministic plan over the ADMITTED candidate. cmd_run has one
+  # dispatchable work action, so this is an honest degenerate plan: no
+  # comparison occurred and none is claimed. Class-A facts (HEAD, goal) are
+  # revalidated by the planner's validate step immediately before dispatch.
+  local planout plan_id plan_status
+  planout="$(printf '%s' "$reach" | node "$SRC/build-os/tools/planner.mjs" plan --dir "$d" --run-id "$run_id" --origin cmd_run --candidates run --h0 "$agency")" || { tr_step 4 refuse "\"planner refused\""; die "planner refused — $planout"; }
+  plan_status="$(printf '%s' "$planout" | python3 -c 'import json,sys;print(json.load(sys.stdin)["status"])')"
+  plan_id="$(printf '%s' "$planout" | python3 -c 'import json,sys;d=json.load(sys.stdin);print(d["plan"]["content_hash"][:12] if d.get("plan") else "-")')"
+  [ "$plan_status" = "PLANNED" ] || { tr_step 4 refuse "\"plan status $plan_status\""; die "no dispatch: plan status $plan_status"; }
+  tr_step 4 plan "\"plan_id=$plan_id degenerate\""
+  local reval
+  reval="$(printf '%s' "$planout" | python3 -c 'import json,sys;print(json.dumps(json.load(sys.stdin)["plan"]))' | node --input-type=module -e "
+import { validatePlan } from '$SRC/build-os/tools/planner.mjs';
+import fs from 'node:fs';
+const p = JSON.parse(fs.readFileSync(0,'utf8'));
+const v = validatePlan('$d', p);
+console.log(v.ok ? 'ok' : 'STALE: ' + v.reason);
+")"
+  [ "$reval" = "ok" ] || { tr_step 5 refuse "\"$reval\""; die "no dispatch: $reval"; }
+  [ "$DRY" -eq 1 ] && { tr_step 5 dry-run "\"planned+revalidated, no dispatch\""; say "dry-run: gate open; would dispatch one worker session"; return 0; }
+  tr_step 5 dispatch "\"worker session plan_id=$plan_id\""
   local ts prompt stream started
   ts="$(date -u +%Y%m%dT%H%M%SZ)"; stream="$d/build-os/receipts/run-$ts.jsonl"
   prompt="$(printf '# Goal (from gravito.goal — the binding contract)\n%s\n\nAuthority: %s\nProhibited: %s\nAcceptance: %s\n\nWork ONLY in this repository. Never push, merge, deploy, or touch secrets. Deliver the work, state the outcome once, stop.' \
@@ -256,6 +276,29 @@ cmd_run(){
   bash "$SRC/build-os/tools/meter-run.sh" "$stream" "$d" "$(( $(date +%s) - started ))"
   bash "$SRC/build-os/tools/residue-sweep.sh" sweep "$d" "$snap"; rm -f "$snap"
   say "run: complete — 'gravito review $d' next"
+}
+
+cmd_plan(){
+  # Zone 4 operator surface: deterministic plan over the FULL admitted action
+  # set (multi-candidate ordering, lexicographic policy). Inspection surface;
+  # executing anything remains each verb's own path.
+  local d; d="$(resolve_dir "${1:-}")"
+  local reach; reach="$(node "$SRC/build-os/tools/reachability.mjs" --json "$d" 2>/dev/null)" || die "reachability construction failed"
+  local out; out="$(printf '%s' "$reach" | node "$SRC/build-os/tools/planner.mjs" plan --dir "$d" --run-id "plan-$(date -u +%Y%m%dT%H%M%SZ)-$$" --origin cmd_plan)" || { say "$out"; die "planner refused"; }
+  printf '%s' "$out" | python3 -c '
+import json,sys
+d=json.load(sys.stdin)
+if d["status"]!="PLANNED":
+    print("plan:", d["status"], "-", d.get("refusal","")); sys.exit(0)
+p=d["plan"]
+print(f"plan {p["content_hash"][:12]} — {p["candidates_admitted"]} admitted candidate(s)" + (" (degenerate)" if p["degenerate"] else ""))
+print(f"  selected: {p["selected"]}")
+for o in p["ordered"]: print(f"  {o["rank"]}. {o["action"]:<10} dep={o["dependency_satisfied"]} evidence={o["produces_evidence"]} reversible={o["reversible"]} blast={o["blast_radius"]}")
+unsafe=[x for x in p["parallel_classification"] if x["class"]!="safely_parallel"]
+print(f"  parallel: {sum(1 for x in p["parallel_classification"] if x["class"]=="safely_parallel")} safe pair(s); {len(unsafe)} conflicting/unknown (unknown is never safe)")
+print(f"  verification: {p["required_verification"]}")
+print(f"  cognition handoff: {p["cognition_requirement"]["state"]} — consumer UCDL UNWIRED (descriptor only)")
+'
 }
 
 cmd_predict(){
@@ -412,7 +455,17 @@ sys.exit(0 if any(g.get('matcher')=='Edit|Write|NotebookEdit|Bash' and any('mutg
     else
       row "reach.admission" "cmd_run" "current" "STATICALLY_CONNECTED" "admission caller in CLI; no run-trace in this repo"
     fi
-    row "reach.planner" "(none)" "n/a" "IMPLEMENTED_UNWIRED" "no planning/scoring layer exists; selectAction is tests-only by design"
+    if [ -f "$d/build-os/receipts/plans.jsonl" ] && grep -q '"origin":"cmd_run"' "$d/build-os/receipts/plans.jsonl"; then
+      row "planner" "cmd_run" "current" "WIRED_UNPROVEN" "plan receipt: $(grep '"origin":"cmd_run"' "$d/build-os/receipts/plans.jsonl" | tail -1 | python3 -c 'import json,sys;d=json.loads(sys.stdin.read());print(d["content_hash"][:12],d["run_id"])' 2>/dev/null || echo '?')"
+    else
+      row "planner" "cmd_run" "current" "STATICALLY_CONNECTED" "caller in CLI; no cmd_run plan receipt in this repo"
+    fi
+    if [ -f "$d/build-os/receipts/plans.jsonl" ] && grep -q '"origin":"cmd_plan"' "$d/build-os/receipts/plans.jsonl"; then
+      row "planner" "cmd_plan" "current" "WIRED_UNPROVEN" "plan receipt exists (multi-candidate ordering executed)"
+    else
+      row "planner" "cmd_plan" "current" "STATICALLY_CONNECTED" "caller in CLI; no cmd_plan receipt in this repo"
+    fi
+    row "cognition-handoff" "planner" "n/a" "IMPLEMENTED_UNWIRED" "descriptor emitted in plans; consumer UCDL UNWIRED (the seam, not an invocation)"
     # delta streams
     if [ -f "$d/build-os/receipts/deltas.jsonl" ]; then
       row "delta.observe" "cmd_review" "current" "WIRED_UNPROVEN" "last: $(tail -1 "$d/build-os/receipts/deltas.jsonl" | python3 -c 'import json,sys;d=json.loads(sys.stdin.read());print(d["at"],d["prediction_status"])' 2>/dev/null || echo '?')"
@@ -461,8 +514,9 @@ case "$CMD" in
   run)       cmd_run "$@" ;;
   health)    cmd_health "$@" ;;
   predict)   cmd_predict "$@" ;;
+  plan)      cmd_plan "$@" ;;
   review)    cmd_review "$@" ;;
   diagnose)  cmd_diagnose "$@" ;;
   stop)      cmd_stop "$@" ;;
-  help|*)    sed -n '2,22p' "$0" ;;
+  help|*)    sed -n '2,23p' "$0" ;;
 esac

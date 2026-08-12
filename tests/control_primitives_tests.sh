@@ -50,7 +50,7 @@ rm -f "$R/build-os/receipts/run.pid"
 echo "== P-2 + sequence: reachability is the REAL admission input, traced =="
 RID=$(tail -1 "$TRC" | python3 -c 'import json,sys;print(json.loads(sys.stdin.read())["run_id"])')
 STEPS=$(grep "\"$RID\"" "$TRC" | python3 -c 'import json,sys;print(",".join(json.loads(l)["step"] for l in sys.stdin))')
-ok '[ "$STEPS" = "h0,reachability,authority,dry-run" ]' "one run_id, ordered: h0 -> reachability -> authority -> admission ($STEPS)"
+ok '[ "$STEPS" = "h0,reachability,authority,plan,dry-run" ]' "one run_id, ordered: h0 -> reachability -> authority -> plan -> admission ($STEPS)"
 ok '[ "$(grep "\"$RID\"" "$TRC" | grep -c "\"step\":\"h0\"")" = 1 ]' "exactly ONE h0 step per dispatch attempt (correlation id proof)"
 # LAPSED window (its sibling out-of-window state NOT-YET-LIVE is exercised by goal_enforcement_tests)
 sed -i 's/^starts: .*/starts: 2026-07-01/; s/^expires: .*/expires: 2026-08-01/' "$R/gravito.goal"
@@ -159,7 +159,8 @@ DOUT=$("$G" diagnose "$R" 2>/dev/null)
 ok 'printf "%s" "$DOUT" | grep "H0_system" | grep "cmd_run" | grep -q "WIRED_UNPROVEN"' "H0@cmd_run WIRED_UNPROVEN (receipt evidence here)"
 ok 'printf "%s" "$DOUT" | grep "H0_system" | grep "tool-gate" | grep -q "WIRED_UNPROVEN"' "H0@tool-gate WIRED_UNPROVEN (refusal receipt evidence here)"
 ok 'printf "%s" "$DOUT" | grep "reach.admission" | grep -q "WIRED_UNPROVEN"' "admission WIRED_UNPROVEN (run-trace evidence)"
-ok 'printf "%s" "$DOUT" | grep "reach.planner" | grep -q "IMPLEMENTED_UNWIRED"' "planner IMPLEMENTED_UNWIRED — split status can never collapse into admission's"
+ok 'printf "%s" "$DOUT" | grep "planner" | grep -q "cmd_run"' "planner reported per entry point (split from admission, never one label)"
+ok 'printf "%s" "$DOUT" | grep "cognition-handoff" | grep -q "IMPLEMENTED_UNWIRED"' "cognition handoff stays IMPLEMENTED_UNWIRED (descriptor only, UCDL unwired)"
 ok 'printf "%s" "$DOUT" | grep -q "uncovered/unsupported boundaries"' "uncovered boundaries named in the matrix output"
 ok '! printf "%s" "$DOUT" | grep -E "^  [^ ]" | grep -q "OUTCOME_PROVEN"' "no matrix ROW claims OUTCOME_PROVEN from tests alone (legend may name the status)"
 R3="$WORK/fresh"; mkdir -p "$R3"; git -C "$R3" init -q; git -C "$R3" remote add origin https://x/f.git

@@ -292,19 +292,19 @@ challenger material at best.
 - outcome-test: gates behind it: real budget halt + real publish block (experiment/program level). The admission construction itself: E2E real-entry-point proof incl. lapsed-goal refusal outside R_t+ (task level); no measured beneficial outcome yet
 - status: wired-unproven
 
-## Reachability: general planning/scoring selection (selectAction over R_t+)
-- equation: a* = argmax over R_t+ of V(a) — selection strictly inside the admitted set
-- class: A
+## Zone-4 deterministic planner (selection over R_t+)
+- equation: selected = lexicographic(dependency_satisfied, produces_evidence, reversible, blast_radius asc, name) over R_t+ ONLY; parallel pairs safe iff declared write sets provably disjoint (UNKNOWN never safe)
+- class: B
 - zone: 4
-- implementation: build-os/tools/reachability.mjs selectAction() — argmax strictly over R_t+, outside scores ignored by construction (score-resurrection proof executed)
-- caller: none in any production path — tests only. NO planner/scoring layer exists to consume R_t+. This is an EXPLICIT ARCHITECTURAL DEPENDENCY, not a wiring gap to patch: a future planner must (1) receive ONLY R_t+ (never the raw action universe), (2) treat authority as a constraint never a score term, (3) emit a selection receipt naming candidates, scores, and the admitted set, (4) be built as its own authorized packet
-- inputs: R_t+ and a scores map (no production scorer exists)
-- decision: none today — a superficial caller must NOT be created to improve this status
-- receipt: none (selection receipts are part of the future contract above)
-- baseline: n/a (Class A constraint on any future scorer)
-- falsifier: n/a
-- outcome-test: none possible without the planner
-- status: implemented-unwired
+- implementation: build-os/tools/planner.mjs — typed input (run_id, dir, reach receipt, candidates), identity/integrity refusals, NO_REACHABLE_ACTION on empty set, content-addressed plans (identical inputs => identical hash), hash-chained plans.jsonl, validatePlan Class-A revalidation before dispatch, cognition-requirement descriptor (the UCDL seam, not an invocation). NO Class-C/D terms: no probabilities, utilities, attractors, trust, Phi, semantic relevance, adaptive thresholds, or LLM calls
+- caller: bin/gravito cmd_run (degenerate one-candidate plan, honest: no comparison claimed; plan step traced, revalidated before dispatch) + bin/gravito cmd_plan (multi-candidate ordering, inspection surface). Parallel groups are CLASSIFIED only — executing them requires separate authorization
+- inputs: reachability receipt, goal file facts, manifests, run streams, git HEAD (all Class-B observable)
+- decision: which admitted action dispatches (cmd_run) / how admitted actions order (cmd_plan)
+- receipt: build-os/receipts/plans.jsonl (append-only, hash-chained, mutex-serialized); run-trace.jsonl step plan
+- baseline: n/a — this IS the deterministic baseline any future Class-C/D planner must beat
+- falsifier: n/a for the mechanism; the ordering POLICY's falsifier is a Zone-10 question once outcomes are labeled
+- outcome-test: E2E real-entry-point proof (planner_tests 25/25: refusals, degenerate honesty, determinism, revalidation, concurrency, torn receipts — task level). Planner OUTCOME VALUE: UNPROVEN — no measured beneficial outcome exists
+- status: wired-unproven
 
 ## Ethics/authority as constraint, never penalty
 - equation: a* = argmax_{a in R_t, E(a)=1} V(a) — optimize only inside admissible space
