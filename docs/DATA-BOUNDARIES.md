@@ -1,4 +1,4 @@
-# Gravito data boundaries (R0) — what lives where, what leaves, how to remove it
+# Gravito data boundaries (R0.1) — what lives where, what leaves, how to remove it
 
 **What leaves the machine:** model provider API calls only (prompts, file
 contents the worker reads, tool results — to the configured Claude endpoint).
@@ -10,10 +10,24 @@ home. Telemetry default: OFF (there is no telemetry sender to turn on).
 `build-os/memory/` (project memory, task logs, spend-ledger.jsonl,
 .project-identity stamp) · `build-os/receipts/` (install manifests, run
 streams run-*.jsonl — these CONTAIN worker transcripts including file
-contents the worker read) · `build-os/packets/` (task state) ·
+contents the worker read; refusals.log — goal-gate refusal receipts;
+residue.log — hygiene-sweep receipts) · `build-os/residue/<ts>/`
+(incidental tool droppings a worker left at the repo root, moved here
+reversibly by the post-run sweep — product files are never swept) ·
+`build-os/packets/` (task state) ·
 `gravito.goal` (the owner contract). User scope: `~/.claude`, `~/build-os`
 (engine + user-level memory; namespace guard keeps project stores from
 crossing repos — proven by tests/cross_repo_isolation_tests.sh).
+
+**Metering (R0.1) — what is counted and what is NOT:** `gravito run`
+parses each worker stream's provider-reported usage into
+`build-os/memory/spend-ledger.jsonl` (flock-serialized, deduplicated per
+stream; a stream with no result event is recorded NOT-METERED, never
+estimated). The goal gate halts on this committed ledger. **NOT metered,
+stated explicitly:** the operator's own interactive sessions, direct
+`claude` invocations outside `gravito run`, experiment harnesses, and any
+MCP-side execution. Numbers for those paths do not exist and are never
+inferred.
 
 **Secrets:** Gravito never reads or stores secrets by design; preflight
 refuses repos with obvious secret files at root; the publish gate blocks

@@ -105,6 +105,22 @@ Experimental geometry/math, intelligence claims, and whole-system
 performance claims are OUTSIDE this gate and default OFF until separately
 proven and activated (whole-system validation program).
 
+## R0 / R0.1 addendum — what the assessment above now understates
+
+This assessment predates R0/R0.1 execution and is kept as the record of what
+was known then. Executed since (evidence: docs/R0-EVIDENCE.md, tests):
+journey items 1–3, 5, 7, 9, 10 have working, test-proven implementations
+(`gravito` preflight/init/goal/run/review/stop/rollback/uninstall/purge;
+isolation 14/14; lifecycle suite; goal gate fail-closed). R0.1 upgraded the
+two honest residuals it named: the goal contract is now enforced at TOOL
+level (PreToolUse mutgate, fail closed before side effects, refusal
+receipts — tests/goal_enforcement_tests.sh) rather than by announcement,
+and `gravito run` streams are metered into a committed ledger the gate
+halts on. Still true and still open: paths listed under "NOT METERED" in
+docs/DATA-BOUNDARIES.md; MCP-hosted mutating tools are not in the mutgate
+matcher; a bare human shell bypasses tool gates by design; R1/R2 remain
+unauthorized.
+
 ## Releases
 
 - **R0 — owner uses a 2nd internal repo:** blockers list below; plus
