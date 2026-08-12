@@ -1,0 +1,18 @@
+{
+  "work": "EXP-0010: 20 leanrules arms (2 sequences x 5 ordered positions x 2 isolated reps) against EXP-0009's frozen position-matched native comparator; rule-unit memory, selective <=1536B delivery, transport pin unchanged",
+  "decision_id": "D3",
+  "hypothesis_id": "H-memory-beats-rediscovery",
+  "differs_from_prior": "the unit of memory changes from distilled prior-task reports to mechanically-extracted repair rules (error-class identity, applicability, demonstrated diff hunks), and delivery becomes selective: matched error classes only, hard cap 1536 bytes, pointer mode unreachable",
+  "possible_results": [
+    { "result": "position-matched leanrules/native gap becomes MORE favorable as rules accumulate, acceptance held, rules delivered in the improving arms",
+      "next_action": "rule-unit memory compounds — proceed to Phase 2 proof 2 (reusable skills) carrying this memory design" },
+    { "result": "flat gap",
+      "next_action": "stop memory proofs on this corpus — the next experiment changes the TASK CORPUS to tasks with genuinely expensive discovery, not the memory design again" },
+    { "result": "gap LESS favorable — even 1.5KB of targeted rules drags",
+      "next_action": "reject push-delivery memory architecture for this corpus regardless of unit; corpus change required before any further memory claim" },
+    { "result": "acceptance or quality loss in leanrules arms",
+      "next_action": "the memory-advantage claim FAILS at this proof regardless of economics — record and stop" },
+    { "result": "favorable curve with zero delivered-rule bytes in the improving arms",
+      "next_action": "CONFOUND — locate the actual driver before any memory claim" }
+  ]
+}
