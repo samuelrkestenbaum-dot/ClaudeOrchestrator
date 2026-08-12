@@ -1,0 +1,60 @@
+=== EXP-0010 READ — leanrules (new) vs EXP-0009 native (frozen comparator) ===
+
+--- 0. COMPARATOR IDENTITY ---
+prompt sha uniform at all 10 positions across both studies
+
+--- 1. ADMISSIBILITY & ACCEPTANCE (gate: acceptance loss => claim FAILS) ---
+native (frozen): 20/20 admissible, 20 accepted
+leanrules:       20/20 admissible, 19 accepted  missing/inadmissible: none
+
+--- 2. TOM GUARD (leanrules must hold the lean zeros) ---
+memory_writes_by_worker: 0 total
+capability_search=1 gate_diagnosis=0 routing_bookkeeping=0 gate_challenge=0 control_calls=1
+(known false-positive pattern: completion reports; inspect any flags verbatim before calling regression)
+
+--- 3. RULE DELIVERY EVIDENCE (per leanrules arm) ---
+arm                  matched  instB in-stream memReads
+A1.leanrules.r1            0      0        no        0
+A2.leanrules.r1            1      0        no        0
+A3.leanrules.r1            2   1025       yes        0
+A4.leanrules.r1            3   1065       yes        0
+A5.leanrules.r1            4   1251       yes        0
+B1.leanrules.r1            0      0        no        0
+B2.leanrules.r1            1   1442       yes        0
+B3.leanrules.r1            2      0        no        0
+B4.leanrules.r1            3    976       yes        0
+B5.leanrules.r1            4   1351       yes        0
+A1.leanrules.r2            0      0        no        0
+A2.leanrules.r2            1   1127       yes        0
+A3.leanrules.r2            2   1022       yes        0
+A4.leanrules.r2            3   1049       yes        0
+A5.leanrules.r2            4   1235       yes        0
+B1.leanrules.r2            0      0        no        0
+B2.leanrules.r2            1   1350       yes        0
+B3.leanrules.r2            2      0        no        0
+B4.leanrules.r2            3    976       yes        0
+B5.leanrules.r2            4   1351       yes        0
+arms with rules installed: 13/20; all delivered in-stream: true
+
+--- 4. PRIMARY: POSITION-MATCHED GAP (leanrules/native ratio per position; paired, admissible both sides) ---
+cost      P1..P5:     0.97    1.07    1.01    0.79    0.96
+  P1=0.97  late(P4,P5)=0.87  => gap MORE favorable with position
+uncached  P1..P5:     1.13    1.09    1.25    0.94    0.94
+  P1=1.13  late(P4,P5)=0.94  => gap MORE favorable with position
+turns     P1..P5:     0.78    1.01    0.89    0.73    0.91
+  P1=0.78  late(P4,P5)=0.82  => gap LESS favorable with position
+
+--- 5. SECONDARY: ABSOLUTE POSITION CURVES (context only) ---
+cost     native         1.67     0.79     0.79     1.27     1.74
+cost     leanrules      1.61     0.84     0.82     1.08     2.03
+uncached native        45104    28515    27852    40680    50846
+uncached leanrules     50828    29988    32481    40217    52548
+turns    native           42       20       24       31       36
+turns    leanrules        33       21       23       25       40
+
+--- 6. STALE/INCORRECT-RULE HARM ---
+rule-delivered arms not accepted: 0/13
+
+--- 7. REDISCOVERY (outside-task-file reads / searches) per position ---
+native     outsideReads    1.5   0.5   0.5   0.8   1.0   searches    0.0   0.0   0.0   0.0   0.0
+leanrules  outsideReads    1.0   0.0   0.3   0.0   0.3   searches    0.0   0.0   0.0   0.0   0.0

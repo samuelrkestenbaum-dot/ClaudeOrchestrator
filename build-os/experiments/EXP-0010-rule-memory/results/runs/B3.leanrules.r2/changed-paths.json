@@ -1,0 +1,9 @@
+{
+  "base_commit": "431ca859c2ce248536ff0f27ddd8d7258a3c05db",
+  "product_paths": [
+    "server/planes/router.ts"
+  ],
+  "governance_paths": [
+    "build-os/packets/routing/routing-auto-20260812T062301Z-19971-20260812T062301Z.md"
+  ]
+}

@@ -1,0 +1,337 @@
+diff --git a/server/_core/logger.ts b/server/_core/logger.ts
+index c59b823..c8487b2 100644
+--- a/server/_core/logger.ts
++++ b/server/_core/logger.ts
+@@ -222,6 +222,7 @@ export type LogDomain =
+   | 'promotion-readiness-gate'
+   | 'billing'
+   | 'emotional-geometry'
++  | 'geometry-admin-router'
+   | 'alert-sse'
+   | 'neurocosmology-advanced'
+   | 'tenant-analytics'
+diff --git a/server/router-groups/geometry-admin-router.ts b/server/router-groups/geometry-admin-router.ts
+index e00f347..54ba532 100644
+--- a/server/router-groups/geometry-admin-router.ts
++++ b/server/router-groups/geometry-admin-router.ts
+@@ -18,7 +18,8 @@ import { adminProcedure, router } from '../_core/trpc';
+ import { getDb } from '../db';
+ import { geometrySessions, geometrySnapshots, geometryEvents } from '../../drizzle/schema';
+ import { desc, eq, and, gte, count, avg, max, sql } from 'drizzle-orm';
+-import { createSafeDefaults, preGenerationHook, postGenerationHook } from '../emotional-geometry-runtime/geometry-runtime-bridge';
++import { createSafeDefaults, preGenerationHook, postGenerationHook, type GeometryPreGenerationResult, type GeometryPostGenerationResult } from '../emotional-geometry-runtime/geometry-runtime-bridge';
++import { createInitialState, updateBaseDimensions, type CanonicalEmotionalState } from '../emotional-geometry-runtime/state/EmotionalState';
+ import { getGeometryMetrics, resetGeometryMetrics, recordPreHook, recordPostHook } from '../emotional-geometry-runtime/geometry-metrics';
+ import { getFlags, getRuntimeMode, setGeometryFlag, setGeometryRuntimeMode, type GeometryFeatureFlags, type GeometryRuntimeMode } from '../emotional-geometry-runtime/feature-flags';
+ import { advancedPreGenerationHook, advancedPostGenerationHook } from '../neurocosmology-runtime-advanced/integration-hooks';
+@@ -27,6 +28,44 @@ import { getAlertConfigs, getAlertConfig, setAlertThreshold, setAlertEnabled, se
+ import { getEscalationPolicies, createEscalationPolicy, updateEscalationPolicy, deleteEscalationPolicy, getEscalationHistory, runEscalationCheck, isEscalationEngineRunning, getSSEClientCount, type EscalationPolicyConfig } from '../emotional-geometry-runtime/escalation-engine';
+ import { getAlertFrequencyByType, getAlertSummaryStats, getIncidents, getIncidentDetail, resolveIncident, acknowledgeIncident } from '../emotional-geometry-runtime/alert-analytics';
+ 
++/**
++ * Resolve the database handle for the geometry dashboard.
++ *
++ * `getDb()` returns `null` when no DATABASE_URL is configured. Every procedure
++ * below reads persisted geometry history, so there is no meaningful degraded
++ * answer — surface the missing dependency as a 503 instead of letting a null
++ * handle reach a query builder.
++ */
++async function requireDb(): Promise<NonNullable<Awaited<ReturnType<typeof getDb>>>> {
++  const db = await getDb();
++  if (!db) {
++    throw new TRPCError({
++      code: 'SERVICE_UNAVAILABLE',
++      message: 'Database unavailable: geometry admin data requires a configured database',
++    });
++  }
++  return db;
++}
++
++/**
++ * Lift a flat geometry state snapshot into the canonical emotional state the
++ * neurocosmology hooks expect. Mirrors the mapping used by the governed
++ * generation pipeline so diagnostics exercise the same shape as production.
++ */
++function buildCanonicalState(
++  snapshot: Record<string, number> | undefined,
++  sessionId: string,
++  userId: string,
++): CanonicalEmotionalState {
++  return updateBaseDimensions(createInitialState(sessionId, userId), {
++    emotionalMass: snapshot?.emotionalMass ?? 0,
++    valenceCharge: snapshot?.emotionalValence ?? snapshot?.emotionalCharge ?? 0,
++    attentionCurvature: snapshot?.attentionCurvature ?? 0,
++    memoryEntropy: snapshot?.memoryEntropy ?? 0.5,
++    relationalDistance: snapshot?.emotionalDistance ?? 1,
++  });
++}
++
+ export const geometryAdminRouter = router({
+   // =========================================================================
+   // NEUROCOSMOLOGY VALIDATION ENDPOINTS
+@@ -108,7 +147,7 @@ export const geometryAdminRouter = router({
+       timeRangeHours: z.number().min(1).max(720).default(24),
+     }).optional())
+     .query(async ({ input }) => {
+-      const db = await getDb();
++      const db = await requireDb();
+       const hours = input?.timeRangeHours ?? 24;
+       const since = new Date(Date.now() - hours * 60 * 60 * 1000);
+ 
+@@ -180,7 +219,7 @@ export const geometryAdminRouter = router({
+       status: z.enum(["active", "completed", "error"]).optional(),
+     }).optional())
+     .query(async ({ input }) => {
+-      const db = await getDb();
++      const db = await requireDb();
+       const limit = input?.limit ?? 20;
+       const offset = input?.offset ?? 0;
+       const status = input?.status;
+@@ -212,7 +251,7 @@ export const geometryAdminRouter = router({
+       limit: z.number().min(1).max(500).default(100),
+     }))
+     .query(async ({ input }) => {
+-      const db = await getDb();
++      const db = await requireDb();
+       const snapshots = await db
+         .select()
+         .from(geometrySnapshots)
+@@ -236,7 +275,7 @@ export const geometryAdminRouter = router({
+       timeRangeHours: z.number().min(1).max(720).default(24),
+     }).optional())
+     .query(async ({ input }) => {
+-      const db = await getDb();
++      const db = await requireDb();
+       const limit = input?.limit ?? 50;
+       const offset = input?.offset ?? 0;
+       const since = new Date(Date.now() - (input?.timeRangeHours ?? 24) * 60 * 60 * 1000);
+@@ -302,7 +341,7 @@ export const geometryAdminRouter = router({
+       timeRangeHours: z.number().min(1).max(720).default(24),
+     }).optional())
+     .query(async ({ input }) => {
+-      const db = await getDb();
++      const db = await requireDb();
+       const since = new Date(Date.now() - (input?.timeRangeHours ?? 24) * 60 * 60 * 1000);
+ 
+       const distribution = await db
+@@ -324,7 +363,7 @@ export const geometryAdminRouter = router({
+   diagnosticGeneration: adminProcedure
+     .input(z.object({
+       prompt: z.string().min(1).max(500).default('What is emotional intelligence and why does it matter?'),
+-      currentState: z.record(z.number()).optional(),
++      currentState: z.record(z.string(), z.number()).optional(),
+     }).optional())
+     .mutation(async ({ input, ctx }) => {
+       const startTime = performance.now();
+@@ -366,7 +405,13 @@ export const geometryAdminRouter = router({
+           auditTrail.push(`[PRE-HOOK] Constraints: ${preResult.constraintsInjected.join(', ')}`);
+         }
+         // Record metrics
+-        recordPreHook(preResult.fixationRisk, preResult.driftScore, preResult.computeTimeMs);
++        recordPreHook(
++          preResult.fixationRisk,
++          preResult.driftScore,
++          preResult.computeTimeMs,
++          preResult.shouldConstrain,
++          preResult.constraintsInjected.length,
++        );
+         auditTrail.push(`[METRICS] Pre-hook metrics recorded`);
+       } catch (err) {
+         auditTrail.push(`[PRE-HOOK] FAILED: ${err instanceof Error ? err.message : String(err)}`);
+@@ -374,9 +419,12 @@ export const geometryAdminRouter = router({
+       }
+ 
+       // Step 2: Advanced neurocosmology pre-hook
++      // The advanced hooks operate on the canonical emotional state, so the flat
++      // diagnostic snapshot is lifted through the same mapping the pipeline uses.
++      const diagnosticState = buildCanonicalState(testState, `diag_${Date.now()}`, `admin-${ctx.user.id}`);
+       try {
+         const advPre = await advancedPreGenerationHook({
+-          currentState: testState,
++          currentState: diagnosticState,
+           stateHistory: [],
+         });
+         if (advPre.enabled) {
+@@ -402,7 +450,7 @@ export const geometryAdminRouter = router({
+         });
+         auditTrail.push(`[POST-HOOK] Hash: ${postResult.postStateHash}, EntropyΔ: ${postResult.entropyDelta.toFixed(4)}, CurvatureΔ: ${postResult.curvatureDelta.toFixed(4)}, Loop: ${postResult.loopDetected}, Time: ${postResult.computeTimeMs.toFixed(2)}ms`);
+         // Record metrics
+-        recordPostHook(postResult.loopDetected, postResult.computeTimeMs);
++        recordPostHook(postResult.computeTimeMs, postResult.loopDetected);
+         auditTrail.push(`[METRICS] Post-hook metrics recorded`);
+       } catch (err) {
+         auditTrail.push(`[POST-HOOK] FAILED: ${err instanceof Error ? err.message : String(err)}`);
+@@ -411,7 +459,7 @@ export const geometryAdminRouter = router({
+       // Step 5: Advanced neurocosmology post-hook
+       try {
+         const advPost = await advancedPostGenerationHook({
+-          updatedState: testState,
++          updatedState: diagnosticState,
+           stateHistory: [],
+         });
+         if (advPost.enabled) {
+@@ -451,7 +499,7 @@ export const geometryAdminRouter = router({
+       bucketMinutes: z.number().min(1).max(60).default(5),
+     }).optional())
+     .query(async ({ input }) => {
+-      const db = await getDb();
++      const db = await requireDb();
+       const hours = input?.timeRangeHours ?? 24;
+       const bucketMin = input?.bucketMinutes ?? 5;
+       const since = new Date(Date.now() - hours * 60 * 60 * 1000);
+@@ -831,7 +879,7 @@ export const geometryAdminRouter = router({
+       sessionId: z.string(),
+     }))
+     .query(async ({ input }) => {
+-      const db = await getDb();
++      const db = await requireDb();
+ 
+       // Get session
+       const [session] = await db
+@@ -943,32 +991,65 @@ export const geometryAdminRouter = router({
+       log.info({ alertType: input.alertType, channelId: input.channelId }, 'Firing test alert');
+ 
+       // Build synthetic metrics that will trigger the specified alert type
+-      const syntheticPre = {
+-        fixationRisk: input.alertType === 'high_fixation_risk' ? 0.95 : 0.1,
+-        driftScore: input.alertType === 'high_drift_score' ? 0.95 : 0.1,
+-        loopDetected: input.alertType === 'high_loop_rate',
+-        singularityDetected: input.alertType === 'singularity_burst',
+-        phaseTransition: input.alertType === 'phase_transition_burst',
+-        invariantViolations: input.alertType === 'invariant_violation_accumulation' ? 15 : 0,
++      const alertType = input.alertType as AlertType;
++      const degraded = alertType === 'compute_degradation';
++      const stateHash = `test_alert_${Date.now()}`;
++
++      const syntheticPre: GeometryPreGenerationResult = {
++        stateSnapshot: {},
++        preStateHash: stateHash,
++        fixationRisk: alertType === 'high_fixation_risk' ? 0.95 : 0.1,
++        stabilityClass: 'stable',
++        driftScore: alertType === 'high_drift_score' ? 0.95 : 0.1,
++        constraintsInjected: [],
++        shouldConstrain: false,
++        computeTimeMs: degraded ? 500 : 10,
++        eigenClassification: null,
+       };
+ 
+-      const syntheticPost = {
+-        computeTimeMs: input.alertType === 'compute_degradation' ? 500 : 10,
+-        postComputeTimeMs: input.alertType === 'compute_degradation' ? 500 : 5,
++      const syntheticPost: GeometryPostGenerationResult = {
++        postStateHash: stateHash,
++        entropyDelta: 0,
++        curvatureDelta: 0,
++        loopDetected: alertType === 'high_loop_rate',
++        fieldSnapshot: {},
++        auditRecord: {
++          id: stateHash,
++          timestamp: Date.now(),
++          preStateHash: stateHash,
++          postStateHash: stateHash,
++          eigenClassification: null,
++          driftScore: syntheticPre.driftScore,
++          fixationProbability: syntheticPre.fixationRisk,
++          constraintsInjected: [],
++          canonMapping: {},
++          computeTimeMs: degraded ? 500 : 5,
++          stabilityReport: {},
++        },
++        computeTimeMs: degraded ? 500 : 5,
++      };
++
++      // Singularity / phase-transition / invariant signals reach the evaluator
++      // through the advanced neurocosmology channel, not the geometry result.
++      const syntheticNeuro = {
++        singularityDetected: alertType === 'singularity_burst',
++        phaseTransitionDetected: alertType === 'phase_transition_burst',
++        invariantViolations: alertType === 'invariant_violation_accumulation' ? 15 : 0,
+       };
+ 
+       try {
+-        const result = await evaluateAlerts(
+-          syntheticPre as any,
+-          syntheticPost as any,
+-          `test_session_${Date.now()}`,
+-        );
++        const alertsFired = await evaluateAlerts({
++          sessionId: `test_session_${Date.now()}`,
++          preResult: syntheticPre,
++          postResult: syntheticPost,
++          neuroAdvanced: syntheticNeuro,
++        });
+ 
+         return {
+           success: true,
+-          alertsFired: result.alertsFired,
+-          message: result.alertsFired > 0
+-            ? `Test alert fired successfully (${result.alertsFired} alert(s))`
++          alertsFired,
++          message: alertsFired > 0
++            ? `Test alert fired successfully (${alertsFired} alert(s))`
+             : 'Alert was suppressed (check if enabled and cooldown is active)',
+           timestamp: Date.now(),
+         };
+
+diff --git a/build-os/packets/routing/routing-auto-20260812T055626Z-14421-20260812T055626Z.md b/build-os/packets/routing/routing-auto-20260812T055626Z-14421-20260812T055626Z.md
+--- /dev/null
++++ b/build-os/packets/routing/routing-auto-20260812T055626Z-14421-20260812T055626Z.md
++# ROUTING RECEIPT — one file per routing decision. The recorded verdict is BINDING
++# (build-os/memory/routing_contract.md); routing-check.sh refuses this receipt at
++# close if executed_mode exceeds selected_mode with no escalation record, if an
++# escalation carries no evidence, or if consumption exceeds a budget undeclared.
++task_id: auto-20260812T055626Z-14421
++description_sha256: 27b3f1b706c909c94af97ff3625e4a0a813089bab6bc2c90aa89c5978cb14534
++descriptor: {"expected_files_changed":1,"requires_tests":false,"expected_session_count":1,"prior_context_required":false,"handoff_required":false,"consequence_level":"low","irreversible_or_external_mutation":false,"high_blast_radius":false,"unclear_acceptance_criteria":false,"security_or_compliance_consequence":false,"parallel_workstreams_benefit":false,"high_rework_history":false,"nondeterministic_verification":false}
++selected_mode: direct
++selector_note: -
++issued_at: 2026-08-12T05:56:26Z
++# --- budgets: DERIVED DEFAULTS from EXP-0002 sealed records, operator-tunable, not laws.
++# --- Derivation: ON-surface light runs measured 172k-369k total tokens / 0 dispatches
++# --- (named exceedance: raw T4 at 526,461 - context, not the band); the
++# --- blowouts measured 4.9M/7.4M tokens, 4-5 dispatches, $3.63/$4.80. See route-task.sh.
++budget_max_subagents: 0
++budget_max_total_tokens: 250000
++budget_max_uncached_tokens: 30000
++budget_max_model_calls: 12
++budget_max_wall_clock_s: 300
++budget_max_cost_usd: 0.40
++# --- process allowance (PACKET-0053): the packet's OWN gate chain is governance
++# --- ceremony, counted SEPARATELY from task work by the live gate and attributed
++# --- to governance_process (the 0050/0051 calibration question, resolved). Default
++# --- 7 = the LARGEST LEGAL chain in the doctrine: mandatory_full_regate runs
++# --- builder, qa, reviewer, fix-builder, qa, reviewer, archivist. (No-fix chain
++# --- is 4; fix-then-pass is 6.) Process dispatches never eat budget_max_subagents.
++process_dispatch_allowance: 7
++# --- empty at issue; filled at close. AN UNKNOWN IS NOT A ZERO: "-" is an honest
++# --- admission and is never refused; refusal is for CONTRADICTION, not absence.
++executed_mode: -
++escalation: -
++escalation_evidence: -
++consumed_subagents: -
++consumed_total_tokens: -
++consumed_uncached_tokens: -
++consumed_model_calls: -
++consumed_wall_clock_s: -
++consumed_cost_usd: -
++degradation_note: -
++# --- close-fill EXTENSIONS (PACKET-0053). consumed_subagents above counts TASK
++# --- dispatches (vs budget_max_subagents); consumed_process_dispatches counts the
++# --- gate chain (vs process_dispatch_allowance). The attr_* layers attribute
++# --- consumption where derivable at close — tokens or cost with provenance, or
++# --- "-" as an admission, NEVER a zero nobody measured. Receipts predating these
++# --- fields stay valid: routing-check.sh reads an absent field as "-".
++consumed_process_dispatches: -
++attr_task_execution: -
++attr_context_retrieval: -
++attr_subagent_execution: -
++attr_verification: -
++attr_review: -
++attr_governance_process: -
++attr_experiment_audit: -
++# --- contribution rows (PACKET-0053): marginal-contribution accounting, MANDATORY
++# --- for a Full close with dispatches>0 (routing-check.sh refuses otherwise). The
++# --- live gate seeds one stub row per admitted Full task dispatch; fill at close:
++# --- contribution: <subagent_type> | <unique_question> | <output_ref> | changed_implementation=y/n/- | changed_conclusion=y/n/- | caught_defect=y/n/- | duplicated_work=y/n/- | tokens=<v|-> | cost=<v|-> | time=<v|->
++# --- An all-"-" row passes as an admission and is REPORTED as non-contributing.
++

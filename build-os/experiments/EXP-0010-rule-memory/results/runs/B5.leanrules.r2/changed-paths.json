@@ -1,0 +1,9 @@
+{
+  "base_commit": "e44485e5e419f7c2af75d9f9c11bd2e6033879e4",
+  "product_paths": [
+    "server/governance/model-router.ts"
+  ],
+  "governance_paths": [
+    "build-os/packets/routing/routing-auto-20260812T063252Z-29776-20260812T063252Z.md"
+  ]
+}

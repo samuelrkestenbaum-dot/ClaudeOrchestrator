@@ -1,0 +1,10 @@
+{
+  "base_commit": "d726a7e8f84030bd7fb4f51ac10db68f1bd5037c",
+  "product_paths": [
+    "server/_core/logger.ts",
+    "server/emotional-geometry-runtime/alert-analytics.ts"
+  ],
+  "governance_paths": [
+    "build-os/packets/routing/routing-auto-20260812T040318Z-5335-20260812T040318Z.md"
+  ]
+}

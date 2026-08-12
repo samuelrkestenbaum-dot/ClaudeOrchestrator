@@ -1,0 +1,29 @@
+{
+  "config": "leanrules",
+  "sequence": "B",
+  "position": 5,
+  "rep": 1,
+  "memory_unit": "repair-rules",
+  "source_identity": {
+    "treatment": "leanrules",
+    "requested_ref": "a530659",
+    "resolved_commit": "a53065939e9449ce5825e12e63878efa76c2c2ba"
+  },
+  "administered_sha": "274e24c14196342b84bde78b013deab03453e634",
+  "prompt_sha256_16": "e7015d54fc8d5a60",
+  "memory_store": "memory-stores/B.rep1/repair-rules.md",
+  "rules_matched": 4,
+  "rules_installed_bytes": 1351,
+  "rules_capped": true,
+  "verification": "runnable",
+  "allowed_tools": [
+    "Bash(npx tsc:*)",
+    "Bash(./node_modules/.bin/tsc:*)",
+    "Bash(node_modules/.bin/tsc:*)"
+  ],
+  "permission_mode": "acceptEdits",
+  "bash_timeouts": {
+    "BASH_DEFAULT_TIMEOUT_MS": "600000",
+    "BASH_MAX_TIMEOUT_MS": "600000"
+  }
+}

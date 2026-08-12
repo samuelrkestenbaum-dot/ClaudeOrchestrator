@@ -1,0 +1,9 @@
+{
+  "base_commit": "9af707054919a20f606bdb2033bf98ee53fd1083",
+  "product_paths": [
+    "server/infrastructure/data-retention.ts"
+  ],
+  "governance_paths": [
+    "build-os/packets/routing/routing-auto-20260812T053308Z-14811-20260812T053308Z.md"
+  ]
+}

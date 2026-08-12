@@ -51,7 +51,8 @@
       "fact": "the lean result replicates: an independent draw confirms the architecture",
       "evidence": "reps 4-6: cost 1.26x native (band: 1.18-1.3x confirms), uncached 1.18x, all TOM classes 0, acceptance 12/12, verification in-band 12/12, cost fully separated below current 4/4 tasks"
     },
-    "EXP-0009: push-delivered machine-distilled task-report memory does NOT compound on self-contained fix tasks \u2014 the position-matched leanmem/native gap became LESS favorable as memory accumulated (largest advantage at P1, empty store); delivery worked, harm was zero, the value of the remembered content was the failure (branch 3)."
+    "EXP-0009: push-delivered machine-distilled task-report memory does NOT compound on self-contained fix tasks \u2014 the position-matched leanmem/native gap became LESS favorable as memory accumulated (largest advantage at P1, empty store); delivery worked, harm was zero, the value of the remembered content was the failure (branch 3).",
+    "EXP-0010: rule-unit memory COMPOUNDS \u2014 changing the memory unit from prose reports to mechanically-extracted repair rules (demonstrated diff hunks, selective <=1536B class-matched delivery, same transport pin) flipped the position-matched trend from degrading (0.89->1.04) to improving (0.97->0.87 cost, 1.13->0.94 uncached) against the same frozen native comparator."
   ],
   "open_decisions": [
     {
@@ -102,12 +103,21 @@
       "decision": "Does persistent memory beat rediscovery over a task sequence? (Phase 2, proof 1 of 5)",
       "open_uncertainty": "Whether lean-mem's cost/turns curve falls across sequence positions while native stays flat, with acceptance held and >=1 reused-memory event in the arms that got cheaper",
       "resolved_by": "EXP-0009 per its frozen preregistration: 2 rule-derived sequences x 5 positions x 2 arms x 2 reps; fork applied only when both reps exist",
-      "status": "open",
-      "measurement_attempts": 1,
+      "status": "resolved",
+      "measurement_attempts": 2,
       "attempt_log": [
-        "EXP-0009 (40 arms, 2 seqs x 5 pos x 2 arms x 2 reps, position-matched, isolated per-rep stores): gap LESS favorable with position (cost 0.89->1.04, uncached 0.93->1.07, turns 0.85->0.97); acceptance 40/40 held; memory_reads=0 in all leanmem arms; TOM guard held. Branch 3 fired: distilled-report push-delivered memory is net context drag on self-contained tasks."
+        "EXP-0009 (40 arms, 2 seqs x 5 pos x 2 arms x 2 reps, position-matched, isolated per-rep stores): gap LESS favorable with position (cost 0.89->1.04, uncached 0.93->1.07, turns 0.85->0.97); acceptance 40/40 held; memory_reads=0 in all leanmem arms; TOM guard held. Branch 3 fired: distilled-report push-delivered memory is net context drag on self-contained tasks.",
+        "EXP-0010 (20 leanrules arms vs EXP-0009 frozen native, position-matched, rule-unit memory, selective <=1536B delivery, transport pin unchanged): branch-1 signature appeared \u2014 cost ratio 0.97->0.87 and uncached 1.13->0.94 MORE favorable with position; harm 0/13; TOM guard held; all improving arms had rules delivered. Rule-unit memory compounds."
       ],
-      "next_action": "redesign memory delivery/content before any further Phase 2 proof; a redesigned delivery is the stated difference a repeat attempt requires"
+      "next_action": "Phase 2 proof 2 (reusable learned skills), carrying the rule-unit memory design; fix selector break->continue and adjudicator prose false positive before its freeze",
+      "resolution": "YES via rule-unit memory: compact mechanically-extracted repair rules, selectively delivered, create a growing position-matched advantage after full context charging \u2014 on the corpus MOST hostile to memory. Report-unit memory (attempt 1) remains refuted."
+    },
+    {
+      "id": "D4",
+      "status": "open",
+      "measurement_attempts": 0,
+      "question": "Do reusable learned SKILLS (procedures a worker can apply, beyond per-error repair rules) compound organizational advantage further \u2014 especially on tasks whose discovery is genuinely expensive?",
+      "context": "Phase 2 proof 2. Opened by D3 branch 1. Corpus choice is load-bearing: EXP-0009/0010 proved the self-contained-task ceiling; proof 2 should prefer expensive-discovery tasks."
     }
   ],
   "stop_conditions": [

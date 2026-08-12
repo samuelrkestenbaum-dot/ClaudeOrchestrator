@@ -1,0 +1,178 @@
+PRE-FLIGHT A1/leanrules rep1
+  ok   no_concurrent_measured_arm: acquired
+  ok   exact_seed_restored_before_every_position: 2543c873141f restored and verified
+  ok   administration.load_bearing_controllers_present: 13 named controllers present
+  ok   administration.data_retained_not_overwritten: arm tree retains its own durable memory
+  ok   administration.no_session_local_state: 4 session-local files withheld by lifecycle, not by directory
+  ok   administration.benchmark_withheld_from_arm: experiments and pilots absent from the arm tree
+  ok   leanrules.transport_markers: auto-routing + substrate-side stop + UNCHANGED memory push transport all administered
+  ok   rule_store_provenance: no store yet (position 1, or a fresh rep) — nothing to verify
+  ok   rules_installed_selectively: no matching rules — position 1 or fresh rep; the hook emits nothing
+  ok   task_file_present: server/emotional-geometry-runtime/alert-analytics.ts
+  ok   administered_state_committed: d726a7e8f840
+  ok   node_modules_available: shared, byte-identical across arms
+  ok   prompt_identity: sha256:58b8ad83799f35e5 — same builder as EXP-0009; identical to the frozen native comparator by construction
+UNIT A1/leanrules rep1: terminal=completed admissible=true accepted=false rules_in=0B mem_reads=0 distilled=true elapsed=498.3s
+error: Debug: Namespace set to "git" (ignored)
+Debug: Key file set to "/home/claude/.ssh/commit_signing_key.pub" (ignored, using server key)
+Error: signing failed: Signing failed: signing operation failed: signing server returned status 503 (95-byte body)
+Usage:
+  environment-runner code-sign [flags]
+
+Flags:
+  -h, --help   help for code-sign
+
+Error: signing failed: Signing failed: signing operation failed: signing server returned status 503 (95-byte body)
+
+fatal: failed to write commit object
+PRE-FLIGHT A2/leanrules rep1
+  ok   no_concurrent_measured_arm: acquired
+  ok   exact_seed_restored_before_every_position: 2543c873141f restored and verified
+  ok   administration.load_bearing_controllers_present: 13 named controllers present
+  ok   administration.data_retained_not_overwritten: arm tree retains its own durable memory
+  ok   administration.no_session_local_state: 4 session-local files withheld by lifecycle, not by directory
+  ok   administration.benchmark_withheld_from_arm: experiments and pilots absent from the arm tree
+  ok   leanrules.transport_markers: auto-routing + substrate-side stop + UNCHANGED memory push transport all administered
+  ok   rule_store_provenance: 1 rule(s), all same-sequence same-rep earlier-position
+  ok   rules_installed_selectively: no matching rules — position 1 or fresh rep; the hook emits nothing
+  ok   task_file_present: server/infrastructure/data-retention.ts
+  FAIL administered_state_committed: Command failed: git -C /home/user/exp0007-arm -c user.email=harness@exp0010 -c user.name=exp0010-harness commit -q --allow-empty -m exp0010: administered leanrules A2 rep1
+error: Debug: Namespace set 
+  ok   node_modules_available: shared, byte-identical across arms
+  ok   prompt_identity: sha256:2c27218412e4b351 — same builder as EXP-0009; identical to the frozen native comparator by construction
+REFUSED — 1 pre-flight condition(s) failed.
+PRE-FLIGHT A2/leanrules rep1
+  ok   no_concurrent_measured_arm: acquired
+  ok   exact_seed_restored_before_every_position: 2543c873141f restored and verified
+  ok   administration.load_bearing_controllers_present: 13 named controllers present
+  ok   administration.data_retained_not_overwritten: arm tree retains its own durable memory
+  ok   administration.no_session_local_state: 4 session-local files withheld by lifecycle, not by directory
+  ok   administration.benchmark_withheld_from_arm: experiments and pilots absent from the arm tree
+  ok   leanrules.transport_markers: auto-routing + substrate-side stop + UNCHANGED memory push transport all administered
+  ok   rule_store_provenance: 1 rule(s), all same-sequence same-rep earlier-position
+  ok   rules_installed_selectively: no matching rules — position 1 or fresh rep; the hook emits nothing
+  ok   task_file_present: server/infrastructure/data-retention.ts
+  ok   administered_state_committed: 244e300af68a
+  ok   node_modules_available: shared, byte-identical across arms
+  ok   prompt_identity: sha256:2c27218412e4b351 — same builder as EXP-0009; identical to the frozen native comparator by construction
+UNIT A2/leanrules rep1: terminal=completed admissible=true accepted=true rules_in=0B mem_reads=0 distilled=true elapsed=463.0s
+PRE-FLIGHT A3/leanrules rep1
+  ok   no_concurrent_measured_arm: acquired
+  ok   exact_seed_restored_before_every_position: 2543c873141f restored and verified
+  ok   administration.load_bearing_controllers_present: 13 named controllers present
+  ok   administration.data_retained_not_overwritten: arm tree retains its own durable memory
+  ok   administration.no_session_local_state: 4 session-local files withheld by lifecycle, not by directory
+  ok   administration.benchmark_withheld_from_arm: experiments and pilots absent from the arm tree
+  ok   leanrules.transport_markers: auto-routing + substrate-side stop + UNCHANGED memory push transport all administered
+  ok   rule_store_provenance: 2 rule(s), all same-sequence same-rep earlier-position
+  ok   rules_installed_selectively: 2 matched rule(s), 1025B installed (cap 1536, capped) — inline delivery guaranteed
+  ok   task_file_present: server/deployment/deployment-persistence.ts
+  ok   administered_state_committed: 0754c7a22625
+  ok   node_modules_available: shared, byte-identical across arms
+  ok   prompt_identity: sha256:1b7631acfa35e971 — same builder as EXP-0009; identical to the frozen native comparator by construction
+UNIT A3/leanrules rep1: terminal=completed admissible=true accepted=true rules_in=1025B mem_reads=0 distilled=true elapsed=280.5s
+PRE-FLIGHT A4/leanrules rep1
+  ok   no_concurrent_measured_arm: acquired
+  ok   exact_seed_restored_before_every_position: 2543c873141f restored and verified
+  ok   administration.load_bearing_controllers_present: 13 named controllers present
+  ok   administration.data_retained_not_overwritten: arm tree retains its own durable memory
+  ok   administration.no_session_local_state: 4 session-local files withheld by lifecycle, not by directory
+  ok   administration.benchmark_withheld_from_arm: experiments and pilots absent from the arm tree
+  ok   leanrules.transport_markers: auto-routing + substrate-side stop + UNCHANGED memory push transport all administered
+  ok   rule_store_provenance: 3 rule(s), all same-sequence same-rep earlier-position
+  ok   rules_installed_selectively: 3 matched rule(s), 1065B installed (cap 1536, capped) — inline delivery guaranteed
+  ok   task_file_present: server/emotional-geometry-runtime/geometry-alerting.ts
+  ok   administered_state_committed: df92c0cbb97b
+  ok   node_modules_available: shared, byte-identical across arms
+  ok   prompt_identity: sha256:7b162f208b43c909 — same builder as EXP-0009; identical to the frozen native comparator by construction
+UNIT A4/leanrules rep1: terminal=completed admissible=true accepted=true rules_in=1065B mem_reads=0 distilled=true elapsed=288.9s
+PRE-FLIGHT A5/leanrules rep1
+  ok   no_concurrent_measured_arm: acquired
+  ok   exact_seed_restored_before_every_position: 2543c873141f restored and verified
+  ok   administration.load_bearing_controllers_present: 13 named controllers present
+  ok   administration.data_retained_not_overwritten: arm tree retains its own durable memory
+  ok   administration.no_session_local_state: 4 session-local files withheld by lifecycle, not by directory
+  ok   administration.benchmark_withheld_from_arm: experiments and pilots absent from the arm tree
+  ok   leanrules.transport_markers: auto-routing + substrate-side stop + UNCHANGED memory push transport all administered
+  ok   rule_store_provenance: 4 rule(s), all same-sequence same-rep earlier-position
+  ok   rules_installed_selectively: 4 matched rule(s), 1251B installed (cap 1536, capped) — inline delivery guaranteed
+  ok   task_file_present: server/router-groups/geometry-admin-router.ts
+  ok   administered_state_committed: 9b09a4e38b1a
+  ok   node_modules_available: shared, byte-identical across arms
+  ok   prompt_identity: sha256:ef81505f4b72dbe4 — same builder as EXP-0009; identical to the frozen native comparator by construction
+UNIT A5/leanrules rep1: terminal=completed admissible=true accepted=true rules_in=1251B mem_reads=0 distilled=true elapsed=932.4s
+PRE-FLIGHT B1/leanrules rep1
+  ok   no_concurrent_measured_arm: acquired
+  ok   exact_seed_restored_before_every_position: 2543c873141f restored and verified
+  ok   administration.load_bearing_controllers_present: 13 named controllers present
+  ok   administration.data_retained_not_overwritten: arm tree retains its own durable memory
+  ok   administration.no_session_local_state: 4 session-local files withheld by lifecycle, not by directory
+  ok   administration.benchmark_withheld_from_arm: experiments and pilots absent from the arm tree
+  ok   leanrules.transport_markers: auto-routing + substrate-side stop + UNCHANGED memory push transport all administered
+  ok   rule_store_provenance: no store yet (position 1, or a fresh rep) — nothing to verify
+  ok   rules_installed_selectively: no matching rules — position 1 or fresh rep; the hook emits nothing
+  ok   task_file_present: server/governance/control-tower-router.ts
+  ok   administered_state_committed: e875944aa5e0
+  ok   node_modules_available: shared, byte-identical across arms
+  ok   prompt_identity: sha256:edfa75cf672642ef — same builder as EXP-0009; identical to the frozen native comparator by construction
+UNIT B1/leanrules rep1: terminal=completed admissible=true accepted=true rules_in=0B mem_reads=0 distilled=true elapsed=426.3s
+PRE-FLIGHT B2/leanrules rep1
+  ok   no_concurrent_measured_arm: acquired
+  ok   exact_seed_restored_before_every_position: 2543c873141f restored and verified
+  ok   administration.load_bearing_controllers_present: 13 named controllers present
+  ok   administration.data_retained_not_overwritten: arm tree retains its own durable memory
+  ok   administration.no_session_local_state: 4 session-local files withheld by lifecycle, not by directory
+  ok   administration.benchmark_withheld_from_arm: experiments and pilots absent from the arm tree
+  ok   leanrules.transport_markers: auto-routing + substrate-side stop + UNCHANGED memory push transport all administered
+  ok   rule_store_provenance: 1 rule(s), all same-sequence same-rep earlier-position
+  ok   rules_installed_selectively: 1 matched rule(s), 1442B installed (cap 1536) — inline delivery guaranteed
+  ok   task_file_present: server/governance/behavioral-correctness-audit.ts
+  ok   administered_state_committed: 3f617bd857f8
+  ok   node_modules_available: shared, byte-identical across arms
+  ok   prompt_identity: sha256:89e808afc3208df1 — same builder as EXP-0009; identical to the frozen native comparator by construction
+UNIT B2/leanrules rep1: terminal=completed admissible=true accepted=true rules_in=1442B mem_reads=0 distilled=true elapsed=318.9s
+PRE-FLIGHT B3/leanrules rep1
+  ok   no_concurrent_measured_arm: acquired
+  ok   exact_seed_restored_before_every_position: 2543c873141f restored and verified
+  ok   administration.load_bearing_controllers_present: 13 named controllers present
+  ok   administration.data_retained_not_overwritten: arm tree retains its own durable memory
+  ok   administration.no_session_local_state: 4 session-local files withheld by lifecycle, not by directory
+  ok   administration.benchmark_withheld_from_arm: experiments and pilots absent from the arm tree
+  ok   leanrules.transport_markers: auto-routing + substrate-side stop + UNCHANGED memory push transport all administered
+  ok   rule_store_provenance: 2 rule(s), all same-sequence same-rep earlier-position
+  ok   rules_installed_selectively: no matching rules — position 1 or fresh rep; the hook emits nothing
+  ok   task_file_present: server/planes/router.ts
+  ok   administered_state_committed: 5e48db50c923
+  ok   node_modules_available: shared, byte-identical across arms
+  ok   prompt_identity: sha256:50bb091d0aeead9e — same builder as EXP-0009; identical to the frozen native comparator by construction
+UNIT B3/leanrules rep1: terminal=completed admissible=true accepted=true rules_in=0B mem_reads=0 distilled=true elapsed=355.3s
+PRE-FLIGHT B4/leanrules rep1
+  ok   no_concurrent_measured_arm: acquired
+  ok   exact_seed_restored_before_every_position: 2543c873141f restored and verified
+  ok   administration.load_bearing_controllers_present: 13 named controllers present
+  ok   administration.data_retained_not_overwritten: arm tree retains its own durable memory
+  ok   administration.no_session_local_state: 4 session-local files withheld by lifecycle, not by directory
+  ok   administration.benchmark_withheld_from_arm: experiments and pilots absent from the arm tree
+  ok   leanrules.transport_markers: auto-routing + substrate-side stop + UNCHANGED memory push transport all administered
+  ok   rule_store_provenance: 3 rule(s), all same-sequence same-rep earlier-position
+  ok   rules_installed_selectively: 3 matched rule(s), 976B installed (cap 1536, capped) — inline delivery guaranteed
+  ok   task_file_present: server/copilot/batch-page-updater.ts
+  ok   administered_state_committed: 41cfec0db562
+  ok   node_modules_available: shared, byte-identical across arms
+  ok   prompt_identity: sha256:b931b4dae4f94ad8 — same builder as EXP-0009; identical to the frozen native comparator by construction
+UNIT B4/leanrules rep1: terminal=completed admissible=true accepted=true rules_in=976B mem_reads=0 distilled=true elapsed=281.9s
+PRE-FLIGHT B5/leanrules rep1
+  ok   no_concurrent_measured_arm: acquired
+  ok   exact_seed_restored_before_every_position: 2543c873141f restored and verified
+  ok   administration.load_bearing_controllers_present: 13 named controllers present
+  ok   administration.data_retained_not_overwritten: arm tree retains its own durable memory
+  ok   administration.no_session_local_state: 4 session-local files withheld by lifecycle, not by directory
+  ok   administration.benchmark_withheld_from_arm: experiments and pilots absent from the arm tree
+  ok   leanrules.transport_markers: auto-routing + substrate-side stop + UNCHANGED memory push transport all administered
+  ok   rule_store_provenance: 4 rule(s), all same-sequence same-rep earlier-position
+  ok   rules_installed_selectively: 4 matched rule(s), 1351B installed (cap 1536, capped) — inline delivery guaranteed
+  ok   task_file_present: server/governance/model-router.ts
+  ok   administered_state_committed: 274e24c14196
+  ok   node_modules_available: shared, byte-identical across arms
+  ok   prompt_identity: sha256:e7015d54fc8d5a60 — same builder as EXP-0009; identical to the frozen native comparator by construction
+UNIT B5/leanrules rep1: terminal=completed admissible=true accepted=true rules_in=1351B mem_reads=0 distilled=true elapsed=313.9s

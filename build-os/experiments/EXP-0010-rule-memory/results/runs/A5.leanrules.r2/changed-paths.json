@@ -1,0 +1,10 @@
+{
+  "base_commit": "96565a09b66b5e7d94371dea5dc8f2dfe6196908",
+  "product_paths": [
+    "server/_core/logger.ts",
+    "server/router-groups/geometry-admin-router.ts"
+  ],
+  "governance_paths": [
+    "build-os/packets/routing/routing-auto-20260812T055626Z-14421-20260812T055626Z.md"
+  ]
+}

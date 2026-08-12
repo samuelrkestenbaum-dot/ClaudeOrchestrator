@@ -1,0 +1,9 @@
+{
+  "base_commit": "3f617bd857f8eff594a26ab61a9eccd8b71e5fea",
+  "product_paths": [
+    "server/governance/behavioral-correctness-audit.ts"
+  ],
+  "governance_paths": [
+    "build-os/packets/routing/routing-auto-20260812T045940Z-22360-20260812T045940Z.md"
+  ]
+}
