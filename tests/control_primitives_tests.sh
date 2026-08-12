@@ -52,7 +52,8 @@ RID=$(tail -1 "$TRC" | python3 -c 'import json,sys;print(json.loads(sys.stdin.re
 STEPS=$(grep "\"$RID\"" "$TRC" | python3 -c 'import json,sys;print(",".join(json.loads(l)["step"] for l in sys.stdin))')
 ok '[ "$STEPS" = "h0,reachability,authority,dry-run" ]' "one run_id, ordered: h0 -> reachability -> authority -> admission ($STEPS)"
 ok '[ "$(grep "\"$RID\"" "$TRC" | grep -c "\"step\":\"h0\"")" = 1 ]' "exactly ONE h0 step per dispatch attempt (correlation id proof)"
-sed -i 's/^starts: .*/starts: 2026-07-01/; s/^expires: .*/expires: 2026-08-01/' "$R/gravito.goal"   # LAPSED
+# LAPSED window (its sibling out-of-window state NOT-YET-LIVE is exercised by goal_enforcement_tests)
+sed -i 's/^starts: .*/starts: 2026-07-01/; s/^expires: .*/expires: 2026-08-01/' "$R/gravito.goal"
 OUT=$(env BUILD_OS_NOW=2026-08-13 "$G" run "$R" --dry-run 2>&1); RC=$?
 ok '[ "$RC" != 0 ] && printf "%s" "$OUT" | grep -q "outside R_t+"' "lapsed goal: dispatch refused because run is OUTSIDE R_t+ (admission, not telemetry)"
 ok 'tail -1 "$TRC" | grep -q "\"step\":\"refuse\"" && tail -2 "$TRC" | head -1 | grep -q "\"step\":\"authority\""' \
@@ -116,18 +117,57 @@ COUT=$(node "$SRC/build-os/tools/convergence-counters.mjs" "$R2")
 ok 'printf "%s" "$COUT" | grep -q "ZERO verified change"' "NEGATIVE CASE: semantic activity without verified change reported as NOT progress"
 ok '! grep -Eq "convergence-counters|reachability.mjs" "$SRC/.claude/hooks/routing-gate.sh"' "no gate consumes counters or scores"
 
-echo "== diagnose: per-entry-point labels from invocation evidence =="
+echo "== LEGACY POLICY: managed target missing H0 tool FAILS CLOSED until update =="
+RL="$WORK/legacy"; mkdir -p "$RL"; git -C "$RL" init -q; git -C "$RL" remote add origin https://x/leg.git
+echo base > "$RL/app.txt"; echo "keep me" > "$RL/user-file.txt"
+git -C "$RL" -c user.email=t@t -c user.name=t add -A; git -C "$RL" -c user.email=t@t -c user.name=t commit -qm s
+"$G" init "$RL" >/dev/null 2>&1
+"$G" goal "$WORK/goal.txt" "$RL" >/dev/null
+rm "$RL/build-os/tools/h0-check.sh"    # simulate an R1-era target
+sha_user="$(sha256sum "$RL/user-file.txt" | cut -d' ' -f1)"
+printf '{"tool_name":"Edit","tool_input":{"file_path":"%s/app.txt"}}' "$RL" \
+  | env CLAUDE_PROJECT_DIR="$RL" bash "$RL/.claude/hooks/routing-gate.sh" mutgate >"$WORK/out" 2>"$WORK/err"; LRC=$?
+ok '[ "$LRC" = 2 ] && grep -q "H0 HALT (fail closed)" "$WORK/err" && grep -q "gravito update" "$WORK/err"' \
+  "missing H0 component: mutation FAILS CLOSED with actionable UPDATE receipt (exit 2)"
+ok 'grep -q "UPDATE_REQUIRED" "$RL/build-os/receipts/refusals.log"' "refusal receipt names UPDATE_REQUIRED"
+ok '[ "$(cat "$RL/app.txt")" = "base" ]' "no side effect while unprotected"
+DL=$("$G" diagnose "$RL" 2>/dev/null)
+ok 'printf "%s" "$DL" | grep -q "UPDATE_REQUIRED"' "diagnose reports UPDATE_REQUIRED for the tool-gate entry point"
+chmod -x "$RL/build-os/tools" 2>/dev/null || true
+"$G" update "$RL" >/dev/null 2>&1 || true
+chmod +x "$RL/build-os/tools" 2>/dev/null || true
+"$G" update "$RL" >/dev/null
+ok '[ -x "$RL/build-os/tools/h0-check.sh" ]' "gravito update restores the H0 component (torn attempt then repair)"
+S1=$(python3 -c "import json;print(open('$RL/.claude/settings.json').read())" | sha256sum)
+"$G" update "$RL" >/dev/null
+S2=$(python3 -c "import json;print(open('$RL/.claude/settings.json').read())" | sha256sum)
+ok '[ "$S1" = "$S2" ]' "repeated update is idempotent: settings byte-identical, matchers registered exactly once"
+ok '[ "$(python3 -c "
+import json
+s=json.load(open('\''$RL/.claude/settings.json'\''))
+print(sum(1 for g in s['\''hooks'\'']['\''PreToolUse'\''] if g.get('\''matcher'\'')=='\''Edit|Write|NotebookEdit|Bash'\''))")" = 1 ]' \
+  "exactly ONE mutgate matcher after repeated updates (no double registration)"
+ok '[ "$(sha256sum "$RL/user-file.txt" | cut -d" " -f1)" = "$sha_user" ]' "unrelated target file byte-identical across updates"
+printf '{"tool_name":"Edit","tool_input":{"file_path":"%s/app.txt"}}' "$RL" \
+  | env CLAUDE_PROJECT_DIR="$RL" BUILD_OS_NOW=2026-08-13 bash "$RL/.claude/hooks/routing-gate.sh" mutgate >/dev/null 2>&1; LRC=$?
+ok '[ "$LRC" != 2 ]' "after update: mutation allowed again under the LIVE goal (repair proven E2E)"
+UNM="$WORK/unmanaged"; mkdir -p "$UNM"; git -C "$UNM" init -q; echo z > "$UNM/f.txt"
+ok '[ ! -d "$UNM/.claude" ]' "unmanaged repository untouched — no control claimed over it"
+
+echo "== diagnose: matrix labels from invocation evidence, never source alone =="
 DOUT=$("$G" diagnose "$R" 2>/dev/null)
-ok 'printf "%s" "$DOUT" | grep -q "WIRED  H0_system @ cmd_run"' "H0@cmd_run WIRED (receipt evidence here)"
-ok 'printf "%s" "$DOUT" | grep -q "WIRED  H0_system @ tool-gate"' "H0@tool-gate WIRED (refusal receipt evidence here)"
-ok 'printf "%s" "$DOUT" | grep -q "STATICALLY_CONNECTED  reachability @ cmd_health"' \
-  "cmd_health path honestly STATICALLY_CONNECTED (no invocation receipt exists for it)"
+ok 'printf "%s" "$DOUT" | grep "H0_system" | grep "cmd_run" | grep -q "WIRED_UNPROVEN"' "H0@cmd_run WIRED_UNPROVEN (receipt evidence here)"
+ok 'printf "%s" "$DOUT" | grep "H0_system" | grep "tool-gate" | grep -q "WIRED_UNPROVEN"' "H0@tool-gate WIRED_UNPROVEN (refusal receipt evidence here)"
+ok 'printf "%s" "$DOUT" | grep "reach.admission" | grep -q "WIRED_UNPROVEN"' "admission WIRED_UNPROVEN (run-trace evidence)"
+ok 'printf "%s" "$DOUT" | grep "reach.planner" | grep -q "IMPLEMENTED_UNWIRED"' "planner IMPLEMENTED_UNWIRED — split status can never collapse into admission's"
+ok 'printf "%s" "$DOUT" | grep -q "uncovered/unsupported boundaries"' "uncovered boundaries named in the matrix output"
+ok '! printf "%s" "$DOUT" | grep -E "^  [^ ]" | grep -q "OUTCOME_PROVEN"' "no matrix ROW claims OUTCOME_PROVEN from tests alone (legend may name the status)"
 R3="$WORK/fresh"; mkdir -p "$R3"; git -C "$R3" init -q; git -C "$R3" remote add origin https://x/f.git
 echo x > "$R3/a.txt"; git -C "$R3" -c user.email=t@t -c user.name=t add -A; git -C "$R3" -c user.email=t@t -c user.name=t commit -qm s
 "$G" init "$R3" >/dev/null 2>&1
 D3=$("$G" diagnose "$R3" 2>/dev/null)
-ok 'printf "%s" "$D3" | grep -q "STATICALLY_CONNECTED  H0_system @ cmd_run"' \
-  "fresh repo: source caller alone yields STATICALLY_CONNECTED, never WIRED"
+ok 'printf "%s" "$D3" | grep "H0_system" | grep "cmd_run" | grep -q "STATICALLY_CONNECTED"' \
+  "fresh repo: source caller alone yields STATICALLY_CONNECTED, never WIRED_*"
 
 echo
 echo "==== RESULT: $PASS passed, $FAIL failed ===="

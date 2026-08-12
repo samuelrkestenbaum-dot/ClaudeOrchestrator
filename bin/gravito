@@ -377,25 +377,57 @@ PY
     { ls -1t "$d"/build-os/receipts/install-manifest-*.txt "$d"/build-os/receipts/run-*.jsonl 2>/dev/null || true; } | head -3 | sed 's/^/  /'
     echo "-- residue quarantine (empty = none)"
     { ls -1d "$d"/build-os/residue/*/ 2>/dev/null || true; } | sed 's/^/  /'
-    echo "-- control primitives, PER ENTRY POINT (labels: WIRED = static caller"
-    echo "   AND executed invocation receipt here; STATICALLY_CONNECTED = caller"
-    echo "   in source, no invocation receipt in this repo yet; IMPLEMENTED ="
-    echo "   module exists, no caller. Source grep alone never yields WIRED.)"
-    ctl(){ # <name> <entry-point> <caller-grep> <receipt-evidence-test>
-      local label why
-      if grep -q "$3" "$SRC/bin/gravito" "$SRC/.claude/hooks/routing-gate.sh" 2>/dev/null; then
-        if eval "$4"; then label="WIRED"; why="static caller + invocation receipt"
-        else label="STATICALLY_CONNECTED"; why="caller in source; no invocation receipt in this repo yet"; fi
-      else label="IMPLEMENTED"; why="no caller at this entry point"; fi
-      echo "  $label  $1 @ $2 — $why"
-    }
-    ctl "H0_system"     "cmd_run"      'h0-check.sh" "\$d" >/dev/null'  '[ -f "$d/build-os/receipts/h0-latest.json" ]'
-    ctl "H0_system"     "tool-gate"    'h0-check.sh --gate\|h0.*--gate "\$DATA_ROOT"' 'grep -q "H0 Class-A" "$d/build-os/receipts/refusals.log" 2>/dev/null'
-    ctl "reachability"  "cmd_run"      'reachability.mjs" --json'        '[ -f "$d/build-os/receipts/run-trace.jsonl" ] && grep -q reachability "$d/build-os/receipts/run-trace.jsonl"'
-    ctl "reachability"  "cmd_health"   'reachability.mjs" "\$d"$'       'true && false'
-    ctl "delta"         "cmd_review"   'delta-receipt.sh" observe'       '[ -f "$d/build-os/receipts/deltas.jsonl" ]'
-    ctl "delta.predict" "cmd_predict"  'delta-receipt.sh" predict'       '[ -f "$d/build-os/receipts/predictions.jsonl" ]'
-    ctl "convergence"   "cmd_review"   'convergence-counters.mjs" "\$d" 2' 'grep -q P_verified "$d/build-os/receipts/diagnose-"*.txt 2>/dev/null || false'
+    echo "-- control wiring matrix (control | entry point | install state | status | evidence)"
+    echo "   statuses: ABSENT / UPDATE_REQUIRED / IMPLEMENTED_UNWIRED /"
+    echo "   STATICALLY_CONNECTED / WIRED_UNPROVEN / OUTCOME_PROVEN."
+    echo "   A source line or installed file NEVER yields WIRED_*: an executed"
+    echo "   invocation receipt from a supported path is required."
+    echo "   OUTCOME_PROVEN additionally requires measured beneficial outcomes."
+    _m_reg(){ python3 -c "
+import json,sys
+try: s=json.load(open('$d/.claude/settings.json'))
+except Exception: sys.exit(1)
+pt=s.get('hooks',{}).get('PreToolUse',[])
+sys.exit(0 if any(g.get('matcher')=='Edit|Write|NotebookEdit|Bash' and any('mutgate' in h.get('command','') for h in g.get('hooks',[])) for g in pt) else 1)"; }
+    row(){ printf "  %-22s %-11s %-18s %-20s %s\n" "$1" "$2" "$3" "$4" "$5"; }
+    # H0 @ tool-gate — depends on the TARGET's install state
+    if ! _m_reg; then
+      row "H0_system" "tool-gate" "pre-R1(no matcher)" "ABSENT" "UNPROTECTED: no hook runs here; gravito update to protect"
+    elif [ ! -x "$d/build-os/tools/h0-check.sh" ]; then
+      row "H0_system" "tool-gate" "R1(no h0 tool)" "UPDATE_REQUIRED" "FAIL-CLOSED active: mutations refuse until gravito update"
+    elif EV=$(grep "H0 " "$d/build-os/receipts/refusals.log" 2>/dev/null | tail -1) && [ -n "$EV" ]; then
+      row "H0_system" "tool-gate" "current" "WIRED_UNPROVEN" "refusal receipt: ${EV%% tool=*}"
+    else
+      row "H0_system" "tool-gate" "current" "STATICALLY_CONNECTED" "matcher+tool present; no invocation receipt in this repo"
+    fi
+    # H0 @ cmd_run
+    if [ -f "$d/build-os/receipts/h0-latest.json" ]; then
+      row "H0_system" "cmd_run" "current" "WIRED_UNPROVEN" "receipt h0-latest.json @ $(python3 -c "import json;print(json.load(open('$d/build-os/receipts/h0-latest.json'))['at'])" 2>/dev/null || echo '?')"
+    else
+      row "H0_system" "cmd_run" "current" "STATICALLY_CONNECTED" "caller in CLI; no invocation receipt in this repo"
+    fi
+    # reachability: admission vs planner — SPLIT statuses, never one label
+    if [ -f "$d/build-os/receipts/run-trace.jsonl" ] && grep -q '"step":"reachability"' "$d/build-os/receipts/run-trace.jsonl"; then
+      row "reach.admission" "cmd_run" "current" "WIRED_UNPROVEN" "run-trace $(grep '"step":"reachability"' "$d/build-os/receipts/run-trace.jsonl" | tail -1 | python3 -c 'import json,sys;print(json.loads(sys.stdin.read())["run_id"])' 2>/dev/null || echo '?')"
+    else
+      row "reach.admission" "cmd_run" "current" "STATICALLY_CONNECTED" "admission caller in CLI; no run-trace in this repo"
+    fi
+    row "reach.planner" "(none)" "n/a" "IMPLEMENTED_UNWIRED" "no planning/scoring layer exists; selectAction is tests-only by design"
+    # delta streams
+    if [ -f "$d/build-os/receipts/deltas.jsonl" ]; then
+      row "delta.observe" "cmd_review" "current" "WIRED_UNPROVEN" "last: $(tail -1 "$d/build-os/receipts/deltas.jsonl" | python3 -c 'import json,sys;d=json.loads(sys.stdin.read());print(d["at"],d["prediction_status"])' 2>/dev/null || echo '?')"
+    else
+      row "delta.observe" "cmd_review" "current" "STATICALLY_CONNECTED" "caller in CLI; no observation receipt in this repo"
+    fi
+    if [ -f "$d/build-os/receipts/predictions.jsonl" ]; then
+      row "delta.predict" "cmd_predict" "current" "WIRED_UNPROVEN" "$(grep -c . "$d/build-os/receipts/predictions.jsonl") forecast(s)"
+    else
+      row "delta.predict" "cmd_predict" "current" "STATICALLY_CONNECTED" "caller in CLI; no forecast recorded in this repo"
+    fi
+    row "convergence" "cmd_review" "current" "STATICALLY_CONNECTED" "report-only diagnostics; leaves no invocation receipt by design"
+    echo "  uncovered/unsupported boundaries: bare human shell; pre-R1 targets"
+    echo "  with unregistered matchers; experiment harnesses bypassing gravito;"
+    echo "  sessions in unmanaged (non-Gravito) repositories."
     if [ -f "$d/build-os/receipts/deltas.jsonl" ] || [ -f "$d/build-os/receipts/predictions.jsonl" ]; then
       bash "$SRC/build-os/tools/delta-receipt.sh" verify "$d" 2>/dev/null | sed 's/^/  /' || true
     fi

@@ -89,7 +89,7 @@ ok '"$G" diagnose "$R5" >/dev/null 2>&1' "diagnose exits 0 on a healthy repo (no
 DOUT="$("$G" diagnose "$R5" 2>/dev/null)"
 ok 'printf "%s" "$DOUT" | grep -q "namespace: MATCH"' "healthy repo: diagnose reports namespace MATCH"
 ok 'printf "%s" "$DOUT" | grep -q "all present"' "healthy repo: engine files all present"
-ok 'printf "%s" "$DOUT" | grep -qc "wired" && ! printf "%s" "$DOUT" | grep -q "UNWIRED"' "healthy repo: all three tool gates report wired"
+ok 'printf "%s" "$DOUT" | grep -q "^  wired" && ! printf "%s" "$DOUT" | grep -qE "^  UNWIRED "' "healthy repo: all three tool gates report wired"
 ok 'ls "$R5"/build-os/receipts/diagnose-*.txt >/dev/null 2>&1' "diagnose bundle receipt written"
 rm "$R5/build-os/tools/goal-check.sh"
 python3 - "$R5/.claude/settings.json" <<'PY'

@@ -92,6 +92,14 @@ if you didn't forecast, it says so rather than inventing one. Review also
 prints a few program-health numbers; they are informational only and never
 gate anything.
 
+Honest scope: what is proven end-to-end today is the front of the loop —
+health, then available actions, then authority, then dispatch, all on one
+traced attempt — plus the separate review/forecast records afterwards.
+There is no unified planner or full learning loop yet; `gravito diagnose`
+shows a per-control wiring matrix and names the boundaries this system
+does NOT cover (including your own shell, and older installs until
+`gravito update`, whose mutations refuse rather than run unprotected).
+
 ## When something looks wrong
 
 `gravito diagnose "$REPO"` is the support surface: namespace verdict,
