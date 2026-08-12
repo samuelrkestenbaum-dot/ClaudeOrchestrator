@@ -38,6 +38,9 @@ mkdir -p "$DEST/.claude/agents" "$DEST/.claude/commands" "$DEST/.claude/hooks" \
 cp "$SRC/.claude/agents/"*.md   "$DEST/.claude/agents/"
 cp "$SRC/.claude/commands/"*.md "$DEST/.claude/commands/"
 cp "$SRC/.claude/hooks/"*.sh "$DEST/.claude/hooks/"
+# Engine tools the hooks gate on (PKT-R0-4): the goal contract validator.
+mkdir -p "$DEST/build-os/tools"
+cp "$SRC/build-os/tools/goal-check.sh" "$DEST/build-os/tools/"
 chmod +x "$DEST/.claude/hooks/"*.sh
 echo "  + agents, commands, hooks"
 

@@ -21,7 +21,7 @@ mkrepo(){ # <dir> <remote-url>
 }
 run_session_start(){ # <repo> -> stdout; fresh once-marker each call
   env HOME="$WORK/home" CLAUDE_PROJECT_DIR="$1" CLAUDE_SESSION_ID="iso-$RANDOM$RANDOM" \
-    bash "$SRC/.claude/hooks/session-start-build-os.sh" 2>/dev/null
+    bash "$SRC/.claude/hooks/session-start-build-os.sh" 2>/dev/null </dev/null
 }
 mkdir -p "$WORK/home"
 A="$WORK/repoA"; B="$WORK/repoB"

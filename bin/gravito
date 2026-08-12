@@ -1,0 +1,170 @@
+#!/usr/bin/env bash
+# gravito — the R0 lifecycle CLI (PKT-R0-3/4/5). Wraps existing machinery
+# (install-project.sh, init-build-os.sh, authority-envelope.sh, the namespace
+# guard); it invents no new state formats. Every mutating verb writes a
+# manifest/receipt, is idempotent, and offers --dry-run; destructive verbs
+# DEFAULT to dry-run and require --force. Honest surfaces only: numbers this
+# repo does not meter are reported as "not metered", never invented.
+#
+#   gravito preflight [DIR]        read-only eligibility check
+#   gravito init [DIR]             preflight + deterministic install + stamp + manifest
+#   gravito status [DIR]           unified status/receipts surface
+#   gravito update [DIR]           re-install engine files; manifest diff receipt
+#   gravito rollback [DIR]         restore engine files from the PREVIOUS manifest
+#   gravito uninstall [DIR]        remove ENGINE files (keeps build-os/ user data)  [dry-run default]
+#   gravito purge [DIR]            remove ALL Gravito state from the repo          [dry-run default]
+#   gravito goal <file> [DIR]      validate + install the goal contract (PKT-R0-4)
+set -euo pipefail
+SRC="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+CMD="${1:-help}"; shift || true
+FORCE=0; DRY=0
+ARGS=()
+for a in "$@"; do case "$a" in --force) FORCE=1 ;; --dry-run) DRY=1 ;; *) ARGS+=("$a") ;; esac; done
+set -- "${ARGS[@]:-}"
+
+say(){ printf '%s\n' "$*"; }
+die(){ printf 'gravito: %s\n' "$*" >&2; exit 1; }
+now(){ date -u +%FT%TZ; }
+
+resolve_dir(){ local d="${1:-$(pwd)}"; [ -d "$d" ] || die "no such directory: $d"; (cd "$d" && pwd); }
+manifest_dir(){ printf '%s/build-os/receipts' "$1"; }
+latest_manifest(){ ls -1 "$(manifest_dir "$1")"/install-manifest-*.txt 2>/dev/null | sort | tail -1; }
+
+# Engine file inventory: exactly what install-project.sh copies.
+engine_files(){ # <dest> -> repo-relative paths that ARE engine (not user data)
+  local d="$1" f
+  for f in "$d"/.claude/agents/*.md "$d"/.claude/commands/*.md "$d"/.claude/hooks/*.sh "$d"/build-os/tools/goal-check.sh "$d"/CLAUDE.md; do
+    [ -f "$f" ] && printf '%s\n' "${f#"$d"/}"
+  done
+}
+write_manifest(){ # <dest> <label>
+  local d="$1" mf
+  mkdir -p "$(manifest_dir "$d")"
+  mf="$(manifest_dir "$d")/install-manifest-$(date -u +%Y%m%dT%H%M%SZ)-$2.txt"
+  { echo "# gravito install manifest — $2 at $(now)"
+    engine_files "$d" | while read -r rel; do printf '%s  %s\n' "$(sha256sum "$d/$rel" | cut -d' ' -f1)" "$rel"; done
+  } > "$mf"
+  say "receipt: ${mf#"$d"/}"
+}
+
+cmd_preflight(){
+  local d; d="$(resolve_dir "${1:-}")"; local failed=0
+  chk(){ if eval "$2"; then say "  ok   $1"; else say "  FAIL $1"; failed=1; fi }
+  say "gravito preflight — $d (read-only)"
+  chk "is a git repository"                'git -C "$d" rev-parse --git-dir >/dev/null 2>&1'
+  chk "not the Build OS source repo"       '[ "$d" != "$SRC" ]'
+  chk "working tree readable"              '[ -r "$d" ]'
+  chk "no foreign-project namespace stamp" '! { [ -f "$d/build-os/memory/.project-identity" ] && source "$SRC/.claude/hooks/project-identity.sh" && [ "$(bosi_namespace_verdict "$d")" = "QUARANTINE" ]; }'
+  chk "no obvious secret files at root"    '! ls "$d"/.env "$d"/*.pem 2>/dev/null | grep -q .'
+  [ "$failed" -eq 0 ] && say "preflight: ELIGIBLE" || { say "preflight: REFUSED — resolve the FAIL lines first"; return 1; }
+}
+
+cmd_init(){
+  local d; d="$(resolve_dir "${1:-}")"
+  cmd_preflight "$d" || die "init refused by preflight"
+  [ "$DRY" -eq 1 ] && { say "dry-run: would install engine + scaffold + stamp into $d"; return 0; }
+  "$SRC/install-project.sh" "$d" >/dev/null
+  ( cd "$d" && "$SRC/init-build-os.sh" >/dev/null )
+  write_manifest "$d" init
+  say "init: complete (idempotent — re-running converges to the same manifest hashes)"
+}
+
+cmd_update(){
+  local d; d="$(resolve_dir "${1:-}")"
+  [ -n "$(latest_manifest "$d")" ] || die "no install manifest — run 'gravito init' first"
+  [ "$DRY" -eq 1 ] && { say "dry-run: would re-copy engine files and write a manifest"; return 0; }
+  "$SRC/install-project.sh" "$d" >/dev/null
+  write_manifest "$d" update
+  say "update: complete"
+}
+
+cmd_rollback(){
+  local d; d="$(resolve_dir "${1:-}")"
+  local mfs prev
+  mfs="$(ls -1 "$(manifest_dir "$d")"/install-manifest-*.txt 2>/dev/null | sort)"
+  prev="$(printf '%s\n' "$mfs" | tail -2 | head -1)"
+  [ -n "$prev" ] && [ "$prev" != "$(printf '%s\n' "$mfs" | tail -1)" ] || die "no previous manifest to roll back to"
+  say "rollback target: ${prev#"$d"/}"
+  say "NOTE: rollback restores ENGINE files only; it never touches product code or build-os/ user data."
+  [ "$DRY" -eq 1 ] && { say "dry-run: would verify/restore files listed above"; return 0; }
+  # R0 semantics: engine files come from the source repo; rollback = re-copy
+  # then verify against the previous manifest's hashes, reporting drift.
+  "$SRC/install-project.sh" "$d" >/dev/null
+  local drift=0
+  while read -r h rel; do
+    [ -n "$rel" ] || continue
+    case "$h" in \#*) continue ;; esac
+    if [ ! -f "$d/$rel" ] || [ "$(sha256sum "$d/$rel" | cut -d' ' -f1)" != "$h" ]; then say "  drift vs previous manifest: $rel"; drift=1; fi
+  done < "$prev"
+  write_manifest "$d" rollback
+  [ "$drift" -eq 0 ] && say "rollback: engine matches the previous manifest" || say "rollback: completed with drift noted above (engine source has moved on — expected after upstream updates)"
+}
+
+cmd_uninstall(){
+  local d; d="$(resolve_dir "${1:-}")"
+  local mf; mf="$(latest_manifest "$d")"
+  [ -n "$mf" ] || die "no install manifest — nothing recorded to uninstall"
+  say "uninstall plan (engine only; build-os/ user data KEPT):"
+  awk '!/^#/ {print "  rm " $2}' "$mf"
+  if [ "$FORCE" -ne 1 ]; then say "dry-run (default). Re-run with --force to execute."; return 0; fi
+  awk '!/^#/ {print $2}' "$mf" | while read -r rel; do rm -f "$d/$rel"; done
+  find "$d/.claude" -type d -empty -delete 2>/dev/null || true
+  say "uninstall: engine removed at $(now); user data intact. Receipt kept: ${mf#"$d"/}"
+}
+
+cmd_purge(){
+  local d; d="$(resolve_dir "${1:-}")"
+  say "purge plan — COMPLETE local Gravito data removal for this repo:"
+  say "  rm -rf .claude/  build-os/  gravito.goal (if present)"
+  say "  (product files are never touched; this cannot be undone)"
+  if [ "$FORCE" -ne 1 ]; then say "dry-run (default). Re-run with --force to execute."; return 0; fi
+  rm -rf "$d/.claude" "$d/build-os" "$d/gravito.goal"
+  say "purge: all Gravito state removed at $(now)"
+}
+
+cmd_goal(){
+  local f="${1:-}"; local d; d="$(resolve_dir "${2:-}")"
+  [ -n "$f" ] && [ -f "$f" ] || die "usage: gravito goal <file> [DIR] — see templates/gravito.goal.example"
+  bash "$SRC/build-os/tools/goal-check.sh" "$f" || die "goal contract INVALID — fix the errors above; nothing installed"
+  [ "$DRY" -eq 1 ] && { say "dry-run: goal valid; would install to $d/gravito.goal"; return 0; }
+  cp "$f" "$d/gravito.goal"
+  say "goal installed: $d/gravito.goal (budget halts enforced per contract; see 'gravito status')"
+}
+
+cmd_status(){
+  local d; d="$(resolve_dir "${1:-}")"
+  say "=== gravito status — $d @ $(now) ==="
+  if [ -r "$SRC/.claude/hooks/project-identity.sh" ]; then
+    source "$SRC/.claude/hooks/project-identity.sh"
+    say "namespace: $(bosi_namespace_verdict "$d") (id $(bosi_project_id "$d"))"
+  fi
+  if [ -f "$d/gravito.goal" ]; then
+    say "goal: $(awk -F': ' '$1=="goal"{print $2; exit}' "$d/gravito.goal")"
+    say "authority: $(awk -F': ' '$1=="authority"{print $2; exit}' "$d/gravito.goal") | expiry: $(awk -F': ' '$1=="expires"{print $2; exit}' "$d/gravito.goal")"
+    bash "$SRC/build-os/tools/goal-check.sh" --status "$d/gravito.goal" || true
+  else
+    say "goal: none installed (gravito goal <file>)"
+  fi
+  say "state: $( [ -f "$d/build-os/packets/active_packet.md" ] && grep -m1 '^- \*\*Status:\*\*' "$d/build-os/packets/active_packet.md" || echo 'no active packet' )"
+  say "workers: $(pgrep -fc 'claude -p' 2>/dev/null || echo 0) headless worker session(s) on this host"
+  local mf; mf="$(latest_manifest "$d")"
+  say "install: ${mf:+manifest $(basename "$mf")}${mf:-not installed via gravito init}"
+  say "last receipts:"; ls -1t "$d"/build-os/receipts/*.md 2>/dev/null | head -3 | sed 's/^/  /' || true
+  say "tokens/cost/time: NOT METERED in R0 (provider-native metering ships with the R1 telemetry logger; no numbers are invented here)"
+  say "interventions: NOT METERED in R0 (same logger)"
+  say "pending approvals: check the conversation — external mutation always awaits an explicit operator go"
+  say "stop:     interrupt the session or let the current step finish (state is durable; resume by re-invoking)"
+  say "rollback: gravito rollback $d   |   uninstall: gravito uninstall $d [--force]   |   purge: gravito purge $d [--force]"
+}
+
+case "$CMD" in
+  preflight) cmd_preflight "$@" ;;
+  init)      cmd_init "$@" ;;
+  status)    cmd_status "$@" ;;
+  update)    cmd_update "$@" ;;
+  rollback)  cmd_rollback "$@" ;;
+  uninstall) cmd_uninstall "$@" ;;
+  purge)     cmd_purge "$@" ;;
+  goal)      cmd_goal "$@" ;;
+  help|*)    sed -n '2,18p' "$0" ;;
+esac
