@@ -38,10 +38,16 @@ ok '[ "$(python3 -c "import json;d=json.load(open(\"$WORK/resurrect.json\"));pri
   "an unmatched unit is NEVER selected, even with effectively infinite budget; rejection reason recorded"
 
 echo "== 4. homeostasis and gates run BEFORE autonomy/dispatch (code order) =="
-GATE_LINE=$(grep -n -- '--gate "\$d/gravito.goal"' "$SRC/bin/gravito" | head -1 | cut -d: -f1)
+# The authority gate is invoked ONCE, inside the reachability construction
+# (admission = the same evaluation, not a second control). cmd_run order:
+# H0 -> reachability(authority inside) -> dispatch.
+H0_LINE=$(grep -n 'h0-check.sh" "\$d" >/dev/null' "$SRC/bin/gravito" | head -1 | cut -d: -f1)
+REACH_LINE=$(grep -n 'reachability.mjs" --json' "$SRC/bin/gravito" | head -1 | cut -d: -f1)
 SPAWN_LINE=$(grep -n 'claude -p --output-format' "$SRC/bin/gravito" | head -1 | cut -d: -f1)
-ok '[ -n "$GATE_LINE" ] && [ -n "$SPAWN_LINE" ] && [ "$GATE_LINE" -lt "$SPAWN_LINE" ]' \
-  "cmd_run: goal gate (line $GATE_LINE) precedes worker dispatch (line $SPAWN_LINE)"
+ok '[ -n "$H0_LINE" ] && [ -n "$REACH_LINE" ] && [ -n "$SPAWN_LINE" ] && [ "$H0_LINE" -lt "$REACH_LINE" ] && [ "$REACH_LINE" -lt "$SPAWN_LINE" ]' \
+  "cmd_run: H0 ($H0_LINE) -> reachability ($REACH_LINE) -> dispatch ($SPAWN_LINE), in order"
+ok 'grep -q -- "--gate" "$SRC/build-os/tools/reachability.mjs" && ! grep -q -- "--gate \"\$d/gravito.goal\"" "$SRC/bin/gravito"' \
+  "the authority gate runs ONCE, inside the reachability construction (no duplicate gate in cmd_run)"
 PREF_LINE=$(grep -n 'cmd_preflight "\$d" || die' "$SRC/bin/gravito" | head -1 | cut -d: -f1)
 INST_LINE=$(grep -n 'install-project.sh" "\$d"' "$SRC/bin/gravito" | head -1 | cut -d: -f1)
 ok '[ -n "$PREF_LINE" ] && [ "$PREF_LINE" -lt "$INST_LINE" ]' \
@@ -115,7 +121,7 @@ for e in entries:
         paths = re.findall(r'[A-Za-z0-9_./\-]+\.(?:sh|mjs|json|txt|md)', f.get('implementation','')) or []
         if not any(os.path.exists(os.path.join(src,p)) for p in paths):
             problems.append(f'{name}: wired status but no implementation path exists on disk')
-        callers = re.findall(r'[A-Za-z0-9_./\-]+\.(?:sh|mjs|json)', f.get('caller','')) or []
+        callers = re.findall(r'(?:bin/gravito|[A-Za-z0-9_./\-]+\.(?:sh|mjs|json))', f.get('caller','')) or []
         traced = False
         for c in callers:
             cp = os.path.join(src,c)

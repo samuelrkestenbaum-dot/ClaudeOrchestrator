@@ -16,6 +16,8 @@
 #   gravito goal <file> [DIR]      validate + install the goal contract (PKT-R0-4)
 #   gravito run [DIR]              gate + dispatch ONE worker session; meters spend into the ledger
 #   gravito review [DIR]           diff summary + acceptance (acceptance_cmd runs; prose is shown)
+#   gravito health [DIR]           H0 system health facts + reachable actions (pre-work surface)
+#   gravito predict <value> [DIR]  record a pre-run acceptance forecast (optional; enables delta)
 #   gravito diagnose [DIR]         support bundle: identity, wiring, goal, ledger, receipts
 #   gravito stop [DIR]             halt the worker at a safe boundary; state durable
 set -euo pipefail
@@ -37,7 +39,7 @@ latest_manifest(){ ls -1 "$(manifest_dir "$1")"/install-manifest-*.txt 2>/dev/nu
 # Engine file inventory: exactly what install-project.sh copies.
 engine_files(){ # <dest> -> repo-relative paths that ARE engine (not user data)
   local d="$1" f
-  for f in "$d"/.claude/agents/*.md "$d"/.claude/commands/*.md "$d"/.claude/hooks/*.sh "$d"/.claude/hooks/mcp-readonly-allowlist.txt "$d"/build-os/tools/goal-check.sh "$d"/build-os/tools/route-task.sh "$d"/build-os/tools/mode-select.mjs "$d"/CLAUDE.md; do
+  for f in "$d"/.claude/agents/*.md "$d"/.claude/commands/*.md "$d"/.claude/hooks/*.sh "$d"/.claude/hooks/mcp-readonly-allowlist.txt "$d"/build-os/tools/goal-check.sh "$d"/build-os/tools/h0-check.sh "$d"/build-os/tools/route-task.sh "$d"/build-os/tools/mode-select.mjs "$d"/CLAUDE.md; do
     [ -f "$f" ] && printf '%s\n' "${f#"$d"/}"
   done
 }
@@ -198,13 +200,45 @@ cmd_status(){
   say "rollback: gravito rollback $d   |   uninstall: gravito uninstall $d [--force]   |   purge: gravito purge $d [--force]"
 }
 
+cmd_health(){
+  # Zone 2+3 operator surface: H0_system facts + explicit reachable actions.
+  local d; d="$(resolve_dir "${1:-}")"
+  bash "$SRC/build-os/tools/h0-check.sh" "$d" || true
+  node "$SRC/build-os/tools/reachability.mjs" "$d"
+}
+
 cmd_run(){
   local d; d="$(resolve_dir "${1:-}")"
-  [ -f "$d/gravito.goal" ] || die "no gravito.goal installed — run 'gravito goal <file>' first"
-  local gc="$d/build-os/tools/goal-check.sh"; [ -x "$gc" ] || gc="$SRC/build-os/tools/goal-check.sh"
-  bash "$gc" --gate "$d/gravito.goal" || die "goal gate HALT — see the message above; not dispatching"
-  [ -f "$d/build-os/receipts/run.pid" ] && kill -0 "$(cat "$d/build-os/receipts/run.pid")" 2>/dev/null     && die "a worker is already running (pid $(cat "$d/build-os/receipts/run.pid")) — 'gravito stop $d' first"
-  [ "$DRY" -eq 1 ] && { say "dry-run: gate open; would dispatch one worker session"; return 0; }
+  # CANONICAL SEQUENCE, traced with one correlation id per dispatch attempt:
+  # state -> H0 (full surface, once) -> reachability construction (executable
+  # + feasible facts, once) -> authority/admissibility (the SAME goal gate,
+  # invoked ONCE, inside the construction — reachability contains no policy
+  # of its own) -> admission (dispatch only if 'run' is in R_t+) -> dispatch.
+  # Every refusal happens BEFORE any side effect (no pid, no stream).
+  local run_id trace; run_id="run-$(date -u +%Y%m%dT%H%M%SZ)-$$"
+  mkdir -p "$d/build-os/receipts"; trace="$d/build-os/receipts/run-trace.jsonl"
+  tr_step(){ printf '{"run_id":"%s","seq":%d,"step":"%s","detail":%s}\n' "$run_id" "$1" "$2" "$3" >> "$trace"; }
+  local h0rc=0; bash "$SRC/build-os/tools/h0-check.sh" "$d" >/dev/null 2>&1 || h0rc=$?
+  local agency; agency="$(python3 -c "import json;print(json.load(open('$d/build-os/receipts/h0-latest.json'))['agency'])" 2>/dev/null || echo unknown)"
+  tr_step 1 h0 "\"agency=$agency\""
+  if [ "$h0rc" -eq 4 ]; then
+    tr_step 2 refuse "\"H0 Class-A block\""
+    { bash "$SRC/build-os/tools/h0-check.sh" "$d" 2>&1 || true; } | grep "BLOCKED" >&2 || true
+    die "H0_system Class-A block — see build-os/receipts/h0-latest.json"
+  fi
+  local reach admitted reason gate
+  reach="$(node "$SRC/build-os/tools/reachability.mjs" --json "$d" 2>/dev/null)" || die "reachability construction failed"
+  admitted="$(printf '%s' "$reach" | python3 -c "import json,sys;r=json.load(sys.stdin);print('yes' if 'run' in r['R_t_plus'] else 'no')")"
+  reason="$(printf '%s' "$reach" | python3 -c "import json,sys;r=json.load(sys.stdin);print(next(a['reason'] for a in r['actions'] if a['a']=='run'))")"
+  gate="$(printf '%s' "$reach" | python3 -c "import json,sys;print(json.load(sys.stdin)['gate'])")"
+  tr_step 2 reachability "\"run_in_R_t_plus=$admitted\""
+  tr_step 3 authority "$(printf '%s' "$gate" | python3 -c 'import json,sys;print(json.dumps(sys.stdin.read()))')"
+  if [ "$admitted" != "yes" ]; then
+    tr_step 4 refuse "$(printf '%s' "$reason" | python3 -c 'import json,sys;print(json.dumps(sys.stdin.read()))')"
+    die "not dispatching — 'run' is outside R_t+: $reason"
+  fi
+  [ "$DRY" -eq 1 ] && { tr_step 4 dry-run "\"admitted, no dispatch\""; say "dry-run: gate open; would dispatch one worker session"; return 0; }
+  tr_step 4 dispatch "\"worker session\""
   local ts prompt stream started
   ts="$(date -u +%Y%m%dT%H%M%SZ)"; stream="$d/build-os/receipts/run-$ts.jsonl"
   prompt="$(printf '# Goal (from gravito.goal — the binding contract)\n%s\n\nAuthority: %s\nProhibited: %s\nAcceptance: %s\n\nWork ONLY in this repository. Never push, merge, deploy, or touch secrets. Deliver the work, state the outcome once, stop.' \
@@ -224,18 +258,69 @@ cmd_run(){
   say "run: complete — 'gravito review $d' next"
 }
 
+cmd_predict(){
+  # Zone 7 pre-action surface: record a FORECAST before running. Optional by
+  # design — a missing prediction is later recorded NOT_RECORDED, never
+  # invented from the goal (a success criterion is not yhat).
+  local val="${1:-}"; local d; d="$(resolve_dir "${2:-}")"
+  [ -n "$val" ] || die "usage: gravito predict '<predicted acceptance value: PASS|FAIL|...>' [DIR]"
+  local id; id="$(bash "$SRC/build-os/tools/delta-receipt.sh" predict "$d" --var acceptance --value "$val" --scale task --by operator)" || die "prediction not recorded"
+  say "prediction recorded: $id (outcome_var=acceptance, predicted=$val)"
+}
+
 cmd_review(){
+  # Zone 7 boundary (execution -> evidence). The acceptance result is
+  # recorded as an OBSERVATION (outcome_var=acceptance) in the immutable
+  # chain. delta is computed ONLY against a prediction actually made
+  # beforehand via 'gravito predict' — never manufactured from the goal.
+  # Zone 9 counters REPORT after (Class-B diagnostics; they grade nothing).
   local d; d="$(resolve_dir "${1:-}")"
   say "=== gravito review — $d ==="
   say "-- changes since HEAD:"; git -C "$d" status --short | sed 's/^/  /' | head -20
-  local cmd
+  local cmd verdict rc=0 predid=""
+  # newest acceptance prediction not yet referenced by any observation
+  if [ -f "$d/build-os/receipts/predictions.jsonl" ]; then
+    predid="$(python3 - "$d" <<'PY'
+import json, os, sys
+d = sys.argv[1]
+preds = []
+for raw in open(os.path.join(d, "build-os/receipts/predictions.jsonl")):
+    try: p = json.loads(raw)
+    except Exception: continue
+    if p.get("outcome_var") == "acceptance": preds.append(p["id"])
+used = set()
+df = os.path.join(d, "build-os/receipts/deltas.jsonl")
+if os.path.exists(df):
+    for raw in open(df):
+        try: used.add(json.loads(raw).get("prediction_id"))
+        except Exception: pass
+free = [p for p in preds if p not in used]
+print(free[-1] if free else "")
+PY
+)"
+  fi
   cmd="$(awk -F': ' '$1=="acceptance_cmd"{sub(/^[^:]*: /,"");print;exit}' "$d/gravito.goal" 2>/dev/null)"
   if [ -n "$cmd" ]; then
     say "-- acceptance_cmd: $cmd"
-    if ( cd "$d" && bash -c "$cmd" >/dev/null 2>&1 ); then say "acceptance: PASS"; else say "acceptance: FAIL"; return 1; fi
+    if ( cd "$d" && bash -c "$cmd" >/dev/null 2>&1 ); then verdict="PASS"; say "acceptance: PASS"; else verdict="FAIL"; say "acceptance: FAIL"; rc=1; fi
+    bash "$SRC/build-os/tools/delta-receipt.sh" observe "$d" \
+      --var acceptance --observed "$verdict" \
+      --evidence "acceptance_cmd: $cmd" \
+      ${predid:+--prediction-id "$predid"} \
+      --alternative "flaky-acceptance-or-incomplete-work-see-diff" \
+      --scale task --consequence none >/dev/null || say "delta receipt: append failed — see stream"
   else
     say "-- acceptance (human judgment): $(awk -F': ' '$1=="acceptance"{sub(/^[^:]*: /,"");print;exit}' "$d/gravito.goal" 2>/dev/null)"
+    bash "$SRC/build-os/tools/delta-receipt.sh" observe "$d" \
+      --var acceptance --observed "human-judgment-displayed" \
+      --evidence "no acceptance_cmd in contract" \
+      ${predid:+--prediction-id "$predid"} \
+      --alternative "human-judgment path has no mechanical verdict" \
+      --scale task --consequence none >/dev/null || true
   fi
+  say "-- program signals (diagnostics only — these grade nothing):"
+  node "$SRC/build-os/tools/convergence-counters.mjs" "$d" 2>/dev/null | sed 's/^/  /' || true
+  return $rc
 }
 
 cmd_diagnose(){
@@ -292,6 +377,28 @@ PY
     { ls -1t "$d"/build-os/receipts/install-manifest-*.txt "$d"/build-os/receipts/run-*.jsonl 2>/dev/null || true; } | head -3 | sed 's/^/  /'
     echo "-- residue quarantine (empty = none)"
     { ls -1d "$d"/build-os/residue/*/ 2>/dev/null || true; } | sed 's/^/  /'
+    echo "-- control primitives, PER ENTRY POINT (labels: WIRED = static caller"
+    echo "   AND executed invocation receipt here; STATICALLY_CONNECTED = caller"
+    echo "   in source, no invocation receipt in this repo yet; IMPLEMENTED ="
+    echo "   module exists, no caller. Source grep alone never yields WIRED.)"
+    ctl(){ # <name> <entry-point> <caller-grep> <receipt-evidence-test>
+      local label why
+      if grep -q "$3" "$SRC/bin/gravito" "$SRC/.claude/hooks/routing-gate.sh" 2>/dev/null; then
+        if eval "$4"; then label="WIRED"; why="static caller + invocation receipt"
+        else label="STATICALLY_CONNECTED"; why="caller in source; no invocation receipt in this repo yet"; fi
+      else label="IMPLEMENTED"; why="no caller at this entry point"; fi
+      echo "  $label  $1 @ $2 — $why"
+    }
+    ctl "H0_system"     "cmd_run"      'h0-check.sh" "\$d" >/dev/null'  '[ -f "$d/build-os/receipts/h0-latest.json" ]'
+    ctl "H0_system"     "tool-gate"    'h0-check.sh --gate\|h0.*--gate "\$DATA_ROOT"' 'grep -q "H0 Class-A" "$d/build-os/receipts/refusals.log" 2>/dev/null'
+    ctl "reachability"  "cmd_run"      'reachability.mjs" --json'        '[ -f "$d/build-os/receipts/run-trace.jsonl" ] && grep -q reachability "$d/build-os/receipts/run-trace.jsonl"'
+    ctl "reachability"  "cmd_health"   'reachability.mjs" "\$d"$'       'true && false'
+    ctl "delta"         "cmd_review"   'delta-receipt.sh" observe'       '[ -f "$d/build-os/receipts/deltas.jsonl" ]'
+    ctl "delta.predict" "cmd_predict"  'delta-receipt.sh" predict'       '[ -f "$d/build-os/receipts/predictions.jsonl" ]'
+    ctl "convergence"   "cmd_review"   'convergence-counters.mjs" "\$d" 2' 'grep -q P_verified "$d/build-os/receipts/diagnose-"*.txt 2>/dev/null || false'
+    if [ -f "$d/build-os/receipts/deltas.jsonl" ] || [ -f "$d/build-os/receipts/predictions.jsonl" ]; then
+      bash "$SRC/build-os/tools/delta-receipt.sh" verify "$d" 2>/dev/null | sed 's/^/  /' || true
+    fi
     local nw; nw="$(pgrep -fc 'claude -p' 2>/dev/null)" || nw=0
     echo "-- workers on this host: ${nw:-0}"
   } | tee "$out"
@@ -320,8 +427,10 @@ case "$CMD" in
   purge)     cmd_purge "$@" ;;
   goal)      cmd_goal "$@" ;;
   run)       cmd_run "$@" ;;
+  health)    cmd_health "$@" ;;
+  predict)   cmd_predict "$@" ;;
   review)    cmd_review "$@" ;;
   diagnose)  cmd_diagnose "$@" ;;
   stop)      cmd_stop "$@" ;;
-  help|*)    sed -n '2,20p' "$0" ;;
+  help|*)    sed -n '2,22p' "$0" ;;
 esac
