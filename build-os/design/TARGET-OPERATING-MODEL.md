@@ -193,3 +193,14 @@ container while the session is idle — restart notifications arrive only on
 next session activity. Closing that residual window (push notification on
 milestone/failure, or running work outside the reclaimable container) is
 #53's territory.
+
+## Continuation doctrine (#55, operator four-branch rule)
+
+A stop is valid on exactly four grounds, assessed mechanically
+(`build-os/motion/continuation.mjs`): an EXPLICIT operator stop (automation
+never counts); a genuine blocker after exhaustion across ≥2 route classes; a
+material unresolved ambiguity — which is SURFACED by name, never silently
+parked as a hold; or the absence of any specified+authorized+runnable+
+unblocked+positive-value task. Otherwise the verdict is CONTINUE and a stop
+is invalid. Timers detect failure, events drive work, and idleness requires
+one of these four reasons.
