@@ -1,0 +1,7 @@
+{
+  "base_commit": "5142d8beb47a1c3cdb3d1343b3c71dc578c7777e",
+  "product_paths": [
+    "server/mcp/tool-executor.ts"
+  ],
+  "governance_paths": []
+}

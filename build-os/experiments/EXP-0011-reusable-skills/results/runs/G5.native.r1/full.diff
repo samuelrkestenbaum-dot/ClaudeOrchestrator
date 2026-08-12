@@ -1,0 +1,14 @@
+diff --git a/server/governance/four-eyes-approval.standalone-test.ts b/server/governance/four-eyes-approval.standalone-test.ts
+index 0b570be..e273f9e 100644
+--- a/server/governance/four-eyes-approval.standalone-test.ts
++++ b/server/governance/four-eyes-approval.standalone-test.ts
+@@ -8,7 +8,7 @@ async function check(name: string, fn: () => Promise<void> | void) {
+   try { await fn(); console.log(`  ✓ ${name}`); }
+   catch (e) { failed++; console.error(`  ✗ ${name}\n      ${(e as Error).message}`); }
+ }
+-function assert(cond: unknown, msg: string) { if (!cond) throw new Error(msg); }
++function assert(cond: unknown, msg: string): asserts cond { if (!cond) throw new Error(msg); }
+ function eq<T>(a: T, b: T, msg: string) { if (a !== b) throw new Error(`${msg}: expected ${JSON.stringify(b)}, got ${JSON.stringify(a)}`); }
+ 
+ (async () => {
+

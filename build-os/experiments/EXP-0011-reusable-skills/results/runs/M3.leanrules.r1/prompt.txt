@@ -1,0 +1,16 @@
+# Task M3
+
+Fix the TypeScript type errors in `server/mcp/mcp-handler-v2.ts`.
+
+That file currently has 9 typecheck error(s) (TS2305, TS2339, TS2344, TS2345, TS2352, TS2353, TS2554).
+The first is at line 39: TS2305: Module '"./async-job-queue"' has no exported member 'JobStatus'.
+
+## How this will be judged (identical in both conditions)
+
+Verification command: `npx tsc --noEmit -p tsconfig.json`
+Accepted when: the command reports ZERO errors for `server/mcp/mcp-handler-v2.ts`, AND no new error appears in any other file.
+
+REJECTED, regardless of the compiler result: `@ts-ignore`, `@ts-expect-error`, `@ts-nocheck`, `any` casts,
+or deleting the offending code. Fix the type, do not silence it.
+
+Work in the current repository. Do not push, and do not touch anything outside it.

@@ -1,0 +1,224 @@
+diff --git a/server/governance/governance-dashboard-router.ts b/server/governance/governance-dashboard-router.ts
+index af200d0..532678c 100644
+--- a/server/governance/governance-dashboard-router.ts
++++ b/server/governance/governance-dashboard-router.ts
+@@ -24,13 +24,13 @@
+ import { z } from 'zod';
+ import { router, adminProcedure, protectedProcedure } from '../_core/trpc';
+ import { getExternalTransportStatus, getTransportMetrics, exportPrometheusMetrics } from './production-transport-selector';
+-import { getAuthorityMetrics, getAuthorityLayerHealth, getAuthorityAuditTrail } from './gravito-authority-layer';
++import { getAuthorityMetrics, getAuthorityLayerHealth, getAuthorityConfig } from './gravito-authority-layer';
+ import { getExternalGravitoHealth } from './gravito-external-client';
+ import { getPreApprovalMetrics, REGULATED_SURFACES } from './regulated-surface-preapproval';
+ import { getSyncWrapperMetrics } from './mcp-sync-wrapper';
+ import { getAuthorityAuditEntries, getAuthorityAuditStats } from '../db';
+ import { getGovernanceUptimeMetrics, getInlineMetrics, getCircuitBreakerState, getAuthorityAuditSummary } from './co-processor/gravito-inline-client';
+-import type { AuthorityAuditEntry, TransportMetrics, ExternalGravitoHealth, SyncWrapperMetrics, AuthorityLayerHealth, InlineMetrics, AuthorityAuditSummaryEntry } from '../../shared/governance-types';
++import type { AuthorityAuditEntry } from '../../shared/governance-types';
+ 
+ // ============================================================================
+ // PANEL 1: TRANSPORT HEALTH
+@@ -42,6 +42,9 @@ const transportHealthProcedure = adminProcedure.query(async () => {
+   const externalHealth = getExternalGravitoHealth();
+   const syncMetrics = getSyncWrapperMetrics();
+ 
++  // Transport metrics count successes and failures separately; total is their sum.
++  const transportCalls = metrics.successesTotal + metrics.failuresTotal;
++
+   return {
+     // Current state
+     transport: {
+@@ -55,39 +58,41 @@ const transportHealthProcedure = adminProcedure.query(async () => {
+ 
+     // Performance metrics
+     performance: {
+-      totalCalls: metrics.totalCalls,
+-      successCount: metrics.successCount,
+-      failureCount: metrics.failureCount,
+-      successRate: metrics.totalCalls > 0
+-        ? Math.round((metrics.successCount / metrics.totalCalls) * 10000) / 100
++      totalCalls: transportCalls,
++      successCount: metrics.successesTotal,
++      failureCount: metrics.failuresTotal,
++      successRate: transportCalls > 0
++        ? Math.round((metrics.successesTotal / transportCalls) * 10000) / 100
+         : 0,
+       latency: {
+         p50: metrics.latencyP50Ms,
+         p95: metrics.latencyP95Ms,
+         p99: metrics.latencyP99Ms,
+       },
+-      transportSwitches: metrics.transportSwitches,
++      transportSwitches: metrics.transportSwitchCount,
+     },
+ 
+     // External client health
+     externalClient: {
+       circuitBreakerState: externalHealth.circuitBreakerState,
+       totalCalls: externalHealth.totalCalls,
+-      successRate: externalHealth.successRate,
++      successRate: externalHealth.totalCalls > 0
++        ? Math.round((externalHealth.successfulCalls / externalHealth.totalCalls) * 10000) / 100
++        : 0,
+       averageLatencyMs: externalHealth.averageLatencyMs,
+       fallbackRate: externalHealth.fallbackRate,
+-      lastError: externalHealth.lastError,
++      lastError: externalHealth.lastFailureReason,
+     },
+ 
+-    // Sync wrapper stats
++    // Sync wrapper stats (async MCP jobs the wrapper resolved synchronously)
+     syncWrapper: {
+-      totalSubmissions: syncMetrics.totalSubmissions,
+-      syncResolved: syncMetrics.syncResolved,
+-      asyncReturned: syncMetrics.asyncReturned,
+-      pollAttempts: syncMetrics.pollAttempts,
+-      pollSuccesses: syncMetrics.pollSuccesses,
+-      pollTimeouts: syncMetrics.pollTimeouts,
+-      activeJobs: syncMetrics.activeJobs,
++      asyncJobsDetected: syncMetrics.asyncJobsDetected,
++      jobsCompletedSync: syncMetrics.jobsCompletedSync,
++      jobsTimedOut: syncMetrics.jobsTimedOut,
++      jobsFailed: syncMetrics.jobsFailed,
++      pollAttempts: syncMetrics.totalPollAttempts,
++      avgWaitTimeMs: syncMetrics.avgWaitTimeMs,
++      cacheHits: syncMetrics.cacheHits,
+     },
+   };
+ });
+@@ -144,9 +149,10 @@ const authorityDecisionsProcedure = adminProcedure
+ 
+       // Authority layer state
+       authorityLayer: {
+-        enabled: authorityHealth.enabled,
+-        externalReachable: authorityHealth.externalReachable,
+-        internalReachable: authorityHealth.internalReachable,
++        externalEnabled: getAuthorityConfig().externalEnabled,
++        externalReachable: authorityHealth.external.reachable,
++        status: authorityHealth.status,
++        statusReason: authorityHealth.statusReason,
+         metrics: {
+           externalSuccesses: authorityMetrics.externalSuccesses,
+           externalFailures: authorityMetrics.externalFailures,
+@@ -159,8 +165,8 @@ const authorityDecisionsProcedure = adminProcedure
+       // Inline client state
+       inlineClient: {
+         circuitBreakerState: breakerState,
+-        totalCalls: inlineMetrics.totalCalls,
+-        successRate: inlineMetrics.successRate,
++        totalCalls: inlineMetrics.totalInvocations,
++        gravitoInvocationRate: inlineMetrics.gravitoInvocationRate,
+         avgLatencyMs: inlineMetrics.avgLatencyMs,
+         uptime: uptimeMetrics,
+       },
+@@ -298,12 +304,15 @@ const overviewProcedure = adminProcedure
+     return {
+       // Overall health status
+       overallHealth: {
+-        status: transportStatus.enabled && authorityHealth.enabled ? 'healthy' :
+-          !transportStatus.enabled && authorityHealth.internalReachable ? 'degraded' :
++        // Fully healthy needs transport up AND an unimpaired authority layer;
++        // a still-serving (degraded) authority layer keeps the system usable.
++        status: transportStatus.enabled && authorityHealth.status === 'healthy' ? 'healthy' :
++          authorityHealth.status !== 'unavailable' ? 'degraded' :
+           'critical',
+         transportMode: transportStatus.mode,
+-        externalReachable: authorityHealth.externalReachable,
+-        internalReachable: authorityHealth.internalReachable,
++        externalReachable: authorityHealth.external.reachable,
++        authorityStatus: authorityHealth.status,
++        authorityStatusReason: authorityHealth.statusReason,
+       },
+ 
+       // Key metrics (for dashboard cards)
+diff --git a/shared/governance-types.ts b/shared/governance-types.ts
+index 4c229fe..8bd2410 100644
+--- a/shared/governance-types.ts
++++ b/shared/governance-types.ts
+@@ -4,6 +4,8 @@
+  * Generated via Claude Sonnet 4.6 analysis of server router return shapes.
+  */
+ 
++import type { GovernanceAuthorityAuditRow } from "../drizzle/schema";
++
+ // ============================================================
+ // Governance & Control Tower Types
+ // ============================================================
+@@ -577,3 +579,14 @@ export interface CoProcessorMetrics {
+ export interface ProductIcons {
+   [key: string]: unknown;
+ }
++
++// ============================================================
++// Authority Audit Types
++// ============================================================
++
++/**
++ * A durable governance authority-audit record, as returned by
++ * `getAuthorityAuditEntries()` from the `governance_authority_audit` table.
++ * Aliased from the schema row so the two cannot drift apart.
++ */
++export type AuthorityAuditEntry = GovernanceAuthorityAuditRow;
+
+diff --git a/build-os/packets/routing/routing-auto-20260812T105009Z-8044-20260812T105009Z.md b/build-os/packets/routing/routing-auto-20260812T105009Z-8044-20260812T105009Z.md
+--- /dev/null
++++ b/build-os/packets/routing/routing-auto-20260812T105009Z-8044-20260812T105009Z.md
++# ROUTING RECEIPT — one file per routing decision. The recorded verdict is BINDING
++# (build-os/memory/routing_contract.md); routing-check.sh refuses this receipt at
++# close if executed_mode exceeds selected_mode with no escalation record, if an
++# escalation carries no evidence, or if consumption exceeds a budget undeclared.
++task_id: auto-20260812T105009Z-8044
++description_sha256: 27b3f1b706c909c94af97ff3625e4a0a813089bab6bc2c90aa89c5978cb14534
++descriptor: {"expected_files_changed":1,"requires_tests":false,"expected_session_count":1,"prior_context_required":false,"handoff_required":false,"consequence_level":"low","irreversible_or_external_mutation":false,"high_blast_radius":false,"unclear_acceptance_criteria":false,"security_or_compliance_consequence":false,"parallel_workstreams_benefit":false,"high_rework_history":false,"nondeterministic_verification":false}
++selected_mode: direct
++selector_note: -
++issued_at: 2026-08-12T10:50:09Z
++# --- budgets: DERIVED DEFAULTS from EXP-0002 sealed records, operator-tunable, not laws.
++# --- Derivation: ON-surface light runs measured 172k-369k total tokens / 0 dispatches
++# --- (named exceedance: raw T4 at 526,461 - context, not the band); the
++# --- blowouts measured 4.9M/7.4M tokens, 4-5 dispatches, $3.63/$4.80. See route-task.sh.
++budget_max_subagents: 0
++budget_max_total_tokens: 250000
++budget_max_uncached_tokens: 30000
++budget_max_model_calls: 12
++budget_max_wall_clock_s: 300
++budget_max_cost_usd: 0.40
++# --- process allowance (PACKET-0053): the packet's OWN gate chain is governance
++# --- ceremony, counted SEPARATELY from task work by the live gate and attributed
++# --- to governance_process (the 0050/0051 calibration question, resolved). Default
++# --- 7 = the LARGEST LEGAL chain in the doctrine: mandatory_full_regate runs
++# --- builder, qa, reviewer, fix-builder, qa, reviewer, archivist. (No-fix chain
++# --- is 4; fix-then-pass is 6.) Process dispatches never eat budget_max_subagents.
++process_dispatch_allowance: 7
++# --- empty at issue; filled at close. AN UNKNOWN IS NOT A ZERO: "-" is an honest
++# --- admission and is never refused; refusal is for CONTRADICTION, not absence.
++executed_mode: -
++escalation: -
++escalation_evidence: -
++consumed_subagents: -
++consumed_total_tokens: -
++consumed_uncached_tokens: -
++consumed_model_calls: -
++consumed_wall_clock_s: -
++consumed_cost_usd: -
++degradation_note: -
++# --- close-fill EXTENSIONS (PACKET-0053). consumed_subagents above counts TASK
++# --- dispatches (vs budget_max_subagents); consumed_process_dispatches counts the
++# --- gate chain (vs process_dispatch_allowance). The attr_* layers attribute
++# --- consumption where derivable at close — tokens or cost with provenance, or
++# --- "-" as an admission, NEVER a zero nobody measured. Receipts predating these
++# --- fields stay valid: routing-check.sh reads an absent field as "-".
++consumed_process_dispatches: -
++attr_task_execution: -
++attr_context_retrieval: -
++attr_subagent_execution: -
++attr_verification: -
++attr_review: -
++attr_governance_process: -
++attr_experiment_audit: -
++# --- contribution rows (PACKET-0053): marginal-contribution accounting, MANDATORY
++# --- for a Full close with dispatches>0 (routing-check.sh refuses otherwise). The
++# --- live gate seeds one stub row per admitted Full task dispatch; fill at close:
++# --- contribution: <subagent_type> | <unique_question> | <output_ref> | changed_implementation=y/n/- | changed_conclusion=y/n/- | caught_defect=y/n/- | duplicated_work=y/n/- | tokens=<v|-> | cost=<v|-> | time=<v|->
++# --- An all-"-" row passes as an admission and is REPORTED as non-contributing.
++

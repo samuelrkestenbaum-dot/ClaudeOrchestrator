@@ -1,0 +1,9 @@
+{
+  "base_commit": "0deec3ff2f640412b7f03c8363086a7cd27a38cc",
+  "product_paths": [
+    "server/governance/structural-proof-audit.ts"
+  ],
+  "governance_paths": [
+    "build-os/packets/routing/routing-auto-20260812T110223Z-22371-20260812T110223Z.md"
+  ]
+}

@@ -1,0 +1,374 @@
+diff --git a/server/mcp/mcp-http-handler.ts b/server/mcp/mcp-http-handler.ts
+index ba4517a..0c64453 100644
+--- a/server/mcp/mcp-http-handler.ts
++++ b/server/mcp/mcp-http-handler.ts
+@@ -162,6 +162,46 @@ import { generalLog } from '../_core/logger';
+ import { unsafeCast } from '../../shared/type-bridge';
+ import { authenticateMCP, extractApiKey, validateApiKey, AUTH_METADATA } from './mcp-auth';
+ 
++// ============================================================================
++// TYPED READERS FOR LOOSELY-STRUCTURED INPUT
++// JSON-RPC params, MCP tool arguments and HTTP headers all arrive untyped.
++// These readers narrow a single field to the primitive the caller needs and
++// return undefined when the field is absent or of the wrong shape, so callers
++// can supply a default with `??` instead of asserting a type.
++// ============================================================================
++
++/** Read a non-empty string field from an untyped object. */
++function readStringField(source: unknown, key: string): string | undefined {
++  if (typeof source !== 'object' || source === null) return undefined;
++  const value = (source as Record<string, unknown>)[key];
++  return typeof value === 'string' && value.length > 0 ? value : undefined;
++}
++
++/** Read a finite number field from an untyped object. */
++function readNumberField(source: unknown, key: string): number | undefined {
++  if (typeof source !== 'object' || source === null) return undefined;
++  const value = (source as Record<string, unknown>)[key];
++  return typeof value === 'number' && Number.isFinite(value) ? value : undefined;
++}
++
++/** Read a request header as a single non-empty string (Express may give an array). */
++function readHeaderString(req: Request, name: string): string | undefined {
++  const value = req.headers[name];
++  if (typeof value === 'string') return value.length > 0 ? value : undefined;
++  if (Array.isArray(value)) return value.find(entry => entry.length > 0);
++  return undefined;
++}
++
++/**
++ * Request fields attached by the MCP auth layer. They are optional because
++ * this router also serves unauthenticated discovery endpoints.
++ */
++interface McpAuthenticatedRequest extends Request {
++  apiKey?: string;
++  authMethod?: string;
++  authUserId?: number;
++}
++
+ // Finance Pack tools definition
+ const FINANCE_PACK_TOOLS = [
+   {
+@@ -1154,7 +1194,7 @@ mcpRouter.post('/', async (req: Request, res: Response) => {
+           tools: ALL_TOOLS.map(tool => ({
+             name: tool.name,
+             description: tool.description,
+-            inputSchema: typeof ((tool.inputSchema as unknown as Record<string, unknown>))?._def === 'object' ? zodToJsonSchema((tool.inputSchema as unknown as Record<string, unknown>)) : tool.inputSchema,
++            inputSchema: isZodSchema(tool.inputSchema) ? zodToJsonSchema(tool.inputSchema) : tool.inputSchema,
+           })),
+         };
+         break;
+@@ -1195,8 +1235,13 @@ mcpRouter.post('/', async (req: Request, res: Response) => {
+         // ================================================================
+         try {
+           const { registerSurfaceIfMissing } = await import('../governance/auto-surface-registration');
+-          const productId = (args as unknown as Record<string, unknown>)?.product_id || (args as unknown as Record<string, unknown>)?.surface_id || req.headers['x-product-id'] as string || 'unknown-mcp-client';
+-          const productName = (args as unknown as Record<string, unknown>)?.product_name || req.headers['x-product-name'] as string || undefined;
++          const productId =
++            readStringField(args, 'product_id') ??
++            readStringField(args, 'surface_id') ??
++            readHeaderString(req, 'x-product-id') ??
++            'unknown-mcp-client';
++          const productName =
++            readStringField(args, 'product_name') ?? readHeaderString(req, 'x-product-name');
+           await registerSurfaceIfMissing({
+             productId,
+             productName,
+@@ -1385,10 +1430,10 @@ mcpRouter.post('/', async (req: Request, res: Response) => {
+         // ================================================================
+         let authCtx: AuthorizationContext | null = null;
+         
+-        if (((req as unknown as Record<string, unknown>)).authMethod === 'master') {
++        if ((req as McpAuthenticatedRequest).authMethod === 'master') {
+           // Master key — use dogfood context (internal tenant or simulated plan)
+           // Owner user ID defaults to 1 for dogfood context resolution
+-          const dogfoodCtx = await getDogfoodContext(((req as unknown as Record<string, unknown>)).authUserId || 1);
++          const dogfoodCtx = await getDogfoodContext((req as McpAuthenticatedRequest).authUserId || 1);
+           authCtx = {
+             orgId: dogfoodCtx.orgId,
+             orgSlug: dogfoodCtx.orgSlug,
+@@ -1759,7 +1804,7 @@ mcpRouter.post('/', async (req: Request, res: Response) => {
+           case 'gravito.runEscalation': {
+             const { runEscalationCheck: escalate } = await import('../agent/mcp/break-glass-ops');
+             try {
+-              const escRes = await escalate((args as unknown as Record<string, unknown>)?.thresholdMinutes || 30);
++              const escRes = await escalate(readNumberField(args, 'thresholdMinutes') ?? 30);
+               result = { content: [{ type: 'text', text: JSON.stringify(escRes) }] };
+             } catch (e: unknown) {
+               generalLog.error('[MCP] runEscalation error:', e);
+@@ -2233,7 +2278,7 @@ mcpRouter.post('/', async (req: Request, res: Response) => {
+     // Only for tools/call (actual governance checks), not tools/list
+     // ================================================================
+     if (method === 'tools/call') {
+-      const authUserId = ((req as unknown as Record<string, unknown>)).authUserId as number | undefined;
++      const authUserId = (req as McpAuthenticatedRequest).authUserId;
+       // Fire-and-forget: don't block the response on metering
+       (async () => {
+         try {
+@@ -2393,12 +2438,11 @@ mcpRouter.post('/tools/list', (req: Request, res: Response) => {
+   const catalog = resolveToolsForMcpList();
+   const tools = catalog.map(tool => {
+     // Check if inputSchema is already a plain object (JSON schema) vs Zod schema
+-    const schema = tool.inputSchema as unknown as Record<string, unknown>;
+-    const isZodSchema = schema && typeof schema.parse === 'function';
++    const schema = tool.inputSchema;
+     return {
+       name: tool.name,
+       description: tool.description,
+-      inputSchema: isZodSchema ? zodToJsonSchema(schema) : schema,
++      inputSchema: isZodSchema(schema) ? zodToJsonSchema(schema) : schema,
+     };
+   });
+   
+@@ -2417,50 +2461,99 @@ mcpRouter.post('/tools/list', (req: Request, res: Response) => {
+ // HELPER: Convert Zod schema to JSON Schema
+ // ============================================================================
+ 
+-function zodToJsonSchema(schema: z.ZodType<any>, definitions?: Map<string, any>): any {
++/** A JSON Schema node as emitted by the converter below. */
++interface JsonSchemaNode {
++  type: string;
++  description?: string;
++  enum?: (string | number)[];
++  properties?: Record<string, JsonSchemaNode>;
++  required?: string[];
++  items?: JsonSchemaNode;
++  default?: unknown;
++}
++
++/**
++ * The slice of a Zod schema's internal `_def` that the converter reads.
++ * Zod 4 tags the kind on `type` and keeps enum members on `entries`; schemas
++ * built by Zod 3 tag the kind on `typeName`, keep enum members on `values`
++ * and store an array's element schema on `type`. Both layouts are probed, so
++ * every field is optional and `type` carries either tag or element schema.
++ */
++interface ZodDefProbe {
++  type?: string | z.ZodType<unknown>;
++  typeName?: string;
++  entries?: Record<string, string | number>;
++  values?: (string | number)[] | Record<string, string | number>;
++  element?: z.ZodType<unknown>;
++  innerType?: z.ZodType<unknown>;
++  defaultValue?: unknown;
++}
++
++/** True when a tool's `inputSchema` is a Zod schema rather than a literal JSON Schema. */
++function isZodSchema(value: unknown): value is z.ZodType<unknown> {
++  if (typeof value !== 'object' || value === null) return false;
++  const candidate = value as { parse?: unknown; _def?: unknown };
++  return typeof candidate.parse === 'function' && typeof candidate._def === 'object';
++}
++
++/** Read the internal definition of a Zod schema through the probe above. */
++function readZodDef(schema: z.ZodType<unknown>): ZodDefProbe {
++  const def: unknown = schema._def;
++  return typeof def === 'object' && def !== null ? (def as ZodDefProbe) : {};
++}
++
++/** Normalise Zod's enum members: a list in Zod 3, the enum object for native enums. */
++function readEnumValues(values: ZodDefProbe['values']): (string | number)[] | undefined {
++  if (Array.isArray(values)) return values;
++  if (typeof values === 'object' && values !== null) return Object.values(values);
++  return undefined;
++}
++
++function zodToJsonSchema(schema: z.ZodType<unknown>, definitions?: Map<string, JsonSchemaNode>): JsonSchemaNode {
+   // Basic conversion - for full compatibility, use zod-to-json-schema package
+-  const description = (schema as unknown as Record<string, unknown>).description || '';
+-  const def = (schema as unknown as Record<string, unknown>)._def;
+-  
++  const description = schema.description || '';
++  const def = readZodDef(schema);
++
+   // Check for enum using multiple detection methods
+   // Zod 3.x uses _def.type === 'enum' and _def.entries
+-  if (def?.type === 'enum' && def?.entries) {
++  if (def.type === 'enum' && def.entries) {
+     return {
+       type: 'string',
+       enum: Object.keys(def.entries),
+       description,
+     };
+   }
+-  
++
+   // Zod 3.x alternative: check typeName
+-  if (def?.typeName === 'ZodEnum') {
++  if (def.typeName === 'ZodEnum') {
+     return {
+       type: 'string',
+-      enum: def.values || Object.keys(def.entries || {}),
++      enum: readEnumValues(def.values) ?? Object.keys(def.entries || {}),
+       description,
+     };
+   }
+-  
+-  if (def?.typeName === 'ZodNativeEnum') {
++
++  if (def.typeName === 'ZodNativeEnum') {
+     return {
+       type: 'string',
+-      enum: Object.values(def.values),
++      enum: readEnumValues(def.values) ?? [],
+       description,
+     };
+   }
+-  
++
+   if (schema instanceof z.ZodObject) {
+-    const shape = schema.shape;
+-    const properties: Record<string, unknown> = {};
++    const shape: Record<string, unknown> = schema.shape;
++    const properties: Record<string, JsonSchemaNode> = {};
+     const required: string[] = [];
+-    
++
+     for (const [key, value] of Object.entries(shape)) {
+-      properties[key] = zodToJsonSchema(value as z.ZodType<any>, definitions);
+-      if (!(value as unknown as Record<string, unknown>).isOptional?.()) {
++      const field = isZodSchema(value) ? value : undefined;
++      properties[key] = field ? zodToJsonSchema(field, definitions) : { type: 'any', description: '' };
++      if (!field?.isOptional()) {
+         required.push(key);
+       }
+     }
+-    
++
+     return {
+       type: 'object',
+       properties,
+@@ -2468,51 +2561,57 @@ function zodToJsonSchema(schema: z.ZodType<any>, definitions?: Map<string, any>)
+       description,
+     };
+   }
+-  
++
+   if (schema instanceof z.ZodString) {
+     return { type: 'string', description };
+   }
+-  
++
+   if (schema instanceof z.ZodNumber) {
+     return { type: 'number', description };
+   }
+-  
++
+   if (schema instanceof z.ZodBoolean) {
+     return { type: 'boolean', description };
+   }
+-  
++
+   if (schema instanceof z.ZodArray) {
++    // Zod 4 keeps the element schema on `element`, Zod 3 on `type`.
++    const element = def.element ?? def.type;
+     return {
+       type: 'array',
+-      items: zodToJsonSchema((schema as unknown as Record<string, unknown>)._def.type, definitions),
++      items: isZodSchema(element) ? zodToJsonSchema(element, definitions) : { type: 'any', description: '' },
+       description,
+     };
+   }
+-  
++
+   // ZodEnum already handled above via typeName check
+   if (schema instanceof z.ZodEnum) {
+     return {
+       type: 'string',
+-      enum: (schema as unknown as Record<string, unknown>)._def.values,
++      enum: readEnumValues(def.values) ?? Object.keys(def.entries || {}),
+       description,
+     };
+   }
+-  
++
+   if (schema instanceof z.ZodDefault) {
+-    const inner = zodToJsonSchema((schema as unknown as Record<string, unknown>)._def.innerType, definitions);
++    const inner: JsonSchemaNode = isZodSchema(def.innerType)
++      ? zodToJsonSchema(def.innerType, definitions)
++      : { type: 'any', description };
+     try {
+-      const defaultVal = (schema as unknown as Record<string, unknown>)._def.defaultValue;
++      const defaultVal = def.defaultValue;
+       inner.default = typeof defaultVal === 'function' ? defaultVal() : defaultVal;
+     } catch {
+       // Ignore default value extraction errors
+     }
+     return inner;
+   }
+-  
++
+   if (schema instanceof z.ZodOptional) {
+-    return zodToJsonSchema((schema as unknown as Record<string, unknown>)._def.innerType, definitions);
++    return isZodSchema(def.innerType)
++      ? zodToJsonSchema(def.innerType, definitions)
++      : { type: 'any', description };
+   }
+-  
++
+   // Fallback
+   return { type: 'any', description };
+ }
+
+diff --git a/build-os/packets/routing/routing-auto-20260812T135126Z-5092-20260812T135126Z.md b/build-os/packets/routing/routing-auto-20260812T135126Z-5092-20260812T135126Z.md
+--- /dev/null
++++ b/build-os/packets/routing/routing-auto-20260812T135126Z-5092-20260812T135126Z.md
++# ROUTING RECEIPT — one file per routing decision. The recorded verdict is BINDING
++# (build-os/memory/routing_contract.md); routing-check.sh refuses this receipt at
++# close if executed_mode exceeds selected_mode with no escalation record, if an
++# escalation carries no evidence, or if consumption exceeds a budget undeclared.
++task_id: auto-20260812T135126Z-5092
++description_sha256: 27b3f1b706c909c94af97ff3625e4a0a813089bab6bc2c90aa89c5978cb14534
++descriptor: {"expected_files_changed":1,"requires_tests":false,"expected_session_count":1,"prior_context_required":false,"handoff_required":false,"consequence_level":"low","irreversible_or_external_mutation":false,"high_blast_radius":false,"unclear_acceptance_criteria":false,"security_or_compliance_consequence":false,"parallel_workstreams_benefit":false,"high_rework_history":false,"nondeterministic_verification":false}
++selected_mode: direct
++selector_note: -
++issued_at: 2026-08-12T13:51:26Z
++# --- budgets: DERIVED DEFAULTS from EXP-0002 sealed records, operator-tunable, not laws.
++# --- Derivation: ON-surface light runs measured 172k-369k total tokens / 0 dispatches
++# --- (named exceedance: raw T4 at 526,461 - context, not the band); the
++# --- blowouts measured 4.9M/7.4M tokens, 4-5 dispatches, $3.63/$4.80. See route-task.sh.
++budget_max_subagents: 0
++budget_max_total_tokens: 250000
++budget_max_uncached_tokens: 30000
++budget_max_model_calls: 12
++budget_max_wall_clock_s: 300
++budget_max_cost_usd: 0.40
++# --- process allowance (PACKET-0053): the packet's OWN gate chain is governance
++# --- ceremony, counted SEPARATELY from task work by the live gate and attributed
++# --- to governance_process (the 0050/0051 calibration question, resolved). Default
++# --- 7 = the LARGEST LEGAL chain in the doctrine: mandatory_full_regate runs
++# --- builder, qa, reviewer, fix-builder, qa, reviewer, archivist. (No-fix chain
++# --- is 4; fix-then-pass is 6.) Process dispatches never eat budget_max_subagents.
++process_dispatch_allowance: 7
++# --- empty at issue; filled at close. AN UNKNOWN IS NOT A ZERO: "-" is an honest
++# --- admission and is never refused; refusal is for CONTRADICTION, not absence.
++executed_mode: -
++escalation: -
++escalation_evidence: -
++consumed_subagents: -
++consumed_total_tokens: -
++consumed_uncached_tokens: -
++consumed_model_calls: -
++consumed_wall_clock_s: -
++consumed_cost_usd: -
++degradation_note: -
++# --- close-fill EXTENSIONS (PACKET-0053). consumed_subagents above counts TASK
++# --- dispatches (vs budget_max_subagents); consumed_process_dispatches counts the
++# --- gate chain (vs process_dispatch_allowance). The attr_* layers attribute
++# --- consumption where derivable at close — tokens or cost with provenance, or
++# --- "-" as an admission, NEVER a zero nobody measured. Receipts predating these
++# --- fields stay valid: routing-check.sh reads an absent field as "-".
++consumed_process_dispatches: -
++attr_task_execution: -
++attr_context_retrieval: -
++attr_subagent_execution: -
++attr_verification: -
++attr_review: -
++attr_governance_process: -
++attr_experiment_audit: -
++# --- contribution rows (PACKET-0053): marginal-contribution accounting, MANDATORY
++# --- for a Full close with dispatches>0 (routing-check.sh refuses otherwise). The
++# --- live gate seeds one stub row per admitted Full task dispatch; fill at close:
++# --- contribution: <subagent_type> | <unique_question> | <output_ref> | changed_implementation=y/n/- | changed_conclusion=y/n/- | caught_defect=y/n/- | duplicated_work=y/n/- | tokens=<v|-> | cost=<v|-> | time=<v|->
++# --- An all-"-" row passes as an admission and is REPORTED as non-contributing.
++

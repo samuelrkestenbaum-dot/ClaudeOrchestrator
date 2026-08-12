@@ -1,0 +1,56 @@
+{
+  "accepted": false,
+  "task_file": "server/mcp/tool-executor.ts",
+  "condition_1_zero_errors_in_file": {
+    "pass": false,
+    "errors_before": 29,
+    "errors_after": 29,
+    "remaining": [
+      "TS2345 Argument of type 'string' is not assignable to parameter of type 'Surface'.",
+      "TS2538 Type 'unknown' cannot be used as an index type.",
+      "TS2322 Type '{}' is not assignable to type 'string'.",
+      "TS2322 Type '{}' is not assignable to type 'Record<string, unknown>'.",
+      "TS2345 Argument of type '{}' is not assignable to parameter of type 'number'.",
+      "TS2345 Argument of type '{}' is not assignable to parameter of type 'string'.",
+      "TS2345 Argument of type '{ messages: ({ role: \"system\"; content: {}; } | { role: \"user\"; content: {}; })[]; }' is not assignable to parameter of type 'InvokeParams'.",
+      "TS2345 Argument of type '{}' is not assignable to parameter of type 'string'.",
+      "TS2339 Property 'length' does not exist on type '{}'.",
+      "TS2345 Argument of type '{}' is not assignable to parameter of type 'string[]'.",
+      "TS2345 Argument of type '{}' is not assignable to parameter of type 'string'.",
+      "TS2345 Argument of type '{}' is not assignable to parameter of type 'string'.",
+      "TS2345 Argument of type '{}' is not assignable to parameter of type 'string'.",
+      "TS2345 Argument of type '{}' is not assignable to parameter of type 'string'.",
+      "TS2552 Cannot find name 'json'. Did you mean 'JSON'?",
+      "TS2339 Property 'file' does not exist on type 'SurfaceFinding'.",
+      "TS2552 Cannot find name 'json'. Did you mean 'JSON'?",
+      "TS2304 Cannot find name 'json'.",
+      "TS2304 Cannot find name 'json'.",
+      "TS2304 Cannot find name 'json'."
+    ]
+  },
+  "condition_2_no_new_errors_elsewhere": {
+    "pass": true,
+    "new_error_count": 0,
+    "path_artifacts_excluded": 5,
+    "path_artifact_note": "errors identical to a baseline error once every absolute path is erased — the same pre-existing error seen under a different tree name. Reported, never silently dropped.",
+    "new_errors": []
+  },
+  "diff_rejection": {
+    "rejected": false,
+    "hits": [],
+    "net_introduced": {},
+    "pattern_added_counts": {},
+    "pattern_removed_counts": {},
+    "hits_offset_by_removals": [],
+    "deletion_suspected": false,
+    "lines_added": 0,
+    "lines_removed": 0,
+    "note": "patterns are matched on ADDED lines only; matching the whole file would reject a task for `any` casts the seed already contained"
+  },
+  "total_errors_before": 781,
+  "total_errors_after": 781,
+  "path_normalisations_applied": 5,
+  "path_normalisation_note": "tsc embeds absolute paths in some messages, and the baseline tree and the arm tree sit at different paths. Without normalising the tree root out, the SAME pre-existing error hashes differently and an untouched file reads as a regression. The frozen acceptance rule is unchanged; an environment difference is removed, not a code difference. This count is reported so the correction can never be silent.",
+  "verdict_basis": "compiler output and diff text only — no judgement, no adjudicator opinion",
+  "verification_exit_code": 2
+}

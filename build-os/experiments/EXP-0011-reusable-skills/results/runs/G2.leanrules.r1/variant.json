@@ -1,0 +1,36 @@
+{
+  "config": "leanrules",
+  "sequence": "G",
+  "position": 2,
+  "rep": 1,
+  "subsystem": "governance",
+  "memory_unit": "repair-rules",
+  "source_identity": {
+    "treatment": "leanrules",
+    "requested_ref": "a530659",
+    "resolved_commit": "a53065939e9449ce5825e12e63878efa76c2c2ba"
+  },
+  "administered_sha": "0deec3ff2f640412b7f03c8363086a7cd27a38cc",
+  "prompt_sha256_16": "a5941bdce16d412c",
+  "memory_store": "memory-stores/G.rep1.leanrules/repair-rules.md",
+  "install": {
+    "kind": "rules-context",
+    "text": "",
+    "matched": 0,
+    "bytes": 0,
+    "skipped_oversize": 0,
+    "rules": 0
+  },
+  "skill_path": null,
+  "verification": "runnable",
+  "allowed_tools": [
+    "Bash(npx tsc:*)",
+    "Bash(./node_modules/.bin/tsc:*)",
+    "Bash(node_modules/.bin/tsc:*)"
+  ],
+  "permission_mode": "acceptEdits",
+  "bash_timeouts": {
+    "BASH_DEFAULT_TIMEOUT_MS": "600000",
+    "BASH_MAX_TIMEOUT_MS": "600000"
+  }
+}

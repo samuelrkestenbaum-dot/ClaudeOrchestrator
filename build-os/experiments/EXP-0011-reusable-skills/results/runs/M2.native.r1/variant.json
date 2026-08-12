@@ -1,0 +1,31 @@
+{
+  "config": "native",
+  "sequence": "M",
+  "position": 2,
+  "rep": 1,
+  "subsystem": "mcp",
+  "memory_unit": null,
+  "source_identity": null,
+  "administered_sha": "1c0fbd1330e6a897c421757cb05be28eae891af4",
+  "prompt_sha256_16": "cab26ca2a83866a5",
+  "memory_store": null,
+  "install": {
+    "kind": "none",
+    "matched": 0,
+    "bytes": 0,
+    "skipped_oversize": 0,
+    "rules": 0
+  },
+  "skill_path": null,
+  "verification": "runnable",
+  "allowed_tools": [
+    "Bash(npx tsc:*)",
+    "Bash(./node_modules/.bin/tsc:*)",
+    "Bash(node_modules/.bin/tsc:*)"
+  ],
+  "permission_mode": "acceptEdits",
+  "bash_timeouts": {
+    "BASH_DEFAULT_TIMEOUT_MS": "600000",
+    "BASH_MAX_TIMEOUT_MS": "600000"
+  }
+}

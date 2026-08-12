@@ -1,0 +1,293 @@
+diff --git a/server/governance/surface-discovery/guardian.ts b/server/governance/surface-discovery/guardian.ts
+index 7117984..ef55f9e 100644
+--- a/server/governance/surface-discovery/guardian.ts
++++ b/server/governance/surface-discovery/guardian.ts
+@@ -21,14 +21,14 @@ import type {
+   DiscoveryConfigData,
+   SweepEvaluation,
+   SweepResult,
++  SweepTriggerType,
+   ChangeDetectionResult,
+   DiscoveredSurfaceData,
+   AdapterConfig,
+   SurfaceType,
+-  BusinessTruth,
+ } from './types';
+ import { DiscoveryStatus } from './types';
+-import { remediateSweepResults } from './remediation';
++import type { SurfaceType as ShieldSurfaceType } from '../../agent/mcp/gravito-mcp-server';
+ import { gatedRemediateSweepResults } from './gravito-gate';
+ import { evaluateCompletenessGate } from './completeness-gate';
+ import { getBusinessTruthContext } from '../../services/truth-context-provider';
+@@ -68,7 +68,8 @@ export async function runDiscovery(customerId: string, config: DiscoveryConfigDa
+     customerId,
+     adapterType: config.adapters.map(a => a.type).join(','),
+     status: 'running',
+-    startedAt: new Date(startTime),
++    // discovery_runs stores timestamps as epoch-millis bigints, not Date columns.
++    startedAt: startTime,
+   });
+ 
+   // Run each enabled adapter
+@@ -158,7 +159,7 @@ export async function runDiscovery(customerId: string, config: DiscoveryConfigDa
+       surfacesStale: inventoryResult.staleSurfaces,
+       surfacesDead: inventoryResult.deadSurfaces,
+       durationMs,
+-      completedAt: new Date(),
++      completedAt: startTime + durationMs,
+     })
+     .where(eq(discoveryRuns.runId, runId));
+ 
+@@ -264,6 +265,9 @@ export async function detectChanges(customerId: string): Promise<ChangeDetection
+  * This is the completeness gate — the thing that asks "have we seen everything?"
+  */
+ export async function evaluateForSweep(customerId: string, config?: DiscoveryConfigData): Promise<SweepEvaluation> {
++  const db = await getDb();
++  if (!db) throw new Error('Database unavailable');
++
+   const coverageScorer = new CoverageScorer();
+   const coverage = await coverageScorer.computeCoverage(customerId);
+ 
+@@ -314,7 +318,18 @@ export async function evaluateForSweep(customerId: string, config?: DiscoveryCon
+   // Determine priority
+   const priority = coverage.overallCoverage < thresholds.criticalThreshold ? 'critical' : 'medium';
+ 
+-  const affectedSurfaces = shouldTrigger ? (await getDb().select().from(discoveredSurfaces).where(and(eq(discoveredSurfaces.customerId, customerId), ne(discoveredSurfaces.status, 'ignored')))).map(s => s.surfaceId) : [];
++  // SweepEvaluation carries the COUNT of surfaces a sweep would touch — every
++  // surface for this customer that has not been explicitly excluded.
++  const affectedSurfaces = shouldTrigger
++    ? (await db
++        .select({ surfaceId: discoveredSurfaces.surfaceId })
++        .from(discoveredSurfaces)
++        .where(and(
++          eq(discoveredSurfaces.customerId, customerId),
++          ne(discoveredSurfaces.status, 'ignored'),
++        ))
++      ).length
++    : 0;
+ 
+   return {
+     shouldTrigger,
+@@ -328,23 +343,25 @@ export async function evaluateForSweep(customerId: string, config?: DiscoveryCon
+ /**
+  * Trigger a sweep run and store it in the database.
+  */
+-export async function triggerSweep(customerId: string, evaluation: SweepEvaluation, triggerType: 'manual' | 'scheduled'): Promise<SweepResult> {
++export async function triggerSweep(customerId: string, evaluation: SweepEvaluation, triggerType: SweepTriggerType): Promise<SweepResult> {
+   const db = await getDb();
+   if (!db) throw new Error('Database unavailable');
+ 
+-  const sweepId = `sweep_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+   const startTime = Date.now();
+ 
+-  // Store the trigger record
+-  await db.insert(sweepTriggers).values({
+-    sweepId,
++  // Store the trigger record. The sweep id is the serial primary key assigned by
++  // the database — downstream tables (remediation_actions.sweepId) join on it.
++  const [trigger] = await db.insert(sweepTriggers).values({
+     customerId,
+     triggerType,
+-    status: 'triggered',
+-    triggeredAt: new Date(),
+-    evaluation: JSON.stringify(evaluation),
+     priority: evaluation.priority,
+-  });
++    reasons: evaluation.reasons,
++    affectedSurfaces: evaluation.affectedSurfaces,
++    coverageAtTrigger: evaluation.coverageAtEvaluation,
++    status: 'triggered',
++  }).returning({ id: sweepTriggers.id });
++
++  const sweepId = trigger.id;
+ 
+   log.info({ customerId, sweepId, triggerType, priority: evaluation.priority }, 'Sweep triggered, starting remediation...');
+ 
+@@ -352,67 +369,141 @@ export async function triggerSweep(customerId: string, evaluation: SweepEvaluati
+   const surfacesToSweep = await db.select().from(discoveredSurfaces).where(
+     and(
+       eq(discoveredSurfaces.customerId, customerId),
+-      inArray(discoveredSurfaces.status, ['new', 'stale', 'reviewed'])
++      inArray(discoveredSurfaces.status, [
++        DiscoveryStatus.DISCOVERED,
++        DiscoveryStatus.STALE,
++        DiscoveryStatus.REVIEWED,
++      ])
+     )
+   );
+ 
++  const finishSweep = async (result: SweepResult, status: string): Promise<SweepResult> => {
++    await db.update(sweepTriggers)
++      .set({
++        status,
++        surfacesReviewed: result.surfacesReviewed,
++        surfacesRemediated: result.surfacesRemediated,
++        durationMs: result.durationMs,
++        completedAt: new Date(),
++      })
++      .where(eq(sweepTriggers.id, sweepId));
++    return result;
++  };
++
+   if (surfacesToSweep.length === 0) {
+     log.warn({ customerId, sweepId }, 'Sweep triggered but no active surfaces found to process.');
+-    const result: SweepResult = { sweepId, status: 'completed', surfacesProcessed: 0, durationMs: Date.now() - startTime, errors: [] };
+-    await db.update(sweepTriggers).set({ status: 'completed', result: JSON.stringify(result) }).where(eq(sweepTriggers.sweepId, sweepId));
+-    return result;
++    return finishSweep({
++      sweepId,
++      surfacesReviewed: 0,
++      surfacesRemediated: 0,
++      issuesFound: 0,
++      durationMs: Date.now() - startTime,
++    }, 'completed');
+   }
+ 
+-  // Map to Shield-compatible format
+-  const shieldInputs = surfacesToSweep.map(surface => ({
+-    surface_id: surface.surfaceId,
+-    customer_id: customerId,
+-    surface_type: mapSurfaceTypeToShieldType(surface.surfaceType),
+-    content_url: surface.url,
+-    content_snapshot: surface.contentSnapshot || '',
+-  }));
++  // The business truth context is the constitutional source of truth every
++  // rewrite must stay consistent with. It is process-wide, not per-customer.
++  const truthContext = getBusinessTruthContext();
+ 
+-  // Get business truth context
+-  const truthContext = await getBusinessTruthContext(customerId) as BusinessTruth;
++  // Review each surface through Shield to find out WHAT is incoherent.
++  // Dynamic import mirrors gravito-gate.ts — avoids a circular module graph.
++  const { shieldReviewContent } = await import('../../agent/mcp/domains/shield');
+ 
+-  // Execute remediation via Shield
+-  let shieldResults: Awaited<ReturnType<typeof remediateSweepResults>>;
+-  try {
+-    // Use the gated function to ensure Gravito review
+-    const remediationInput = shieldResults.map(r => ({ ...r, truthContext }));
+-    shieldResults = await gatedRemediateSweepResults(remediationInput);
++  const surfacesNeedingRemediation: Array<{
++    surfaceId: string;
++    surfaceUrl: string;
++    content: string;
++    reviewResult: { score: number; issues: unknown[]; patches: unknown[]; block_release: boolean };
++  }> = [];
++  const errors: string[] = [];
++  let surfacesReviewed = 0;
++  let issuesFound = 0;
+ 
++  for (const surface of surfacesToSweep) {
++    const content = surface.contentSnapshot || '';
++    if (!content.trim()) {
++      // No captured content means nothing to review — discovery only saw the URL.
++      continue;
++    }
++
++    try {
++      const review = await shieldReviewContent('latest', {
++        content,
++        surface_type: mapSurfaceTypeToShieldType(surface.surfaceType),
++        artifact_type: 'web_copy',
++        policy_preset: 'startup',
++        mode: 'release_gate',
++        surface_id: surface.surfaceId,
++      }, surface.surfaceId);
++
++      surfacesReviewed++;
++      issuesFound += review.issues.length;
++
++      if (review.issues.length === 0 && !review.block_release) continue;
++
++      surfacesNeedingRemediation.push({
++        surfaceId: surface.surfaceId,
++        surfaceUrl: surface.url,
++        content,
++        reviewResult: {
++          score: review.score,
++          issues: review.issues,
++          patches: review.patches,
++          block_release: review.block_release,
++        },
++      });
++    } catch (error) {
++      const errMsg = error instanceof Error ? error.message : String(error);
++      log.error({ customerId, sweepId, surfaceId: surface.surfaceId, error: errMsg }, 'Surface review failed');
++      errors.push(`Surface ${surface.surfaceId}: ${errMsg}`);
++    }
++  }
++
++  // Execute remediation through the Gravito gate — nothing ships unreviewed.
++  let gateResults: Awaited<ReturnType<typeof gatedRemediateSweepResults>>;
++  try {
++    gateResults = await gatedRemediateSweepResults(sweepId, customerId, surfacesNeedingRemediation, truthContext);
+   } catch (error) {
+     const errMsg = error instanceof Error ? error.message : String(error);
+     log.error({ customerId, sweepId, error: errMsg }, 'Remediation sweep failed');
+-    const result: SweepResult = { sweepId, status: 'failed', surfacesProcessed: 0, durationMs: Date.now() - startTime, errors: [errMsg] };
+-    await db.update(sweepTriggers).set({ status: 'failed', result: JSON.stringify(result) }).where(eq(sweepTriggers.sweepId, sweepId));
+-    return result;
++    return finishSweep({
++      sweepId,
++      surfacesReviewed,
++      surfacesRemediated: 0,
++      issuesFound,
++      durationMs: Date.now() - startTime,
++    }, 'failed');
+   }
+ 
+   // Post-process results (e.g., update surface status)
+-  const errors: string[] = [];
+-  for (const res of shieldResults) {
+-    if (res.status === 'error') {
+-      errors.push(`Surface ${res.surface_id}: ${res.error}`);
++  for (const res of gateResults.results) {
++    if (!res.accepted) {
++      errors.push(`Surface ${res.surfaceId}: gate decision ${res.gateDecision}`);
+       continue;
+     }
+     await db.update(discoveredSurfaces)
+-      .set({ status: 'reviewed', lastSeen: new Date() })
+-      .where(and(eq(discoveredSurfaces.surfaceId, res.surface_id), eq(discoveredSurfaces.customerId, customerId)));
++      .set({ status: DiscoveryStatus.REVIEWED, lastReviewedAt: new Date(), lastSeen: new Date() })
++      .where(and(eq(discoveredSurfaces.surfaceId, res.surfaceId), eq(discoveredSurfaces.customerId, customerId)));
+   }
+ 
+   const result: SweepResult = {
+     sweepId,
+-    status: errors.length > 0 ? 'completed_with_errors' : 'completed',
+-    surfacesProcessed: shieldInputs.length,
++    surfacesReviewed,
++    surfacesRemediated: gateResults.accepted,
++    issuesFound,
+     durationMs: Date.now() - startTime,
+-    errors,
+   };
+ 
+-  await db.update(sweepTriggers).set({ status: result.status, result: JSON.stringify(result) }).where(eq(sweepTriggers.sweepId, sweepId));
++  await finishSweep(result, errors.length > 0 ? 'completed_with_errors' : 'completed');
+ 
+-  log.info({ customerId, sweepId, duration: result.durationMs, processed: result.surfacesProcessed, errors: errors.length }, 'Remediation sweep complete');
++  log.info({
++    customerId, sweepId,
++    duration: result.durationMs,
++    reviewed: result.surfacesReviewed,
++    remediated: result.surfacesRemediated,
++    issuesFound: result.issuesFound,
++    errors: errors.length,
++  }, 'Remediation sweep complete');
+ 
+   return result;
+ }
+@@ -487,8 +578,8 @@ export async function runProactiveCoherencePipeline(customerId: string, config:
+ // HELPERS
+ // =============================================================================
+ 
+-function mapSurfaceTypeToShieldType(surfaceType: string): string {
+-  const mapping: Record<string, string> = {
++function mapSurfaceTypeToShieldType(surfaceType: string): ShieldSurfaceType {
++  const mapping: Record<string, ShieldSurfaceType> = {
+     web_page: 'website',
+     api_endpoint: 'generic',
+     email_template: 'sales',
+

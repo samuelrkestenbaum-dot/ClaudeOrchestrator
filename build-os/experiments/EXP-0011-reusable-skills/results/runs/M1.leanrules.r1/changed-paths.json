@@ -1,0 +1,9 @@
+{
+  "base_commit": "5f1d472e0fd2e1c7af3ab9b8be5dc140a3af4486",
+  "product_paths": [
+    "server/mcp/tool-executor.ts"
+  ],
+  "governance_paths": [
+    "build-os/packets/routing/routing-auto-20260812T132743Z-2544-20260812T132744Z.md"
+  ]
+}

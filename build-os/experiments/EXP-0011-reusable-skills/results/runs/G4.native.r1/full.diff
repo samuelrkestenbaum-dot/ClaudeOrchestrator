@@ -1,0 +1,197 @@
+diff --git a/server/governance/policy-as-code.ts b/server/governance/policy-as-code.ts
+index 35eaf5e..4879ffc 100644
+--- a/server/governance/policy-as-code.ts
++++ b/server/governance/policy-as-code.ts
+@@ -75,6 +75,23 @@ export interface PolicyTestResult {
+ const policyVersions: Map<string, PolicyVersion> = new Map();
+ let currentVersion: string | null = null;
+ 
++/**
++ * Narrowing helpers for untrusted YAML / evaluation input.
++ * Parsed YAML and rule inputs are structurally unknown, so every field read
++ * goes through one of these instead of being assumed.
++ */
++function isRecord(value: unknown): value is Record<string, unknown> {
++  return typeof value === "object" && value !== null && !Array.isArray(value);
++}
++
++function toArray(value: unknown): unknown[] {
++  return Array.isArray(value) ? value : [];
++}
++
++function toStringOrUndefined(value: unknown): string | undefined {
++  return typeof value === "string" ? value : undefined;
++}
++
+ /**
+  * Generate cryptographic signature for policy
+  */
+@@ -150,66 +167,82 @@ export function createPolicyVersion(
+ export function loadPolicyFromFile(filePath: string): PolicyVersion | null {
+   try {
+     const content = fs.readFileSync(filePath, "utf-8");
+-    const parsed = yaml.parse(content);
+-    
++    const parsed: unknown = yaml.parse(content);
++
++    if (!isRecord(parsed)) return null;
++
+     const rules: PolicyRule[] = [];
+     const tests: PolicyTest[] = [];
+-    
++
+     // Extract rules from various sections
+-    if (parsed.gate_rules) {
+-      for (const rule of parsed.gate_rules.release_gate || []) {
++    if (isRecord(parsed.gate_rules)) {
++      for (const entry of toArray(parsed.gate_rules.release_gate)) {
++        if (!isRecord(entry)) continue;
++        const ruleId = toStringOrUndefined(entry.rule);
++        if (!ruleId) continue;
++        const condition = toStringOrUndefined(entry.condition) ?? "";
+         rules.push({
+-          id: rule.rule,
+-          name: rule.rule,
+-          description: rule.condition,
++          id: ruleId,
++          name: ruleId,
++          description: condition,
+           severity: "P0",
+-          condition: rule.condition,
+-          action: rule.action === "block_if_false" ? "block" : "warn",
+-          message: `Gate rule failed: ${rule.rule}`,
++          condition,
++          action: entry.action === "block_if_false" ? "block" : "warn",
++          message: `Gate rule failed: ${ruleId}`,
+           enabled: true,
+         });
+       }
+     }
+-    
++
+     // Extract violation codes as rules
+-    if (parsed.violation_codes) {
++    if (isRecord(parsed.violation_codes)) {
+       for (const [severity, violations] of Object.entries(parsed.violation_codes)) {
+-        for (const v of violations as unknown[]) {
++        for (const v of toArray(violations)) {
++          if (!isRecord(v)) continue;
++          const code = toStringOrUndefined(v.code);
++          if (!code) continue;
++          const description = toStringOrUndefined(v.description) ?? "";
+           rules.push({
+-            id: v.code,
+-            name: v.code,
+-            description: v.description,
++            id: code,
++            name: code,
++            description,
+             severity: severity.startsWith("P0") ? "P0" : severity.startsWith("P1") ? "P1" : "P2",
+-            condition: `violation_code == "${v.code}"`,
++            condition: `violation_code == "${code}"`,
+             action: v.action === "block_release" ? "block" : v.action === "warn_and_require_fix" ? "warn" : "log",
+-            message: v.description,
++            message: description,
+             enabled: true,
+           });
+         }
+       }
+     }
+-    
++
+     // Extract forbidden terms as rules
+-    if (parsed.forbidden) {
+-      for (const headline of parsed.forbidden.headlines || []) {
++    if (isRecord(parsed.forbidden)) {
++      for (const headline of toArray(parsed.forbidden.headlines)) {
++        if (!isRecord(headline)) continue;
++        const pattern = toStringOrUndefined(headline.pattern);
++        if (!pattern) continue;
+         rules.push({
+-          id: `FORBIDDEN_HEADLINE_${headline.pattern.replace(/\s+/g, "_").toUpperCase()}`,
+-          name: `Forbidden Headline: ${headline.pattern}`,
+-          description: headline.reason,
++          id: `FORBIDDEN_HEADLINE_${pattern.replace(/\s+/g, "_").toUpperCase()}`,
++          name: `Forbidden Headline: ${pattern}`,
++          description: toStringOrUndefined(headline.reason) ?? "",
+           severity: "P0",
+-          condition: `headline.toLowerCase().includes("${headline.pattern.toLowerCase()}")`,
++          condition: `headline.toLowerCase().includes("${pattern.toLowerCase()}")`,
+           action: "block",
+-          message: `Forbidden headline pattern: ${headline.pattern}`,
++          message: `Forbidden headline pattern: ${pattern}`,
+           enabled: true,
+         });
+       }
+     }
+-    
+-    const version = parsed.version || "1.0.0";
+-    
++
++    const version = toStringOrUndefined(parsed.version) || "1.0.0";
++
++    const firstApprover = toArray(parsed.approved_by)[0];
++    const approvedBy = isRecord(firstApprover) ? toStringOrUndefined(firstApprover.user) : undefined;
++
+     return createPolicyVersion(
+       version,
+-      parsed.approved_by?.[0]?.user || "system",
++      approvedBy || "system",
+       `Loaded from ${filePath}`,
+       rules,
+       tests,
+@@ -335,7 +368,7 @@ export function runPolicyTests(version?: string): PolicyTestResult[] {
+         passed: false,
+         expected: test.expected_result,
+         actual: "error",
+-        error: error.message,
++        error: error instanceof Error ? error.message : String(error),
+       });
+     }
+   }
+@@ -383,27 +416,34 @@ export function evaluateRule(
+   
+   if (rule.condition.includes("violation_code")) {
+     const codeMatch = rule.condition.match(/violation_code == "([^"]+)"/);
+-    if (codeMatch && input.violation_codes?.includes(codeMatch[1])) {
+-      triggered = true;
++    const codes = input.violation_codes;
++    if (codeMatch) {
++      const code = codeMatch[1];
++      const hasCode = Array.isArray(codes)
++        ? codes.some(c => c === code)
++        : typeof codes === "string" && codes.includes(code);
++      if (hasCode) triggered = true;
+     }
+   }
+-  
++
+   if (rule.condition.includes("headline")) {
+     const patternMatch = rule.condition.match(/includes\("([^"]+)"\)/);
+-    if (patternMatch && input.headline?.toLowerCase().includes(patternMatch[1].toLowerCase())) {
++    const headline = input.headline;
++    if (patternMatch && typeof headline === "string" && headline.toLowerCase().includes(patternMatch[1].toLowerCase())) {
+       triggered = true;
+     }
+   }
+-  
++
+   if (rule.condition.includes("score")) {
+     const scoreMatch = rule.condition.match(/score\s*([<>=]+)\s*(\d+)/);
+-    if (scoreMatch && input.score !== undefined) {
++    const score = input.score;
++    if (scoreMatch && typeof score === "number") {
+       const op = scoreMatch[1];
+       const threshold = parseInt(scoreMatch[2]);
+-      if (op === "<" && input.score < threshold) triggered = true;
+-      if (op === "<=" && input.score <= threshold) triggered = true;
+-      if (op === ">" && input.score > threshold) triggered = true;
+-      if (op === ">=" && input.score >= threshold) triggered = true;
++      if (op === "<" && score < threshold) triggered = true;
++      if (op === "<=" && score <= threshold) triggered = true;
++      if (op === ">" && score > threshold) triggered = true;
++      if (op === ">=" && score >= threshold) triggered = true;
+     }
+   }
+   
+

@@ -1,0 +1,83 @@
+diff --git a/server/mcp/mcp-handler-v2.ts b/server/mcp/mcp-handler-v2.ts
+index b196e71..00af3cc 100644
+--- a/server/mcp/mcp-handler-v2.ts
++++ b/server/mcp/mcp-handler-v2.ts
+@@ -36,7 +36,7 @@ import { recordAudit } from './mcp-audit-trail';
+ import {
+   shouldUseAsync, createAsyncJob, markRunning, completeAsyncJob,
+   failAsyncJob, getJob, buildJobResponse, getAsyncQueueStats,
+-  listJobs, cancelJob, getEstimatedDuration, JobStatus,
++  listJobs, cancelJob, getEstimatedDuration, type AsyncJobStatus,
+ } from './async-job-queue';
+ import {
+   extractCorrelationId, buildCorrelationContext, getCorrelationHeaders,
+@@ -198,10 +198,10 @@ function zodToJsonSchema(schema: z.ZodType<unknown>): Record<string, unknown> {
+   if (schema instanceof z.ZodNumber) return { type: 'number', description };
+   if (schema instanceof z.ZodBoolean) return { type: 'boolean', description };
+   if (schema instanceof z.ZodArray) {
+-    return { type: 'array', items: zodToJsonSchema((schema as z.ZodArray<ZodTypeAny>)._def.type), description };
++    return { type: 'array', items: zodToJsonSchema((schema as z.ZodArray<ZodTypeAny>).element), description };
+   }
+   if (schema instanceof z.ZodEnum) {
+-    return { type: 'string', enum: (schema as z.ZodEnum<[string, ...string[]]>)._def.values, description };
++    return { type: 'string', enum: schema.options, description };
+   }
+   if (schema instanceof z.ZodDefault) {
+     const inner = zodToJsonSchema((schema as z.ZodDefault<ZodTypeAny>)._def.innerType);
+@@ -340,7 +340,7 @@ mcpRouterV2.post('/', async (req: Request, res: Response) => {
+             error: {
+               code: -32005,
+               message: `Rate limit exceeded for tool ${name}. Please try again later.`,
+-              data: getRateLimitStatus(apiKey || clientIp, name),
++              data: { ...getRateLimitStatus(apiKey || clientIp), bucket: rateLimitResult.bucket },
+             },
+           });
+         }
+@@ -503,8 +503,7 @@ mcpRouterV2.post('/', async (req: Request, res: Response) => {
+         recordAudit(
+           requestId, name, apiKey || 'anonymous', clientIp, userAgent,
+           normalizedArgs, result, true, isBlockedResponse(responseText),
+-          // @ts-ignore — argument type mismatch (interface drift)
+-          extractScore(responseText), durationMs,
++          extractScore(responseText) ?? null, durationMs,
+         );
+ 
+         // Enrich successful response with governance metadata
+@@ -685,7 +684,7 @@ mcpRouterV2.get('/health/metrics', (_req: Request, res: Response) => {
+       '',
+       '# HELP gravito_rewrites_last5m Rewrites in the last 5 minutes',
+       '# TYPE gravito_rewrites_last5m gauge',
+-      `gravito_rewrites_last5m ${streams.rewriteFrequency.last5m}`,
++      `gravito_rewrites_last5m ${streams.rewriteFrequency.rewritesLast5m}`,
+       '',
+       '# HELP gravito_circuit_breaker_trips_total Total circuit breaker trips',
+       '# TYPE gravito_circuit_breaker_trips_total counter',
+@@ -813,7 +812,7 @@ mcpRouterV2.get('/jobs', async (req: Request, res: Response) => {
+     return res.status(403).json({ error: 'Invalid API key.' });
+   }
+ 
+-  const status = req.query.status as JobStatus | undefined;
++  const status = req.query.status as AsyncJobStatus | undefined;
+   const limit = Math.min(parseInt(req.query.limit as string) || 20, 100);
+   const offset = parseInt(req.query.offset as string) || 0;
+ 
+diff --git a/server/mcp/tool-executor.ts b/server/mcp/tool-executor.ts
+index 86ef651..0a1d94b 100644
+--- a/server/mcp/tool-executor.ts
++++ b/server/mcp/tool-executor.ts
+@@ -183,6 +183,14 @@ export interface ExecutionContext {
+   apiKey?: string;
+   clientIp?: string;
+   userAgent?: string;
++  /**
++   * Client-supplied (or server-generated) correlation id for the request that
++   * triggered this execution — see nervous-system-stabilizer. Optional and
++   * additive: call sites that don't trace leave it undefined.
++   */
++  correlationId?: string;
++  /** Server-generated per-request id, used to tie execution to audit records. */
++  requestId?: string;
+   /**
+    * TRUSTED authenticated tenant, resolved by the HTTP handler from a validated
+    * inference credential (provisioned tenant key → org-<id>/user-<id>, spoof-
+

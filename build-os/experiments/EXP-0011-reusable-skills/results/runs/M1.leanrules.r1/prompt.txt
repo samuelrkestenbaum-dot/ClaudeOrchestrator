@@ -1,0 +1,16 @@
+# Task M1
+
+Fix the TypeScript type errors in `server/mcp/tool-executor.ts`.
+
+That file currently has 29 typecheck error(s) (TS2304, TS2322, TS2339, TS2345, TS2353, TS2538, TS2552).
+The first is at line 250: TS2345: Argument of type 'string' is not assignable to parameter of type 'Surface'.
+
+## How this will be judged (identical in both conditions)
+
+Verification command: `npx tsc --noEmit -p tsconfig.json`
+Accepted when: the command reports ZERO errors for `server/mcp/tool-executor.ts`, AND no new error appears in any other file.
+
+REJECTED, regardless of the compiler result: `@ts-ignore`, `@ts-expect-error`, `@ts-nocheck`, `any` casts,
+or deleting the offending code. Fix the type, do not silence it.
+
+Work in the current repository. Do not push, and do not touch anything outside it.

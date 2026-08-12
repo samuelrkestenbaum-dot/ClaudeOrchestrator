@@ -1,0 +1,11 @@
+{
+  "base_commit": "3ce7653af3d55c4579e448e51866de7c3b1afa2d",
+  "product_paths": [
+    "server/db.ts",
+    "server/governance/governance-dashboard-router.ts",
+    "shared/governance-types.ts"
+  ],
+  "governance_paths": [
+    "build-os/packets/routing/routing-auto-20260812T103527Z-25725-20260812T103527Z.md"
+  ]
+}

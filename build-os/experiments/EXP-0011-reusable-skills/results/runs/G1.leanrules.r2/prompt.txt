@@ -1,0 +1,16 @@
+# Task G1
+
+Fix the TypeScript type errors in `server/governance/governance-dashboard-router.ts`.
+
+That file currently has 32 typecheck error(s) (TS2305, TS2339).
+The first is at line 33: TS2305: Module '"../../shared/governance-types"' has no exported member 'AuthorityAuditEntry'.
+
+## How this will be judged (identical in both conditions)
+
+Verification command: `npx tsc --noEmit -p tsconfig.json`
+Accepted when: the command reports ZERO errors for `server/governance/governance-dashboard-router.ts`, AND no new error appears in any other file.
+
+REJECTED, regardless of the compiler result: `@ts-ignore`, `@ts-expect-error`, `@ts-nocheck`, `any` casts,
+or deleting the offending code. Fix the type, do not silence it.
+
+Work in the current repository. Do not push, and do not touch anything outside it.

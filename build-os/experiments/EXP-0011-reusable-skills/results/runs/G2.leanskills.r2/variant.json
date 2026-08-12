@@ -1,0 +1,35 @@
+{
+  "config": "leanskills",
+  "sequence": "G",
+  "position": 2,
+  "rep": 2,
+  "subsystem": "governance",
+  "memory_unit": "compiled-skill",
+  "source_identity": {
+    "treatment": "leanskills",
+    "requested_ref": "a530659",
+    "resolved_commit": "a53065939e9449ce5825e12e63878efa76c2c2ba"
+  },
+  "administered_sha": "c7aba7b72fefc2544e5652652aeb3484e3cf53f6",
+  "prompt_sha256_16": "a5941bdce16d412c",
+  "memory_store": "memory-stores/G.rep2.leanskills/repair-rules.md",
+  "install": {
+    "kind": "skill",
+    "matched": 1,
+    "bytes": 4002,
+    "skipped_oversize": 0,
+    "rules": 1
+  },
+  "skill_path": ".claude/skills/repair-governance/SKILL.md",
+  "verification": "runnable",
+  "allowed_tools": [
+    "Bash(npx tsc:*)",
+    "Bash(./node_modules/.bin/tsc:*)",
+    "Bash(node_modules/.bin/tsc:*)"
+  ],
+  "permission_mode": "acceptEdits",
+  "bash_timeouts": {
+    "BASH_DEFAULT_TIMEOUT_MS": "600000",
+    "BASH_MAX_TIMEOUT_MS": "600000"
+  }
+}

@@ -1,0 +1,134 @@
+diff --git a/server/mcp/mcp-sync-wrapper.ts b/server/mcp/mcp-sync-wrapper.ts
+index 956385b..c04cc41 100644
+--- a/server/mcp/mcp-sync-wrapper.ts
++++ b/server/mcp/mcp-sync-wrapper.ts
+@@ -27,7 +27,7 @@ import {
+   type AsyncJob,
+   type CreateJobOptions,
+ } from './async-job-queue';
+-import { executeTool, type ToolExecutionOptions } from './tool-executor';
++import { executeTool, type ExecutionContext } from './tool-executor';
+ 
+ const log = createLogger('mcp-sync-wrapper');
+ 
+@@ -88,12 +88,13 @@ export async function mcpGovernedCall(
+     try {
+       log.info(`[${correlationId}] Attempting sync execution for ${toolName} (estimated: ${estimatedDuration}ms)`);
+       
+-      const result = await executeTool(toolName, payload, {
++      const ctx: ExecutionContext = {
+         apiKey: jobOptions.apiKey,
+         clientIp: jobOptions.clientIp,
+         userAgent: jobOptions.userAgent,
+         correlationId,
+-      } as ToolExecutionOptions);
++      };
++      const result = await executeTool(toolName, payload, ctx);
+ 
+       const elapsedMs = Date.now() - startTime;
+       log.info(`[${correlationId}] Sync execution completed in ${elapsedMs}ms`);
+@@ -112,7 +113,9 @@ export async function mcpGovernedCall(
+   // Create async job
+   log.info(`[${correlationId}] Creating async job for ${toolName} (estimated: ${estimatedDuration}ms)`);
+   
+-  const job = createAsyncJob(toolName, payload, jobOptions);
++  // createAsyncJob returns the job plus its 202 response headers; only the job
++  // matters here — this wrapper builds its own MCP-shaped response below.
++  const { job } = createAsyncJob(toolName, payload, jobOptions);
+   
+   // Start execution in background
+   executeAsyncJob(job, correlationId).catch(err => {
+@@ -153,12 +156,13 @@ async function executeAsyncJob(job: AsyncJob, correlationId?: string): Promise<v
+   try {
+     markRunning(job.id);
+     
+-    const result = await executeTool(job.toolName, job.args, {
++    const ctx: ExecutionContext = {
+       apiKey: job.apiKey,
+       clientIp: job.clientIp,
+       userAgent: job.userAgent,
+       correlationId,
+-    } as ToolExecutionOptions);
++    };
++    const result = await executeTool(job.toolName, job.args, ctx);
+ 
+     completeAsyncJob(job.id, result);
+   } catch (err) {
+diff --git a/server/mcp/tool-executor.ts b/server/mcp/tool-executor.ts
+index 86ef651..74e25c9 100644
+--- a/server/mcp/tool-executor.ts
++++ b/server/mcp/tool-executor.ts
+@@ -183,6 +183,10 @@ export interface ExecutionContext {
+   apiKey?: string;
+   clientIp?: string;
+   userAgent?: string;
++  /** Correlation id threaded from the caller so tool logs join the request trace. */
++  correlationId?: string;
++  /** JSON-RPC request id of the originating MCP call, when the caller has one. */
++  requestId?: string;
+   /**
+    * TRUSTED authenticated tenant, resolved by the HTTP handler from a validated
+    * inference credential (provisioned tenant key → org-<id>/user-<id>, spoof-
+
+diff --git a/build-os/packets/routing/routing-auto-20260812T155229Z-21273-20260812T155229Z.md b/build-os/packets/routing/routing-auto-20260812T155229Z-21273-20260812T155229Z.md
+--- /dev/null
++++ b/build-os/packets/routing/routing-auto-20260812T155229Z-21273-20260812T155229Z.md
++# ROUTING RECEIPT — one file per routing decision. The recorded verdict is BINDING
++# (build-os/memory/routing_contract.md); routing-check.sh refuses this receipt at
++# close if executed_mode exceeds selected_mode with no escalation record, if an
++# escalation carries no evidence, or if consumption exceeds a budget undeclared.
++task_id: auto-20260812T155229Z-21273
++description_sha256: 27b3f1b706c909c94af97ff3625e4a0a813089bab6bc2c90aa89c5978cb14534
++descriptor: {"expected_files_changed":1,"requires_tests":false,"expected_session_count":1,"prior_context_required":false,"handoff_required":false,"consequence_level":"low","irreversible_or_external_mutation":false,"high_blast_radius":false,"unclear_acceptance_criteria":false,"security_or_compliance_consequence":false,"parallel_workstreams_benefit":false,"high_rework_history":false,"nondeterministic_verification":false}
++selected_mode: direct
++selector_note: -
++issued_at: 2026-08-12T15:52:29Z
++# --- budgets: DERIVED DEFAULTS from EXP-0002 sealed records, operator-tunable, not laws.
++# --- Derivation: ON-surface light runs measured 172k-369k total tokens / 0 dispatches
++# --- (named exceedance: raw T4 at 526,461 - context, not the band); the
++# --- blowouts measured 4.9M/7.4M tokens, 4-5 dispatches, $3.63/$4.80. See route-task.sh.
++budget_max_subagents: 0
++budget_max_total_tokens: 250000
++budget_max_uncached_tokens: 30000
++budget_max_model_calls: 12
++budget_max_wall_clock_s: 300
++budget_max_cost_usd: 0.40
++# --- process allowance (PACKET-0053): the packet's OWN gate chain is governance
++# --- ceremony, counted SEPARATELY from task work by the live gate and attributed
++# --- to governance_process (the 0050/0051 calibration question, resolved). Default
++# --- 7 = the LARGEST LEGAL chain in the doctrine: mandatory_full_regate runs
++# --- builder, qa, reviewer, fix-builder, qa, reviewer, archivist. (No-fix chain
++# --- is 4; fix-then-pass is 6.) Process dispatches never eat budget_max_subagents.
++process_dispatch_allowance: 7
++# --- empty at issue; filled at close. AN UNKNOWN IS NOT A ZERO: "-" is an honest
++# --- admission and is never refused; refusal is for CONTRADICTION, not absence.
++executed_mode: -
++escalation: -
++escalation_evidence: -
++consumed_subagents: -
++consumed_total_tokens: -
++consumed_uncached_tokens: -
++consumed_model_calls: -
++consumed_wall_clock_s: -
++consumed_cost_usd: -
++degradation_note: -
++# --- close-fill EXTENSIONS (PACKET-0053). consumed_subagents above counts TASK
++# --- dispatches (vs budget_max_subagents); consumed_process_dispatches counts the
++# --- gate chain (vs process_dispatch_allowance). The attr_* layers attribute
++# --- consumption where derivable at close — tokens or cost with provenance, or
++# --- "-" as an admission, NEVER a zero nobody measured. Receipts predating these
++# --- fields stay valid: routing-check.sh reads an absent field as "-".
++consumed_process_dispatches: -
++attr_task_execution: -
++attr_context_retrieval: -
++attr_subagent_execution: -
++attr_verification: -
++attr_review: -
++attr_governance_process: -
++attr_experiment_audit: -
++# --- contribution rows (PACKET-0053): marginal-contribution accounting, MANDATORY
++# --- for a Full close with dispatches>0 (routing-check.sh refuses otherwise). The
++# --- live gate seeds one stub row per admitted Full task dispatch; fill at close:
++# --- contribution: <subagent_type> | <unique_question> | <output_ref> | changed_implementation=y/n/- | changed_conclusion=y/n/- | caught_defect=y/n/- | duplicated_work=y/n/- | tokens=<v|-> | cost=<v|-> | time=<v|->
++# --- An all-"-" row passes as an admission and is REPORTED as non-contributing.
++

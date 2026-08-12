@@ -1,0 +1,9 @@
+{
+  "base_commit": "1d134726c754a4a4e0121321b8c2954446df3f13",
+  "product_paths": [
+    "server/governance/four-eyes-approval.standalone-test.ts"
+  ],
+  "governance_paths": [
+    "build-os/packets/routing/routing-auto-20260812T123746Z-1390-20260812T123746Z.md"
+  ]
+}

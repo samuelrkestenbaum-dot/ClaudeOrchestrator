@@ -1,0 +1,9 @@
+{
+  "base_commit": "96b1ef846aee2feb38bec4941ecce5f150326abe",
+  "product_paths": [
+    "server/governance/policy-as-code.ts"
+  ],
+  "governance_paths": [
+    "build-os/packets/routing/routing-auto-20260812T121900Z-20345-20260812T121900Z.md"
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "base_commit": "32b1834774b9216961e600452212de5b46d7b5b1",
+  "product_paths": [
+    "server/governance/surface-discovery/guardian.ts"
+  ],
+  "governance_paths": []
+}

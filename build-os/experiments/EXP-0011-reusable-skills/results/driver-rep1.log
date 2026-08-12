@@ -1,0 +1,430 @@
+PRE-FLIGHT G1/native rep1
+  ok   no_concurrent_measured_arm: acquired
+  ok   exact_seed_restored_before_every_position: 2543c873141f restored and verified
+  ok   administration.substrate_absent: build-os, .claude, CLAUDE.md all removed
+  ok   task_file_present: server/governance/governance-dashboard-router.ts
+  ok   administered_state_committed: 0fcd0f17235f
+  ok   node_modules_available: shared, byte-identical across arms
+  ok   prompt_identity: sha256:a572e65e25dad8c4 — built from sequences.json only; identical across the three configs by construction
+UNIT G1/native rep1: terminal=completed admissible=true accepted=true install=none:0B distilled=false elapsed=875.1s
+PRE-FLIGHT G1/leanrules rep1
+  ok   no_concurrent_measured_arm: acquired
+  ok   exact_seed_restored_before_every_position: 2543c873141f restored and verified
+  ok   administration.load_bearing_controllers_present: 13 named controllers present
+  ok   administration.data_retained_not_overwritten: arm tree retains its own durable memory
+  ok   administration.no_session_local_state: 4 session-local files withheld by lifecycle, not by directory
+  ok   administration.benchmark_withheld_from_arm: experiments and pilots absent from the arm tree
+  ok   transport_markers: pinned transport administered unchanged
+  ok   store_provenance: no store yet (position 1, or a fresh rep) — nothing to verify
+  ok   delivery_prepared: no matching rules — position 1 or fresh rep
+  ok   task_file_present: server/governance/governance-dashboard-router.ts
+  ok   administered_state_committed: 3ce7653af3d5
+  ok   node_modules_available: shared, byte-identical across arms
+  ok   prompt_identity: sha256:a572e65e25dad8c4 — built from sequences.json only; identical across the three configs by construction
+UNIT G1/leanrules rep1: terminal=completed admissible=true accepted=true install=rules-context:0B distilled=true elapsed=779.7s
+PRE-FLIGHT G1/leanskills rep1
+  ok   no_concurrent_measured_arm: acquired
+  ok   exact_seed_restored_before_every_position: 2543c873141f restored and verified
+  ok   administration.load_bearing_controllers_present: 13 named controllers present
+  ok   administration.data_retained_not_overwritten: arm tree retains its own durable memory
+  ok   administration.no_session_local_state: 4 session-local files withheld by lifecycle, not by directory
+  ok   administration.benchmark_withheld_from_arm: experiments and pilots absent from the arm tree
+  ok   transport_markers: pinned transport administered unchanged
+  ok   store_provenance: no store yet (position 1, or a fresh rep) — nothing to verify
+  ok   skill_compiled_valid: no prior rules — position 1 or fresh rep; no skill installed
+  ok   no_memory_file_for_skills_arm: skills arm carries the capability surface only — no rules ride session-start context
+  ok   task_file_present: server/governance/governance-dashboard-router.ts
+  ok   administered_state_committed: 8cd1a833ade7
+  ok   node_modules_available: shared, byte-identical across arms
+  ok   prompt_identity: sha256:a572e65e25dad8c4 — built from sequences.json only; identical across the three configs by construction
+UNIT G1/leanskills rep1: terminal=completed admissible=true accepted=true install=skill:0B distilled=true elapsed=644.3s
+PRE-FLIGHT G2/leanrules rep1
+  ok   no_concurrent_measured_arm: acquired
+  ok   exact_seed_restored_before_every_position: 2543c873141f restored and verified
+  ok   administration.load_bearing_controllers_present: 13 named controllers present
+  ok   administration.data_retained_not_overwritten: arm tree retains its own durable memory
+  ok   administration.no_session_local_state: 4 session-local files withheld by lifecycle, not by directory
+  ok   administration.benchmark_withheld_from_arm: experiments and pilots absent from the arm tree
+  ok   transport_markers: pinned transport administered unchanged
+  ok   store_provenance: 1 rule(s), all same-sequence same-rep earlier-position
+  ok   delivery_prepared: no matching rules — position 1 or fresh rep
+  ok   task_file_present: server/governance/structural-proof-audit.ts
+  ok   administered_state_committed: 0deec3ff2f64
+  ok   node_modules_available: shared, byte-identical across arms
+  ok   prompt_identity: sha256:a5941bdce16d412c — built from sequences.json only; identical across the three configs by construction
+UNIT G2/leanrules rep1: terminal=completed admissible=true accepted=true install=rules-context:0B distilled=true elapsed=405.4s
+PRE-FLIGHT G2/leanskills rep1
+  ok   no_concurrent_measured_arm: acquired
+  ok   exact_seed_restored_before_every_position: 2543c873141f restored and verified
+  ok   administration.load_bearing_controllers_present: 13 named controllers present
+  ok   administration.data_retained_not_overwritten: arm tree retains its own durable memory
+  ok   administration.no_session_local_state: 4 session-local files withheld by lifecycle, not by directory
+  ok   administration.benchmark_withheld_from_arm: experiments and pilots absent from the arm tree
+  ok   transport_markers: pinned transport administered unchanged
+  ok   store_provenance: 1 rule(s), all same-sequence same-rep earlier-position
+  ok   skill_compiled_valid: 1 rule(s) into .claude/skills/repair-governance/SKILL.md, 2706B, frontmatter valid
+  ok   no_memory_file_for_skills_arm: skills arm carries the capability surface only — no rules ride session-start context
+  ok   task_file_present: server/governance/structural-proof-audit.ts
+  ok   administered_state_committed: 88c8cd8bbfcc
+  ok   node_modules_available: shared, byte-identical across arms
+  ok   prompt_identity: sha256:a5941bdce16d412c — built from sequences.json only; identical across the three configs by construction
+UNIT G2/leanskills rep1: terminal=completed admissible=true accepted=true install=skill:2706B distilled=true elapsed=339.2s
+PRE-FLIGHT G2/native rep1
+  ok   no_concurrent_measured_arm: acquired
+  ok   exact_seed_restored_before_every_position: 2543c873141f restored and verified
+  ok   administration.substrate_absent: build-os, .claude, CLAUDE.md all removed
+  ok   task_file_present: server/governance/structural-proof-audit.ts
+  ok   administered_state_committed: a3c24e5a13ea
+  ok   node_modules_available: shared, byte-identical across arms
+  ok   prompt_identity: sha256:a5941bdce16d412c — built from sequences.json only; identical across the three configs by construction
+UNIT G2/native rep1: terminal=completed admissible=true accepted=true install=none:0B distilled=false elapsed=386.5s
+PRE-FLIGHT G3/leanskills rep1
+  ok   no_concurrent_measured_arm: acquired
+  ok   exact_seed_restored_before_every_position: 2543c873141f restored and verified
+  ok   administration.load_bearing_controllers_present: 13 named controllers present
+  ok   administration.data_retained_not_overwritten: arm tree retains its own durable memory
+  ok   administration.no_session_local_state: 4 session-local files withheld by lifecycle, not by directory
+  ok   administration.benchmark_withheld_from_arm: experiments and pilots absent from the arm tree
+  ok   transport_markers: pinned transport administered unchanged
+  ok   store_provenance: 2 rule(s), all same-sequence same-rep earlier-position
+  ok   skill_compiled_valid: 2 rule(s) into .claude/skills/repair-governance/SKILL.md, 4350B, frontmatter valid
+  ok   no_memory_file_for_skills_arm: skills arm carries the capability surface only — no rules ride session-start context
+  ok   task_file_present: server/governance/surface-discovery/guardian.ts
+  ok   administered_state_committed: 4aa3edbc7531
+  ok   node_modules_available: shared, byte-identical across arms
+  ok   prompt_identity: sha256:01d8f979849f068f — built from sequences.json only; identical across the three configs by construction
+UNIT G3/leanskills rep1: terminal=completed admissible=true accepted=true install=skill:4350B distilled=true elapsed=575.1s
+PRE-FLIGHT G3/native rep1
+  ok   no_concurrent_measured_arm: acquired
+  ok   exact_seed_restored_before_every_position: 2543c873141f restored and verified
+  ok   administration.substrate_absent: build-os, .claude, CLAUDE.md all removed
+  ok   task_file_present: server/governance/surface-discovery/guardian.ts
+  ok   administered_state_committed: 38fce48d0ffc
+  ok   node_modules_available: shared, byte-identical across arms
+  ok   prompt_identity: sha256:01d8f979849f068f — built from sequences.json only; identical across the three configs by construction
+UNIT G3/native rep1: terminal=completed admissible=true accepted=true install=none:0B distilled=false elapsed=582.8s
+PRE-FLIGHT G3/leanrules rep1
+  ok   no_concurrent_measured_arm: acquired
+  ok   exact_seed_restored_before_every_position: 2543c873141f restored and verified
+  ok   administration.load_bearing_controllers_present: 13 named controllers present
+  ok   administration.data_retained_not_overwritten: arm tree retains its own durable memory
+  ok   administration.no_session_local_state: 4 session-local files withheld by lifecycle, not by directory
+  ok   administration.benchmark_withheld_from_arm: experiments and pilots absent from the arm tree
+  ok   transport_markers: pinned transport administered unchanged
+  ok   store_provenance: 2 rule(s), all same-sequence same-rep earlier-position
+  ok   delivery_prepared: no matching rules — position 1 or fresh rep
+  ok   task_file_present: server/governance/surface-discovery/guardian.ts
+  ok   administered_state_committed: 89f39acc436c
+  ok   node_modules_available: shared, byte-identical across arms
+  ok   prompt_identity: sha256:01d8f979849f068f — built from sequences.json only; identical across the three configs by construction
+UNIT G3/leanrules rep1: terminal=completed admissible=true accepted=true install=rules-context:0B distilled=true elapsed=710.3s
+PRE-FLIGHT G4/native rep1
+  ok   no_concurrent_measured_arm: acquired
+  ok   exact_seed_restored_before_every_position: 2543c873141f restored and verified
+  ok   administration.substrate_absent: build-os, .claude, CLAUDE.md all removed
+  ok   task_file_present: server/governance/policy-as-code.ts
+  ok   administered_state_committed: d1d01f80c0f2
+  ok   node_modules_available: shared, byte-identical across arms
+  ok   prompt_identity: sha256:73c64ad378844fe9 — built from sequences.json only; identical across the three configs by construction
+UNIT G4/native rep1: terminal=completed admissible=true accepted=false install=none:0B distilled=false elapsed=641.0s
+PRE-FLIGHT G4/leanrules rep1
+  ok   no_concurrent_measured_arm: acquired
+  ok   exact_seed_restored_before_every_position: 2543c873141f restored and verified
+  ok   administration.load_bearing_controllers_present: 13 named controllers present
+  ok   administration.data_retained_not_overwritten: arm tree retains its own durable memory
+  ok   administration.no_session_local_state: 4 session-local files withheld by lifecycle, not by directory
+  ok   administration.benchmark_withheld_from_arm: experiments and pilots absent from the arm tree
+  ok   transport_markers: pinned transport administered unchanged
+  ok   store_provenance: 3 rule(s), all same-sequence same-rep earlier-position
+  ok   delivery_prepared: 3 matched, 1338B as context (skips: 2)
+  ok   task_file_present: server/governance/policy-as-code.ts
+  ok   administered_state_committed: f6e87beca808
+  ok   node_modules_available: shared, byte-identical across arms
+  ok   prompt_identity: sha256:73c64ad378844fe9 — built from sequences.json only; identical across the three configs by construction
+UNIT G4/leanrules rep1: terminal=infrastructure_error admissible=false accepted=false install=rules-context:1338B distilled=false elapsed=209.9s
+PRE-FLIGHT G4/leanrules rep1
+  ok   no_concurrent_measured_arm: acquired
+  ok   exact_seed_restored_before_every_position: 2543c873141f restored and verified
+  ok   administration.load_bearing_controllers_present: 13 named controllers present
+  ok   administration.data_retained_not_overwritten: arm tree retains its own durable memory
+  ok   administration.no_session_local_state: 4 session-local files withheld by lifecycle, not by directory
+  ok   administration.benchmark_withheld_from_arm: experiments and pilots absent from the arm tree
+  ok   transport_markers: pinned transport administered unchanged
+  ok   store_provenance: 3 rule(s), all same-sequence same-rep earlier-position
+  ok   delivery_prepared: 3 matched, 1338B as context (skips: 2)
+  ok   task_file_present: server/governance/policy-as-code.ts
+  ok   administered_state_committed: 96b1ef846aee
+  ok   node_modules_available: shared, byte-identical across arms
+  ok   prompt_identity: sha256:73c64ad378844fe9 — built from sequences.json only; identical across the three configs by construction
+UNIT G4/leanrules rep1: terminal=completed admissible=true accepted=true install=rules-context:1338B distilled=true elapsed=381.9s
+PRE-FLIGHT G4/leanskills rep1
+  ok   no_concurrent_measured_arm: acquired
+  ok   exact_seed_restored_before_every_position: 2543c873141f restored and verified
+  ok   administration.load_bearing_controllers_present: 13 named controllers present
+  ok   administration.data_retained_not_overwritten: arm tree retains its own durable memory
+  ok   administration.no_session_local_state: 4 session-local files withheld by lifecycle, not by directory
+  ok   administration.benchmark_withheld_from_arm: experiments and pilots absent from the arm tree
+  ok   transport_markers: pinned transport administered unchanged
+  ok   store_provenance: 3 rule(s), all same-sequence same-rep earlier-position
+  ok   skill_compiled_valid: 3 rule(s) into .claude/skills/repair-governance/SKILL.md, 5840B, frontmatter valid
+  ok   no_memory_file_for_skills_arm: skills arm carries the capability surface only — no rules ride session-start context
+  ok   task_file_present: server/governance/policy-as-code.ts
+  ok   administered_state_committed: 25516db684b0
+  ok   node_modules_available: shared, byte-identical across arms
+  ok   prompt_identity: sha256:73c64ad378844fe9 — built from sequences.json only; identical across the three configs by construction
+UNIT G4/leanskills rep1: terminal=completed admissible=true accepted=true install=skill:5840B distilled=true elapsed=523.9s
+PRE-FLIGHT G5/leanrules rep1
+  ok   no_concurrent_measured_arm: acquired
+  ok   exact_seed_restored_before_every_position: 2543c873141f restored and verified
+  ok   administration.load_bearing_controllers_present: 13 named controllers present
+  ok   administration.data_retained_not_overwritten: arm tree retains its own durable memory
+  ok   administration.no_session_local_state: 4 session-local files withheld by lifecycle, not by directory
+  ok   administration.benchmark_withheld_from_arm: experiments and pilots absent from the arm tree
+  ok   transport_markers: pinned transport administered unchanged
+  ok   store_provenance: 4 rule(s), all same-sequence same-rep earlier-position
+  ok   delivery_prepared: no matching rules — position 1 or fresh rep
+  ok   task_file_present: server/governance/four-eyes-approval.standalone-test.ts
+  ok   administered_state_committed: 1d134726c754
+  ok   node_modules_available: shared, byte-identical across arms
+  ok   prompt_identity: sha256:89d0e0b2bf44f35b — built from sequences.json only; identical across the three configs by construction
+UNIT G5/leanrules rep1: terminal=completed admissible=true accepted=true install=rules-context:0B distilled=true elapsed=703.2s
+PRE-FLIGHT G5/leanskills rep1
+  ok   no_concurrent_measured_arm: acquired
+  ok   exact_seed_restored_before_every_position: 2543c873141f restored and verified
+  ok   administration.load_bearing_controllers_present: 13 named controllers present
+  ok   administration.data_retained_not_overwritten: arm tree retains its own durable memory
+  ok   administration.no_session_local_state: 4 session-local files withheld by lifecycle, not by directory
+  ok   administration.benchmark_withheld_from_arm: experiments and pilots absent from the arm tree
+  ok   transport_markers: pinned transport administered unchanged
+  ok   store_provenance: 4 rule(s), all same-sequence same-rep earlier-position
+  ok   skill_compiled_valid: 3 rule(s) into .claude/skills/repair-governance/SKILL.md, 5407B, frontmatter valid
+  ok   no_memory_file_for_skills_arm: skills arm carries the capability surface only — no rules ride session-start context
+  ok   task_file_present: server/governance/four-eyes-approval.standalone-test.ts
+  ok   administered_state_committed: 1e3dd487d18d
+  ok   node_modules_available: shared, byte-identical across arms
+  ok   prompt_identity: sha256:89d0e0b2bf44f35b — built from sequences.json only; identical across the three configs by construction
+UNIT G5/leanskills rep1: terminal=completed admissible=true accepted=true install=skill:5407B distilled=true elapsed=331.8s
+PRE-FLIGHT G5/native rep1
+  ok   no_concurrent_measured_arm: acquired
+  ok   exact_seed_restored_before_every_position: 2543c873141f restored and verified
+  ok   administration.substrate_absent: build-os, .claude, CLAUDE.md all removed
+  ok   task_file_present: server/governance/four-eyes-approval.standalone-test.ts
+  ok   administered_state_committed: 1cda40130dbf
+  ok   node_modules_available: shared, byte-identical across arms
+  ok   prompt_identity: sha256:89d0e0b2bf44f35b — built from sequences.json only; identical across the three configs by construction
+UNIT G5/native rep1: terminal=completed admissible=true accepted=true install=none:0B distilled=false elapsed=560.6s
+PRE-FLIGHT M1/native rep1
+  ok   no_concurrent_measured_arm: acquired
+  ok   exact_seed_restored_before_every_position: 2543c873141f restored and verified
+  ok   administration.substrate_absent: build-os, .claude, CLAUDE.md all removed
+  ok   task_file_present: server/mcp/tool-executor.ts
+  ok   administered_state_committed: 5142d8beb47a
+  ok   node_modules_available: shared, byte-identical across arms
+  ok   prompt_identity: sha256:e8827177e250195d — built from sequences.json only; identical across the three configs by construction
+UNIT M1/native rep1: terminal=completed admissible=true accepted=true install=none:0B distilled=false elapsed=760.5s
+PRE-FLIGHT M1/leanrules rep1
+  ok   no_concurrent_measured_arm: acquired
+  ok   exact_seed_restored_before_every_position: 2543c873141f restored and verified
+  ok   administration.load_bearing_controllers_present: 13 named controllers present
+  ok   administration.data_retained_not_overwritten: arm tree retains its own durable memory
+  ok   administration.no_session_local_state: 4 session-local files withheld by lifecycle, not by directory
+  ok   administration.benchmark_withheld_from_arm: experiments and pilots absent from the arm tree
+  ok   transport_markers: pinned transport administered unchanged
+  ok   store_provenance: no store yet (position 1, or a fresh rep) — nothing to verify
+  ok   delivery_prepared: no matching rules — position 1 or fresh rep
+  ok   task_file_present: server/mcp/tool-executor.ts
+  ok   administered_state_committed: 4abd07989413
+  ok   node_modules_available: shared, byte-identical across arms
+  ok   prompt_identity: sha256:e8827177e250195d — built from sequences.json only; identical across the three configs by construction
+UNIT M1/leanrules rep1: terminal=infrastructure_error admissible=false accepted=false install=rules-context:0B distilled=false elapsed=202.1s
+PRE-FLIGHT M1/leanrules rep1
+  ok   no_concurrent_measured_arm: acquired
+  ok   exact_seed_restored_before_every_position: 2543c873141f restored and verified
+  ok   administration.load_bearing_controllers_present: 13 named controllers present
+  ok   administration.data_retained_not_overwritten: arm tree retains its own durable memory
+  ok   administration.no_session_local_state: 4 session-local files withheld by lifecycle, not by directory
+  ok   administration.benchmark_withheld_from_arm: experiments and pilots absent from the arm tree
+  ok   transport_markers: pinned transport administered unchanged
+  ok   store_provenance: no store yet (position 1, or a fresh rep) — nothing to verify
+  ok   delivery_prepared: no matching rules — position 1 or fresh rep
+  ok   task_file_present: server/mcp/tool-executor.ts
+  ok   administered_state_committed: 5f1d472e0fd2
+  ok   node_modules_available: shared, byte-identical across arms
+  ok   prompt_identity: sha256:e8827177e250195d — built from sequences.json only; identical across the three configs by construction
+UNIT M1/leanrules rep1: terminal=completed admissible=true accepted=true install=rules-context:0B distilled=true elapsed=643.4s
+PRE-FLIGHT M1/leanskills rep1
+  ok   no_concurrent_measured_arm: acquired
+  ok   exact_seed_restored_before_every_position: 2543c873141f restored and verified
+  ok   administration.load_bearing_controllers_present: 13 named controllers present
+  ok   administration.data_retained_not_overwritten: arm tree retains its own durable memory
+  ok   administration.no_session_local_state: 4 session-local files withheld by lifecycle, not by directory
+  ok   administration.benchmark_withheld_from_arm: experiments and pilots absent from the arm tree
+  ok   transport_markers: pinned transport administered unchanged
+  ok   store_provenance: no store yet (position 1, or a fresh rep) — nothing to verify
+  ok   skill_compiled_valid: no prior rules — position 1 or fresh rep; no skill installed
+  ok   no_memory_file_for_skills_arm: skills arm carries the capability surface only — no rules ride session-start context
+  ok   task_file_present: server/mcp/tool-executor.ts
+  ok   administered_state_committed: a86229089feb
+  ok   node_modules_available: shared, byte-identical across arms
+  ok   prompt_identity: sha256:e8827177e250195d — built from sequences.json only; identical across the three configs by construction
+UNIT M1/leanskills rep1: terminal=completed admissible=true accepted=true install=skill:0B distilled=true elapsed=595.3s
+PRE-FLIGHT M2/leanrules rep1
+  ok   no_concurrent_measured_arm: acquired
+  ok   exact_seed_restored_before_every_position: 2543c873141f restored and verified
+  ok   administration.load_bearing_controllers_present: 13 named controllers present
+  ok   administration.data_retained_not_overwritten: arm tree retains its own durable memory
+  ok   administration.no_session_local_state: 4 session-local files withheld by lifecycle, not by directory
+  ok   administration.benchmark_withheld_from_arm: experiments and pilots absent from the arm tree
+  ok   transport_markers: pinned transport administered unchanged
+  ok   store_provenance: 1 rule(s), all same-sequence same-rep earlier-position
+  ok   delivery_prepared: no matching rules — position 1 or fresh rep
+  ok   task_file_present: server/mcp/mcp-http-handler.ts
+  ok   administered_state_committed: 890feedddcc5
+  ok   node_modules_available: shared, byte-identical across arms
+  ok   prompt_identity: sha256:cab26ca2a83866a5 — built from sequences.json only; identical across the three configs by construction
+UNIT M2/leanrules rep1: terminal=completed admissible=true accepted=true install=rules-context:0B distilled=true elapsed=1118.2s
+PRE-FLIGHT M2/leanskills rep1
+  ok   no_concurrent_measured_arm: acquired
+  ok   exact_seed_restored_before_every_position: 2543c873141f restored and verified
+  ok   administration.load_bearing_controllers_present: 13 named controllers present
+  ok   administration.data_retained_not_overwritten: arm tree retains its own durable memory
+  ok   administration.no_session_local_state: 4 session-local files withheld by lifecycle, not by directory
+  ok   administration.benchmark_withheld_from_arm: experiments and pilots absent from the arm tree
+  ok   transport_markers: pinned transport administered unchanged
+  ok   store_provenance: 1 rule(s), all same-sequence same-rep earlier-position
+  ok   skill_compiled_valid: 1 rule(s) into .claude/skills/repair-mcp/SKILL.md, 1861B, frontmatter valid
+  ok   no_memory_file_for_skills_arm: skills arm carries the capability surface only — no rules ride session-start context
+  ok   task_file_present: server/mcp/mcp-http-handler.ts
+  ok   administered_state_committed: 6879c4b82064
+  ok   node_modules_available: shared, byte-identical across arms
+  ok   prompt_identity: sha256:cab26ca2a83866a5 — built from sequences.json only; identical across the three configs by construction
+UNIT M2/leanskills rep1: terminal=completed admissible=true accepted=true install=skill:1861B distilled=true elapsed=1149.1s
+PRE-FLIGHT M2/native rep1
+  ok   no_concurrent_measured_arm: acquired
+  ok   exact_seed_restored_before_every_position: 2543c873141f restored and verified
+  ok   administration.substrate_absent: build-os, .claude, CLAUDE.md all removed
+  ok   task_file_present: server/mcp/mcp-http-handler.ts
+  ok   administered_state_committed: 1c0fbd1330e6
+  ok   node_modules_available: shared, byte-identical across arms
+  ok   prompt_identity: sha256:cab26ca2a83866a5 — built from sequences.json only; identical across the three configs by construction
+UNIT M2/native rep1: terminal=completed admissible=true accepted=true install=none:0B distilled=false elapsed=726.8s
+PRE-FLIGHT M3/leanskills rep1
+  ok   no_concurrent_measured_arm: acquired
+  ok   exact_seed_restored_before_every_position: 2543c873141f restored and verified
+  ok   administration.load_bearing_controllers_present: 13 named controllers present
+  ok   administration.data_retained_not_overwritten: arm tree retains its own durable memory
+  ok   administration.no_session_local_state: 4 session-local files withheld by lifecycle, not by directory
+  ok   administration.benchmark_withheld_from_arm: experiments and pilots absent from the arm tree
+  ok   transport_markers: pinned transport administered unchanged
+  ok   store_provenance: 2 rule(s), all same-sequence same-rep earlier-position
+  ok   skill_compiled_valid: 2 rule(s) into .claude/skills/repair-mcp/SKILL.md, 4158B, frontmatter valid
+  ok   no_memory_file_for_skills_arm: skills arm carries the capability surface only — no rules ride session-start context
+  ok   task_file_present: server/mcp/mcp-handler-v2.ts
+  ok   administered_state_committed: d1775fdab808
+  ok   node_modules_available: shared, byte-identical across arms
+  ok   prompt_identity: sha256:eb5fca73c1b91df1 — built from sequences.json only; identical across the three configs by construction
+UNIT M3/leanskills rep1: terminal=completed admissible=true accepted=true install=skill:4158B distilled=true elapsed=675.3s
+PRE-FLIGHT M3/native rep1
+  ok   no_concurrent_measured_arm: acquired
+  ok   exact_seed_restored_before_every_position: 2543c873141f restored and verified
+  ok   administration.substrate_absent: build-os, .claude, CLAUDE.md all removed
+  ok   task_file_present: server/mcp/mcp-handler-v2.ts
+  ok   administered_state_committed: d4cc593f5860
+  ok   node_modules_available: shared, byte-identical across arms
+  ok   prompt_identity: sha256:eb5fca73c1b91df1 — built from sequences.json only; identical across the three configs by construction
+UNIT M3/native rep1: terminal=completed admissible=true accepted=true install=none:0B distilled=false elapsed=591.9s
+PRE-FLIGHT M3/leanrules rep1
+  ok   no_concurrent_measured_arm: acquired
+  ok   exact_seed_restored_before_every_position: 2543c873141f restored and verified
+  ok   administration.load_bearing_controllers_present: 13 named controllers present
+  ok   administration.data_retained_not_overwritten: arm tree retains its own durable memory
+  ok   administration.no_session_local_state: 4 session-local files withheld by lifecycle, not by directory
+  ok   administration.benchmark_withheld_from_arm: experiments and pilots absent from the arm tree
+  ok   transport_markers: pinned transport administered unchanged
+  ok   store_provenance: 2 rule(s), all same-sequence same-rep earlier-position
+  ok   delivery_prepared: no matching rules — position 1 or fresh rep
+  ok   task_file_present: server/mcp/mcp-handler-v2.ts
+  ok   administered_state_committed: aa087744b1fd
+  ok   node_modules_available: shared, byte-identical across arms
+  ok   prompt_identity: sha256:eb5fca73c1b91df1 — built from sequences.json only; identical across the three configs by construction
+UNIT M3/leanrules rep1: terminal=completed admissible=true accepted=true install=rules-context:0B distilled=true elapsed=518.9s
+PRE-FLIGHT M4/native rep1
+  ok   no_concurrent_measured_arm: acquired
+  ok   exact_seed_restored_before_every_position: 2543c873141f restored and verified
+  ok   administration.substrate_absent: build-os, .claude, CLAUDE.md all removed
+  ok   task_file_present: server/mcp/schema-normalizer.ts
+  ok   administered_state_committed: a2f3031e15d6
+  ok   node_modules_available: shared, byte-identical across arms
+  ok   prompt_identity: sha256:a19032026d6bf0ef — built from sequences.json only; identical across the three configs by construction
+UNIT M4/native rep1: terminal=completed admissible=true accepted=true install=none:0B distilled=false elapsed=651.9s
+PRE-FLIGHT M4/leanrules rep1
+  ok   no_concurrent_measured_arm: acquired
+  ok   exact_seed_restored_before_every_position: 2543c873141f restored and verified
+  ok   administration.load_bearing_controllers_present: 13 named controllers present
+  ok   administration.data_retained_not_overwritten: arm tree retains its own durable memory
+  ok   administration.no_session_local_state: 4 session-local files withheld by lifecycle, not by directory
+  ok   administration.benchmark_withheld_from_arm: experiments and pilots absent from the arm tree
+  ok   transport_markers: pinned transport administered unchanged
+  ok   store_provenance: 3 rule(s), all same-sequence same-rep earlier-position
+  ok   delivery_prepared: no matching rules — position 1 or fresh rep
+  ok   task_file_present: server/mcp/schema-normalizer.ts
+  ok   administered_state_committed: 0fa7d3501a0c
+  ok   node_modules_available: shared, byte-identical across arms
+  ok   prompt_identity: sha256:a19032026d6bf0ef — built from sequences.json only; identical across the three configs by construction
+UNIT M4/leanrules rep1: terminal=completed admissible=true accepted=true install=rules-context:0B distilled=true elapsed=478.4s
+PRE-FLIGHT M4/leanskills rep1
+  ok   no_concurrent_measured_arm: acquired
+  ok   exact_seed_restored_before_every_position: 2543c873141f restored and verified
+  ok   administration.load_bearing_controllers_present: 13 named controllers present
+  ok   administration.data_retained_not_overwritten: arm tree retains its own durable memory
+  ok   administration.no_session_local_state: 4 session-local files withheld by lifecycle, not by directory
+  ok   administration.benchmark_withheld_from_arm: experiments and pilots absent from the arm tree
+  ok   transport_markers: pinned transport administered unchanged
+  ok   store_provenance: 3 rule(s), all same-sequence same-rep earlier-position
+  ok   skill_compiled_valid: 3 rule(s) into .claude/skills/repair-mcp/SKILL.md, 6181B, frontmatter valid
+  ok   no_memory_file_for_skills_arm: skills arm carries the capability surface only — no rules ride session-start context
+  ok   task_file_present: server/mcp/schema-normalizer.ts
+  ok   administered_state_committed: d82f2385fc9b
+  ok   node_modules_available: shared, byte-identical across arms
+  ok   prompt_identity: sha256:a19032026d6bf0ef — built from sequences.json only; identical across the three configs by construction
+UNIT M4/leanskills rep1: terminal=completed admissible=true accepted=true install=skill:6181B distilled=true elapsed=522.5s
+PRE-FLIGHT M5/leanrules rep1
+  ok   no_concurrent_measured_arm: acquired
+  ok   exact_seed_restored_before_every_position: 2543c873141f restored and verified
+  ok   administration.load_bearing_controllers_present: 13 named controllers present
+  ok   administration.data_retained_not_overwritten: arm tree retains its own durable memory
+  ok   administration.no_session_local_state: 4 session-local files withheld by lifecycle, not by directory
+  ok   administration.benchmark_withheld_from_arm: experiments and pilots absent from the arm tree
+  ok   transport_markers: pinned transport administered unchanged
+  ok   store_provenance: 4 rule(s), all same-sequence same-rep earlier-position
+  ok   delivery_prepared: 4 matched, 1364B as context (skips: 3)
+  ok   task_file_present: server/mcp/mcp-sync-wrapper.ts
+  ok   administered_state_committed: e38324b77573
+  ok   node_modules_available: shared, byte-identical across arms
+  ok   prompt_identity: sha256:595fc7f22d716ce6 — built from sequences.json only; identical across the three configs by construction
+UNIT M5/leanrules rep1: terminal=completed admissible=true accepted=true install=rules-context:1364B distilled=true elapsed=554.5s
+PRE-FLIGHT M5/leanskills rep1
+  ok   no_concurrent_measured_arm: acquired
+  ok   exact_seed_restored_before_every_position: 2543c873141f restored and verified
+  ok   administration.load_bearing_controllers_present: 13 named controllers present
+  ok   administration.data_retained_not_overwritten: arm tree retains its own durable memory
+  ok   administration.no_session_local_state: 4 session-local files withheld by lifecycle, not by directory
+  ok   administration.benchmark_withheld_from_arm: experiments and pilots absent from the arm tree
+  ok   transport_markers: pinned transport administered unchanged
+  ok   store_provenance: 4 rule(s), all same-sequence same-rep earlier-position
+  ok   skill_compiled_valid: 3 rule(s) into .claude/skills/repair-mcp/SKILL.md, 6569B, frontmatter valid
+  ok   no_memory_file_for_skills_arm: skills arm carries the capability surface only — no rules ride session-start context
+  ok   task_file_present: server/mcp/mcp-sync-wrapper.ts
+  ok   administered_state_committed: 9b1a8aadddb9
+  ok   node_modules_available: shared, byte-identical across arms
+  ok   prompt_identity: sha256:595fc7f22d716ce6 — built from sequences.json only; identical across the three configs by construction
+UNIT M5/leanskills rep1: terminal=completed admissible=true accepted=true install=skill:6569B distilled=true elapsed=616.8s
+PRE-FLIGHT M5/native rep1
+  ok   no_concurrent_measured_arm: acquired
+  ok   exact_seed_restored_before_every_position: 2543c873141f restored and verified
+  ok   administration.substrate_absent: build-os, .claude, CLAUDE.md all removed
+  ok   task_file_present: server/mcp/mcp-sync-wrapper.ts
+  ok   administered_state_committed: fd7cf2efad64
+  ok   node_modules_available: shared, byte-identical across arms
+  ok   prompt_identity: sha256:595fc7f22d716ce6 — built from sequences.json only; identical across the three configs by construction
+UNIT M5/native rep1: terminal=completed admissible=true accepted=true install=none:0B distilled=false elapsed=510.5s

@@ -1,0 +1,7 @@
+{
+  "base_commit": "1c0fbd1330e6a897c421757cb05be28eae891af4",
+  "product_paths": [
+    "server/mcp/mcp-http-handler.ts"
+  ],
+  "governance_paths": []
+}

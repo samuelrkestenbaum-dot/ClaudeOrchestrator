@@ -1,0 +1,10 @@
+{
+  "base_commit": "9b1a8aadddb9e8ab7902c2abe1384ce47ff45a95",
+  "product_paths": [
+    "server/mcp/mcp-sync-wrapper.ts",
+    "server/mcp/tool-executor.ts"
+  ],
+  "governance_paths": [
+    "build-os/packets/routing/routing-auto-20260812T160314Z-29008-20260812T160314Z.md"
+  ]
+}

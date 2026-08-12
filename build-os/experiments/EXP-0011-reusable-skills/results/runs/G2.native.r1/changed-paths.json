@@ -1,0 +1,7 @@
+{
+  "base_commit": "a3c24e5a13ea4418746e3db1e0d5b58ea51961b4",
+  "product_paths": [
+    "server/governance/structural-proof-audit.ts"
+  ],
+  "governance_paths": []
+}

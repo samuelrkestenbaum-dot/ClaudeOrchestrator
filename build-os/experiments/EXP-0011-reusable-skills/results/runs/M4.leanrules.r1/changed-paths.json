@@ -1,0 +1,9 @@
+{
+  "base_commit": "0fa7d3501a0cd2abbb8f4467bad6a02be3e574ca",
+  "product_paths": [
+    "server/mcp/schema-normalizer.ts"
+  ],
+  "governance_paths": [
+    "build-os/packets/routing/routing-auto-20260812T153248Z-4711-20260812T153248Z.md"
+  ]
+}

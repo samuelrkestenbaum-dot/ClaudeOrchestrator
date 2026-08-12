@@ -1,0 +1,36 @@
+{
+  "config": "leanrules",
+  "sequence": "M",
+  "position": 5,
+  "rep": 1,
+  "subsystem": "mcp",
+  "memory_unit": "repair-rules",
+  "source_identity": {
+    "treatment": "leanrules",
+    "requested_ref": "a530659",
+    "resolved_commit": "a53065939e9449ce5825e12e63878efa76c2c2ba"
+  },
+  "administered_sha": "e38324b775737b017686cf8735a201fe452e548a",
+  "prompt_sha256_16": "595fc7f22d716ce6",
+  "memory_store": "memory-stores/M.rep1.leanrules/repair-rules.md",
+  "install": {
+    "kind": "rules-context",
+    "text": "## RULE TS2339 — Property '_def' does not exist on type '{}'.\n- applicability: files where tsc reports any of: TS2339 (subsystem server/mcp/)\n- confidence: fix of M4 (7 occurrence(s)) ACCEPTED — zero errors remained in the task file, no new errors elsewhere\n- toolseq: Read>Bash>Edit>Bash\n- procedure: when these codes fire, apply the demonstrated transform:\n```diff\n@@ -53,27 +53,48 @@ interface ToolFieldMap {\n \n const fieldMapCache = new Map<string, ToolFieldMap>();\n \n+/** The object shape a Zod object schema exposes, in either of its two forms. */\n+type ZodShape = Record<string, unknown>;\n+\n+/**\n+ * Minimal structural view of the Zod internals this module probes.\n+ * Zod's public types don't expose `_def.shape` uniformly across versions, so we\n+ * describe only the two access paths used here rather than depending on them.\n+ */\n+interface ZodSchemaLike {\n+  _def: { shape?: ZodShape | (() => ZodShape) };\n+  shape?: ZodShape;\n+}\n+\n+function isZodSchemaLike(value: unknown): value is ZodSchemaLike {\n+  return (\n+    typeof value === 'object' &&\n+    value !== null &&\n+    '_def' in value &&\n+    Boolean(value._def)\n+  );\n+}\n+\n function buildFieldMapCache(): void {\n   if (fieldMapCache.size > 0) return;\n \n   for (const tool of GRAVITO_TOOLS) {\n```\n- provenance: sequence=M rep=1 position=4 run=M4.leanrules.r1 authored_by=harness-rule-distiller\n\n",
+    "matched": 4,
+    "bytes": 1364,
+    "skipped_oversize": 3,
+    "rules": 4
+  },
+  "skill_path": null,
+  "verification": "runnable",
+  "allowed_tools": [
+    "Bash(npx tsc:*)",
+    "Bash(./node_modules/.bin/tsc:*)",
+    "Bash(node_modules/.bin/tsc:*)"
+  ],
+  "permission_mode": "acceptEdits",
+  "bash_timeouts": {
+    "BASH_DEFAULT_TIMEOUT_MS": "600000",
+    "BASH_MAX_TIMEOUT_MS": "600000"
+  }
+}

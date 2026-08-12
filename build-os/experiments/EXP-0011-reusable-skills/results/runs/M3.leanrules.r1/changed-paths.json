@@ -1,0 +1,10 @@
+{
+  "base_commit": "aa087744b1fd146d23711ab27e19c580e39782bc",
+  "product_paths": [
+    "server/mcp/mcp-handler-v2.ts",
+    "server/mcp/tool-executor.ts"
+  ],
+  "governance_paths": [
+    "build-os/packets/routing/routing-auto-20260812T151017Z-18536-20260812T151017Z.md"
+  ]
+}

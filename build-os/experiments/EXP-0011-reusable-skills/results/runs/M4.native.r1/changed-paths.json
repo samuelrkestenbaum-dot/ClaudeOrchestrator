@@ -1,0 +1,7 @@
+{
+  "base_commit": "a2f3031e15d6f152599018f6b6c936460f75efa2",
+  "product_paths": [
+    "server/mcp/schema-normalizer.ts"
+  ],
+  "governance_paths": []
+}

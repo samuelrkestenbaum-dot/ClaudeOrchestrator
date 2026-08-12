@@ -1,0 +1,358 @@
+diff --git a/server/governance/structural-proof-audit.ts b/server/governance/structural-proof-audit.ts
+index 19c4a0a..70dec37 100644
+--- a/server/governance/structural-proof-audit.ts
++++ b/server/governance/structural-proof-audit.ts
+@@ -28,6 +28,11 @@ function record(category: string, claim: string, passed: boolean, evidence: stri
+   results.push({ category, claim, passed, evidence, details });
+ }
+ 
++// Caught values are `unknown`; narrow to a printable message for the evidence string.
++function errorMessage(e: unknown): string {
++  return e instanceof Error ? e.message : String(e);
++}
++
+ async function runAudit() {
+   governanceLog.info('═══════════════════════════════════════════════════════════════');
+   governanceLog.info('  STRUCTURAL PROOF AUDIT v2 — EVERY CLAIM TESTED WITH EXECUTION');
+@@ -50,7 +55,7 @@ async function runAudit() {
+       missing.length === 0 ? `Found all: ${required.join(', ')}` : `Missing: ${missing.join(', ')}`,
+       { allExports: exports });
+   } catch (e: unknown) {
+-    record('IMPORTS', 'meaning-interpreter.ts is importable', false, `Import failed: ${e.message}`);
++    record('IMPORTS', 'meaning-interpreter.ts is importable', false, `Import failed: ${errorMessage(e)}`);
+   }
+ 
+   // 1b. Human Interaction Model
+@@ -64,7 +69,7 @@ async function runAudit() {
+       missing.length === 0 ? `Found all: ${required.join(', ')}` : `Missing: ${missing.join(', ')}`,
+       { allExports: exports });
+   } catch (e: unknown) {
+-    record('IMPORTS', 'human-interaction-model.ts is importable', false, `Import failed: ${e.message}`);
++    record('IMPORTS', 'human-interaction-model.ts is importable', false, `Import failed: ${errorMessage(e)}`);
+   }
+ 
+   // 1c. Stability Response Engine
+@@ -78,7 +83,7 @@ async function runAudit() {
+       missing.length === 0 ? `Found all: ${required.join(', ')}` : `Missing: ${missing.join(', ')}`,
+       { allExports: exports });
+   } catch (e: unknown) {
+-    record('IMPORTS', 'stability-response-engine.ts is importable', false, `Import failed: ${e.message}`);
++    record('IMPORTS', 'stability-response-engine.ts is importable', false, `Import failed: ${errorMessage(e)}`);
+   }
+ 
+   // 1d. Human Context Model
+@@ -92,7 +97,7 @@ async function runAudit() {
+       missing.length === 0 ? `Found all: ${required.join(', ')}` : `Missing: ${missing.join(', ')}`,
+       { allExports: exports });
+   } catch (e: unknown) {
+-    record('IMPORTS', 'human-context-model.ts is importable', false, `Import failed: ${e.message}`);
++    record('IMPORTS', 'human-context-model.ts is importable', false, `Import failed: ${errorMessage(e)}`);
+   }
+ 
+   // 1e. Existence Classifier
+@@ -106,7 +111,7 @@ async function runAudit() {
+       missing.length === 0 ? `Found all: ${required.join(', ')}` : `Missing: ${missing.join(', ')}`,
+       { allExports: exports });
+   } catch (e: unknown) {
+-    record('IMPORTS', 'existence-classifier.ts is importable', false, `Import failed: ${e.message}`);
++    record('IMPORTS', 'existence-classifier.ts is importable', false, `Import failed: ${errorMessage(e)}`);
+   }
+ 
+   // 1f. Cognitive Feedback Loop
+@@ -120,7 +125,7 @@ async function runAudit() {
+       missing.length === 0 ? `Found all: ${required.join(', ')}` : `Missing: ${missing.join(', ')}`,
+       { allExports: exports });
+   } catch (e: unknown) {
+-    record('IMPORTS', 'cognitive-feedback-loop.ts is importable', false, `Import failed: ${e.message}`);
++    record('IMPORTS', 'cognitive-feedback-loop.ts is importable', false, `Import failed: ${errorMessage(e)}`);
+   }
+ 
+   // 1g. Content Ingestion Bridge
+@@ -134,7 +139,7 @@ async function runAudit() {
+       missing.length === 0 ? `Found all: ${required.join(', ')}` : `Missing: ${missing.join(', ')}`,
+       { allExports: exports });
+   } catch (e: unknown) {
+-    record('IMPORTS', 'content-ingestion-cognition-bridge.ts is importable', false, `Import failed: ${e.message}`);
++    record('IMPORTS', 'content-ingestion-cognition-bridge.ts is importable', false, `Import failed: ${errorMessage(e)}`);
+   }
+ 
+   // 1h. Shield (MCP domain)
+@@ -148,7 +153,7 @@ async function runAudit() {
+       missing.length === 0 ? `Found all: ${required.join(', ')}` : `Missing: ${missing.join(', ')}`,
+       { allExports: exports });
+   } catch (e: unknown) {
+-    record('IMPORTS', 'shield.ts is importable', false, `Import failed: ${e.message}`);
++    record('IMPORTS', 'shield.ts is importable', false, `Import failed: ${errorMessage(e)}`);
+   }
+ 
+   // 1i. Persistence layer
+@@ -162,7 +167,7 @@ async function runAudit() {
+       missing.length === 0 ? `Found all: ${required.join(', ')}` : `Missing: ${missing.join(', ')}`,
+       { allExports: exports });
+   } catch (e: unknown) {
+-    record('IMPORTS', 'persistence.ts is importable', false, `Import failed: ${e.message}`);
++    record('IMPORTS', 'persistence.ts is importable', false, `Import failed: ${errorMessage(e)}`);
+   }
+ 
+   // 1j. Continuity domains
+@@ -182,7 +187,7 @@ async function runAudit() {
+         `Exports: ${exports.join(', ')}`,
+         { allExports: exports });
+     } catch (e: unknown) {
+-      record('IMPORTS', `${mod}.ts is importable`, false, `Import failed: ${e.message}`);
++      record('IMPORTS', `${mod}.ts is importable`, false, `Import failed: ${errorMessage(e)}`);
+     }
+   }
+ 
+@@ -195,7 +200,7 @@ async function runAudit() {
+       `Exports: ${exports.join(', ')}`,
+       { allExports: exports });
+   } catch (e: unknown) {
+-    record('IMPORTS', 'hitl.ts is importable', false, `Import failed: ${e.message}`);
++    record('IMPORTS', 'hitl.ts is importable', false, `Import failed: ${errorMessage(e)}`);
+   }
+ 
+   // 1l. Surface Registry
+@@ -207,7 +212,7 @@ async function runAudit() {
+       `Exports: ${exports.join(', ')}`,
+       { allExports: exports });
+   } catch (e: unknown) {
+-    record('IMPORTS', 'surface-registry.ts is importable', false, `Import failed: ${e.message}`);
++    record('IMPORTS', 'surface-registry.ts is importable', false, `Import failed: ${errorMessage(e)}`);
+   }
+ 
+   // ========================================================================
+@@ -237,7 +242,7 @@ async function runAudit() {
+       result.concerns.length > 0 && result.stabilityRisk > 0,
+       `concerns=${result.concerns.length}, risk=${result.stabilityRisk}, types=[${result.concerns.map((c: any) => c.type).join(',')}]`);
+   } catch (e: unknown) {
+-    record('EXECUTION', 'interpretMeaning() runs', false, `Error: ${e.message}`);
++    record('EXECUTION', 'interpretMeaning() runs', false, `Error: ${errorMessage(e)}`);
+   }
+ 
+   // 2b. computeFromMeaningAnalysis — actually call it
+@@ -261,7 +266,7 @@ async function runAudit() {
+       `dominantPattern=${snapshot.dominantPattern}, stabilityIndex=${snapshot.stabilityIndex}, trajectory=${snapshot.trajectory}`,
+       { resultKeys: Object.keys(snapshot) });
+   } catch (e: unknown) {
+-    record('EXECUTION', 'computeFromMeaningAnalysis() runs', false, `Error: ${e.message}`);
++    record('EXECUTION', 'computeFromMeaningAnalysis() runs', false, `Error: ${errorMessage(e)}`);
+   }
+ 
+   // 2c. generateStabilityResponse — actually call it
+@@ -285,7 +290,7 @@ async function runAudit() {
+       `strategy=${response.strategy}, outputStability=${response.outputStabilityScore}, trustPreservation=${response.trustPreservationScore}, modifications=${response.contentModifications.length}`,
+       { resultKeys: Object.keys(response) });
+   } catch (e: unknown) {
+-    record('EXECUTION', 'generateStabilityResponse() runs', false, `Error: ${e.message}`);
++    record('EXECUTION', 'generateStabilityResponse() runs', false, `Error: ${errorMessage(e)}`);
+   }
+ 
+   // 2d. getResponseCalibration — actually call it
+@@ -319,7 +324,7 @@ async function runAudit() {
+       `complexity=${calibration.complexityLevel}, urgency=${calibration.urgency}, tone="${calibration.toneGuidance.slice(0, 60)}..."`,
+       { resultKeys: Object.keys(calibration) });
+   } catch (e: unknown) {
+-    record('EXECUTION', 'getResponseCalibration() runs', false, `Error: ${e.message}`);
++    record('EXECUTION', 'getResponseCalibration() runs', false, `Error: ${errorMessage(e)}`);
+   }
+ 
+   // 2e. runCognitiveFeedbackLoop — THE BIG ONE
+@@ -351,7 +356,7 @@ async function runAudit() {
+       `iterations=${result.totalIterations}, converged=${result.converged}, risk=${result.overallRiskLevel}, stability=${result.finalStabilityScore}, trust=${result.finalTrustScore}, systemsRan=[${systemsRan.join(',')}]`,
+       { resultKeys: Object.keys(result), systemsRan });
+   } catch (e: unknown) {
+-    record('EXECUTION', 'runCognitiveFeedbackLoop() runs', false, `Error: ${e.message}`);
++    record('EXECUTION', 'runCognitiveFeedbackLoop() runs', false, `Error: ${errorMessage(e)}`);
+   }
+ 
+   // 2f. quickCognitiveAssessment
+@@ -367,7 +372,7 @@ async function runAudit() {
+       `risk=${result.riskLevel}, stability=${result.stabilityScore}, pattern=${result.dominantPattern}`,
+       { resultKeys: Object.keys(result) });
+   } catch (e: unknown) {
+-    record('EXECUTION', 'quickCognitiveAssessment() runs', false, `Error: ${e.message}`);
++    record('EXECUTION', 'quickCognitiveAssessment() runs', false, `Error: ${errorMessage(e)}`);
+   }
+ 
+   // 2g. ingestContent
+@@ -383,7 +388,7 @@ async function runAudit() {
+       `ingestionId=${result.ingestionId}, surfaceType=${result.surfaceType}, hasCognitiveResult=${!!result.cognitiveResult}, surfaceRegistered=${result.surfaceRegistered}`,
+       { resultKeys: Object.keys(result) });
+   } catch (e: unknown) {
+-    record('EXECUTION', 'ingestContent() runs', false, `Error: ${e.message}`);
++    record('EXECUTION', 'ingestContent() runs', false, `Error: ${errorMessage(e)}`);
+   }
+ 
+   // 2h. fullGovernancePipeline — end-to-end
+@@ -403,7 +408,7 @@ async function runAudit() {
+       `meaningConcerns=${result.meaningAnalysis.concerns.length}, pattern=${result.geometrySnapshot.dominantPattern}, strategy=${result.stabilityResponse.strategy}, wasModified=${result.wasModified}`,
+       { resultKeys: Object.keys(result) });
+   } catch (e: unknown) {
+-    record('EXECUTION', 'fullGovernancePipeline() runs', false, `Error: ${e.message}`);
++    record('EXECUTION', 'fullGovernancePipeline() runs', false, `Error: ${errorMessage(e)}`);
+   }
+ 
+   // 2i. stabilizeContent — full pipeline
+@@ -419,7 +424,7 @@ async function runAudit() {
+       `strategy=${result.response.strategy}, wasModified=${result.wasModified}, outputStability=${result.response.outputStabilityScore}`,
+       { resultKeys: Object.keys(result) });
+   } catch (e: unknown) {
+-    record('EXECUTION', 'stabilizeContent() runs', false, `Error: ${e.message}`);
++    record('EXECUTION', 'stabilizeContent() runs', false, `Error: ${errorMessage(e)}`);
+   }
+ 
+   // 2j. getGravitoExistenceMap
+@@ -431,7 +436,7 @@ async function runAudit() {
+       `total=${map.totalComponents}, materialized=${map.materialized}, intentional=${map.intentional}, latent=${map.latent}, maturity=${map.overallMaturity}`,
+       { componentIds: map.components.map((c: any) => `${c.componentId}:${c.state}`) });
+   } catch (e: unknown) {
+-    record('EXECUTION', 'getGravitoExistenceMap() runs', false, `Error: ${e.message}`);
++    record('EXECUTION', 'getGravitoExistenceMap() runs', false, `Error: ${errorMessage(e)}`);
+   }
+ 
+   // ========================================================================
+@@ -459,7 +464,7 @@ async function runAudit() {
+       hasNonBlocking,
+       hasNonBlocking ? 'Found non-blocking pattern (.catch/void) for cognitive loop' : 'Cognitive loop may be blocking');
+   } catch (e: unknown) {
+-    record('WIRING', 'shield.ts source analysis', false, `Error reading source: ${e.message}`);
++    record('WIRING', 'shield.ts source analysis', false, `Error reading source: ${errorMessage(e)}`);
+   }
+ 
+   // 3b. Verify continuity-outcomes.ts has DB persistence
+@@ -481,7 +486,7 @@ async function runAudit() {
+       hasTagOutcomeDb,
+       hasTagOutcomeDb ? 'tagOutcome calls DB persistence' : 'tagOutcome does NOT call DB');
+   } catch (e: unknown) {
+-    record('WIRING', 'continuity-outcomes.ts source analysis', false, `Error: ${e.message}`);
++    record('WIRING', 'continuity-outcomes.ts source analysis', false, `Error: ${errorMessage(e)}`);
+   }
+ 
+   // 3c. Verify continuity-self-model.ts has DB persistence (FIXED: check for upsertCapability)
+@@ -504,7 +509,7 @@ async function runAudit() {
+       hasUpdateDb,
+       hasUpdateDb ? 'updateReliability calls continuitySelfModelDb.updateReliability' : 'updateReliability does NOT call DB');
+   } catch (e: unknown) {
+-    record('WIRING', 'continuity-self-model.ts source analysis', false, `Error: ${e.message}`);
++    record('WIRING', 'continuity-self-model.ts source analysis', false, `Error: ${errorMessage(e)}`);
+   }
+ 
+   // 3d. Verify continuity-internal-state.ts has DB persistence
+@@ -522,7 +527,7 @@ async function runAudit() {
+       hasRecordDb,
+       hasRecordDb ? 'recordStateSignal calls DB persistence' : 'recordStateSignal does NOT call DB');
+   } catch (e: unknown) {
+-    record('WIRING', 'continuity-internal-state.ts source analysis', false, `Error: ${e.message}`);
++    record('WIRING', 'continuity-internal-state.ts source analysis', false, `Error: ${errorMessage(e)}`);
+   }
+ 
+   // 3e. Verify cognitive-feedback-loop.ts actually calls all 5 systems
+@@ -555,7 +560,7 @@ async function runAudit() {
+         : `Missing calls to: ${missing.join(', ')}. Found: ${found.join(', ')}`,
+       { found, missing });
+   } catch (e: unknown) {
+-    record('WIRING', 'cognitive-feedback-loop.ts system calls analysis', false, `Error: ${e.message}`);
++    record('WIRING', 'cognitive-feedback-loop.ts system calls analysis', false, `Error: ${errorMessage(e)}`);
+   }
+ 
+   // 3f. Verify ingestion bridge calls cognitive feedback loop and has 8 surface types
+@@ -583,7 +588,7 @@ async function runAudit() {
+         ? `All 8 types found: ${foundTypes.join(', ')}` 
+         : `Missing: ${missingTypes.join(', ')}. Found: ${foundTypes.join(', ')}`);
+   } catch (e: unknown) {
+-    record('WIRING', 'ingestion bridge source analysis', false, `Error: ${e.message}`);
++    record('WIRING', 'ingestion bridge source analysis', false, `Error: ${errorMessage(e)}`);
+   }
+ 
+   // ========================================================================
+@@ -633,7 +638,7 @@ async function runAudit() {
+       map.overallMaturity > 0.5,
+       `maturity=${map.overallMaturity}, materialized=${map.materialized}/${map.totalComponents}`);
+   } catch (e: unknown) {
+-    record('EXISTENCE', 'Existence classifier analysis', false, `Error: ${e.message}`);
++    record('EXISTENCE', 'Existence classifier analysis', false, `Error: ${errorMessage(e)}`);
+   }
+ 
+   // ========================================================================
+@@ -684,7 +689,7 @@ async function runAudit() {
+       !!step4Ok,
+       `original="${content.slice(0, 40)}..." → stabilized="${stabilized.slice(0, 40)}..."`);
+   } catch (e: unknown) {
+-    record('DATA_FLOW', 'Cross-system data flow', false, `Error: ${e.message}`);
++    record('DATA_FLOW', 'Cross-system data flow', false, `Error: ${errorMessage(e)}`);
+   }
+ 
+   // 5b. Full cognitive loop data flow
+@@ -716,7 +721,7 @@ async function runAudit() {
+       result.converged !== undefined && result.totalIterations > 0,
+       `converged=${result.converged}, iterations=${result.totalIterations}`);
+   } catch (e: unknown) {
+-    record('DATA_FLOW', 'Cognitive loop data flow', false, `Error: ${e.message}`);
++    record('DATA_FLOW', 'Cognitive loop data flow', false, `Error: ${errorMessage(e)}`);
+   }
+ 
+   // ========================================================================
+
+diff --git a/build-os/packets/routing/routing-auto-20260812T111035Z-28278-20260812T111035Z.md b/build-os/packets/routing/routing-auto-20260812T111035Z-28278-20260812T111035Z.md
+--- /dev/null
++++ b/build-os/packets/routing/routing-auto-20260812T111035Z-28278-20260812T111035Z.md
++# ROUTING RECEIPT — one file per routing decision. The recorded verdict is BINDING
++# (build-os/memory/routing_contract.md); routing-check.sh refuses this receipt at
++# close if executed_mode exceeds selected_mode with no escalation record, if an
++# escalation carries no evidence, or if consumption exceeds a budget undeclared.
++task_id: auto-20260812T111035Z-28278
++description_sha256: 27b3f1b706c909c94af97ff3625e4a0a813089bab6bc2c90aa89c5978cb14534
++descriptor: {"expected_files_changed":1,"requires_tests":false,"expected_session_count":1,"prior_context_required":false,"handoff_required":false,"consequence_level":"low","irreversible_or_external_mutation":false,"high_blast_radius":false,"unclear_acceptance_criteria":false,"security_or_compliance_consequence":false,"parallel_workstreams_benefit":false,"high_rework_history":false,"nondeterministic_verification":false}
++selected_mode: direct
++selector_note: -
++issued_at: 2026-08-12T11:10:35Z
++# --- budgets: DERIVED DEFAULTS from EXP-0002 sealed records, operator-tunable, not laws.
++# --- Derivation: ON-surface light runs measured 172k-369k total tokens / 0 dispatches
++# --- (named exceedance: raw T4 at 526,461 - context, not the band); the
++# --- blowouts measured 4.9M/7.4M tokens, 4-5 dispatches, $3.63/$4.80. See route-task.sh.
++budget_max_subagents: 0
++budget_max_total_tokens: 250000
++budget_max_uncached_tokens: 30000
++budget_max_model_calls: 12
++budget_max_wall_clock_s: 300
++budget_max_cost_usd: 0.40
++# --- process allowance (PACKET-0053): the packet's OWN gate chain is governance
++# --- ceremony, counted SEPARATELY from task work by the live gate and attributed
++# --- to governance_process (the 0050/0051 calibration question, resolved). Default
++# --- 7 = the LARGEST LEGAL chain in the doctrine: mandatory_full_regate runs
++# --- builder, qa, reviewer, fix-builder, qa, reviewer, archivist. (No-fix chain
++# --- is 4; fix-then-pass is 6.) Process dispatches never eat budget_max_subagents.
++process_dispatch_allowance: 7
++# --- empty at issue; filled at close. AN UNKNOWN IS NOT A ZERO: "-" is an honest
++# --- admission and is never refused; refusal is for CONTRADICTION, not absence.
++executed_mode: -
++escalation: -
++escalation_evidence: -
++consumed_subagents: -
++consumed_total_tokens: -
++consumed_uncached_tokens: -
++consumed_model_calls: -
++consumed_wall_clock_s: -
++consumed_cost_usd: -
++degradation_note: -
++# --- close-fill EXTENSIONS (PACKET-0053). consumed_subagents above counts TASK
++# --- dispatches (vs budget_max_subagents); consumed_process_dispatches counts the
++# --- gate chain (vs process_dispatch_allowance). The attr_* layers attribute
++# --- consumption where derivable at close — tokens or cost with provenance, or
++# --- "-" as an admission, NEVER a zero nobody measured. Receipts predating these
++# --- fields stay valid: routing-check.sh reads an absent field as "-".
++consumed_process_dispatches: -
++attr_task_execution: -
++attr_context_retrieval: -
++attr_subagent_execution: -
++attr_verification: -
++attr_review: -
++attr_governance_process: -
++attr_experiment_audit: -
++# --- contribution rows (PACKET-0053): marginal-contribution accounting, MANDATORY
++# --- for a Full close with dispatches>0 (routing-check.sh refuses otherwise). The
++# --- live gate seeds one stub row per admitted Full task dispatch; fill at close:
++# --- contribution: <subagent_type> | <unique_question> | <output_ref> | changed_implementation=y/n/- | changed_conclusion=y/n/- | caught_defect=y/n/- | duplicated_work=y/n/- | tokens=<v|-> | cost=<v|-> | time=<v|->
++# --- An all-"-" row passes as an admission and is REPORTED as non-contributing.
++

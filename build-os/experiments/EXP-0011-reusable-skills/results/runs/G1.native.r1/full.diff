@@ -1,0 +1,170 @@
+diff --git a/server/governance/governance-dashboard-router.ts b/server/governance/governance-dashboard-router.ts
+index af200d0..0473fbf 100644
+--- a/server/governance/governance-dashboard-router.ts
++++ b/server/governance/governance-dashboard-router.ts
+@@ -27,10 +27,20 @@ import { getExternalTransportStatus, getTransportMetrics, exportPrometheusMetric
+ import { getAuthorityMetrics, getAuthorityLayerHealth, getAuthorityAuditTrail } from './gravito-authority-layer';
+ import { getExternalGravitoHealth } from './gravito-external-client';
+ import { getPreApprovalMetrics, REGULATED_SURFACES } from './regulated-surface-preapproval';
+-import { getSyncWrapperMetrics } from './mcp-sync-wrapper';
++import { getSyncWrapperMetrics, listJobs } from './mcp-sync-wrapper';
+ import { getAuthorityAuditEntries, getAuthorityAuditStats } from '../db';
+ import { getGovernanceUptimeMetrics, getInlineMetrics, getCircuitBreakerState, getAuthorityAuditSummary } from './co-processor/gravito-inline-client';
+-import type { AuthorityAuditEntry, TransportMetrics, ExternalGravitoHealth, SyncWrapperMetrics, AuthorityLayerHealth, InlineMetrics, AuthorityAuditSummaryEntry } from '../../shared/governance-types';
++import type { GovernanceAuthorityAuditRow } from '../../drizzle/schema';
++
++/**
++ * Audit entries surfaced by this router come from the `governance_authority_audit`
++ * table (via `getAuthorityAuditEntries`), so they carry the persisted row shape
++ * (`id` / `createdAt`) rather than the in-memory `AuthorityAuditEntry` shape.
++ */
++type AuthorityAuditRow = GovernanceAuthorityAuditRow;
++
++/** Upper bound of the sync wrapper's in-memory job registry. */
++const MAX_TRACKED_JOBS = 100;
+ 
+ // ============================================================================
+ // PANEL 1: TRANSPORT HEALTH
+@@ -42,6 +52,10 @@ const transportHealthProcedure = adminProcedure.query(async () => {
+   const externalHealth = getExternalGravitoHealth();
+   const syncMetrics = getSyncWrapperMetrics();
+ 
++  // TransportMetrics tracks successes/failures separately; total is their sum.
++  const totalTransportCalls = metrics.successesTotal + metrics.failuresTotal;
++  const activeJobs = listJobs({ statusFilter: 'running', limit: MAX_TRACKED_JOBS }).length;
++
+   return {
+     // Current state
+     transport: {
+@@ -55,39 +69,42 @@ const transportHealthProcedure = adminProcedure.query(async () => {
+ 
+     // Performance metrics
+     performance: {
+-      totalCalls: metrics.totalCalls,
+-      successCount: metrics.successCount,
+-      failureCount: metrics.failureCount,
+-      successRate: metrics.totalCalls > 0
+-        ? Math.round((metrics.successCount / metrics.totalCalls) * 10000) / 100
++      totalCalls: totalTransportCalls,
++      successCount: metrics.successesTotal,
++      failureCount: metrics.failuresTotal,
++      successRate: totalTransportCalls > 0
++        ? Math.round((metrics.successesTotal / totalTransportCalls) * 10000) / 100
+         : 0,
+       latency: {
+         p50: metrics.latencyP50Ms,
+         p95: metrics.latencyP95Ms,
+         p99: metrics.latencyP99Ms,
+       },
+-      transportSwitches: metrics.transportSwitches,
++      transportSwitches: metrics.transportSwitchCount,
+     },
+ 
+     // External client health
+     externalClient: {
+       circuitBreakerState: externalHealth.circuitBreakerState,
+       totalCalls: externalHealth.totalCalls,
+-      successRate: externalHealth.successRate,
++      successRate: externalHealth.totalCalls > 0
++        ? Math.round((externalHealth.successfulCalls / externalHealth.totalCalls) * 10000) / 100
++        : 0,
+       averageLatencyMs: externalHealth.averageLatencyMs,
+       fallbackRate: externalHealth.fallbackRate,
+-      lastError: externalHealth.lastError,
++      lastError: externalHealth.lastFailureReason,
+     },
+ 
+     // Sync wrapper stats
+     syncWrapper: {
+-      totalSubmissions: syncMetrics.totalSubmissions,
+-      syncResolved: syncMetrics.syncResolved,
+-      asyncReturned: syncMetrics.asyncReturned,
+-      pollAttempts: syncMetrics.pollAttempts,
+-      pollSuccesses: syncMetrics.pollSuccesses,
+-      pollTimeouts: syncMetrics.pollTimeouts,
+-      activeJobs: syncMetrics.activeJobs,
++      totalSubmissions: syncMetrics.asyncJobsDetected,
++      syncResolved: syncMetrics.jobsCompletedSync,
++      asyncReturned: syncMetrics.jobsTimedOut,
++      jobsFailed: syncMetrics.jobsFailed,
++      pollAttempts: syncMetrics.totalPollAttempts,
++      avgWaitTimeMs: syncMetrics.avgWaitTimeMs,
++      cacheHits: syncMetrics.cacheHits,
++      activeJobs,
+     },
+   };
+ });
+@@ -144,9 +161,10 @@ const authorityDecisionsProcedure = adminProcedure
+ 
+       // Authority layer state
+       authorityLayer: {
+-        enabled: authorityHealth.enabled,
+-        externalReachable: authorityHealth.externalReachable,
+-        internalReachable: authorityHealth.internalReachable,
++        status: authorityHealth.status,
++        statusReason: authorityHealth.statusReason,
++        externalReachable: authorityHealth.external.reachable,
++        externalCircuitBreakerState: authorityHealth.external.circuitBreakerState,
+         metrics: {
+           externalSuccesses: authorityMetrics.externalSuccesses,
+           externalFailures: authorityMetrics.externalFailures,
+@@ -159,8 +177,10 @@ const authorityDecisionsProcedure = adminProcedure
+       // Inline client state
+       inlineClient: {
+         circuitBreakerState: breakerState,
+-        totalCalls: inlineMetrics.totalCalls,
+-        successRate: inlineMetrics.successRate,
++        totalCalls: inlineMetrics.totalInvocations,
++        successRate: uptimeMetrics.totalInvocations > 0
++          ? Math.round((uptimeMetrics.totalSuccessful / uptimeMetrics.totalInvocations) * 10000) / 100
++          : 0,
+         avgLatencyMs: inlineMetrics.avgLatencyMs,
+         uptime: uptimeMetrics,
+       },
+@@ -169,7 +189,7 @@ const authorityDecisionsProcedure = adminProcedure
+       memoryAudit: memoryAuditTrail,
+ 
+       // Recent database entries
+-      recentEntries: recentEntries.map((entry: AuthorityAuditEntry) => ({
++      recentEntries: recentEntries.map((entry: AuthorityAuditRow) => ({
+         id: entry.id,
+         surfaceType: entry.surfaceType,
+         regulated: entry.regulated,
+@@ -236,7 +256,7 @@ const regulatedFlowProcedure = adminProcedure.query(async () => {
+     regulatedSurfaces: Array.from(REGULATED_SURFACES),
+ 
+     // Recent regulated decisions
+-    recentRegulatedDecisions: regulatedEntries.map((entry: AuthorityAuditEntry) => ({
++    recentRegulatedDecisions: regulatedEntries.map((entry: AuthorityAuditRow) => ({
+       id: entry.id,
+       surfaceType: entry.surfaceType,
+       externalAttempted: entry.externalAttempted,
+@@ -298,12 +318,13 @@ const overviewProcedure = adminProcedure
+     return {
+       // Overall health status
+       overallHealth: {
+-        status: transportStatus.enabled && authorityHealth.enabled ? 'healthy' :
+-          !transportStatus.enabled && authorityHealth.internalReachable ? 'degraded' :
+-          'critical',
++        status: authorityHealth.status === 'unavailable' ? 'critical' :
++          transportStatus.enabled && authorityHealth.status === 'healthy' ? 'healthy' :
++          'degraded',
+         transportMode: transportStatus.mode,
+-        externalReachable: authorityHealth.externalReachable,
+-        internalReachable: authorityHealth.internalReachable,
++        externalReachable: authorityHealth.external.reachable,
++        authorityStatus: authorityHealth.status,
++        authorityStatusReason: authorityHealth.statusReason,
+       },
+ 
+       // Key metrics (for dashboard cards)
+@@ -319,7 +340,7 @@ const overviewProcedure = adminProcedure
+       },
+ 
+       // Recent activity
+-      recentActivity: recentEntries.slice(0, 10).map((entry: AuthorityAuditEntry) => ({
++      recentActivity: recentEntries.slice(0, 10).map((entry: AuthorityAuditRow) => ({
+         surfaceType: entry.surfaceType,
+         regulated: entry.regulated,
+         approved: entry.finalApproved,
+

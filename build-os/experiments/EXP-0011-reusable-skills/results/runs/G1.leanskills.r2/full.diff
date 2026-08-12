@@ -1,0 +1,294 @@
+diff --git a/server/db.ts b/server/db.ts
+index b66b717..366ce7c 100644
+--- a/server/db.ts
++++ b/server/db.ts
+@@ -83,6 +83,7 @@ import {
+   GovernedSurface,
+   InsertGovernedSurface,
+   governanceAuthorityAudit,
++  GovernanceAuthorityAuditRow,
+   InsertGovernanceAuthorityAuditRow,
+ } from "../drizzle/schema";
+ import { ENV } from './_core/env';
+@@ -3038,7 +3039,7 @@ export async function getAuthorityAuditEntries(options: {
+   surfaceType?: string;
+   regulated?: boolean;
+   sinceTimestamp?: number;
+-} = {}): Promise<any[]> {
++} = {}): Promise<GovernanceAuthorityAuditRow[]> {
+   const db = await getDb();
+   if (!db) return [];
+ 
+diff --git a/server/governance/governance-dashboard-router.ts b/server/governance/governance-dashboard-router.ts
+index af200d0..e2d0d45 100644
+--- a/server/governance/governance-dashboard-router.ts
++++ b/server/governance/governance-dashboard-router.ts
+@@ -27,10 +27,36 @@ import { getExternalTransportStatus, getTransportMetrics, exportPrometheusMetric
+ import { getAuthorityMetrics, getAuthorityLayerHealth, getAuthorityAuditTrail } from './gravito-authority-layer';
+ import { getExternalGravitoHealth } from './gravito-external-client';
+ import { getPreApprovalMetrics, REGULATED_SURFACES } from './regulated-surface-preapproval';
+-import { getSyncWrapperMetrics } from './mcp-sync-wrapper';
++import { getSyncWrapperMetrics, listJobs } from './mcp-sync-wrapper';
+ import { getAuthorityAuditEntries, getAuthorityAuditStats } from '../db';
+ import { getGovernanceUptimeMetrics, getInlineMetrics, getCircuitBreakerState, getAuthorityAuditSummary } from './co-processor/gravito-inline-client';
+-import type { AuthorityAuditEntry, TransportMetrics, ExternalGravitoHealth, SyncWrapperMetrics, AuthorityLayerHealth, InlineMetrics, AuthorityAuditSummaryEntry } from '../../shared/governance-types';
++import type { TransportMetrics } from './production-transport-selector';
++import type { AuthorityLayerHealth } from './gravito-authority-layer';
++import type { GravitoExternalHealthMetrics } from './gravito-external-client';
++import type { SyncWrapperMetrics } from './mcp-sync-wrapper';
++import type { GovernanceAuthorityAuditRow } from '../../drizzle/schema';
++
++// ============================================================================
++// SHARED DERIVATIONS
++// ============================================================================
++
++/**
++ * The authority layer reports an overall status plus the external client's own
++ * health; the dashboard shows three booleans. Internal governance runs
++ * in-process, so it is reachable whenever the layer itself is not unavailable.
++ */
++function describeAuthorityReachability(health: AuthorityLayerHealth): {
++  enabled: boolean;
++  externalReachable: boolean;
++  internalReachable: boolean;
++} {
++  const operational = health.status !== 'unavailable';
++  return {
++    enabled: operational,
++    externalReachable: health.external.reachable,
++    internalReachable: operational,
++  };
++}
+ 
+ // ============================================================================
+ // PANEL 1: TRANSPORT HEALTH
+@@ -38,9 +64,15 @@ import type { AuthorityAuditEntry, TransportMetrics, ExternalGravitoHealth, Sync
+ 
+ const transportHealthProcedure = adminProcedure.query(async () => {
+   const status = getExternalTransportStatus();
+-  const metrics = getTransportMetrics();
+-  const externalHealth = getExternalGravitoHealth();
+-  const syncMetrics = getSyncWrapperMetrics();
++  const metrics: TransportMetrics = getTransportMetrics();
++  const externalHealth: GravitoExternalHealthMetrics = getExternalGravitoHealth();
++  const syncMetrics: SyncWrapperMetrics = getSyncWrapperMetrics();
++
++  // TransportMetrics counts successes and failures separately; the dashboard
++  // reports the combined call volume.
++  const transportCalls = metrics.successesTotal + metrics.failuresTotal;
++  // Jobs still running (not completed / failed / cancelled / timed out).
++  const activeJobs = listJobs({ statusFilter: 'running', limit: 1000 }).length;
+ 
+   return {
+     // Current state
+@@ -55,39 +87,41 @@ const transportHealthProcedure = adminProcedure.query(async () => {
+ 
+     // Performance metrics
+     performance: {
+-      totalCalls: metrics.totalCalls,
+-      successCount: metrics.successCount,
+-      failureCount: metrics.failureCount,
+-      successRate: metrics.totalCalls > 0
+-        ? Math.round((metrics.successCount / metrics.totalCalls) * 10000) / 100
++      totalCalls: transportCalls,
++      successCount: metrics.successesTotal,
++      failureCount: metrics.failuresTotal,
++      successRate: transportCalls > 0
++        ? Math.round((metrics.successesTotal / transportCalls) * 10000) / 100
+         : 0,
+       latency: {
+         p50: metrics.latencyP50Ms,
+         p95: metrics.latencyP95Ms,
+         p99: metrics.latencyP99Ms,
+       },
+-      transportSwitches: metrics.transportSwitches,
++      transportSwitches: metrics.transportSwitchCount,
+     },
+ 
+     // External client health
+     externalClient: {
+       circuitBreakerState: externalHealth.circuitBreakerState,
+       totalCalls: externalHealth.totalCalls,
+-      successRate: externalHealth.successRate,
++      successRate: externalHealth.totalCalls > 0
++        ? Math.round((externalHealth.successfulCalls / externalHealth.totalCalls) * 10000) / 100
++        : 0,
+       averageLatencyMs: externalHealth.averageLatencyMs,
+       fallbackRate: externalHealth.fallbackRate,
+-      lastError: externalHealth.lastError,
++      lastError: externalHealth.lastFailureReason,
+     },
+ 
+     // Sync wrapper stats
+     syncWrapper: {
+-      totalSubmissions: syncMetrics.totalSubmissions,
+-      syncResolved: syncMetrics.syncResolved,
+-      asyncReturned: syncMetrics.asyncReturned,
+-      pollAttempts: syncMetrics.pollAttempts,
+-      pollSuccesses: syncMetrics.pollSuccesses,
+-      pollTimeouts: syncMetrics.pollTimeouts,
+-      activeJobs: syncMetrics.activeJobs,
++      totalSubmissions: syncMetrics.asyncJobsDetected,
++      syncResolved: syncMetrics.jobsCompletedSync,
++      asyncReturned: syncMetrics.jobsTimedOut,
++      pollAttempts: syncMetrics.totalPollAttempts,
++      pollSuccesses: syncMetrics.jobsCompletedSync,
++      pollTimeouts: syncMetrics.jobsTimedOut,
++      activeJobs,
+     },
+   };
+ });
+@@ -108,12 +142,16 @@ const authorityDecisionsProcedure = adminProcedure
+ 
+     // Get authority layer metrics
+     const authorityMetrics = getAuthorityMetrics();
+-    const authorityHealth = getAuthorityLayerHealth();
++    const authorityHealth: AuthorityLayerHealth = getAuthorityLayerHealth();
++    const reachability = describeAuthorityReachability(authorityHealth);
+ 
+     // Get inline client metrics
+     const inlineMetrics = getInlineMetrics();
+     const breakerState = getCircuitBreakerState();
+     const uptimeMetrics = getGovernanceUptimeMetrics();
++    const inlineSuccessRate = uptimeMetrics.totalInvocations > 0
++      ? Math.round((uptimeMetrics.totalSuccessful / uptimeMetrics.totalInvocations) * 10000) / 100
++      : 0;
+ 
+     // Get in-memory audit trail (fast)
+     const memoryAuditTrail = getAuthorityAuditSummary();
+@@ -144,9 +182,9 @@ const authorityDecisionsProcedure = adminProcedure
+ 
+       // Authority layer state
+       authorityLayer: {
+-        enabled: authorityHealth.enabled,
+-        externalReachable: authorityHealth.externalReachable,
+-        internalReachable: authorityHealth.internalReachable,
++        enabled: reachability.enabled,
++        externalReachable: reachability.externalReachable,
++        internalReachable: reachability.internalReachable,
+         metrics: {
+           externalSuccesses: authorityMetrics.externalSuccesses,
+           externalFailures: authorityMetrics.externalFailures,
+@@ -159,8 +197,8 @@ const authorityDecisionsProcedure = adminProcedure
+       // Inline client state
+       inlineClient: {
+         circuitBreakerState: breakerState,
+-        totalCalls: inlineMetrics.totalCalls,
+-        successRate: inlineMetrics.successRate,
++        totalCalls: inlineMetrics.totalInvocations,
++        successRate: inlineSuccessRate,
+         avgLatencyMs: inlineMetrics.avgLatencyMs,
+         uptime: uptimeMetrics,
+       },
+@@ -169,7 +207,7 @@ const authorityDecisionsProcedure = adminProcedure
+       memoryAudit: memoryAuditTrail,
+ 
+       // Recent database entries
+-      recentEntries: recentEntries.map((entry: AuthorityAuditEntry) => ({
++      recentEntries: recentEntries.map((entry: GovernanceAuthorityAuditRow) => ({
+         id: entry.id,
+         surfaceType: entry.surfaceType,
+         regulated: entry.regulated,
+@@ -236,7 +274,7 @@ const regulatedFlowProcedure = adminProcedure.query(async () => {
+     regulatedSurfaces: Array.from(REGULATED_SURFACES),
+ 
+     // Recent regulated decisions
+-    recentRegulatedDecisions: regulatedEntries.map((entry: AuthorityAuditEntry) => ({
++    recentRegulatedDecisions: regulatedEntries.map((entry: GovernanceAuthorityAuditRow) => ({
+       id: entry.id,
+       surfaceType: entry.surfaceType,
+       externalAttempted: entry.externalAttempted,
+@@ -295,15 +333,17 @@ const overviewProcedure = adminProcedure
+       getAuthorityAuditEntries({ limit: 20 }),
+     ]);
+ 
++    const reachability = describeAuthorityReachability(authorityHealth);
++
+     return {
+       // Overall health status
+       overallHealth: {
+-        status: transportStatus.enabled && authorityHealth.enabled ? 'healthy' :
+-          !transportStatus.enabled && authorityHealth.internalReachable ? 'degraded' :
++        status: transportStatus.enabled && reachability.enabled ? 'healthy' :
++          !transportStatus.enabled && reachability.internalReachable ? 'degraded' :
+           'critical',
+         transportMode: transportStatus.mode,
+-        externalReachable: authorityHealth.externalReachable,
+-        internalReachable: authorityHealth.internalReachable,
++        externalReachable: reachability.externalReachable,
++        internalReachable: reachability.internalReachable,
+       },
+ 
+       // Key metrics (for dashboard cards)
+@@ -319,7 +359,7 @@ const overviewProcedure = adminProcedure
+       },
+ 
+       // Recent activity
+-      recentActivity: recentEntries.slice(0, 10).map((entry: AuthorityAuditEntry) => ({
++      recentActivity: recentEntries.slice(0, 10).map((entry: GovernanceAuthorityAuditRow) => ({
+         surfaceType: entry.surfaceType,
+         regulated: entry.regulated,
+         approved: entry.finalApproved,
+
+diff --git a/build-os/packets/routing/routing-auto-20260812T165159Z-10086-20260812T165159Z.md b/build-os/packets/routing/routing-auto-20260812T165159Z-10086-20260812T165159Z.md
+--- /dev/null
++++ b/build-os/packets/routing/routing-auto-20260812T165159Z-10086-20260812T165159Z.md
++# ROUTING RECEIPT — one file per routing decision. The recorded verdict is BINDING
++# (build-os/memory/routing_contract.md); routing-check.sh refuses this receipt at
++# close if executed_mode exceeds selected_mode with no escalation record, if an
++# escalation carries no evidence, or if consumption exceeds a budget undeclared.
++task_id: auto-20260812T165159Z-10086
++description_sha256: 27b3f1b706c909c94af97ff3625e4a0a813089bab6bc2c90aa89c5978cb14534
++descriptor: {"expected_files_changed":1,"requires_tests":false,"expected_session_count":1,"prior_context_required":false,"handoff_required":false,"consequence_level":"low","irreversible_or_external_mutation":false,"high_blast_radius":false,"unclear_acceptance_criteria":false,"security_or_compliance_consequence":false,"parallel_workstreams_benefit":false,"high_rework_history":false,"nondeterministic_verification":false}
++selected_mode: direct
++selector_note: -
++issued_at: 2026-08-12T16:51:59Z
++# --- budgets: DERIVED DEFAULTS from EXP-0002 sealed records, operator-tunable, not laws.
++# --- Derivation: ON-surface light runs measured 172k-369k total tokens / 0 dispatches
++# --- (named exceedance: raw T4 at 526,461 - context, not the band); the
++# --- blowouts measured 4.9M/7.4M tokens, 4-5 dispatches, $3.63/$4.80. See route-task.sh.
++budget_max_subagents: 0
++budget_max_total_tokens: 250000
++budget_max_uncached_tokens: 30000
++budget_max_model_calls: 12
++budget_max_wall_clock_s: 300
++budget_max_cost_usd: 0.40
++# --- process allowance (PACKET-0053): the packet's OWN gate chain is governance
++# --- ceremony, counted SEPARATELY from task work by the live gate and attributed
++# --- to governance_process (the 0050/0051 calibration question, resolved). Default
++# --- 7 = the LARGEST LEGAL chain in the doctrine: mandatory_full_regate runs
++# --- builder, qa, reviewer, fix-builder, qa, reviewer, archivist. (No-fix chain
++# --- is 4; fix-then-pass is 6.) Process dispatches never eat budget_max_subagents.
++process_dispatch_allowance: 7
++# --- empty at issue; filled at close. AN UNKNOWN IS NOT A ZERO: "-" is an honest
++# --- admission and is never refused; refusal is for CONTRADICTION, not absence.
++executed_mode: -
++escalation: -
++escalation_evidence: -
++consumed_subagents: -
++consumed_total_tokens: -
++consumed_uncached_tokens: -
++consumed_model_calls: -
++consumed_wall_clock_s: -
++consumed_cost_usd: -
++degradation_note: -
++# --- close-fill EXTENSIONS (PACKET-0053). consumed_subagents above counts TASK
++# --- dispatches (vs budget_max_subagents); consumed_process_dispatches counts the
++# --- gate chain (vs process_dispatch_allowance). The attr_* layers attribute
++# --- consumption where derivable at close — tokens or cost with provenance, or
++# --- "-" as an admission, NEVER a zero nobody measured. Receipts predating these
++# --- fields stay valid: routing-check.sh reads an absent field as "-".
++consumed_process_dispatches: -
++attr_task_execution: -
++attr_context_retrieval: -
++attr_subagent_execution: -
++attr_verification: -
++attr_review: -
++attr_governance_process: -
++attr_experiment_audit: -
++# --- contribution rows (PACKET-0053): marginal-contribution accounting, MANDATORY
++# --- for a Full close with dispatches>0 (routing-check.sh refuses otherwise). The
++# --- live gate seeds one stub row per admitted Full task dispatch; fill at close:
++# --- contribution: <subagent_type> | <unique_question> | <output_ref> | changed_implementation=y/n/- | changed_conclusion=y/n/- | caught_defect=y/n/- | duplicated_work=y/n/- | tokens=<v|-> | cost=<v|-> | time=<v|->
++# --- An all-"-" row passes as an admission and is REPORTED as non-contributing.
++

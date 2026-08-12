@@ -1,0 +1,7 @@
+{
+  "base_commit": "0fcd0f17235f5ae727081c989c38d3ded106fec3",
+  "product_paths": [
+    "server/governance/governance-dashboard-router.ts"
+  ],
+  "governance_paths": []
+}

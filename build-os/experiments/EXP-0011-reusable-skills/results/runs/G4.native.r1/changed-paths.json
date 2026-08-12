@@ -1,0 +1,7 @@
+{
+  "base_commit": "d1d01f80c0f2851ef84367de2f27e48890c2036b",
+  "product_paths": [
+    "server/governance/policy-as-code.ts"
+  ],
+  "governance_paths": []
+}

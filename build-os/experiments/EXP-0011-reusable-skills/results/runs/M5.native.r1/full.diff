@@ -1,0 +1,55 @@
+diff --git a/server/mcp/mcp-sync-wrapper.ts b/server/mcp/mcp-sync-wrapper.ts
+index 956385b..39fbd48 100644
+--- a/server/mcp/mcp-sync-wrapper.ts
++++ b/server/mcp/mcp-sync-wrapper.ts
+@@ -27,7 +27,7 @@ import {
+   type AsyncJob,
+   type CreateJobOptions,
+ } from './async-job-queue';
+-import { executeTool, type ToolExecutionOptions } from './tool-executor';
++import { executeTool } from './tool-executor';
+ 
+ const log = createLogger('mcp-sync-wrapper');
+ 
+@@ -93,7 +93,7 @@ export async function mcpGovernedCall(
+         clientIp: jobOptions.clientIp,
+         userAgent: jobOptions.userAgent,
+         correlationId,
+-      } as ToolExecutionOptions);
++      });
+ 
+       const elapsedMs = Date.now() - startTime;
+       log.info(`[${correlationId}] Sync execution completed in ${elapsedMs}ms`);
+@@ -112,7 +112,7 @@ export async function mcpGovernedCall(
+   // Create async job
+   log.info(`[${correlationId}] Creating async job for ${toolName} (estimated: ${estimatedDuration}ms)`);
+   
+-  const job = createAsyncJob(toolName, payload, jobOptions);
++  const { job } = createAsyncJob(toolName, payload, jobOptions);
+   
+   // Start execution in background
+   executeAsyncJob(job, correlationId).catch(err => {
+@@ -158,7 +158,7 @@ async function executeAsyncJob(job: AsyncJob, correlationId?: string): Promise<v
+       clientIp: job.clientIp,
+       userAgent: job.userAgent,
+       correlationId,
+-    } as ToolExecutionOptions);
++    });
+ 
+     completeAsyncJob(job.id, result);
+   } catch (err) {
+diff --git a/server/mcp/tool-executor.ts b/server/mcp/tool-executor.ts
+index 86ef651..1d5f7df 100644
+--- a/server/mcp/tool-executor.ts
++++ b/server/mcp/tool-executor.ts
+@@ -183,6 +183,9 @@ export interface ExecutionContext {
+   apiKey?: string;
+   clientIp?: string;
+   userAgent?: string;
++  /** Request-scoped tracing ids propagated by the MCP handlers for log correlation. */
++  correlationId?: string;
++  requestId?: string;
+   /**
+    * TRUSTED authenticated tenant, resolved by the HTTP handler from a validated
+    * inference credential (provisioned tenant key → org-<id>/user-<id>, spoof-
+

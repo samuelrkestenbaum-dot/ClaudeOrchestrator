@@ -1,0 +1,9 @@
+{
+  "base_commit": "890feedddcc5568948e6fa7e6160aa978c485674",
+  "product_paths": [
+    "server/mcp/mcp-http-handler.ts"
+  ],
+  "governance_paths": [
+    "build-os/packets/routing/routing-auto-20260812T135126Z-5092-20260812T135126Z.md"
+  ]
+}

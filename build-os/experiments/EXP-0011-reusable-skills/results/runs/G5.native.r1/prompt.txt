@@ -1,0 +1,16 @@
+# Task G5
+
+Fix the TypeScript type errors in `server/governance/four-eyes-approval.standalone-test.ts`.
+
+That file currently has 17 typecheck error(s) (TS2339).
+The first is at line 24: TS2339: Property 'proposal' does not exist on type 'Result'.
+
+## How this will be judged (identical in both conditions)
+
+Verification command: `npx tsc --noEmit -p tsconfig.json`
+Accepted when: the command reports ZERO errors for `server/governance/four-eyes-approval.standalone-test.ts`, AND no new error appears in any other file.
+
+REJECTED, regardless of the compiler result: `@ts-ignore`, `@ts-expect-error`, `@ts-nocheck`, `any` casts,
+or deleting the offending code. Fix the type, do not silence it.
+
+Work in the current repository. Do not push, and do not touch anything outside it.

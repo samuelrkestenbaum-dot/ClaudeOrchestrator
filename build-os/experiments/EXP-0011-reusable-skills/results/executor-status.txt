@@ -1,0 +1,6 @@
+Current state:        G3/native rep2 → session
+Current action:       Bash (worker session)
+Last meaningful event: 16.6s ago
+Next transition:      arm_complete → launch G3/leanrules rep2
+Blocked on:           nothing
+Updated:              2026-08-12T17:54:21.126Z

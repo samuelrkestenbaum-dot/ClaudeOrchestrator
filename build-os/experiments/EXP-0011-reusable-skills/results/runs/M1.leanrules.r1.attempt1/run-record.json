@@ -1,0 +1,25 @@
+{
+ "artifact": "run_record",
+ "run_id": "R-6334fbceebed",
+ "task_id": "M1",
+ "arm": "leanrules",
+ "launched_at": "2026-08-12T13:22:41.898Z",
+ "expected_session_id": "36c4cb6b-25f3-4f76-9eb0-504fd6572d12",
+ "orchestrator_session_id": "5489b495-ae3d-5612-a4e1-61b4b5c6b6e4",
+ "timeout_ceiling_s": 1200,
+ "pid": null,
+ "state": "terminal",
+ "terminal_reason": "infrastructure_error",
+ "admissible": false,
+ "is_error": true,
+ "result_event_observed": true,
+ "child_session_id": "36c4cb6b-25f3-4f76-9eb0-504fd6572d12",
+ "isolation": {
+  "isolated": true,
+  "observed": [
+   "36c4cb6b-25f3-4f76-9eb0-504fd6572d12"
+  ],
+  "reason": "child session id is distinct from the orchestrator's and matches the assignment"
+ },
+ "admissibility_note": "REFUSED: terminal reason 'infrastructure_error' is not a completion"
+}

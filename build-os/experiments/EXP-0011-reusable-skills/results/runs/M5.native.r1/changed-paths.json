@@ -1,0 +1,8 @@
+{
+  "base_commit": "fd7cf2efad64a6fbbdc4101c002ad16f623c7f6c",
+  "product_paths": [
+    "server/mcp/mcp-sync-wrapper.ts",
+    "server/mcp/tool-executor.ts"
+  ],
+  "governance_paths": []
+}

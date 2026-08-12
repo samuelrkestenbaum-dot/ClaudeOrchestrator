@@ -1,0 +1,47 @@
+diff --git a/server/mcp/schema-normalizer.ts b/server/mcp/schema-normalizer.ts
+index 6f9460a..5684417 100644
+--- a/server/mcp/schema-normalizer.ts
++++ b/server/mcp/schema-normalizer.ts
+@@ -16,6 +16,7 @@
+  * This is a pure function transform — no side effects, no state.
+  */
+ 
++import { z } from 'zod';
+ import { GRAVITO_TOOLS } from '../agent/mcp/gravito-mcp-server';
+ 
+ // ============================================================================
+@@ -58,27 +59,16 @@ function buildFieldMapCache(): void {
+ 
+   for (const tool of GRAVITO_TOOLS) {
+     const shortName = tool.name.replace('gravito.', '');
+-    const inputSchema = tool.inputSchema as unknown;
+-    
+-    if (!inputSchema || !inputSchema._def) {
+-      // Not a Zod schema — skip
+-      continue;
+-    }
++    const inputSchema = tool.inputSchema;
+ 
+-    // Extract field names from Zod schema shape
+-    let shape: Record<string, unknown> = {};
+-    try {
+-      if (inputSchema.shape) {
+-        shape = inputSchema.shape;
+-      } else if (inputSchema._def?.shape) {
+-        shape = typeof inputSchema._def.shape === 'function' 
+-          ? inputSchema._def.shape() 
+-          : inputSchema._def.shape;
+-      }
+-    } catch {
++    if (!(inputSchema instanceof z.ZodObject)) {
++      // Not a Zod object schema — no named fields to map
+       continue;
+     }
+ 
++    // Extract field names from the Zod object shape
++    const shape: z.ZodRawShape = inputSchema.shape;
++
+     const schemaFields = new Set(Object.keys(shape));
+     const camelToSchemaMap = new Map<string, string>();
+     const snakeToSchemaMap = new Map<string, string>();
+

@@ -1,0 +1,267 @@
+diff --git a/server/governance/surface-discovery/guardian.ts b/server/governance/surface-discovery/guardian.ts
+index 7117984..ce600c4 100644
+--- a/server/governance/surface-discovery/guardian.ts
++++ b/server/governance/surface-discovery/guardian.ts
+@@ -25,10 +25,8 @@ import type {
+   DiscoveredSurfaceData,
+   AdapterConfig,
+   SurfaceType,
+-  BusinessTruth,
+ } from './types';
+ import { DiscoveryStatus } from './types';
+-import { remediateSweepResults } from './remediation';
+ import { gatedRemediateSweepResults } from './gravito-gate';
+ import { evaluateCompletenessGate } from './completeness-gate';
+ import { getBusinessTruthContext } from '../../services/truth-context-provider';
+@@ -68,7 +66,8 @@ export async function runDiscovery(customerId: string, config: DiscoveryConfigDa
+     customerId,
+     adapterType: config.adapters.map(a => a.type).join(','),
+     status: 'running',
+-    startedAt: new Date(startTime),
++    // discovery_runs.startedAt / .completedAt are bigint epoch-millis columns, not timestamps.
++    startedAt: startTime,
+   });
+ 
+   // Run each enabled adapter
+@@ -158,7 +157,7 @@ export async function runDiscovery(customerId: string, config: DiscoveryConfigDa
+       surfacesStale: inventoryResult.staleSurfaces,
+       surfacesDead: inventoryResult.deadSurfaces,
+       durationMs,
+-      completedAt: new Date(),
++      completedAt: Date.now(),
+     })
+     .where(eq(discoveryRuns.runId, runId));
+ 
+@@ -314,7 +313,23 @@ export async function evaluateForSweep(customerId: string, config?: DiscoveryCon
+   // Determine priority
+   const priority = coverage.overallCoverage < thresholds.criticalThreshold ? 'critical' : 'medium';
+ 
+-  const affectedSurfaces = shouldTrigger ? (await getDb().select().from(discoveredSurfaces).where(and(eq(discoveredSurfaces.customerId, customerId), ne(discoveredSurfaces.status, 'ignored')))).map(s => s.surfaceId) : [];
++  // SweepEvaluation.affectedSurfaces is a count (and sweep_triggers.affectedSurfaces
++  // is an integer column), so count the rows in SQL rather than materialising them.
++  let affectedSurfaces = 0;
++  if (shouldTrigger) {
++    const db = await getDb();
++    if (!db) throw new Error('Database unavailable');
++    const counted = await db
++      .select({ count: sql<number>`count(*)::int` })
++      .from(discoveredSurfaces)
++      .where(
++        and(
++          eq(discoveredSurfaces.customerId, customerId),
++          ne(discoveredSurfaces.status, 'ignored'),
++        )
++      );
++    affectedSurfaces = counted[0]?.count ?? 0;
++  }
+ 
+   return {
+     shouldTrigger,
+@@ -332,19 +347,20 @@ export async function triggerSweep(customerId: string, evaluation: SweepEvaluati
+   const db = await getDb();
+   if (!db) throw new Error('Database unavailable');
+ 
+-  const sweepId = `sweep_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+   const startTime = Date.now();
+ 
+-  // Store the trigger record
+-  await db.insert(sweepTriggers).values({
+-    sweepId,
++  // Store the trigger record. The row's serial id IS the sweep id — SweepResult
++  // and the remediation gate both identify a sweep by that number.
++  const [trigger] = await db.insert(sweepTriggers).values({
+     customerId,
+     triggerType,
+     status: 'triggered',
+-    triggeredAt: new Date(),
+-    evaluation: JSON.stringify(evaluation),
+     priority: evaluation.priority,
+-  });
++    reasons: evaluation.reasons,
++    affectedSurfaces: evaluation.affectedSurfaces,
++    coverageAtTrigger: evaluation.coverageAtEvaluation,
++  }).returning({ id: sweepTriggers.id });
++  const sweepId = trigger.id;
+ 
+   log.info({ customerId, sweepId, triggerType, priority: evaluation.priority }, 'Sweep triggered, starting remediation...');
+ 
+@@ -358,61 +374,88 @@ export async function triggerSweep(customerId: string, evaluation: SweepEvaluati
+ 
+   if (surfacesToSweep.length === 0) {
+     log.warn({ customerId, sweepId }, 'Sweep triggered but no active surfaces found to process.');
+-    const result: SweepResult = { sweepId, status: 'completed', surfacesProcessed: 0, durationMs: Date.now() - startTime, errors: [] };
+-    await db.update(sweepTriggers).set({ status: 'completed', result: JSON.stringify(result) }).where(eq(sweepTriggers.sweepId, sweepId));
++    const result: SweepResult = { sweepId, surfacesReviewed: 0, surfacesRemediated: 0, issuesFound: 0, durationMs: Date.now() - startTime };
++    await db.update(sweepTriggers)
++      .set({ status: 'completed', surfacesReviewed: 0, surfacesRemediated: 0, durationMs: result.durationMs, completedAt: new Date() })
++      .where(eq(sweepTriggers.id, sweepId));
+     return result;
+   }
+ 
+-  // Map to Shield-compatible format
+-  const shieldInputs = surfacesToSweep.map(surface => ({
+-    surface_id: surface.surfaceId,
+-    customer_id: customerId,
+-    surface_type: mapSurfaceTypeToShieldType(surface.surfaceType),
+-    content_url: surface.url,
+-    content_snapshot: surface.contentSnapshot || '',
++  // Map to the remediation-gate input shape. The stored snapshot is the content
++  // under review; lastScore is the most recent score recorded for the surface.
++  const remediationInputs = surfacesToSweep.map(surface => ({
++    surfaceId: surface.surfaceId,
++    surfaceUrl: surface.url,
++    content: surface.contentSnapshot || '',
++    reviewResult: {
++      score: surface.lastScore ?? 0,
++      issues: [],
++      patches: [],
++      block_release: false,
++    },
+   }));
+ 
+-  // Get business truth context
+-  const truthContext = await getBusinessTruthContext(customerId) as BusinessTruth;
++  log.info({
++    customerId,
++    sweepId,
++    surfaces: remediationInputs.length,
++    shieldTypes: [...new Set(surfacesToSweep.map(s => mapSurfaceTypeToShieldType(s.surfaceType)))],
++  }, 'Sweeping surfaces through the Gravito-gated remediation pipeline');
++
++  // Get business truth context — a prompt-ready string the remediator embeds
++  const truthContext = getBusinessTruthContext();
+ 
+-  // Execute remediation via Shield
+-  let shieldResults: Awaited<ReturnType<typeof remediateSweepResults>>;
++  // Execute remediation behind the Gravito gate
++  let gateOutcome: Awaited<ReturnType<typeof gatedRemediateSweepResults>>;
+   try {
+-    // Use the gated function to ensure Gravito review
+-    const remediationInput = shieldResults.map(r => ({ ...r, truthContext }));
+-    shieldResults = await gatedRemediateSweepResults(remediationInput);
+-
++    gateOutcome = await gatedRemediateSweepResults(sweepId, customerId, remediationInputs, truthContext);
+   } catch (error) {
+     const errMsg = error instanceof Error ? error.message : String(error);
+     log.error({ customerId, sweepId, error: errMsg }, 'Remediation sweep failed');
+-    const result: SweepResult = { sweepId, status: 'failed', surfacesProcessed: 0, durationMs: Date.now() - startTime, errors: [errMsg] };
+-    await db.update(sweepTriggers).set({ status: 'failed', result: JSON.stringify(result) }).where(eq(sweepTriggers.sweepId, sweepId));
++    const result: SweepResult = { sweepId, surfacesReviewed: 0, surfacesRemediated: 0, issuesFound: 0, durationMs: Date.now() - startTime };
++    await db.update(sweepTriggers)
++      .set({ status: 'failed', surfacesReviewed: 0, surfacesRemediated: 0, durationMs: result.durationMs, completedAt: new Date() })
++      .where(eq(sweepTriggers.id, sweepId));
+     return result;
+   }
+ 
+   // Post-process results (e.g., update surface status)
+   const errors: string[] = [];
+-  for (const res of shieldResults) {
+-    if (res.status === 'error') {
+-      errors.push(`Surface ${res.surface_id}: ${res.error}`);
++  for (const res of gateOutcome.results) {
++    if (!res.accepted) {
++      errors.push(`Surface ${res.surfaceId}: remediation ${res.gateDecision}`);
+       continue;
+     }
+     await db.update(discoveredSurfaces)
+       .set({ status: 'reviewed', lastSeen: new Date() })
+-      .where(and(eq(discoveredSurfaces.surfaceId, res.surface_id), eq(discoveredSurfaces.customerId, customerId)));
++      .where(and(eq(discoveredSurfaces.surfaceId, res.surfaceId), eq(discoveredSurfaces.customerId, customerId)));
+   }
+ 
+   const result: SweepResult = {
+     sweepId,
+-    status: errors.length > 0 ? 'completed_with_errors' : 'completed',
+-    surfacesProcessed: shieldInputs.length,
++    surfacesReviewed: gateOutcome.totalSurfaces,
++    surfacesRemediated: gateOutcome.accepted,
++    issuesFound: errors.length,
+     durationMs: Date.now() - startTime,
+-    errors,
+   };
+ 
+-  await db.update(sweepTriggers).set({ status: result.status, result: JSON.stringify(result) }).where(eq(sweepTriggers.sweepId, sweepId));
++  await db.update(sweepTriggers)
++    .set({
++      status: errors.length > 0 ? 'completed_with_errors' : 'completed',
++      surfacesReviewed: result.surfacesReviewed,
++      surfacesRemediated: result.surfacesRemediated,
++      durationMs: result.durationMs,
++      completedAt: new Date(),
++    })
++    .where(eq(sweepTriggers.id, sweepId));
+ 
+-  log.info({ customerId, sweepId, duration: result.durationMs, processed: result.surfacesProcessed, errors: errors.length }, 'Remediation sweep complete');
++  log.info({
++    customerId, sweepId,
++    duration: result.durationMs,
++    reviewed: result.surfacesReviewed,
++    remediated: result.surfacesRemediated,
++    errors: errors.length,
++  }, 'Remediation sweep complete');
+ 
+   return result;
+ }
+
+diff --git a/build-os/packets/routing/routing-auto-20260812T112538Z-5203-20260812T112538Z.md b/build-os/packets/routing/routing-auto-20260812T112538Z-5203-20260812T112538Z.md
+--- /dev/null
++++ b/build-os/packets/routing/routing-auto-20260812T112538Z-5203-20260812T112538Z.md
++# ROUTING RECEIPT — one file per routing decision. The recorded verdict is BINDING
++# (build-os/memory/routing_contract.md); routing-check.sh refuses this receipt at
++# close if executed_mode exceeds selected_mode with no escalation record, if an
++# escalation carries no evidence, or if consumption exceeds a budget undeclared.
++task_id: auto-20260812T112538Z-5203
++description_sha256: 27b3f1b706c909c94af97ff3625e4a0a813089bab6bc2c90aa89c5978cb14534
++descriptor: {"expected_files_changed":1,"requires_tests":false,"expected_session_count":1,"prior_context_required":false,"handoff_required":false,"consequence_level":"low","irreversible_or_external_mutation":false,"high_blast_radius":false,"unclear_acceptance_criteria":false,"security_or_compliance_consequence":false,"parallel_workstreams_benefit":false,"high_rework_history":false,"nondeterministic_verification":false}
++selected_mode: direct
++selector_note: -
++issued_at: 2026-08-12T11:25:38Z
++# --- budgets: DERIVED DEFAULTS from EXP-0002 sealed records, operator-tunable, not laws.
++# --- Derivation: ON-surface light runs measured 172k-369k total tokens / 0 dispatches
++# --- (named exceedance: raw T4 at 526,461 - context, not the band); the
++# --- blowouts measured 4.9M/7.4M tokens, 4-5 dispatches, $3.63/$4.80. See route-task.sh.
++budget_max_subagents: 0
++budget_max_total_tokens: 250000
++budget_max_uncached_tokens: 30000
++budget_max_model_calls: 12
++budget_max_wall_clock_s: 300
++budget_max_cost_usd: 0.40
++# --- process allowance (PACKET-0053): the packet's OWN gate chain is governance
++# --- ceremony, counted SEPARATELY from task work by the live gate and attributed
++# --- to governance_process (the 0050/0051 calibration question, resolved). Default
++# --- 7 = the LARGEST LEGAL chain in the doctrine: mandatory_full_regate runs
++# --- builder, qa, reviewer, fix-builder, qa, reviewer, archivist. (No-fix chain
++# --- is 4; fix-then-pass is 6.) Process dispatches never eat budget_max_subagents.
++process_dispatch_allowance: 7
++# --- empty at issue; filled at close. AN UNKNOWN IS NOT A ZERO: "-" is an honest
++# --- admission and is never refused; refusal is for CONTRADICTION, not absence.
++executed_mode: -
++escalation: -
++escalation_evidence: -
++consumed_subagents: -
++consumed_total_tokens: -
++consumed_uncached_tokens: -
++consumed_model_calls: -
++consumed_wall_clock_s: -
++consumed_cost_usd: -
++degradation_note: -
++# --- close-fill EXTENSIONS (PACKET-0053). consumed_subagents above counts TASK
++# --- dispatches (vs budget_max_subagents); consumed_process_dispatches counts the
++# --- gate chain (vs process_dispatch_allowance). The attr_* layers attribute
++# --- consumption where derivable at close — tokens or cost with provenance, or
++# --- "-" as an admission, NEVER a zero nobody measured. Receipts predating these
++# --- fields stay valid: routing-check.sh reads an absent field as "-".
++consumed_process_dispatches: -
++attr_task_execution: -
++attr_context_retrieval: -
++attr_subagent_execution: -
++attr_verification: -
++attr_review: -
++attr_governance_process: -
++attr_experiment_audit: -
++# --- contribution rows (PACKET-0053): marginal-contribution accounting, MANDATORY
++# --- for a Full close with dispatches>0 (routing-check.sh refuses otherwise). The
++# --- live gate seeds one stub row per admitted Full task dispatch; fill at close:
++# --- contribution: <subagent_type> | <unique_question> | <output_ref> | changed_implementation=y/n/- | changed_conclusion=y/n/- | caught_defect=y/n/- | duplicated_work=y/n/- | tokens=<v|-> | cost=<v|-> | time=<v|->
++# --- An all-"-" row passes as an admission and is REPORTED as non-contributing.
++

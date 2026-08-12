@@ -1,0 +1,9 @@
+{
+  "base_commit": "89f39acc436c7f7cd9a2fe4198a2e6605c4a2c5a",
+  "product_paths": [
+    "server/governance/surface-discovery/guardian.ts"
+  ],
+  "governance_paths": [
+    "build-os/packets/routing/routing-auto-20260812T114812Z-26336-20260812T114812Z.md"
+  ]
+}

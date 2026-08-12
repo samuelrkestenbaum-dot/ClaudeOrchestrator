@@ -1,0 +1,7 @@
+{
+  "base_commit": "1cda40130dbfec542b27e268e74852ff497c3f6f",
+  "product_paths": [
+    "server/governance/four-eyes-approval.standalone-test.ts"
+  ],
+  "governance_paths": []
+}

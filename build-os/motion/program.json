@@ -115,9 +115,13 @@
     {
       "id": "D4",
       "status": "open",
-      "measurement_attempts": 0,
+      "measurement_attempts": 1,
       "question": "Do reusable learned SKILLS (procedures a worker can apply, beyond per-error repair rules) compound organizational advantage further \u2014 especially on tasks whose discovery is genuinely expensive?",
-      "context": "Phase 2 proof 2. Opened by D3 branch 1. Corpus choice is load-bearing: EXP-0009/0010 proved the self-contained-task ceiling; proof 2 should prefer expensive-discovery tasks."
+      "context": "Phase 2 proof 2. Opened by D3 branch 1. Corpus choice is load-bearing: EXP-0009/0010 proved the self-contained-task ceiling; proof 2 should prefer expensive-discovery tasks.",
+      "attempt_log": [
+        "EXP-0011 TERMINATED BY OWNER at 38/60 final cells (operational priority, direction-independent, no inferential read run): no preregistered verdict; cells are exploratory only; fork NOT applied. See EXP-0011-reusable-skills/TERMINATION-RECEIPT.md."
+      ],
+      "next_action": "owner-directed R0 usability program first; any future D4 measurement is a fresh preregistered attempt (repeat-attempt rule applies)"
     }
   ],
   "stop_conditions": [

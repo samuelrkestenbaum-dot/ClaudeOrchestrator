@@ -1,0 +1,179 @@
+diff --git a/server/governance/governance-dashboard-router.ts b/server/governance/governance-dashboard-router.ts
+index af200d0..906cd97 100644
+--- a/server/governance/governance-dashboard-router.ts
++++ b/server/governance/governance-dashboard-router.ts
+@@ -27,10 +27,10 @@ import { getExternalTransportStatus, getTransportMetrics, exportPrometheusMetric
+ import { getAuthorityMetrics, getAuthorityLayerHealth, getAuthorityAuditTrail } from './gravito-authority-layer';
+ import { getExternalGravitoHealth } from './gravito-external-client';
+ import { getPreApprovalMetrics, REGULATED_SURFACES } from './regulated-surface-preapproval';
+-import { getSyncWrapperMetrics } from './mcp-sync-wrapper';
++import { getSyncWrapperMetrics, listJobs } from './mcp-sync-wrapper';
+ import { getAuthorityAuditEntries, getAuthorityAuditStats } from '../db';
+ import { getGovernanceUptimeMetrics, getInlineMetrics, getCircuitBreakerState, getAuthorityAuditSummary } from './co-processor/gravito-inline-client';
+-import type { AuthorityAuditEntry, TransportMetrics, ExternalGravitoHealth, SyncWrapperMetrics, AuthorityLayerHealth, InlineMetrics, AuthorityAuditSummaryEntry } from '../../shared/governance-types';
++import type { GovernanceAuthorityAuditRow } from '../../drizzle/schema';
+ 
+ // ============================================================================
+ // PANEL 1: TRANSPORT HEALTH
+@@ -42,6 +42,11 @@ const transportHealthProcedure = adminProcedure.query(async () => {
+   const externalHealth = getExternalGravitoHealth();
+   const syncMetrics = getSyncWrapperMetrics();
+ 
++  // TransportMetrics counts successes and failures separately; total is their sum.
++  const transportCalls = metrics.successesTotal + metrics.failuresTotal;
++  // Jobs still in flight (the wrapper tracks them in its job registry, not in metrics).
++  const activeJobs = listJobs({ statusFilter: 'running', limit: 1000 }).length;
++
+   return {
+     // Current state
+     transport: {
+@@ -55,39 +60,41 @@ const transportHealthProcedure = adminProcedure.query(async () => {
+ 
+     // Performance metrics
+     performance: {
+-      totalCalls: metrics.totalCalls,
+-      successCount: metrics.successCount,
+-      failureCount: metrics.failureCount,
+-      successRate: metrics.totalCalls > 0
+-        ? Math.round((metrics.successCount / metrics.totalCalls) * 10000) / 100
++      totalCalls: transportCalls,
++      successCount: metrics.successesTotal,
++      failureCount: metrics.failuresTotal,
++      successRate: transportCalls > 0
++        ? Math.round((metrics.successesTotal / transportCalls) * 10000) / 100
+         : 0,
+       latency: {
+         p50: metrics.latencyP50Ms,
+         p95: metrics.latencyP95Ms,
+         p99: metrics.latencyP99Ms,
+       },
+-      transportSwitches: metrics.transportSwitches,
++      transportSwitches: metrics.transportSwitchCount,
+     },
+ 
+     // External client health
+     externalClient: {
+       circuitBreakerState: externalHealth.circuitBreakerState,
+       totalCalls: externalHealth.totalCalls,
+-      successRate: externalHealth.successRate,
++      successRate: externalHealth.totalCalls > 0
++        ? Math.round((externalHealth.successfulCalls / externalHealth.totalCalls) * 10000) / 100
++        : 0,
+       averageLatencyMs: externalHealth.averageLatencyMs,
+       fallbackRate: externalHealth.fallbackRate,
+-      lastError: externalHealth.lastError,
++      lastError: externalHealth.lastFailureReason,
+     },
+ 
+     // Sync wrapper stats
+     syncWrapper: {
+-      totalSubmissions: syncMetrics.totalSubmissions,
+-      syncResolved: syncMetrics.syncResolved,
+-      asyncReturned: syncMetrics.asyncReturned,
+-      pollAttempts: syncMetrics.pollAttempts,
+-      pollSuccesses: syncMetrics.pollSuccesses,
+-      pollTimeouts: syncMetrics.pollTimeouts,
+-      activeJobs: syncMetrics.activeJobs,
++      totalSubmissions: syncMetrics.asyncJobsDetected,
++      syncResolved: syncMetrics.jobsCompletedSync,
++      asyncReturned: syncMetrics.jobsTimedOut,
++      pollAttempts: syncMetrics.totalPollAttempts,
++      pollSuccesses: syncMetrics.jobsCompletedSync,
++      pollTimeouts: syncMetrics.jobsTimedOut,
++      activeJobs,
+     },
+   };
+ });
+@@ -144,9 +151,11 @@ const authorityDecisionsProcedure = adminProcedure
+ 
+       // Authority layer state
+       authorityLayer: {
+-        enabled: authorityHealth.enabled,
+-        externalReachable: authorityHealth.externalReachable,
+-        internalReachable: authorityHealth.internalReachable,
++        enabled: authorityHealth.status !== 'unavailable',
++        externalReachable: authorityHealth.external.reachable,
++        // Internal governance runs in-process; it is unusable only while its
++        // circuit breaker is open.
++        internalReachable: breakerState.state !== 'open',
+         metrics: {
+           externalSuccesses: authorityMetrics.externalSuccesses,
+           externalFailures: authorityMetrics.externalFailures,
+@@ -159,8 +168,10 @@ const authorityDecisionsProcedure = adminProcedure
+       // Inline client state
+       inlineClient: {
+         circuitBreakerState: breakerState,
+-        totalCalls: inlineMetrics.totalCalls,
+-        successRate: inlineMetrics.successRate,
++        totalCalls: inlineMetrics.totalInvocations,
++        successRate: inlineMetrics.totalInvocations > 0
++          ? Math.round((uptimeMetrics.totalSuccessful / inlineMetrics.totalInvocations) * 10000) / 100
++          : 0,
+         avgLatencyMs: inlineMetrics.avgLatencyMs,
+         uptime: uptimeMetrics,
+       },
+@@ -169,7 +180,7 @@ const authorityDecisionsProcedure = adminProcedure
+       memoryAudit: memoryAuditTrail,
+ 
+       // Recent database entries
+-      recentEntries: recentEntries.map((entry: AuthorityAuditEntry) => ({
++      recentEntries: recentEntries.map((entry: GovernanceAuthorityAuditRow) => ({
+         id: entry.id,
+         surfaceType: entry.surfaceType,
+         regulated: entry.regulated,
+@@ -236,7 +247,7 @@ const regulatedFlowProcedure = adminProcedure.query(async () => {
+     regulatedSurfaces: Array.from(REGULATED_SURFACES),
+ 
+     // Recent regulated decisions
+-    recentRegulatedDecisions: regulatedEntries.map((entry: AuthorityAuditEntry) => ({
++    recentRegulatedDecisions: regulatedEntries.map((entry: GovernanceAuthorityAuditRow) => ({
+       id: entry.id,
+       surfaceType: entry.surfaceType,
+       externalAttempted: entry.externalAttempted,
+@@ -281,6 +292,7 @@ const overviewProcedure = adminProcedure
+       authorityMetrics,
+       authorityHealth,
+       preApprovalMetrics,
++      breakerState,
+       dbStats,
+       recentEntries,
+     ] = await Promise.all([
+@@ -291,19 +303,24 @@ const overviewProcedure = adminProcedure
+       Promise.resolve(getAuthorityMetrics()),
+       Promise.resolve(getAuthorityLayerHealth()),
+       Promise.resolve(getPreApprovalMetrics()),
++      Promise.resolve(getCircuitBreakerState()),
+       getAuthorityAuditStats(days),
+       getAuthorityAuditEntries({ limit: 20 }),
+     ]);
+ 
++    // Internal governance runs in-process; it is unusable only while its
++    // circuit breaker is open.
++    const internalReachable = breakerState.state !== 'open';
++
+     return {
+       // Overall health status
+       overallHealth: {
+-        status: transportStatus.enabled && authorityHealth.enabled ? 'healthy' :
+-          !transportStatus.enabled && authorityHealth.internalReachable ? 'degraded' :
++        status: transportStatus.enabled && authorityHealth.status === 'healthy' ? 'healthy' :
++          !transportStatus.enabled && internalReachable ? 'degraded' :
+           'critical',
+         transportMode: transportStatus.mode,
+-        externalReachable: authorityHealth.externalReachable,
+-        internalReachable: authorityHealth.internalReachable,
++        externalReachable: authorityHealth.external.reachable,
++        internalReachable,
+       },
+ 
+       // Key metrics (for dashboard cards)
+@@ -319,7 +336,7 @@ const overviewProcedure = adminProcedure
+       },
+ 
+       // Recent activity
+-      recentActivity: recentEntries.slice(0, 10).map((entry: AuthorityAuditEntry) => ({
++      recentActivity: recentEntries.slice(0, 10).map((entry: GovernanceAuthorityAuditRow) => ({
+         surfaceType: entry.surfaceType,
+         regulated: entry.regulated,
+         approved: entry.finalApproved,
+

@@ -1,0 +1,395 @@
+diff --git a/server/mcp/tool-executor.ts b/server/mcp/tool-executor.ts
+index 86ef651..607cf52 100644
+--- a/server/mcp/tool-executor.ts
++++ b/server/mcp/tool-executor.ts
+@@ -78,6 +78,7 @@ import {
+   runFullContentIntelligenceAudit,
+ } from '../governance/content-intelligence';
+ 
++import type { Surface } from './fail-closed-gate';
+ import { mcpError, mcpSuccess, classifyError, type MCPErrorCode } from './mcp-error-contract';
+ import { validateToolInput, coerceToolInput } from './tool-input-validator';
+ import {
+@@ -191,6 +192,11 @@ export interface ExecutionContext {
+    * receipt's tenant binding to `authenticated_tenant`.
+    */
+   authenticatedTenant?: { tenantId: string; source: string };
++  /**
++   * Caller identity used as the control-plane `agentId` when the transport
++   * resolved one. Optional: callers that omit it fall back to `mcp-caller`.
++   */
++  userId?: string;
+ }
+ 
+ // Tool arguments arrive as parsed JSON from JSON-RPC — untyped at the boundary.
+@@ -206,6 +212,50 @@ function mcpText(data: unknown): MCPContent {
+   return { content: [{ type: 'text', text: JSON.stringify(data) }] };
+ }
+ 
++// ============================================================================
++// HELPERS: narrow untyped JSON-RPC arguments at the trust boundary
++// ============================================================================
++
++/** A present, non-empty string argument — otherwise the fallback. */
++function asString(value: unknown, fallback: string): string {
++  return typeof value === 'string' && value.length > 0 ? value : fallback;
++}
++
++/** A present, non-empty string argument — otherwise undefined. */
++function asOptionalString(value: unknown): string | undefined {
++  return typeof value === 'string' && value.length > 0 ? value : undefined;
++}
++
++/** A numeric argument — otherwise the fallback. */
++function asNumber(value: unknown, fallback: number): number {
++  return typeof value === 'number' && Number.isFinite(value) ? value : fallback;
++}
++
++/** An object argument (not an array) — otherwise the fallback. */
++function asRecord(value: unknown, fallback: Record<string, unknown>): Record<string, unknown> {
++  return typeof value === 'object' && value !== null && !Array.isArray(value)
++    ? (value as Record<string, unknown>)
++    : fallback;
++}
++
++/** An all-strings array argument — otherwise undefined. */
++function asStringArray(value: unknown): string[] | undefined {
++  if (!Array.isArray(value)) return undefined;
++  const strings = value.filter((entry): entry is string => typeof entry === 'string');
++  return strings.length === value.length ? strings : undefined;
++}
++
++/** Every surface the fail-closed gate recognises; anything else is 'general'. */
++const APPROVAL_SURFACES: readonly Surface[] = [
++  'medical', 'financial', 'legal', 'hr', 'compliance',
++  'sales', 'support', 'marketing', 'general',
++];
++
++/** Narrow an untyped surface argument onto the gate's Surface union. */
++function asSurface(value: unknown): Surface {
++  return APPROVAL_SURFACES.find((surface) => surface === value) ?? 'general';
++}
++
+ /** Safe wrapper — catches errors and returns them as standardized MCP content */
+ async function safeTool(fn: () => Promise<MCPContent>, toolName?: string): Promise<MCPContent> {
+   try {
+@@ -247,11 +297,11 @@ const governanceTools: Record<string, ToolHandler> = {
+         const { getFailClosedGate } = await import('./fail-closed-gate');
+         const gate = getFailClosedGate();
+         const token = gate.createApprovalToken(
+-          (normalized.surface_type as string) || 'general',
++          asSurface(normalized.surface_type),
+           'reviewContent',
+           true,
+           [],
+-          (normalized.policy_preset as string) || 'default',
++          asString(normalized.policy_preset, 'default'),
+           false
+         );
+         (result as Record<string, unknown>).approval_token = token.tokenId;
+@@ -512,20 +562,21 @@ const creativeTools: Record<string, ToolHandler> = {
+     // Map MCP parameters to server method parameters
+     const prompt = args.goal
+       ? `${args.goal}${args.audience ? ` for ${args.audience}` : ''}${args.context ? `. Context: ${args.context}` : ''}`
+-      : args.prompt || 'Generate content';
+-    
++      : asString(args.prompt, 'Generate content');
++
+     // Map creative artifact_types to valid review types
+     const creativeToReviewType: Record<string, string> = {
+       hero_section: 'web_copy', landing_page: 'web_copy', email_campaign: 'email',
+       social_post: 'ad_copy', blog_post: 'doc', whitepaper: 'doc',
+       case_study: 'doc', product_description: 'web_copy', ad_copy: 'ad_copy',
+     };
+-    const artifactType = creativeToReviewType[args.artifact_type] || args.artifact_type || 'web_copy';
+-    
++    const requestedType = asOptionalString(args.artifact_type);
++    const artifactType = (requestedType && creativeToReviewType[requestedType]) || requestedType || 'web_copy';
++
+     return mcpText(await server.generateArtifact({
+       prompt,
+       artifact_type: artifactType,
+-      constraints: args.constraints || {},
++      constraints: asRecord(args.constraints, {}),
+     }));
+   },
+ 
+@@ -685,7 +736,7 @@ const breakGlassTools: Record<string, ToolHandler> = {
+   runEscalation: async (args) => {
+     const { runEscalationCheck: escalate } = await import('../agent/mcp/break-glass-ops');
+     try {
+-      return mcpText(await escalate(args?.thresholdMinutes || 30));
++      return mcpText(await escalate(asNumber(args?.thresholdMinutes, 30)));
+     } catch (e: unknown) {
+       generalLog.error('[ToolExecutor] runEscalation error:', e);
+       return mcpText(mcpError('Escalation check failed', classifyError(e), 'runEscalation'));
+@@ -705,14 +756,17 @@ const enforcementTools: Record<string, ToolHandler> = {
+   preReleaseCheck: async (args) => mcpText(await preReleaseGate(args as any)),
+ 
+   checkContentEnforcement: async (args) => {
+-    const checkResult = await duringCreationCheck(args?.content || '', args?.contentType || 'general');
++    const checkResult = await duringCreationCheck(asString(args?.content, ''), asString(args?.contentType, 'general'));
+     return mcpText(checkResult);
+   },
+ 
+   governedGenerate: async (args, ctx) => {
+-    const prompt = args?.prompt || 'Generate content';
+-    const contentType = args?.contentType || 'general';
+-    const systemPrompt = args?.systemPrompt || 'You are a professional content writer. Generate clear, accurate, and compliant content.';
++    const prompt = asString(args?.prompt, 'Generate content');
++    const contentType = asString(args?.contentType, 'general');
++    const systemPrompt = asString(
++      args?.systemPrompt,
++      'You are a professional content writer. Generate clear, accurate, and compliant content.',
++    );
+ 
+     // The legacy governedInvokeLLM path — the exact behavior shipped today.
+     // FLAG-OFF returns this verbatim (BYTE-IDENTICAL); the FLAG-ON branch also
+@@ -749,9 +803,9 @@ const enforcementTools: Record<string, ToolHandler> = {
+     try {
+       const { governedGenerate: canonicalGovernedGenerate } = await import('../governance/governed-generate');
+       const params: GovernedGenerateParams = {
+-        messages: [{ role: 'user' as const, content: typeof prompt === 'string' ? prompt : String(prompt) }],
+-        systemPrompt: typeof systemPrompt === 'string' ? systemPrompt : String(systemPrompt),
+-        contentType: typeof contentType === 'string' ? contentType : String(contentType),
++        messages: [{ role: 'user' as const, content: prompt }],
++        systemPrompt,
++        contentType,
+         contentRole:
+           typeof args?.content_role === 'string'
+             ? (args.content_role as GovernedGenerateParams['contentRole'])
+@@ -790,41 +844,46 @@ const enforcementTools: Record<string, ToolHandler> = {
+ 
+ const narrativeTools: Record<string, ToolHandler> = {
+   auditNarrativeCoherence: async (args) => {
+-    const surface = args?.surface || 'website';
+-    if (surface === 'docs' && args?.docsDir) {
+-      return mcpText(await auditDocsDirectory(args.docsDir, args.surface));
++    const surface = asString(args?.surface, 'website');
++    const docsDir = asOptionalString(args?.docsDir);
++    const routes = asStringArray(args?.routes);
++    if (surface === 'docs' && docsDir) {
++      return mcpText(await auditDocsDirectory(docsDir, surface));
+     } else if (surface === 'generic' && args?.contentUnits) {
+       const adapter = new GenericAdapter(args.contentUnits as ContentUnit[], 'generic');
+       const { runNarrativeCoherenceAudit } = await import('../governance/narrative-coherence');
+       return mcpText(await runNarrativeCoherenceAudit(adapter));
+-    } else if (args?.routes?.length) {
+-      return mcpText(await auditWebsiteRoutes(args.routes));
++    } else if (routes?.length) {
++      return mcpText(await auditWebsiteRoutes(routes));
+     }
+     return mcpText(await auditGravitoWebsite());
+   },
+ 
+   quickNarrativeCheck: async (args) => {
+-    const surface = args?.surface || 'website';
+-    const adapter = surface === 'docs' && args?.docsDir
+-      ? new DocsAdapter(args.docsDir)
++    const surface = asString(args?.surface, 'website');
++    const docsDir = asOptionalString(args?.docsDir);
++    const adapter = surface === 'docs' && docsDir
++      ? new DocsAdapter(docsDir)
+       : new WebsiteAdapter();
+     return mcpText(await quickCoherenceCheck(adapter));
+   },
+ 
+   discoverContentUnits: async (args) => {
+-    const surface = args?.surface || 'website';
+-    const adapter = surface === 'docs' && args?.docsDir
+-      ? new DocsAdapter(args.docsDir)
++    const surface = asString(args?.surface, 'website');
++    const docsDir = asOptionalString(args?.docsDir);
++    const adapter = surface === 'docs' && docsDir
++      ? new DocsAdapter(docsDir)
+       : new WebsiteAdapter();
+     const units = adapter.discover();
+     return mcpText({ surface: adapter.surface, count: units.length, units });
+   },
+ 
+   auditDocsCoherence: async (args) => {
+-    if (!args?.docsDir) {
++    const docsDir = asOptionalString(args?.docsDir);
++    if (!docsDir) {
+       return mcpText(mcpError('docsDir parameter is required', 'VALIDATION_ERROR', 'auditDocsCoherence'));
+     }
+-    return mcpText(await auditDocsDirectory(args.docsDir, args.surface));
++    return mcpText(await auditDocsDirectory(docsDir, asString(args?.surface, 'docs')));
+   },
+ };
+ 
+@@ -834,10 +893,11 @@ const narrativeTools: Record<string, ToolHandler> = {
+ 
+ const digestibilityTools: Record<string, ToolHandler> = {
+   auditDigestibility: async (args) => {
+-    const surface = args?.surface || 'website';
++    const surface = asString(args?.surface, 'website');
++    const docsDir = asOptionalString(args?.docsDir);
+     let auditResult;
+-    if (surface === 'docs' && args?.docsDir) {
+-      const adapter = new DocsAdapter(args.docsDir);
++    if (surface === 'docs' && docsDir) {
++      const adapter = new DocsAdapter(docsDir);
+       auditResult = await runDigestibilityAudit(adapter);
+     } else if (surface === 'generic' && args?.contentUnits) {
+       const { GenericAdapter: GA } = await import('../governance/narrative-coherence');
+@@ -1265,7 +1325,7 @@ const surfaceGovernanceTools: Record<string, ToolHandler> = {
+   'surfaceGovernance.scan': async () => {
+     const sg = await import('../surface-governance');
+     const result = await sg.scanSurface();
+-    return json({
++    return mcpText({
+       scanId: result.scanId,
+       timestamp: result.timestamp,
+       summary: result.summary,
+@@ -1276,19 +1336,21 @@ const surfaceGovernanceTools: Record<string, ToolHandler> = {
+         severity: f.severity,
+         title: f.title,
+         description: f.description,
+-        file: f.file,
++        // A finding names its file through the patch when it is auto-fixable;
++        // otherwise `location` is the best locator the scanner produced.
++        file: f.patch?.file ?? f.location,
+         autoFixable: f.autoFixable,
+       })),
+     });
+   },
+   'surfaceGovernance.status': async () => {
+     const sg = await import('../surface-governance');
+-    return json(sg.getSurfaceGovernanceStatus());
++    return mcpText(sg.getSurfaceGovernanceStatus());
+   },
+   'surfaceGovernance.getRules': async (args) => {
+     const sg = await import('../surface-governance');
+     const rules = args.enabledOnly ? sg.getEnabledRules() : sg.getRules();
+-    return json(rules);
++    return mcpText(rules);
+   },
+   'surfaceGovernance.configureRule': async (args) => {
+     const sg = await import('../surface-governance');
+@@ -1298,13 +1360,13 @@ const surfaceGovernanceTools: Record<string, ToolHandler> = {
+       case 'disable': sg.disableRule(ruleId); break;
+       case 'updateSeverity': if (severity) sg.updateRuleSeverity(ruleId, severity as any); break;
+     }
+-    return json({ success: true, ruleId, action });
++    return mcpText({ success: true, ruleId, action });
+   },
+   'surfaceGovernance.planRemediation': async () => {
+     const sg = await import('../surface-governance');
+     const plan = sg.planRemediation();
+-    if (!plan) return json({ error: 'No scan results available. Run surfaceGovernance.scan first.' });
+-    return json({
++    if (!plan) return mcpText({ error: 'No scan results available. Run surfaceGovernance.scan first.' });
++    return mcpText({
+       scanId: plan.scanId,
+       summary: plan.summary,
+       findings: plan.findings.map(f => ({
+@@ -1320,8 +1382,8 @@ const surfaceGovernanceTools: Record<string, ToolHandler> = {
+   'surfaceGovernance.applyFixes': async (args) => {
+     const sg = await import('../surface-governance');
+     const plan = sg.applyAllFixes({ dryRun: !!args.dryRun });
+-    if (!plan) return json({ error: 'No remediation plan available. Run surfaceGovernance.planRemediation first.' });
+-    return json({
++    if (!plan) return mcpText({ error: 'No remediation plan available. Run surfaceGovernance.planRemediation first.' });
++    return mcpText({
+       summary: plan.summary,
+       results: plan.findings.map(f => ({
+         findingId: f.findingId,
+@@ -1334,13 +1396,13 @@ const surfaceGovernanceTools: Record<string, ToolHandler> = {
+   'surfaceGovernance.applySingleFix': async (args) => {
+     const sg = await import('../surface-governance');
+     const plan = sg.applySingleFix(args.findingId as string);
+-    if (!plan) return json({ error: 'No remediation plan available.' });
++    if (!plan) return mcpText({ error: 'No remediation plan available.' });
+     const item = plan.findings.find(f => f.findingId === args.findingId);
+-    return json({ findingId: args.findingId, status: item?.status, error: item?.error });
++    return mcpText({ findingId: args.findingId, status: item?.status, error: item?.error });
+   },
+   'surfaceGovernance.getScanHistory': async () => {
+     const sg = await import('../surface-governance');
+-    return json(sg.getScanHistory());
++    return mcpText(sg.getScanHistory());
+   },
+ };
+ 
+@@ -1412,13 +1474,13 @@ export async function executeTool(
+       agentId: ctx.userId || 'mcp-caller',
+       action: `mcp:${shortName}`,
+       content: JSON.stringify(args).slice(0, 500),
+-      surface: 'mcp',
+-      riskScore: 0.3,
+-      metadata: { toolName: shortName, callerType: 'mcp' },
++      // surface/riskScore are not part of the enforce() contract — they travel
++      // in metadata, which the control plane preserves into the audit ledger.
++      metadata: { toolName: shortName, callerType: 'mcp', surface: 'mcp', riskScore: 0.3 },
+     });
+     const cpMode = getEnforcementMode();
+     generalLog.info(`[ToolExecutor:ControlPlane:${cpMode}] ${shortName} — ${cpResult.allowed ? 'ALLOWED' : 'BLOCKED'}: ${cpResult.reason}`);
+-    if (cpResult.blocked && (cpMode === 'hard' || cpMode === 'soft')) {
++    if (!cpResult.allowed && (cpMode === 'hard' || cpMode === 'soft')) {
+       generalLog.warn(`[ToolExecutor:ControlPlane] BLOCKED tool ${shortName} in ${cpMode} mode: ${cpResult.reason}`);
+       return mcpText({ error: `Control plane ${cpMode}-blocked: ${cpResult.reason}`, blocked: true });
+     }
+
+diff --git a/build-os/packets/routing/routing-auto-20260812T133959Z-19698-20260812T133959Z.md b/build-os/packets/routing/routing-auto-20260812T133959Z-19698-20260812T133959Z.md
+--- /dev/null
++++ b/build-os/packets/routing/routing-auto-20260812T133959Z-19698-20260812T133959Z.md
++# ROUTING RECEIPT — one file per routing decision. The recorded verdict is BINDING
++# (build-os/memory/routing_contract.md); routing-check.sh refuses this receipt at
++# close if executed_mode exceeds selected_mode with no escalation record, if an
++# escalation carries no evidence, or if consumption exceeds a budget undeclared.
++task_id: auto-20260812T133959Z-19698
++description_sha256: 27b3f1b706c909c94af97ff3625e4a0a813089bab6bc2c90aa89c5978cb14534
++descriptor: {"expected_files_changed":1,"requires_tests":false,"expected_session_count":1,"prior_context_required":false,"handoff_required":false,"consequence_level":"low","irreversible_or_external_mutation":false,"high_blast_radius":false,"unclear_acceptance_criteria":false,"security_or_compliance_consequence":false,"parallel_workstreams_benefit":false,"high_rework_history":false,"nondeterministic_verification":false}
++selected_mode: direct
++selector_note: -
++issued_at: 2026-08-12T13:39:59Z
++# --- budgets: DERIVED DEFAULTS from EXP-0002 sealed records, operator-tunable, not laws.
++# --- Derivation: ON-surface light runs measured 172k-369k total tokens / 0 dispatches
++# --- (named exceedance: raw T4 at 526,461 - context, not the band); the
++# --- blowouts measured 4.9M/7.4M tokens, 4-5 dispatches, $3.63/$4.80. See route-task.sh.
++budget_max_subagents: 0
++budget_max_total_tokens: 250000
++budget_max_uncached_tokens: 30000
++budget_max_model_calls: 12
++budget_max_wall_clock_s: 300
++budget_max_cost_usd: 0.40
++# --- process allowance (PACKET-0053): the packet's OWN gate chain is governance
++# --- ceremony, counted SEPARATELY from task work by the live gate and attributed
++# --- to governance_process (the 0050/0051 calibration question, resolved). Default
++# --- 7 = the LARGEST LEGAL chain in the doctrine: mandatory_full_regate runs
++# --- builder, qa, reviewer, fix-builder, qa, reviewer, archivist. (No-fix chain
++# --- is 4; fix-then-pass is 6.) Process dispatches never eat budget_max_subagents.
++process_dispatch_allowance: 7
++# --- empty at issue; filled at close. AN UNKNOWN IS NOT A ZERO: "-" is an honest
++# --- admission and is never refused; refusal is for CONTRADICTION, not absence.
++executed_mode: -
++escalation: -
++escalation_evidence: -
++consumed_subagents: -
++consumed_total_tokens: -
++consumed_uncached_tokens: -
++consumed_model_calls: -
++consumed_wall_clock_s: -
++consumed_cost_usd: -
++degradation_note: -
++# --- close-fill EXTENSIONS (PACKET-0053). consumed_subagents above counts TASK
++# --- dispatches (vs budget_max_subagents); consumed_process_dispatches counts the
++# --- gate chain (vs process_dispatch_allowance). The attr_* layers attribute
++# --- consumption where derivable at close — tokens or cost with provenance, or
++# --- "-" as an admission, NEVER a zero nobody measured. Receipts predating these
++# --- fields stay valid: routing-check.sh reads an absent field as "-".
++consumed_process_dispatches: -
++attr_task_execution: -
++attr_context_retrieval: -
++attr_subagent_execution: -
++attr_verification: -
++attr_review: -
++attr_governance_process: -
++attr_experiment_audit: -
++# --- contribution rows (PACKET-0053): marginal-contribution accounting, MANDATORY
++# --- for a Full close with dispatches>0 (routing-check.sh refuses otherwise). The
++# --- live gate seeds one stub row per admitted Full task dispatch; fill at close:
++# --- contribution: <subagent_type> | <unique_question> | <output_ref> | changed_implementation=y/n/- | changed_conclusion=y/n/- | caught_defect=y/n/- | duplicated_work=y/n/- | tokens=<v|-> | cost=<v|-> | time=<v|->
++# --- An all-"-" row passes as an admission and is REPORTED as non-contributing.
++

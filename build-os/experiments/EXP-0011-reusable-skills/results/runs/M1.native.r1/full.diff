@@ -1,0 +1,328 @@
+diff --git a/server/mcp/tool-executor.ts b/server/mcp/tool-executor.ts
+index 86ef651..447ee4a 100644
+--- a/server/mcp/tool-executor.ts
++++ b/server/mcp/tool-executor.ts
+@@ -79,6 +79,7 @@ import {
+ } from '../governance/content-intelligence';
+ 
+ import { mcpError, mcpSuccess, classifyError, type MCPErrorCode } from './mcp-error-contract';
++import type { Surface } from './fail-closed-gate';
+ import { validateToolInput, coerceToolInput } from './tool-input-validator';
+ import {
+   optimizeModelRoute as routingSelectModel,
+@@ -206,6 +207,45 @@ function mcpText(data: unknown): MCPContent {
+   return { content: [{ type: 'text', text: JSON.stringify(data) }] };
+ }
+ 
++// ============================================================================
++// HELPERS: Narrow untyped JSON-RPC args to the shapes downstream APIs declare
++// ============================================================================
++
++/** Coerce an arg to a string, matching template-literal semantics (nullish → ''). */
++function asText(value: unknown): string {
++  if (typeof value === 'string') return value;
++  if (value === undefined || value === null) return '';
++  return String(value);
++}
++
++/** Coerce an arg to a number; non-numeric, non-finite and zero values fall back. */
++function asNumber(value: unknown, fallback: number): number {
++  const n = typeof value === 'number' ? value : typeof value === 'string' ? Number(value) : NaN;
++  return Number.isFinite(n) && n !== 0 ? n : fallback;
++}
++
++/** Narrow an arg to a plain JSON object. */
++function isRecord(value: unknown): value is Record<string, unknown> {
++  return typeof value === 'object' && value !== null && !Array.isArray(value);
++}
++
++/** Narrow an arg to an array of strings, dropping non-string entries. */
++function asStringArray(value: unknown): string[] {
++  return Array.isArray(value) ? value.filter((entry): entry is string => typeof entry === 'string') : [];
++}
++
++/**
++ * Narrow a caller-supplied surface name against the gate's own surface lists.
++ * The lists are passed in so the source of truth stays in fail-closed-gate.
++ */
++function isKnownSurface(
++  value: string,
++  regulated: readonly string[],
++  advisory: readonly string[],
++): value is Surface {
++  return value === 'general' || regulated.includes(value) || advisory.includes(value);
++}
++
+ /** Safe wrapper — catches errors and returns them as standardized MCP content */
+ async function safeTool(fn: () => Promise<MCPContent>, toolName?: string): Promise<MCPContent> {
+   try {
+@@ -244,14 +284,19 @@ const governanceTools: Record<string, ToolHandler> = {
+     // This token can be passed to downstream tools to unlock gated operations
+     if (result && typeof result === 'object' && !result.block_release) {
+       try {
+-        const { getFailClosedGate } = await import('./fail-closed-gate');
++        const { getFailClosedGate, REGULATED_SURFACES, ADVISORY_SURFACES } = await import('./fail-closed-gate');
+         const gate = getFailClosedGate();
++        // Callers may name any surface; the gate only understands its own set.
++        const requestedSurface = asText(normalized.surface_type);
++        const tokenSurface: Surface = isKnownSurface(requestedSurface, REGULATED_SURFACES, ADVISORY_SURFACES)
++          ? requestedSurface
++          : 'general';
+         const token = gate.createApprovalToken(
+-          (normalized.surface_type as string) || 'general',
++          tokenSurface,
+           'reviewContent',
+           true,
+           [],
+-          (normalized.policy_preset as string) || 'default',
++          asText(normalized.policy_preset) || 'default',
+           false
+         );
+         (result as Record<string, unknown>).approval_token = token.tokenId;
+@@ -511,21 +556,22 @@ const creativeTools: Record<string, ToolHandler> = {
+     const server = getGravitoMCPServer();
+     // Map MCP parameters to server method parameters
+     const prompt = args.goal
+-      ? `${args.goal}${args.audience ? ` for ${args.audience}` : ''}${args.context ? `. Context: ${args.context}` : ''}`
+-      : args.prompt || 'Generate content';
+-    
++      ? `${asText(args.goal)}${args.audience ? ` for ${asText(args.audience)}` : ''}${args.context ? `. Context: ${asText(args.context)}` : ''}`
++      : asText(args.prompt) || 'Generate content';
++
+     // Map creative artifact_types to valid review types
+     const creativeToReviewType: Record<string, string> = {
+       hero_section: 'web_copy', landing_page: 'web_copy', email_campaign: 'email',
+       social_post: 'ad_copy', blog_post: 'doc', whitepaper: 'doc',
+       case_study: 'doc', product_description: 'web_copy', ad_copy: 'ad_copy',
+     };
+-    const artifactType = creativeToReviewType[args.artifact_type] || args.artifact_type || 'web_copy';
+-    
++    const requestedType = asText(args.artifact_type);
++    const artifactType = creativeToReviewType[requestedType] || requestedType || 'web_copy';
++
+     return mcpText(await server.generateArtifact({
+       prompt,
+       artifact_type: artifactType,
+-      constraints: args.constraints || {},
++      constraints: isRecord(args.constraints) ? args.constraints : {},
+     }));
+   },
+ 
+@@ -685,7 +731,7 @@ const breakGlassTools: Record<string, ToolHandler> = {
+   runEscalation: async (args) => {
+     const { runEscalationCheck: escalate } = await import('../agent/mcp/break-glass-ops');
+     try {
+-      return mcpText(await escalate(args?.thresholdMinutes || 30));
++      return mcpText(await escalate(asNumber(args?.thresholdMinutes, 30)));
+     } catch (e: unknown) {
+       generalLog.error('[ToolExecutor] runEscalation error:', e);
+       return mcpText(mcpError('Escalation check failed', classifyError(e), 'runEscalation'));
+@@ -705,14 +751,14 @@ const enforcementTools: Record<string, ToolHandler> = {
+   preReleaseCheck: async (args) => mcpText(await preReleaseGate(args as any)),
+ 
+   checkContentEnforcement: async (args) => {
+-    const checkResult = await duringCreationCheck(args?.content || '', args?.contentType || 'general');
++    const checkResult = await duringCreationCheck(asText(args?.content), asText(args?.contentType) || 'general');
+     return mcpText(checkResult);
+   },
+ 
+   governedGenerate: async (args, ctx) => {
+-    const prompt = args?.prompt || 'Generate content';
+-    const contentType = args?.contentType || 'general';
+-    const systemPrompt = args?.systemPrompt || 'You are a professional content writer. Generate clear, accurate, and compliant content.';
++    const prompt = asText(args?.prompt) || 'Generate content';
++    const contentType = asText(args?.contentType) || 'general';
++    const systemPrompt = asText(args?.systemPrompt) || 'You are a professional content writer. Generate clear, accurate, and compliant content.';
+ 
+     // The legacy governedInvokeLLM path — the exact behavior shipped today.
+     // FLAG-OFF returns this verbatim (BYTE-IDENTICAL); the FLAG-ON branch also
+@@ -749,9 +795,9 @@ const enforcementTools: Record<string, ToolHandler> = {
+     try {
+       const { governedGenerate: canonicalGovernedGenerate } = await import('../governance/governed-generate');
+       const params: GovernedGenerateParams = {
+-        messages: [{ role: 'user' as const, content: typeof prompt === 'string' ? prompt : String(prompt) }],
+-        systemPrompt: typeof systemPrompt === 'string' ? systemPrompt : String(systemPrompt),
+-        contentType: typeof contentType === 'string' ? contentType : String(contentType),
++        messages: [{ role: 'user' as const, content: prompt }],
++        systemPrompt,
++        contentType,
+         contentRole:
+           typeof args?.content_role === 'string'
+             ? (args.content_role as GovernedGenerateParams['contentRole'])
+@@ -790,41 +836,46 @@ const enforcementTools: Record<string, ToolHandler> = {
+ 
+ const narrativeTools: Record<string, ToolHandler> = {
+   auditNarrativeCoherence: async (args) => {
+-    const surface = args?.surface || 'website';
+-    if (surface === 'docs' && args?.docsDir) {
+-      return mcpText(await auditDocsDirectory(args.docsDir, args.surface));
++    const surface = asText(args?.surface) || 'website';
++    const docsDir = asText(args?.docsDir);
++    const routes = asStringArray(args?.routes);
++    if (surface === 'docs' && docsDir) {
++      return mcpText(await auditDocsDirectory(docsDir, surface));
+     } else if (surface === 'generic' && args?.contentUnits) {
+       const adapter = new GenericAdapter(args.contentUnits as ContentUnit[], 'generic');
+       const { runNarrativeCoherenceAudit } = await import('../governance/narrative-coherence');
+       return mcpText(await runNarrativeCoherenceAudit(adapter));
+-    } else if (args?.routes?.length) {
+-      return mcpText(await auditWebsiteRoutes(args.routes));
++    } else if (routes.length) {
++      return mcpText(await auditWebsiteRoutes(routes));
+     }
+     return mcpText(await auditGravitoWebsite());
+   },
+ 
+   quickNarrativeCheck: async (args) => {
+-    const surface = args?.surface || 'website';
+-    const adapter = surface === 'docs' && args?.docsDir
+-      ? new DocsAdapter(args.docsDir)
++    const surface = asText(args?.surface) || 'website';
++    const docsDir = asText(args?.docsDir);
++    const adapter = surface === 'docs' && docsDir
++      ? new DocsAdapter(docsDir)
+       : new WebsiteAdapter();
+     return mcpText(await quickCoherenceCheck(adapter));
+   },
+ 
+   discoverContentUnits: async (args) => {
+-    const surface = args?.surface || 'website';
+-    const adapter = surface === 'docs' && args?.docsDir
+-      ? new DocsAdapter(args.docsDir)
++    const surface = asText(args?.surface) || 'website';
++    const docsDir = asText(args?.docsDir);
++    const adapter = surface === 'docs' && docsDir
++      ? new DocsAdapter(docsDir)
+       : new WebsiteAdapter();
+     const units = adapter.discover();
+     return mcpText({ surface: adapter.surface, count: units.length, units });
+   },
+ 
+   auditDocsCoherence: async (args) => {
+-    if (!args?.docsDir) {
++    const docsDir = asText(args?.docsDir);
++    if (!docsDir) {
+       return mcpText(mcpError('docsDir parameter is required', 'VALIDATION_ERROR', 'auditDocsCoherence'));
+     }
+-    return mcpText(await auditDocsDirectory(args.docsDir, args.surface));
++    return mcpText(await auditDocsDirectory(docsDir, asText(args?.surface) || 'docs'));
+   },
+ };
+ 
+@@ -834,10 +885,11 @@ const narrativeTools: Record<string, ToolHandler> = {
+ 
+ const digestibilityTools: Record<string, ToolHandler> = {
+   auditDigestibility: async (args) => {
+-    const surface = args?.surface || 'website';
++    const surface = asText(args?.surface) || 'website';
++    const docsDir = asText(args?.docsDir);
+     let auditResult;
+-    if (surface === 'docs' && args?.docsDir) {
+-      const adapter = new DocsAdapter(args.docsDir);
++    if (surface === 'docs' && docsDir) {
++      const adapter = new DocsAdapter(docsDir);
+       auditResult = await runDigestibilityAudit(adapter);
+     } else if (surface === 'generic' && args?.contentUnits) {
+       const { GenericAdapter: GA } = await import('../governance/narrative-coherence');
+@@ -1265,7 +1317,7 @@ const surfaceGovernanceTools: Record<string, ToolHandler> = {
+   'surfaceGovernance.scan': async () => {
+     const sg = await import('../surface-governance');
+     const result = await sg.scanSurface();
+-    return json({
++    return mcpText({
+       scanId: result.scanId,
+       timestamp: result.timestamp,
+       summary: result.summary,
+@@ -1276,19 +1328,19 @@ const surfaceGovernanceTools: Record<string, ToolHandler> = {
+         severity: f.severity,
+         title: f.title,
+         description: f.description,
+-        file: f.file,
++        file: f.location,
+         autoFixable: f.autoFixable,
+       })),
+     });
+   },
+   'surfaceGovernance.status': async () => {
+     const sg = await import('../surface-governance');
+-    return json(sg.getSurfaceGovernanceStatus());
++    return mcpText(sg.getSurfaceGovernanceStatus());
+   },
+   'surfaceGovernance.getRules': async (args) => {
+     const sg = await import('../surface-governance');
+     const rules = args.enabledOnly ? sg.getEnabledRules() : sg.getRules();
+-    return json(rules);
++    return mcpText(rules);
+   },
+   'surfaceGovernance.configureRule': async (args) => {
+     const sg = await import('../surface-governance');
+@@ -1298,13 +1350,13 @@ const surfaceGovernanceTools: Record<string, ToolHandler> = {
+       case 'disable': sg.disableRule(ruleId); break;
+       case 'updateSeverity': if (severity) sg.updateRuleSeverity(ruleId, severity as any); break;
+     }
+-    return json({ success: true, ruleId, action });
++    return mcpText({ success: true, ruleId, action });
+   },
+   'surfaceGovernance.planRemediation': async () => {
+     const sg = await import('../surface-governance');
+     const plan = sg.planRemediation();
+-    if (!plan) return json({ error: 'No scan results available. Run surfaceGovernance.scan first.' });
+-    return json({
++    if (!plan) return mcpText({ error: 'No scan results available. Run surfaceGovernance.scan first.' });
++    return mcpText({
+       scanId: plan.scanId,
+       summary: plan.summary,
+       findings: plan.findings.map(f => ({
+@@ -1320,8 +1372,8 @@ const surfaceGovernanceTools: Record<string, ToolHandler> = {
+   'surfaceGovernance.applyFixes': async (args) => {
+     const sg = await import('../surface-governance');
+     const plan = sg.applyAllFixes({ dryRun: !!args.dryRun });
+-    if (!plan) return json({ error: 'No remediation plan available. Run surfaceGovernance.planRemediation first.' });
+-    return json({
++    if (!plan) return mcpText({ error: 'No remediation plan available. Run surfaceGovernance.planRemediation first.' });
++    return mcpText({
+       summary: plan.summary,
+       results: plan.findings.map(f => ({
+         findingId: f.findingId,
+@@ -1334,13 +1386,13 @@ const surfaceGovernanceTools: Record<string, ToolHandler> = {
+   'surfaceGovernance.applySingleFix': async (args) => {
+     const sg = await import('../surface-governance');
+     const plan = sg.applySingleFix(args.findingId as string);
+-    if (!plan) return json({ error: 'No remediation plan available.' });
++    if (!plan) return mcpText({ error: 'No remediation plan available.' });
+     const item = plan.findings.find(f => f.findingId === args.findingId);
+-    return json({ findingId: args.findingId, status: item?.status, error: item?.error });
++    return mcpText({ findingId: args.findingId, status: item?.status, error: item?.error });
+   },
+   'surfaceGovernance.getScanHistory': async () => {
+     const sg = await import('../surface-governance');
+-    return json(sg.getScanHistory());
++    return mcpText(sg.getScanHistory());
+   },
+ };
+ 
+@@ -1409,16 +1461,18 @@ export async function executeTool(
+   try {
+     const { enforce: cpEnforce, getEnforcementMode } = await import('../control-plane');
+     const cpResult = await cpEnforce({
+-      agentId: ctx.userId || 'mcp-caller',
++      // The only trusted caller identity on the context; falls back to the
++      // generic MCP principal for unauthenticated calls.
++      agentId: ctx.authenticatedTenant?.tenantId || 'mcp-caller',
+       action: `mcp:${shortName}`,
+       content: JSON.stringify(args).slice(0, 500),
+-      surface: 'mcp',
+-      riskScore: 0.3,
+-      metadata: { toolName: shortName, callerType: 'mcp' },
++      // surface/riskScore are not part of EnforceRequest — they ride along as
++      // audit metadata, which recordAudit persists with the entry.
++      metadata: { toolName: shortName, callerType: 'mcp', surface: 'mcp', riskScore: 0.3 },
+     });
+     const cpMode = getEnforcementMode();
+     generalLog.info(`[ToolExecutor:ControlPlane:${cpMode}] ${shortName} — ${cpResult.allowed ? 'ALLOWED' : 'BLOCKED'}: ${cpResult.reason}`);
+-    if (cpResult.blocked && (cpMode === 'hard' || cpMode === 'soft')) {
++    if (!cpResult.allowed && (cpMode === 'hard' || cpMode === 'soft')) {
+       generalLog.warn(`[ToolExecutor:ControlPlane] BLOCKED tool ${shortName} in ${cpMode} mode: ${cpResult.reason}`);
+       return mcpText({ error: `Control plane ${cpMode}-blocked: ${cpResult.reason}`, blocked: true });
+     }
+

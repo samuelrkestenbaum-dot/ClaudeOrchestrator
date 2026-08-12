@@ -1,0 +1,276 @@
+diff --git a/server/mcp/mcp-http-handler.ts b/server/mcp/mcp-http-handler.ts
+index ba4517a..d5c465f 100644
+--- a/server/mcp/mcp-http-handler.ts
++++ b/server/mcp/mcp-http-handler.ts
+@@ -985,6 +985,92 @@ const ToolCallRequestSchema = z.object({
+   arguments: z.record(z.string(), z.any()).optional(),
+ });
+ 
++// ============================================================================
++// TYPED VIEWS OVER UNTRUSTED / MIDDLEWARE-ATTACHED VALUES
++// ============================================================================
++
++/** Fields attached to the Express request by the MCP auth middleware. */
++interface McpAuthenticatedRequest extends Request {
++  authMethod?: string;
++  authUserId?: number;
++  apiKey?: string;
++}
++
++function mcpAuthRequest(req: Request): McpAuthenticatedRequest {
++  return req as McpAuthenticatedRequest;
++}
++
++/** JSON-RPC `params.arguments` after transport decoding: keys known, values not. */
++type ToolCallArguments = Record<string, unknown>;
++
++function toolCallArguments(value: unknown): ToolCallArguments {
++  return typeof value === 'object' && value !== null ? (value as ToolCallArguments) : {};
++}
++
++/**
++ * Narrow an unknown value to a non-empty string, mirroring the `||` chains that
++ * fall through empty strings to the next candidate.
++ */
++function readString(value: unknown): string | undefined {
++  return typeof value === 'string' && value.length > 0 ? value : undefined;
++}
++
++/** Narrow an unknown value to a finite number. */
++function readNumber(value: unknown): number | undefined {
++  return typeof value === 'number' && Number.isFinite(value) ? value : undefined;
++}
++
++/**
++ * JSON Schema fragment emitted for MCP tool discovery. Only the subset of
++ * keywords this handler produces is modelled.
++ */
++interface JsonSchemaNode {
++  type?: string;
++  description?: string;
++  enum?: unknown[];
++  properties?: Record<string, JsonSchemaNode>;
++  required?: string[];
++  items?: JsonSchemaNode;
++  default?: unknown;
++}
++
++/**
++ * Structural view of the Zod internals the converter reads. Zod 4 tags defs
++ * with `type`/`entries`; Zod 3 used `typeName`/`values`. Both are probed so the
++ * converter keeps working across the versions in the dependency tree.
++ */
++interface ZodSchemaDef {
++  type?: unknown;
++  typeName?: unknown;
++  entries?: Record<string, unknown>;
++  values?: unknown;
++  innerType?: unknown;
++  defaultValue?: unknown;
++}
++
++interface ZodSchemaLike {
++  description?: unknown;
++  parse?: unknown;
++  _def?: ZodSchemaDef;
++}
++
++function asZodSchemaLike(value: unknown): ZodSchemaLike | undefined {
++  return typeof value === 'object' && value !== null ? (value as ZodSchemaLike) : undefined;
++}
++
++/** True when a tool's `inputSchema` carries Zod internals rather than plain JSON Schema. */
++function hasZodDef(value: unknown): boolean {
++  return typeof asZodSchemaLike(value)?._def === 'object';
++}
++
++/** Coerce a Zod enum's `values`/`entries` container into a JSON Schema `enum` list. */
++function enumMemberList(values: unknown): unknown[] | undefined {
++  if (Array.isArray(values)) return values;
++  if (values instanceof Set) return Array.from(values);
++  if (typeof values === 'object' && values !== null) return Object.values(values);
++  return undefined;
++}
++
+ // ============================================================================
+ // ROUTER SETUP
+ // ============================================================================
+@@ -1154,7 +1240,7 @@ mcpRouter.post('/', async (req: Request, res: Response) => {
+           tools: ALL_TOOLS.map(tool => ({
+             name: tool.name,
+             description: tool.description,
+-            inputSchema: typeof ((tool.inputSchema as unknown as Record<string, unknown>))?._def === 'object' ? zodToJsonSchema((tool.inputSchema as unknown as Record<string, unknown>)) : tool.inputSchema,
++            inputSchema: hasZodDef(tool.inputSchema) ? zodToJsonSchema(tool.inputSchema) : tool.inputSchema,
+           })),
+         };
+         break;
+@@ -1195,8 +1281,13 @@ mcpRouter.post('/', async (req: Request, res: Response) => {
+         // ================================================================
+         try {
+           const { registerSurfaceIfMissing } = await import('../governance/auto-surface-registration');
+-          const productId = (args as unknown as Record<string, unknown>)?.product_id || (args as unknown as Record<string, unknown>)?.surface_id || req.headers['x-product-id'] as string || 'unknown-mcp-client';
+-          const productName = (args as unknown as Record<string, unknown>)?.product_name || req.headers['x-product-name'] as string || undefined;
++          const toolArgs = toolCallArguments(args);
++          const productId =
++            readString(toolArgs.product_id) ||
++            readString(toolArgs.surface_id) ||
++            readString(req.headers['x-product-id']) ||
++            'unknown-mcp-client';
++          const productName = readString(toolArgs.product_name) || readString(req.headers['x-product-name']);
+           await registerSurfaceIfMissing({
+             productId,
+             productName,
+@@ -1385,10 +1476,10 @@ mcpRouter.post('/', async (req: Request, res: Response) => {
+         // ================================================================
+         let authCtx: AuthorizationContext | null = null;
+         
+-        if (((req as unknown as Record<string, unknown>)).authMethod === 'master') {
++        if (mcpAuthRequest(req).authMethod === 'master') {
+           // Master key — use dogfood context (internal tenant or simulated plan)
+           // Owner user ID defaults to 1 for dogfood context resolution
+-          const dogfoodCtx = await getDogfoodContext(((req as unknown as Record<string, unknown>)).authUserId || 1);
++          const dogfoodCtx = await getDogfoodContext(mcpAuthRequest(req).authUserId || 1);
+           authCtx = {
+             orgId: dogfoodCtx.orgId,
+             orgSlug: dogfoodCtx.orgSlug,
+@@ -1759,7 +1850,7 @@ mcpRouter.post('/', async (req: Request, res: Response) => {
+           case 'gravito.runEscalation': {
+             const { runEscalationCheck: escalate } = await import('../agent/mcp/break-glass-ops');
+             try {
+-              const escRes = await escalate((args as unknown as Record<string, unknown>)?.thresholdMinutes || 30);
++              const escRes = await escalate(readNumber(toolCallArguments(args).thresholdMinutes) || 30);
+               result = { content: [{ type: 'text', text: JSON.stringify(escRes) }] };
+             } catch (e: unknown) {
+               generalLog.error('[MCP] runEscalation error:', e);
+@@ -2233,7 +2324,7 @@ mcpRouter.post('/', async (req: Request, res: Response) => {
+     // Only for tools/call (actual governance checks), not tools/list
+     // ================================================================
+     if (method === 'tools/call') {
+-      const authUserId = ((req as unknown as Record<string, unknown>)).authUserId as number | undefined;
++      const authUserId = mcpAuthRequest(req).authUserId;
+       // Fire-and-forget: don't block the response on metering
+       (async () => {
+         try {
+@@ -2393,8 +2484,8 @@ mcpRouter.post('/tools/list', (req: Request, res: Response) => {
+   const catalog = resolveToolsForMcpList();
+   const tools = catalog.map(tool => {
+     // Check if inputSchema is already a plain object (JSON schema) vs Zod schema
+-    const schema = tool.inputSchema as unknown as Record<string, unknown>;
+-    const isZodSchema = schema && typeof schema.parse === 'function';
++    const schema: unknown = tool.inputSchema;
++    const isZodSchema = typeof asZodSchemaLike(schema)?.parse === 'function';
+     return {
+       name: tool.name,
+       description: tool.description,
+@@ -2417,11 +2508,12 @@ mcpRouter.post('/tools/list', (req: Request, res: Response) => {
+ // HELPER: Convert Zod schema to JSON Schema
+ // ============================================================================
+ 
+-function zodToJsonSchema(schema: z.ZodType<any>, definitions?: Map<string, any>): any {
++function zodToJsonSchema(schema: unknown, definitions?: Map<string, JsonSchemaNode>): JsonSchemaNode {
+   // Basic conversion - for full compatibility, use zod-to-json-schema package
+-  const description = (schema as unknown as Record<string, unknown>).description || '';
+-  const def = (schema as unknown as Record<string, unknown>)._def;
+-  
++  const schemaLike = asZodSchemaLike(schema);
++  const description = readString(schemaLike?.description) || '';
++  const def = schemaLike?._def;
++
+   // Check for enum using multiple detection methods
+   // Zod 3.x uses _def.type === 'enum' and _def.entries
+   if (def?.type === 'enum' && def?.entries) {
+@@ -2431,36 +2523,36 @@ function zodToJsonSchema(schema: z.ZodType<any>, definitions?: Map<string, any>)
+       description,
+     };
+   }
+-  
++
+   // Zod 3.x alternative: check typeName
+   if (def?.typeName === 'ZodEnum') {
+     return {
+       type: 'string',
+-      enum: def.values || Object.keys(def.entries || {}),
++      enum: enumMemberList(def.values) || Object.keys(def.entries || {}),
+       description,
+     };
+   }
+-  
++
+   if (def?.typeName === 'ZodNativeEnum') {
+     return {
+       type: 'string',
+-      enum: Object.values(def.values),
++      enum: enumMemberList(def.values) || [],
+       description,
+     };
+   }
+-  
++
+   if (schema instanceof z.ZodObject) {
+-    const shape = schema.shape;
+-    const properties: Record<string, unknown> = {};
++    const shape: Record<string, unknown> = schema.shape;
++    const properties: Record<string, JsonSchemaNode> = {};
+     const required: string[] = [];
+-    
++
+     for (const [key, value] of Object.entries(shape)) {
+-      properties[key] = zodToJsonSchema(value as z.ZodType<any>, definitions);
+-      if (!(value as unknown as Record<string, unknown>).isOptional?.()) {
++      properties[key] = zodToJsonSchema(value, definitions);
++      if (!(value instanceof z.ZodType) || !value.isOptional()) {
+         required.push(key);
+       }
+     }
+-    
++
+     return {
+       type: 'object',
+       properties,
+@@ -2484,35 +2576,35 @@ function zodToJsonSchema(schema: z.ZodType<any>, definitions?: Map<string, any>)
+   if (schema instanceof z.ZodArray) {
+     return {
+       type: 'array',
+-      items: zodToJsonSchema((schema as unknown as Record<string, unknown>)._def.type, definitions),
++      items: zodToJsonSchema(def?.type, definitions),
+       description,
+     };
+   }
+-  
++
+   // ZodEnum already handled above via typeName check
+   if (schema instanceof z.ZodEnum) {
+     return {
+       type: 'string',
+-      enum: (schema as unknown as Record<string, unknown>)._def.values,
++      enum: enumMemberList(def?.values),
+       description,
+     };
+   }
+-  
++
+   if (schema instanceof z.ZodDefault) {
+-    const inner = zodToJsonSchema((schema as unknown as Record<string, unknown>)._def.innerType, definitions);
++    const inner = zodToJsonSchema(def?.innerType, definitions);
+     try {
+-      const defaultVal = (schema as unknown as Record<string, unknown>)._def.defaultValue;
+-      inner.default = typeof defaultVal === 'function' ? defaultVal() : defaultVal;
++      const defaultVal = def?.defaultValue;
++      inner.default = typeof defaultVal === 'function' ? (defaultVal as () => unknown)() : defaultVal;
+     } catch {
+       // Ignore default value extraction errors
+     }
+     return inner;
+   }
+-  
++
+   if (schema instanceof z.ZodOptional) {
+-    return zodToJsonSchema((schema as unknown as Record<string, unknown>)._def.innerType, definitions);
++    return zodToJsonSchema(def?.innerType, definitions);
+   }
+-  
++
+   // Fallback
+   return { type: 'any', description };
+ }
+
