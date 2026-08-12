@@ -53,7 +53,8 @@ from arm B; arm A's ordinary artifacts accumulate only in arm A —
 ## Substrate, magnitude, and replication (corrections 3 and 5)
 
 One meaningful untouched product repository (owner-selected; NOT
-empathiq-website), 10–20 independently selected matched task pairs, plus **at
+empathiq-website), matched task pairs per the rev 3 two-stage design (n1=12
+→ n_max=24; the earlier 10–20 range is SUPERSEDED by rev 3 §A), plus **at
 least three independently accepted end-to-end milestones** (or an
 owner-approved equivalent replication structure). Task weights/rubric value
 points are FROZEN BEFORE TREATMENT so a trivial fix and a substantial feature
