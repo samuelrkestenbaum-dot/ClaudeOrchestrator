@@ -110,7 +110,10 @@ rate-limit rejection (not slowness); (c) repo-external infrastructure
 failure (registry down). Each requires contemporaneous evidence, applies
 identically to both arms, and forces a task RE-RUN (never silent excision).
 Everything else — timeouts, crashes, malformed output, model refusals,
-capability gaps — is ITT and stays charged.
+capability gaps — is ITT and stays charged. Hardening per RED-TEAM-AUDIT
+H2 / DESIGN rev 4 §T4: machine-generated evidence, blind adjudication, max
+one re-run per arm-task from a fresh clone, per-arm exclusion counts with a
+2:1 asymmetry flag.
 
 ## 9. Ordering (PROPOSED recommendation, with the tradeoff)
 

@@ -340,3 +340,53 @@ capsule format needs a one-page spec at freeze. With those three plus the
 owner decisions, the design is execution-ready. The single-operator
 limitation and one-repo scope remain material and are carried prominently
 into every claim the study can emit.
+
+---
+
+# Rev 4 — red-team corrections (see ../RED-TEAM-AUDIT.md; PROPOSED)
+
+**T1 Time accounting under concurrency.** ACTIVE WALL TIME = elapsed time
+with ≥1 worker active; AGGREGATE COMPUTE TIME = sum across workers. Both
+always reported, both arms. "Faster" claims draw ONLY on active wall time
+under the equal-concurrency estimand; the natural-operation estimand yields
+throughput statements, never "faster".
+
+**T2 Infrastructure model calls.** Every model call made by any Gravito
+component (compilation, orchestration, verification, recovery, state
+maintenance) is provider-metered in native categories and charged to arm B
+as setup or ongoing overhead by timing. A post-hoc discovered unmetered
+infrastructure call is a hard veto for all token/cost claims.
+
+**T3 Model identity and token comparability.** Model id(s) pinned per arm at
+freeze. If arm B legitimately uses multiple models, tokens are reported per
+model id; cost is the only cross-model comparator; token claims are made
+same-model only. "Exact tokens" is preregistered as uncached input +
+cache_creation + output; cache_read is reported separately; caching
+asymmetry is thereby visible, not laundered.
+
+**T4 Environmental exclusion hardening.** An exclusion requires
+machine-generated contemporaneous telemetry evidence; it is adjudicated by
+the written rule blind to interim progress; at most ONE environmental
+re-run per arm-task; the re-run starts from a fresh clone with interim work
+discarded; per-arm exclusion counts are reported, and an asymmetry beyond
+2:1 flags the study for review before any claim.
+
+**T5 Multiplicity and dispersion.** The five owner metrics (ITT) are the
+sole primary family. Directional claims report unadjusted and Holm-adjusted
+(m=5) intervals; product claims require adjusted exclusion. All other
+splits (phase, weighted/unweighted beyond the preregistered pairing,
+gross/net beyond the stated horizons) are exploratory and labeled so.
+Consistency claims require CV and a robust dispersion measure (median/IQR)
+to agree in direction.
+
+**T6 Negative-result rule and completeness manifest (frozen).** Every
+preregistered metric is published with equal prominence regardless of
+direction. A negative or inconclusive product result is reported as exactly
+that; mechanism speculation lives only in a marked exploratory section. The
+read ships with a COMPLETE-RESULTS MANIFEST: every cell, every preregistered
+analysis, per-file sha256 over raw telemetry (hash-chained JSONL batches,
+raw provider usage retained). A missing preregistered item invalidates the
+report.
+
+**T7 Continuation scope.** The fresh-context continuation test is
+descriptive evidence in both arms; it gates no claim.

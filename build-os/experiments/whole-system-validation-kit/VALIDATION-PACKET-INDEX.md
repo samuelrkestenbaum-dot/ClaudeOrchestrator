@@ -21,7 +21,10 @@ PACKET §9 recommends whole-system-first while POST-EXP-0011-ROADMAP's staged
 A/B/C were operator-directed as "the next" studies — recorded as an OPEN
 OWNER RECONCILIATION (choice #9), a tension not a contradiction; (c) SESOI,
 milestones ≥3, ITT list, amortization, washout, audit size verified
-consistent across DESIGN/PACKET/kit. Unresolved owner inputs: choice table
+consistent across DESIGN/PACKET/kit. Rev 4: RED-TEAM-AUDIT.md applied — DESIGN gains rev 4 §T1–T7; packet §8
+hardened; kit telemetry/operator/acceptance/skeleton amended. Consistency
+note above predates rev 4 and is superseded by the audit's sweep.
+Unresolved owner inputs: choice table
 #1–12 in PACKET §11 (SESOI, margin, repos, strata confirm, rubric author,
 operator/FAQ/rescue, horizons, exclusions confirm, ordering, n confirm,
 budget, milestones).

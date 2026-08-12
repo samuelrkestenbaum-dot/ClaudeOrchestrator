@@ -15,3 +15,7 @@ ITT-charged or re-drawn ONLY per the frozen infeasibility/exclusion rules —
 never by preference. Operator-learning disclosure: single-operator design;
 order/period analysis reported; 4-pair second-operator audit per rev 3 §B;
 limitation carried into every claim.
+
+Rev 4 (red-team): the FAQ is frozen at freeze and UNAMENDABLE after the
+first run; questions outside it are always charged interventions; per-arm
+FAQ hit counts are logged and reported.

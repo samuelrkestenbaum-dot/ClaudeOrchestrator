@@ -34,3 +34,13 @@ recorded (its own notes/plans upkeep) so NET/GROSS comparisons are honest.
 Logger interface (future): log(event) → fsync'd JSONL; meter_start/stop(kind);
 verify() replays a stream against schema + clock monotonicity and reports
 gaps — verify() green is part of qualification, not of design.
+
+## Rev 4 additions (red-team)
+- session_usage adds: request_latency_ms stats; model_id per request.
+- New event: infrastructure_usage — model calls by Gravito components,
+  same native categories, charge_class setup|ongoing (DESIGN rev 4 §T2).
+- Tamper-evidence: JSONL batches hash-chained (each batch records prior
+  batch sha256); raw provider usage payloads retained; close-time manifest
+  lists per-file sha256 (DESIGN rev 4 §T6).
+- Time accounting emits both active-wall and aggregate-compute segments
+  (DESIGN rev 4 §T1).

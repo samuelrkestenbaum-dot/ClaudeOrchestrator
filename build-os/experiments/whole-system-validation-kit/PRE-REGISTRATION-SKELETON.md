@@ -34,3 +34,6 @@ orthogonal-runtime rule with disclosure + identity proof.
 margins/horizons chosen (#1,2,7), operator + FAQ + rescue list (#6),
 milestones defined (#12), budget ceiling (#11), calibration + qualification
 executed (kit RELIABILITY-QUALIFICATION-CHECKLIST).
+## Rev 4 bindings: multiplicity rule (Holm m=5) per DESIGN rev 4 §T5;
+negative-result rule + complete-results manifest per §T6 (frozen here at
+freeze); model ids per arm: __ ; token metric per §T3.
