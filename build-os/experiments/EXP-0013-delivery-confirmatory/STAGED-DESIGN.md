@@ -35,6 +35,14 @@ SD of paired log cost-ratio 0.3125; infra-error rate 5% (2/40); ~600s and
   inflation vs the precommitted <10% bound, refusing under study locks.
   Stated limit: provider-side contention is invisible to it by design.
 - Exit: tests/context_delivery_tests.sh green (12/12 at freeze).
+- Neurocosmology boundary corrections (post-audit, same stage): rendered
+  worker output carries no delivery-machinery identity (receipts only);
+  the dose window's lower edge Theta_sufficiency is DECLARED and RECEIPTED
+  per policy but non-blocking while uncalibrated (Class C holds no hard
+  authority; calibration is Zone-10 work). UCDL's zone boundary — Zone 5
+  only, no runtime caller — is pinned by
+  tests/neurocosmology_invariant_tests.sh, alongside the canonical
+  math-to-effect registry (build-os/registry/neurocosmology_math_registry.md).
 
 ## Stage A — 8-cell / 4-matched-pair qualification pilot (REQUIRES OWNER GO)
 

@@ -109,9 +109,15 @@ export const POLICIES = {
   // Insights first (newest-scored first); exhibits only into remaining room.
   // With >=1 match and cap >= smallest matched insight, delivery CANNOT be
   // empty — the structural fix for the EXP-0011 starvation class.
-  "insight-first@1": { name: "insight-first@1", order: "score", granularity: "atom", exhibits: "if-room" },
+  //
+  // theta_sufficiency is the LOWER edge of the dose window (Θ < C < B). It is
+  // uncalibrated Class-C math today (no labeled outcomes), so it is DECLARED
+  // and RECEIPTED, never blocking: an uncalibrated heuristic threshold must
+  // not hold hard authority over delivery. Calibrating it into a gate is a
+  // Zone-10 change that requires labeled outcomes and its own authorization.
+  "insight-first@1": { name: "insight-first@1", order: "score", granularity: "atom", exhibits: "if-room", theta_sufficiency: 0 },
   // Whole units or nothing (the legacy shape, kept for controlled comparison).
-  "whole-unit@1": { name: "whole-unit@1", order: "score", granularity: "unit", exhibits: "with-unit" },
+  "whole-unit@1": { name: "whole-unit@1", order: "score", granularity: "unit", exhibits: "with-unit", theta_sufficiency: 0 },
 };
 
 export function applyBudget(candidates, policyName, capBytes) {
@@ -164,19 +170,23 @@ function resolvedText(units, selected) {
   }).join("\n");
 }
 
+// Rendered output is WORKER-FACING: it carries the compiled conclusion and
+// nothing about the machinery that produced it (no layer names, versions,
+// scores, or policy identifiers — those live in the receipt only). The
+// Neurocosmology worker-context rule: Gravito knows a lot and says very little.
 export function renderContext(units, selection) {
   const body = resolvedText(units, selection.selected);
-  return body ? `# Organizational memory — verified units (delivered by UCDL ${UCDL_VERSION})\n\n${body}` : "";
+  return body ? `# Verified knowledge for this task\n\n${body}` : "";
 }
 
 export function renderSkillMd(units, selection, meta = {}) {
   const body = resolvedText(units, selection.selected);
   if (!body) return "";
-  const name = meta.name || "delivered-knowledge";
+  const name = meta.name || "verified-knowledge";
   return [
     "---",
     `name: ${name}`,
-    `description: ${meta.description || `Verified knowledge units delivered by UCDL ${UCDL_VERSION}. Invoke when the matched task class applies.`}`,
+    `description: ${meta.description || "Verified repair knowledge for this task class. Invoke when the matched task class applies."}`,
     "---",
     "",
     body,
@@ -222,6 +232,13 @@ export function deliver({ storeText, units, query, policyName = "insight-first@1
     selected_ids: selection.selected.map((s) => s.id),
     delivered_bytes: selection.delivered_bytes,
     est_tokens: Math.ceil(selection.delivered_bytes / 4),
+    dose_window: {
+      theta_sufficiency: selection.policy.theta_sufficiency ?? 0,
+      cap_bytes: selection.policy.cap_bytes,
+      delivered_bytes: selection.delivered_bytes,
+      within: selection.delivered_bytes > (selection.policy.theta_sufficiency ?? 0) && selection.delivered_bytes <= selection.policy.cap_bytes,
+      note: "theta is uncalibrated Class-C: reported, never blocking (calibration is Zone-10 work)",
+    },
     truncated: selection.truncated,
     freshness: "logical(sequence,rep,position) — wall-time absent from source stores, never inferred",
     access_observability: "delivery-side only; worker reads/invocations are observed by the harness stream parser, not here",
