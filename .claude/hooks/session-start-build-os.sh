@@ -33,6 +33,19 @@ if [ -r "$HOOK_DIR/project-identity.sh" ]; then
   esac
 fi
 
+# PKT-R0-4 — GOAL GATE, fail closed. When a gravito.goal contract is
+# installed, an expired window or exceeded budget HALTS the session at this
+# boundary: the directive below is binding on the worker; hard tool-level
+# enforcement is R1 scope and is not claimed here.
+if [ -f "$ROOT/gravito.goal" ] && [ -x "$ROOT/build-os/tools/goal-check.sh" -o -x "$HOOK_DIR/../../build-os/tools/goal-check.sh" ]; then
+  _GC="$ROOT/build-os/tools/goal-check.sh"; [ -x "$_GC" ] || _GC="$HOOK_DIR/../../build-os/tools/goal-check.sh"
+  if ! _GOUT="$(bash "$_GC" --gate "$ROOT/gravito.goal" 2>&1)"; then
+    echo "GOAL HALT (binding): $_GOUT"
+    echo "Do NOT begin or continue goal work this session. State is durable; the owner's next action is named above."
+    echo
+  fi
+fi
+
 _MEMLOG="$ROOT/build-os/memory/task-log.md"
 if [ "$_NS_VERDICT" != "QUARANTINE" ] && [ -f "$_MEMLOG" ]; then
   _MEMSZ=$(wc -c < "$_MEMLOG" 2>/dev/null || echo 0)

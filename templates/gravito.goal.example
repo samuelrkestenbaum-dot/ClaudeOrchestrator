@@ -1,0 +1,16 @@
+# gravito.goal — one file: what to do, under what authority, within what
+# budgets, judged how, stoppable when. Install with: gravito goal <file> [DIR]
+goal: Fix the flaky retry logic in server/queue and add regression tests
+repository: this repo (namespace-stamped by gravito init)
+authority: edit product files; run tests; commit locally. NO push/merge/deploy/secrets.
+allowed_actions: read, edit, run tests, local commits
+prohibited_actions: push, merge, deploy, publish, secrets, files outside this repo
+model_policy: default session model; no model changes without owner word
+budget_tokens: 2000000
+budget_minutes: 240
+budget_usd: 25
+acceptance: npm test passes with zero failures, and the new regression test fails on the pre-fix commit
+intervention: owner answers clarifications; anything beyond the task statement is logged
+stop_conditions: budget exceeded; acceptance achieved; owner stop; authority boundary reached
+starts: 2026-08-12
+expires: 2026-08-26
