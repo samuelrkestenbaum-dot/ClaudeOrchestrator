@@ -1,0 +1,240 @@
+{
+ "derivation_rule": "subsystems = top-level dirs under server/ ranked by total baseline error count; top 2; within each, top 5 files by in-subsystem error count desc, tie alphabetical; positions P1..P5 in that order. Rule stated before the lists were looked at.",
+ "sequences": {
+  "G": [
+   {
+    "task_id": "G1",
+    "sequence": "G",
+    "subsystem": "governance",
+    "position": 1,
+    "file": "server/governance/governance-dashboard-router.ts",
+    "cluster": {
+     "code": "TS2305+TS2339",
+     "msg": "Module '\"../../shared/governance-types\"' has no exported member 'AuthorityAuditEntry'."
+    },
+    "error_count": 32,
+    "first_error": {
+     "line": 33,
+     "code": "TS2305",
+     "msg": "Module '\"../../shared/governance-types\"' has no exported member 'AuthorityAuditEntry'."
+    },
+    "codes": [
+     "TS2305",
+     "TS2339"
+    ]
+   },
+   {
+    "task_id": "G2",
+    "sequence": "G",
+    "subsystem": "governance",
+    "position": 2,
+    "file": "server/governance/structural-proof-audit.ts",
+    "cluster": {
+     "code": "TS18046",
+     "msg": "'e' is of type 'unknown'."
+    },
+    "error_count": 31,
+    "first_error": {
+     "line": 53,
+     "code": "TS18046",
+     "msg": "'e' is of type 'unknown'."
+    },
+    "codes": [
+     "TS18046"
+    ]
+   },
+   {
+    "task_id": "G3",
+    "sequence": "G",
+    "subsystem": "governance",
+    "position": 3,
+    "file": "server/governance/surface-discovery/guardian.ts",
+    "cluster": {
+     "code": "TS2305+TS2322+TS2339+TS2353+TS2454+TS2488+TS2554+TS2739+TS2769+TS7006",
+     "msg": "Module '\"./types\"' has no exported member 'BusinessTruth'."
+    },
+    "error_count": 24,
+    "first_error": {
+     "line": 28,
+     "code": "TS2305",
+     "msg": "Module '\"./types\"' has no exported member 'BusinessTruth'."
+    },
+    "codes": [
+     "TS2305",
+     "TS2322",
+     "TS2339",
+     "TS2353",
+     "TS2454",
+     "TS2488",
+     "TS2554",
+     "TS2739",
+     "TS2769",
+     "TS7006"
+    ]
+   },
+   {
+    "task_id": "G4",
+    "sequence": "G",
+    "subsystem": "governance",
+    "position": 4,
+    "file": "server/governance/policy-as-code.ts",
+    "cluster": {
+     "code": "TS18046+TS18047+TS2339+TS2365",
+     "msg": "'v' is of type 'unknown'."
+    },
+    "error_count": 18,
+    "first_error": {
+     "line": 179,
+     "code": "TS18046",
+     "msg": "'v' is of type 'unknown'."
+    },
+    "codes": [
+     "TS18046",
+     "TS18047",
+     "TS2339",
+     "TS2365"
+    ]
+   },
+   {
+    "task_id": "G5",
+    "sequence": "G",
+    "subsystem": "governance",
+    "position": 5,
+    "file": "server/governance/four-eyes-approval.standalone-test.ts",
+    "cluster": {
+     "code": "TS2339",
+     "msg": "Property 'proposal' does not exist on type 'Result'."
+    },
+    "error_count": 17,
+    "first_error": {
+     "line": 24,
+     "code": "TS2339",
+     "msg": "Property 'proposal' does not exist on type 'Result'."
+    },
+    "codes": [
+     "TS2339"
+    ]
+   }
+  ],
+  "M": [
+   {
+    "task_id": "M1",
+    "sequence": "M",
+    "subsystem": "mcp",
+    "position": 1,
+    "file": "server/mcp/tool-executor.ts",
+    "cluster": {
+     "code": "TS2304+TS2322+TS2339+TS2345+TS2353+TS2538+TS2552",
+     "msg": "Argument of type 'string' is not assignable to parameter of type 'Surface'."
+    },
+    "error_count": 29,
+    "first_error": {
+     "line": 250,
+     "code": "TS2345",
+     "msg": "Argument of type 'string' is not assignable to parameter of type 'Surface'."
+    },
+    "codes": [
+     "TS2304",
+     "TS2322",
+     "TS2339",
+     "TS2345",
+     "TS2353",
+     "TS2538",
+     "TS2552"
+    ]
+   },
+   {
+    "task_id": "M2",
+    "sequence": "M",
+    "subsystem": "mcp",
+    "position": 2,
+    "file": "server/mcp/mcp-http-handler.ts",
+    "cluster": {
+     "code": "TS2322+TS2339+TS2345+TS2349+TS2571",
+     "msg": "Argument of type 'Record<string, unknown>' is not assignable to parameter of type 'ZodType<any, unknown, $ZodTypeInternals<any, unknown>>'."
+    },
+    "error_count": 20,
+    "first_error": {
+     "line": 1157,
+     "code": "TS2345",
+     "msg": "Argument of type 'Record<string, unknown>' is not assignable to parameter of type 'ZodType<any, unknown, $ZodTypeInternals<any, unknown>>'."
+    },
+    "codes": [
+     "TS2322",
+     "TS2339",
+     "TS2345",
+     "TS2349",
+     "TS2571"
+    ]
+   },
+   {
+    "task_id": "M3",
+    "sequence": "M",
+    "subsystem": "mcp",
+    "position": 3,
+    "file": "server/mcp/mcp-handler-v2.ts",
+    "cluster": {
+     "code": "TS2305+TS2339+TS2344+TS2345+TS2352+TS2353+TS2554",
+     "msg": "Module '\"./async-job-queue\"' has no exported member 'JobStatus'."
+    },
+    "error_count": 9,
+    "first_error": {
+     "line": 39,
+     "code": "TS2305",
+     "msg": "Module '\"./async-job-queue\"' has no exported member 'JobStatus'."
+    },
+    "codes": [
+     "TS2305",
+     "TS2339",
+     "TS2344",
+     "TS2345",
+     "TS2352",
+     "TS2353",
+     "TS2554"
+    ]
+   },
+   {
+    "task_id": "M4",
+    "sequence": "M",
+    "subsystem": "mcp",
+    "position": 4,
+    "file": "server/mcp/schema-normalizer.ts",
+    "cluster": {
+     "code": "TS2339",
+     "msg": "Property '_def' does not exist on type '{}'."
+    },
+    "error_count": 7,
+    "first_error": {
+     "line": 63,
+     "code": "TS2339",
+     "msg": "Property '_def' does not exist on type '{}'."
+    },
+    "codes": [
+     "TS2339"
+    ]
+   },
+   {
+    "task_id": "M5",
+    "sequence": "M",
+    "subsystem": "mcp",
+    "position": 5,
+    "file": "server/mcp/mcp-sync-wrapper.ts",
+    "cluster": {
+     "code": "TS2305+TS2339+TS2345",
+     "msg": "Module '\"./tool-executor\"' has no exported member 'ToolExecutionOptions'."
+    },
+    "error_count": 6,
+    "first_error": {
+     "line": 30,
+     "code": "TS2305",
+     "msg": "Module '\"./tool-executor\"' has no exported member 'ToolExecutionOptions'."
+    },
+    "codes": [
+     "TS2305",
+     "TS2339",
+     "TS2345"
+    ]
+   }
+  ]
+ }
+}

@@ -1,0 +1,17 @@
+{
+  "work": "EXP-0011: 60 arms (2 subsystem sequences x 5 ordered positions x native/leanrules/leanskills x 2 isolated reps) — does a compiled reusable SKILL add value beyond proven rule memory, on higher-discovery-cost tasks?",
+  "decision_id": "D4",
+  "hypothesis_id": "H-skills-beat-rules",
+  "possible_results": [
+    { "result": "skills > rules > native on position-matched cost+uncached, acceptance held, skill invocation/reads present in improving arms",
+      "next_action": "learned capability confirmed — proceed to Phase 2 proof 3 (outcome history) carrying the skill surface" },
+    { "result": "skills = rules > native (both compound, no marginal skill value)",
+      "next_action": "rules suffice — proceed to proof 3 carrying rule memory, drop the skill surface" },
+    { "result": "skills < rules (skill packaging drags)",
+      "next_action": "keep rule memory, reject the skill surface for this scale of knowledge; proof 3 proceeds with rules" },
+    { "result": "acceptance or quality loss in any treated arm set",
+      "next_action": "the capability claim FAILS at this proof regardless of economics — record and stop" },
+    { "result": "favorable skill curve with zero skill invocations/reads in the improving arms",
+      "next_action": "CONFOUND — locate the actual driver before any capability claim" }
+  ]
+}

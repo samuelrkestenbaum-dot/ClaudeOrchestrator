@@ -120,8 +120,16 @@ export const REJECTION_PATTERNS = [
   { id: "ts_ignore",        re: /@ts-ignore/,                     why: "suppresses the error instead of fixing it" },
   { id: "ts_expect_error",  re: /@ts-expect-error/,               why: "suppresses the error instead of fixing it" },
   { id: "ts_nocheck",       re: /@ts-nocheck/,                    why: "disables checking for the whole file" },
-  { id: "any_cast",         re: /\bas\s+any\b|:\s*any\b|<any>/,   why: "erases the type rather than satisfying it" },
+  // code_only: type syntax cannot act from a comment line, so this pattern is
+  // not applied to pure-comment lines — EXP-0010's A1.leanrules.r1 was
+  // rejected for the English words "as any" inside an added JSDoc sentence.
+  // The @ts-* suppressions above are the opposite case: they ONLY ever occur
+  // in comments, so they are never comment-skipped.
+  { id: "any_cast",         re: /\bas\s+any\b|:\s*any\b|<any>/,   why: "erases the type rather than satisfying it", code_only: true },
 ];
+
+/** A line that is pure comment: // line comments, block openers, JSDoc interiors/closers. */
+const isCommentLine = (body) => /^\s*(\/\/|\/\*|\*)/.test(body);
 
 /**
  * Scan a unified diff for rejection patterns on ADDED lines within the task
@@ -143,13 +151,13 @@ export function scanDiff(diff, taskFile) {
       const body = line.slice(1);
       if (line.startsWith("+")) {
         added++;
-        for (const rp of REJECTION_PATTERNS) if (rp.re.test(body)) {
+        for (const rp of REJECTION_PATTERNS) if (rp.re.test(body) && !(rp.code_only && isCommentLine(body))) {
           addedCount[rp.id] = (addedCount[rp.id] || 0) + 1;
           hits.push({ pattern: rp.id, why: rp.why, line: body.trim().slice(0, 160) });
         }
       } else if (line.startsWith("-")) {
         removed++;
-        for (const rp of REJECTION_PATTERNS) if (rp.re.test(body)) {
+        for (const rp of REJECTION_PATTERNS) if (rp.re.test(body) && !(rp.code_only && isCommentLine(body))) {
           removedCount[rp.id] = (removedCount[rp.id] || 0) + 1;
           removedHits.push({ pattern: rp.id, line: body.trim().slice(0, 160) });
         }
