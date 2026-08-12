@@ -14,6 +14,9 @@
 #   gravito uninstall [DIR]        remove ENGINE files (keeps build-os/ user data)  [dry-run default]
 #   gravito purge [DIR]            remove ALL Gravito state from the repo          [dry-run default]
 #   gravito goal <file> [DIR]      validate + install the goal contract (PKT-R0-4)
+#   gravito run [DIR]              gate + dispatch ONE worker session; meters spend into the ledger
+#   gravito review [DIR]           diff summary + acceptance (acceptance_cmd runs; prose is shown)
+#   gravito stop [DIR]             halt the worker at a safe boundary; state durable
 set -euo pipefail
 SRC="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 CMD="${1:-help}"; shift || true
@@ -157,6 +160,72 @@ cmd_status(){
   say "rollback: gravito rollback $d   |   uninstall: gravito uninstall $d [--force]   |   purge: gravito purge $d [--force]"
 }
 
+cmd_run(){
+  local d; d="$(resolve_dir "${1:-}")"
+  [ -f "$d/gravito.goal" ] || die "no gravito.goal installed — run 'gravito goal <file>' first"
+  local gc="$d/build-os/tools/goal-check.sh"; [ -x "$gc" ] || gc="$SRC/build-os/tools/goal-check.sh"
+  bash "$gc" --gate "$d/gravito.goal" || die "goal gate HALT — see the message above; not dispatching"
+  [ -f "$d/build-os/receipts/run.pid" ] && kill -0 "$(cat "$d/build-os/receipts/run.pid")" 2>/dev/null     && die "a worker is already running (pid $(cat "$d/build-os/receipts/run.pid")) — 'gravito stop $d' first"
+  [ "$DRY" -eq 1 ] && { say "dry-run: gate open; would dispatch one worker session"; return 0; }
+  local ts prompt stream started
+  ts="$(date -u +%Y%m%dT%H%M%SZ)"; stream="$d/build-os/receipts/run-$ts.jsonl"
+  prompt="$(printf '# Goal (from gravito.goal — the binding contract)\n%s\n\nAuthority: %s\nProhibited: %s\nAcceptance: %s\n\nWork ONLY in this repository. Never push, merge, deploy, or touch secrets. Deliver the work, state the outcome once, stop.' \
+    "$(awk -F': ' '$1=="goal"{sub(/^[^:]*: /,"");print;exit}' "$d/gravito.goal")" \
+    "$(awk -F': ' '$1=="authority"{sub(/^[^:]*: /,"");print;exit}' "$d/gravito.goal")" \
+    "$(awk -F': ' '$1=="prohibited_actions"{sub(/^[^:]*: /,"");print;exit}' "$d/gravito.goal")" \
+    "$(awk -F': ' '$1=="acceptance"{sub(/^[^:]*: /,"");print;exit}' "$d/gravito.goal")")"
+  started="$(date +%s)"
+  say "run: dispatching one worker session (stream → ${stream#"$d"/})"
+  ( cd "$d" && printf '%s' "$prompt" | claude -p --output-format stream-json --verbose --permission-mode acceptEdits > "$stream" 2>"$d/build-os/receipts/run-$ts.err" ) &
+  echo $! > "$d/build-os/receipts/run.pid"
+  wait "$(cat "$d/build-os/receipts/run.pid")" || true
+  rm -f "$d/build-os/receipts/run.pid"
+  # METER into the ledger the goal gate reads: provider-native usage + wall minutes.
+  python3 - "$stream" "$d" "$started" <<'PY'
+import json, sys, time
+stream, d, started = sys.argv[1], sys.argv[2], int(sys.argv[3])
+tok = usd = 0
+try:
+    for line in open(stream):
+        try: e = json.loads(line)
+        except Exception: continue
+        if e.get("type") == "result":
+            u = e.get("usage") or {}
+            tok = (u.get("input_tokens") or 0) + (u.get("output_tokens") or 0) + (u.get("cache_creation_input_tokens") or 0) + (u.get("cache_read_input_tokens") or 0)
+            usd = e.get("total_cost_usd") or 0
+except FileNotFoundError: pass
+mins = max(1, round((time.time() - started) / 60))
+open(f"{d}/build-os/memory/spend-ledger.jsonl", "a").write(json.dumps({"tokens": tok, "usd": round(usd, 4), "minutes": mins, "stream": stream.split("/")[-1]}) + "\n")
+print(f"run: metered {tok} tokens, ${usd:.4f}, {mins} min into spend-ledger.jsonl")
+PY
+  say "run: complete — 'gravito review $d' next"
+}
+
+cmd_review(){
+  local d; d="$(resolve_dir "${1:-}")"
+  say "=== gravito review — $d ==="
+  say "-- changes since HEAD:"; git -C "$d" status --short | sed 's/^/  /' | head -20
+  local cmd
+  cmd="$(awk -F': ' '$1=="acceptance_cmd"{sub(/^[^:]*: /,"");print;exit}' "$d/gravito.goal" 2>/dev/null)"
+  if [ -n "$cmd" ]; then
+    say "-- acceptance_cmd: $cmd"
+    if ( cd "$d" && bash -c "$cmd" >/dev/null 2>&1 ); then say "acceptance: PASS"; else say "acceptance: FAIL"; return 1; fi
+  else
+    say "-- acceptance (human judgment): $(awk -F': ' '$1=="acceptance"{sub(/^[^:]*: /,"");print;exit}' "$d/gravito.goal" 2>/dev/null)"
+  fi
+}
+
+cmd_stop(){
+  local d; d="$(resolve_dir "${1:-}")"
+  if [ -f "$d/build-os/receipts/run.pid" ] && kill -0 "$(cat "$d/build-os/receipts/run.pid")" 2>/dev/null; then
+    kill "$(cat "$d/build-os/receipts/run.pid")" 2>/dev/null || true
+    rm -f "$d/build-os/receipts/run.pid"
+    say "stop: worker halted at a safe boundary; state is durable (streams + ledger under build-os/). Resume: gravito run $d"
+  else
+    say "stop: no worker running; state durable. Resume: gravito run $d"
+  fi
+}
+
 case "$CMD" in
   preflight) cmd_preflight "$@" ;;
   init)      cmd_init "$@" ;;
@@ -166,5 +235,8 @@ case "$CMD" in
   uninstall) cmd_uninstall "$@" ;;
   purge)     cmd_purge "$@" ;;
   goal)      cmd_goal "$@" ;;
+  run)       cmd_run "$@" ;;
+  review)    cmd_review "$@" ;;
+  stop)      cmd_stop "$@" ;;
   help|*)    sed -n '2,18p' "$0" ;;
 esac
