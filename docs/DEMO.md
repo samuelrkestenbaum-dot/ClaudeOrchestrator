@@ -1,5 +1,12 @@
 # DEMO — 30 minutes, start to finish, against a sample repo
 
+> **Start with the golden path first.** The operator front door is the
+> `gravito` CLI — `gravito init` → `goal` → `run` → `review` → `stop` — and
+> lives in [`ONBOARDING.md`](ONBOARDING.md), executed verbatim by
+> `tests/doc_drift_tests.sh`. This demo goes DEEPER than daily use: it walks
+> the orchestrator internals (lanes, packets, gates, receipts) that the CLI
+> drives for you. You do not need any of it to use Gravito on a repository.
+
 A scripted walkthrough you can run **alone, offline, on a throwaway repo**. Ten
 steps, ~30 minutes. Every step below is a command you paste and an observable you
 check — no slides, no narration where a command would do.

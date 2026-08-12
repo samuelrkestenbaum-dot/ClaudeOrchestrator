@@ -26,6 +26,27 @@ Claude Code's native tools and to external tools / MCP servers **when connected*
 
 ---
 
+## 🚀 The golden path (start here — five commands)
+
+The operator front door is the `gravito` CLI; the full walkthrough with the
+honest list of what is and is not enforced is
+[`docs/ONBOARDING.md`](docs/ONBOARDING.md), and the exact block below is
+executed verbatim by `tests/doc_drift_tests.sh` so it cannot silently rot:
+
+```
+bin/gravito preflight  <repo>    # read-only eligibility check
+bin/gravito init       <repo>    # deterministic, receipted install
+bin/gravito goal  <file> <repo>  # install the owner contract (see templates/)
+bin/gravito diagnose   <repo>    # verify wiring, goal, ledger in one page
+bin/gravito run        <repo>    # gate-checked, metered worker dispatch
+```
+
+Then `gravito review` / `gravito stop`, and `gravito rollback` /
+`gravito uninstall` / `gravito purge` to leave (destructive verbs default to
+dry-run; purge restores installer-touched files byte-identically).
+
+---
+
 ## 🤖 If you are a Claude Code session reading this repo
 
 You were probably told something like *"look at ClaudeOrchestrator and install it
