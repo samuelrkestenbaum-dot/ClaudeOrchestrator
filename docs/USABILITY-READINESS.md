@@ -116,10 +116,16 @@ two honest residuals it named: the goal contract is now enforced at TOOL
 level (PreToolUse mutgate, fail closed before side effects, refusal
 receipts — tests/goal_enforcement_tests.sh) rather than by announcement,
 and `gravito run` streams are metered into a committed ledger the gate
-halts on. Still true and still open: paths listed under "NOT METERED" in
-docs/DATA-BOUNDARIES.md; MCP-hosted mutating tools are not in the mutgate
-matcher; a bare human shell bypasses tool gates by design; R1/R2 remain
-unauthorized.
+halts on. R1 (authorized 2026-08-12, local-only) then closed two more:
+MCP tools are now gated DEFAULT CLOSED behind a narrow read-only allowlist,
+and a wiring defect (targets shipped but never REGISTERED the tool-gate
+matchers — disclosed in R0-EVIDENCE) was found failure-first and fixed;
+`gravito diagnose` (R1 item 3) and the doc-drift-protected golden-path
+front door (R1 item 2, executed verbatim by tests) now exist. Still true
+and still open: a bare human shell bypasses tool gates by design; operator
+interactive sessions are unmetered; the non-author walkthrough (R1 item 1,
+the R1 acceptance evidence) is preregistered in docs/WALKTHROUGH-KIT.md
+but requires fresh owner authorization to run; R2 remains unauthorized.
 
 ## Releases
 

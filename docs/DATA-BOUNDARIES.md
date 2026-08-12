@@ -1,4 +1,4 @@
-# Gravito data boundaries (R0.1) — what lives where, what leaves, how to remove it
+# Gravito data boundaries (R1) — what lives where, what leaves, how to remove it
 
 **What leaves the machine:** model provider API calls only (prompts, file
 contents the worker reads, tool results — to the configured Claude endpoint).
@@ -28,6 +28,16 @@ stated explicitly:** the operator's own interactive sessions, direct
 `claude` invocations outside `gravito run`, experiment harnesses, and any
 MCP-side execution. Numbers for those paths do not exist and are never
 inferred.
+
+**Tool-level enforcement boundary (R1):** file mutations
+(Edit/Write/NotebookEdit/Bash) and ALL `mcp__*` tools pass the fail-closed
+goal gate — MCP default-closed via the narrow read-only allowlist
+(`.claude/hooks/mcp-readonly-allowlist.txt`); an undeclared MCP tool is
+treated as a mutation. NOT enforced, stated plainly: a bare human shell
+(no hooks run); a mutating tool wrongly added to the allowlist (the list is
+the trust boundary — keep it narrow); hook internal errors fail open with a
+logged trace. Targets installed before R1 must run `gravito update` to gain
+matcher registration; `gravito diagnose` shows wired/UNWIRED per matcher.
 
 **Secrets:** Gravito never reads or stores secrets by design; preflight
 refuses repos with obvious secret files at root; the publish gate blocks

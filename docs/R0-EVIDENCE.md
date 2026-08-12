@@ -132,6 +132,19 @@ goal-check.sh naming NOT-YET-LIVE without LAPSED: its out-of-window state
 was renamed EXPIRED→LAPSED to match the envelope/claim-evidence/registry
 class. Suites after: authority_envelope 126/0.
 
+## CORRECTION (found and fixed in R1, disclosed here where the claim lives)
+R0.1-1 above says real execution passes the PreToolUse mutgate in every
+session. That was TRUE of this source repository and of the hook's behavior,
+but FALSE of installed TARGETS: the installer SHIPPED the hook scripts and
+never REGISTERED the PreToolUse matchers in the target's settings.json, so a
+real session in a target repo never consulted the goal gate at tool level.
+The R0.1 behavior tests invoked the hook directly and therefore could not
+see this. Found by R1's failure-first wiring probe (a fresh target showed
+zero PreToolUse entries); fixed in R1-P2 (installer registers gate/mutgate/
+mcpgate/count/post); pinned by tests/goal_enforcement_tests.sh §5b, and
+`gravito diagnose` now reports wired/UNWIRED per matcher so this class of
+defect is operator-visible, not archaeology.
+
 ## R0.1 EXIT — golden path re-run on a fresh DISPOSABLE repo: PASSED
 Before-manifest (sha256 of every pre-existing file) taken pre-init. Then:
 init → goal (LIVE 2026-08-12→2026-08-26) → run: gate OPEN, ONE real
@@ -149,3 +162,54 @@ byte-identical** (sha256sum -c OK, including .gitignore), the only
 remaining non-original file being the worker's product docs/NOTES.md.
 Fixture destroyed after. Suite totals at close: goal_enforcement 25/25,
 lifecycle 28/28, cross_repo_isolation 14/14, authority_envelope 126/0.
+
+# R1 (2026-08-12, owner-authorized, local-only) — executed evidence
+
+## R1-P2 — MCP mutation gate + the wiring defect: EXECUTED
+The correction block above is this packet's headline: targets now REGISTER
+all five tool-gate matchers at install (goal_enforcement §5b). New `mcpgate`
+mode: every `mcp__*` tool call is gated DEFAULT CLOSED — a tool is exempt
+only if it matches `.claude/hooks/mcp-readonly-allowlist.txt` (narrow,
+engine-shipped: GitHub get/list/search/issue_read/pull_request_read only);
+everything else, including read-sounding undeclared names, passes the same
+fail-closed goal gate as Edit/Write/Bash, with refusal receipts naming the
+exact tool (§5c: unknown write blocked; undeclared "fetch_data" blocked;
+allowlisted read passes even lapsed; LIVE goal allows; no goal unaffected).
+Still true: the wrapper fails OPEN on internal hook errors (control-plane
+availability choice, unchanged from R0.1) and a bare human shell runs no
+hooks at all.
+
+## R1-P3 — gravito diagnose: EXECUTED
+One support bundle: namespace verdict, missing engine files BY NAME,
+tool-gate wiring reported wired/UNWIRED per matcher, goal window/budget,
+ledger, refusals tail, receipts, residue, workers; written to
+build-os/receipts/diagnose-*.txt. Broken-fixture tests prove it names the
+actual fault (lifecycle §9). Defect found by the doc-drift suite and fixed:
+diagnose crashed under pipefail when a receipts glob matched nothing —
+partial bundles now impossible (exit-0 asserted on healthy repos).
+
+## R1-P1 — front door + drift protection: EXECUTED
+ONBOARDING.md rewritten golden-path-first (CLI verbs; the honest
+NOT-enforced list on page one; no performance claims). README carries the
+five-command golden path; DEMO.md routes newcomers to it and is re-scoped
+as internals. tests/doc_drift_tests.sh (10/10) EXECUTES the ONBOARDING
+golden-path block verbatim on a disposable repo, checks the outputs the doc
+promises, refuses phantom `gravito` verbs across all three docs, and
+existence-checks every source-repo path ONBOARDING names.
+
+## R1-P4 — walkthrough kit: WRITTEN (run NOT authorized, NOT run)
+docs/WALKTHROUGH-KIT.md preregisters the non-author walkthrough: operator
+qualification, setup, script, success criteria S1–S5, failure criteria
+F1–F4 (30-minute block rule = stop, fix, fresh run), friction/intervention
+logs, evidence bundle location, and the explicit non-claims. Recruiting the
+operator and running it require fresh owner authorization.
+
+## R1 residuals, stated plainly
+A bare human shell in a target runs no hooks (structural). The MCP
+allowlist gates by TOOL NAME, not by inspecting what a server actually
+does — a mutating tool misdeclared into the allowlist would pass; the
+allowlist is the trust boundary and stays narrow by policy. Hook wrapper
+fails open on internal errors (logged). Operator interactive sessions
+remain unmetered. Existing targets installed before R1 need `gravito
+update` to gain registration; until then diagnose shows UNWIRED. The
+non-author walkthrough — R1's acceptance evidence — has not run.
