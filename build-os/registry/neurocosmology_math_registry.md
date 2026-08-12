@@ -278,19 +278,33 @@ challenger material at best.
 - outcome-test: none — research
 - status: theoretical
 
-## Reachability set R_t and admissible R_t+
-- equation: R_t = {a executable, authorized, feasible}; R_t+ = {a in R_t : E(a)=1}
+## Reachability: run/dispatch admission (R_t, R_t+ at the dispatch boundary)
+- equation: R_t = {a executable, authorized, feasible}; R_t+ = admissible subset; dispatch only if action in R_t+
 - class: A
 - zone: 3
-- implementation: experiment side: sealed executor.mjs predicate. Product side: build-os/tools/reachability.mjs — explicit R_t/R_t+ construction with per-action reasons; the authority gate (goal-check --gate) is invoked ONCE inside the construction, so admission and authority are one evaluation, not two controls
-- caller: bin/gravito cmd_run — R_t+ membership is the REAL dispatch admission (refuse before side effects if run outside R_t+); bin/gravito cmd_health (operator surface); sealed executor.mjs (38 cells). Planning/SCORING consumer: ABSENT — reported dependency, selectAction() is the future planner entry (tests only)
-- inputs: run-records, locks, goal window, ledger, tool name, allowlist
-- decision: launch/refuse (experiments); allow/block mutation (product)
-- receipt: run-trace.jsonl (run_id, ordered steps h0->reachability->authority->admission); refusals.log; run-record admissibility (sealed)
+- implementation: build-os/tools/reachability.mjs (constructReachability — per-action reasons; the authority gate goal-check --gate invoked ONCE inside the construction, so admission and authority are one evaluation); sealed executor.mjs predicate (experiments)
+- caller: bin/gravito cmd_run — R_t+ membership is the REAL dispatch admission (refuse before side effects if run outside R_t+); bin/gravito cmd_health (operator surface); sealed executor.mjs (38 cells)
+- inputs: goal window/budget via the gate, worker pid, provider CLI, manifests, goal presence
+- decision: dispatch or refuse, before any side effect
+- receipt: run-trace.jsonl (run_id, ordered steps); refusals via die; run-record admissibility (sealed)
 - baseline: n/a (Class A)
 - falsifier: n/a
-- outcome-test: gates: real budget halt + real publish block (experiment/program level). Product R_t construction: E2E admission proof + score-resurrection proof (task level); no real-outcome test yet for the construction itself
-- status: outcome-proven
+- outcome-test: gates behind it: real budget halt + real publish block (experiment/program level). The admission construction itself: E2E real-entry-point proof incl. lapsed-goal refusal outside R_t+ (task level); no measured beneficial outcome yet
+- status: wired-unproven
+
+## Reachability: general planning/scoring selection (selectAction over R_t+)
+- equation: a* = argmax over R_t+ of V(a) — selection strictly inside the admitted set
+- class: A
+- zone: 4
+- implementation: build-os/tools/reachability.mjs selectAction() — argmax strictly over R_t+, outside scores ignored by construction (score-resurrection proof executed)
+- caller: none in any production path — tests only. NO planner/scoring layer exists to consume R_t+. This is an EXPLICIT ARCHITECTURAL DEPENDENCY, not a wiring gap to patch: a future planner must (1) receive ONLY R_t+ (never the raw action universe), (2) treat authority as a constraint never a score term, (3) emit a selection receipt naming candidates, scores, and the admitted set, (4) be built as its own authorized packet
+- inputs: R_t+ and a scores map (no production scorer exists)
+- decision: none today — a superficial caller must NOT be created to improve this status
+- receipt: none (selection receipts are part of the future contract above)
+- baseline: n/a (Class A constraint on any future scorer)
+- falsifier: n/a
+- outcome-test: none possible without the planner
+- status: implemented-unwired
 
 ## Ethics/authority as constraint, never penalty
 - equation: a* = argmax_{a in R_t, E(a)=1} V(a) — optimize only inside admissible space
@@ -369,7 +383,7 @@ challenger material at best.
 - implementation: enforced and TRACED: bin/gravito cmd_run emits run-trace.jsonl (run_id, seq, steps h0->reachability->authority->admission->dispatch|refuse); routing-gate.sh goal_gate_or_block (H0 Class-A before authority per mutation); sealed executor.mjs; order pinned by tests/neurocosmology_invariant_tests.sh
 - caller: PreToolUse hooks; bin/gravito; sealed executor
 - inputs: code structure itself (order of operations)
-- decision: an out-of-order path is a defect
+- decision: an out-of-order path is a defect. HONEST SCOPE: the WIRED PREFIX is state -> H0 -> reachability -> authority -> admission/dispatch (one traced run_id). Review/prediction receipts are SEPARATELY wired at cmd_review/cmd_predict. NOT yet one production state machine: planning (absent), cognition compiler (UCDL implemented-unwired), execution orchestration, verification->learning as a single loop. A shared run ID does not create a unified state machine
 - receipt: build-os/receipts/run-trace.jsonl (correlation id per dispatch attempt); refusals.log
 - baseline: n/a
 - falsifier: n/a (Class A ordering)

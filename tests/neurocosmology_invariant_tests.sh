@@ -146,6 +146,15 @@ ok 'grep -q "theta_sufficiency" "$SRC/build-os/delivery/ucdl.mjs" && grep -q "ne
 ok 'grep -q "no wall clock" "$SRC/build-os/delivery/ucdl.mjs" || grep -q "byte-identical" "$SRC/build-os/delivery/ucdl.mjs"' \
   "delivery receipts are deterministic derivations of inputs — never retro-edited truth"
 
+echo "== 12b. reachability status is SPLIT by decision boundary — no collapse =="
+ok 'grep -q "^## Reachability: run/dispatch admission" "$REG" && grep -q "^## Reachability: general planning/scoring selection" "$REG"' \
+  "registry carries BOTH reachability capabilities as separate entries"
+ok '! grep -q "^## Reachability set R_t and admissible R_t+$" "$REG"' "the old combined entry is gone (statuses cannot re-merge)"
+PLST=$(awk '/^## Reachability: general planning\/scoring selection/,/^## [^R]/' "$REG" | grep '^- status:' | head -1)
+ok '[ "$PLST" = "- status: implemented-unwired" ]' "planner selection stays implemented-unwired without a real caller ($PLST)"
+ok 'grep -A40 "^## Reachability: general planning/scoring selection" "$REG" | grep -q "superficial caller must NOT be created"' \
+  "the no-superficial-caller rule is recorded in the entry itself"
+
 echo "== 12. sealed experiment evidence untouched by this packet =="
 ok '[ -z "$(cd "$SRC" && git status --porcelain -- build-os/experiments/EXP-0011-reusable-skills build-os/experiments/EXP-0010* 2>/dev/null)" ]' \
   "no modification to sealed EXP-0010/0011 trees in the working tree"
