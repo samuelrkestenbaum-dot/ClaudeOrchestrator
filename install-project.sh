@@ -41,6 +41,12 @@ cp "$SRC/.claude/hooks/"*.sh "$DEST/.claude/hooks/"
 # Engine tools the hooks gate on (PKT-R0-4): the goal contract validator.
 mkdir -p "$DEST/build-os/tools"
 cp "$SRC/build-os/tools/goal-check.sh" "$DEST/build-os/tools/"
+# Routing tools the mutgate's auto-route mints with (DATA_ROOT-only by
+# design): without these every first mutation in a target repo falls to the
+# manual recovery path — found by R0.1's failure-first enforcement tests.
+cp "$SRC/build-os/tools/route-task.sh" "$DEST/build-os/tools/"
+[ -f "$SRC/build-os/tools/mode-select.mjs" ] && cp "$SRC/build-os/tools/mode-select.mjs" "$DEST/build-os/tools/"
+mkdir -p "$DEST/build-os/packets/routing"
 chmod +x "$DEST/.claude/hooks/"*.sh
 echo "  + agents, commands, hooks"
 

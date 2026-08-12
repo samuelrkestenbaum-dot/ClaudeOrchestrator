@@ -3,7 +3,7 @@
 #
 # One file states: what to do, under what authority, within what budgets,
 # judged how, stoppable when. This tool VALIDATES the schema, and GATES on
-# expiry and budgets FAIL-CLOSED: an expired, malformed, or over-budget goal
+# expiry and budgets FAIL-CLOSED: a lapsed, malformed, or over-budget goal
 # exits nonzero with the operator's next action named. It consumes the
 # authority-envelope philosophy (half-open [starts, expires); no clock
 # fallback) without granting anything itself.
@@ -50,7 +50,7 @@ valid_date "$NOW" || { echo "goal-check: REFUSED — clock '$NOW' is not a real 
 
 WINDOW="LIVE"
 [ "$NOW" \< "$ST" ] && WINDOW="NOT-YET-LIVE"
-{ [ "$EX" \< "$NOW" ] || [ "$EX" = "$NOW" ]; } && WINDOW="EXPIRED"
+{ [ "$EX" \< "$NOW" ] || [ "$EX" = "$NOW" ]; } && WINDOW="LAPSED"
 
 LEDGER="$DIR/build-os/memory/spend-ledger.jsonl"; [ -f "$LEDGER" ] || LEDGER="$(dirname "$DIR")/build-os/memory/spend-ledger.jsonl"
 TOK=0; USD=0; MIN=0

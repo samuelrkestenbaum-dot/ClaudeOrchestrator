@@ -562,6 +562,38 @@ auto_route_first_mutation(){ # <raw-json> <tool> -> rc 0 iff a receipt was minte
 }
 
 mutgate_decide(){ # <stdin-json> — protocol on stdout: ALLOW or BLOCK + message
+  # R0.1 §1 — GOAL GATE, FAIL CLOSED, evaluated BEFORE anything else so no
+  # side effect can precede it. Applies to every mutating tool in every
+  # session that passes PreToolUse (direct, resumed, nested subagents). The
+  # existing routing logic below deliberately fails OPEN on receipt problems;
+  # the goal gate is the opposite by owner instruction: an installed
+  # gravito.goal that is expired/not-yet/over-budget BLOCKS, with an
+  # actionable refusal receipt. Reads are never gated (emergency stop and
+  # status stay available); a missing goal file changes nothing.
+  local _gtool
+  _gtool="$(printf '%s' "${1:-}" | sed -n 's/.*"tool_name"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | head -n1)"
+  case "$_gtool" in Read|Grep|Glob) : ;; *)
+  if [ -f "$DATA_ROOT/gravito.goal" ]; then
+    _gc="$DATA_ROOT/build-os/tools/goal-check.sh"
+    [ -x "$_gc" ] || _gc="$(dirname "${BASH_SOURCE[0]}")/../../build-os/tools/goal-check.sh"
+    if [ -x "$_gc" ]; then
+      if ! _gout="$(bash "$_gc" --gate "$DATA_ROOT/gravito.goal" 2>&1)"; then
+        mkdir -p "$DATA_ROOT/build-os/receipts"
+        _gstat="$(bash "$_gc" --status "$DATA_ROOT/gravito.goal" 2>/dev/null || true)"
+        printf '%s tool=%s BLOCKED %s | %s\n' "$(date -u +%FT%TZ)" "${_gtool:-unknown}" "$_gstat" "$_gout" >> "$DATA_ROOT/build-os/receipts/refusals.log"
+        printf 'BLOCK\nGOAL HALT (tool-level, fail closed): %s\nThis mutation was refused BEFORE any side effect. Receipt: build-os/receipts/refusals.log. Reads, gravito status, and gravito stop remain available.\n' "$_gout"
+        return 0
+      fi
+    else
+      # Fail CLOSED on a missing gate when a goal exists: an unenforceable
+      # contract must not silently become no contract.
+      mkdir -p "$DATA_ROOT/build-os/receipts"
+      printf '%s tool=%s BLOCKED gate-tool-missing\n' "$(date -u +%FT%TZ)" "${_gtool:-unknown}" >> "$DATA_ROOT/build-os/receipts/refusals.log"
+      printf 'BLOCK\nGOAL HALT (fail closed): gravito.goal is installed but goal-check.sh is missing — run gravito update to restore the engine.\n'
+      return 0
+    fi
+  fi
+  esac
   local in="$1" tool cls rec tid="none" mode="-" v act rtool rcmd sha exc
   tool="$(printf '%s' "$in" | sed -n 's/.*"tool_name"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | head -n1)"
   [ -n "$tool" ] || return 1   # unreadable event -> fail open in the wrapper
