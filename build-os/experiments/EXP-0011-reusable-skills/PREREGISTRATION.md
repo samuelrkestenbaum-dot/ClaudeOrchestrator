@@ -47,3 +47,18 @@ keep rules, reject the surface at this scale; acceptance loss → FAILS;
 favorable-without-use → confound. Applied only when both reps exist. No
 rescue variants. Structural use evidence: Skill invocations + SKILL.md reads
 in-stream.
+
+## Operator read-hierarchy amendment (pre-data: 0 completed cells at amendment)
+
+Dictated with the 268e350 push go, while G1/native rep 1 was still in session:
+
+1. **PRIMARY: marginal LeanSkills vs LeanRules** — the branch determinant.
+2. Economics: cost / uncached / turns.
+3. Speed: active worker time, tool calls, verification cycles, early→late.
+4. Consistency: CV, P90/max latency, retries/timeouts, new-error rate,
+   tool-path mode share, early-vs-experienced variance, tail outcomes.
+
+Named in advance as the most interesting outcome: rules remain somewhat
+cheaper while skills materially collapse latency and variance — the
+progression "rules encode what to know; skills encode how to execute
+reliably." Recorded before data so the read cannot drift toward it.
