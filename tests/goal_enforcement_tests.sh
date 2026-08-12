@@ -59,6 +59,39 @@ echo b > "$R2/app.txt"; git -C "$R2" -c user.email=t@t -c user.name=t add -A; gi
 "$SRC/bin/gravito" init "$R2" >/dev/null 2>&1
 ok '[ "$(hook Edit "$R2" BUILD_OS_NOW=2026-08-13)" != 2 ]' "no goal file => no goal gate (existing mutgate semantics unchanged)"
 
+echo "== 5b. WIRING: installed targets must REGISTER the tool gates (R1-P2) =="
+# R0.1's defect, found by refreshing entry-point evidence: hooks were SHIPPED
+# to targets but never REGISTERED in the target's settings.json, so a real
+# session in a target never consulted the goal gate at tool level. Behavior
+# proofs above invoke the hook directly; these assertions pin the wiring.
+wired(){ python3 -c "
+import json,sys
+s=json.load(open('$R/.claude/settings.json'))
+pt=s.get('hooks',{}).get('PreToolUse',[])
+ok=any(g.get('matcher')=='$1' and any('routing-gate.sh $2' in h.get('command','') for h in g.get('hooks',[])) for g in pt)
+sys.exit(0 if ok else 1)"; }
+ok 'wired "Edit|Write|NotebookEdit|Bash" mutgate' "target registers the file-tool mutgate matcher"
+ok 'wired "mcp__.*" mcpgate' "target registers the MCP mutation gate matcher"
+ok 'wired "Task|Agent" gate' "target registers the routing gate matcher"
+
+echo "== 5c. MCP mutation gate: DEFAULT CLOSED (R1-P2) =="
+mcphook(){ # <tool> -> exit code
+  printf '{"tool_name":"%s","tool_input":{}}' "$1" \
+    | env CLAUDE_PROJECT_DIR="$R" BUILD_OS_NOW="$2" bash "$R/.claude/hooks/routing-gate.sh" mcpgate >"$WORK/out" 2>"$WORK/err"
+  echo $?
+}
+sed -i 's/^starts: .*/starts: 2026-07-01/; s/^expires: .*/expires: 2026-08-01/' "$R/gravito.goal"   # LAPSED
+ok '[ "$(mcphook mcp__github__create_pull_request 2026-08-13)" = 2 ]' "unknown MCP WRITE tool BLOCKED under a lapsed goal"
+ok '[ "$(mcphook mcp__foo__fetch_data 2026-08-13)" = 2 ]' "read-SOUNDING but undeclared MCP tool BLOCKED (default closed)"
+ok 'grep -q "mcp__foo__fetch_data" "$R/build-os/receipts/refusals.log"' "MCP refusal receipt names the exact tool"
+ok '[ "$(mcphook mcp__github__get_file_contents 2026-08-13)" != 2 ]' "allowlisted read-only MCP tool passes even while lapsed"
+sed -i 's/^starts: .*/starts: 2026-08-01/; s/^expires: .*/expires: 2026-12-31/' "$R/gravito.goal"   # LIVE again
+ok '[ "$(mcphook mcp__github__create_pull_request 2026-08-13)" != 2 ]' "unknown MCP tool allowed under a LIVE in-budget goal"
+R4="$WORK/repo4"; mkdir -p "$R4"; git -C "$R4" init -q; git -C "$R4" remote add origin https://x/enf4.git
+echo b > "$R4/app.txt"; git -C "$R4" -c user.email=t@t -c user.name=t add -A; git -C "$R4" -c user.email=t@t -c user.name=t commit -qm s
+"$SRC/bin/gravito" init "$R4" >/dev/null 2>&1
+ok '[ "$(printf "{\"tool_name\":\"mcp__x__write_thing\",\"tool_input\":{}}" | env CLAUDE_PROJECT_DIR="$R4" bash "$R4/.claude/hooks/routing-gate.sh" mcpgate >/dev/null 2>&1; echo $?)" != 2 ]' "no goal installed => MCP tools unaffected (contract scope unchanged)"
+
 echo "== 6. metering: dedupe + concurrency-safe committed ledger =="
 M="$SRC/build-os/tools/meter-run.sh"
 S1="$R/build-os/receipts/run-A.jsonl"

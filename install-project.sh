@@ -38,6 +38,8 @@ mkdir -p "$DEST/.claude/agents" "$DEST/.claude/commands" "$DEST/.claude/hooks" \
 cp "$SRC/.claude/agents/"*.md   "$DEST/.claude/agents/"
 cp "$SRC/.claude/commands/"*.md "$DEST/.claude/commands/"
 cp "$SRC/.claude/hooks/"*.sh "$DEST/.claude/hooks/"
+# R1-P2: the MCP read-only allowlist is engine data the hooks gate on.
+cp "$SRC/.claude/hooks/mcp-readonly-allowlist.txt" "$DEST/.claude/hooks/"
 # Engine tools the hooks gate on (PKT-R0-4): the goal contract validator.
 mkdir -p "$DEST/build-os/tools"
 cp "$SRC/build-os/tools/goal-check.sh" "$DEST/build-os/tools/"
@@ -85,18 +87,31 @@ except (FileNotFoundError, json.JSONDecodeError):
     data = {}
 hooks = data.setdefault("hooks", {})
 
-def ensure(event, script):
+def ensure(event, script, matcher=None):
     cmd = "$CLAUDE_PROJECT_DIR/.claude/hooks/%s" % script
     groups = hooks.setdefault(event, [])
     for g in groups:
+        if matcher is not None and g.get("matcher") != matcher:
+            continue
         for h in g.get("hooks", []):
             if str(h.get("command", "")).endswith(script):
                 return
-    groups.append({"hooks": [{"type": "command", "command": cmd}]})
+    entry = {"hooks": [{"type": "command", "command": cmd}]}
+    if matcher is not None:
+        entry["matcher"] = matcher
+    groups.append(entry)
 
 if register_session:
     ensure("SessionStart", "session-start-build-os.sh")
 ensure("UserPromptSubmit", "prompt-router.sh")
+# R0.1 defect fixed in R1-P2: the tool gates were SHIPPED but never
+# REGISTERED, so target sessions never consulted the goal gate at tool
+# level. Registration is what makes enforcement real in a target.
+ensure("PreToolUse", "routing-gate.sh gate", "Task|Agent")
+ensure("PreToolUse", "routing-gate.sh mutgate", "Edit|Write|NotebookEdit|Bash")
+ensure("PreToolUse", "routing-gate.sh mcpgate", "mcp__.*")
+ensure("PreToolUse", "routing-gate.sh count", "*")
+ensure("PostToolUse", "routing-gate.sh post", "*")
 
 with open(path, "w") as f:
     json.dump(data, f, indent=2)

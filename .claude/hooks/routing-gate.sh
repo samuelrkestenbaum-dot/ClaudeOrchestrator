@@ -561,38 +561,78 @@ auto_route_first_mutation(){ # <raw-json> <tool> -> rc 0 iff a receipt was minte
   return 0
 }
 
+# R0.1 §1 / R1-P2 — THE GOAL GATE, FAIL CLOSED, shared by every mutating
+# entry: the file-tool mutgate below and the MCP mutation gate (mcpgate).
+# An installed gravito.goal that is lapsed/not-yet/over-budget BLOCKS with an
+# actionable refusal receipt, BEFORE any side effect. A missing goal file
+# changes nothing (existing semantics). Returns 0 = proceed; on a halt it
+# prints the caller-protocol "BLOCK\n<message>" itself and returns 1.
+goal_gate_or_block(){ # <tool-name>
+  local _gtool="${1:-unknown}" _gc _gout _gstat
+  [ -f "$DATA_ROOT/gravito.goal" ] || return 0
+  _gc="$DATA_ROOT/build-os/tools/goal-check.sh"
+  [ -x "$_gc" ] || _gc="$(dirname "${BASH_SOURCE[0]}")/../../build-os/tools/goal-check.sh"
+  if [ -x "$_gc" ]; then
+    if ! _gout="$(bash "$_gc" --gate "$DATA_ROOT/gravito.goal" 2>&1)"; then
+      mkdir -p "$DATA_ROOT/build-os/receipts"
+      _gstat="$(bash "$_gc" --status "$DATA_ROOT/gravito.goal" 2>/dev/null || true)"
+      printf '%s tool=%s BLOCKED %s | %s\n' "$(date -u +%FT%TZ)" "$_gtool" "$_gstat" "$_gout" >> "$DATA_ROOT/build-os/receipts/refusals.log"
+      printf 'BLOCK\nGOAL HALT (tool-level, fail closed): %s\nThis mutation was refused BEFORE any side effect. Receipt: build-os/receipts/refusals.log. Reads, gravito status, and gravito stop remain available.\n' "$_gout"
+      return 1
+    fi
+  else
+    # Fail CLOSED on a missing gate when a goal exists: an unenforceable
+    # contract must not silently become no contract.
+    mkdir -p "$DATA_ROOT/build-os/receipts"
+    printf '%s tool=%s BLOCKED gate-tool-missing\n' "$(date -u +%FT%TZ)" "$_gtool" >> "$DATA_ROOT/build-os/receipts/refusals.log"
+    printf 'BLOCK\nGOAL HALT (fail closed): gravito.goal is installed but goal-check.sh is missing — run gravito update to restore the engine.\n'
+    return 1
+  fi
+  return 0
+}
+
+# R1-P2 — MCP MUTATION GATE, DEFAULT CLOSED. Every mcp__* tool call reaches
+# this mode via its own PreToolUse matcher. Classification is the closed part:
+# a tool is read-only ONLY if it matches a line in the narrowly declared
+# allowlist (engine-shipped; target may not widen it silently — the DATA_ROOT
+# copy is only consulted if the engine copy is absent). Everything else —
+# including read-SOUNDING names nobody declared — is treated as a MUTATION and
+# passes the same fail-closed goal gate as Edit/Write/Bash. No goal installed
+# = no goal gate, identical to the file-tool contract.
+mcp_readonly(){ # <tool-name> -> 0 iff allowlisted read-only
+  local _t="$1" _f _line
+  for _f in "$(dirname "${BASH_SOURCE[0]}")/mcp-readonly-allowlist.txt" \
+            "$DATA_ROOT/.claude/hooks/mcp-readonly-allowlist.txt"; do
+    [ -f "$_f" ] || continue
+    while IFS= read -r _line; do
+      case "$_line" in ''|\#*) continue ;; esac
+      # shellcheck disable=SC2254 — glob patterns are the allowlist format
+      case "$_t" in $_line) return 0 ;; esac
+    done < "$_f"
+    return 1   # first allowlist found is authoritative
+  done
+  return 1     # no allowlist anywhere = nothing is read-only
+}
+
+mcpgate_decide(){ # <stdin-json> — protocol on stdout: ALLOW or BLOCK + message
+  local _tool
+  _tool="$(printf '%s' "${1:-}" | sed -n 's/.*"tool_name"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | head -n1)"
+  case "$_tool" in mcp__*) : ;; *) printf 'ALLOW\n'; return 0 ;; esac
+  if mcp_readonly "$_tool"; then printf 'ALLOW\n'; return 0; fi
+  goal_gate_or_block "$_tool" || return 0   # BLOCK already printed
+  printf 'ALLOW\n'; return 0
+}
+
 mutgate_decide(){ # <stdin-json> — protocol on stdout: ALLOW or BLOCK + message
-  # R0.1 §1 — GOAL GATE, FAIL CLOSED, evaluated BEFORE anything else so no
-  # side effect can precede it. Applies to every mutating tool in every
-  # session that passes PreToolUse (direct, resumed, nested subagents). The
-  # existing routing logic below deliberately fails OPEN on receipt problems;
-  # the goal gate is the opposite by owner instruction: an installed
-  # gravito.goal that is expired/not-yet/over-budget BLOCKS, with an
-  # actionable refusal receipt. Reads are never gated (emergency stop and
-  # status stay available); a missing goal file changes nothing.
+  # R0.1 §1 — goal gate FIRST, so no side effect can precede it. Applies in
+  # every session that passes PreToolUse (direct, resumed, nested subagents).
+  # The routing logic below deliberately fails OPEN on receipt problems; the
+  # goal gate is the opposite by owner instruction. Reads are never gated
+  # (emergency stop and status stay available).
   local _gtool
   _gtool="$(printf '%s' "${1:-}" | sed -n 's/.*"tool_name"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | head -n1)"
   case "$_gtool" in Read|Grep|Glob) : ;; *)
-  if [ -f "$DATA_ROOT/gravito.goal" ]; then
-    _gc="$DATA_ROOT/build-os/tools/goal-check.sh"
-    [ -x "$_gc" ] || _gc="$(dirname "${BASH_SOURCE[0]}")/../../build-os/tools/goal-check.sh"
-    if [ -x "$_gc" ]; then
-      if ! _gout="$(bash "$_gc" --gate "$DATA_ROOT/gravito.goal" 2>&1)"; then
-        mkdir -p "$DATA_ROOT/build-os/receipts"
-        _gstat="$(bash "$_gc" --status "$DATA_ROOT/gravito.goal" 2>/dev/null || true)"
-        printf '%s tool=%s BLOCKED %s | %s\n' "$(date -u +%FT%TZ)" "${_gtool:-unknown}" "$_gstat" "$_gout" >> "$DATA_ROOT/build-os/receipts/refusals.log"
-        printf 'BLOCK\nGOAL HALT (tool-level, fail closed): %s\nThis mutation was refused BEFORE any side effect. Receipt: build-os/receipts/refusals.log. Reads, gravito status, and gravito stop remain available.\n' "$_gout"
-        return 0
-      fi
-    else
-      # Fail CLOSED on a missing gate when a goal exists: an unenforceable
-      # contract must not silently become no contract.
-      mkdir -p "$DATA_ROOT/build-os/receipts"
-      printf '%s tool=%s BLOCKED gate-tool-missing\n' "$(date -u +%FT%TZ)" "${_gtool:-unknown}" >> "$DATA_ROOT/build-os/receipts/refusals.log"
-      printf 'BLOCK\nGOAL HALT (fail closed): gravito.goal is installed but goal-check.sh is missing — run gravito update to restore the engine.\n'
-      return 0
-    fi
-  fi
+    goal_gate_or_block "$_gtool" || return 0   # BLOCK already printed
   esac
   local in="$1" tool cls rec tid="none" mode="-" v act rtool rcmd sha exc
   tool="$(printf '%s' "$in" | sed -n 's/.*"tool_name"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | head -n1)"
@@ -785,9 +825,9 @@ status_report(){
 # ---------------------------------------------------------------- wrapper ----
 CMD="${1:-}"
 case "$CMD" in
-  gate|mutgate|count|post|status) ;;
+  gate|mutgate|mcpgate|count|post|status) ;;
   -h|--help|help) sed -n '2,70p' "${BASH_SOURCE[0]}"; exit 0 ;;
-  *) printf 'routing-gate: unknown command "%s" — expected gate|mutgate|count|post|status\n' "${CMD:-}" >&2; exit 2 ;;
+  *) printf 'routing-gate: unknown command "%s" — expected gate|mutgate|mcpgate|count|post|status\n' "${CMD:-}" >&2; exit 2 ;;
 esac
 
 if [ "$CMD" = "status" ]; then status_report; exit $?; fi
@@ -810,7 +850,7 @@ case "$CMD" in
   post)
     post_tool "$IN" || logrow "-" "-" "FAIL-OPEN" "cmd=post internal error"
     exit 0 ;;
-  gate|mutgate)
+  gate|mutgate|mcpgate)
     # Keep the hook's REAL stderr reachable on fd 9: the decide functions run
     # with stderr silenced (incidental tool noise must not pollute a refusal),
     # but logrow's unwritable-store fallback line must still escape — a trace
@@ -818,6 +858,8 @@ case "$CMD" in
     exec 9>&2
     if [ "$CMD" = "gate" ]; then
       OUT="$(gate_decide "$IN" 2>/dev/null)"; RC=$?
+    elif [ "$CMD" = "mcpgate" ]; then
+      OUT="$(mcpgate_decide "$IN" 2>/dev/null)"; RC=$?
     else
       OUT="$(mutgate_decide "$IN" 2>/dev/null)"; RC=$?
     fi

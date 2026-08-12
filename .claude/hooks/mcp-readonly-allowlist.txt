@@ -1,0 +1,14 @@
+# MCP read-only allowlist — R1-P2. DEFAULT CLOSED: an mcp__* tool is exempt
+# from the goal gate ONLY if it matches a line here. Everything else is
+# treated as a mutation, including read-sounding names nobody declared.
+# Format: one shell glob per line, matched against the full tool name.
+# Keep this NARROW — widening it is an authority decision, not a convenience.
+#
+# GitHub MCP server: pure lookups only. Deliberately absent: create_*,
+# update_*, delete_*, merge_*, push_*, *_write, add_*, fork_*, enable_*,
+# request_*, run_*, subscribe_* — anything that changes remote state.
+mcp__github__get_*
+mcp__github__list_*
+mcp__github__search_*
+mcp__github__issue_read
+mcp__github__pull_request_read
