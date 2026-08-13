@@ -1,5 +1,13 @@
 # EXP-0013 Stage A — EXECUTION READINESS (launch-minus-one)
 
+> **SUPERSEDED (historical document).** The owner-authorized adversarial
+> audit REFUTED this verdict — see PRE-SPEND-AUDIT.md and AMENDMENT-V3.md:
+> the v2 corpus was structurally void (seed/measured code disjointness),
+> the budget gate had no durable spend source, seed distillation was
+> unimplemented, the analysis median was direction-biased, and the freeze
+> missed additions/permissions. The verification tool of record is now
+> freeze3.mjs; this file is kept byte-stable as history except this notice.
+
 ## VERDICT: READY_FOR_SPEND_AUTHORIZATION
 
 Every launch-blocking item below is materialized, executable, and proven with

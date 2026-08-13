@@ -1,13 +1,13 @@
 # Task S11
 
-Fix the TypeScript type errors in `server/deployment/deployment-router.ts`.
+Fix the TypeScript type errors in `server/deployment/deployment-persistence.ts`.
 
-That file currently has 15 typecheck error(s) (TS2322, TS2339, TS2345, TS2551, TS2554).
+That file currently has 14 typecheck error(s) (TS18047).
 
 ## How this will be judged (identical in both conditions)
 
 Verification command: `npx tsc --noEmit -p tsconfig.json`
-Accepted when: the command reports ZERO errors for `server/deployment/deployment-router.ts`, AND no new error identity appears in any file
+Accepted when: the command reports ZERO errors for `server/deployment/deployment-persistence.ts`, AND no new error identity appears in any file
 (errors are compared by file+code+message, never by line number).
 
 REJECTED, regardless of the compiler result: `@ts-ignore`, `@ts-expect-error`, `@ts-nocheck`, `any` casts,
