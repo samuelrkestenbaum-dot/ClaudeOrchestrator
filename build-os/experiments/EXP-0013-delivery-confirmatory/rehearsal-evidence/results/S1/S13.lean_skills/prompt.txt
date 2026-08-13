@@ -1,0 +1,16 @@
+# Task S13
+
+Fix the TypeScript type errors in `server/deployment/cms-content-layer.ts`.
+
+That file currently has 12 typecheck error(s) (TS18047).
+
+## How this will be judged (identical in both conditions)
+
+Verification command: `npx tsc --noEmit -p tsconfig.json`
+Accepted when: the command reports ZERO errors for `server/deployment/cms-content-layer.ts`, AND no new error identity appears in any file
+(errors are compared by file+code+message, never by line number).
+
+REJECTED, regardless of the compiler result: `@ts-ignore`, `@ts-expect-error`, `@ts-nocheck`, `any` casts,
+or deleting the offending code. Fix the type, do not silence it.
+
+Work in the current repository. Do not push, and do not touch anything outside it.
