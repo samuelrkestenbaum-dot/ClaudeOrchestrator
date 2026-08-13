@@ -44,17 +44,17 @@ cp "$SRC/bin/gravito" "$T/bin/"; cp "$SRC/install-project.sh" "$SRC/init-build-o
 cp -r "$SRC/templates" "$T/templates"
 cp -r "$SRC/.claude/agents" "$SRC/.claude/commands" "$SRC/.claude/hooks" "$T/.claude/"
 cp -r "$SRC/build-os/maintenance" "$T/build-os/maintenance"
-cp "$SRC/tests/exp0013_readiness_tests.sh" "$SRC/tests/exp0013_fixture_tests.sh" "$SRC/tests/exp0013_redteam_tests.sh" "$SRC/tests/exp0013_capability_tests.sh" "$SRC/tests/exp0013_release_tests.sh" "$T/tests/" 2>/dev/null
+cp "$SRC/tests/exp0013_readiness_tests.sh" "$SRC/tests/exp0013_fixture_tests.sh" "$SRC/tests/exp0013_redteam_tests.sh" "$SRC/tests/exp0013_capability_tests.sh" "$SRC/tests/exp0013_release_tests.sh" "$SRC/tests/exp0013_review_tests.sh" "$T/tests/" 2>/dev/null
 FC="$T/build-os/experiments/EXP-0013-delivery-confirmatory"
-if [ -f "$E/FREEZE-MANIFEST-v5.json" ]; then
+if [ -f "$E/FREEZE-MANIFEST-v6.json" ]; then
   echo rogue > "$FC/harness/rogue.mjs"
-  OUT=$(node "$FC/harness/freeze5.mjs" verify 2>&1); rm "$FC/harness/rogue.mjs"
+  OUT=$(node "$FC/harness/freeze6.mjs" verify 2>&1); rm "$FC/harness/rogue.mjs"
   ok 'printf "%s" "$OUT" | grep -q "UNEXPECTED_FILE harness/rogue.mjs"' "ADDED file in a frozen dir => typed refusal (v2 gap closed)"
   chmod 777 "$FC/harness/oracle.mjs"
-  OUT=$(node "$FC/harness/freeze5.mjs" verify 2>&1); chmod 644 "$FC/harness/oracle.mjs"
+  OUT=$(node "$FC/harness/freeze6.mjs" verify 2>&1); chmod 644 "$FC/harness/oracle.mjs"
   ok 'printf "%s" "$OUT" | grep -q "MODE_DRIFT harness/oracle.mjs"' "PERMISSION change => typed refusal (v2 gap closed)"
   mv "$FC/harness/oracle.mjs" "$WORK/oracle.hold"
-  OUT=$(node "$FC/harness/freeze5.mjs" verify 2>&1); mv "$WORK/oracle.hold" "$FC/harness/oracle.mjs"
+  OUT=$(node "$FC/harness/freeze6.mjs" verify 2>&1); mv "$WORK/oracle.hold" "$FC/harness/oracle.mjs"
   ok 'printf "%s" "$OUT" | grep -q "MISSING_FILE"' "REMOVED/renamed frozen file => typed refusal, not a crash"
 else
   ok 'false' "v3 manifest exists (add)"; ok 'false' "(mode)"; ok 'false' "(missing)"

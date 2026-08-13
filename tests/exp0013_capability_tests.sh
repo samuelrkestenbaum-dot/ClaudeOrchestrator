@@ -36,8 +36,8 @@ for f in $NOPROV; do
   if grep -E "^import" "$H/$f" 2>/dev/null | grep -qE "provider-call-site"; then echo "  LEAK: $f imports provider-call-site"; LEAK=1; fi
 done
 ok '[ "$LEAK" = 0 ]' "NO no-provider module imports provider-call-site (the only inference owner) — structural, not procedural"
-ok '[ "$(grep -rl "from \"./provider-call-site" "$H" | wc -l)" = 0 ]' \
-  "provider-call-site has ZERO importers inside the harness — it can only be acquired explicitly at a measured entry"
+ok '[ "$(grep -rl "from \"./provider-call-site" "$H" | grep -v launch-measured | wc -l)" = 0 ]' \
+  "provider-call-site has exactly ONE importer: launch-measured.mjs, the sanctioned measured entry (AMENDMENT v6) — nothing in preparation imports it"
 ok '! grep -E "^import" "$H/transport-rehearsal.mjs" | grep -qE "child_process|worker_threads|node:net|node:http"' \
   "rehearsal transport still imports no exec/network capability"
 ok '! grep -rE "^import.*(node:http|node:net|node:tls|node:dgram)" "$H" | grep -q .' "NO harness module imports any network capability"

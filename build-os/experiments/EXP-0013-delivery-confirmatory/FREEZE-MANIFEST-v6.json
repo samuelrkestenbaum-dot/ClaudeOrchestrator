@@ -1,0 +1,478 @@
+{
+  "artifact": "exp0013_freeze_manifest_v6",
+  "predecessors": "v1 live-verified; v2/v3/v4 manifests immutable history (their own verifies superseded per AMENDMENT-V5.md)",
+  "source_commit_at_freeze": "4adf8ba3aaf95a59520082f8d1274164d6579021",
+  "files": {
+    "FREEZE-MANIFEST.json": {
+      "sha256": "1291c0ae8befdfb4c8aa0711e12f539928662d6a8262822ea834b899b7c326df",
+      "mode": "644"
+    },
+    "FREEZE-MANIFEST-v2.json": {
+      "sha256": "2299f379af8dc6a0eac1460e7dee58fee855b06f240de2cc494479780df347d8",
+      "mode": "644"
+    },
+    "FREEZE-MANIFEST-v3.json": {
+      "sha256": "2569ca3c4074b8ba0aaf24fb0b1f3a0db99770075fe7adfb1f0ea34fb4fb093a",
+      "mode": "644"
+    },
+    "FREEZE-MANIFEST-v4.json": {
+      "sha256": "a89de23bfb0e254950848f3632bbec114f7c837692f806f2ddf21a1b34bcf006",
+      "mode": "644"
+    },
+    "FREEZE-MANIFEST-v5.json": {
+      "sha256": "51b95e006f725e6e5ef84c1c0bcda4e3c25a31c40bf6a269b80d7133db85ea17",
+      "mode": "644"
+    },
+    "FAILURE-MODES-ADDENDUM.md": {
+      "sha256": "8be33198b555542e80e149b75e51c9ae812df2f995a16c19f0008061b215cbb7",
+      "mode": "644"
+    },
+    "AMENDMENT-V3.md": {
+      "sha256": "5cbee799e5d3e5fba630c8db4826be298acd6eb1fd1e6c026e58145ff8fd8a89",
+      "mode": "644"
+    },
+    "AMENDMENT-V4.md": {
+      "sha256": "dc0a887167c7893472f523fcbeeaa2860ef7dda338b63ea3dffdd2d6cfe3276c",
+      "mode": "644"
+    },
+    "AMENDMENT-V5.md": {
+      "sha256": "74572e0053f73ce1cfd20eef589eb510909fd72024ec62cc711395f7fb646040",
+      "mode": "644"
+    },
+    "AMENDMENT-V6.md": {
+      "sha256": "fb45763ea5a2129ffccd5bac857b92d5cd62f38c8fccad2944bf2b04cbdda6cf",
+      "mode": "644"
+    },
+    "INCIDENT-2026-08-13-UNAUTHORIZED-CALL.md": {
+      "sha256": "39390f7b2182ea257ca8e8b0d43d386311c0a6e30ff43c4bf2ec978f9316a8e0",
+      "mode": "644"
+    },
+    "ESCROW-HANDOFF.md": {
+      "sha256": "91ce67d4faddf61b0893dd9e16a5978ad628107556c98fe29576377b0f188db0",
+      "mode": "644"
+    },
+    "PREREGISTRATION-STAGE-A.md": {
+      "sha256": "1f2ed43f2260b1d0ae575d9fca60e57dc8f3eb8a854b570ca3c27765125e9035",
+      "mode": "644"
+    },
+    "FAILURE-MODES.md": {
+      "sha256": "b8fe8494d7f50aac2e0eb8b4a77a928501a863f2a773574a53cc399f9d81498e",
+      "mode": "644"
+    },
+    "STAGED-DESIGN.md": {
+      "sha256": "a0a5aa9d28dca18a4f65476bf6ed85ad73421a02b3f514471a8c7a21393067ce",
+      "mode": "644"
+    },
+    "corpus/sequences.json": {
+      "sha256": "f6a69200b76198801b085b3b8591d173bedd3ecbeca537fd8363a01c305bf969",
+      "mode": "644"
+    },
+    "corpus/baseline-tsc.txt": {
+      "sha256": "9b935d7a7c86948288cf7db364dfe68a021c8e67e9278704dafa14971a6386c7",
+      "mode": "644"
+    },
+    "corpus/ARM-ORDER-COMMITMENT.json": {
+      "sha256": "6f89f4bed7686698339670ac9c326f1ac91c7dfe2307dce6595ad785b83319fa",
+      "mode": "644"
+    },
+    "corpus/RERUN-ORDER-COMMITMENT.json": {
+      "sha256": "f1fa5422c60f17c572f4cbee9bfc5033998cbe4107f3517ef0020fc3f4ed3fc9",
+      "mode": "644"
+    },
+    "harness/fixture.mjs": {
+      "sha256": "d419622005e6e6799b6ad62d8bd314f67482b2f28f9c209d104e96da4640cf9b",
+      "mode": "755"
+    },
+    "harness/scheduler.mjs": {
+      "sha256": "2a7191b46a06365e4d79c341f3ac128be2eeaf6925c79105f6568b38dc166a76",
+      "mode": "755"
+    },
+    "harness/views.mjs": {
+      "sha256": "623802a4e226c444529380a8d6cede362a6fbbd659e24adf8b5d42ff70e1a616",
+      "mode": "755"
+    },
+    "harness/fake-worker.sh": {
+      "sha256": "203ad2e4f5b92d89b8a49cef1468e25bea3d2fe2305002ee3bbaebec1823e46b",
+      "mode": "755"
+    },
+    "harness/freeze.mjs": {
+      "sha256": "3e76c6cccefdd4b0685f8bdbd4a5b68dce5500b9252a239c058609267fa81e95",
+      "mode": "755"
+    },
+    "harness/oracle.mjs": {
+      "sha256": "340729ea059e090fd0d20615b8effa5823061a2041c49b4f8689d40e43083e5d",
+      "mode": "644"
+    },
+    "harness/telemetry.mjs": {
+      "sha256": "e95f98e0372f6531adc9b57e88032e6fd026d776695ad3844a2f84ecc43bad59",
+      "mode": "644"
+    },
+    "harness/model-config.json": {
+      "sha256": "377be3d107909b6dd909cd06c78a7f902172a62c3752cb96d4456088554d28f9",
+      "mode": "644"
+    },
+    "harness/seal-orders.mjs": {
+      "sha256": "cc82c0c53b27cbf682914276756984fac832316552d5a61172dfae72f43e5d5d",
+      "mode": "644"
+    },
+    "harness/controller.mjs": {
+      "sha256": "05483961f63d41bad2994fc19f1ee04bfb36046c1e869cac48fc13372e416b55",
+      "mode": "644"
+    },
+    "harness/analysis.mjs": {
+      "sha256": "df935324e84fef888667f6998e62fc3ecdada4918e66db1eac9a75b02872f17a",
+      "mode": "644"
+    },
+    "harness/freeze2.mjs": {
+      "sha256": "d20484e902c380fe6b29809b487c0c5bbdd0b7b314ba8ff782bbb97efddd58f3",
+      "mode": "644"
+    },
+    "harness/freeze3.mjs": {
+      "sha256": "a139de0738e206dfbb8d6ad4fa87e07794e1a8475f95dc016a64ee03240f2d3e",
+      "mode": "644"
+    },
+    "harness/freeze4.mjs": {
+      "sha256": "801310e4acb708dd449a09d40d1d3ac66e3463bcebbdda5f6654d32141e5e1e7",
+      "mode": "644"
+    },
+    "harness/freeze5.mjs": {
+      "sha256": "72da289e031a7b5d7b888220bb5b6720d243ce2de0dbda56ea8257dea5adc6e3",
+      "mode": "644"
+    },
+    "harness/freeze6.mjs": {
+      "sha256": "6278fe5742d97575d0857849d3c59452359311068a2016ae8721327bfcd477c0",
+      "mode": "644"
+    },
+    "harness/supervise.mjs": {
+      "sha256": "4bbaeed4e510d47f8f71acc1942c470523e9ca80d2c96e00e265f75eda3bdaab",
+      "mode": "644"
+    },
+    "harness/transport-rehearsal.mjs": {
+      "sha256": "5e95b488a0fb99f2aaa73247a340cca30a8f103ad37ff495a446ad4052cd6df1",
+      "mode": "644"
+    },
+    "harness/transport-measured.mjs": {
+      "sha256": "d603d4a5d9cfaeaa0d69c12d7a5d49cca1024e3dc7bfc44251fd118dae93f6c5",
+      "mode": "644"
+    },
+    "harness/spend-ledger.mjs": {
+      "sha256": "e27a52f5dc8ec1fcce8695c6de851ec7a516db68cfe727a171a08cd8af6ea1bc",
+      "mode": "644"
+    },
+    "harness/distill.mjs": {
+      "sha256": "932ae7a78eca44b1b49f5c0a09a6eb5a50c3c1afe3bb867a1f07bc860ca9ee14",
+      "mode": "644"
+    },
+    "harness/mapping-escrow.mjs": {
+      "sha256": "e4cd0e8b889f571ee4a65a371f134b99f6a9fa848f3e24b144ccaa507dc40d00",
+      "mode": "644"
+    },
+    "harness/leakcheck2.mjs": {
+      "sha256": "bfa0e058f68ec68041817caea9326b23e98eff257df9eb40c6df99c7572142ae",
+      "mode": "644"
+    },
+    "harness/exec-registry.mjs": {
+      "sha256": "763cec45f0f7c090232b8b5c094d0f48b9f019dbc778c00cb31c89e926a212fd",
+      "mode": "644"
+    },
+    "harness/provider-argv.mjs": {
+      "sha256": "5707d599b2a0ad121ced6f436447e005ea7e28f52aeeceff05e2c820abec0f20",
+      "mode": "644"
+    },
+    "harness/provider-call-site.mjs": {
+      "sha256": "dfdd69da80e0251708a307a82af59c7e935892e6049a84e5071bf83884fadb25",
+      "mode": "644"
+    },
+    "harness/authorization.mjs": {
+      "sha256": "50e9214270645d7370ba470b2ea91dd1bd0d53ca29955e9a1d31ded5050c01a7",
+      "mode": "644"
+    },
+    "harness/escrow-cli.mjs": {
+      "sha256": "5814456e425c3845189cef335d16f1730152d7a7ad4db4a9b6a3ff9703f70b9b",
+      "mode": "644"
+    },
+    "harness/oracle-runner.mjs": {
+      "sha256": "33da773c3d9619fb966f6cff5f52727c5fd9d28391d3c989e6981883fa4c48ab",
+      "mode": "644"
+    },
+    "harness/launch-measured.mjs": {
+      "sha256": "768579816745d52a1264286e4ef78c7e200e61042a89b5ea44c809309171ad48",
+      "mode": "644"
+    },
+    "../../delivery/ucdl.mjs": {
+      "sha256": "f6dc5439bd0567bcdfa10cd6ac1b16871a0236e8b8182ebf25ef4fa655c300d6",
+      "mode": "644"
+    },
+    "../../tools/planner.mjs": {
+      "sha256": "6f6d664e810058a58b267954a8b19b56cce27aece3caf29756cc8fe2b21f49c5",
+      "mode": "644"
+    },
+    "../../tools/reachability.mjs": {
+      "sha256": "75fde85e4551c49e87757ad724832498fe5187974eac5fa7fd690dfadf57c88b",
+      "mode": "755"
+    },
+    "../../tools/h0-check.sh": {
+      "sha256": "6089afd749f12f12bd23b6c677ddb4dedf953e743415d9405d5281f587c3df63",
+      "mode": "755"
+    },
+    "../../tools/goal-check.sh": {
+      "sha256": "c2e63aadadea83e79aa8fde8bc11baf7b5472925d9e3f055a8a4b02d85c2306e",
+      "mode": "755"
+    },
+    "../../tools/route-task.sh": {
+      "sha256": "f76e7eb88eef401b5a3f514d7f779d7b00ec8f137d8b1ed651d25c273bc1ae0e",
+      "mode": "755"
+    },
+    "../../tools/mode-select.mjs": {
+      "sha256": "e5c9711e7e36f406f4a26668343077c9a213c6e10139f4002f457ad4414e6439",
+      "mode": "755"
+    },
+    "../../../bin/gravito": {
+      "sha256": "161e61362344106c5df7dcc3c8a247d859595a44237f1a13caac8bae2e45b7ae",
+      "mode": "755"
+    },
+    "../../../install-project.sh": {
+      "sha256": "c9220706fa7ad60be180d6c465f649a1f59255c5c7bead2d5bad991b53e1bec9",
+      "mode": "755"
+    },
+    "../../../init-build-os.sh": {
+      "sha256": "bc45886de7209c649485997805ae7bc17ed28f92efaf2e602e3bfb611f6081f2",
+      "mode": "755"
+    },
+    "../../../tests/exp0013_fixture_tests.sh": {
+      "sha256": "a973d2a627ecdf379859e4f9bdd9c5cb432e4aab7cb0c936a767d5c18db4ba67",
+      "mode": "644"
+    },
+    "../../../tests/exp0013_readiness_tests.sh": {
+      "sha256": "76c84a68dbd71b6039f2c8cfdd52b24ae8ee868f0f984afedb83830c8d16d373",
+      "mode": "644"
+    },
+    "../../../tests/exp0013_redteam_tests.sh": {
+      "sha256": "9e1620b2a19e3d0af5f57289a8ba562b6795ad583aef3123b954ccdcba8e5468",
+      "mode": "644"
+    },
+    "../../../tests/exp0013_capability_tests.sh": {
+      "sha256": "3072b1d7487e176fbb526df2b0fec18ca5d2159ef734dff19afd7bb698d3761e",
+      "mode": "644"
+    },
+    "../../../tests/exp0013_release_tests.sh": {
+      "sha256": "f1478a8a2d0b95a19d0252c3ed72121dd64856e4fda5dd23e922d131da6bb8ea",
+      "mode": "644"
+    },
+    "../../../tests/exp0013_review_tests.sh": {
+      "sha256": "c64226f1448fc9b92180186db9ae52c430f701449948c15468e0b26f9505bf2b",
+      "mode": "644"
+    }
+  },
+  "trees": {
+    "../../../templates": {
+      "build-os/memory/current_state.md": {
+        "sha256": "59e9649690f5b345aefa40923d738def339cbc8e52b8d321e13fb017e2a54b21",
+        "mode": "644"
+      },
+      "build-os/memory/residue.md": {
+        "sha256": "81c72126cebe39cd83eefa6f41a3396f0161a4821de5d68200c305c2d0f2690c",
+        "mode": "644"
+      },
+      "build-os/memory/tool_router.example.md": {
+        "sha256": "3e9f53b3f756482f288117f82ff44a0e3b56327d1e5d687c8ee57722f826e942",
+        "mode": "644"
+      },
+      "build-os/memory/tool_router.md": {
+        "sha256": "6419b02ea65d0ced6268d300f4a374d01a8ccea4e7f7494ab44c4c37b83255ed",
+        "mode": "644"
+      },
+      "build-os/packets/active_packet.md": {
+        "sha256": "339d706913006e5558e359148af72ecf76ca004ff04a39f765c2aaf4e05c7811",
+        "mode": "644"
+      },
+      "build-os/receipts/README.md": {
+        "sha256": "538b601792cfbeba3cbf32c0e26b8be3b8acb3cdce313cd50e939fb22260204b",
+        "mode": "644"
+      },
+      "gravito.goal.example": {
+        "sha256": "b5fb0e0e40d09129499591eb3403d29fce1ffd776cb1a61990ec1ac598e23f84",
+        "mode": "644"
+      },
+      "repomix.config.json": {
+        "sha256": "673727aea13a5fad1bdd93e1f85aa920456de8baaf895a9554a806069ee5c9ec",
+        "mode": "644"
+      },
+      "serena-pinned.mcp.json": {
+        "sha256": "5f26287d01d0e27b82a035b78523ffd0201cc9099c7ec8519b84323643f1c1f3",
+        "mode": "644"
+      },
+      "session-start-bootstrap.sh": {
+        "sha256": "0a9b71517832935e39443a3f4b03a7343de21667ceb2ac53860ce0075f86f9a3",
+        "mode": "755"
+      }
+    },
+    "../../../.claude/agents": {
+      "archivist.md": {
+        "sha256": "45d3b5fef7e2f591ac15f829c680cc5b2e765d025a65b19d5e046700900090ea",
+        "mode": "644"
+      },
+      "build-orchestrator.md": {
+        "sha256": "cdef80e6b64c112b5f2046dffc04ac0d79f2ca99e2340160a2c46b8a4b086251",
+        "mode": "644"
+      },
+      "builder.md": {
+        "sha256": "9312dce68aeb2171aee50744258af70cbf7fe331f799d206ebc43c9e67f6d77c",
+        "mode": "644"
+      },
+      "qa.md": {
+        "sha256": "ad52bd8be9c14c70b1c91fa08c986119f5c76e27cfec00974ea37af47f386915",
+        "mode": "644"
+      },
+      "reviewer.md": {
+        "sha256": "c2b10991206a0af6cddbfd612f50a1997deb0521d78819a0778eb27dcb0519e5",
+        "mode": "644"
+      }
+    },
+    "../../../.claude/commands": {
+      "capability-profile.md": {
+        "sha256": "a32911618d78f81ac9ec244e7b6bec94ab09c9f256d2226240a7c41582f72917",
+        "mode": "644"
+      },
+      "close-packet.md": {
+        "sha256": "8ec01a54a3a62e826d400268264a9897a91b408f0a6be3ea80abc075f44ab9a5",
+        "mode": "644"
+      },
+      "next-packet.md": {
+        "sha256": "51874e69fa2f3e3288cddf59e27e53c0c1143281507e58e0ce73342783f4f325",
+        "mode": "644"
+      },
+      "review-packet.md": {
+        "sha256": "bd6aac498d3ae3b87d1cdb17a394769ca6d9f54522c44573b775067a95d8cd01",
+        "mode": "644"
+      }
+    },
+    "../../../.claude/hooks": {
+      "build-os-identity.sh": {
+        "sha256": "192cd768d38e93e4d15c7e4d8447faa7f7e6a7cd797e532f2f2e6b2ae96240c5",
+        "mode": "755"
+      },
+      "concession-gate.sh": {
+        "sha256": "fe285a217d040bcf56004d74cd6b93c6854ce95ccfa5bf65cc33a374d9170761",
+        "mode": "755"
+      },
+      "hook-once.sh": {
+        "sha256": "8377a2bc0ecbd8e2d4c156c7ed77782ddb4d226402f8890a163177ee00f5bdae",
+        "mode": "755"
+      },
+      "mcp-readonly-allowlist.txt": {
+        "sha256": "6b1b244502de7054941f9d9fca1134c5bc085776b524d64a4634fdc7a5e28801",
+        "mode": "644"
+      },
+      "project-identity.sh": {
+        "sha256": "2fc6755c7813beac6f7ad615552d620e3b29089f660004ea4e963ee746b0cae6",
+        "mode": "755"
+      },
+      "prompt-router.sh": {
+        "sha256": "580e59ca90fd4abedf35467cde1630288d37d9d6afe50406936dae045703abaf",
+        "mode": "755"
+      },
+      "routing-gate.sh": {
+        "sha256": "c13b0c5417ec56508aeea29ebf0f118bd3439f36c0ec7b1d6ebd2d6980b2f859",
+        "mode": "755"
+      },
+      "session-start-build-os.sh": {
+        "sha256": "04eaba4b802cbd77be23ff2b37f1889ef3ca7ad6f84eafecdae143e69c881263",
+        "mode": "755"
+      }
+    },
+    "../../maintenance": {
+      "install-maintenance.sh": {
+        "sha256": "a7ac43866be84cb107e46faefd02454a3c6c0bce5c2b30eb54808616dc0b1aee",
+        "mode": "755"
+      },
+      "PORTING.md": {
+        "sha256": "0e2b7d9cca4b02cea7085b78745ddc317dbb41ec96d473e9a26277bf19a0b22f",
+        "mode": "644"
+      },
+      "real-memory-tripwire.mjs": {
+        "sha256": "c29c11a0ab2a933c8e7202e60e42e84f431d17d790ef7bacd392815a10974c11",
+        "mode": "644"
+      },
+      "rootscan-controls.json": {
+        "sha256": "0b9db43bbd13f4f723ae19b13a3af19e5956e8c06a8e486268cb0ef0c578f63a",
+        "mode": "644"
+      },
+      "rotate-memory.mjs": {
+        "sha256": "7b455c4649065cabea0ac17204f7e053d34e844002f0ac27903bfd85d7596757",
+        "mode": "644"
+      },
+      "rotate-memory.rootscan.test.mjs": {
+        "sha256": "bc6c36d014766f1be455bc4e7bdd792c3a6e97049d9800950bb5f6d428745e5f",
+        "mode": "644"
+      },
+      "rotate-memory.sh": {
+        "sha256": "10f31271380748a1fd47e858ac92f87c60f6238c7e6095a14a3cd271b5bfa822",
+        "mode": "755"
+      },
+      "rotate-memory.test.mjs": {
+        "sha256": "d6e2f8e6f4794e7a756fcb4007b3e1afb87bf4df15f777d5404bd64c342d9a92",
+        "mode": "644"
+      },
+      "run-tests.sh": {
+        "sha256": "08ac4e75cf65a34376813819b9dd8ec4cca34f41e51da6b399f443c82433775a",
+        "mode": "755"
+      },
+      "source-scan.mjs": {
+        "sha256": "f736cd5c0f657c42681f86757a65015ec3ada9a0d2259bb5643cd8620750c65f",
+        "mode": "644"
+      },
+      "templates/standing_gates.md": {
+        "sha256": "73592c0e3dbb6db1f779caabba754d0b1d53f566105560976c522fd3966dd2ac",
+        "mode": "644"
+      }
+    }
+  },
+  "inventory": {
+    "harness": [
+      "analysis.mjs",
+      "authorization.mjs",
+      "controller.mjs",
+      "distill.mjs",
+      "escrow-cli.mjs",
+      "exec-registry.mjs",
+      "fake-worker.sh",
+      "fixture.mjs",
+      "freeze.mjs",
+      "freeze2.mjs",
+      "freeze3.mjs",
+      "freeze4.mjs",
+      "freeze5.mjs",
+      "freeze6.mjs",
+      "launch-measured.mjs",
+      "leakcheck2.mjs",
+      "mapping-escrow.mjs",
+      "model-config.json",
+      "oracle-runner.mjs",
+      "oracle.mjs",
+      "provider-argv.mjs",
+      "provider-call-site.mjs",
+      "scheduler.mjs",
+      "seal-orders.mjs",
+      "spend-ledger.mjs",
+      "supervise.mjs",
+      "telemetry.mjs",
+      "transport-measured.mjs",
+      "transport-rehearsal.mjs",
+      "views.mjs"
+    ],
+    "corpus": [
+      "ARM-ORDER-COMMITMENT.json",
+      "RERUN-ORDER-COMMITMENT.json",
+      "baseline-tsc.txt",
+      "sequences.json"
+    ]
+  },
+  "unfrozen": [
+    "sealed order/rerun/blinding stores + salts (outside repo; commitments frozen)",
+    "corpus/mapping-escrow.json (owner-created post-publication; digest recorded in that go)",
+    "the p1-distilled live stores (spend-time products of frozen distill.mjs)",
+    "EXECUTION-READINESS.md, PRE-SPEND-AUDIT.md, PUBLICATION-READINESS.md, RELEASE-AUDIT.md, OWNER-GUIDE.md (describe freezes)",
+    "rehearsal-evidence/ (run products, not contract)"
+  ]
+}

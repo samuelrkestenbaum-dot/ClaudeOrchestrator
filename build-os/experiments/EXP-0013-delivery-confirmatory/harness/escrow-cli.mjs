@@ -33,8 +33,11 @@ const sha = (b) => crypto.createHash("sha256").update(b).digest("hex");
 // history, or any file.
 process.stdin.setEncoding("utf8");
 const _lines = []; const _resolvers = []; let _buf = "";
+const restoreTty = () => { try { if (process.stdin.isTTY) process.stdin.setRawMode(false); } catch {} };
+process.on("exit", restoreTty); // v6 (review F2): NEVER leave the owner's terminal in raw mode
+let _eof = false;
 process.stdin.on("data", (c) => {
-  if (process.stdin.isTTY && c === "") { process.stdout.write("\n"); process.exit(130); }
+  if (process.stdin.isTTY && c === "") { restoreTty(); process.stdout.write("\n"); process.exit(130); }
   _buf += c;
   let m;
   while ((m = _buf.match(/[\r\n]/))) {
@@ -42,20 +45,35 @@ process.stdin.on("data", (c) => {
     const r = _resolvers.shift(); if (r) r(line); else _lines.push(line);
   }
 });
+// v6 (review F2): stdin EOF previously let the event loop drain and the
+// process exit 0 as a silent no-op "success". EOF now resolves every
+// pending prompt with null, which callers treat as a typed refusal.
+process.stdin.on("end", () => { _eof = true; while (_resolvers.length) _resolvers.shift()(null); });
 async function promptHidden(q) {
   process.stdout.write(q);
   if (process.stdin.isTTY) process.stdin.setRawMode(true);
   process.stdin.resume();
-  const line = _lines.length ? Promise.resolve(_lines.shift()) : new Promise((r) => _resolvers.push(r));
-  const ans = await line;
-  if (process.stdin.isTTY) process.stdin.setRawMode(false);
+  const ans = _lines.length ? _lines.shift() : (_eof ? null : await new Promise((r) => _resolvers.push(r)));
+  restoreTty();
   process.stdout.write("\n");
   return ans;
 }
 
 async function main() {
   const mode = process.argv[2];
+  // v6 (review F2): piped secrets can leak through shell history and process
+  // plumbing. Real (owner) mode REQUIRES a TTY; non-TTY stdin is refused
+  // unless the explicit synthetic-test adapter env is set (test suites only,
+  // synthetic passphrases only).
+  if (!process.stdin.isTTY && process.env.EXP0013_ESCROW_TEST_STDIN !== "1") {
+    console.log("REFUSED: NON_TTY_STDIN — real escrow requires an interactive terminal; piped secrets can leak via shell history. (Tests set EXP0013_ESCROW_TEST_STDIN=1 with SYNTHETIC passphrases only.)");
+    process.exit(1);
+  }
   if (mode === "create") {
+    if (fs.existsSync(OUT)) {
+      console.log("REFUSED: ESCROW_ARTIFACT_ALREADY_EXISTS — refusing to overwrite a live escrow; delete it deliberately first if you intend to re-escrow.");
+      process.exit(1);
+    }
     // Bundle BOTH sealed stores (orders + rerun orders) into one plaintext.
     const bundle = {};
     for (const f of ["orders.json", "rerun-orders.json"]) {
@@ -67,9 +85,14 @@ async function main() {
     fs.writeFileSync(tmpPlain, JSON.stringify(bundle), { mode: 0o600 });
     const pass = await promptHidden("Escrow passphrase (min 12 chars, echo disabled): ");
     const pass2 = await promptHidden("Repeat passphrase: ");
+    if (pass === null || pass2 === null) { fs.rmSync(tmpPlain, { force: true }); console.log("REFUSED: STDIN_EOF before both passphrase entries"); process.exit(1); }
     if (pass !== pass2) { fs.rmSync(tmpPlain, { force: true }); console.log("REFUSED: passphrases differ"); process.exit(1); }
-    const c = escrowCreate({ sealedPath: tmpPlain, passphrase: pass, outFile: OUT });
-    if (!c.ok) { fs.rmSync(tmpPlain, { force: true }); console.log(`REFUSED: ${c.reason}`); process.exit(1); }
+    // v6 (review F2): atomic create — write to a tmp name, rename into place;
+    // an interrupted run can never leave a partial file at the real path.
+    const OUT_TMP = OUT + `.tmp.${process.pid}`;
+    const c = escrowCreate({ sealedPath: tmpPlain, passphrase: pass, outFile: OUT_TMP });
+    if (!c.ok) { fs.rmSync(tmpPlain, { force: true }); fs.rmSync(OUT_TMP, { force: true }); console.log(`REFUSED: ${c.reason}`); process.exit(1); }
+    fs.renameSync(OUT_TMP, OUT); fs.chmodSync(OUT, 0o644); // ciphertext is publish-safe by design
     // Decryptability proof WITHOUT revealing any label:
     const tmpRec = path.join(os.tmpdir(), `escrow-chk-${process.pid}.json`);
     const r = escrowRecover({ escrowFile: OUT, passphrase: pass, outPath: tmpRec });

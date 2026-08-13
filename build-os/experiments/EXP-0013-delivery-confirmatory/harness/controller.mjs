@@ -105,7 +105,7 @@ console.log(JSON.stringify(pr.plan.cognition_requirement));`], { encoding: "utf8
   return JSON.parse(out.trim());
 }
 
-function workerPrompt(task) {
+export function workerPrompt(task) {
   return [
     `# Task ${task.task_id}`, "",
     `Fix the TypeScript type errors in \`${task.file}\`.`, "",
@@ -132,11 +132,11 @@ export async function runStageA({ mode = "rehearsal", studyDir, isoRoot, shimDir
 
   const v1 = spawnSync("node", [path.join(HERE, "freeze.mjs"), "verify"], { encoding: "utf8" });
   step("freeze_v1", v1.status === 0, (v1.stdout || v1.stderr).trim());
-  const v3mf = path.join(ROOT, "FREEZE-MANIFEST-v5.json");
+  const v3mf = path.join(ROOT, "FREEZE-MANIFEST-v6.json");
   if (fs.existsSync(v3mf)) {
-    const v3 = spawnSync("node", [path.join(HERE, "freeze5.mjs"), "verify"], { encoding: "utf8" });
-    step("freeze_v5", v3.status === 0, (v3.stdout || v3.stderr).trim());
-  } else logStep(studyDir, { step: "freeze_v5", ok: null, detail: "v5 manifest not yet created (required before spend, not before rehearsal)" });
+    const v3 = spawnSync("node", [path.join(HERE, "freeze6.mjs"), "verify"], { encoding: "utf8" });
+    step("freeze_v6", v3.status === 0, (v3.stdout || v3.stderr).trim());
+  } else logStep(studyDir, { step: "freeze_v6", ok: null, detail: "v6 manifest not yet created (required before spend, not before rehearsal)" });
   logStep(studyDir, { step: "freeze_v2", ok: null, detail: "v2 manifest preserved as immutable history; superseded per AMENDMENT-V3.md/V4.md" });
 
   const lock = path.join(studyDir, ".study-lock");
@@ -215,7 +215,7 @@ export async function runStageA({ mode = "rehearsal", studyDir, isoRoot, shimDir
             freeze_intact: fs.existsSync(v3mf),
           });
           step(`admit_${cell}`, mode === "rehearsal" ? true : adm.admitted,
-            adm.admitted ? "admissible" : `${adm.reason}${fs.existsSync(v3mf) ? "" : " (v5 freeze pending — expected pre-freeze)"}`);
+            adm.admitted ? "admissible" : `${adm.reason}${fs.existsSync(v3mf) ? "" : " (v6 freeze pending — expected pre-freeze)"}`);
           const gate = budgetGate({ spentUsd: 0 });
           step(`budget_${cell}`, gate.allowed, `projected $${gate.projected.toFixed(2)}`);
           const b = await transport.call({ cell, argv: buildArgv(), stdinText: prompt, cwd: wt, cwdDisplay: `<ISO>/${seq}/worktree` });
@@ -263,11 +263,11 @@ export async function runMeasured({ studyDir, isoRoot, transport, spendAuthPath 
   if (transport.kind === "measured-real") {
     if (!spendAuthPath || !fs.existsSync(spendAuthPath)) return abort("MEASURED_MODE_REQUIRES_SPEND_AUTHORIZATION");
     let auth; try { auth = JSON.parse(fs.readFileSync(spendAuthPath, "utf8")); } catch { return abort("SPEND_AUTH_MALFORMED"); }
-    const v3mf = path.join(ROOT, "FREEZE-MANIFEST-v5.json");
+    const v3mf = path.join(ROOT, "FREEZE-MANIFEST-v6.json");
     const digest = fs.existsSync(v3mf) ? sha(fs.readFileSync(v3mf)) : null;
     if (auth.spend_authorized !== true || !auth.freeze_digest || auth.freeze_digest !== digest)
       return abort("SPEND_AUTH_INVALID_OR_FREEZE_MISMATCH");
-    const v3 = spawnSync("node", [path.join(HERE, "freeze5.mjs"), "verify"], { encoding: "utf8" });
+    const v3 = spawnSync("node", [path.join(HERE, "freeze6.mjs"), "verify"], { encoding: "utf8" });
     if (v3.status !== 0) return abort("INVALID_HARNESS_CHANGED_AFTER_FREEZE");
   }
 
@@ -342,11 +342,16 @@ export async function runMeasured({ studyDir, isoRoot, transport, spendAuthPath 
         if (r.refused) { step(`seed_${cell}`, false, r.refused); return abort(r.refused); }
         if (r.modelAbort) { step("model_id_gate", false, `${r.modelAbort} — study aborted after call 1, before call 2`); return abort(r.modelAbort); }
         if (r.orphanFail) { step(`orphans_${cell}`, false, r.orphanFail.join(",")); return abort("ORPHANED_WORKER"); }
-        const o = oracleFor({ seq, cell, worktree: wt, kind: "seed" });
-        const acc = oracleAcceptance({ baselineText: o.baselineText, afterText: o.afterText, targetFile: task.file });
-        const d = distill({ task, acceptance: acc, diffText: o.diffText ?? "" });
-        if (r.res.terminal_reason !== "success" || !r.tel.metered || !d.ok) {
-          step(`seed_${cell}`, false, `terminal=${r.res.terminal_reason} metered=${r.tel.metered} distill=${d.ok ? "ok" : d.reason}`);
+        // v6 (review F1): the oracle FAILS CLOSED — a runner throw is a seed
+        // failure, never a silently-clean compile.
+        let d = null, oracleFail = null;
+        try {
+          const o = oracleFor({ seq, cell, worktree: wt, kind: "seed" });
+          const acc = oracleAcceptance({ baselineText: o.baselineText, afterText: o.afterText, targetFile: task.file });
+          d = distill({ task, acceptance: acc, diffText: o.diffText ?? "" });
+        } catch (e) { oracleFail = String(e.message).slice(0, 120); }
+        if (r.res.terminal_reason !== "success" || !r.tel.metered || oracleFail || !d?.ok) {
+          step(`seed_${cell}`, false, `terminal=${r.res.terminal_reason} metered=${r.tel.metered} oracle=${oracleFail ?? "ok"} distill=${d ? (d.ok ? "ok" : d.reason) : "n/a"}`);
           if (attempt === 2) return abort("SEQUENCE_VOID_SEED_FAILED_TWICE");
         } else {
           store = d;
@@ -375,15 +380,23 @@ export async function runMeasured({ studyDir, isoRoot, transport, spendAuthPath 
             if (r.refused) { step(`cell_${cell}`, false, r.refused); return abort(r.refused); }
             if (r.modelAbort) { step("model_id_gate", false, r.modelAbort); return abort(r.modelAbort); }
             if (r.orphanFail) { step(`orphans_${cell}`, false, r.orphanFail.join(",")); return abort("ORPHANED_WORKER"); }
-            const infra = r.res.terminal_reason !== "success" || !r.tel.metered;
+            let infra = r.res.terminal_reason !== "success" || !r.tel.metered;
+            let terminal = r.res.terminal_reason;
+            let acc = null;
+            if (!infra) {
+              // v6 (review F1): a runner throw makes the CELL infrastructure-
+              // invalid under an honest terminal_reason — never a clean run.
+              try {
+                const o = oracleFor({ seq, cell, worktree: wt, kind: "measured", arm });
+                acc = oracleAcceptance({ baselineText: o.baselineText, afterText: o.afterText, targetFile: task.file });
+              } catch { infra = true; terminal = "oracle_failed"; }
+            }
             if (infra) infraInvalid = true;
-            const o = oracleFor({ seq, cell, worktree: wt, kind: "measured", arm });
-            const acc = infra ? null : oracleAcceptance({ baselineText: o.baselineText, afterText: o.afterText, targetFile: task.file });
             cells.push({ seq, pos, arm, rerun_of: round > 1 ? `${seq}.${pos}` : null,
               delivery_valid: true, invalid_reason: null,
               accepted: acc ? acc.accepted : null, metered: r.tel.metered,
               economics: r.tel.economics, elapsed_s: r.res.elapsed_s,
-              terminal_reason: r.res.terminal_reason });
+              terminal_reason: terminal });
             step(`cell_${cell}`, true, `terminal=${r.res.terminal_reason} metered=${r.tel.metered} accepted=${acc ? acc.accepted : "n/a"}`);
           }
           if (!infraInvalid) break;

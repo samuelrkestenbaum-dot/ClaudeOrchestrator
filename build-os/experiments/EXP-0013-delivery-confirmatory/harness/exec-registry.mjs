@@ -48,6 +48,7 @@ const REGISTRY = {
     timeout_ms: 300000, result_schema: "script-defined", failure: "non-zero exit surfaces",
     modes: { any: [
       [{ re: "^-c$" }, { re: "^git -C .*archive.*tar -x -C.*$" }],  // the pinned corpus archive pipe
+      [{ re: "^-c$" }, { re: "^cd [^;|&`$()]+ && npx tsc --noEmit -p tsconfig\\.json$" }], // the acceptance-oracle compile (AMENDMENT v6)
       [{ re: ".*/h0-check\\.sh$" }, { re: "^--gate$" }],
       [{ re: ".*/fake-worker\\.sh$" }, { rest: true }],
     ] },

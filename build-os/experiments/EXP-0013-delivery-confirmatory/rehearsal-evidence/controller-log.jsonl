@@ -1,62 +1,62 @@
 {"step":"freeze_v1","ok":true,"detail":"freeze intact: 10 artifacts","prev_sha":"genesis"}
-{"step":"freeze_v5","ok":true,"detail":"v5 freeze intact: 59 artifacts + 38 tree files + inventory (v1 re-verified)","prev_sha":"9b24bcfe933892327f2771b8542ddd9cb27adb9035e4498d0eeaab5ff9db0278"}
-{"step":"freeze_v2","ok":null,"detail":"v2 manifest preserved as immutable history; superseded per AMENDMENT-V3.md/V4.md","prev_sha":"c03e13820d77a36d85aef38a8c91259ded935d05e56fdd9185cfa33a63906671"}
-{"step":"study_lock","ok":true,"detail":"acquired","prev_sha":"2419f8c2e1abf43f27b3c878ff659575037c2d6dd085d9edc3776eee34e85984"}
-{"step":"cli_preflight","ok":true,"detail":"claude --version => 2.1.231 (Claude Code) (expected 2.1.231; registry-gated, argv strictly [\"--version\"], env scrubbed)","prev_sha":"6605e06efbc9a46f237c5a5edc4594eb1b68d3125a631f45e68dcbc412cb18d3"}
-{"step":"h0_gate","ok":true,"detail":"h0-check --gate exit 0","prev_sha":"afc4208a8276b35a033a762e759b2e0dd237443359dc8fa97b315115d0420391"}
-{"step":"isolation_manifest","ok":true,"detail":"unique paths for S1,S2","prev_sha":"061c0234c35c81bc73d24df5f490f9c384a83ede9ca357a5f8ef6c10313e1307"}
-{"step":"sealed_orders","ok":true,"detail":"commitment verified, balance 2/2","prev_sha":"54b7b1077797df6a0132d617a748b3a861aebe6d929392d1ac4a7b1d5ecb737f"}
-{"step":"sealed_rerun_orders","ok":true,"detail":"contingency rerun orders precommitted","prev_sha":"93bbb2abd4f042ca5076804ecd0fe72d1b793f7e5fd66306132f57a4117be372"}
-{"step":"schedule","ok":true,"detail":"lanes=2, serial topology per model-config","prev_sha":"8a12e84b00be728b36accdc8e1cd59c3fdbee8bf2a6494c5fef0b49e10c47ac9"}
-{"step":"worktree_S1","ok":true,"detail":"514d6c03eaa9 task_file_sha e472fb404715","prev_sha":"b97115710c2b0c365764e83fb5f92d813cd074dfb65e678492a36a642c1129e0"}
-{"step":"budget_S11","ok":true,"detail":"projected $6.00 of $100","prev_sha":"01c9585c3405f59606f7d92dd7c8321e8be5089ec753693039f5089496b11945"}
-{"step":"barrier_S11","ok":true,"detail":"seed call digested, not launched","prev_sha":"e794dd546de732393fc35c0db202968a881ca4e95124a6c3752c0a4d669b57d4"}
-{"step":"plan_S12","ok":true,"detail":"descriptor objective_terms=[\"TS18047\"]","prev_sha":"7514d375f3f61739fc3ec57c1177793939e304908eace21cae0f292f193024ec"}
-{"step":"distill_S12","ok":true,"detail":"store 13332cf96675 via distill-v3 (rehearsal-synthetic seed record)","prev_sha":"a74fc11f04087f71ba0fe69363e2a48afd4e636c1a01987bfe532331b279e2f5"}
-{"step":"deliver_S12","ok":true,"detail":"pair-equivalent delivery, both arms","prev_sha":"56b00a4a2a52b0649a817d23a8b7541d7ae9f7cebd30171a318971f087f26f3a"}
-{"step":"admit_S12.lean_skills","ok":true,"detail":"admissible","prev_sha":"20112bdb9dbc15e6d1176f7db62cd39b0fdda865b46a1123cdcc6be7ef29c2ca"}
-{"step":"budget_S12.lean_skills","ok":true,"detail":"projected $6.00","prev_sha":"75db6e2865e3e54546811ce0ad34ab8b8f4573a8c7eab0c70b3db6a37d2b0ad0"}
-{"step":"barrier_S12.lean_skills","ok":true,"detail":"call digested, not launched","prev_sha":"406b5b3178dcf2301f7679a322da60bb54296d4e401424efee0a1d0086b6b80c"}
-{"step":"orphans_S12.lean_skills","ok":true,"detail":"no orphaned processes","prev_sha":"7504bd2716d1254b5b2740fc76e01e9b10def07abd83ff94422eab851a74887f"}
-{"step":"admit_S12.lean_rules","ok":true,"detail":"admissible","prev_sha":"d5920c2e0b0d96f2729ed371b0f11ea3b4a9ee705a17c3225361816301e68d47"}
-{"step":"budget_S12.lean_rules","ok":true,"detail":"projected $6.00","prev_sha":"3f970964ee6081590ee8f6a199a5e782339154afcbcad7f898e691d987a9f525"}
-{"step":"barrier_S12.lean_rules","ok":true,"detail":"call digested, not launched","prev_sha":"d0971a560324920f219ff07a32351ec03f5d0347a0a581e551b28109af426f64"}
-{"step":"orphans_S12.lean_rules","ok":true,"detail":"no orphaned processes","prev_sha":"3cae67ec9aa6e3adc96a4a3aa097f28e284b1eec163af82a2dd67c8124ede71c"}
-{"step":"plan_S13","ok":true,"detail":"descriptor objective_terms=[\"TS18047\"]","prev_sha":"a05599d49259c622f28875e03c64e7f60c6dd5549bfbcc7fd8b46d728e4c2b0b"}
-{"step":"distill_S13","ok":true,"detail":"store 13332cf96675 via distill-v3 (rehearsal-synthetic seed record)","prev_sha":"e653aaa92dfc909d67cd228107e9d89eb7e955bf5e0f1941e1500081d1cda2ef"}
-{"step":"deliver_S13","ok":true,"detail":"pair-equivalent delivery, both arms","prev_sha":"4f7267fd4f92f505a9c86702fe5d375f71bd3f2f2ac910b879eb90f00611988a"}
-{"step":"admit_S13.lean_rules","ok":true,"detail":"admissible","prev_sha":"43596d9cede7a85dbbca53f24733877855d4f6e9ab2e4612b9227062077f7822"}
-{"step":"budget_S13.lean_rules","ok":true,"detail":"projected $6.00","prev_sha":"4b7e85650aa17621be303b0078777920585f9ce1f1f3e00bcfa8fcaafd8a43b8"}
-{"step":"barrier_S13.lean_rules","ok":true,"detail":"call digested, not launched","prev_sha":"ee7571602cb86d58d8eba3afd187cd727c14774afd22f777e8b977d5db6e0795"}
-{"step":"orphans_S13.lean_rules","ok":true,"detail":"no orphaned processes","prev_sha":"87db2a657ab6b313aa3c219b18645d5a5b29c4350e12087809695bc2bb2ad65e"}
-{"step":"admit_S13.lean_skills","ok":true,"detail":"admissible","prev_sha":"f1c92e5f35f88b34692801b82f56f0df6c7dfcaf24355e7da49b4689f78e0e88"}
-{"step":"budget_S13.lean_skills","ok":true,"detail":"projected $6.00","prev_sha":"6f34e73f2b11f863aed709f62700218d5370bfb097c6b3a93543c2d08f93ee4b"}
-{"step":"barrier_S13.lean_skills","ok":true,"detail":"call digested, not launched","prev_sha":"d2315639037fee8a8bcd1b854cb4670dfdc3360f9696f167e4959d831c6c0e58"}
-{"step":"orphans_S13.lean_skills","ok":true,"detail":"no orphaned processes","prev_sha":"92fc7de637f385a2aee2e570f4a5b7ec416b7beb430258503dfe821d07ba0721"}
-{"step":"worktree_S2","ok":true,"detail":"17d58c4f483b task_file_sha 4cc39bed15d7","prev_sha":"cf40e2a8f739b22e42994b351975133010eb250faf33bff81649af7ef72b4bfd"}
-{"step":"budget_S21","ok":true,"detail":"projected $6.00 of $100","prev_sha":"3ab5fff9deff5b66a0c5bbeb01dd008e404ce5bbd5beeae44521275887d23221"}
-{"step":"barrier_S21","ok":true,"detail":"seed call digested, not launched","prev_sha":"212e93ca798c265931be39b2097cd92d95edc349c83b9e38a1f947e714df7b09"}
-{"step":"plan_S22","ok":true,"detail":"descriptor objective_terms=[\"TS2339\",\"TS2345\"]","prev_sha":"d2c83c6d61dedbc580e8c5584fa8951f894cec8bc36b4b0f7bcfc77fb7417b5c"}
-{"step":"distill_S22","ok":true,"detail":"store d8cc6b78a8e6 via distill-v3 (rehearsal-synthetic seed record)","prev_sha":"c20c4888a83b065ae9e462e1ad046efacfe640114706eb65733a942f885983b2"}
-{"step":"deliver_S22","ok":true,"detail":"pair-equivalent delivery, both arms","prev_sha":"cfe8879415aabd62dea20add6ae3748e30f3d16c7822112f88e3cb8aa1df2ca4"}
-{"step":"admit_S22.lean_rules","ok":true,"detail":"admissible","prev_sha":"6d403fe390a75a048782dc724289ec25d75f47b22b3681db4373af92954ea38f"}
-{"step":"budget_S22.lean_rules","ok":true,"detail":"projected $6.00","prev_sha":"235b8b48798a1903ab5c73969a4b5eb557b36753a04173dc7bf28db0ec2f6a65"}
-{"step":"barrier_S22.lean_rules","ok":true,"detail":"call digested, not launched","prev_sha":"0a8b9c43b2c4708b64255f42074e3cb247a5b9fc071ff36d9c454f5e79b4139a"}
-{"step":"orphans_S22.lean_rules","ok":true,"detail":"no orphaned processes","prev_sha":"e640c4689b45f5aeaf118f366dee4c72da49e36b1fd6f9e14b9bdaed26e01435"}
-{"step":"admit_S22.lean_skills","ok":true,"detail":"admissible","prev_sha":"eb431fd2e0319e08fab705b94f0966eef40a3f855313f766262071a80bfbd612"}
-{"step":"budget_S22.lean_skills","ok":true,"detail":"projected $6.00","prev_sha":"f891a8c91139ece466ab5e4e0ede36c3baf7e66945e8a4341c1d02a297e1d11f"}
-{"step":"barrier_S22.lean_skills","ok":true,"detail":"call digested, not launched","prev_sha":"240c6c491bbb2eba96309c8b78e2160fb2c582f197fb3ce30e73885d0f9b6e4b"}
-{"step":"orphans_S22.lean_skills","ok":true,"detail":"no orphaned processes","prev_sha":"12f86101e25d926466fdb1de820afb0cb76cc01a5cef700dc1b448917e782a9f"}
-{"step":"plan_S23","ok":true,"detail":"descriptor objective_terms=[\"TS2339\",\"TS7053\"]","prev_sha":"d4532ee5e3584657bfd62ffd19b2e8bdc614ac7e3e3624586ff17e294ec87dcd"}
-{"step":"distill_S23","ok":true,"detail":"store d8cc6b78a8e6 via distill-v3 (rehearsal-synthetic seed record)","prev_sha":"1f7294f53f9988473b6e9415fb952bc3956a4f7f67981f83aedf8eb0d3b344a4"}
-{"step":"deliver_S23","ok":true,"detail":"pair-equivalent delivery, both arms","prev_sha":"00d8e9d1a6e5c811ffd331871dc6e40162425a94f1d87603513ef8dbd15e2f27"}
-{"step":"admit_S23.lean_skills","ok":true,"detail":"admissible","prev_sha":"a7f42ac86033480bb0580e2b4292aed97fafd48db31bcf91206d443982c5b414"}
-{"step":"budget_S23.lean_skills","ok":true,"detail":"projected $6.00","prev_sha":"f8b723bbe1c3ca8a7512d693bf125e5dcbc214d10359c4525cd056a5eef4b76e"}
-{"step":"barrier_S23.lean_skills","ok":true,"detail":"call digested, not launched","prev_sha":"ce7dee529ebb42a08110fd6ad16c7c3b659944359858ea3ffdf2744b8cb62568"}
-{"step":"orphans_S23.lean_skills","ok":true,"detail":"no orphaned processes","prev_sha":"3e73e485d6ee815a561746d250fb995e0968d85b9f43c6a66e9bc40484d77abf"}
-{"step":"admit_S23.lean_rules","ok":true,"detail":"admissible","prev_sha":"64a7c8b1c064238ac5ce04e173732bc2e4e35e8575ea41a1f2641d01cd1698e1"}
-{"step":"budget_S23.lean_rules","ok":true,"detail":"projected $6.00","prev_sha":"366864ebece4828e351e1986df2624de103efe487789a4b5ba52fcb3745ef82f"}
-{"step":"barrier_S23.lean_rules","ok":true,"detail":"call digested, not launched","prev_sha":"61ab6b345f18cca029bca767600d318ac17bd4f1284e31afab7f277bbf4ce378"}
-{"step":"orphans_S23.lean_rules","ok":true,"detail":"no orphaned processes","prev_sha":"0dd7a0c77f8a026e7d568f095422ec0eaf46492a0d5dc384efc2db22cb9114ab"}
-{"step":"receipt_chain_S1","ok":true,"detail":"4 receipts chained","prev_sha":"bf269ef85f24682c4031fc418397fa9cf59f1ccd1858fbd9d7548c455aac7ddb"}
-{"step":"shim_untripped","ok":true,"detail":"PATH-shadow claude was never executed","prev_sha":"d4c1c450abc0ad726ca0e44ea78e77a002040db6f11c505fc3ca43c5436ff291"}
+{"step":"freeze_v6","ok":true,"detail":"v6 freeze intact: 65 artifacts + 38 tree files + inventory (v1 re-verified)","prev_sha":"9b24bcfe933892327f2771b8542ddd9cb27adb9035e4498d0eeaab5ff9db0278"}
+{"step":"freeze_v2","ok":null,"detail":"v2 manifest preserved as immutable history; superseded per AMENDMENT-V3.md/V4.md","prev_sha":"f4ea1e86c9b9f8cd7e71c020080d31a691ee317c7d34b64e47ba5c1f814b383d"}
+{"step":"study_lock","ok":true,"detail":"acquired","prev_sha":"ab7be35d170efaa4e07b4507134298fb6eff47f4b076094c8647c1813640be99"}
+{"step":"cli_preflight","ok":true,"detail":"claude --version => 2.1.231 (Claude Code) (expected 2.1.231; registry-gated, argv strictly [\"--version\"], env scrubbed)","prev_sha":"b04739191803e5f385d1a85719fbc1ad73e96ade90ea863f099047903ee05f30"}
+{"step":"h0_gate","ok":true,"detail":"h0-check --gate exit 0","prev_sha":"87f794dcae45bec8c0fffdea54694c85089c9b8c400c5cf99845a99df311e958"}
+{"step":"isolation_manifest","ok":true,"detail":"unique paths for S1,S2","prev_sha":"f7062cb241d991effa6795cb9af6463a6c4744221aaf79c0d30169b74a8462e5"}
+{"step":"sealed_orders","ok":true,"detail":"commitment verified, balance 2/2","prev_sha":"176502629324022d287fe0841d79fdb25162b7c158f385669d28efa03d975bd8"}
+{"step":"sealed_rerun_orders","ok":true,"detail":"contingency rerun orders precommitted","prev_sha":"00c0b34513157afb6a0d8468f1cad13c433606a9dfb0554b815f003823c6732c"}
+{"step":"schedule","ok":true,"detail":"lanes=2, serial topology per model-config","prev_sha":"13abaa01b1c08cc1ecb29258890e514e7a1c3c5625c5416436863ac76f5ec0dc"}
+{"step":"worktree_S1","ok":true,"detail":"ea373ccc242b task_file_sha e472fb404715","prev_sha":"afc6c4598566d12b26e9cfca63a97101eea69eef989db31648f90eda5e956021"}
+{"step":"budget_S11","ok":true,"detail":"projected $6.00 of $100","prev_sha":"4a2ecdf02cb5456623f064fd97afa886384f69b70af89fcfebda304aadec55df"}
+{"step":"barrier_S11","ok":true,"detail":"seed call digested, not launched","prev_sha":"8998a4a2aa1fbddefb26734be0ea2a93393c7f4509bf0d4cb73fdae0b1f77ed8"}
+{"step":"plan_S12","ok":true,"detail":"descriptor objective_terms=[\"TS18047\"]","prev_sha":"648ed9f610891c7803f839316dca004118e74ffba0f97b8d101199811538629b"}
+{"step":"distill_S12","ok":true,"detail":"store 13332cf96675 via distill-v3 (rehearsal-synthetic seed record)","prev_sha":"0285c52b6e0fd859152bd0762a80447fd02b494416d696aed02bc16ac6827b9a"}
+{"step":"deliver_S12","ok":true,"detail":"pair-equivalent delivery, both arms","prev_sha":"f044bde4646ea25fbf2d73f9b85c9ab97a958690f996019dd2aace457810ba0e"}
+{"step":"admit_S12.lean_skills","ok":true,"detail":"admissible","prev_sha":"d6b4a642cc0425915888b3dd0248d5b9cc04add368b5b39c3f29642b8d23d4ca"}
+{"step":"budget_S12.lean_skills","ok":true,"detail":"projected $6.00","prev_sha":"d886cd8c0557355f1e388c313fa9d23c09af95455bf0f9412dcf6547426600eb"}
+{"step":"barrier_S12.lean_skills","ok":true,"detail":"call digested, not launched","prev_sha":"7eecf44be738051b4c5be7c9cfdfca8f7d338c99eaa46630dff3c517e33906cc"}
+{"step":"orphans_S12.lean_skills","ok":true,"detail":"no orphaned processes","prev_sha":"37c26783b86a79fb05515796ed63b1ab0bf102f2ed7fa8b60c5213c6129e4883"}
+{"step":"admit_S12.lean_rules","ok":true,"detail":"admissible","prev_sha":"2bae1def1c6f0e0338e8a0bad70f707afc675ae900685f20b5a4d44864f67e03"}
+{"step":"budget_S12.lean_rules","ok":true,"detail":"projected $6.00","prev_sha":"a121a16b1093ff4e464f6549747ac527991b4e55a2ee2e32c9cc8b3631e04f0a"}
+{"step":"barrier_S12.lean_rules","ok":true,"detail":"call digested, not launched","prev_sha":"cfae47ac48568273aae2136b0857b5601e5d6bac565f546acc9165bcd277893a"}
+{"step":"orphans_S12.lean_rules","ok":true,"detail":"no orphaned processes","prev_sha":"e763e14ca74b339b9b917e596a9d72ee96a409cc83ca7a23d35386f521afc2fc"}
+{"step":"plan_S13","ok":true,"detail":"descriptor objective_terms=[\"TS18047\"]","prev_sha":"434cf412b8949afd6fcadf45bfb0bd673dc8ffd0efb7713f2429c443041e048a"}
+{"step":"distill_S13","ok":true,"detail":"store 13332cf96675 via distill-v3 (rehearsal-synthetic seed record)","prev_sha":"ce0ab4a68486f741dc624e6aa8d2dc47a0c4d54904f173e70024716b2d2150df"}
+{"step":"deliver_S13","ok":true,"detail":"pair-equivalent delivery, both arms","prev_sha":"50aeb908eb9692eae9076bf27a126b65cf09781023282db0e79fb7a5a57627ad"}
+{"step":"admit_S13.lean_rules","ok":true,"detail":"admissible","prev_sha":"d67d9c7fd7face5279c08c69e220000409a504d191b92e03389749bc4e43b6ea"}
+{"step":"budget_S13.lean_rules","ok":true,"detail":"projected $6.00","prev_sha":"4b15d72dc5228aed9a6b62455084c285e08b897dda489e3484bf68b04db75d24"}
+{"step":"barrier_S13.lean_rules","ok":true,"detail":"call digested, not launched","prev_sha":"eb4f2fea86352901928c4d4b06b8d76d45b306966a00f497376904ef589f5962"}
+{"step":"orphans_S13.lean_rules","ok":true,"detail":"no orphaned processes","prev_sha":"2021d27921093afcbab642f5677c852ddaf1a8775bb935e3dc910c911a70fa45"}
+{"step":"admit_S13.lean_skills","ok":true,"detail":"admissible","prev_sha":"bdd4d1b7add227611d4ce211efe59263ec7ee4d5c8ce736780760fb13ce2c96b"}
+{"step":"budget_S13.lean_skills","ok":true,"detail":"projected $6.00","prev_sha":"9971a98fe36f1c59ba7ef32a824b7f42cbd12f68a67a956066bcf72be50e88ee"}
+{"step":"barrier_S13.lean_skills","ok":true,"detail":"call digested, not launched","prev_sha":"a83c99bf053cde4260be063a6750445ef22aefaa15775568c10cfbddb27285d5"}
+{"step":"orphans_S13.lean_skills","ok":true,"detail":"no orphaned processes","prev_sha":"4d2924834ab8ff494775c0b2afe05157ff3dcc7d379c9869074abdd562207cdb"}
+{"step":"worktree_S2","ok":true,"detail":"b24b82cdc4df task_file_sha 4cc39bed15d7","prev_sha":"322ab0cf87978dce03a31e98baee339a594c82513a54688cd67175d8ebef87ca"}
+{"step":"budget_S21","ok":true,"detail":"projected $6.00 of $100","prev_sha":"b76eb710d7dfc6056b7995267f6925b67532f53457051282eebe336d6c839b9f"}
+{"step":"barrier_S21","ok":true,"detail":"seed call digested, not launched","prev_sha":"68dff509967952f875bad12598cd73f0a1d01b6515c36a94fc961800eba7ac50"}
+{"step":"plan_S22","ok":true,"detail":"descriptor objective_terms=[\"TS2339\",\"TS2345\"]","prev_sha":"11b4f9a853ced17d92a5a6bbec1c2ea9387be3f6d5d58df5bebf4ef7c50008b5"}
+{"step":"distill_S22","ok":true,"detail":"store d8cc6b78a8e6 via distill-v3 (rehearsal-synthetic seed record)","prev_sha":"7e213c11c2abede4c35bd218f7824d9e2ffbb2c20813f602119b09da314bb668"}
+{"step":"deliver_S22","ok":true,"detail":"pair-equivalent delivery, both arms","prev_sha":"37484fd581128f1f928cd8586cabb08767efb6507eb1bddce3b9681eebb5e4d7"}
+{"step":"admit_S22.lean_rules","ok":true,"detail":"admissible","prev_sha":"47245df1b8c5c10a65b79c6112732e3f14d836b9240de73441f76eafda210320"}
+{"step":"budget_S22.lean_rules","ok":true,"detail":"projected $6.00","prev_sha":"7a272d528b4dcb6e7e16bafa3c4839ece539715091f5a4e340aa70b0ecd199d2"}
+{"step":"barrier_S22.lean_rules","ok":true,"detail":"call digested, not launched","prev_sha":"7313cf7a737ce2e8305551cae68ad2a78e9eb263440c7dde2e291b0449dabdae"}
+{"step":"orphans_S22.lean_rules","ok":true,"detail":"no orphaned processes","prev_sha":"d198fbaf981cb2d023f44221aec248a5b0662993203252bfc889d50ad6bc2eec"}
+{"step":"admit_S22.lean_skills","ok":true,"detail":"admissible","prev_sha":"b57d23107d7bb7b2795ff9f8fe9a1317115c676d7726e6e27eec5c7a20acb2ab"}
+{"step":"budget_S22.lean_skills","ok":true,"detail":"projected $6.00","prev_sha":"157870f0f3770a5fb4912fe3573f48f33334d297849070297ecd8d6e0a40d535"}
+{"step":"barrier_S22.lean_skills","ok":true,"detail":"call digested, not launched","prev_sha":"c3fe628709fdb2f540c345dce7a6af11cc6134c79b4b31bc92c38a0787320dec"}
+{"step":"orphans_S22.lean_skills","ok":true,"detail":"no orphaned processes","prev_sha":"ca57e1d04b43f8635a1179772bde4d8d7a3243b2597d23198310d92851444d4f"}
+{"step":"plan_S23","ok":true,"detail":"descriptor objective_terms=[\"TS2339\",\"TS7053\"]","prev_sha":"fd12dd3a92e37113c228e160ed1afb2fbfce7f3f349f01fa847d35d33de0c243"}
+{"step":"distill_S23","ok":true,"detail":"store d8cc6b78a8e6 via distill-v3 (rehearsal-synthetic seed record)","prev_sha":"61ef04e712aac8a3c6e87276ef3dee5652d88fc7ac94c014f9c3bb08f7d114e9"}
+{"step":"deliver_S23","ok":true,"detail":"pair-equivalent delivery, both arms","prev_sha":"ed99dd132a6534e8f4fb55d13c16a7a55a2d7e8252d454ff9e7d0eadbc37f3c8"}
+{"step":"admit_S23.lean_skills","ok":true,"detail":"admissible","prev_sha":"725417d98e5e17ed48908f71fe5682adf129bfafebf504d134cafada9767ea63"}
+{"step":"budget_S23.lean_skills","ok":true,"detail":"projected $6.00","prev_sha":"a9487bf6956ddb116d6b83252d9f7e8ec285c753039dfc1ce19bbd6c5b7294e0"}
+{"step":"barrier_S23.lean_skills","ok":true,"detail":"call digested, not launched","prev_sha":"cf17e6c783a76eab7eeaf3880e1ee2ad23d9e2494dfc61cf6d80b07d15fb2756"}
+{"step":"orphans_S23.lean_skills","ok":true,"detail":"no orphaned processes","prev_sha":"059b1c85ccd4b25c3d4af325ed2f927656d8b84da1ba2f84cfc0505742b9b649"}
+{"step":"admit_S23.lean_rules","ok":true,"detail":"admissible","prev_sha":"4cee1287df636a59b821974cb8ebf71deb1d65c773b0b68f7db7d3c833102c6e"}
+{"step":"budget_S23.lean_rules","ok":true,"detail":"projected $6.00","prev_sha":"297e7b1c030c7a99c1a9b9f846b7b84557f3fc640a94f3a80077193e53e8b151"}
+{"step":"barrier_S23.lean_rules","ok":true,"detail":"call digested, not launched","prev_sha":"e651d3c119fe35f87bc20126577fc41c21c41d6ed22aaf7e95a53755de8aa978"}
+{"step":"orphans_S23.lean_rules","ok":true,"detail":"no orphaned processes","prev_sha":"c1c821c65e0c45fd56f28f5241004cabd1fea8ce2d05f2faa00e893f1cd3cd99"}
+{"step":"receipt_chain_S1","ok":true,"detail":"4 receipts chained","prev_sha":"c6d2c3e4ffe79cb164a3177bffd279c1d2c917cc577cca3e946f73e7a71a93cb"}
+{"step":"shim_untripped","ok":true,"detail":"PATH-shadow claude was never executed","prev_sha":"1fadc68e5ba754a29c70b95d8b0f706d8c0435651d8bf4379bc7bf7644fddb26"}

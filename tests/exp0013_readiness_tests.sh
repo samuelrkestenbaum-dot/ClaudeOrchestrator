@@ -241,16 +241,16 @@ import json,sys; rows=json.loads(sys.stdin.read())
 assert all(r[\"v\"]!=\"VOID\" or r[\"eff\"] is None for r in rows)
 exit(0)"' "a VOID stage never emits an efficiency report"
 
-echo "== 10. freeze v5: verifies, preserves v1 + v2-as-history, tamper-detects on a copy =="
+echo "== 10. freeze v6: verifies, preserves v1 + v2-as-history, tamper-detects on a copy =="
 ok 'node "$H/freeze.mjs" verify >/dev/null 2>&1' "v1 freeze still verifies untouched"
-if [ -f "$E/FREEZE-MANIFEST-v5.json" ]; then
-  ok 'node "$H/freeze5.mjs" verify >/dev/null 2>&1' "v5 freeze verifies (hashes + modes + directory inventory; v1 re-verified inside)"
+if [ -f "$E/FREEZE-MANIFEST-v6.json" ]; then
+  ok 'node "$H/freeze6.mjs" verify >/dev/null 2>&1' "v6 freeze verifies (hashes + modes + directory inventory; v1 re-verified inside)"
   ok 'python3 -c "
 import json,hashlib
-m=json.load(open(\"$E/FREEZE-MANIFEST-v5.json\"))
+m=json.load(open(\"$E/FREEZE-MANIFEST-v6.json\"))
 h=hashlib.sha256(open(\"$E/FREEZE-MANIFEST-v2.json\",\"rb\").read()).hexdigest()
 assert m[\"files\"][\"FREEZE-MANIFEST-v2.json\"][\"sha256\"]==h
-"' "v2 manifest preserved byte-identically as immutable history inside v5"
+"' "v2 manifest preserved byte-identically as immutable history inside v6"
   T="$WORK/copy"; mkdir -p "$T/build-os/experiments" "$T/build-os/delivery" "$T/build-os/tools" "$T/tests" "$T/bin" "$T/.claude"
   cp -r "$E" "$T/build-os/experiments/"
   cp "$SRC/build-os/delivery/ucdl.mjs" "$T/build-os/delivery/"
@@ -260,15 +260,15 @@ assert m[\"files\"][\"FREEZE-MANIFEST-v2.json\"][\"sha256\"]==h
   cp -r "$SRC/templates" "$T/templates"
   cp -r "$SRC/.claude/agents" "$SRC/.claude/commands" "$SRC/.claude/hooks" "$T/.claude/"
   cp -r "$SRC/build-os/maintenance" "$T/build-os/maintenance"
-  cp "$SRC/tests/exp0013_readiness_tests.sh" "$SRC/tests/exp0013_fixture_tests.sh" "$SRC/tests/exp0013_redteam_tests.sh" "$SRC/tests/exp0013_capability_tests.sh" "$SRC/tests/exp0013_release_tests.sh" "$T/tests/"
+  cp "$SRC/tests/exp0013_readiness_tests.sh" "$SRC/tests/exp0013_fixture_tests.sh" "$SRC/tests/exp0013_redteam_tests.sh" "$SRC/tests/exp0013_capability_tests.sh" "$SRC/tests/exp0013_release_tests.sh" "$SRC/tests/exp0013_review_tests.sh" "$T/tests/"
   sed -i 's/proposed_ceiling_usd\": 100/proposed_ceiling_usd\": 10000/' "$T/build-os/experiments/EXP-0013-delivery-confirmatory/harness/model-config.json"
-  OUT=$(node "$T/build-os/experiments/EXP-0013-delivery-confirmatory/harness/freeze5.mjs" verify 2>&1)
+  OUT=$(node "$T/build-os/experiments/EXP-0013-delivery-confirmatory/harness/freeze6.mjs" verify 2>&1)
   ok 'printf "%s" "$OUT" | grep -q "INVALID_HARNESS_CHANGED_AFTER_FREEZE: harness/model-config.json"' \
     "post-freeze spend-ceiling tamper on a disposable copy => typed refusal naming the file"
 else
-  ok 'false' "v5 freeze manifest exists"
-  ok 'false' "v2-history preservation (needs v5 manifest)"
-  ok 'false' "v5 tamper-detection (needs manifest)"
+  ok 'false' "v6 freeze manifest exists"
+  ok 'false' "v2-history preservation (needs v6 manifest)"
+  ok 'false' "v6 tamper-detection (needs manifest)"
 fi
 
 echo
