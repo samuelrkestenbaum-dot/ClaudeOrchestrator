@@ -1,0 +1,204 @@
+{
+  "artifact": "exp0013_freeze_manifest_v3",
+  "predecessors": "FREEZE-MANIFEST.json (still verified live) and FREEZE-MANIFEST-v2.json (immutable history; its own verify is superseded per AMENDMENT-V3.md)",
+  "source_commit_at_freeze": "29ae7b712b9a2c82d4378d6a34c0221dabf84d10",
+  "files": {
+    "FREEZE-MANIFEST.json": {
+      "sha256": "1291c0ae8befdfb4c8aa0711e12f539928662d6a8262822ea834b899b7c326df",
+      "mode": "644"
+    },
+    "FREEZE-MANIFEST-v2.json": {
+      "sha256": "2299f379af8dc6a0eac1460e7dee58fee855b06f240de2cc494479780df347d8",
+      "mode": "644"
+    },
+    "FAILURE-MODES-ADDENDUM.md": {
+      "sha256": "8be33198b555542e80e149b75e51c9ae812df2f995a16c19f0008061b215cbb7",
+      "mode": "644"
+    },
+    "AMENDMENT-V3.md": {
+      "sha256": "5cbee799e5d3e5fba630c8db4826be298acd6eb1fd1e6c026e58145ff8fd8a89",
+      "mode": "644"
+    },
+    "PREREGISTRATION-STAGE-A.md": {
+      "sha256": "1f2ed43f2260b1d0ae575d9fca60e57dc8f3eb8a854b570ca3c27765125e9035",
+      "mode": "644"
+    },
+    "FAILURE-MODES.md": {
+      "sha256": "b8fe8494d7f50aac2e0eb8b4a77a928501a863f2a773574a53cc399f9d81498e",
+      "mode": "644"
+    },
+    "STAGED-DESIGN.md": {
+      "sha256": "a0a5aa9d28dca18a4f65476bf6ed85ad73421a02b3f514471a8c7a21393067ce",
+      "mode": "644"
+    },
+    "corpus/sequences.json": {
+      "sha256": "a4c17e40a61ac4e2038d081f425b3c57fc12c31c490aaba389b4f7b6f4ebc2f9",
+      "mode": "644"
+    },
+    "corpus/baseline-tsc.txt": {
+      "sha256": "1dce735d438030a53a89912e7eaba37491def74a7c0908a7a23a087d006626ba",
+      "mode": "644"
+    },
+    "corpus/ARM-ORDER-COMMITMENT.json": {
+      "sha256": "6f89f4bed7686698339670ac9c326f1ac91c7dfe2307dce6595ad785b83319fa",
+      "mode": "644"
+    },
+    "corpus/RERUN-ORDER-COMMITMENT.json": {
+      "sha256": "f1fa5422c60f17c572f4cbee9bfc5033998cbe4107f3517ef0020fc3f4ed3fc9",
+      "mode": "644"
+    },
+    "harness/fixture.mjs": {
+      "sha256": "d419622005e6e6799b6ad62d8bd314f67482b2f28f9c209d104e96da4640cf9b",
+      "mode": "755"
+    },
+    "harness/scheduler.mjs": {
+      "sha256": "2a7191b46a06365e4d79c341f3ac128be2eeaf6925c79105f6568b38dc166a76",
+      "mode": "755"
+    },
+    "harness/views.mjs": {
+      "sha256": "623802a4e226c444529380a8d6cede362a6fbbd659e24adf8b5d42ff70e1a616",
+      "mode": "755"
+    },
+    "harness/fake-worker.sh": {
+      "sha256": "203ad2e4f5b92d89b8a49cef1468e25bea3d2fe2305002ee3bbaebec1823e46b",
+      "mode": "755"
+    },
+    "harness/freeze.mjs": {
+      "sha256": "3e76c6cccefdd4b0685f8bdbd4a5b68dce5500b9252a239c058609267fa81e95",
+      "mode": "755"
+    },
+    "harness/oracle.mjs": {
+      "sha256": "4ba5ae4b26d0d720665cb5692e46e42e10966ab86a7018cfcd6cef3929aecc93",
+      "mode": "644"
+    },
+    "harness/telemetry.mjs": {
+      "sha256": "e95f98e0372f6531adc9b57e88032e6fd026d776695ad3844a2f84ecc43bad59",
+      "mode": "644"
+    },
+    "harness/model-config.json": {
+      "sha256": "e08893711bc7f2a441f00e60358456712c87731f766ff9220c3527e08f865573",
+      "mode": "644"
+    },
+    "harness/seal-orders.mjs": {
+      "sha256": "cc82c0c53b27cbf682914276756984fac832316552d5a61172dfae72f43e5d5d",
+      "mode": "644"
+    },
+    "harness/controller.mjs": {
+      "sha256": "0db4da36d8e5dde3f9560d9165cbe7fe44af92391d9641034041e294bb58a18c",
+      "mode": "644"
+    },
+    "harness/analysis.mjs": {
+      "sha256": "df935324e84fef888667f6998e62fc3ecdada4918e66db1eac9a75b02872f17a",
+      "mode": "644"
+    },
+    "harness/freeze2.mjs": {
+      "sha256": "d20484e902c380fe6b29809b487c0c5bbdd0b7b314ba8ff782bbb97efddd58f3",
+      "mode": "644"
+    },
+    "harness/freeze3.mjs": {
+      "sha256": "a139de0738e206dfbb8d6ad4fa87e07794e1a8475f95dc016a64ee03240f2d3e",
+      "mode": "644"
+    },
+    "harness/supervise.mjs": {
+      "sha256": "4bbaeed4e510d47f8f71acc1942c470523e9ca80d2c96e00e265f75eda3bdaab",
+      "mode": "644"
+    },
+    "harness/transport-rehearsal.mjs": {
+      "sha256": "f239e87c58d4d9a6d710a11ba9149186a82d7887bcbe2be23c3ac49743e9e6ee",
+      "mode": "644"
+    },
+    "harness/transport-measured.mjs": {
+      "sha256": "57a4aaf521b5e6cb1db8b0e9939dab0aeb3c468a090ba4c2f11d47c4e96296ba",
+      "mode": "644"
+    },
+    "harness/spend-ledger.mjs": {
+      "sha256": "6b6359faf290184ce9c1d6895584710428b9db00aea8409598da3eea7d12a17f",
+      "mode": "644"
+    },
+    "harness/distill.mjs": {
+      "sha256": "932ae7a78eca44b1b49f5c0a09a6eb5a50c3c1afe3bb867a1f07bc860ca9ee14",
+      "mode": "644"
+    },
+    "harness/mapping-escrow.mjs": {
+      "sha256": "e4cd0e8b889f571ee4a65a371f134b99f6a9fa848f3e24b144ccaa507dc40d00",
+      "mode": "644"
+    },
+    "harness/leakcheck2.mjs": {
+      "sha256": "bfa0e058f68ec68041817caea9326b23e98eff257df9eb40c6df99c7572142ae",
+      "mode": "644"
+    },
+    "../../delivery/ucdl.mjs": {
+      "sha256": "f6dc5439bd0567bcdfa10cd6ac1b16871a0236e8b8182ebf25ef4fa655c300d6",
+      "mode": "644"
+    },
+    "../../tools/planner.mjs": {
+      "sha256": "6f6d664e810058a58b267954a8b19b56cce27aece3caf29756cc8fe2b21f49c5",
+      "mode": "644"
+    },
+    "../../tools/reachability.mjs": {
+      "sha256": "75fde85e4551c49e87757ad724832498fe5187974eac5fa7fd690dfadf57c88b",
+      "mode": "755"
+    },
+    "../../tools/h0-check.sh": {
+      "sha256": "6089afd749f12f12bd23b6c677ddb4dedf953e743415d9405d5281f587c3df63",
+      "mode": "755"
+    },
+    "../../../bin/gravito": {
+      "sha256": "161e61362344106c5df7dcc3c8a247d859595a44237f1a13caac8bae2e45b7ae",
+      "mode": "755"
+    },
+    "../../../templates/gravito.goal.example": {
+      "sha256": "b5fb0e0e40d09129499591eb3403d29fce1ffd776cb1a61990ec1ac598e23f84",
+      "mode": "644"
+    },
+    "../../../tests/exp0013_fixture_tests.sh": {
+      "sha256": "a973d2a627ecdf379859e4f9bdd9c5cb432e4aab7cb0c936a767d5c18db4ba67",
+      "mode": "644"
+    },
+    "../../../tests/exp0013_readiness_tests.sh": {
+      "sha256": "b057997dd24e6c6f244fd6bb8530f9569a8f6c14e212bee46520fa937ba54c7e",
+      "mode": "644"
+    },
+    "../../../tests/exp0013_redteam_tests.sh": {
+      "sha256": "253df332c1d68522b4791618566aaed755199c4f39e893a43faefdfabb5bf5d0",
+      "mode": "644"
+    }
+  },
+  "inventory": {
+    "harness": [
+      "analysis.mjs",
+      "controller.mjs",
+      "distill.mjs",
+      "fake-worker.sh",
+      "fixture.mjs",
+      "freeze.mjs",
+      "freeze2.mjs",
+      "freeze3.mjs",
+      "leakcheck2.mjs",
+      "mapping-escrow.mjs",
+      "model-config.json",
+      "oracle.mjs",
+      "scheduler.mjs",
+      "seal-orders.mjs",
+      "spend-ledger.mjs",
+      "supervise.mjs",
+      "telemetry.mjs",
+      "transport-measured.mjs",
+      "transport-rehearsal.mjs",
+      "views.mjs"
+    ],
+    "corpus": [
+      "ARM-ORDER-COMMITMENT.json",
+      "RERUN-ORDER-COMMITMENT.json",
+      "baseline-tsc.txt",
+      "sequences.json"
+    ]
+  },
+  "unfrozen": [
+    "sealed order/rerun/blinding stores + salts (outside repo by design; commitments ARE frozen)",
+    "mapping escrow ciphertext (created only after the owner supplies a passphrase; prerequisite in the spend template)",
+    "the p1-distilled live stores (produced at spend time via the frozen distill.mjs, digest-pinned before p2)",
+    "EXECUTION-READINESS.md and PRE-SPEND-AUDIT.md (describe freezes; freezing them would be circular)",
+    "rehearsal-evidence/ (run products, not contract)"
+  ]
+}

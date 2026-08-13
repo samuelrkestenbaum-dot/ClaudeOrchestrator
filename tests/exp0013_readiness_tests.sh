@@ -45,10 +45,13 @@ import json
 c=json.load(open("$E/corpus/sequences.json"))
 e11=["governance","mcp"]
 assert all(t["subsystem"] not in e11 for s in c["sequences"].values() for t in s)
-assert "amendment" in c and "coherence-field" in c["amendment"]["ground"]
+assert "coherence-field" in json.dumps(c.get("amendment_v2",{}))          # quarantine amendment preserved
+assert "INVALID_UNINTENDED_EMPTY_TREATMENT" in json.dumps(c.get("amendment_v3",{}))  # seed-coverage amendment disclosed
+for sid,p in c["seed_coverage_proof"].items():
+    assert p["p2_shared"] and p["p3_shared"], f"{sid} seed does not cover measured positions"
 files=[t["file"] for s in c["sequences"].values() for t in s]
 assert len(files)==len(set(files))==6
-PYEOF' "corpus artifact records derivation rule, quarantine amendment, and 6 distinct files"
+PYEOF' "corpus records both disclosed amendments and PROVES seed-coverage for every measured position"
 
 echo "== 2. oracle: identity-multiset semantics =="
 OUT=$(mod "
@@ -237,22 +240,31 @@ import json,sys; rows=json.loads(sys.stdin.read())
 assert all(r[\"v\"]!=\"VOID\" or r[\"eff\"] is None for r in rows)
 exit(0)"' "a VOID stage never emits an efficiency report"
 
-echo "== 10. freeze v2: verifies, preserves v1 byte-identically, tamper-detects on a copy =="
+echo "== 10. freeze v3: verifies, preserves v1 + v2-as-history, tamper-detects on a copy =="
 ok 'node "$H/freeze.mjs" verify >/dev/null 2>&1' "v1 freeze still verifies untouched"
-if [ -f "$E/FREEZE-MANIFEST-v2.json" ]; then
-  ok 'node "$H/freeze2.mjs" verify >/dev/null 2>&1' "v2 freeze verifies (and re-verifies v1 inside it)"
-  T="$WORK/copy"; mkdir -p "$T/build-os/experiments" "$T/build-os/delivery" "$T/build-os/tools" "$T/tests"
+if [ -f "$E/FREEZE-MANIFEST-v3.json" ]; then
+  ok 'node "$H/freeze3.mjs" verify >/dev/null 2>&1' "v3 freeze verifies (hashes + modes + directory inventory; v1 re-verified inside)"
+  ok 'python3 -c "
+import json,hashlib
+m=json.load(open(\"$E/FREEZE-MANIFEST-v3.json\"))
+h=hashlib.sha256(open(\"$E/FREEZE-MANIFEST-v2.json\",\"rb\").read()).hexdigest()
+assert m[\"files\"][\"FREEZE-MANIFEST-v2.json\"][\"sha256\"]==h
+"' "v2 manifest preserved byte-identically as immutable history inside v3"
+  T="$WORK/copy"; mkdir -p "$T/build-os/experiments" "$T/build-os/delivery" "$T/build-os/tools" "$T/tests" "$T/bin" "$T/templates"
   cp -r "$E" "$T/build-os/experiments/"
   cp "$SRC/build-os/delivery/ucdl.mjs" "$T/build-os/delivery/"
-  cp "$SRC/build-os/tools/planner.mjs" "$T/build-os/tools/"
-  cp "$SRC/tests/exp0013_readiness_tests.sh" "$T/tests/"
+  cp "$SRC/build-os/tools/planner.mjs" "$SRC/build-os/tools/reachability.mjs" "$T/build-os/tools/"
+  cp "$SRC/build-os/tools/h0-check.sh" "$T/build-os/tools/"
+  cp "$SRC/bin/gravito" "$T/bin/"; cp "$SRC/templates/gravito.goal.example" "$T/templates/"
+  cp "$SRC/tests/exp0013_readiness_tests.sh" "$SRC/tests/exp0013_fixture_tests.sh" "$SRC/tests/exp0013_redteam_tests.sh" "$T/tests/"
   sed -i 's/proposed_ceiling_usd\": 100/proposed_ceiling_usd\": 10000/' "$T/build-os/experiments/EXP-0013-delivery-confirmatory/harness/model-config.json"
-  OUT=$(node "$T/build-os/experiments/EXP-0013-delivery-confirmatory/harness/freeze2.mjs" verify 2>&1)
+  OUT=$(node "$T/build-os/experiments/EXP-0013-delivery-confirmatory/harness/freeze3.mjs" verify 2>&1)
   ok 'printf "%s" "$OUT" | grep -q "INVALID_HARNESS_CHANGED_AFTER_FREEZE: harness/model-config.json"' \
     "post-freeze spend-ceiling tamper on a disposable copy => typed refusal naming the file"
 else
-  ok 'false' "v2 freeze manifest exists"
-  ok 'false' "v2 tamper-detection (needs manifest)"
+  ok 'false' "v3 freeze manifest exists"
+  ok 'false' "v2-history preservation (needs v3 manifest)"
+  ok 'false' "v3 tamper-detection (needs manifest)"
 fi
 
 echo

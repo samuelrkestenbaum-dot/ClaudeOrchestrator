@@ -89,7 +89,12 @@ export function analyze({ cells, concurrentOverlapDetected = false }) {
     const sd = Math.sqrt(absLogs.map((x) => (x - mean) ** 2).reduce((a, b) => a + b, 0) / Math.max(1, absLogs.length - 1));
     const sorted = [...eff].sort((a, b) => a - b);
     const median = sorted.length % 2 ? sorted[(sorted.length - 1) / 2] : (sorted[sorted.length / 2 - 1] + sorted[sorted.length / 2]) / 2;
-    const medianPct = Math.abs(Math.exp(median) - 1) * 100;
+    // AMENDMENT v3 (audit-found bias): |exp(median)-1| is direction-DEPENDENT
+    // (a 0.75x ratio read 25% while its mirror 1.333x read 33%), so the
+    // ladder was easier to cross in one direction. The label-neutral form
+    // exp(|median|)-1 — the larger arm relative to the smaller — is
+    // symmetric under relabeling, proven by the relabel-invariance test.
+    const medianPct = (Math.exp(Math.abs(median)) - 1) * 100;
     const signsConsistent = eff.every((x) => x > 0) || eff.every((x) => x < 0);
     ladder = !signsConsistent || medianPct < 10 ? "NO_AUTOMATIC_EXPANSION_OWNER_DECIDES"
       : medianPct < 20 ? "EXPANSION_ONLY_AT_RECOMPUTED_POWERED_N"

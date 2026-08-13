@@ -83,9 +83,58 @@ export function verify({ sealedDir = SEALED_DIR, commitFile = COMMIT_FILE } = {}
   return { ok: true, orders: s.orders, blinding_salt: s.blinding_salt };
 }
 
+// ---- AMENDMENT v3: pre-sealed RERUN contingency orders -------------------
+// The preregistration says an invalid pair is "rerun once as a whole (both
+// arms, fresh order draw)". The audit flagged the ambiguity: a draw made AT
+// rerun time is not precommitted. Resolution (disclosed in AMENDMENT-V3.md):
+// "fresh" means fresh relative to the original order, but the contingency
+// draw itself is made and sealed NOW, one independent fair coin per pair,
+// under its own commitment. Order therefore persists precommitted across
+// every possible rerun.
+
+export const RERUN_COMMIT_FILE = path.join(ROOT, "corpus", "RERUN-ORDER-COMMITMENT.json");
+
+export function drawRerunOrders(randomByte = () => crypto.randomBytes(1)[0]) {
+  const orders = {};
+  for (const p of PAIRS) {
+    const [seq, pos] = p.split(".p");
+    let b; do { b = randomByte(); } while (b >= 254); // uniform coin over 0..253
+    ((orders[seq] ??= {})[Number(pos)] = b % 2 === 0 ? [A, B] : [B, A]);
+  }
+  return orders;
+}
+
+export function generateRerun({ sealedDir = SEALED_DIR, commitFile = RERUN_COMMIT_FILE } = {}) {
+  const f = path.join(sealedDir, "rerun-orders.json");
+  if (fs.existsSync(f)) return { ok: false, reason: "SEALED_RERUN_ORDERS_ALREADY_EXIST" };
+  const orders = drawRerunOrders();
+  const salt = crypto.randomBytes(32).toString("hex");
+  fs.mkdirSync(sealedDir, { recursive: true, mode: 0o700 });
+  fs.writeFileSync(f, JSON.stringify({ artifact: "exp0013_sealed_rerun_orders", orders, rerun_salt: salt }, null, 2) + "\n", { mode: 0o600 });
+  fs.writeFileSync(commitFile, JSON.stringify({
+    artifact: "exp0013_rerun_order_commitment",
+    scheme: "sha256(rerun_salt | canonical(orders)); sealed OUTSIDE the repository like the primary orders",
+    semantics: "contingency order for each pair's single permitted whole-pair rerun; drawn per-pair with an independent fair coin, PRECOMMITTED here (resolves the preregistration's 'fresh order draw' as fresh-but-pre-sealed)",
+    pairs: PAIRS,
+    commitment: commitment(salt, orders),
+  }, null, 2) + "\n");
+  return { ok: true };
+}
+
+export function verifyRerun({ sealedDir = SEALED_DIR, commitFile = RERUN_COMMIT_FILE } = {}) {
+  if (!fs.existsSync(commitFile)) return { ok: false, reason: "NO_RERUN_COMMITMENT_FILE" };
+  const c = JSON.parse(fs.readFileSync(commitFile, "utf8"));
+  const f = path.join(sealedDir, "rerun-orders.json");
+  if (!fs.existsSync(f)) return { ok: false, reason: "SEALED_RERUN_STORE_ABSENT" };
+  const s = JSON.parse(fs.readFileSync(f, "utf8"));
+  if (commitment(s.rerun_salt, s.orders) !== c.commitment) return { ok: false, reason: "RERUN_COMMITMENT_MISMATCH" };
+  return { ok: true, orders: s.orders };
+}
+
 if (process.argv[1] === new URL(import.meta.url).pathname) {
   const mode = process.argv[2];
   if (mode === "generate") { const r = generate(); console.log(JSON.stringify(r)); process.exit(r.ok ? 0 : 1); }
-  else if (mode === "verify") { const r = verify(); console.log(JSON.stringify({ ok: r.ok, reason: r.reason ?? null })); process.exit(r.ok ? 0 : 1); }
-  else { console.log("usage: seal-orders.mjs generate|verify"); process.exit(1); }
+  else if (mode === "generate-rerun") { const r = generateRerun(); console.log(JSON.stringify(r)); process.exit(r.ok ? 0 : 1); }
+  else if (mode === "verify") { const r = verify(); const r2 = verifyRerun(); console.log(JSON.stringify({ ok: r.ok && r2.ok, primary: r.reason ?? "ok", rerun: r2.reason ?? "ok" })); process.exit(r.ok && r2.ok ? 0 : 1); }
+  else { console.log("usage: seal-orders.mjs generate|generate-rerun|verify"); process.exit(1); }
 }

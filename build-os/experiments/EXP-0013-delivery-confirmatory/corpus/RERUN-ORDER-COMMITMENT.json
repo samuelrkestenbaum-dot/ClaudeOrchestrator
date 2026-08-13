@@ -1,0 +1,12 @@
+{
+  "artifact": "exp0013_rerun_order_commitment",
+  "scheme": "sha256(rerun_salt | canonical(orders)); sealed OUTSIDE the repository like the primary orders",
+  "semantics": "contingency order for each pair's single permitted whole-pair rerun; drawn per-pair with an independent fair coin, PRECOMMITTED here (resolves the preregistration's 'fresh order draw' as fresh-but-pre-sealed)",
+  "pairs": [
+    "S1.p2",
+    "S1.p3",
+    "S2.p2",
+    "S2.p3"
+  ],
+  "commitment": "94cb25b3b80db037ac75e583baf5b9aa44df0ce0fa90feafa0b625fa86e5e252"
+}
