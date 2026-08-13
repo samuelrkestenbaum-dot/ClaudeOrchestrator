@@ -1,0 +1,13 @@
+{
+  "artifact": "exp0013_arm_order_commitment",
+  "scheme": "sha256(order_salt | canonical(orders)); order_salt and orders sealed OUTSIDE the repository",
+  "sealed_store": "outside repo (path intentionally environment-local); dies with the container — absence at spend time forces a fresh disclosed draw + fresh commitment BEFORE any launch",
+  "balance": "2 pairs lean_rules-first / 2 pairs lean_skills-first (enforced by construction)",
+  "pairs": [
+    "S1.p2",
+    "S1.p3",
+    "S2.p2",
+    "S2.p3"
+  ],
+  "commitment": "3f3725a5979e1120a8d075e35ea24a3607512391a8d3eb96e73fa895ae2e1df9"
+}

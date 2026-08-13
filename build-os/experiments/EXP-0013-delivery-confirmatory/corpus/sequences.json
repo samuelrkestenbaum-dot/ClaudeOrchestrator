@@ -1,0 +1,305 @@
+{
+ "artifact": "exp0013_corpus",
+ "source": {
+  "repo": "empathiq-website (archived copy — real repo never modified)",
+  "pinned_commit": "2543c873141fa64653a7993d326465d5e0dd1006",
+  "materialization": "git archive <pin> | tar -x into disposable tree; node_modules symlinked (same pattern as sealed EXP-0011 run-arm.mjs)",
+  "verify_cmd": "npx tsc --noEmit -p tsconfig.json",
+  "baseline_tsc_sha256": "1dce735d438030a53a89912e7eaba37491def74a7c0908a7a23a087d006626ba",
+  "baseline_total_error_lines": 781
+ },
+ "derivation_rule": "Stated before any error inspection: subsystems = top-level dirs under server/ ranked by total baseline error count, EXCLUDING governance and mcp (EXP-0011 disjointness); top 2 remaining = S1 (higher), S2; within each, top 3 files by in-subsystem error count desc, tie alphabetical; positions p1..p3 in that order.",
+ "amendment": {
+  "what": "emotional-geometry-runtime (rank 1 post-exclusion, 60 errors) additionally excluded",
+  "ground": "pre-existing owner quarantine of the historical coherence-field source (registry: located, not copied, not wired, no authority). Building EXP-0013 evidence stores and worker tasks from quarantined source would entangle experiment artifacts with it.",
+  "honesty": "rule-statement defect disclosed, not a silent swap: the exclusion ground predates the rule statement; the amendment was decided on subsystem IDENTITY only — no error content was examined in making it.",
+  "effect": "selection shifted from {emotional-geometry-runtime, deployment} to {deployment, agent}"
+ },
+ "disjointness": {
+  "exp0011_subsystems": [
+   "governance (server/governance/)",
+   "mcp (server/mcp/)"
+  ],
+  "file_overlap_with_exp0011_tasks": 0,
+  "disclosure": "S2 (agent) errors all fall under server/agent/mcp/ — a distinct directory tree from EXP-0011 server/mcp/ with zero file overlap, satisfying the frozen rule; the thematic resemblance (MCP-related code) is recorded rather than hidden."
+ },
+ "subsystem_ranking": [
+  {
+   "subsystem": "governance",
+   "errors": 288
+  },
+  {
+   "subsystem": "mcp",
+   "errors": 88
+  },
+  {
+   "subsystem": "emotional-geometry-runtime",
+   "errors": 60
+  },
+  {
+   "subsystem": "deployment",
+   "errors": 59
+  },
+  {
+   "subsystem": "agent",
+   "errors": 36
+  },
+  {
+   "subsystem": "dogfooding",
+   "errors": 30
+  },
+  {
+   "subsystem": "reviewer",
+   "errors": 30
+  },
+  {
+   "subsystem": "router-groups",
+   "errors": 24
+  },
+  {
+   "subsystem": "infrastructure",
+   "errors": 16
+  },
+  {
+   "subsystem": "nervous-system",
+   "errors": 15
+  },
+  {
+   "subsystem": "routes",
+   "errors": 15
+  },
+  {
+   "subsystem": "copilot",
+   "errors": 12
+  },
+  {
+   "subsystem": "routers",
+   "errors": 12
+  },
+  {
+   "subsystem": "services",
+   "errors": 11
+  },
+  {
+   "subsystem": "cron",
+   "errors": 8
+  },
+  {
+   "subsystem": "neurocosmology-runtime-advanced",
+   "errors": 7
+  },
+  {
+   "subsystem": "sdk",
+   "errors": 6
+  },
+  {
+   "subsystem": "abtest",
+   "errors": 5
+  },
+  {
+   "subsystem": "nexus-command",
+   "errors": 5
+  },
+  {
+   "subsystem": "claims",
+   "errors": 4
+  },
+  {
+   "subsystem": "human_interaction",
+   "errors": 3
+  },
+  {
+   "subsystem": "planes",
+   "errors": 3
+  },
+  {
+   "subsystem": "workflows",
+   "errors": 3
+  },
+  {
+   "subsystem": "distribution",
+   "errors": 2
+  },
+  {
+   "subsystem": "surface-intelligence",
+   "errors": 2
+  },
+  {
+   "subsystem": "_core",
+   "errors": 1
+  },
+  {
+   "subsystem": "agents",
+   "errors": 1
+  },
+  {
+   "subsystem": "dx",
+   "errors": 1
+  },
+  {
+   "subsystem": "health",
+   "errors": 1
+  },
+  {
+   "subsystem": "jobs",
+   "errors": 1
+  },
+  {
+   "subsystem": "kill-switch",
+   "errors": 1
+  },
+  {
+   "subsystem": "leads",
+   "errors": 1
+  },
+  {
+   "subsystem": "observability",
+   "errors": 1
+  },
+  {
+   "subsystem": "replay",
+   "errors": 1
+  },
+  {
+   "subsystem": "surface-scoring",
+   "errors": 1
+  }
+ ],
+ "treatment_blindness": "Selection used error COUNTS and subsystem identity only. No error content, no file content, and no fix difficulty was examined before selection was fixed.",
+ "sequences": {
+  "S1": [
+   {
+    "task_id": "S11",
+    "sequence": "S1",
+    "subsystem": "deployment",
+    "position": 1,
+    "file": "server/deployment/deployment-router.ts",
+    "cluster": {
+     "code": "TS2322+TS2339+TS2345+TS2551+TS2554",
+     "msg": "Expected 2-3 arguments, but got 1."
+    },
+    "error_count": 15,
+    "first_error": {
+     "line": 235,
+     "code": "TS2554",
+     "msg": "Expected 2-3 arguments, but got 1."
+    },
+    "codes": [
+     "TS2322",
+     "TS2339",
+     "TS2345",
+     "TS2551",
+     "TS2554"
+    ]
+   },
+   {
+    "task_id": "S12",
+    "sequence": "S1",
+    "subsystem": "deployment",
+    "position": 2,
+    "file": "server/deployment/deployment-persistence.ts",
+    "cluster": {
+     "code": "TS18047",
+     "msg": "'db' is possibly 'null'."
+    },
+    "error_count": 14,
+    "first_error": {
+     "line": 21,
+     "code": "TS18047",
+     "msg": "'db' is possibly 'null'."
+    },
+    "codes": [
+     "TS18047"
+    ]
+   },
+   {
+    "task_id": "S13",
+    "sequence": "S1",
+    "subsystem": "deployment",
+    "position": 3,
+    "file": "server/deployment/cms-content-layer.ts",
+    "cluster": {
+     "code": "TS18047",
+     "msg": "'db' is possibly 'null'."
+    },
+    "error_count": 12,
+    "first_error": {
+     "line": 76,
+     "code": "TS18047",
+     "msg": "'db' is possibly 'null'."
+    },
+    "codes": [
+     "TS18047"
+    ]
+   }
+  ],
+  "S2": [
+   {
+    "task_id": "S21",
+    "sequence": "S2",
+    "subsystem": "agent",
+    "position": 1,
+    "file": "server/agent/mcp/unified-gravito.ts",
+    "cluster": {
+     "code": "TS2305+TS2352+TS2554+TS2740+TS2769",
+     "msg": "Module '\"./outbound-pack\"' has no exported member 'BrandVoice'."
+    },
+    "error_count": 11,
+    "first_error": {
+     "line": 55,
+     "code": "TS2305",
+     "msg": "Module '\"./outbound-pack\"' has no exported member 'BrandVoice'."
+    },
+    "codes": [
+     "TS2305",
+     "TS2352",
+     "TS2554",
+     "TS2740",
+     "TS2769"
+    ]
+   },
+   {
+    "task_id": "S22",
+    "sequence": "S2",
+    "subsystem": "agent",
+    "position": 2,
+    "file": "server/agent/mcp/domains/persistence.ts",
+    "cluster": {
+     "code": "TS2339+TS2345",
+     "msg": "Property 'userId' does not exist on type 'PgTableWithColumns<{ name: \"agent_persona_states\"; schema: undefined; columns: { id: PgColumn<{ name: \"id\"; tableName: \"agent_persona_states\"; dataType: \"number\"; columnType: \"PgSerial\"; data: number; driverParam: number; ... 8 more ...; generated: undefined; }, {}, {}>; ... 6 more ...; updatedAt: PgColumn<...>; }; ...'."
+    },
+    "error_count": 8,
+    "first_error": {
+     "line": 681,
+     "code": "TS2339",
+     "msg": "Property 'userId' does not exist on type 'PgTableWithColumns<{ name: \"agent_persona_states\"; schema: undefined; columns: { id: PgColumn<{ name: \"id\"; tableName: \"agent_persona_states\"; dataType: \"number\"; columnType: \"PgSerial\"; data: number; driverParam: number; ... 8 more ...; generated: undefined; }, {}, {}>; ... 6 more ...; updatedAt: PgColumn<...>; }; ...'."
+    },
+    "codes": [
+     "TS2339",
+     "TS2345"
+    ]
+   },
+   {
+    "task_id": "S23",
+    "sequence": "S2",
+    "subsystem": "agent",
+    "position": 3,
+    "file": "server/agent/mcp/unified-tool-bridge.ts",
+    "cluster": {
+     "code": "TS2339+TS2345",
+     "msg": "Property 'split' does not exist on type '{}'."
+    },
+    "error_count": 8,
+    "first_error": {
+     "line": 885,
+     "code": "TS2339",
+     "msg": "Property 'split' does not exist on type '{}'."
+    },
+    "codes": [
+     "TS2339",
+     "TS2345"
+    ]
+   }
+  ]
+ }
+}

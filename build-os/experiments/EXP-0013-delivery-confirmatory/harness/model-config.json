@@ -1,0 +1,43 @@
+{
+ "artifact": "exp0013_model_config",
+ "model": {
+  "requested": "claude-opus-5",
+  "requested_via": "--model claude-opus-5 (explicit on every worker invocation; never omitted, never 'default')",
+  "precedent": "EXP-0011 run-arm.mjs MODEL default and EXP-0012 pin — same model family as the measured cost baseline",
+  "allowed_provider_model_ids": ["claude-opus-5", "^claude-opus-5-\\d{8}$"],
+  "id_check": "provider-native id extracted from the FIRST call's stream (system init model + result modelUsage keys); membership in the allowed set is checked BEFORE any second call; mismatch = MODEL_ID_NOT_ALLOWED, study aborts with zero further spend"
+ },
+ "cli": {
+  "expected_version": "2.1.229",
+  "preflight": "claude --version must equal expected_version exactly; drift = REFUSED (config re-freeze and fresh authorization required)"
+ },
+ "invocation": {
+  "argv": ["claude", "-p", "--output-format", "stream-json", "--verbose", "--model", "<model.requested>", "--session-id", "<per-cell uuid>", "--permission-mode", "acceptEdits", "--allowedTools", "Bash(npx tsc:*)", "Bash(./node_modules/.bin/tsc:*)", "Bash(node_modules/.bin/tsc:*)"],
+  "prompt_transport": "STDIN only (argv prompt is INVALID_PROMPT_VIA_ARGV_FORBIDDEN)",
+  "cwd": "per-sequence isolated worktree (scheduler isolationManifest)",
+  "env": "scrubbedEnv + CI=1 + BASH_DEFAULT_TIMEOUT_MS=600000 + BASH_MAX_TIMEOUT_MS=600000 (EXP-0011 transport precedent)",
+  "max_turns": "not limited by flag — bounded by the wall-clock ceiling below (recorded honestly; EXP-0011 precedent)",
+  "timeout_ceiling_s": 1200,
+  "timeout_mechanism": "controller-owned timer: SIGKILL to the worker process group at ceiling; terminal_reason=timeout recorded; cell is infrastructure-invalid under the reliability gate",
+  "retry_policy": "NO automatic retries; reruns exist only as whole-pair reruns under the frozen reliability gate (max 1 per pair, max 2 total), plus at most one seed rerun per sequence",
+  "concurrency": 1,
+  "topology": "SERIAL — one worker at a time across the whole study (owner default; the synthetic CPU calibration is not provider-isolation proof, and prior E4 contamination showed elapsed inflation under load). Elapsed remains a secondary metric under serial execution; token metrics primary."
+ },
+ "streaming_schema": {
+  "result_event": "type=result with usage.{input_tokens,output_tokens,cache_read_input_tokens,cache_creation_input_tokens}, total_cost_usd, num_turns",
+  "validation": "telemetry.mjs parseStream — typed reasons for missing/malformed/duplicate result, stale session, model-id mismatch; missing telemetry is NOT_METERED, never inferred"
+ },
+ "calls": {
+  "planned": { "seed_unmeasured": 2, "measured": 8, "total": 10 },
+  "worst_case": { "seed_reruns": 2, "pair_rerun_cells": 4, "total": 16 },
+  "seed_semantics": "ONE neutral renderer-independent seed call per sequence at p1 (no UCDL treatment, no renderer); its distilled store is frozen (digest-pinned) before p2 and is the SAME store for p2 and p3 in both arms — no arm-dependent accumulation can contaminate the pair"
+ },
+ "spend": {
+  "grounding": "EXP-0011 measured (same model, same task shape, n=40): mean $1.867/cell, p90 $3.388, max $4.282, median elapsed 587s, max 1149s",
+  "per_call_worst_usd": 6.0,
+  "planned_estimate_usd": 19.0,
+  "worst_case_estimate_usd": 96.0,
+  "proposed_ceiling_usd": 100.0,
+  "budget_gate": "before EVERY provider call: spent_so_far + per_call_worst_usd <= proposed_ceiling_usd, else HALT with reason BUDGET_CEILING before the call is made (never after)"
+ }
+}

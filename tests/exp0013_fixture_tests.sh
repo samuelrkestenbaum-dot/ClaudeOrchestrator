@@ -127,16 +127,24 @@ bash "$SRC/build-os/tools/meter-run.sh" "$WORK/abort.jsonl" "$R" 30 >/dev/null
 ok 'grep -q "NOT-METERED" "$R/build-os/memory/spend-ledger.jsonl"' "aborted stream (no result event) => NOT-METERED, never inferred"
 rm -f "$R/build-os/memory/spend-ledger.jsonl"
 
-echo "== 7. freeze: manifest creates and detects post-freeze change =="
-node "$H/freeze.mjs" create >/dev/null
-ok '[ -f "$H/../FREEZE-MANIFEST.json" ]' "freeze manifest created with source commit + artifact hashes"
-ok 'node "$H/freeze.mjs" verify >/dev/null' "freeze verifies intact"
-printf '\n' >> "$H/fixture.mjs"
-ok '! node "$H/freeze.mjs" verify >/dev/null 2>&1' "any post-freeze harness change: DETECTED (typed)"
-python3 -c "
-c=open('$H/fixture.mjs').read()
-open('$H/fixture.mjs','w').write(c.rstrip('\n')+'\n')"
-node "$H/freeze.mjs" create >/dev/null   # re-freeze after restoring bytes
+echo "== 7. freeze: manifest creates and detects post-freeze change (on a disposable copy) =="
+# DEFECT FIX: this section previously ran freeze.mjs create IN PLACE, silently
+# rewriting the committed FREEZE-MANIFEST.json (source_commit_at_freeze drifted
+# to whatever HEAD ran the suite) and touch-restoring frozen fixture.mjs bytes.
+# It now exercises create/verify/tamper on a disposable copy only.
+FT="$WORK/freeze-copy"; mkdir -p "$FT/build-os/experiments" "$FT/build-os/delivery" "$FT/build-os/tools"
+cp -r "$H/.." "$FT/build-os/experiments/EXP-0013-delivery-confirmatory"
+cp "$SRC/build-os/delivery/ucdl.mjs" "$FT/build-os/delivery/"
+cp "$SRC/build-os/tools/planner.mjs" "$FT/build-os/tools/"
+git -C "$FT" init -q && git -C "$FT" -c user.email=t@t -c user.name=t add -A && git -C "$FT" -c user.email=t@t -c user.name=t commit -qm freeze-copy
+FH="$FT/build-os/experiments/EXP-0013-delivery-confirmatory/harness"
+node "$FH/freeze.mjs" create >/dev/null
+ok '[ -f "$FH/../FREEZE-MANIFEST.json" ]' "freeze manifest created with source commit + artifact hashes"
+ok 'node "$FH/freeze.mjs" verify >/dev/null' "freeze verifies intact"
+printf '\n' >> "$FH/fixture.mjs"
+ok '! node "$FH/freeze.mjs" verify >/dev/null 2>&1' "any post-freeze harness change: DETECTED (typed)"
+ok '[ -z "$(cd "$SRC" && git diff --name-only -- build-os/experiments/EXP-0013-delivery-confirmatory/FREEZE-MANIFEST.json build-os/experiments/EXP-0013-delivery-confirmatory/harness)" ]' \
+  "REAL tree: v1 manifest and tracked frozen harness files unmodified by this suite"
 
 echo "== 8. production untouched; sealed evidence byte-identical =="
 ok '! grep -rq "EXP-0013" "$SRC/bin/gravito" "$SRC/.claude/hooks"' "no production path references the fixture"

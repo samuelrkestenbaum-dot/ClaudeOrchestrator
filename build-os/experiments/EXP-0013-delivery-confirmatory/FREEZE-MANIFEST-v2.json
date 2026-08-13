@@ -1,0 +1,25 @@
+{
+  "artifact": "exp0013_freeze_manifest_v2",
+  "predecessor": "FREEZE-MANIFEST.json (immutable; re-verified on every v2 verify)",
+  "source_commit_at_freeze": "77d514de312ec58b52d79555e19843f4a23588a6",
+  "files": {
+    "FREEZE-MANIFEST.json": "1291c0ae8befdfb4c8aa0711e12f539928662d6a8262822ea834b899b7c326df",
+    "FAILURE-MODES-ADDENDUM.md": "8be33198b555542e80e149b75e51c9ae812df2f995a16c19f0008061b215cbb7",
+    "corpus/sequences.json": "3be9d4bcaa0e7d0dfc0fcae1d6f79290dd3a3fe8c849a3179b90e1a1fb2f49a6",
+    "corpus/baseline-tsc.txt": "1dce735d438030a53a89912e7eaba37491def74a7c0908a7a23a087d006626ba",
+    "corpus/ARM-ORDER-COMMITMENT.json": "6f89f4bed7686698339670ac9c326f1ac91c7dfe2307dce6595ad785b83319fa",
+    "harness/oracle.mjs": "4ba5ae4b26d0d720665cb5692e46e42e10966ab86a7018cfcd6cef3929aecc93",
+    "harness/telemetry.mjs": "e95f98e0372f6531adc9b57e88032e6fd026d776695ad3844a2f84ecc43bad59",
+    "harness/model-config.json": "e08893711bc7f2a441f00e60358456712c87731f766ff9220c3527e08f865573",
+    "harness/seal-orders.mjs": "56b7db984127619cc2140dbf3eb70403b58cce94b684070151df1eab3e268b08",
+    "harness/controller.mjs": "6e2dddfc01409d3b42c64cdbc42dddc9952f0ca3443e000204ddaa39c765819a",
+    "harness/analysis.mjs": "31ca79778ddc3776908a34bcd3cc0d37944d829a60f99d255305e0bb3c4857c4",
+    "harness/freeze2.mjs": "d20484e902c380fe6b29809b487c0c5bbdd0b7b314ba8ff782bbb97efddd58f3",
+    "../../../tests/exp0013_readiness_tests.sh": "a70a63122197b92c9cda9b9537f01fa3cb623ab6e2397b856a9d63313e6af240"
+  },
+  "unfrozen": [
+    "sealed arm orders + salts (outside repo by design; commitment IS frozen)",
+    "the p1-distilled evidence stores (produced at spend time, digest-pinned before p2)",
+    "EXECUTION-READINESS.md (describes this freeze; freezing it would be circular)"
+  ]
+}
