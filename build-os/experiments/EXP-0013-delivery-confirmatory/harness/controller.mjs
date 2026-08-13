@@ -31,14 +31,16 @@ import { execFileSync, spawnSync } from "node:child_process";
 import { buildTreatments, admitCell, appendReceipt, verifyReceipts } from "./fixture.mjs";
 import { buildSchedule, isolationManifest } from "./scheduler.mjs";
 import * as sealOrders from "./seal-orders.mjs";
-import { supervise, detectOrphans } from "./supervise.mjs";
+import { detectOrphans } from "./supervise.mjs"; // v4: no execution primitive beyond the orphan scan
 import { rehearsalTransport } from "./transport-rehearsal.mjs";
+import { cliVersionProbe } from "./exec-registry.mjs";
+import { buildProviderArgv } from "./provider-argv.mjs";
 import { parseStream } from "./telemetry.mjs";
 import { acceptance as oracleAcceptance } from "./oracle.mjs";
 import { distill } from "./distill.mjs";
 import * as ledger from "./spend-ledger.mjs";
 
-export { supervise, detectOrphans };
+export { detectOrphans };
 
 const sha = (s) => crypto.createHash("sha256").update(s).digest("hex");
 const HERE = path.dirname(new URL(import.meta.url).pathname);
@@ -63,12 +65,11 @@ export function budgetGate({ spentUsd, perCallWorstUsd = CONFIG.spend.per_call_w
     : { allowed: false, reason: "BUDGET_CEILING", projected, ceiling: ceilingUsd };
 }
 
-/** STRICT CLI probe — the ONLY permitted exec of the CLI outside a measured
- *  transport. Exactly ["--version"], nothing else, ever (audit incident:
- *  any stray argv is consumed as a prompt = a paid call). */
-function cliVersionProbe() {
-  return spawnSync("claude", ["--version"], { encoding: "utf8" });
-}
+// AMENDMENT v4: the controller no longer execs the provider CLI at all.
+// The version probe lives in exec-registry.mjs (typed argv allowlist, env
+// scrubbed) and inference capability exists only in provider-call-site.mjs,
+// which this module never imports — no-provider modes are structurally
+// incapable of acquiring it.
 
 // ------------------------------------------------------------ study assembly
 
@@ -119,10 +120,7 @@ function workerPrompt(task) {
   ].join("\n");
 }
 
-function buildArgv() {
-  return CONFIG.invocation.argv.map((a) =>
-    a === "<model.requested>" ? CONFIG.model.requested : a === "<per-cell uuid>" ? crypto.randomUUID() : a);
-}
+const buildArgv = () => buildProviderArgv(CONFIG, crypto.randomUUID()); // PURE text for rehearsal digests
 
 // ---------------------------------------------------------------- rehearsal
 
@@ -134,12 +132,12 @@ export async function runStageA({ mode = "rehearsal", studyDir, isoRoot, shimDir
 
   const v1 = spawnSync("node", [path.join(HERE, "freeze.mjs"), "verify"], { encoding: "utf8" });
   step("freeze_v1", v1.status === 0, (v1.stdout || v1.stderr).trim());
-  const v3mf = path.join(ROOT, "FREEZE-MANIFEST-v3.json");
+  const v3mf = path.join(ROOT, "FREEZE-MANIFEST-v4.json");
   if (fs.existsSync(v3mf)) {
-    const v3 = spawnSync("node", [path.join(HERE, "freeze3.mjs"), "verify"], { encoding: "utf8" });
-    step("freeze_v3", v3.status === 0, (v3.stdout || v3.stderr).trim());
-  } else logStep(studyDir, { step: "freeze_v3", ok: null, detail: "v3 manifest not yet created (required before spend, not before rehearsal)" });
-  logStep(studyDir, { step: "freeze_v2", ok: null, detail: "v2 manifest preserved as immutable history; superseded by v3 per AMENDMENT-V3.md" });
+    const v3 = spawnSync("node", [path.join(HERE, "freeze4.mjs"), "verify"], { encoding: "utf8" });
+    step("freeze_v4", v3.status === 0, (v3.stdout || v3.stderr).trim());
+  } else logStep(studyDir, { step: "freeze_v4", ok: null, detail: "v4 manifest not yet created (required before spend, not before rehearsal)" });
+  logStep(studyDir, { step: "freeze_v2", ok: null, detail: "v2 manifest preserved as immutable history; superseded per AMENDMENT-V3.md/V4.md" });
 
   const lock = path.join(studyDir, ".study-lock");
   try { fs.mkdirSync(lock); } catch { step("study_lock", false, "INVALID_STUDY_LOCK_CONFLICT"); }
@@ -147,8 +145,8 @@ export async function runStageA({ mode = "rehearsal", studyDir, isoRoot, shimDir
 
   try {
     const ver = cliVersionProbe();
-    const verOk = ver.status === 0 && ver.stdout.includes(CONFIG.cli.expected_version);
-    step("cli_preflight", verOk, `claude --version => ${String(ver.stdout).trim()} (expected ${CONFIG.cli.expected_version}; probe argv is strictly ["--version"])`);
+    const verOk = !ver.refused && ver.status === 0 && ver.stdout.includes(CONFIG.cli.expected_version);
+    step("cli_preflight", verOk, `claude --version => ${String(ver.refused ?? ver.stdout).trim()} (expected ${CONFIG.cli.expected_version}; registry-gated, argv strictly ["--version"], env scrubbed)`);
 
     const h0 = spawnSync("bash", [path.join(ORCH, "build-os/tools/h0-check.sh"), "--gate"], { encoding: "utf8", cwd: ORCH });
     step("h0_gate", h0.status === 0, `h0-check --gate exit ${h0.status}`);
@@ -217,7 +215,7 @@ export async function runStageA({ mode = "rehearsal", studyDir, isoRoot, shimDir
             freeze_intact: fs.existsSync(v3mf),
           });
           step(`admit_${cell}`, mode === "rehearsal" ? true : adm.admitted,
-            adm.admitted ? "admissible" : `${adm.reason}${fs.existsSync(v3mf) ? "" : " (v3 freeze pending — expected pre-freeze)"}`);
+            adm.admitted ? "admissible" : `${adm.reason}${fs.existsSync(v3mf) ? "" : " (v4 freeze pending — expected pre-freeze)"}`);
           const gate = budgetGate({ spentUsd: 0 });
           step(`budget_${cell}`, gate.allowed, `projected $${gate.projected.toFixed(2)}`);
           const b = await transport.call({ cell, argv: buildArgv(), stdinText: prompt, cwd: wt });
@@ -265,11 +263,11 @@ export async function runMeasured({ studyDir, isoRoot, transport, spendAuthPath 
   if (transport.kind === "measured-real") {
     if (!spendAuthPath || !fs.existsSync(spendAuthPath)) return abort("MEASURED_MODE_REQUIRES_SPEND_AUTHORIZATION");
     let auth; try { auth = JSON.parse(fs.readFileSync(spendAuthPath, "utf8")); } catch { return abort("SPEND_AUTH_MALFORMED"); }
-    const v3mf = path.join(ROOT, "FREEZE-MANIFEST-v3.json");
+    const v3mf = path.join(ROOT, "FREEZE-MANIFEST-v4.json");
     const digest = fs.existsSync(v3mf) ? sha(fs.readFileSync(v3mf)) : null;
-    if (auth.spend_authorized !== true || !auth.freeze_v3_digest || auth.freeze_v3_digest !== digest)
+    if (auth.spend_authorized !== true || !auth.freeze_v4_digest || auth.freeze_v4_digest !== digest)
       return abort("SPEND_AUTH_INVALID_OR_FREEZE_MISMATCH");
-    const v3 = spawnSync("node", [path.join(HERE, "freeze3.mjs"), "verify"], { encoding: "utf8" });
+    const v3 = spawnSync("node", [path.join(HERE, "freeze4.mjs"), "verify"], { encoding: "utf8" });
     if (v3.status !== 0) return abort("INVALID_HARNESS_CHANGED_AFTER_FREEZE");
   }
 
@@ -297,7 +295,9 @@ export async function runMeasured({ studyDir, isoRoot, transport, spendAuthPath 
     if (!gate.allowed) return { refused: "BUDGET_CEILING" };
     const idx = callIndex++;
     ledger.reserveCall(studyDir, { call_index: idx, cell, kind, bound_usd: bound });
-    const res = await transport.call({ cell, argv: transport.kind === "test-fake" ? [] : buildArgv(), stdinText: prompt, cwd, env: process.env, ceilingS: CONFIG.invocation.timeout_ceiling_s, outFile, marker: cell });
+    // v4: the TRANSPORT owns argv construction and execution; the state
+    // machine hands over only the semantic request.
+    const res = await transport.call({ cell, stdinText: prompt, cwd, env: process.env, ceilingS: CONFIG.invocation.timeout_ceiling_s, outFile, marker: cell });
     const streamText = fs.existsSync(outFile) ? fs.readFileSync(outFile, "utf8") : "";
     const tel = parseStream(streamText, { allowedModelIds: CONFIG.model.allowed_provider_model_ids });
     ledger.settleCall(studyDir, { call_index: idx, cell, cost_usd: tel.economics?.total_cost_usd ?? null, metered: tel.metered });

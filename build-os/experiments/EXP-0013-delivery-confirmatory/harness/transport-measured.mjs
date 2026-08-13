@@ -1,25 +1,13 @@
 #!/usr/bin/env node
-// MEASURED + TEST transports (AMENDMENT v3).
+// TEST transport only (AMENDMENT v4).
 //
-//   measuredTransport — the ONLY module that may execute the real provider
-//     CLI for a cell. Constructed exclusively by runMeasured after the
-//     spend-authorization gate passes; rehearsal code paths never import it.
-//   testFakeTransport — drives the measured state machine in tests with a
-//     scripted behavior per call, writing a synthetic stream to outFile. It
-//     REFUSES to execute anything: pure in-process file writes. It exists so
-//     call-count, budget, model-check, rerun and void logic are proven
-//     executable without any provider contact.
+// The real measured transport NO LONGER LIVES HERE: inference capability is
+// owned exclusively by provider-call-site.mjs, acquired only through
+// acquireProviderTransport() after spend-authorization validation. This
+// module keeps testFakeTransport, which drives the measured state machine
+// with scripted synthetic streams and REFUSES to execute anything — it has
+// no child_process import and throws on any provider-shaped argv.
 import fs from "node:fs";
-import { supervise } from "./supervise.mjs";
-
-export function measuredTransport() {
-  return {
-    kind: "measured-real",
-    async call({ argv, stdinText, cwd, env, ceilingS, outFile, marker }) {
-      return supervise({ argv, stdinText, cwd, env, ceilingS, outFile, marker });
-    },
-  };
-}
 
 /** script(req, callIndex) -> { streamText?, terminal_reason?, elapsed_s? } */
 export function testFakeTransport(script) {

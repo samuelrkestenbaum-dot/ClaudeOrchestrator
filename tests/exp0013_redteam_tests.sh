@@ -15,7 +15,8 @@ ok(){ if eval "$1"; then PASS=$((PASS+1)); echo "  PASS: $2"; else FAIL=$((FAIL+
 mod(){ node --input-type=module -e "
 import fs from 'node:fs'; import path from 'node:path'; import crypto from 'node:crypto';
 import { runMeasured, MAX_CALLS, CONFIG, CORPUS } from '$H/controller.mjs';
-import { testFakeTransport, measuredTransport } from '$H/transport-measured.mjs';
+import { testFakeTransport } from '$H/transport-measured.mjs';
+const measuredTransport = () => ({ kind: 'measured-real', call: async () => { throw new Error('unreachable in tests'); } });
 import { rehearsalTransport } from '$H/transport-rehearsal.mjs';
 import { reserveCall, settleCall, loadLedger } from '$H/spend-ledger.mjs';
 import { distill } from '$H/distill.mjs';
@@ -39,17 +40,17 @@ cp -r "$E" "$T/build-os/experiments/"
 cp "$SRC/build-os/delivery/ucdl.mjs" "$T/build-os/delivery/"
 cp "$SRC/build-os/tools/planner.mjs" "$SRC/build-os/tools/reachability.mjs" "$SRC/build-os/tools/h0-check.sh" "$T/build-os/tools/"
 cp "$SRC/bin/gravito" "$T/bin/"; cp "$SRC/templates/gravito.goal.example" "$T/templates/"
-cp "$SRC/tests/exp0013_readiness_tests.sh" "$SRC/tests/exp0013_fixture_tests.sh" "$SRC/tests/exp0013_redteam_tests.sh" "$T/tests/" 2>/dev/null
+cp "$SRC/tests/exp0013_readiness_tests.sh" "$SRC/tests/exp0013_fixture_tests.sh" "$SRC/tests/exp0013_redteam_tests.sh" "$SRC/tests/exp0013_capability_tests.sh" "$T/tests/" 2>/dev/null
 FC="$T/build-os/experiments/EXP-0013-delivery-confirmatory"
-if [ -f "$E/FREEZE-MANIFEST-v3.json" ]; then
+if [ -f "$E/FREEZE-MANIFEST-v4.json" ]; then
   echo rogue > "$FC/harness/rogue.mjs"
-  OUT=$(node "$FC/harness/freeze3.mjs" verify 2>&1); rm "$FC/harness/rogue.mjs"
+  OUT=$(node "$FC/harness/freeze4.mjs" verify 2>&1); rm "$FC/harness/rogue.mjs"
   ok 'printf "%s" "$OUT" | grep -q "UNEXPECTED_FILE harness/rogue.mjs"' "ADDED file in a frozen dir => typed refusal (v2 gap closed)"
   chmod 777 "$FC/harness/oracle.mjs"
-  OUT=$(node "$FC/harness/freeze3.mjs" verify 2>&1); chmod 644 "$FC/harness/oracle.mjs"
+  OUT=$(node "$FC/harness/freeze4.mjs" verify 2>&1); chmod 644 "$FC/harness/oracle.mjs"
   ok 'printf "%s" "$OUT" | grep -q "MODE_DRIFT harness/oracle.mjs"' "PERMISSION change => typed refusal (v2 gap closed)"
   mv "$FC/harness/oracle.mjs" "$WORK/oracle.hold"
-  OUT=$(node "$FC/harness/freeze3.mjs" verify 2>&1); mv "$WORK/oracle.hold" "$FC/harness/oracle.mjs"
+  OUT=$(node "$FC/harness/freeze4.mjs" verify 2>&1); mv "$WORK/oracle.hold" "$FC/harness/oracle.mjs"
   ok 'printf "%s" "$OUT" | grep -q "MISSING_FILE"' "REMOVED/renamed frozen file => typed refusal, not a crash"
 else
   ok 'false' "v3 manifest exists (add)"; ok 'false' "(mode)"; ok 'false' "(missing)"
@@ -203,8 +204,8 @@ const t=rehearsalTransport('$WORK/rt'); fs.mkdirSync('$WORK/rt',{recursive:true}
 const r=await t.call({cell:'x',argv:['claude','-p','--model','claude-opus-5'],stdinText:'p',cwd:'/tmp'});
 console.log(JSON.stringify(r));")
 ok 'printf "%s" "$OUT" | grep -q "NO_PROVIDER_CALL"' "rehearsal transport records the digest and returns the sentinel — nothing can launch through it"
-ok 'grep -q "cliVersionProbe" "$H/controller.mjs" && grep -c "spawnSync(\"claude\"" "$H/controller.mjs" | grep -qx 1' \
-  "exactly ONE claude exec site in the controller: the [\"--version\"]-only probe (audit incident encoded)"
+ok '! grep -q "spawnSync(\"claude\"" "$H/controller.mjs" && grep -q "cliVersionProbe" "$H/exec-registry.mjs"' \
+  "v4: the controller execs NO provider CLI at all — the [\"--version\"]-only probe lives behind the typed exec registry"
 
 echo "== R8. hardened view leak check =="
 OUT=$(mod "

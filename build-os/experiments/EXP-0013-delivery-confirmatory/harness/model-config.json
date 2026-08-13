@@ -8,8 +8,10 @@
   "id_check": "provider-native id extracted from the FIRST call's stream (system init model + result modelUsage keys); membership in the allowed set is checked BEFORE any second call; mismatch = MODEL_ID_NOT_ALLOWED, study aborts with zero further spend"
  },
  "cli": {
-  "expected_version": "2.1.229",
-  "preflight": "claude --version must equal expected_version exactly; drift = REFUSED (config re-freeze and fresh authorization required)"
+  "expected_version": "2.1.231",
+  "preflight": "claude --version must equal expected_version exactly; drift = REFUSED (config re-freeze and fresh authorization required)",
+  "drift_disclosure": "the CLI AUTO-UPDATED 2.1.229 -> 2.1.231 between the v3 freeze and the v4 leg, caught live by the version preflight (AMENDMENT v4). This environment's CLI updates outside harness control: the pin is enforced per launch, the binary is a symlink (/opt/node22/bin/claude -> /opt/claude-code/bin/claude, recorded by exec-registry executableIdentity), and any further drift before spend refuses the launch until re-frozen and re-authorized",
+  "identity": { "path": "/opt/node22/bin/claude", "realpath": "/opt/claude-code/bin/claude", "is_symlink_or_wrapper": true }
  },
  "invocation": {
   "argv": ["claude", "-p", "--output-format", "stream-json", "--verbose", "--model", "<model.requested>", "--session-id", "<per-cell uuid>", "--permission-mode", "acceptEdits", "--allowedTools", "Bash(npx tsc:*)", "Bash(./node_modules/.bin/tsc:*)", "Bash(node_modules/.bin/tsc:*)"],

@@ -20,7 +20,8 @@ mod(){ node --input-type=module -e "
 import { parseTsc, identityMultiset, acceptance, validateTask } from '$H/oracle.mjs';
 import { parseStream } from '$H/telemetry.mjs';
 import { drawOrders, canonical, commitment, generate, verify as verifySeal, PAIRS } from '$H/seal-orders.mjs';
-import { supervise, detectOrphans, budgetGate, CONFIG, CORPUS } from '$H/controller.mjs';
+import { budgetGate, CONFIG, CORPUS } from '$H/controller.mjs';
+import { supervise, detectOrphans } from '$H/supervise.mjs';
 import { analyze } from '$H/analysis.mjs';
 import fs from 'node:fs';
 const BASELINE = fs.readFileSync('$E/corpus/baseline-tsc.txt','utf8');
@@ -240,31 +241,31 @@ import json,sys; rows=json.loads(sys.stdin.read())
 assert all(r[\"v\"]!=\"VOID\" or r[\"eff\"] is None for r in rows)
 exit(0)"' "a VOID stage never emits an efficiency report"
 
-echo "== 10. freeze v3: verifies, preserves v1 + v2-as-history, tamper-detects on a copy =="
+echo "== 10. freeze v4: verifies, preserves v1 + v2-as-history, tamper-detects on a copy =="
 ok 'node "$H/freeze.mjs" verify >/dev/null 2>&1' "v1 freeze still verifies untouched"
-if [ -f "$E/FREEZE-MANIFEST-v3.json" ]; then
-  ok 'node "$H/freeze3.mjs" verify >/dev/null 2>&1' "v3 freeze verifies (hashes + modes + directory inventory; v1 re-verified inside)"
+if [ -f "$E/FREEZE-MANIFEST-v4.json" ]; then
+  ok 'node "$H/freeze4.mjs" verify >/dev/null 2>&1' "v4 freeze verifies (hashes + modes + directory inventory; v1 re-verified inside)"
   ok 'python3 -c "
 import json,hashlib
-m=json.load(open(\"$E/FREEZE-MANIFEST-v3.json\"))
+m=json.load(open(\"$E/FREEZE-MANIFEST-v4.json\"))
 h=hashlib.sha256(open(\"$E/FREEZE-MANIFEST-v2.json\",\"rb\").read()).hexdigest()
 assert m[\"files\"][\"FREEZE-MANIFEST-v2.json\"][\"sha256\"]==h
-"' "v2 manifest preserved byte-identically as immutable history inside v3"
+"' "v2 manifest preserved byte-identically as immutable history inside v4"
   T="$WORK/copy"; mkdir -p "$T/build-os/experiments" "$T/build-os/delivery" "$T/build-os/tools" "$T/tests" "$T/bin" "$T/templates"
   cp -r "$E" "$T/build-os/experiments/"
   cp "$SRC/build-os/delivery/ucdl.mjs" "$T/build-os/delivery/"
   cp "$SRC/build-os/tools/planner.mjs" "$SRC/build-os/tools/reachability.mjs" "$T/build-os/tools/"
   cp "$SRC/build-os/tools/h0-check.sh" "$T/build-os/tools/"
   cp "$SRC/bin/gravito" "$T/bin/"; cp "$SRC/templates/gravito.goal.example" "$T/templates/"
-  cp "$SRC/tests/exp0013_readiness_tests.sh" "$SRC/tests/exp0013_fixture_tests.sh" "$SRC/tests/exp0013_redteam_tests.sh" "$T/tests/"
+  cp "$SRC/tests/exp0013_readiness_tests.sh" "$SRC/tests/exp0013_fixture_tests.sh" "$SRC/tests/exp0013_redteam_tests.sh" "$SRC/tests/exp0013_capability_tests.sh" "$T/tests/"
   sed -i 's/proposed_ceiling_usd\": 100/proposed_ceiling_usd\": 10000/' "$T/build-os/experiments/EXP-0013-delivery-confirmatory/harness/model-config.json"
-  OUT=$(node "$T/build-os/experiments/EXP-0013-delivery-confirmatory/harness/freeze3.mjs" verify 2>&1)
+  OUT=$(node "$T/build-os/experiments/EXP-0013-delivery-confirmatory/harness/freeze4.mjs" verify 2>&1)
   ok 'printf "%s" "$OUT" | grep -q "INVALID_HARNESS_CHANGED_AFTER_FREEZE: harness/model-config.json"' \
     "post-freeze spend-ceiling tamper on a disposable copy => typed refusal naming the file"
 else
-  ok 'false' "v3 freeze manifest exists"
-  ok 'false' "v2-history preservation (needs v3 manifest)"
-  ok 'false' "v3 tamper-detection (needs manifest)"
+  ok 'false' "v4 freeze manifest exists"
+  ok 'false' "v2-history preservation (needs v4 manifest)"
+  ok 'false' "v4 tamper-detection (needs manifest)"
 fi
 
 echo

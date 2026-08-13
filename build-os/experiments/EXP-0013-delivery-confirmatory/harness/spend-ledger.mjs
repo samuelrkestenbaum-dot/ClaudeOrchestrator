@@ -23,8 +23,24 @@ const FILE = "spend-ledger.jsonl";
 function append(dir, obj) {
   const f = path.join(dir, FILE);
   fs.mkdirSync(dir, { recursive: true });
-  const prev = (() => { try { const l = fs.readFileSync(f, "utf8").trim().split("\n"); return sha(l[l.length - 1]); } catch { return "genesis"; } })();
-  fs.appendFileSync(f, JSON.stringify({ ...obj, prev_sha: prev }) + "\n");
+  // mkdir-mutex (AMENDMENT v4): concurrent writers serialize so the chain
+  // never interleaves; a crashed holder's stale lock (>10s) is broken.
+  const lock = f + ".lock";
+  const t0 = Date.now();
+  for (;;) {
+    try { fs.mkdirSync(lock); break; }
+    catch {
+      try { if (Date.now() - fs.statSync(lock).mtimeMs > 10_000) { fs.rmdirSync(lock); continue; } } catch {}
+      if (Date.now() - t0 > 15_000) throw new Error("LEDGER_LOCK_TIMEOUT");
+      const buf = new SharedArrayBuffer(4); Atomics.wait(new Int32Array(buf), 0, 0, 5);
+    }
+  }
+  try {
+    const prev = (() => { try { const l = fs.readFileSync(f, "utf8").trim().split("\n"); return sha(l[l.length - 1]); } catch { return "genesis"; } })();
+    fs.appendFileSync(f, JSON.stringify({ ...obj, prev_sha: prev }) + "\n");
+  } finally {
+    try { fs.rmdirSync(lock); } catch {}
+  }
 }
 
 export function reserveCall(dir, { call_index, cell, kind, bound_usd }) {
