@@ -127,10 +127,10 @@ server/agent/mcp/unified-tool-bridge.ts(1087,42): error TS2339: Property 'toLowe
 server/agents/website-operator.ts(494,5): error TS2322: Type 'null' is not assignable to type 'string'.
 server/behavioral-profiler.ts(2,20): error TS2307: Cannot find module './_core/db' or its corresponding type declarations.
 server/behavioral-profiler.ts(5,26): error TS2345: Argument of type '"behavioral-profiler"' is not assignable to parameter of type 'LogDomain'.
-server/claims/router.ts(21,90): error TS2551: Property 'governanceClaims' does not exist on type 'typeof import("/tmp/claude-0/-home-user/5489b495-ae3d-5612-a4e1-61b4b5c6b6e4/scratchpad/exp0013-corpus-baseline/drizzle/schema")'. Did you mean 'governanceScans'?
-server/claims/router.ts(51,17): error TS2339: Property 'governanceClaims' does not exist on type 'typeof import("/tmp/claude-0/-home-user/5489b495-ae3d-5612-a4e1-61b4b5c6b6e4/scratchpad/exp0013-corpus-baseline/drizzle/schema")'.
-server/claims/router.ts(71,17): error TS2339: Property 'governanceClaims' does not exist on type 'typeof import("/tmp/claude-0/-home-user/5489b495-ae3d-5612-a4e1-61b4b5c6b6e4/scratchpad/exp0013-corpus-baseline/drizzle/schema")'.
-server/claims/router.ts(85,17): error TS2339: Property 'governanceClaims' does not exist on type 'typeof import("/tmp/claude-0/-home-user/5489b495-ae3d-5612-a4e1-61b4b5c6b6e4/scratchpad/exp0013-corpus-baseline/drizzle/schema")'.
+server/claims/router.ts(21,90): error TS2551: Property 'governanceClaims' does not exist on type 'typeof import("<TREE>/drizzle/schema")'. Did you mean 'governanceScans'?
+server/claims/router.ts(51,17): error TS2339: Property 'governanceClaims' does not exist on type 'typeof import("<TREE>/drizzle/schema")'.
+server/claims/router.ts(71,17): error TS2339: Property 'governanceClaims' does not exist on type 'typeof import("<TREE>/drizzle/schema")'.
+server/claims/router.ts(85,17): error TS2339: Property 'governanceClaims' does not exist on type 'typeof import("<TREE>/drizzle/schema")'.
 server/copilot/batch-page-updater.ts(147,98): error TS18046: 'error' is of type 'unknown'.
 server/copilot/batch-page-updater.ts(257,15): error TS18046: 'error' is of type 'unknown'.
 server/copilot/brand-truth-bridge.ts(95,9): error TS18046: 'p' is of type 'unknown'.
@@ -366,7 +366,7 @@ server/emotional-geometry-runtime/session-persistence.ts(90,30): error TS18047: 
 server/emotional-geometry-runtime/session-persistence.ts(121,9): error TS18047: 'db' is possibly 'null'.
 server/emotional-geometry-runtime/session-persistence.ts(154,9): error TS18047: 'db' is possibly 'null'.
 server/emotional-geometry-runtime/session-persistence.ts(299,11): error TS18047: 'db' is possibly 'null'.
-server/emotional-geometry-runtime/validation/calibrationMode.ts(337,13): error TS2339: Property 'fireAlert' does not exist on type 'typeof import("/tmp/claude-0/-home-user/5489b495-ae3d-5612-a4e1-61b4b5c6b6e4/scratchpad/exp0013-corpus-baseline/server/emotional-geometry-runtime/geometry-alerting")'.
+server/emotional-geometry-runtime/validation/calibrationMode.ts(337,13): error TS2339: Property 'fireAlert' does not exist on type 'typeof import("<TREE>/server/emotional-geometry-runtime/geometry-alerting")'.
 server/emotional-geometry-runtime/validation/humanMapEvaluator.ts(204,27): error TS2352: Conversion of type 'HumanBenchmarkEntry' to type 'Record<string, unknown>' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
   Index signature for type 'string' is missing in type 'HumanBenchmarkEntry'.
 server/emotional-geometry-runtime/validation/invarianceEvaluator.ts(148,15): error TS2352: Conversion of type 'BaseDimensionsTrace' to type 'Record<string, number>' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.

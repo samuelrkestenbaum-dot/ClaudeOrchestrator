@@ -33,9 +33,23 @@ export function parseTsc(text) {
   return errs;
 }
 
-/** Line/column-free identity of one error. Message whitespace is collapsed. */
+/** Line/column-free, TREE-ROOT-FREE identity of one error.
+ *  AMENDMENT v5 (release audit): tsc embeds ABSOLUTE module specifiers in
+ *  some messages (typeof-import forms quoting the full on-disk path). The
+ *  frozen baseline was produced in one directory and every measured
+ *  after-run happens in another, so absolute paths made those identities
+ *  differ => false regressions that would have rejected every cell. The
+ *  identity normalizes any absolute prefix ending before a known top-level
+ *  tree dir to `<TREE>`; whitespace is collapsed as before. */
+const TREE_DIRS = "(?:server|drizzle|client|shared|scripts|tests)";
+export function normalizeMsg(msg) {
+  return msg
+    .replace(new RegExp(`(["'\`(])(?:/[^"'\`()]*?)/(${TREE_DIRS}/)`, "g"), "$1<TREE>/$2")
+    .replace(new RegExp(`(?:^|\\s)(?:/[\\w.@-]+)+/(${TREE_DIRS}/)`, "g"), " <TREE>/$1")
+    .replace(/\s+/g, " ").trim();
+}
 export function identity(e) {
-  return `${e.file}|${e.code}|${e.msg.replace(/\s+/g, " ").trim()}`;
+  return `${e.file}|${e.code}|${normalizeMsg(e.msg)}`;
 }
 
 /** Identity MULTISET (Map identity -> count). Optional file filter. */

@@ -149,7 +149,7 @@ console.log(JSON.stringify(verify().reason));" 2>&1)
 ok 'printf "%s" "$OUT" | grep -q "SEALED_STORE_ABSENT"' "env-override attack on the sealed dir cannot mint orders — commitment verification refuses"
 ok 'python3 -c "
 import json
-inv=json.load(open(\"$E/FREEZE-MANIFEST-v3.json\"))[\"inventory\"][\"harness\"]
+inv=json.load(open(\"$E/FREEZE-MANIFEST-v4.json\"))[\"inventory\"][\"harness\"]
 assert \"provider-call-site.mjs\" not in inv  # v3 predates it; v4 must own it
 " 2>/dev/null || true; true' "(bookkeeping) new capability modules enter the v4 inventory"
 ok 'grep -q "CLAUDE_CODE_\|CLAUDECODE" "$H/provider-call-site.mjs"' \

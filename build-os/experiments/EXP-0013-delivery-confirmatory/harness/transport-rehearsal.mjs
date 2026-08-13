@@ -21,12 +21,15 @@ const sha = (s) => crypto.createHash("sha256").update(s).digest("hex");
 export function rehearsalTransport(studyDir) {
   return {
     kind: "rehearsal",
-    async call({ cell, argv, stdinText, cwd }) {
+    async call({ cell, argv, stdinText, cwd, cwdDisplay }) {
       const digest = {
         artifact: "exp0013_semantic_request_digest", cell,
         argv, argv_sha256: sha(JSON.stringify(argv)),
         stdin_sha256: sha(stdinText), stdin_bytes: Buffer.byteLength(stdinText, "utf8"),
-        cwd, model_flag: argv[argv.indexOf("--model") + 1] ?? null,
+        // v5 (release audit): committed evidence must not leak container
+        // paths — the digest records the STABLE display form; the raw cwd
+        // stays runtime-only.
+        cwd: cwdDisplay ?? cwd, model_flag: argv[argv.indexOf("--model") + 1] ?? null,
         sentinel: "NO_PROVIDER_CALL",
       };
       fs.appendFileSync(path.join(studyDir, "rehearsal-requests.jsonl"), JSON.stringify(digest) + "\n");

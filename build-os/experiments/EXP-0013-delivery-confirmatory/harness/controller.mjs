@@ -132,11 +132,11 @@ export async function runStageA({ mode = "rehearsal", studyDir, isoRoot, shimDir
 
   const v1 = spawnSync("node", [path.join(HERE, "freeze.mjs"), "verify"], { encoding: "utf8" });
   step("freeze_v1", v1.status === 0, (v1.stdout || v1.stderr).trim());
-  const v3mf = path.join(ROOT, "FREEZE-MANIFEST-v4.json");
+  const v3mf = path.join(ROOT, "FREEZE-MANIFEST-v5.json");
   if (fs.existsSync(v3mf)) {
-    const v3 = spawnSync("node", [path.join(HERE, "freeze4.mjs"), "verify"], { encoding: "utf8" });
-    step("freeze_v4", v3.status === 0, (v3.stdout || v3.stderr).trim());
-  } else logStep(studyDir, { step: "freeze_v4", ok: null, detail: "v4 manifest not yet created (required before spend, not before rehearsal)" });
+    const v3 = spawnSync("node", [path.join(HERE, "freeze5.mjs"), "verify"], { encoding: "utf8" });
+    step("freeze_v5", v3.status === 0, (v3.stdout || v3.stderr).trim());
+  } else logStep(studyDir, { step: "freeze_v5", ok: null, detail: "v5 manifest not yet created (required before spend, not before rehearsal)" });
   logStep(studyDir, { step: "freeze_v2", ok: null, detail: "v2 manifest preserved as immutable history; superseded per AMENDMENT-V3.md/V4.md" });
 
   const lock = path.join(studyDir, ".study-lock");
@@ -175,7 +175,7 @@ export async function runStageA({ mode = "rehearsal", studyDir, isoRoot, shimDir
         fs.writeFileSync(path.join(cellDir, "prompt.txt"), prompt);
         const gate = budgetGate({ spentUsd: 0 });
         step(`budget_${task.task_id}`, gate.allowed, `projected $${gate.projected.toFixed(2)} of $${CONFIG.spend.proposed_ceiling_usd}`);
-        const b = await transport.call({ cell: `${seq}.p1.seed`, argv: buildArgv(), stdinText: prompt, cwd: wt });
+        const b = await transport.call({ cell: `${seq}.p1.seed`, argv: buildArgv(), stdinText: prompt, cwd: wt, cwdDisplay: `<ISO>/${seq}/worktree` });
         step(`barrier_${task.task_id}`, b.sentinel === "NO_PROVIDER_CALL", "seed call digested, not launched");
         prepared++;
       }
@@ -215,10 +215,10 @@ export async function runStageA({ mode = "rehearsal", studyDir, isoRoot, shimDir
             freeze_intact: fs.existsSync(v3mf),
           });
           step(`admit_${cell}`, mode === "rehearsal" ? true : adm.admitted,
-            adm.admitted ? "admissible" : `${adm.reason}${fs.existsSync(v3mf) ? "" : " (v4 freeze pending — expected pre-freeze)"}`);
+            adm.admitted ? "admissible" : `${adm.reason}${fs.existsSync(v3mf) ? "" : " (v5 freeze pending — expected pre-freeze)"}`);
           const gate = budgetGate({ spentUsd: 0 });
           step(`budget_${cell}`, gate.allowed, `projected $${gate.projected.toFixed(2)}`);
-          const b = await transport.call({ cell, argv: buildArgv(), stdinText: prompt, cwd: wt });
+          const b = await transport.call({ cell, argv: buildArgv(), stdinText: prompt, cwd: wt, cwdDisplay: `<ISO>/${seq}/worktree` });
           step(`barrier_${cell}`, b.sentinel === "NO_PROVIDER_CALL", "call digested, not launched");
           const orphans = detectOrphans(cell);
           step(`orphans_${cell}`, orphans.clean, orphans.clean ? "no orphaned processes" : `ORPHANS: ${orphans.orphan_pids.join(",")}`);
@@ -263,11 +263,11 @@ export async function runMeasured({ studyDir, isoRoot, transport, spendAuthPath 
   if (transport.kind === "measured-real") {
     if (!spendAuthPath || !fs.existsSync(spendAuthPath)) return abort("MEASURED_MODE_REQUIRES_SPEND_AUTHORIZATION");
     let auth; try { auth = JSON.parse(fs.readFileSync(spendAuthPath, "utf8")); } catch { return abort("SPEND_AUTH_MALFORMED"); }
-    const v3mf = path.join(ROOT, "FREEZE-MANIFEST-v4.json");
+    const v3mf = path.join(ROOT, "FREEZE-MANIFEST-v5.json");
     const digest = fs.existsSync(v3mf) ? sha(fs.readFileSync(v3mf)) : null;
-    if (auth.spend_authorized !== true || !auth.freeze_v4_digest || auth.freeze_v4_digest !== digest)
+    if (auth.spend_authorized !== true || !auth.freeze_digest || auth.freeze_digest !== digest)
       return abort("SPEND_AUTH_INVALID_OR_FREEZE_MISMATCH");
-    const v3 = spawnSync("node", [path.join(HERE, "freeze4.mjs"), "verify"], { encoding: "utf8" });
+    const v3 = spawnSync("node", [path.join(HERE, "freeze5.mjs"), "verify"], { encoding: "utf8" });
     if (v3.status !== 0) return abort("INVALID_HARNESS_CHANGED_AFTER_FREEZE");
   }
 

@@ -2,23 +2,24 @@
  "artifact": "exp0013_corpus",
  "version": "v3-amended",
  "source": {
-  "repo": "empathiq-website (archived copy — real repo never modified)",
+  "repo": "empathiq-website (archived copy \u2014 real repo never modified)",
   "pinned_commit": "2543c873141fa64653a7993d326465d5e0dd1006",
   "materialization": "git archive <pin> | tar -x into disposable tree; node_modules symlinked (same pattern as sealed EXP-0011 run-arm.mjs)",
   "verify_cmd": "npx tsc --noEmit -p tsconfig.json",
-  "baseline_tsc_sha256": "1dce735d438030a53a89912e7eaba37491def74a7c0908a7a23a087d006626ba",
-  "baseline_total_error_lines": 781
+  "baseline_tsc_sha256": "9b935d7a7c86948288cf7db364dfe68a021c8e67e9278704dafa14971a6386c7",
+  "baseline_total_error_lines": 781,
+  "baseline_normalization": "AMENDMENT v5: 5 of 781 error messages carried the absolute scratch path of the baseline run (tsc absolute import specifiers); normalized to <TREE> for hygiene, and oracle identity is now tree-root-free so acceptance is invariant to where tsc runs (the un-normalized baseline would have produced false regressions rejecting every measured cell)"
  },
  "derivation_rule_v2": "Stated before any error inspection: subsystems = top-level dirs under server/ ranked by total baseline error count, EXCLUDING governance and mcp (EXP-0011 disjointness); top 2 remaining = S1 (higher), S2; within each, top 3 files by in-subsystem error count desc, tie alphabetical; positions p1..p3 in that order.",
  "amendment_v2": {
   "what": "emotional-geometry-runtime (rank 1 post-exclusion, 60 errors) additionally excluded",
   "ground": "pre-existing owner quarantine of the historical coherence-field source (registry: located, not copied, not wired, no authority). Building EXP-0013 evidence stores and worker tasks from quarantined source would entangle experiment artifacts with it.",
-  "honesty": "rule-statement defect disclosed, not a silent swap: the exclusion ground predates the rule statement; the amendment was decided on subsystem IDENTITY only — no error content was examined in making it.",
+  "honesty": "rule-statement defect disclosed, not a silent swap: the exclusion ground predates the rule statement; the amendment was decided on subsystem IDENTITY only \u2014 no error content was examined in making it.",
   "effect": "selection shifted from {emotional-geometry-runtime, deployment} to {deployment, agent}"
  },
  "derivation_rule_v3": "AMENDED (disclosed): subsystems as in v2 (deployment=S1, agent=S2; governance/mcp/emotional-geometry-runtime excluded). Within each subsystem: p1 (seed) = highest-error-count file whose code set shares >=1 code with each of two other files; p2/p3 = the top two remaining files by count sharing >=1 code with p1; ties alphabetical.",
  "amendment_v3": {
-  "finding": "The v2 selection was structurally void: S1 seed codes {TS2322,TS2339,TS2345,TS2551,TS2554} shared ZERO codes with S1.p2/p3 (pure TS18047), and S2 seed {TS2305,TS2352,TS2554,TS2740,TS2769} shared zero with S2.p2/p3 {TS2339,TS2345} — the seed-distilled store could never match the measured positions query, so every measured pair would refuse as INVALID_UNINTENDED_EMPTY_TREATMENT at spend time. Found by executing the v3 measured state machine with fake transports (red-team suite), i.e. by the same typed pre-spend gate that EXP-0011 lacked.",
+  "finding": "The v2 selection was structurally void: S1 seed codes {TS2322,TS2339,TS2345,TS2551,TS2554} shared ZERO codes with S1.p2/p3 (pure TS18047), and S2 seed {TS2305,TS2352,TS2554,TS2740,TS2769} shared zero with S2.p2/p3 {TS2339,TS2345} \u2014 the seed-distilled store could never match the measured positions query, so every measured pair would refuse as INVALID_UNINTENDED_EMPTY_TREATMENT at spend time. Found by executing the v3 measured state machine with fake transports (red-team suite), i.e. by the same typed pre-spend gate that EXP-0011 lacked.",
   "why_this_is_legitimate": "The amendment uses ONLY the frozen baseline compile (no outcomes exist anywhere); the seed-coverage constraint is arm-symmetric (both arms share the store); EXP-0011 itself plausibly suffered this defect class at position 2 (only p1 rules existed; code-disjoint p2 => structural zero delivery its selector recorded as skip).",
   "effect": "S1: deployment-router(15) dropped (no overlap with any peer); S1 = deployment-persistence(14) -> cms-content-layer(12) -> rollout-persistence(8), all TS18047. S2: unified-gravito(11) dropped; S2 = mcp/domains/persistence(8) -> mcp/unified-tool-bridge(8) -> mcp/domains/hitl(3). Cross-sequence code overlap is now EMPTY (S1 {TS18047} vs S2 {TS2339,TS2345,TS7053})."
  },
@@ -28,7 +29,7 @@
    "mcp (server/mcp/)"
   ],
   "file_overlap_with_exp0011_tasks": 0,
-  "disclosure": "S2 (agent) errors all fall under server/agent/mcp/ — a distinct directory tree from EXP-0011 server/mcp/ with zero file overlap, satisfying the frozen rule; the thematic resemblance (MCP-related code) is recorded rather than hidden.",
+  "disclosure": "S2 (agent) errors all fall under server/agent/mcp/ \u2014 a distinct directory tree from EXP-0011 server/mcp/ with zero file overlap, satisfying the frozen rule; the thematic resemblance (MCP-related code) is recorded rather than hidden.",
   "cross_sequence_code_overlap": []
  },
  "subsystem_ranking": [
