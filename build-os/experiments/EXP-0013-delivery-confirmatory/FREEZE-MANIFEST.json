@@ -1,0 +1,21 @@
+{
+  "artifact": "exp0013_freeze_manifest",
+  "source_commit_at_freeze": "dfb70a25a6e132dce9ddea77327833e6bd5f371c",
+  "files": {
+    "PREREGISTRATION-STAGE-A.md": "1f2ed43f2260b1d0ae575d9fca60e57dc8f3eb8a854b570ca3c27765125e9035",
+    "FAILURE-MODES.md": "b8fe8494d7f50aac2e0eb8b4a77a928501a863f2a773574a53cc399f9d81498e",
+    "STAGED-DESIGN.md": "a0a5aa9d28dca18a4f65476bf6ed85ad73421a02b3f514471a8c7a21393067ce",
+    "harness/fixture.mjs": "d419622005e6e6799b6ad62d8bd314f67482b2f28f9c209d104e96da4640cf9b",
+    "harness/scheduler.mjs": "2a7191b46a06365e4d79c341f3ac128be2eeaf6925c79105f6568b38dc166a76",
+    "harness/views.mjs": "623802a4e226c444529380a8d6cede362a6fbbd659e24adf8b5d42ff70e1a616",
+    "harness/fake-worker.sh": "203ad2e4f5b92d89b8a49cef1468e25bea3d2fe2305002ee3bbaebec1823e46b",
+    "harness/freeze.mjs": "3e76c6cccefdd4b0685f8bdbd4a5b68dce5500b9252a239c058609267fa81e95",
+    "../../delivery/ucdl.mjs": "f6dc5439bd0567bcdfa10cd6ac1b16871a0236e8b8182ebf25ef4fa655c300d6",
+    "../../tools/planner.mjs": "6f6d664e810058a58b267954a8b19b56cce27aece3caf29756cc8fe2b21f49c5"
+  },
+  "unfrozen": [
+    "final proprietary task content (not yet authored/authorized)",
+    "arm-order coin flips (generated+sealed at spend authorization)",
+    "sequence corpora (selected per frozen procedure at spend authorization)"
+  ]
+}
