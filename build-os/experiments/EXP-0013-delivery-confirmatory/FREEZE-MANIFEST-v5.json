@@ -1,7 +1,7 @@
 {
   "artifact": "exp0013_freeze_manifest_v5",
   "predecessors": "v1 live-verified; v2/v3/v4 manifests immutable history (their own verifies superseded per AMENDMENT-V5.md)",
-  "source_commit_at_freeze": "123ab36e069867a6c6f29ca3b22f7c64e938617a",
+  "source_commit_at_freeze": "132e64af9fcee991d994202b6afc637148203b1e",
   "files": {
     "FREEZE-MANIFEST.json": {
       "sha256": "1291c0ae8befdfb4c8aa0711e12f539928662d6a8262822ea834b899b7c326df",
@@ -236,7 +236,7 @@
       "mode": "644"
     },
     "../../../tests/exp0013_release_tests.sh": {
-      "sha256": "635d5acb74501dec7f6333b1eb7506093e2dc5f4a57a45bcb942f4dc4adc8f1b",
+      "sha256": "b65ca97dc1e7b69ae2c158914de6b70e0de6d13feb6735cc59a7bef58ec6a663",
       "mode": "644"
     }
   },
