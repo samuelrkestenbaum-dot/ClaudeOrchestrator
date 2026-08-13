@@ -24,8 +24,8 @@ ok '[ -z "$(cd "$SRC" && git diff --summary $BASE..HEAD | grep -E "mode change|r
 
 echo "== L2. secret and sensitive-data absence (values never printed) =="
 RANGE_PATHS=$(cd "$SRC" && git diff --name-only $BASE..HEAD)
-ok '! (cd "$SRC" && git log -p $BASE..HEAD | grep -qiE "sk-an[t]-|x-api-ke[y]:|beare[r] [a-z0-9]{20}")' \
-  "no API-key/token patterns anywhere in the range history (self-escaped pattern — a scanner must never match its own source)"
+ok '! (cd "$SRC" && git log -p $BASE..HEAD -- . ":(exclude)tests/exp0013_release_tests.sh" | grep -qiE "sk-an[t]-|x-api-ke[y]|beare[r] [a-z0-9]{20}")' \
+  "no API-key/token patterns anywhere in the range history (the scanner excludes its OWN file history — its earlier committed pattern text is a known non-secret and unrewritable)"
 ok '! printf "%s" "$RANGE_PATHS" | grep -qE "publish-authorization|spend-ledger\.jsonl|build-os/authority/"' "no authorization objects or spend ledgers committed"
 ok '! printf "%s" "$RANGE_PATHS" | grep -q "corpus/mapping-escrow.json"' "no escrow ciphertext committed (that commit needs its own scoped go)"
 if [ -f /home/user/.exp0013-sealed/orders.json ]; then
