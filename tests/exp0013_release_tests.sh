@@ -62,13 +62,13 @@ json.dump({"artifact":"exp0013_sealed_rerun_orders","orders":{"S1":{"2":["b","a"
 PYEOF
 CL="$WORK/escrow-clone"; git -C "$SRC" worktree add -f --detach "$CL" HEAD >/dev/null 2>&1
 EH="$CL/build-os/experiments/EXP-0013-delivery-confirmatory/harness"
-OUT=$(cd "$CL" && printf 'synthetic-passphrase-xyz\nsynthetic-passphrase-xyz\n' | EXP0013_SEALED_DIR="$SD" node "$EH/escrow-cli.mjs" create 2>&1)
+OUT=$(cd "$CL" && printf 'synthetic-passphrase-xyz\nsynthetic-passphrase-xyz\n' | EXP0013_SEALED_DIR="$SD" EXP0013_ESCROW_TEST_STDIN=1 node "$EH/escrow-cli.mjs" create 2>&1)
 ok 'printf "%s" "$OUT" | grep -q "decryptability: PROVEN" && printf "%s" "$OUT" | grep -q "ciphertext sha256:"' \
   "operator command produces ciphertext + silent decryptability proof (piped stdin adapter; echo path exercised interactively by the owner)"
 ok '! printf "%s" "$OUT" | grep -q "synthetic-passphrase-xyz"' "passphrase never appears in tool output"
 EF="$CL/build-os/experiments/EXP-0013-delivery-confirmatory/corpus/mapping-escrow.json"
 ok '[ -f "$EF" ] && ! grep -q "order_salt\|73796e746865746963\|\"orders\"" "$EF"' "escrow artifact is ciphertext-only: no salts, no orders, no labels"
-OUT=$(cd "$CL" && printf 'WRONG-passphrase-000\n' | node "$EH/escrow-cli.mjs" check 2>&1)
+OUT=$(cd "$CL" && printf 'WRONG-passphrase-000\n' | EXP0013_ESCROW_TEST_STDIN=1 node "$EH/escrow-cli.mjs" check 2>&1)
 ok 'printf "%s" "$OUT" | grep -q "REFUSED: ESCROW_WRONG_KEY_OR_TAMPERED"' "wrong passphrase => typed refusal, no information leaked"
 rm -rf "$SD"   # simulate loss of the original sealed container
 OUT=$(node --input-type=module -e "
