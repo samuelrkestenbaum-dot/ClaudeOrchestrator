@@ -143,6 +143,11 @@ export function plan(input) {
     cognition_requirement: {
       action: selected.action,
       state: selected.action === "run" ? "CONTEXT_REQUIRED" : "NO_CONTEXT_ALLOWED",
+      // Deterministic objective terms extracted from the goal text (Class B:
+      // observable tokens, no semantic scoring). This is how a Zone-5
+      // consumer receives the task's query WITHOUT reconstructing task
+      // requirements outside the planner seam.
+      objective_terms: [...new Set([...goalTxt.matchAll(/TS\d+/g)].map((m) => m[0]))],
       factual_surfaces: ["gravito.goal", "target diff", "acceptance criteria"],
       knowledge_classes: ["verified-repair-rules"],
       authority_summary: (goalTxt.match(/^authority: (.*)$/m) || [, "unknown"])[1],

@@ -296,7 +296,7 @@ challenger material at best.
 - equation: selected = lexicographic(dependency_satisfied, produces_evidence, reversible, blast_radius asc, name) over R_t+ ONLY; parallel pairs safe iff declared write sets provably disjoint (UNKNOWN never safe)
 - class: B
 - zone: 4
-- implementation: build-os/tools/planner.mjs — typed input (run_id, dir, reach receipt, candidates), identity/integrity refusals, NO_REACHABLE_ACTION on empty set, content-addressed plans (identical inputs => identical hash), hash-chained plans.jsonl, validatePlan Class-A revalidation before dispatch, cognition-requirement descriptor (the UCDL seam, not an invocation). NO Class-C/D terms: no probabilities, utilities, attractors, trust, Phi, semantic relevance, adaptive thresholds, or LLM calls
+- implementation: build-os/tools/planner.mjs — typed input (run_id, dir, reach receipt, candidates), identity/integrity refusals, NO_REACHABLE_ACTION on empty set, content-addressed plans (identical inputs => identical hash), hash-chained plans.jsonl, validatePlan Class-A revalidation before dispatch, cognition-requirement descriptor (the UCDL seam, not an invocation). NO Class-C/D terms: no probabilities, utilities, attractors, trust, Phi, semantic relevance, adaptive thresholds, or LLM calls; cognition_requirement additionally carries objective_terms (deterministic TS-code extraction from the goal text) so Zone-5 consumers receive the task query through the planner seam
 - caller: bin/gravito cmd_run (degenerate one-candidate plan, honest: no comparison claimed; plan step traced, revalidated before dispatch) + bin/gravito cmd_plan (multi-candidate ordering, inspection surface). Parallel groups are CLASSIFIED only — executing them requires separate authorization
 - inputs: reachability receipt, goal file facts, manifests, run streams, git HEAD (all Class-B observable)
 - decision: which admitted action dispatches (cmd_run) / how admitted actions order (cmd_plan)
@@ -738,4 +738,18 @@ challenger material at best.
 - baseline: n/a
 - falsifier: n/a (it is the falsifier-requirer)
 - outcome-test: enforcement is the invariant suite passing (task level)
+- status: wired-unproven
+
+## UCDL fixture wiring (EXP-0013 Stage A, disposable)
+- equation: selected = S(E, plan.cognition_requirement, budget, insight-first@1); renderer varies representation only
+- class: B
+- zone: 5
+- implementation: build-os/experiments/EXP-0013-delivery-confirmatory/harness/fixture.mjs — validates the planner descriptor, invokes delivery/ucdl.mjs twice per pair (one selection, two renderers), emits hash-chained delivery receipts with payload/overhead byte separation, enforces pre-spend typed admissibility (EXP-0011's zero-byte class cannot reach a worker)
+- caller: tests/exp0013_fixture_tests.sh (deterministic no-spend qualification, 21/21) — the fixture IS the runtime for this scope; production UCDL remains IMPLEMENTED_UNWIRED (separate entries above, statuses may never merge across scopes)
+- inputs: plan.cognition_requirement (objective_terms from the goal text — the planner seam, never harness reconstruction), normalized store snapshot digest, declared budget
+- decision: whether a prospective measured cell is admissible BEFORE spend; what each arm installs
+- receipt: delivery-receipts.jsonl (chained); FREEZE-MANIFEST.json
+- baseline: n/a (Class B mechanics)
+- falsifier: n/a for mechanics; the RENDERER comparison's outcome question is Stage A/B's to answer
+- outcome-test: renderer comparison UNRUN; treatment effectiveness UNPROVEN; Stage-A harness qualification gates are mechanical (task level)
 - status: wired-unproven
